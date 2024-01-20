@@ -1,5 +1,12 @@
+import React, { useEffect, useState } from "react";
+import { loadInstruments } from "../sound-font/soundFont";
+import soundFontPlayer, { InstrumentName } from "soundfont-player";
+import { Music } from "./sound";
+import {
+  instrumentChannel,
+  instrumentNameToChannelMapping,
+} from "../sound-font/config";
 import MidiPlayer from "midi-player-js";
-import React, { useState } from "react";
 
 interface ReadKaraokeProps {}
 
@@ -10,6 +17,12 @@ interface CursorFile {
 interface LyricsFile {
   line: string;
 }
+interface test {
+  [key: string]: string;
+}
+interface instrument {
+  [key: string]: soundFontPlayer.Player;
+}
 
 const ReadKaraoke: React.FC<ReadKaraokeProps> = ({}) => {
   const [midiTimeValues, setMidiTimeValues] = useState<CursorFile[]>([]);
@@ -17,6 +30,43 @@ const ReadKaraoke: React.FC<ReadKaraokeProps> = ({}) => {
   const [lyricsFile, setLyricsFile] = useState<File | null>(null);
   const [cursorFile, setCursorFile] = useState<File | null>(null);
   const [midFile, setMidFile] = useState<File | null>(null);
+
+  const [time, setTIme] = useState<number>(0);
+  const [inst, setInst] = useState<instrument | undefined>(undefined);
+
+  useEffect(() => {
+    if (!inst) {
+      //   let temp: instrument = {};
+      //   Object.keys(instrumentNameToChannelMapping).map((key: any) => {
+      //     let audio = soundFontPlayer.instrument(new AudioContext(), key);
+      //     temp[key] = audio;
+      //   });
+      //   setInst(temp);
+
+      const temp: instrument = {};
+
+      // สร้าง Promise สำหรับแต่ละเครื่องดนตรี
+      const loadInstruments = Object.keys(instrumentNameToChannelMapping).map(
+        async (key: any) => {
+          const audio = await soundFontPlayer.instrument(
+            new AudioContext(),
+            key
+          );
+          temp[key] = audio;
+        }
+      );
+
+      // รอให้ทุก Promise ใน loadInstruments ทำงานเสร็จ
+      Promise.all(loadInstruments)
+        .then(() => {
+          console.log("Load");
+          setInst(temp);
+        })
+        .catch((error) => {
+          console.error("Error loading instruments:", error);
+        });
+    }
+  }, []);
 
   const handleLyricsFileChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -100,8 +150,26 @@ const ReadKaraoke: React.FC<ReadKaraokeProps> = ({}) => {
         // Load a MIDI file
         Player.loadArrayBuffer(data);
 
+        let s = Player.getSongTime();
+        setTIme(s);
+
         // Play the MIDI file
         Player.play();
+
+        Player.on("midiEvent", (event: any) => {
+          if (inst && event.name == "Note on") {
+            let getKey = instrumentChannel[event.channel];
+            if (getKey) {
+              console.log(getKey);
+              console.log(event.noteName);
+              inst[getKey].play((event.noteName as string).replace("-", ""));
+              console.log(event);
+            }
+          } else {
+            console.log("Inst is null");
+          }
+          //   console.log(event);
+        });
       } catch (error) {
         console.error("Error loading or playing MIDI file:", error);
       }
@@ -110,6 +178,22 @@ const ReadKaraoke: React.FC<ReadKaraokeProps> = ({}) => {
 
   return (
     <div className="flex flex-col gap-3 p-4">
+      {/* {JSON.stringify(inst)} */}
+      <div
+        onClick={() => {
+          //   if (inst) {
+          //     inst["electric_piano_2"].then((data) => {
+          //       data.play("G4");
+          //     });
+          //   }
+          if (inst) {
+            console.log("click");
+            inst[instrumentChannel[1]].play("Gb1");
+          }
+        }}
+      >
+        testplay
+      </div>
       <div className="flex flex-col">
         <label htmlFor="">Lyr File: </label>
         <input
@@ -140,6 +224,7 @@ const ReadKaraoke: React.FC<ReadKaraokeProps> = ({}) => {
         <button onClick={play} className="p-2 border  w-fit">
           Play
         </button>
+        {time}
       </div>
 
       <div className="flex flex-col w-fit">
