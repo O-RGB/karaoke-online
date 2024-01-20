@@ -24,6 +24,10 @@ interface instrument {
   [key: string]: soundFontPlayer.Player;
 }
 
+interface instrumentProgram {
+  [key: string]: number;
+}
+
 const ReadKaraoke: React.FC<ReadKaraokeProps> = ({}) => {
   const [midiTimeValues, setMidiTimeValues] = useState<CursorFile[]>([]);
   const [lyrics, setLyrics] = useState<LyricsFile[]>([]);
@@ -34,15 +38,19 @@ const ReadKaraoke: React.FC<ReadKaraokeProps> = ({}) => {
   const [time, setTIme] = useState<number>(0);
   const [inst, setInst] = useState<instrument | undefined>(undefined);
 
+  const [ch1, setCh1] = useState<number[] | undefined>(undefined);
+  const [ch2, setCh2] = useState<number[] | undefined>(undefined);
+  const [ch3, setCh3] = useState<number[] | undefined>(undefined);
+  const [ch4, setCh4] = useState<number[] | undefined>(undefined);
+  const [ch5, setCh5] = useState<number[] | undefined>(undefined);
+  const [ch6, setCh6] = useState<number[] | undefined>(undefined);
+  const [ch7, setCh7] = useState<number[] | undefined>(undefined);
+  const [ch8, setCh8] = useState<number[] | undefined>(undefined);
+  const [ch9, setCh9] = useState<number[] | undefined>(undefined);
+  const [ch10, setCh10] = useState<number[] | undefined>(undefined);
+
   useEffect(() => {
     if (!inst) {
-      //   let temp: instrument = {};
-      //   Object.keys(instrumentNameToChannelMapping).map((key: any) => {
-      //     let audio = soundFontPlayer.instrument(new AudioContext(), key);
-      //     temp[key] = audio;
-      //   });
-      //   setInst(temp);
-
       const temp: instrument = {};
 
       // สร้าง Promise สำหรับแต่ละเครื่องดนตรี
@@ -143,32 +151,51 @@ const ReadKaraoke: React.FC<ReadKaraokeProps> = ({}) => {
         const data = await midFile.arrayBuffer();
 
         // Initialize player and register event handler
-        var Player = new MidiPlayer.Player(function (event: any) {
-          console.log(event);
-        });
+        var Player = new MidiPlayer.Player();
 
         // Load a MIDI file
         Player.loadArrayBuffer(data);
+        Player.enableTrack(1);
 
         let s = Player.getSongTime();
+        console.log(Player.tempo);
+        console.log(Player.division);
+        console.log(Player.format);
+        console.log(Player.tick);
+        console.log(Player.tracks);
         setTIme(s);
 
-        // Play the MIDI file
+        let x = Player.instruments;
+        console.log(x);
         Player.play();
 
+        //Program Change
+        //
+
+        let keySoung: instrumentProgram = {};
         Player.on("midiEvent", (event: any) => {
           if (inst && event.name == "Note on") {
-            let getKey = instrumentChannel[event.channel];
-            if (getKey) {
-              console.log(getKey);
-              console.log(event.noteName);
-              inst[getKey].play((event.noteName as string).replace("-", ""));
-              console.log(event);
+            let getKey = instrumentChannel[keySoung[event.channel]];
+            if (event.name == "Note on" && event.velocity > 0) {
+              try {
+                console.log(event);
+
+                inst[getKey].play(event.noteNumber);
+              } catch (error) {}
+            } else if (event.name == "Note on" && event.velocity === 0) {
+              try {
+                inst[getKey].stop();
+              } catch (error) {}
             }
-          } else {
-            console.log("Inst is null");
           }
-          //   console.log(event);
+
+          if (event.name == "Program Change") {
+            if (event.value == 0) {
+              keySoung[event.channel] = 1;
+            } else {
+              keySoung[event.channel] = event.value;
+            }
+          }
         });
       } catch (error) {
         console.error("Error loading or playing MIDI file:", error);
@@ -188,7 +215,9 @@ const ReadKaraoke: React.FC<ReadKaraokeProps> = ({}) => {
           //   }
           if (inst) {
             console.log("click");
-            inst[instrumentChannel[1]].play("Gb1");
+            inst[instrumentChannel[1]].play("C4");
+            inst[instrumentChannel[1]].play("E4");
+            inst[instrumentChannel[1]].play("G4");
           }
         }}
       >
@@ -244,6 +273,68 @@ const ReadKaraoke: React.FC<ReadKaraokeProps> = ({}) => {
         <div>
           {lyrics.map((data, index) => {
             return <div key={`lyrics-line-${index}`}>{data.line}</div>;
+          })}
+        </div>
+      </div>
+      <div className="w-full h-full border p-2 flex flex-col gap-2">
+        <div className="flex gap-3">
+          CH1:
+          {ch1?.map((data, index) => {
+            return <div key={`ch1-index-${index}`}>{data}</div>;
+          })}
+        </div>
+        <div className="flex gap-3">
+          CH2:
+          {ch2?.map((data, index) => {
+            return <div key={`ch2-index-${index}`}>{data}</div>;
+          })}
+        </div>
+        <div className="flex gap-3">
+          CH3:
+          {ch3?.map((data, index) => {
+            return <div key={`ch3-index-${index}`}>{data}</div>;
+          })}
+        </div>
+        <div className="flex gap-3">
+          CH4:
+          {ch4?.map((data, index) => {
+            return <div key={`ch4-index-${index}`}>{data}</div>;
+          })}
+        </div>
+        <div className="flex gap-3">
+          CH5:
+          {ch5?.map((data, index) => {
+            return <div key={`ch5-index-${index}`}>{data}</div>;
+          })}
+        </div>
+        <div className="flex gap-3">
+          CH6:
+          {ch6?.map((data, index) => {
+            return <div key={`ch6-index-${index}`}>{data}</div>;
+          })}
+        </div>
+        <div className="flex gap-3">
+          CH7:
+          {ch7?.map((data, index) => {
+            return <div key={`ch7-index-${index}`}>{data}</div>;
+          })}
+        </div>
+        <div className="flex gap-3">
+          CH8:
+          {ch8?.map((data, index) => {
+            return <div key={`ch8-index-${index}`}>{data}</div>;
+          })}
+        </div>
+        <div className="flex gap-3">
+          CH9:
+          {ch9?.map((data, index) => {
+            return <div key={`ch9-index-${index}`}>{data}</div>;
+          })}
+        </div>
+        <div className="flex gap-3">
+          CH10:
+          {ch10?.map((data, index) => {
+            return <div key={`ch10-index-${index}`}>{data}</div>;
           })}
         </div>
       </div>
