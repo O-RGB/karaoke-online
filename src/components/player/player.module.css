@@ -1,0 +1,16 @@
+:root {
+  --player-width: 500px;
+  --player-height: 200px;
+}
+
+.btn {
+  margin: auto;
+  display: block;
+  border: none;
+  outline: none;
+  background-color: black;
+  color: white;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 24px;
+}
