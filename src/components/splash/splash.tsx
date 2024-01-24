@@ -1,6 +1,7 @@
 import { PropsWithChildren, useRef, useState } from "react";
 
 import { Button, Flex, Heading } from "@chakra-ui/react";
+import Wallpaper from "../wallpaper";
 
 export function Splash({ children }: PropsWithChildren) {
   const [ended, setEnded] = useState(false);
@@ -25,30 +26,21 @@ export function Splash({ children }: PropsWithChildren) {
 
   // If the audio has not ended, we can render the splash screen
   return (
-    <Flex
-      height={"100vh"}
-      width={"100%"}
-      alignItems={"center"}
-      justifyContent={"center"}
-      flexDirection={"column"}
-      bg={pressed ? "url('/bg.gif') fixed" : ""}
-      bgRepeat={"repeat-x"}
-      bgSize={"contain"}
-      bgPos={"center"}
-      style={{
-        imageRendering: "pixelated",
-      }}
-    >
-      {!pressed && (
-        <>
-          <Heading>Welcome!</Heading>
-          <Button onClick={handleClick} disabled={pressed} margin={"10px"}>
-            Grant audio permission
-          </Button>
-        </>
+    <div>
+      {!pressed ? (
+        <div
+          onClick={handleClick}
+          className="p-3 rounded-lg border cursor-pointer bg-white"
+        >
+          Grant audio permission
+        </div>
+      ) : (
+        <div className="p-3 rounded-lg border cursor-pointer bg-white">
+          Loading
+        </div>
       )}
 
-      <audio src="/boot.mp3" controls={false} autoPlay={false} ref={audioRef} />
-    </Flex>
+      <audio src="/ping.mp3" controls={false} autoPlay={false} ref={audioRef} />
+    </div>
   );
 }

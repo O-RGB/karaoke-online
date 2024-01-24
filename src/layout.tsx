@@ -12,6 +12,7 @@ import Midi from "./interfaces/midi";
 import SoundFont from "./interfaces/soundfont";
 import { getCDNPathOrNull } from "./utils/constants.utils";
 import { Modal } from "antd";
+import Splash from "./components/splash";
 
 interface ModalProps {
   isOpen: boolean;
@@ -95,23 +96,25 @@ function MidiModal({ isOpen, onClose }: ModalProps) {
     <Modal open={isOpen} onCancel={onClose} title={"Select Midi"}>
       <div className="flex flex-col gap-2">
         <div>Click here to upload a .mid or .midi file</div>
-        <div
-          className="w-20 h-20 border rounded-lg flex justify-center items-center cursor-pointer"
-          onClick={async () => {
-            const input = document.createElement("input");
-            input.type = "file";
-            input.accept = ".mid,.midi";
-            input.onchange = async (_) => {
-              const file = input.files ? input.files[0] : null;
-              if (file) {
-                await player.loadMidi(file);
-              }
-              input.remove();
-              onClose();
-            };
-            input.click();
-          }}
-        ></div>
+        <div className="flex gap-2">
+          <div
+            className="w-20 h-20 border rounded-lg flex justify-center items-center cursor-pointer"
+            onClick={async () => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = ".mid,.midi";
+              input.onchange = async (_) => {
+                const file = input.files ? input.files[0] : null;
+                if (file) {
+                  await player.loadMidi(file);
+                }
+                input.remove();
+                onClose();
+              };
+              input.click();
+            }}
+          ></div>
+        </div>
       </div>
 
       {/* <hr style={{ marginBottom: "20px" }} />
@@ -166,45 +169,49 @@ export default function Layout() {
     <>
       <FontModal isOpen={isModalOpen} onClose={handleCancel} />
       <MidiModal isOpen={midiModal.isOpen} onClose={midiModal.onClose} />
-      <Player />
-
-      <hr />
-      <div className="p-2 flex flex-col gap-2">
-        <div
-          onClick={showModal}
-          className="flex gap-2 items-start cursor-pointer"
-        >
-          <div className="w-10 h-10 bg-blue-500">
-            {player.soundFont != null && (
-              <img
-                src={
-                  getCDNPathOrNull(player.soundFont?.icon) ||
-                  "/default_sf_cover.png"
-                }
-                className="border"
-                alt={"SoundFont Cover"}
-              />
-            )}
-          </div>
-          <div>select soundFont</div>
+      <div className="rounded-xl overflow-hidden">
+        <div className="bg-white">
+          <Player />
         </div>
-        <div
-          onClick={midiModal.onOpen}
-          className="flex gap-2 items-center cursor-pointer"
-        >
-          <div className="w-10 h-10 bg-green-400">
-            {player.midi != null && (
-              <img
-                src={
-                  getCDNPathOrNull(player.midi?.midi.icon) ||
-                  "/default_midi_cover.png"
-                }
-                className="border"
-                alt={"SoundFont Cover"}
-              />
-            )}
+
+        <hr />
+        <div className="p-2 flex flex-col gap-2 bg-white">
+          <div
+            onClick={showModal}
+            className="flex gap-2 items-start cursor-pointer"
+          >
+            <div className="w-10 h-10 bg-blue-500">
+              {player.soundFont != null && (
+                <img
+                  src={
+                    getCDNPathOrNull(player.soundFont?.icon) ||
+                    "/default_sf_cover.png"
+                  }
+                  className="border"
+                  alt={"SoundFont Cover"}
+                />
+              )}
+            </div>
+            <div>select soundFont</div>
           </div>
-          <div>select Mid file</div>
+          <div
+            onClick={midiModal.onOpen}
+            className="flex gap-2 items-center cursor-pointer"
+          >
+            <div className="w-10 h-10 bg-green-400">
+              {player.midi != null && (
+                <img
+                  src={
+                    getCDNPathOrNull(player.midi?.midi.icon) ||
+                    "/default_midi_cover.png"
+                  }
+                  className="border"
+                  alt={"SoundFont Cover"}
+                />
+              )}
+            </div>
+            <div>select Mid file</div>
+          </div>
         </div>
       </div>
     </>

@@ -6,7 +6,8 @@ import Splash from "./components/splash";
 import { DataProvider } from "./context/data";
 import { PlayerProvider } from "./context/player";
 import Layout from "./layout";
-import Home from "./pages/home";
+
+import Wallpaper from "./components/wallpaper";
 
 const config = {
   initialColorMode: "dark",
@@ -22,15 +23,18 @@ function App() {
 
     //   </Splash>
     // </ChakraProvider>
-    <Home>
-      <DataProvider>
-        <SynthesizerProvider>
-          <PlayerProvider>
-            <Layout />
-          </PlayerProvider>
-        </SynthesizerProvider>
-      </DataProvider>
-    </Home>
+
+    <Wallpaper>
+      <Splash>
+        <DataProvider>
+          <SynthesizerProvider>
+            <PlayerProvider>
+              <Layout />
+            </PlayerProvider>
+          </SynthesizerProvider>
+        </DataProvider>
+      </Splash>
+    </Wallpaper>
   );
 }
 
