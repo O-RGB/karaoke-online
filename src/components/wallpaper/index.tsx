@@ -10,7 +10,7 @@ const Wallpaper: React.FC<WallpaperProps> = ({ children, blur }) => {
   return (
     <>
       <div
-        className={`relative h-screen w-screen overflow-hidden flex justify-center items-center `}
+        className={`fixed h-screen w-screen overflow-hidden flex justify-center items-center `}
       >
         <div className="absolute z-50 ">{children}</div>
         <div
