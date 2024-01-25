@@ -11,18 +11,21 @@ import Wallpaper from "./components/wallpaper";
 import FooterPlayer from "./components/overlay/footer";
 import Overlay from "./components/overlay";
 import { Dropdown, MenuProps } from "antd";
+import AllowSound from "./components/overlay/allow-sound";
 
 function App() {
   return (
-    <SynthesizerProvider>
-      <DataProvider>
-        <PlayerProvider>
-          <Overlay>
-            <Wallpaper></Wallpaper>
-          </Overlay>
-        </PlayerProvider>
-      </DataProvider>
-    </SynthesizerProvider>
+    <AllowSound>
+      <SynthesizerProvider>
+        <DataProvider>
+          <PlayerProvider>
+            <Overlay>
+              <Wallpaper></Wallpaper>
+            </Overlay>
+          </PlayerProvider>
+        </DataProvider>
+      </SynthesizerProvider>
+    </AllowSound>
   );
 }
 
