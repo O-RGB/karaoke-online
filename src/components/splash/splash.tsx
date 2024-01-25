@@ -21,6 +21,10 @@ export function Splash({ children }: PropsWithChildren) {
     }
   };
 
+  const skipMobeil = () => {
+    
+  }
+
   // If the audio has ended, we can render the children
   if (ended) return <>{children}</>;
 

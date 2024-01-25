@@ -8,6 +8,8 @@ import { PlayerProvider } from "./context/player";
 import Layout from "./layout";
 
 import Wallpaper from "./components/wallpaper";
+import FooterPlayer from "./components/overlay/footer";
+import Overlay from "./components/overlay/header";
 
 const config = {
   initialColorMode: "dark",
@@ -24,17 +26,19 @@ function App() {
     //   </Splash>
     // </ChakraProvider>
 
-    <Wallpaper>
-      <Splash>
-        <DataProvider>
-          <SynthesizerProvider>
-            <PlayerProvider>
-              <Layout />
-            </PlayerProvider>
-          </SynthesizerProvider>
-        </DataProvider>
-      </Splash>
-    </Wallpaper>
+    <Overlay>
+      <Wallpaper>
+        <Splash>
+          <DataProvider>
+            <SynthesizerProvider>
+              <PlayerProvider>
+                <Layout />
+              </PlayerProvider>
+            </SynthesizerProvider>
+          </DataProvider>
+        </Splash>
+      </Wallpaper>
+    </Overlay>
   );
 }
 

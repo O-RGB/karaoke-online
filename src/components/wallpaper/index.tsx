@@ -7,14 +7,14 @@ interface WallpaperProps {
 const Wallpaper: React.FC<WallpaperProps> = ({ children }) => {
   return (
     <>
-      <div className="relative w-full h-full overflow-hidden flex justify-center items-center">
+      <div className="relative h-screen w-screen overflow-hidden flex justify-center items-center">
         <div className="absolute z-50 ">{children}</div>
-        <div className="">
-          <div className="bg-black h-screen w-screen absolute opacity-30"></div>
+        <div className="absolute h-full w-full">
+          <div className="bg-black absolute opacity-10 h-full w-full"></div>
           <img
             src="/wallpaper.jpeg"
             alt=""
-            className="object-cover h-screen w-screen "
+            className="object-cover  h-full w-full "
           />
         </div>
       </div>
