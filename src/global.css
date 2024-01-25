@@ -7,7 +7,29 @@ body {
   padding: none;
 }
 
+@font-face {
+  font-family: "baiJamjuree";
+  src: url("/public/fonts/BaiJamjuree-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: bold;
+}
+@font-face {
+  font-family: "baiJamjuree";
+  src: url("/public/fonts/BaiJamjuree-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: 500;
+}
+@font-face {
+  font-family: "baiJamjuree";
+  src: url("/public/fonts/BaiJamjuree-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
 
-*{
-  @apply select-none
+.font-baiJamjuree {
+  font-family: "baiJamjuree", sans-serif;
+}
+
+* {
+  @apply select-none font-baiJamjuree;
 }

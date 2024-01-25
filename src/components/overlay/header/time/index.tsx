@@ -3,12 +3,16 @@ import React, { useEffect, useState } from "react";
 interface TimeHeaderProps {
   rounded?: string;
   bgOverLay?: string;
+  textColor?: string;
+  borderColor?: string;
   blur?: string;
 }
 
 const TimeHeader: React.FC<TimeHeaderProps> = ({
   rounded,
   bgOverLay,
+  textColor,
+  borderColor,
   blur,
 }) => {
   const [clock, setClock] = useState<Date>(new Date());
@@ -24,7 +28,7 @@ const TimeHeader: React.FC<TimeHeaderProps> = ({
   return (
     <>
       <div
-        className={`${rounded} ${bgOverLay} ${blur} w-32 md:w-64 h-12 md:h-20   border flex justify-center items-center text-xl md:text-4xl duration-300 `}
+        className={`${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} w-32 md:w-64 h-12 md:h-20 border flex justify-center items-center text-xl md:text-4xl duration-300 `}
       >
         {clock.toLocaleTimeString()}
       </div>

@@ -10,6 +10,11 @@ import {
 
 interface FooterPlayerProps {
   children?: React.ReactNode;
+  bgOverLay?: string;
+  blur?: string;
+  rounded?: string;
+  textColor?: string;
+  borderColor?: string;
 }
 function ButtonPlayer({ children }: { children: React.ReactNode }) {
   return (
@@ -23,29 +28,38 @@ function ValueBar({ children }: { children: React.ReactNode }) {
   return <div></div>;
 }
 
-const FooterPlayer: React.FC<FooterPlayerProps> = ({ children }) => {
+const FooterPlayer: React.FC<FooterPlayerProps> = ({
+  children,
+  bgOverLay,
+  blur,
+  rounded,
+  textColor,
+  borderColor,
+}) => {
   return (
     <div className="h-8 md:h-12 w-full group">
       {/*  translate-y-12 group-hover:translate-y-0 */}
-      <div className="border-[0.5px] border-opacity-10 h-full duration-300 backdrop-blur-sm bg-white/25">
+      <div
+        className={`${bgOverLay} ${blur}   ${textColor} ${borderColor} border h-full duration-300`}
+      >
         <div className="flex h-full">
           <ButtonPlayer>
-            <FaPlay className="text-[10px] md:text-base"></FaPlay>
+            <FaPlay className="text-[10px] md:text-base text-gray-500"></FaPlay>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaPause className="text-[10px] md:text-base"></FaPause>
+            <FaPause className="text-[10px] md:text-base text-gray-500"></FaPause>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaStop className="text-[10px] md:text-base"></FaStop>
+            <FaStop className="text-[10px] md:text-base text-gray-500"></FaStop>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaBackward className="text-[10px] md:text-base"></FaBackward>
+            <FaBackward className="text-[10px] md:text-base text-gray-500"></FaBackward>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaForward className="text-[10px] md:text-base"></FaForward>
+            <FaForward className="text-[10px] md:text-base text-gray-500"></FaForward>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaRecordVinyl className="text-[10px] md:text-base"></FaRecordVinyl>
+            <FaRecordVinyl className="text-[10px] md:text-base text-gray-500"></FaRecordVinyl>
           </ButtonPlayer>
         </div>
       </div>

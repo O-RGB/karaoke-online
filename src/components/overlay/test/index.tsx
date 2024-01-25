@@ -12,6 +12,8 @@ interface ReadMidiFileAndSoundProps {
   rounded?: string;
   bgOverLay?: string;
   blur?: string;
+  textColor?: string;
+  borderColor?: string;
 }
 
 interface ModalProps {
@@ -181,6 +183,8 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
   rounded,
   bgOverLay,
   blur,
+  textColor,
+  borderColor,
 }) => {
   const player = usePlayer();
   const [auxUpdate, setAuxUpdate] = useState(0);
@@ -216,9 +220,9 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
       <MidiModal isOpen={midiModal.isOpen} onClose={midiModal.onClose} />
 
       <div
-        className={`${rounded} ${bgOverLay} ${blur} p-2 w-[16.5rem] md:w-64 border`}
+        className={`${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} p-2 w-[16.5rem] md:w-64 border`}
       >
-        สำหรับทดสอบการอ่านไฟล์ .mid และ sf2 เมื่อเล่นเสียงเพลง
+        สำหรับทดสอบการอ่านไฟล์ .mid และ sf2 เพื่อเล่นเสียงเพลง
         <div className="">
           <Player />
         </div>
