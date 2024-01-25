@@ -213,6 +213,12 @@ export default function Layout() {
             <div>เลือก Midi ไฟล์</div>
           </div>
         </div>
+        <a
+          href="https://github.com/O-RGB/extreme-karaoke-online"
+          className=" underline"
+        >
+          GitHup
+        </a>
       </div>
     </>
   );

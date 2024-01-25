@@ -32,11 +32,11 @@ export function Splash({ children }: PropsWithChildren) {
           onClick={handleClick}
           className="p-3 rounded-lg border cursor-pointer bg-white"
         >
-          Grant audio permission
+          Click ยอมรับให้มีเสียงในเบราว์เซอร์
         </div>
       ) : (
         <div className="p-3 rounded-lg border cursor-pointer bg-white">
-          Loading
+          กำลังโหลด
         </div>
       )}
 
