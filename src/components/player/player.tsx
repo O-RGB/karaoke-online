@@ -59,7 +59,7 @@ export default function Player() {
         isDisabled={!canPlay}
       /> */}
 
-      <div
+      {/* <div
         className="flex gap-2 items-center cursor-pointer"
         onClick={async () => {
           player.setRepeat(!player.repeat);
@@ -69,7 +69,7 @@ export default function Player() {
           <RxLoop />
         </div>
         <div>Click to Loop soung</div>
-      </div>
+      </div> */}
       {/* <IconButton
           aria-label="Loop"
           className={styles.btn}
@@ -89,7 +89,7 @@ export default function Player() {
         }}
       >
         <div className="p-2">{player.playing ? <RxPause /> : <RxPlay />}</div>
-        <div>{player.playing ? "Play" : "Stop"}</div>
+        <div>{player.playing ? "Stop" : "Play"}</div>
       </div>
       {/* <IconButton
           aria-label="Resume/Pause"
@@ -101,7 +101,7 @@ export default function Player() {
           }}
         /> */}
 
-      <div
+      {/* <div
         className="flex gap-2 items-center cursor-pointer"
         onClick={async () => {
           player.setPlaying(false);
@@ -112,7 +112,7 @@ export default function Player() {
           <RxStop />
         </div>
         <div>End</div>
-      </div>
+      </div> */}
 
       {/* <IconButton
           aria-label="Stop"

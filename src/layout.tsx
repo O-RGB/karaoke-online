@@ -94,7 +94,7 @@ function MidiModal({ isOpen, onClose }: ModalProps) {
 
   return (
     <Modal open={isOpen} onCancel={onClose} title={"Select Midi"}>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 ">
         <div>Click here to upload a .mid or .midi file</div>
         <div className="flex gap-2">
           <div
@@ -169,18 +169,18 @@ export default function Layout() {
     <>
       <FontModal isOpen={isModalOpen} onClose={handleCancel} />
       <MidiModal isOpen={midiModal.isOpen} onClose={midiModal.onClose} />
-      <div className="rounded-xl overflow-hidden">
-        <div className="bg-white">
+      <div className="rounded-xl  p-2  bg-white/50  w-fit sm:w-[500px] backdrop-blur-sm border ">
+        สำหรับทดสอบการอ่านไฟล์ .mid และ sf2 เมื่อเล่นเสียงเพลง
+        <div className="">
           <Player />
         </div>
-
         <hr />
-        <div className="p-2 flex flex-col gap-2 bg-white">
+        <div className="p-2 flex flex-col gap-2 ">
           <div
             onClick={showModal}
             className="flex gap-2 items-start cursor-pointer"
           >
-            <div className="w-10 h-10 bg-blue-500">
+            <div className="w-10 h-10 border">
               {player.soundFont != null && (
                 <img
                   src={
@@ -192,13 +192,13 @@ export default function Layout() {
                 />
               )}
             </div>
-            <div>select soundFont</div>
+            <div>เลือก SoundFont</div>
           </div>
           <div
             onClick={midiModal.onOpen}
             className="flex gap-2 items-center cursor-pointer"
           >
-            <div className="w-10 h-10 bg-green-400">
+            <div className="w-10 h-10 border">
               {player.midi != null && (
                 <img
                   src={
@@ -210,7 +210,7 @@ export default function Layout() {
                 />
               )}
             </div>
-            <div>select Mid file</div>
+            <div>เลือก Midi ไฟล์</div>
           </div>
         </div>
       </div>
