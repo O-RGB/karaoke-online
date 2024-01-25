@@ -9,24 +9,20 @@ import Layout from "./layout";
 
 import Wallpaper from "./components/wallpaper";
 import FooterPlayer from "./components/overlay/footer";
-import Overlay from "./components/overlay/header";
+import Overlay from "./components/overlay";
 import { Dropdown, MenuProps } from "antd";
 
 function App() {
   return (
-    <Overlay>
-      <Wallpaper>
-        <Splash>
-          <DataProvider>
-            <SynthesizerProvider>
-              <PlayerProvider>
-                <Layout />
-              </PlayerProvider>
-            </SynthesizerProvider>
-          </DataProvider>
-        </Splash>
-      </Wallpaper>
-    </Overlay>
+    <SynthesizerProvider>
+      <DataProvider>
+        <PlayerProvider>
+          <Overlay>
+            <Wallpaper></Wallpaper>
+          </Overlay>
+        </PlayerProvider>
+      </DataProvider>
+    </SynthesizerProvider>
   );
 }
 

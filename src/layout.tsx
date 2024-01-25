@@ -23,37 +23,9 @@ interface GenericModalProps extends ModalProps, PropsWithChildren {
   title: string;
 }
 
-// function GenericModal({ isOpen, onClose, title, children }: GenericModalProps) {
-//   return (
-//     <Modal isOpen={isOpen} onClose={onClose}>
-//       <ModalOverlay />
-//       <ModalContent>
-//         <ModalHeader>{title}</ModalHeader>
-//         <ModalCloseButton />
-//         <ModalBody overflowY={"scroll"} maxHeight={"400px"}>
-//           {children}
-//         </ModalBody>
-//         <ModalFooter></ModalFooter>
-//       </ModalContent>
-//     </Modal>
-//   );
-// }
-
 interface ModalSelectItemProps {
   value: SoundFont | Midi;
   onClick: () => void;
-}
-
-function ModalSelectItem({ value, onClick }: ModalSelectItemProps) {
-  const asMidi = value as Midi;
-  const icon = getCDNPathOrNull(value.icon);
-
-  return (
-    <div onClick={onClick}>
-      <div> {value.name}</div>
-      <div> {asMidi.author || "Unknown"}</div>
-    </div>
-  );
 }
 
 function FontModal({ isOpen, onClose }: ModalProps) {
@@ -134,13 +106,10 @@ function MidiModal({ isOpen, onClose }: ModalProps) {
 }
 
 export default function Layout() {
-  const isMobile = useMobile();
-  // const fontModal = useDisclosure();
   const midiModal = useDisclosure();
   const player = usePlayer();
   const [auxUpdate, setAuxUpdate] = useState(0);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   function forceUpdate() {
     setAuxUpdate(auxUpdate + 1);
   }
