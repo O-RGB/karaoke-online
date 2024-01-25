@@ -1,8 +1,10 @@
 import React, { useRef, useState } from "react";
 
-interface AllowSoundProps {}
+interface AllowSoundProps {
+  children: React.ReactNode;
+}
 
-const AllowSound: React.FC<AllowSoundProps> = ({}) => {
+const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
   const [ended, setEnded] = useState(false);
   const [pressed, setPressed] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -19,6 +21,8 @@ const AllowSound: React.FC<AllowSoundProps> = ({}) => {
       });
     }
   };
+
+  if (ended) return <>{children}</>;
 
   return (
     <>
