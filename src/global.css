@@ -6,3 +6,8 @@ body {
   border: none;
   padding: none;
 }
+
+
+*{
+  @apply select-none
+}
