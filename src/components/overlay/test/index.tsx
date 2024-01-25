@@ -20,11 +20,117 @@ interface ReadMidiFileAndSoundProps {
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+  test?: CursorFile[];
 }
 
-interface ModalSelectItemProps {
-  value: SoundFont | Midi;
-  onClick: () => void;
+interface CursorFile {
+  value: number;
+}
+
+function CurResultModal({ isOpen, onClose, test }: ModalProps) {
+  return (
+    <Modal
+      footer={<></>}
+      open={isOpen}
+      onCancel={onClose}
+      title={"Result Cur File"}
+    >
+      <div className="grid grid-cols-12">
+        {test?.map((data, index) => {
+          return <div key={`cur-${index}`}>{data.value}</div>;
+        })}
+      </div>
+    </Modal>
+  );
+}
+function CurModal({ isOpen, onClose }: ModalProps) {
+  const [isCurResultOpen, setIsCurResultOpen] = useState(false);
+  const [curResult, setCurResult] = useState<CursorFile[]>([]);
+  const loadCursor = async (file: File) => {
+    try {
+      const data = await file.arrayBuffer();
+      const cursorData: CursorFile[] = [];
+      const view = new DataView(data);
+
+      let offset = 0;
+      while (offset < view.byteLength) {
+        const tmpByte1 = view.getUint8(offset);
+        const tmpByte2 = view.getUint8(offset + 1);
+
+        if (tmpByte2 === 0xff) {
+          break;
+        }
+
+        const value = tmpByte1 + tmpByte2 * 256;
+        console.log(value);
+
+        cursorData.push({ value });
+        offset += 2;
+      }
+      setCurResult(cursorData);
+      setIsCurResultOpen(true);
+      return cursorData;
+    } catch (error) {
+      console.error("Error loading cursor:", error);
+    }
+  };
+
+  return (
+    <>
+      <CurResultModal
+        test={curResult}
+        isOpen={isCurResultOpen}
+        onClose={() => setIsCurResultOpen(false)}
+      />
+      <Modal
+        footer={<></>}
+        open={isOpen}
+        onCancel={onClose}
+        title={"Select SoundFont"}
+      >
+        <div className="flex flex-col gap-2">
+          <div>Click here to upload a .Cur file</div>
+          <div
+            className="h-20 border rounded-lg flex justify-center items-center cursor-pointer"
+            onClick={async () => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = ".cur";
+              input.onchange = async (_) => {
+                const file = input.files ? input.files[0] : null;
+                if (file) {
+                  loadCursor(file);
+                }
+                input.remove();
+                onClose();
+              };
+              input.click();
+            }}
+          >
+            เลือกไฟล์
+          </div>
+          <div
+            className="h-20 border rounded-lg flex justify-center items-center cursor-pointer"
+            onClick={async () => {
+              fetch("/00001.cur")
+                .then((row: any) => row.blob())
+                .then((blob) => {
+                  const file = new File([blob], "sound-test.cur", {
+                    type: blob.type,
+                  });
+
+                  loadCursor(file);
+
+                  onClose();
+                });
+            }}
+          >
+            ใช้ไฟล์ทดสอบ
+          </div>
+        </div>
+      </Modal>
+    </>
+  );
 }
 
 function LyrModal({ isOpen, onClose }: ModalProps) {
@@ -78,7 +184,7 @@ function LyrModal({ isOpen, onClose }: ModalProps) {
               .then((row: any) => row.blob())
               .then((blob) => {
                 console.log(blob);
-                const file = new File([blob], "sound-test.sf2", {
+                const file = new File([blob], "sound-test.lyr", {
                   type: blob.type,
                 });
                 const reader = new FileReader();
@@ -232,30 +338,7 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLyrOpen, setIsLyrOpen] = useState(false);
-
-  const showLyrModal = () => {
-    setIsLyrOpen(true);
-  };
-
-  const handleLyrOk = () => {
-    setIsLyrOpen(false);
-  };
-
-  const handleLyrCancel = () => {
-    setIsLyrOpen(false);
-  };
-
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
+  const [isCurOpen, setIsCurOpen] = useState(false);
 
   useEffect(() => {
     if (!midiModal.isOpen && !isModalOpen) {
@@ -264,9 +347,10 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
   }, [midiModal.isOpen, isModalOpen]);
   return (
     <>
-      <FontModal isOpen={isModalOpen} onClose={handleCancel} />
+      <FontModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       <MidiModal isOpen={midiModal.isOpen} onClose={midiModal.onClose} />
-      <LyrModal isOpen={isLyrOpen} onClose={handleLyrCancel} />
+      <LyrModal isOpen={isLyrOpen} onClose={() => setIsLyrOpen(false)} />
+      <CurModal isOpen={isCurOpen} onClose={() => setIsCurOpen(false)} />
 
       <div
         className={`${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} p-2 w-[16.5rem] md:w-64 border`}
@@ -278,7 +362,7 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
         <hr />
         <div className="p-2 flex flex-col gap-2 ">
           <div
-            onClick={showModal}
+            onClick={() => setIsModalOpen(true)}
             className="flex gap-2 items-start cursor-pointer"
           >
             <div className="w-10 h-10 border">
@@ -314,7 +398,7 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
             <div>เลือก Midi ไฟล์</div>
           </div>
           <div
-            onClick={showLyrModal}
+            onClick={() => setIsLyrOpen(true)}
             className="flex gap-2 items-center cursor-pointer"
           >
             <div className="w-10 h-10 border">
@@ -330,6 +414,13 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
               )}
             </div>
             <div>เลือก Lyr ไฟล์</div>
+          </div>
+          <div
+            onClick={() => setIsCurOpen(true)}
+            className="flex gap-2 items-center cursor-pointer"
+          >
+            <div className="w-10 h-10 border"></div>
+            <div>เลือก Cur ไฟล์</div>
           </div>
         </div>
         <a

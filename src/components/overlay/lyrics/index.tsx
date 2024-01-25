@@ -27,9 +27,13 @@ const LyricsBox: React.FC<LyricsBoxProps> = ({
       <div
         className={`${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} w-full p-2 h-[200px] md:h-[300px] border duration-300`}
       >
-        <div className="flex flex-col gap-10 md:gap-20 text-3xl md:text-6xl justify-center items-center h-full overflow-auto">
+        <div className="flex flex-col gap-10 md:gap-20 text-3xl sm:text-5xl lg:text-7xl font-bold items-center h-full overflow-auto">
           {song.Lyrics.map((data, index) => {
-            return <div key={`lyrics-key-${index}`}>{data}</div>;
+            return (
+              <div key={`lyrics-key-${index}`}>
+                {index}. {data}
+              </div>
+            );
           })}
         </div>
       </div>

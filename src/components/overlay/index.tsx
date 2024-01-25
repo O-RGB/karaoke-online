@@ -13,7 +13,7 @@ interface OverlayProps {
 
 const Overlay: React.FC<OverlayProps> = ({ children }) => {
   const rounded = "rounded-xl";
-  const bgOverLay = "bg-black/20";
+  const bgOverLay = "bg-black/30";
   const blur = "backdrop-blur-sm";
   const textColor = "text-white";
   const borderColor = "border-white/30 ";
