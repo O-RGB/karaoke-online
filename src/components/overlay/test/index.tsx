@@ -7,6 +7,7 @@ import SoundFont from "../../../interfaces/soundfont";
 import { getCDNPathOrNull } from "../../../utils/constants.utils";
 import Player from "../../player";
 import { useDisclosure } from "@chakra-ui/react";
+import useSong from "../../../hooks/useSong";
 
 interface ReadMidiFileAndSoundProps {
   rounded?: string;
@@ -21,43 +22,90 @@ interface ModalProps {
   onClose: () => void;
 }
 
-interface GenericModalProps extends ModalProps, PropsWithChildren {
-  title: string;
-}
-
-// function GenericModal({ isOpen, onClose, title, children }: GenericModalProps) {
-//   return (
-//     <Modal isOpen={isOpen} onClose={onClose}>
-//       <ModalOverlay />
-//       <ModalContent>
-//         <ModalHeader>{title}</ModalHeader>
-//         <ModalCloseButton />
-//         <ModalBody overflowY={"scroll"} maxHeight={"400px"}>
-//           {children}
-//         </ModalBody>
-//         <ModalFooter></ModalFooter>
-//       </ModalContent>
-//     </Modal>
-//   );
-// }
-
 interface ModalSelectItemProps {
   value: SoundFont | Midi;
   onClick: () => void;
 }
 
-function ModalSelectItem({ value, onClick }: ModalSelectItemProps) {
-  const asMidi = value as Midi;
-  const icon = getCDNPathOrNull(value.icon);
-
+function LyrModal({ isOpen, onClose }: ModalProps) {
+  const { soundfonts } = useData();
+  const song = useSong();
   return (
-    <div onClick={onClick}>
-      <div> {value.name}</div>
-      <div> {asMidi.author || "Unknown"}</div>
-    </div>
+    <Modal
+      footer={<></>}
+      open={isOpen}
+      onCancel={onClose}
+      title={"Select SoundFont"}
+    >
+      <div className="flex flex-col gap-2">
+        <div>Click here to upload a .lyr file</div>
+        <div
+          className="h-20 border rounded-lg flex justify-center items-center cursor-pointer"
+          onClick={async () => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".lyr";
+            input.onchange = async (_) => {
+              const file = input.files ? input.files[0] : null;
+              if (file) {
+                const reader = new FileReader();
+
+                reader.onload = (e: any) => {
+                  const contentArrayBuffer = e.target.result;
+                  const decoder = new TextDecoder("windows-874");
+                  const contentUtf8 = decoder.decode(contentArrayBuffer);
+                  const lines = contentUtf8.split("\r\n"); // หรือ '\r\n' ตามที่เหมาะสม
+
+                  console.log(lines);
+                  song.setLyrics(lines);
+                };
+
+                // เริ่มการอ่านไฟล์เป็นข้อความ
+                reader.readAsArrayBuffer(file);
+              }
+              input.remove();
+              onClose();
+            };
+            input.click();
+          }}
+        >
+          เลือกไฟล์
+        </div>
+        <div
+          className="h-20 border rounded-lg flex justify-center items-center cursor-pointer"
+          onClick={async () => {
+            fetch("/00001.lyr")
+              .then((row: any) => row.blob())
+              .then((blob) => {
+                console.log(blob);
+                const file = new File([blob], "sound-test.sf2", {
+                  type: blob.type,
+                });
+                const reader = new FileReader();
+
+                reader.onload = (e: any) => {
+                  const contentArrayBuffer = e.target.result;
+                  const decoder = new TextDecoder("windows-874");
+                  const contentUtf8 = decoder.decode(contentArrayBuffer);
+                  const lines = contentUtf8.split("\r\n"); // หรือ '\r\n' ตามที่เหมาะสม
+
+                  console.log(lines);
+                  song.setLyrics(lines);
+                };
+
+                // เริ่มการอ่านไฟล์เป็นข้อความ
+                reader.readAsArrayBuffer(file);
+
+                onClose();
+              });
+          }}
+        >
+          ใช้ไฟล์ทดสอบ
+        </div>
+      </div>
+    </Modal>
   );
 }
-
 function FontModal({ isOpen, onClose }: ModalProps) {
   const player = usePlayer();
   const { soundfonts } = useData();
@@ -162,19 +210,6 @@ function MidiModal({ isOpen, onClose }: ModalProps) {
           ใช้ไฟล์ทดสอบ
         </div>
       </div>
-
-      {/* <hr style={{ marginBottom: "20px" }} />
-  
-        {midis.map((midi, index) => (
-          <ModalSelectItem
-            value={midi}
-            key={index}
-            onClick={async () => {
-              await player.loadMidi(midi);
-              onClose();
-            }}
-          />
-        ))} */}
     </Modal>
   );
 }
@@ -196,6 +231,19 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
   }
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLyrOpen, setIsLyrOpen] = useState(false);
+
+  const showLyrModal = () => {
+    setIsLyrOpen(true);
+  };
+
+  const handleLyrOk = () => {
+    setIsLyrOpen(false);
+  };
+
+  const handleLyrCancel = () => {
+    setIsLyrOpen(false);
+  };
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -218,6 +266,7 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
     <>
       <FontModal isOpen={isModalOpen} onClose={handleCancel} />
       <MidiModal isOpen={midiModal.isOpen} onClose={midiModal.onClose} />
+      <LyrModal isOpen={isLyrOpen} onClose={handleLyrCancel} />
 
       <div
         className={`${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} p-2 w-[16.5rem] md:w-64 border`}
@@ -263,6 +312,24 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
               )}
             </div>
             <div>เลือก Midi ไฟล์</div>
+          </div>
+          <div
+            onClick={showLyrModal}
+            className="flex gap-2 items-center cursor-pointer"
+          >
+            <div className="w-10 h-10 border">
+              {player.midi != null && (
+                <img
+                  src={
+                    getCDNPathOrNull(player.midi?.midi.icon) ||
+                    "/default_midi_cover.png"
+                  }
+                  className="border"
+                  alt={"Lyr Cover"}
+                />
+              )}
+            </div>
+            <div>เลือก Lyr ไฟล์</div>
           </div>
         </div>
         <a

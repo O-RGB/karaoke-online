@@ -15,7 +15,7 @@ const Wallpaper: React.FC<WallpaperProps> = ({ children, blur }) => {
         <div className="absolute z-50 ">{children}</div>
         <div
           className={`absolute h-full w-full ${
-            blur ? "blur-lg scale-105 opacity-80" : ""
+            blur ? "blur-lg scale-110 opacity-80" : ""
           }`}
         >
           <div className="bg-black absolute opacity-10 h-full w-full"></div>
