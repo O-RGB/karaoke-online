@@ -10,22 +10,10 @@ import Layout from "./layout";
 import Wallpaper from "./components/wallpaper";
 import FooterPlayer from "./components/overlay/footer";
 import Overlay from "./components/overlay/header";
-
-const config = {
-  initialColorMode: "dark",
-  useSystemColorMode: false,
-};
-
-const theme = extendTheme({ config });
+import { Dropdown, MenuProps } from "antd";
 
 function App() {
   return (
-    // <ChakraProvider theme={theme}>
-    //   <Splash>
-
-    //   </Splash>
-    // </ChakraProvider>
-
     <Overlay>
       <Wallpaper>
         <Splash>

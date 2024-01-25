@@ -13,7 +13,7 @@ interface FooterPlayerProps {
 }
 function ButtonPlayer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex justify-center items-center border p-2 w-12 h-full bg-gray-100 hover:bg-gray-200 duration-300 cursor-pointer">
+    <div className="flex justify-center items-center border p-2 w-8 md:w-12 h-full bg-gray-100 hover:bg-gray-200 duration-300 cursor-pointer">
       {children}
     </div>
   );
@@ -25,26 +25,27 @@ function ValueBar({ children }: { children: React.ReactNode }) {
 
 const FooterPlayer: React.FC<FooterPlayerProps> = ({ children }) => {
   return (
-    <div className="h-12 w-full group">
-      <div className="border-[0.5px] border-opacity-10 h-full translate-y-12 group-hover:translate-y-0 duration-300 backdrop-blur-sm bg-white/25">
+    <div className="h-8 md:h-12 w-full group">
+      {/*  translate-y-12 group-hover:translate-y-0 */}
+      <div className="border-[0.5px] border-opacity-10 h-full duration-300 backdrop-blur-sm bg-white/25">
         <div className="flex h-full">
           <ButtonPlayer>
-            <FaPlay></FaPlay>
+            <FaPlay className="text-[10px] md:text-base"></FaPlay>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaPause></FaPause>
+            <FaPause className="text-[10px] md:text-base"></FaPause>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaStop></FaStop>
+            <FaStop className="text-[10px] md:text-base"></FaStop>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaBackward></FaBackward>
+            <FaBackward className="text-[10px] md:text-base"></FaBackward>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaForward></FaForward>
+            <FaForward className="text-[10px] md:text-base"></FaForward>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaRecordVinyl></FaRecordVinyl>
+            <FaRecordVinyl className="text-[10px] md:text-base"></FaRecordVinyl>
           </ButtonPlayer>
         </div>
       </div>
