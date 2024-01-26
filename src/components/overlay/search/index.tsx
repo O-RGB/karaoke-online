@@ -8,6 +8,7 @@ interface SearchSongProps {
   textColor?: string;
   borderColor?: string;
   blur?: string;
+  result?: SearchNCN;
 }
 
 const SearchSong: React.FC<SearchSongProps> = ({
@@ -18,6 +19,7 @@ const SearchSong: React.FC<SearchSongProps> = ({
   textColor,
   borderColor,
   blur,
+  result,
 }) => {
   if (open == false) {
     return <></>;
@@ -35,7 +37,7 @@ const SearchSong: React.FC<SearchSongProps> = ({
           <div className="w-full p-2"></div>
         </div>
         <div className="w-full h-32 p-2 text-5xl flex items-center">
-          ER3494 นางไอ่ของไอ้ 43-(DM)-[74] {">"} มนแคน...
+          {result?.name} - {result?.artist}
         </div>
       </div>
     </>

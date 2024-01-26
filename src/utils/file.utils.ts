@@ -17,3 +17,5 @@ export async function loadBinaryFromURL(url: string) {
   const resp = await fetch(url);
   return await resp.arrayBuffer();
 }
+
+ 

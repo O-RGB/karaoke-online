@@ -6,6 +6,10 @@ import { Dropdown, MenuProps } from "antd";
 import SearchSong from "./search";
 import LyricsBox from "./lyrics";
 import ReadMidiFileAndSound from "./test";
+import ImportFolders from "./import/folders";
+import useSongPlaying from "../../hooks/useSong";
+import useTestLoad from "../../hooks/useTestLoad";
+import usePlayer from "../../hooks/usePlayer";
 
 interface OverlayProps {
   children: React.ReactNode;
@@ -33,6 +37,59 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
     },
   ];
 
+  const [result, setResult] = useState<SearchNCN | undefined>(undefined);
+  const songPlaying = useSongPlaying();
+  const TestLoadFolder = useTestLoad();
+  const player = usePlayer();
+  const search = (search: string) => {
+    arrayTemp.map((data, index) => {
+      let art = data.artist.includes(search);
+      if (art) {
+        setResult(data);
+        return;
+      }
+
+      let filename = data.filename.includes(search);
+      if (filename) {
+        setResult(data);
+        return;
+      }
+
+      let name = data.name.includes(search);
+      if (name) {
+        setResult(data);
+        return;
+      }
+    });
+  };
+
+  const arrayTemp: SearchNCN[] = [
+    {
+      name: "ทำได้เพียง",
+      artist: "25",
+      filename: "00001",
+      path: ["foldertest", "0"],
+    },
+    {
+      name: "ปลอมไว้",
+      artist: "ร่วมกับปลอม",
+      filename: "00002",
+      path: ["foldertest", "2"],
+    },
+  ];
+
+  function getValueFromPath(path: string[], data: Folder): File | undefined {
+    let current: any = data;
+    for (const key of path) {
+      if (current.hasOwnProperty(key)) {
+        current = current[key] as Folder;
+      } else {
+        return undefined; // Path not found
+      }
+    }
+    return current;
+  }
+
   const [onSearchSong, setSearchSong] = useState<boolean>(false);
   const [textSearchSong, setTextSearchSong] = useState<string | undefined>(
     undefined
@@ -42,12 +99,58 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
   const handleKeyPress = (event: any) => {
     setSearchSong(true);
 
+    let reset = () => {
+      setSearchSong(false);
+      setResult(undefined);
+      setTextSearchSong(undefined);
+    };
+
     if (event.key.length == 1) {
-      setTextSearchSong((value) =>
-        value == undefined ? event.key : value + event.key
-      );
+      setTextSearchSong((value) => {
+        let newValue = value == undefined ? event.key : value + event.key;
+        search(newValue);
+        return newValue;
+      });
     } else if (event.key == "Backspace") {
       setTextSearchSong((value) => value?.slice(0, value.length - 1));
+    } else if (event.key == "Enter") {
+      // song.setCursor(result);
+      console.log("endter", TestLoadFolder.Folder, result);
+
+      let temp: any = {};
+      let app: any = {};
+      if (TestLoadFolder.Folder && result?.path) {
+        temp = TestLoadFolder.Folder;
+        let firstPath = result.path[0];
+        let index = result.path.splice(1, result.path.length);
+        let filename = result.filename;
+
+        let main = "Cursor";
+
+        let cur = getValueFromPath(
+          [firstPath, main, ...index, filename + ".cur"],
+          TestLoadFolder.Folder
+        );
+
+        main = "Lyrics";
+        let lyr = getValueFromPath(
+          [firstPath, main, ...index, filename + ".lyr"],
+          TestLoadFolder.Folder
+        );
+        main = "Song";
+        let mid = getValueFromPath(
+          [firstPath, main, ...index, filename + ".mid"],
+          TestLoadFolder.Folder
+        );
+
+        if (mid) {
+          player.loadMidi(mid);
+          setTimeout(() => {
+            player.setPlaying(true);
+          }, 1000);
+        }
+        reset();
+      }
     }
 
     if (timeoutIdRef.current !== null) {
@@ -55,7 +158,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
     }
 
     timeoutIdRef.current = setTimeout(() => {
-      setSearchSong(false);
+      reset();
     }, 3000);
   };
 
@@ -65,15 +168,16 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, []);
+  }, [TestLoadFolder, result]);
 
   return (
     <>
       <Dropdown menu={{ items }} trigger={["contextMenu"]}>
         <div className="relative w-full h-full overflow-hidden ">
-          <div className="fixed top-0 left-0 z-50  w-full h-[30%] ">
+          <div className="fixed top-0 left-0 z-50  w-full h-[30%] flex justify-center items-center">
             <div className="absolute top-16 md:top-24 left-2 right-2 z-50">
               <SearchSong
+                result={result}
                 bgOverLay={bgOverLay}
                 blur={blur}
                 rounded={rounded}
@@ -101,6 +205,17 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
             </div>
           </div>
 
+          <div
+            className={`fixed w-full h-full flex justify-center items-center z-50`}
+          >
+            <ImportFolders
+              bgOverLay={bgOverLay}
+              blur={blur}
+              rounded={rounded}
+              textColor={textColor}
+              borderColor={borderColor}
+            ></ImportFolders>
+          </div>
           <div
             className={`fixed top-16 md:top-24 right-2 ${
               onSearchSong ? "z-40" : "z-50"

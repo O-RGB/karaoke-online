@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import { SongContext } from "../context/song/song-context";
+import { SongPlayingContext } from "../context/song-playing/song-playing-context";
 
-const useSong = () => useContext(SongContext);
+const useSongPlaying = () => useContext(SongPlayingContext);
 
-export default useSong;
+export default useSongPlaying;

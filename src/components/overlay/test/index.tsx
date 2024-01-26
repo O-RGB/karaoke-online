@@ -7,7 +7,7 @@ import SoundFont from "../../../interfaces/soundfont";
 import { getCDNPathOrNull } from "../../../utils/constants.utils";
 import Player from "../../player";
 import { useDisclosure } from "@chakra-ui/react";
-import useSong from "../../../hooks/useSong";
+import useSongPlaying from "../../../hooks/useSong";
 import axios from "axios";
 import Drive from "../initGoogleDrive";
 interface ReadMidiFileAndSoundProps {
@@ -136,7 +136,7 @@ function CurModal({ isOpen, onClose }: ModalProps) {
 
 function LyrModal({ isOpen, onClose }: ModalProps) {
   const { soundfonts } = useData();
-  const song = useSong();
+  const song = useSongPlaying();
   return (
     <Modal
       footer={<></>}
