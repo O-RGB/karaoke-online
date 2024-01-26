@@ -1,5 +1,5 @@
 import { Modal } from "antd";
-import React, { PropsWithChildren, useEffect, useState } from "react";
+import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
 import useData from "../../../hooks/useData";
 import usePlayer from "../../../hooks/usePlayer";
 import Midi from "../../../interfaces/midi";
@@ -8,7 +8,8 @@ import { getCDNPathOrNull } from "../../../utils/constants.utils";
 import Player from "../../player";
 import { useDisclosure } from "@chakra-ui/react";
 import useSong from "../../../hooks/useSong";
-
+import axios from "axios";
+import Drive from "../initGoogleDrive";
 interface ReadMidiFileAndSoundProps {
   rounded?: string;
   bgOverLay?: string;
@@ -345,6 +346,47 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
       forceUpdate();
     }
   }, [midiModal.isOpen, isModalOpen]);
+
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.setAttribute("directory", "");
+      ref.current.setAttribute("webkitdirectory", "");
+      ref.current.setAttribute("mozdirectory", "");
+    }
+  }, [ref]);
+
+  function buildFileTree(files: FileList) {
+    const fileTree: any = {};
+
+    console.log("create tree");
+    for (let i = 0; i < files.length; i++) {
+      const pathArray = files[i].webkitRelativePath.split("/");
+      let currentLevel = fileTree;
+
+      for (let j = 0; j < pathArray.length; j++) {
+        const segment = pathArray[j];
+
+        if (!currentLevel[segment]) {
+          if (j === pathArray.length - 1) {
+            // Last segment, add file
+            currentLevel[segment] = files[i];
+          } else {
+            // Create folder
+            currentLevel[segment] = {};
+          }
+        }
+
+        currentLevel = currentLevel[segment];
+      }
+    }
+
+    console.log(fileTree);
+
+    return fileTree;
+  }
+
   return (
     <>
       <FontModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
@@ -429,6 +471,21 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
         >
           GitHup
         </a>
+        <div className="flex gap-2 items-center cursor-pointer">
+          <input
+            type="file"
+            onChange={(evnet) => {
+              //   console.log(evnet.target.files);
+              if (evnet.target.files) {
+                buildFileTree(evnet.target.files);
+              }
+            }}
+            ref={ref}
+          />
+        </div>
+        <div>
+          <Drive></Drive>
+        </div>
       </div>
     </>
   );
