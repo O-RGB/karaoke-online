@@ -41,14 +41,15 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
 
   const loadLyrics = async (lyrics: File) => {
     if (lyrics) {
+      setLyrics(null);
       const reader = new FileReader();
       reader.onload = (e: any) => {
         const contentArrayBuffer = e.target.result;
         const decoder = new TextDecoder("windows-874");
         const contentUtf8 = decoder.decode(contentArrayBuffer);
-        const lines = contentUtf8.split("\r\n");  
+        const lines = contentUtf8.split("\r\n");
         setLyrics(lines);
-      }; 
+      };
       reader.readAsArrayBuffer(lyrics);
     }
   };

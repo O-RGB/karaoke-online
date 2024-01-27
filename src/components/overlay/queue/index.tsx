@@ -45,8 +45,7 @@ const SearchSong: React.FC<SearchSongProps> = ({
           <>
             {result.length > 0 && (
               <div className="w-full h-32 p-2 text-5xl flex items-center">
-                {searchIndex} - {result[searchIndex].name} -{" "}
-                {result[searchIndex].artist}
+                {result[searchIndex].name} - {result[searchIndex].artist}
               </div>
             )}
           </>

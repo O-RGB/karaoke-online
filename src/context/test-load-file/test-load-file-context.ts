@@ -7,6 +7,16 @@ export interface LoadFileHook {
   SongList: SearchNCN[] | undefined;
   Trie: TrieSearch<SearchNCN> | undefined;
   setFolderProgram: (Folder: Folder) => unknown;
+  readNCNByPath: (
+    filename: string,
+    path: string[]
+  ) =>
+    | {
+        cur: File | undefined;
+        lyr: File | undefined;
+        mid: File | undefined;
+      }
+    | undefined;
 }
 
 export const LoadFileContext = React.createContext<LoadFileHook>({
@@ -14,4 +24,5 @@ export const LoadFileContext = React.createContext<LoadFileHook>({
   SongList: undefined,
   Trie: undefined,
   setFolderProgram: () => {},
+  readNCNByPath: (filename: string, path: string[]) => undefined,
 });

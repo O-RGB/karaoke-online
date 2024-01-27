@@ -14,6 +14,7 @@ import { Dropdown, MenuProps } from "antd";
 import AllowSound from "./components/overlay/allow-sound";
 import { SongPlayingProvider } from "./context/song-playing";
 import { LoadFileProvider } from "./context/test-load-file";
+import { DesktopProvider } from "./context/desktop";
 
 function App() {
   return (
@@ -23,9 +24,11 @@ function App() {
           <SynthesizerProvider>
             <DataProvider>
               <PlayerProvider>
-                <Overlay>
-                  <Wallpaper></Wallpaper>
-                </Overlay>
+                <DesktopProvider>
+                  <Overlay>
+                    <Wallpaper></Wallpaper>
+                  </Overlay>
+                </DesktopProvider>
               </PlayerProvider>
             </DataProvider>
           </SynthesizerProvider>

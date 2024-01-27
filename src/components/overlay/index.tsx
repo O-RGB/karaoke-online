@@ -11,6 +11,7 @@ import useSongPlaying from "../../hooks/useSong";
 import useTestLoad from "../../hooks/useTestLoad";
 import usePlayer from "../../hooks/usePlayer";
 import Fuse, { FuseResult } from "fuse.js";
+import useDesktop from "../../hooks/useDesktop";
 
 interface OverlayProps {
   children: React.ReactNode;
@@ -39,20 +40,18 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
   ];
 
   const [result, setResult] = useState<SearchNCN[] | undefined>(undefined);
-  const [onArrows, setOnArrows] = useState<
-    "Left" | "Right" | "Up" | "Down" | "Reset" | undefined
-  >(undefined);
 
-  const songPlaying = useSongPlaying();
   const TestLoadFolder = useTestLoad();
   const player = usePlayer();
 
   const [searchIndex, setSearchIndex] = useState<number>(0);
+  const [search, setSearch] = useState<string | undefined>(undefined);
   const onArrowInput = (
     onArrows: "Left" | "Right" | "Up" | "Down" | "Reset" | undefined
   ) => {
     if (result) {
       if (onArrows == "Left") {
+        desktop.setSearchBox(true);
         setSearchIndex((value) => {
           let test = value - 1;
           if (test <= 0) {
@@ -62,6 +61,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
           }
         });
       } else if (onArrows == "Right") {
+        desktop.setSearchBox(true);
         setSearchIndex((value) => {
           let test = value + 1;
           if (test > result.length - 1) {
@@ -70,115 +70,88 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
             return test;
           }
         });
-      } else if (onArrows == undefined) {
-        setSearchIndex(0);
       }
     }
   };
 
-  function getValueFromPath(path: string[], data: Folder): File | undefined {
-    let current: any = data;
-    console.log(path);
-    for (const key of path) {
-      if (current.hasOwnProperty(key)) {
-        current = current[key] as Folder;
-      } else {
-        return undefined;
-      }
-    }
-    return current;
-  }
-
-  const [onSearchSong, setSearchSong] = useState<boolean>(false);
-  const [textSearchSong, setTextSearchSong] = useState<string | undefined>(
-    undefined
-  );
+  const desktop = useDesktop();
   const timeoutIdRef: any = useRef<number | null>(null);
 
   const handleKeyPress = (event: any) => {
-    setSearchSong(true);
-
     let reset = () => {
-      setSearchSong(false);
+      desktop.setQueueBox(false);
+      desktop.setSearchBox(false);
       setResult(undefined);
-      setTextSearchSong(undefined);
+      setSearch(undefined);
       onArrowInput(undefined);
+      setSearchIndex(0);
     };
 
+    if (timeoutIdRef.current !== null) {
+      clearTimeout(timeoutIdRef.current);
+    }
     if (event.key.length == 1) {
-      let fullValue = "";
-      setTextSearchSong((value) => {
+      desktop.setSearchBox(true);
+      setSearch((value) => {
         let newValue = value == undefined ? event.key : value + event.key;
-        fullValue = newValue;
+        let search = TestLoadFolder.Trie?.search(newValue);
+        setResult(search);
         return newValue;
       });
-      setTimeout(() => {
-        let search = TestLoadFolder.Trie?.search(fullValue);
-        setResult(search);
-      }, 100);
     } else if (event.key == "Backspace") {
-      setTextSearchSong((value) => value?.slice(0, value.length - 1));
-    } else if (event.key == "Enter") {
-      console.log("endter", TestLoadFolder.Folder, result);
-
-      let temp: any = {};
-      let app: any = {};
-      if (result) {
-        if (TestLoadFolder.Folder && result[searchIndex]?.path) {
-          temp = TestLoadFolder.Folder;
-          let firstPath = result[searchIndex]?.path[0];
-          let index = result[searchIndex]?.path.splice(
-            1,
-            result[searchIndex]?.path.length
-          );
-          let filename = result[searchIndex]?.filename;
-
-          let main = "Cursor";
-
-          let cur = getValueFromPath(
-            [firstPath, main, ...index, filename + ".cur"],
-            TestLoadFolder.Folder
-          );
-
-          main = "Lyrics";
-          let lyr = getValueFromPath(
-            [firstPath, main, ...index, filename + ".lyr"],
-            TestLoadFolder.Folder
-          );
-          main = "Song";
-          let mid = getValueFromPath(
-            [firstPath, main, ...index, filename + ".mid"],
-            TestLoadFolder.Folder
-          );
-
-          console.log(mid, lyr);
-          if (mid && lyr) {
-            player.loadLyrics(lyr);
-            player.loadMidi(mid).then((data) => {
-              if (data) {
-                setTimeout(() => {
-                  player.setPlaying(true);
-                }, 1000);
+      desktop.setSearchBox(true);
+      setSearch((value) => {
+        let newValue = value?.slice(0, value.length - 1);
+        if (newValue) {
+          let search = TestLoadFolder.Trie?.search(newValue);
+          setResult(search);
+        }
+        return newValue;
+      });
+    }
+    if (event.key == "Enter" && desktop.SearchBox) {
+      if (desktop.SearchBox) {
+        if (result) {
+          if (TestLoadFolder.Folder && result[searchIndex]?.path) {
+            let path = result[searchIndex]?.path;
+            let filename = result[searchIndex]?.filename;
+            let fileObj = TestLoadFolder.readNCNByPath(filename, path);
+            if (fileObj) {
+              if (fileObj.lyr && fileObj.mid) {
+                player.loadLyrics(fileObj.lyr);
+                player.loadMidi(fileObj.mid).then((data) => {
+                  if (data) {
+                    desktop.setSearchBox(false);
+                    setTimeout(() => {
+                      player.setPlaying(true);
+                    }, 1000);
+                  }
+                  reset();
+                });
               }
-            });
+            }
           }
-          reset();
         }
       }
     } else if (event.key === "ArrowLeft") {
       onArrowInput("Left");
     } else if (event.key === "ArrowRight") {
       onArrowInput("Right");
-    }
-
-    if (timeoutIdRef.current !== null) {
-      clearTimeout(timeoutIdRef.current);
+    } else if (event.key === "ArrowUp") {
+      desktop.setQueueBox(true);
+      desktop.setSearchBox(false);
+      onArrowInput("Up");
     }
 
     timeoutIdRef.current = setTimeout(() => {
       reset();
-    }, 3000);
+    }, 5000);
   };
+
+  // useEffect(() => {
+  //   keypass.onInputKey(handleKeyPress);
+  //   return () => {};
+  // }, [result]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
@@ -186,7 +159,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [TestLoadFolder, result]);
+  }, [search, searchIndex]);
 
   return (
     <>
@@ -201,8 +174,8 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
                 blur={blur}
                 rounded={rounded}
                 textColor={textColor}
-                input={textSearchSong}
-                open={onSearchSong}
+                input={search}
+                open={desktop.SearchBox}
                 borderColor={borderColor}
               ></SearchSong>
             </div>
@@ -239,7 +212,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
           </div>
           <div
             className={`fixed top-16 md:top-24 right-2 ${
-              onSearchSong ? "z-40" : "z-50"
+              desktop.SearchBox ? "z-40" : "z-50"
             }  duration-300`}
           >
             <ReadMidiFileAndSound
