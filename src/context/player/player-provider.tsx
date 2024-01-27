@@ -13,6 +13,7 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
   const [midi, setMidi] = useState<MidiState | null>(null);
   const [soundFont, setSoundFont] = useState<SoundFont | null>(null);
   const [lastFontLoaded, setLastFontLoaded] = useState<number | undefined>(-1);
+  const [lyrics, setLyrics] = useState<string[] | null>(null);
 
   // Player state.
   const [playing, setPlaying] = useState(false);
@@ -38,6 +39,20 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  const loadLyrics = async (lyrics: File) => {
+    if (lyrics) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const contentArrayBuffer = e.target.result;
+        const decoder = new TextDecoder("windows-874");
+        const contentUtf8 = decoder.decode(contentArrayBuffer);
+        const lines = contentUtf8.split("\r\n");  
+        setLyrics(lines);
+      }; 
+      reader.readAsArrayBuffer(lyrics);
+    }
+  };
+
   // Load the midi file.
   const loadMidi = async (resource: Midi | File) => {
     const buffer = await loadBuffer(resource);
@@ -53,6 +68,9 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
       setBPM(bpm || 0);
 
       setMidi({ midi, buffer });
+      return true;
+    } else {
+      return false;
     }
   };
 
@@ -188,6 +206,8 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
         setRepeat,
         render,
         isRendering,
+        loadLyrics,
+        lyrics,
       }}
     >
       {children}

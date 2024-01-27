@@ -37,7 +37,7 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
         currentLevel = currentLevel[segment];
       }
     }
-    console.log(fileTree);
+
     return fileTree;
   }
 
@@ -49,6 +49,7 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
       ref.current.setAttribute("mozdirectory", "");
     }
   }, [ref]);
+
   return (
     <>
       <div
@@ -58,13 +59,12 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
         <input
           type="file"
           onChange={(evnet) => {
-            //   console.log(evnet.target.files);
             if (evnet.target.files) {
               let folder = buildFileTree(evnet.target.files);
-              console.log(folder)
-              TestLoadFolder.setFolder(folder);
-              // folder = {};
-              // evnet.target.remove();
+
+              TestLoadFolder.setFolderProgram(folder);
+              folder = {};
+              evnet.target.remove();
             }
           }}
           ref={ref}

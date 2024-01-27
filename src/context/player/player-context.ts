@@ -11,11 +11,15 @@ export interface MidiState {
 export interface PlayerHook {
   // Midi
   midi: MidiState | null;
-  loadMidi: (midi: Midi | File) => unknown;
+  loadMidi: (midi: Midi | File) => Promise<boolean>;
 
   // SoundFont
   soundFont: SoundFont | null;
-  loadSoundFont: (soundFont: SoundFont | File) => unknown;
+  loadSoundFont: (soundFont: SoundFont | File) => Promise<void>;
+
+  // Lyrics
+  lyrics: string[] | null;
+  loadLyrics: (lyrics: File) => Promise<void>;
 
   // Player
   currentTick: number;
@@ -35,11 +39,14 @@ export interface PlayerHook {
 export const PlayerContext = React.createContext<PlayerHook>({
   // Midi
   midi: null,
-  loadMidi: () => {},
+  loadMidi: async () => false,
 
   // SoundFont
   soundFont: null,
-  loadSoundFont: () => {},
+  loadSoundFont: async () => {},
+  // SoundFont
+  lyrics: null,
+  loadLyrics: async () => {},
 
   // Player
   currentTick: 0,

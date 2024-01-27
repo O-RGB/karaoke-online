@@ -20,7 +20,7 @@ const Wallpaper: React.FC<WallpaperProps> = ({ children, blur }) => {
         >
           <div className="bg-black absolute opacity-10 h-full w-full"></div>
           <img
-            src="/wallpaper.jpeg"
+            src="/wallpaper11.jpeg"
             alt=""
             className="object-cover  h-full w-full "
           />

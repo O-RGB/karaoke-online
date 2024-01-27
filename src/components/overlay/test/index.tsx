@@ -471,21 +471,6 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
         >
           GitHup
         </a>
-        <div className="flex gap-2 items-center cursor-pointer">
-          <input
-            type="file"
-            onChange={(evnet) => {
-              //   console.log(evnet.target.files);
-              if (evnet.target.files) {
-                buildFileTree(evnet.target.files);
-              }
-            }}
-            ref={ref}
-          />
-        </div>
-        <div>
-          <Drive></Drive>
-        </div>
       </div>
     </>
   );

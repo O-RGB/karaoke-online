@@ -1,11 +1,17 @@
+import Fuse from "fuse.js";
 import React from "react";
+import TrieSearch from "trie-search";
 
 export interface LoadFileHook {
   Folder: Folder | undefined;
-  setFolder: (Folder: Folder) => unknown;
+  SongList: SearchNCN[] | undefined;
+  Trie: TrieSearch<SearchNCN> | undefined;
+  setFolderProgram: (Folder: Folder) => unknown;
 }
 
 export const LoadFileContext = React.createContext<LoadFileHook>({
   Folder: undefined,
-  setFolder: () => {},
+  SongList: undefined,
+  Trie: undefined,
+  setFolderProgram: () => {},
 });

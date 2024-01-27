@@ -1,3 +1,4 @@
+import { FuseResult } from "fuse.js";
 import React, { useEffect, useState } from "react";
 
 interface SearchSongProps {
@@ -8,7 +9,8 @@ interface SearchSongProps {
   textColor?: string;
   borderColor?: string;
   blur?: string;
-  result?: SearchNCN;
+  result?: SearchNCN[];
+  searchIndex: number;
 }
 
 const SearchSong: React.FC<SearchSongProps> = ({
@@ -20,7 +22,10 @@ const SearchSong: React.FC<SearchSongProps> = ({
   borderColor,
   blur,
   result,
+  searchIndex,
 }) => {
+  useEffect(() => {}, [searchIndex]);
+
   if (open == false) {
     return <></>;
   }
@@ -36,9 +41,15 @@ const SearchSong: React.FC<SearchSongProps> = ({
           </div>
           <div className="w-full p-2"></div>
         </div>
-        <div className="w-full h-32 p-2 text-5xl flex items-center">
-          {result?.name} - {result?.artist}
-        </div>
+        {result && (
+          <>
+            {result.length > 0 && (
+              <div className="w-full h-32 p-2 text-5xl flex items-center">
+                {result[searchIndex].name} - {result[searchIndex].artist}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </>
   );
