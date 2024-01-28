@@ -217,7 +217,6 @@ function LyrModal({ isOpen, onClose }: ModalProps) {
 function FontModal({ isOpen, onClose }: ModalProps) {
   const player = usePlayer();
   const { soundfonts } = useData();
-
   return (
     <Modal
       footer={<></>}

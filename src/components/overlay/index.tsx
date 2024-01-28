@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import TimeHeader from "./header/time";
 import FooterPlayer from "./footer";
 import Tempo from "./header/tempo";
-import { Dropdown, Input, MenuProps } from "antd";
+import { Dropdown, Input, MenuProps, Modal } from "antd";
 import SearchSong from "./search";
 import LyricsBox from "./lyrics";
 import ReadMidiFileAndSound from "./test";
@@ -13,6 +13,8 @@ import usePlayer from "../../hooks/usePlayer";
 import Fuse, { FuseResult } from "fuse.js";
 import useDesktop from "../../hooks/useDesktop";
 import MobileInput from "./mobile-input";
+import { PiVinylRecordFill } from "react-icons/pi";
+import { BsImageFill } from "react-icons/bs";
 
 interface OverlayProps {
   children: React.ReactNode;
@@ -27,18 +29,60 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
 
   const items: MenuProps["items"] = [
     {
-      label: "1st menu item",
+      label: "ซาวด์ฟอนต์",
+      icon: <PiVinylRecordFill></PiVinylRecordFill>,
       key: "1",
+      onClick: () => setIsModalOpen(true),
     },
     {
-      label: "2nd menu item",
+      label: "ภาพพื้นหลัง",
+      icon: <BsImageFill></BsImageFill>,
       key: "2",
     },
-    {
-      label: "3rd menu item",
-      key: "3",
-    },
   ];
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const SoundFountSetting = (
+    <div className="flex flex-col gap-2">
+      <div>Click here to upload a .sf2 file</div>
+      <div
+        className="h-20 border rounded-lg flex justify-center items-center cursor-pointer"
+        onClick={async () => {
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = ".sf2";
+          input.onchange = async (_) => {
+            const file = input.files ? input.files[0] : null;
+            if (file) {
+              await player.loadSoundFont(file);
+              setIsModalOpen(false);
+            }
+            input.remove();
+          };
+          input.click();
+        }}
+      >
+        เลือกไฟล์
+      </div>
+      <div
+        className="h-20 border rounded-lg flex justify-center items-center cursor-pointer"
+        onClick={async () => {
+          fetch("/gm.sf2")
+            .then((row: any) => row.blob())
+            .then((blob) => {
+              console.log(blob);
+              const file = new File([blob], "sound-test.sf2", {
+                type: blob.type,
+              });
+              player.loadSoundFont(file);
+              setIsModalOpen(false);
+            });
+        }}
+      >
+        ใช้ไฟล์ทดสอบ
+      </div>
+    </div>
+  );
 
   const [result, setResult] = useState<SearchNCN[] | undefined>(undefined);
 
@@ -179,6 +223,16 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
 
   return (
     <>
+      <Modal
+        footer={<></>}
+        open={isModalOpen}
+        onCancel={() => {
+          setIsModalOpen(false);
+        }}
+        title={"Select SoundFont"}
+      >
+        {SoundFountSetting}
+      </Modal>
       <Dropdown menu={{ items }} trigger={["contextMenu"]}>
         <div className="relative w-full h-full overflow-hidden z-50">
           <div className="fixed top-0 left-0 z-50  w-full h-[30%]">

@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import InputCommon from "../../common/input";
 import useDesktop from "../../../hooks/useDesktop";
+import ButtonCommon from "../../common/button";
 
 interface MobileInputProps {
   search?: string;
@@ -38,19 +39,14 @@ const MobileInput: React.FC<MobileInputProps> = ({
           value={search}
           placeholder="ค้นหา"
         ></InputCommon>
-        <div
-          className={`px-4 flex justify-center items-center bg-white/10 ${borderColor} ${blur} ${textColor} ${rounded}`}
-        >
-          ตกลง
-        </div>
-        <div
+        <ButtonCommon>ตกลง</ButtonCommon>
+        <ButtonCommon
           onClick={() => {
             desktop.setSearchInput(false);
           }}
-          className={`px-4 flex justify-center items-center bg-white/10 ${borderColor} ${blur} ${textColor}  ${rounded}`}
         >
           ยกเลิก
-        </div>
+        </ButtonCommon>
       </div>
     </>
   );

@@ -177,7 +177,6 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
 
   const setZipProgram = async (zip: File) => {
     setLoadType("ZIP");
-    // setZipFile(zip);
     JSZip.loadAsync(zip).then((data) => {
       setZipFileLoad(data);
       getSongListFromZip(zip, data);

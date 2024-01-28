@@ -8,8 +8,11 @@ import {
   FaRecordVinyl,
   FaKeyboard,
 } from "react-icons/fa";
+import { IoMdSettings } from "react-icons/io";
+
 import usePlayer from "../../../hooks/usePlayer";
 import useDesktop from "../../../hooks/useDesktop";
+import ButtonCommon from "../../common/button";
 
 interface FooterPlayerProps {
   children?: React.ReactNode;
@@ -39,12 +42,13 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
     onClick?: () => void;
   }) {
     return (
-      <div
+      <ButtonCommon
         onClick={onClick}
-        className="flex justify-center items-center border p-2 w-8 md:w-12 h-full bg-gray-100 hover:bg-gray-200 duration-300 cursor-pointer"
+        rounded=""
+        // className="flex justify-center items-center p-2 w-8 md:w-12 h-full bg-black/25 hover:bg-black/50 duration-300 cursor-pointer"
       >
         {children}
-      </div>
+      </ButtonCommon>
     );
   }
 
@@ -56,7 +60,7 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
     <div className="h-8 md:h-12 w-full group">
       {/*  translate-y-12 group-hover:translate-y-0 */}
       <div
-        className={`${bgOverLay} ${blur}   ${textColor} ${borderColor} border h-full duration-300 flex justify-between`}
+        className={`${bgOverLay} ${blur} ${textColor} ${borderColor} border h-full w-full duration-300 flex justify-between`}
       >
         <div className="flex h-full">
           {!player.playing ? (
@@ -65,7 +69,7 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
                 player.setPlaying(true);
               }}
             >
-              <FaPlay className="text-[10px] md:text-base text-gray-500"></FaPlay>
+              <FaPlay className="text-[10px] md:text-base"></FaPlay>
             </ButtonPlayer>
           ) : (
             <ButtonPlayer
@@ -73,28 +77,33 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
                 player.setPlaying(false);
               }}
             >
-              <FaPause className="text-[10px] md:text-base text-gray-500"></FaPause>
+              <FaPause className="text-[10px] md:text-base"></FaPause>
             </ButtonPlayer>
           )}
 
           <ButtonPlayer>
-            <FaStop className="text-[10px] md:text-base text-gray-500"></FaStop>
+            <FaStop className="text-[10px] md:text-base"></FaStop>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaBackward className="text-[10px] md:text-base text-gray-500"></FaBackward>
+            <FaBackward className="text-[10px] md:text-base"></FaBackward>
           </ButtonPlayer>
           <ButtonPlayer>
-            <FaForward className="text-[10px] md:text-base text-gray-500"></FaForward>
+            <FaForward className="text-[10px] md:text-base"></FaForward>
           </ButtonPlayer>
           {/* <ButtonPlayer>
-            <FaRecordVinyl className="text-[10px] md:text-base text-gray-500"></FaRecordVinyl>
+            <FaRecordVinyl className="text-[10px] md:text-base"></FaRecordVinyl>
           </ButtonPlayer> */}
         </div>
-        <div>
-          <ButtonPlayer onClick={() => {
-            desktop.setSearchInput(true)
-          }}>
-            <FaKeyboard className="text-[10px] md:text-base text-gray-500"></FaKeyboard>
+        <div className="flex">
+          <ButtonPlayer
+            onClick={() => {
+              desktop.setSearchInput(true);
+            }}
+          >
+            <FaKeyboard className="text-[10px] md:text-base"></FaKeyboard>
+          </ButtonPlayer>
+          <ButtonPlayer onClick={() => {}}>
+            <IoMdSettings className="text-[10px] md:text-base"></IoMdSettings>
           </ButtonPlayer>
         </div>
       </div>
