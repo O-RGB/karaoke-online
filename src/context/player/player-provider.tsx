@@ -158,6 +158,9 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
     if (playing) {
       synthesizer?.seekPlayer(currentTick);
       synthesizer?.playPlayer();
+      // synthesizer?.hookPlayerMIDIEvents(function (s, type, event) {
+      //   return false;
+      // });
     } else {
       synthesizer?.stopPlayer();
     }

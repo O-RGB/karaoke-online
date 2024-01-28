@@ -31,28 +31,25 @@ const SearchSong: React.FC<SearchSongProps> = ({
   }
 
   return (
-    <>
-      <div
-        className={`w-full border ${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor}`}
-      >
-        <div className="flex h-24">
-          <div className="w-[300px] p-2 overflow-hidden text-5xl flex items-center ">
-            {input}
-          </div>
-          <div className="w-full p-2"></div>
+    <div
+      className={`w-full border ${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor}`}
+    >
+      <div className="flex h-24">
+        <div className="w-[300px] p-2 overflow-hidden text-5xl flex items-center ">
+          {input}
         </div>
-        {result && (
-          <>
-            {result.length > 0 && (
-              <div className="w-full h-32 p-2 text-5xl flex items-center">
-                {searchIndex} - {result[searchIndex].name} -{" "}
-                {result[searchIndex].artist}
-              </div>
-            )}
-          </>
-        )}
+        <div className="w-full p-2"></div>
       </div>
-    </>
+      {result && (
+        <>
+          {result.length > 0 && (
+            <div className="w-full h-32 p-2 text-5xl flex items-center">
+              {result[searchIndex]?.name} - {result[searchIndex]?.artist}
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 };
 

@@ -14,6 +14,8 @@ import usePlayer from "../../../hooks/usePlayer";
 import useDesktop from "../../../hooks/useDesktop";
 import ButtonCommon from "../../common/button";
 
+import { Dropdown } from "antd";
+
 interface FooterPlayerProps {
   children?: React.ReactNode;
   bgOverLay?: string;
@@ -21,6 +23,7 @@ interface FooterPlayerProps {
   rounded?: string;
   textColor?: string;
   borderColor?: string;
+  items: any[] | undefined;
 }
 
 const FooterPlayer: React.FC<FooterPlayerProps> = ({
@@ -30,6 +33,7 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
   rounded,
   textColor,
   borderColor,
+  items,
 }) => {
   const player = usePlayer();
   const desktop = useDesktop();
@@ -45,6 +49,8 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
       <ButtonCommon
         onClick={onClick}
         rounded=""
+        bgOverLay="hover:bg-white/20"
+        blur=""
         // className="flex justify-center items-center p-2 w-8 md:w-12 h-full bg-black/25 hover:bg-black/50 duration-300 cursor-pointer"
       >
         {children}
@@ -102,9 +108,12 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
           >
             <FaKeyboard className="text-[10px] md:text-base"></FaKeyboard>
           </ButtonPlayer>
-          <ButtonPlayer onClick={() => {}}>
-            <IoMdSettings className="text-[10px] md:text-base"></IoMdSettings>
-          </ButtonPlayer>
+
+          <Dropdown menu={{ items: items }} trigger={["click"]}>
+            <ButtonPlayer onClick={() => {}}>
+              <IoMdSettings className="text-[10px] md:text-base"></IoMdSettings>
+            </ButtonPlayer>
+          </Dropdown>
         </div>
       </div>
     </div>

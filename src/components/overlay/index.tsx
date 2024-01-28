@@ -15,6 +15,7 @@ import useDesktop from "../../hooks/useDesktop";
 import MobileInput from "./mobile-input";
 import { PiVinylRecordFill } from "react-icons/pi";
 import { BsImageFill } from "react-icons/bs";
+import { FaGithub } from "react-icons/fa";
 
 interface OverlayProps {
   children: React.ReactNode;
@@ -23,7 +24,7 @@ interface OverlayProps {
 const Overlay: React.FC<OverlayProps> = ({ children }) => {
   const rounded = "rounded-xl";
   const bgOverLay = "bg-black/30";
-  const blur = "backdrop-blur-sm";
+  const blur = "backdrop-blur-md";
   const textColor = "text-white";
   const borderColor = "border-white/30 ";
 
@@ -35,9 +36,24 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
       onClick: () => setIsModalOpen(true),
     },
     {
+      label: "ตั้งค่าเนื้อเพลง",
+      icon: <BsImageFill></BsImageFill>,
+      disabled: true,
+      key: "2",
+    },
+    {
       label: "ภาพพื้นหลัง",
       icon: <BsImageFill></BsImageFill>,
-      key: "2",
+      disabled: true,
+      key: "3",
+    },
+    {
+      label: "GitHub",
+      icon: <FaGithub></FaGithub>,
+      key: "4",
+      onClick: () => {
+        window.open("https://github.com/O-RGB/extreme-karaoke-online");
+      },
     },
   ];
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -339,6 +355,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
               rounded={rounded}
               textColor={textColor}
               borderColor={borderColor}
+              items={items}
             ></FooterPlayer>
           </div>
         </div>
