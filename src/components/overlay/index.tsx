@@ -75,6 +75,18 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
     }
   };
 
+  const setSoundFont = () => {
+    fetch("/gm.sf2")
+      .then((row: any) => row.blob())
+      .then((blob) => {
+        console.log(blob);
+        const file = new File([blob], "sound-test.sf2", {
+          type: blob.type,
+        });
+        player.loadSoundFont(file);
+      });
+  };
+
   const desktop = useDesktop();
   const timeoutIdRef: any = useRef<number | null>(null);
 
@@ -151,6 +163,12 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
       reset();
     }, 5000);
   };
+
+  useEffect(() => {
+    if (!player.soundFont) {
+      setSoundFont();
+    }
+  }, []);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
