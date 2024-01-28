@@ -112,24 +112,27 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
     if (event.key == "Enter" && desktop.SearchBox) {
       if (desktop.SearchBox) {
         if (result) {
-          if (TestLoadFolder.Folder && result[searchIndex]?.path) {
+          if (result[searchIndex]?.path) {
             let path = result[searchIndex]?.path;
             let filename = result[searchIndex]?.filename;
-            let fileObj = TestLoadFolder.readNCNByPath(filename, path);
-            if (fileObj) {
-              if (fileObj.lyr && fileObj.mid) {
-                player.loadLyrics(fileObj.lyr);
-                player.loadMidi(fileObj.mid).then((data) => {
-                  if (data) {
-                    desktop.setSearchBox(false);
-                    setTimeout(() => {
-                      player.setPlaying(true);
-                    }, 1000);
+            TestLoadFolder.readNCNByPath(filename, path).then(
+              (getSong: any) => {
+                if (getSong) {
+                  if (getSong.lyr && getSong.mid) {
+                    player.loadLyrics(getSong.lyr);
+                    player.loadMidi(getSong.mid).then((data) => {
+                      if (data) {
+                        desktop.setSearchBox(false);
+                        setTimeout(() => {
+                          player.setPlaying(true);
+                        }, 1000);
+                      }
+                      reset();
+                    });
                   }
-                  reset();
-                });
+                }
               }
-            }
+            );
           }
         }
       }
@@ -147,11 +150,6 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
       reset();
     }, 5000);
   };
-
-  // useEffect(() => {
-  //   keypass.onInputKey(handleKeyPress);
-  //   return () => {};
-  // }, [result]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
@@ -200,7 +198,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
           <div
             className={`fixed w-full h-full flex justify-center items-center z-50`}
           >
-            {!TestLoadFolder.Folder && (
+            {!TestLoadFolder.SongList && (
               <ImportFolders
                 bgOverLay={bgOverLay}
                 blur={blur}

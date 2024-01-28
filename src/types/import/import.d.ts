@@ -4,6 +4,7 @@ interface PathFolders {
 }
 
 type NCNType = "lyr" | "mid" | "cur";
+type LoadType = "FOLDER" | "ZIP";
 
 interface SearchNCN {
   name: string;

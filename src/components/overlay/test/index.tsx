@@ -10,6 +10,7 @@ import { useDisclosure } from "@chakra-ui/react";
 import useSongPlaying from "../../../hooks/useSong";
 import axios from "axios";
 import Drive from "../initGoogleDrive";
+import useTestLoad from "../../../hooks/useTestLoad";
 interface ReadMidiFileAndSoundProps {
   rounded?: string;
   bgOverLay?: string;
@@ -331,6 +332,7 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
   const player = usePlayer();
   const [auxUpdate, setAuxUpdate] = useState(0);
   const midiModal = useDisclosure();
+  const testLoadFile = useTestLoad();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function forceUpdate() {
@@ -386,6 +388,14 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
 
     return fileTree;
   }
+
+  const handleFileChange = async (event: any) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      testLoadFile.setZipProgram(file);
+    }
+  };
 
   return (
     <>
@@ -465,6 +475,7 @@ const ReadMidiFileAndSound: React.FC<ReadMidiFileAndSoundProps> = ({
             <div>เลือก Cur ไฟล์</div>
           </div>
         </div>
+        <input type="file" onChange={handleFileChange} />
         <a
           href="https://github.com/O-RGB/extreme-karaoke-online"
           className=" underline"
