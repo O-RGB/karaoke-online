@@ -6,8 +6,10 @@ import {
   FaBackward,
   FaForward,
   FaRecordVinyl,
+  FaKeyboard,
 } from "react-icons/fa";
 import usePlayer from "../../../hooks/usePlayer";
+import useDesktop from "../../../hooks/useDesktop";
 
 interface FooterPlayerProps {
   children?: React.ReactNode;
@@ -27,6 +29,7 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
   borderColor,
 }) => {
   const player = usePlayer();
+  const desktop = useDesktop();
 
   function ButtonPlayer({
     children,
@@ -53,7 +56,7 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
     <div className="h-8 md:h-12 w-full group">
       {/*  translate-y-12 group-hover:translate-y-0 */}
       <div
-        className={`${bgOverLay} ${blur}   ${textColor} ${borderColor} border h-full duration-300`}
+        className={`${bgOverLay} ${blur}   ${textColor} ${borderColor} border h-full duration-300 flex justify-between`}
       >
         <div className="flex h-full">
           {!player.playing ? (
@@ -86,6 +89,13 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
           {/* <ButtonPlayer>
             <FaRecordVinyl className="text-[10px] md:text-base text-gray-500"></FaRecordVinyl>
           </ButtonPlayer> */}
+        </div>
+        <div>
+          <ButtonPlayer onClick={() => {
+            desktop.setSearchInput(true)
+          }}>
+            <FaKeyboard className="text-[10px] md:text-base text-gray-500"></FaKeyboard>
+          </ButtonPlayer>
         </div>
       </div>
     </div>

@@ -42,6 +42,15 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
   }
 
   const TestLoadFolder = useTestLoad();
+
+  const handleFileChange = async (event: any) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      TestLoadFolder.setZipProgram(file);
+    }
+  };
+
   useEffect(() => {
     if (ref.current) {
       ref.current.setAttribute("directory", "");
@@ -53,15 +62,16 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
   return (
     <>
       <div
-        className={`${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} h-32 p-2 flex flex-col gap-2`}
+        className={`${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} p-2 flex flex-col gap-2`}
       >
+        <div>เลือก NCN จากไหน?</div>
+
         <div>เลือกโฟลเดอร์ NCN</div>
         <input
           type="file"
           onChange={(evnet) => {
             if (evnet.target.files) {
               let folder = buildFileTree(evnet.target.files);
-
               TestLoadFolder.setFolderProgram(folder);
               folder = {};
               evnet.target.remove();
@@ -69,6 +79,8 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
           }}
           ref={ref}
         />
+        <div>เลือก .Zip NCN</div>
+        <input type="file" onChange={handleFileChange} accept=".zip" />
       </div>
     </>
   );

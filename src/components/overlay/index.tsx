@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import TimeHeader from "./header/time";
 import FooterPlayer from "./footer";
 import Tempo from "./header/tempo";
-import { Dropdown, MenuProps } from "antd";
+import { Dropdown, Input, MenuProps } from "antd";
 import SearchSong from "./search";
 import LyricsBox from "./lyrics";
 import ReadMidiFileAndSound from "./test";
@@ -12,6 +12,7 @@ import useTestLoad from "../../hooks/useTestLoad";
 import usePlayer from "../../hooks/usePlayer";
 import Fuse, { FuseResult } from "fuse.js";
 import useDesktop from "../../hooks/useDesktop";
+import MobileInput from "./mobile-input";
 
 interface OverlayProps {
   children: React.ReactNode;
@@ -153,7 +154,6 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
-
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
@@ -162,9 +162,15 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
   return (
     <>
       <Dropdown menu={{ items }} trigger={["contextMenu"]}>
-        <div className="relative w-full h-full overflow-hidden ">
-          <div className="fixed top-0 left-0 z-50  w-full h-[30%] flex justify-center items-center">
-            <div className="absolute top-16 md:top-24 left-2 right-2 z-50">
+        <div className="relative w-full h-full overflow-hidden z-50">
+          <div className="fixed top-0 left-0 z-50  w-full h-[30%]">
+            <div
+              className={`absolute  ${
+                !desktop.SearchInput
+                  ? "top-16 md:top-24"
+                  : "top-[6.5rem] md:top-[8.5rem]"
+              }  left-2 right-2 z-50 duration-300`}
+            >
               <SearchSong
                 searchIndex={searchIndex}
                 result={result}
@@ -177,7 +183,11 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
                 borderColor={borderColor}
               ></SearchSong>
             </div>
-            <div className={`absolute right-2 top-2 flex gap-2`}>
+            <div
+              className={`absolute right-2 ${
+                !desktop.SearchInput ? "top-2" : "top-12"
+              } flex gap-2 duration-300`}
+            >
               <TimeHeader
                 bgOverLay={bgOverLay}
                 blur={blur}
@@ -196,6 +206,21 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
           </div>
 
           <div
+            className={`fixed top-2 left-2 right-2 z-[60] ${
+              !desktop.SearchInput ? "-translate-y-12" : "translate-y-0"
+            } duration-300`}
+          >
+            <MobileInput
+              bgOverLay={bgOverLay}
+              blur={blur}
+              rounded={rounded}
+              textColor={textColor}
+              borderColor={borderColor}
+              search={search}
+            ></MobileInput>
+          </div>
+
+          <div
             className={`fixed w-full h-full flex justify-center items-center z-50`}
           >
             {!TestLoadFolder.SongList && (
@@ -208,7 +233,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
               ></ImportFolders>
             )}
           </div>
-          <div
+          {/* <div
             className={`fixed top-16 md:top-24 right-2 ${
               desktop.SearchBox ? "z-40" : "z-50"
             }  duration-300`}
@@ -220,7 +245,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
               textColor={textColor}
               borderColor={borderColor}
             ></ReadMidiFileAndSound>
-          </div>
+          </div> */}
 
           {player.lyrics && (
             <div className="fixed bottom-10 md:bottom-14 right-2 left-2 z-50 duration-300">
