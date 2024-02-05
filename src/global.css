@@ -33,3 +33,17 @@ body {
 * {
   @apply select-none font-baiJamjuree;
 }
+
+.ant-modal-content {
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+}
+
+.ant-modal-header {
+  background-color: transparent !important;
+}
+
+.ant-modal-close {
+  color: white !important;
+}

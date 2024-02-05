@@ -4,7 +4,7 @@ interface PathFolders {
 }
 
 type NCNType = "lyr" | "mid" | "cur";
-type LoadType = "FOLDER" | "ZIP";
+type LoadType = "FOLDER" | "ZIP" | "API";
 
 interface SearchNCN {
   name: string;
@@ -15,4 +15,21 @@ interface SearchNCN {
 
 interface Folder {
   [key: string]: Folder | Record<string, File>;
+}
+
+interface IGetSongListApi {
+  data: SearchNCN[];
+}
+
+interface MiniApiNCN {
+  lyr: stirng | File;
+  cur: stirng | File;
+  mid: stirng | File;
+  path: string;
+}
+interface MiniApiNCNInput {
+  type: string;
+  path: string;
+  path_category: string;
+  filename: string;
 }

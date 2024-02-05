@@ -13,6 +13,9 @@ export interface LoadFileHook {
   Trie: TrieSearch<SearchNCN> | undefined;
   extractZipByPath: (path: string[]) => Promise<File | undefined>;
   readNCNByPath: (filename: string, path: string[]) => any;
+  loadSongListInApi: () => void;
+  loadFileInApi: (input: MiniApiNCNInput) => void;
+  setApiProgram: () => void;
 }
 
 export const LoadFileContext = React.createContext<LoadFileHook>({
@@ -21,9 +24,12 @@ export const LoadFileContext = React.createContext<LoadFileHook>({
   ZipFile: undefined,
   setZipFile: (zipFile: File) => {},
   setZipProgram: (zipFile: File) => new Promise<any>(() => {}),
+  setApiProgram: () => {},
   // extractZipToSongList: () => false,
   SongList: undefined,
   Trie: undefined,
   extractZipByPath: () => new Promise<any>(() => {}),
   readNCNByPath: (filename: string, path: string[]) => undefined,
+  loadSongListInApi: () => {},
+  loadFileInApi: () => {},
 });

@@ -1,5 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useTestLoad from "../../../../hooks/useTestLoad";
+import InputCommon from "../../../common/input";
+import { FaServer } from "react-icons/fa";
+import { FaFileZipper } from "react-icons/fa6";
+import { FaFolderOpen } from "react-icons/fa";
+import { FaPython } from "react-icons/fa";
+import { Modal } from "antd";
+import ModalCommon from "../../../common/modal/modal";
 
 interface ImportFoldersProps {
   rounded?: string;
@@ -59,14 +66,126 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
     }
   }, [ref]);
 
+  function ButtonStyle({ children, title, full, onClick }: any) {
+    return (
+      <div
+        onClick={onClick}
+        className={`${rounded} ${bgOverLay}  ${textColor} ${borderColor} ${
+          full ? "w-full h-24 md:h-32" : "w-20 md:w-32 h-24 md:h-32"
+        } hover:bg-black/10 duration-300 cursor-pointer`}
+      >
+        <div className="flex gap-1 flex-col justify-center items-center h-full">
+          <div className="text-white/80 text-3xl md:text-6xl ">{children}</div>
+          <div className="text-center px-2 text-xs">{title}</div>
+        </div>
+      </div>
+    );
+  }
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [ModalNode, setModalNode] = useState(<></>);
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const createSongList = () => {
+    setModalNode(
+      <div className="flex gap-6 items-center justify-center">
+        <ButtonStyle
+          onClick={createSongList}
+          title={"create-json-song-list.py"}
+        >
+          <FaPython></FaPython>
+        </ButtonStyle>
+        <div>
+          <div>โปรแกรมเตรียมเนื้อเพลง</div>
+          <div>1.นำไฟล์ไปไว้ในโปรแกรม Karaoke</div>
+          <div>2.กดเปิดโปรแกรม</div>
+          <div>3.จะได้ไฟล์ song_list.json</div>
+        </div>
+      </div>
+    );
+    showModal();
+  };
+  const createServer = () => {
+    setModalNode(
+      <div className="flex gap-6 items-center justify-center">
+        <ButtonStyle onClick={createSongList} title={"mini-karaoke-api.py"}>
+          <FaPython></FaPython>
+        </ButtonStyle>
+        <div>
+          <div>โปรแกรมสร้าง Server</div>
+          <div>1.นำไฟล์ไปไว้ในโปรแกรม Karaoke</div>
+          <div>2.กดเปิดโปรแกรม</div>
+          <div>3.จะได้ URL สำหรับใส่ Input ด้านล่าง</div>
+        </div>
+      </div>
+    );
+    showModal();
+  };
+
+  const createInputServer = () => {
+    setModalNode(
+      <div className="flex gap-6 items-center justify-center">
+        <InputCommon></InputCommon>
+      </div>
+    );
+    showModal();
+  };
+
   return (
     <>
-      <div
-        className={`${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} p-2 flex flex-col gap-2`}
+      <ModalCommon
+        title="Basic Modal"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
       >
-        <div>เลือก NCN จากไหน?</div>
+        {ModalNode}
+      </ModalCommon>
+      <div
+        className={`${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} p-6 px-8 flex flex-col gap-4`}
+      >
+        <div className="">ก่อน import ไฟล์</div>
+        <div className="w-full flex gap-4 justify-center items-center  ">
+          <ButtonStyle onClick={createSongList} title={"เตรียมเนื้อเพลง"}>
+            <FaPython></FaPython>
+          </ButtonStyle>
+          <ButtonStyle onClick={createServer} title={"สร้าง Server เอง"}>
+            <FaPython></FaPython>
+          </ButtonStyle>
+        </div>
+        <hr />
+        <div className="">เลือกไฟล์จาก</div>
+        <div className="w-full flex gap-4 justify-center items-center  ">
+          <ButtonStyle onClick={createInputServer} title={"Server"}>
+            <FaServer></FaServer>
+          </ButtonStyle>
+          <ButtonStyle onClick={handleFileChange} title={"Zip File"}>
+            <FaFileZipper></FaFileZipper>
+          </ButtonStyle>
+        </div>
+        <ButtonStyle
+          full
+          title={
+            <div className="text-center">
+              <div>Folder</div>
+              <div className="text-xs">(คอมพิวเตอร์เท่านั้น)</div>
+            </div>
+          }
+        >
+          <FaFolderOpen></FaFolderOpen>
+        </ButtonStyle>
 
-        <div>เลือกโฟลเดอร์ NCN</div>
+        {/* <div>เลือกโฟลเดอร์ NCN</div>
         <input
           type="file"
           onChange={(evnet) => {
@@ -78,9 +197,18 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
             }
           }}
           ref={ref}
-        />
-        <div>เลือก .Zip NCN</div>
+        /> */}
+        {/* <div>เลือก .Zip NCN</div>
         <input type="file" onChange={handleFileChange} accept=".zip" />
+
+        <div>Read File in mini AIP</div>
+        <button
+          onClick={() => {
+            TestLoadFolder.setApiProgram();
+          }}
+        >
+          test get file
+        </button> */}
       </div>
     </>
   );

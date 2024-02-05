@@ -2,7 +2,7 @@ import { PropsWithChildren, useEffect, useState } from "react";
 import { LoadFileContext } from "./test-load-file-context";
 import TrieSearch from "trie-search";
 import JSZip from "jszip";
-import { extractZipFileWithStreaming } from "../../utils/zip.urils";
+import { GetSongByPath, GetSongList } from "../../api/get_song_list";
 
 const SongListFileName = "song_list.json";
 
@@ -31,6 +31,13 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
     reader.readAsText(file as File);
   }
 
+  function songListApiToJson(json: SearchNCN[]) {
+    setSongList(json);
+    const trie = new TrieSearch<SearchNCN>(["name", "artist"]);
+    trie.addAll(json);
+    setTrie(trie);
+  }
+
   function getSongList(Folder: Folder) {
     let mainKey = Object.keys(Folder);
     if (mainKey.length == 1) {
@@ -53,17 +60,6 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
         songListFileToJson(file);
       }
     }
-    // await extractZipFileWithStreaming(
-    //   zipFile,
-    //   `${zipFile.name.replace(".zip", "")}/${SongListFileName}`
-    // ).then((blob) => {
-    //   if (blob) {
-    //     const file = new File([blob], SongListFileName.replace(".zip", ""), {
-    //       type: "application/octet-stream",
-    //     });
-    //     songListFileToJson(file);
-    //   }
-    // });
   };
 
   async function getValueFromPath(path: string[], data: Folder) {
@@ -79,9 +75,7 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
   }
 
   const extractZipByPath = async (pathParam: string[]) => {
-    console.log("pathParam", pathParam);
     if (ZipFileLoad) {
-      console.log("in Zip Load");
       let path = pathParam.join("/");
       let selectedFile = ZipFileLoad.file(path);
       const blob = await selectedFile?.async("blob");
@@ -98,30 +92,18 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
-  function buildObject(path: string, file: File, result: {}) {
-    const keys = path.split("/").filter(Boolean);
-    keys.reduce((acc: any, key, index) => {
-      if (!acc[key]) {
-        acc[key] = {};
-      }
-      if (index === keys.length - 1) {
-        acc[key] = file;
-      }
-      return acc[key];
-    }, result);
-    return result;
-  }
+  const loadFileInApi = async (input: MiniApiNCNInput) => {
+    const data = await GetSongByPath("http://127.0.0.1:8080/files", input);
+    return data;
+  };
 
-  // const extractZipToSongList = (ZipFile: File) => {
-  //   if (ZipFile) {
-  //     getSongListFromZip(ZipFile);
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // };
+  const loadSongListInApi = () => {
+    GetSongList("http://127.0.0.1:8080/lists").then((data) => {
+      songListApiToJson(data.data);
+    });
+  };
 
-  const readNCNByPath = (filename: string, path: string[]) => {
+  const readNCNByPath = async (filename: string, path: string[]) => {
     if (!loadType) return undefined;
 
     let firstPath = path[0];
@@ -166,6 +148,19 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
         mid = ncn[2];
         return { cur, lyr, mid };
       });
+    } else if (loadType == "API") {
+      const file = await loadFileInApi({
+        filename: filename,
+        path: firstPath,
+        path_category: path[path.length - 1],
+        type: "NCN",
+      });
+
+      return {
+        cur: file.cur,
+        lyr: file.lyr,
+        mid: file.mid,
+      };
     } else {
       return {
         cur,
@@ -175,6 +170,10 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  const setApiProgram = () => {
+    setLoadType("API");
+    loadSongListInApi();
+  };
   const setZipProgram = async (zip: File) => {
     setLoadType("ZIP");
     JSZip.loadAsync(zip).then((data) => {
@@ -202,6 +201,9 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
         setZipFile,
         ZipFile,
         setZipProgram,
+        loadSongListInApi,
+        loadFileInApi,
+        setApiProgram,
         // extractZipToSongList,
       }}
     >

@@ -94,6 +94,7 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
 
   // Seek the player to the given tick.
   const seekPlayer = (tick: number) => {
+    console.log("tick", tick);
     synthesizer?.seekPlayer(tick);
     setCurrentTick(tick);
   };
@@ -158,7 +159,11 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
     if (playing) {
       synthesizer?.seekPlayer(currentTick);
       synthesizer?.playPlayer();
+
+    
+
       // synthesizer?.hookPlayerMIDIEvents(function (s, type, event) {
+      //   console.log(type,event)
       //   return false;
       // });
     } else {
