@@ -15,7 +15,7 @@ export interface LoadFileHook {
   readNCNByPath: (filename: string, path: string[]) => any;
   loadSongListInApi: () => void;
   loadFileInApi: (input: MiniApiNCNInput) => void;
-  setApiProgram: () => void;
+  setApiProgram: (input: string) => void;
 }
 
 export const LoadFileContext = React.createContext<LoadFileHook>({

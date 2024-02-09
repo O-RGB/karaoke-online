@@ -7,6 +7,7 @@ import { FaFolderOpen } from "react-icons/fa";
 import { FaPython } from "react-icons/fa";
 import { Modal } from "antd";
 import ModalCommon from "../../../common/modal/modal";
+import useConfig from "../../../../hooks/useConfig";
 
 interface ImportFoldersProps {
   rounded?: string;
@@ -49,6 +50,7 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
   }
 
   const TestLoadFolder = useTestLoad();
+  const config = useConfig();
 
   const handleFileChange = async (event: any) => {
     const file = event.target.files[0];
@@ -83,12 +85,20 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
   }
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ModalNode, setModalNode] = useState(<></>);
+  const [ModalKey, setModalKey] = useState<string | undefined>(undefined);
 
   const showModal = () => {
     setIsModalOpen(true);
   };
 
-  const handleOk = () => {
+  const handleOk = (value?: string) => {
+    console.log(value);
+    if (value == "SongList") {
+      config.setApiServer(InputApi);
+      TestLoadFolder.setApiProgram(InputApi);
+    } else {
+    }
+
     setIsModalOpen(false);
   };
 
@@ -132,10 +142,16 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
     showModal();
   };
 
+  const [InputApi, setInpuApi] = useState<string>("");
   const createInputServer = () => {
+    setModalKey("SongList");
     setModalNode(
       <div className="flex gap-6 items-center justify-center">
-        <InputCommon></InputCommon>
+        <InputCommon
+          onChange={(e) => {
+            setInpuApi(e.target.value);
+          }}
+        ></InputCommon>
       </div>
     );
     showModal();
@@ -148,6 +164,7 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        value={ModalKey}
       >
         {ModalNode}
       </ModalCommon>

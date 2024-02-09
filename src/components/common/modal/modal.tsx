@@ -3,10 +3,11 @@ import React from "react";
 import ButtonCommon from "../button";
 
 interface ModalCommonProps {
-  onOk?: () => void;
+  onOk?: (value?: string) => void;
   onCancel?: () => void;
   title?: string;
   open?: boolean;
+  value?: string;
   children?: React.ReactNode;
 }
 
@@ -16,6 +17,7 @@ const ModalCommon: React.FC<ModalCommonProps> = ({
   title,
   open,
   children,
+  value,
 }) => {
   const rounded = "rounded-xl";
   const bgOverLay = "bg-black/30";
@@ -23,7 +25,7 @@ const ModalCommon: React.FC<ModalCommonProps> = ({
   const textColor = "text-white";
   const borderColor = "border-white/30 ";
   return (
-    <Modal open={open} onOk={onOk} onCancel={onCancel} footer={<></>}>
+    <Modal open={open} onCancel={onCancel} footer={<></>}>
       <div
         className={`${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} p-3`}
       >
@@ -31,8 +33,8 @@ const ModalCommon: React.FC<ModalCommonProps> = ({
         <div className="p-3">{children}</div>
         <div className="flex w-full justify-end items-end">
           <div className="flex gap-2">
-            <ButtonCommon>OK</ButtonCommon>
-            <ButtonCommon>Close</ButtonCommon>
+            <ButtonCommon onClick={() => onOk?.(value)}>OK</ButtonCommon>
+            <ButtonCommon onClick={onCancel}>Close</ButtonCommon>
           </div>
         </div>
       </div>

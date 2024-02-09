@@ -10,30 +10,33 @@ import Layout from "./layout";
 import Wallpaper from "./components/wallpaper";
 import FooterPlayer from "./components/overlay/footer";
 import Overlay from "./components/overlay";
-import { Dropdown, MenuProps } from "antd";
+
 import AllowSound from "./components/overlay/allow-sound";
 import { SongPlayingProvider } from "./context/song-playing";
 import { LoadFileProvider } from "./context/test-load-file";
 import { DesktopProvider } from "./context/desktop";
+import { ConfigProvider } from "./context/config/config-provider";
 
 function App() {
   return (
     <AllowSound>
-      <LoadFileProvider>
-        <SongPlayingProvider>
-          <SynthesizerProvider>
-            <DataProvider>
-              <PlayerProvider>
-                <DesktopProvider>
-                  <Overlay>
-                    <Wallpaper></Wallpaper>
-                  </Overlay>
-                </DesktopProvider>
-              </PlayerProvider>
-            </DataProvider>
-          </SynthesizerProvider>
-        </SongPlayingProvider>
-      </LoadFileProvider>
+      <ConfigProvider>
+        <LoadFileProvider>
+          <SongPlayingProvider>
+            <SynthesizerProvider>
+              <DataProvider>
+                <PlayerProvider>
+                  <DesktopProvider>
+                    <Overlay>
+                      <Wallpaper></Wallpaper>
+                    </Overlay>
+                  </DesktopProvider>
+                </PlayerProvider>
+              </DataProvider>
+            </SynthesizerProvider>
+          </SongPlayingProvider>
+        </LoadFileProvider>
+      </ConfigProvider>
     </AllowSound>
   );
 }

@@ -3,6 +3,7 @@ import { LoadFileContext } from "./test-load-file-context";
 import TrieSearch from "trie-search";
 import JSZip from "jszip";
 import { GetSongByPath, GetSongList } from "../../api/get_song_list";
+import useConfig from "../../hooks/useConfig";
 
 const SongListFileName = "song_list.json";
 
@@ -14,6 +15,7 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
   const [Trie, setTrie] = useState<TrieSearch<SearchNCN> | undefined>(
     undefined
   );
+  const config = useConfig();
   const [loadType, setLoadType] = useState<LoadType | undefined>(undefined);
 
   function songListFileToJson(file: File) {
@@ -93,12 +95,13 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
   };
 
   const loadFileInApi = async (input: MiniApiNCNInput) => {
-    const data = await GetSongByPath("http://127.0.0.1:8080/files", input);
+    const data = await GetSongByPath(`${config.ApiServer}/files`, input);
     return data;
   };
 
-  const loadSongListInApi = () => {
-    GetSongList("http://127.0.0.1:8080/lists").then((data) => {
+  const loadSongListInApi = (input?: string) => {
+    console.log(`${input ? input : config.ApiServer}/lists`);
+    GetSongList(`${input ? input : config.ApiServer}/lists`).then((data) => {
       songListApiToJson(data.data);
     });
   };
@@ -170,9 +173,9 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
-  const setApiProgram = () => {
+  const setApiProgram = (input?: string) => {
     setLoadType("API");
-    loadSongListInApi();
+    loadSongListInApi(input);
   };
   const setZipProgram = async (zip: File) => {
     setLoadType("ZIP");
@@ -187,7 +190,7 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
     setFolder(Folder);
   };
 
-  useEffect(() => {}, [Folder]);
+  useEffect(() => {}, [Folder, config.ApiServer]);
 
   return (
     <LoadFileContext.Provider
