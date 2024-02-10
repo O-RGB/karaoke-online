@@ -107,6 +107,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
 
   const [searchIndex, setSearchIndex] = useState<number>(0);
   const [search, setSearch] = useState<string | undefined>(undefined);
+
   const onArrowInput = (
     onArrows: "Left" | "Right" | "Up" | "Down" | "Reset" | undefined
   ) => {
@@ -183,7 +184,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
       });
     }
     if (event.key == "Enter" && desktop.SearchBox) {
-      if (desktop.SearchBox) {
+      if (desktop.SearchBox && TestLoadFolder.songLoading == false) {
         if (result) {
           if (result[searchIndex]?.path) {
             let path = result[searchIndex]?.path;
@@ -231,11 +232,13 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyPress);
-    return () => {
-      window.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [search, searchIndex]);
+    if (TestLoadFolder.SongList) {
+      window.addEventListener("keydown", handleKeyPress);
+      return () => {
+        window.removeEventListener("keydown", handleKeyPress);
+      };
+    }
+  }, [search, searchIndex, TestLoadFolder.SongList]);
 
   return (
     <>
@@ -269,6 +272,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
                 input={search}
                 open={desktop.SearchBox}
                 borderColor={borderColor}
+                loading={TestLoadFolder.songLoading}
               ></SearchSong>
             </div>
             <div

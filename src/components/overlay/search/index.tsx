@@ -11,6 +11,7 @@ interface SearchSongProps {
   blur?: string;
   result?: SearchNCN[];
   searchIndex: number;
+  loading?: boolean;
 }
 
 const SearchSong: React.FC<SearchSongProps> = ({
@@ -23,8 +24,9 @@ const SearchSong: React.FC<SearchSongProps> = ({
   blur,
   result,
   searchIndex,
+  loading,
 }) => {
-  useEffect(() => {}, [searchIndex]);
+  useEffect(() => {}, [searchIndex, loading]);
 
   if (open == false) {
     return <></>;
@@ -35,10 +37,11 @@ const SearchSong: React.FC<SearchSongProps> = ({
       className={`w-full border ${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor}`}
     >
       <div className="flex h-24">
-        <div className="w-[300px] p-2 overflow-hidden text-5xl flex items-center ">
+        <div className="w-full p-2 overflow-hidden text-5xl flex items-center ">
           {input}
         </div>
-        <div className="w-full p-2"></div>
+        {loading && <div>Loading...</div>}
+        {/* <div className="w-full p-2"></div> */}
       </div>
       {result && (
         <>

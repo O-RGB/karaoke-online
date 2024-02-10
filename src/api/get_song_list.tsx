@@ -18,7 +18,9 @@ export const GetSongByPath = async (url: string, input: MiniApiNCNInput) => {
 };
 
 export const GetSongList = async (url: string) => {
-  return await FetchApi<IGetSongListApi>(url, "GET").then((data) => {
-    return data;
-  });
+  return await FetchApi<IGetSongListApi>(url, "POST")
+    .then((data) => {
+      return data;
+    })
+    .catch((d) => console.log(d));
 };

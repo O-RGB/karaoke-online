@@ -12,11 +12,13 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
   const [ZipFile, setZipFile] = useState<File | undefined>(undefined);
   const [ZipFileLoad, setZipFileLoad] = useState<JSZip | undefined>(undefined);
   const [SongList, setSongList] = useState<SearchNCN[] | undefined>(undefined);
+  const [songListLoading, setSongListLoad] = useState<boolean>(false);
   const [Trie, setTrie] = useState<TrieSearch<SearchNCN> | undefined>(
     undefined
   );
   const config = useConfig();
   const [loadType, setLoadType] = useState<LoadType | undefined>(undefined);
+  const [songLoading, setSongLoad] = useState<boolean>(false);
 
   function songListFileToJson(file: File) {
     const reader = new FileReader();
@@ -101,13 +103,19 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
 
   const loadSongListInApi = (input?: string) => {
     console.log(`${input ? input : config.ApiServer}/lists`);
+    setSongListLoad(true);
     GetSongList(`${input ? input : config.ApiServer}/lists`).then((data) => {
-      songListApiToJson(data.data);
+      if (data) {
+        setSongListLoad(false);
+        songListApiToJson(data.data);
+      }
     });
   };
 
   const readNCNByPath = async (filename: string, path: string[]) => {
     if (!loadType) return undefined;
+
+    setSongLoad(true);
 
     let firstPath = path[0];
     let getSearch = path.map((v) => v);
@@ -145,12 +153,14 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
         extractZipByPath([firstPath, mainCur, ...getSearch, filename + ".cur"]),
         extractZipByPath([firstPath, mainLyr, ...getSearch, filename + ".lyr"]),
         extractZipByPath([firstPath, mainMid, ...getSearch, filename + ".mid"]),
-      ]).then((ncn) => {
-        cur = ncn[0];
-        lyr = ncn[1];
-        mid = ncn[2];
-        return { cur, lyr, mid };
-      });
+      ])
+        .then((ncn) => {
+          cur = ncn[0];
+          lyr = ncn[1];
+          mid = ncn[2];
+          return { cur, lyr, mid };
+        })
+        .finally(() => setSongLoad(false));
     } else if (loadType == "API") {
       const file = await loadFileInApi({
         filename: filename,
@@ -158,7 +168,7 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
         path_category: path[path.length - 1],
         type: "NCN",
       });
-
+      setSongLoad(false);
       return {
         cur: file.cur,
         lyr: file.lyr,
@@ -207,6 +217,8 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
         loadSongListInApi,
         loadFileInApi,
         setApiProgram,
+        songLoading,
+        songListLoading,
         // extractZipToSongList,
       }}
     >

@@ -8,6 +8,7 @@ import { FaPython } from "react-icons/fa";
 import { Modal } from "antd";
 import ModalCommon from "../../../common/modal/modal";
 import useConfig from "../../../../hooks/useConfig";
+import { AiOutlineLoading } from "react-icons/ai";
 
 interface ImportFoldersProps {
   rounded?: string;
@@ -66,7 +67,25 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
       ref.current.setAttribute("webkitdirectory", "");
       ref.current.setAttribute("mozdirectory", "");
     }
-  }, [ref]);
+
+    if (TestLoadFolder.songListLoading) {
+      loadingModal();
+    } else {
+      handleCancel();
+    }
+  }, [ref, TestLoadFolder.songListLoading]);
+
+  const loadingModal = () => {
+    setModalKey("loading");
+    setModalNode(
+      <div className="flex gap-6 items-center justify-center">
+        <ButtonStyle onClick={createSongList} title={"กำลังโหลด"}>
+          <AiOutlineLoading className="animate-spin text-lg text-white"></AiOutlineLoading>
+        </ButtonStyle>
+      </div>
+    );
+    showModal();
+  };
 
   function ButtonStyle({ children, title, full, onClick }: any) {
     return (
@@ -83,6 +102,7 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
       </div>
     );
   }
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ModalNode, setModalNode] = useState(<></>);
   const [ModalKey, setModalKey] = useState<string | undefined>(undefined);
