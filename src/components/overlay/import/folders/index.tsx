@@ -106,6 +106,7 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ModalNode, setModalNode] = useState(<></>);
   const [ModalKey, setModalKey] = useState<string | undefined>(undefined);
+  const [ModalTitle, setModalTitle] = useState<string | undefined>(undefined);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -164,10 +165,12 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
 
   const [InputApi, setInpuApi] = useState<string>("");
   const createInputServer = () => {
+    setModalTitle("URL Server");
     setModalKey("SongList");
     setModalNode(
       <div className="flex gap-6 items-center justify-center">
         <InputCommon
+          placeholder="http://127.0.0.1:5000"
           onChange={(e) => {
             setInpuApi(e.target.value);
           }}
@@ -180,7 +183,7 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
   return (
     <>
       <ModalCommon
-        title="Basic Modal"
+        title={ModalTitle}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}

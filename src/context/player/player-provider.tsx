@@ -157,6 +157,7 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
   // Play or stop the player when the playing state changes.
   useEffect(() => {
     if (playing) {
+      synthesizer?.setGain(0.2)
       synthesizer?.seekPlayer(currentTick);
       synthesizer?.playPlayer();
 
