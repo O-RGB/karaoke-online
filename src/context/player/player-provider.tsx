@@ -25,6 +25,70 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
   const [currentTick, setCurrentTick] = useState(0);
   const [totalTicks, setTotalTicks] = useState(0);
 
+  // setting
+  const [sound, setSoundSetting] = useState<IChannel[]>([
+    {
+      channel: 1,
+      value: 100,
+      level: 0,
+      control: 0,
+    },
+    {
+      channel: 2,
+      value: 100,
+      level: 0,
+      control: 0,
+    },
+    {
+      channel: 3,
+      value: 100,
+      level: 0,
+      control: 0,
+    },
+    {
+      channel: 4,
+      value: 100,
+      level: 0,
+      control: 0,
+    },
+    {
+      channel: 5,
+      value: 100,
+      level: 0,
+      control: 0,
+    },
+    {
+      channel: 6,
+      value: 100,
+      level: 0,
+      control: 0,
+    },
+    {
+      channel: 7,
+      value: 100,
+      level: 0,
+      control: 0,
+    },
+    {
+      channel: 8,
+      value: 100,
+      level: 0,
+      control: 0,
+    },
+    {
+      channel: 9,
+      value: 100,
+      level: 0,
+      control: 0,
+    },
+    {
+      channel: 10,
+      value: 100,
+      level: 0,
+      control: 0,
+    },
+  ]);
+
   // Check if the source is a file.
   const isFile = (source: Midi | SoundFont | File): source is File => {
     return source instanceof File;
@@ -92,6 +156,28 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  const settingSound = (channel: number, value: number) => {
+    let clone = sound;
+    clone[channel].value = value;
+    setSoundSetting(clone);
+  };
+
+  const settingUpdateLevel = (
+    channel: number,
+    level: number,
+    control: number
+  ) => {
+    let clone = sound;
+
+    clone[channel].level = undefined;
+    clone[channel].control = 0;
+    setSoundSetting(clone);
+
+    clone[channel].level = level;
+    clone[channel].control = control;
+    setSoundSetting(clone);
+  };
+
   // Seek the player to the given tick.
   const seekPlayer = (tick: number) => {
     console.log("tick", tick);
@@ -154,19 +240,46 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
     setCurrentTick(0);
   }, [midi, soundFont]);
 
+  useEffect(() => {
+    if (playing)
+      synthesizer?.hookPlayerMIDIEvents(function (s, type, event) {
+        let nomalValue = event.getValue();
+        let nomalVelocity = event.getVelocity();
+
+        // if (nomalValue > 100) {
+        //   nomalValue = 100;
+        // }
+        // if (nomalVelocity > 100) {
+        //   nomalVelocity = 100;
+        // }
+
+        let ch = event.getChannel() - 1;
+        // console.log(event.getChannel())
+        let getData = sound[ch];
+        if (getData) {
+          if (event.getValue() == 0) {
+            event.setVelocity(0);
+            // settingUpdateLevel(ch, 0, 0);
+          } else {
+            let sound = nomalValue * (getData.value / 100);
+            event.setVelocity(sound);
+            settingUpdateLevel(ch, event.getValue(), event.getControl());
+
+            // if (ch == 8) {
+            //   console.log("event.getValue()", event.getValue());
+            // }
+          }
+        }
+
+        return false;
+      });
+  }, [playing, sound]);
+
   // Play or stop the player when the playing state changes.
   useEffect(() => {
     if (playing) {
-      synthesizer?.setGain(0.2)
       synthesizer?.seekPlayer(currentTick);
       synthesizer?.playPlayer();
-
-    
-
-      // synthesizer?.hookPlayerMIDIEvents(function (s, type, event) {
-      //   console.log(type,event)
-      //   return false;
-      // });
     } else {
       synthesizer?.stopPlayer();
     }
@@ -210,7 +323,9 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
         currentTick,
         totalTicks,
         seek: seekPlayer,
+        settingSound,
         setPlaying,
+        sound,
         soundFont,
         repeat,
         setRepeat,

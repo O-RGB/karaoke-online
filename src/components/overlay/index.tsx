@@ -16,6 +16,7 @@ import MobileInput from "./mobile-input";
 import { PiVinylRecordFill } from "react-icons/pi";
 import { BsImageFill } from "react-icons/bs";
 import { FaGithub } from "react-icons/fa";
+import SoundSetting from "./sound-setting";
 
 interface OverlayProps {
   children: React.ReactNode;
@@ -275,6 +276,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
                 loading={TestLoadFolder.songLoading}
               ></SearchSong>
             </div>
+
             <div
               className={`absolute right-2 ${
                 !desktop.SearchInput ? "top-2" : "top-12"
@@ -295,6 +297,18 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
                 borderColor={borderColor}
               ></Tempo>
             </div>
+          </div>
+
+          <div
+            className={`fixed left-2 top-16 md:top-24 flex gap-2 duration-300 z-[60] right-2`}
+          >
+            <SoundSetting
+              bgOverLay={bgOverLay}
+              blur={blur}
+              rounded={rounded}
+              textColor={textColor}
+              borderColor={borderColor}
+            ></SoundSetting>
           </div>
 
           <div
