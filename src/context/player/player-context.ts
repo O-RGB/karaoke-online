@@ -26,6 +26,7 @@ export interface PlayerHook {
   totalTicks: number;
   seek: (position: number) => unknown;
   settingSound: (channel: number, velocity: number) => void;
+  setSoundFun: (channel: number, fun: any) => void
   sound: IChannel[] | null;
 
   playing: boolean;
@@ -55,6 +56,7 @@ export const PlayerContext = React.createContext<PlayerHook>({
   totalTicks: 0,
   seek: () => {},
   settingSound: () => {},
+  setSoundFun: () => {},
   sound: null,
 
   playing: false,

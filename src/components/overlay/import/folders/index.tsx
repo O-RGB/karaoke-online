@@ -115,8 +115,8 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
   const handleOk = (value?: string) => {
     console.log(value);
     if (value == "SongList") {
-      config.setApiServer(InputApi);
-      TestLoadFolder.setApiProgram(InputApi);
+      config.setApiServer("http://127.0.0.1:8080");
+      TestLoadFolder.setApiProgram("http://127.0.0.1:8080");
     } else {
     }
 
@@ -170,6 +170,7 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
     setModalNode(
       <div className="flex gap-6 items-center justify-center">
         <InputCommon
+        value={"http://127.0.0.1:8080"}
           placeholder="http://127.0.0.1:5000"
           onChange={(e) => {
             setInpuApi(e.target.value);

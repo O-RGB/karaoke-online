@@ -1,27 +1,36 @@
 import { Slider } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import LevelMeter from "./sound-level";
 
 interface SoundBarProps {
   onChangeValueBar?: (ch: number, value: number) => void;
   index: number;
   soundPlayer: IChannel;
+  callback?: (funcCallBack: (number: number) => void) => void;
 }
 
 const SoundBar: React.FC<SoundBarProps> = ({
   onChangeValueBar,
   index,
   soundPlayer,
+  callback,
 }) => {
   const [level, setLevel] = useState<number | undefined>(undefined);
+
+  const funcCallBack = (number: number) => {
+    setLevel(number);
+    setTimeout(() => {
+      // countBack();
+      setLevel(undefined);
+    }, 100);
+  };
+
   useEffect(() => {
-    setLevel(soundPlayer.level);
-    if(index == 8){
-        console.log("กลอง update")
-    }
-  }, [soundPlayer.level]);
+    callback?.(funcCallBack);
+  }, [callback]);
   return (
     <>
-      <div className="sm:p-2 h-full z-50">
+      <div className="sm:p-2 h-full z-50 ">
         <Slider
           vertical
           defaultValue={100}
@@ -31,15 +40,12 @@ const SoundBar: React.FC<SoundBarProps> = ({
         />
       </div>
       <div>{index + 1}</div>
-      {/* {level && (
-        <div
-          style={{
-            height: `${level == 0 ? 0 : level - 35 < 0 ? 0 : level - 35}%`,
-          }}
-          className={`absolute flex bottom-6 w-full bg-neutral-700 z-10`}
-        ></div>
-      )} */}
-      <div>{level}</div>
+
+      <div
+        className={`absolute flex bottom-6 w-full h-full bg-neutral-700 z-10 duration-300`}
+      >
+        <LevelMeter up={level != undefined} inputVolume={level}></LevelMeter>
+      </div>
     </>
   );
 };

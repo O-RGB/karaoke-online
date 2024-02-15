@@ -8,4 +8,5 @@ interface IChannel {
   value: number;
   level?: number;
   control: number;
+  fun: Function;
 }

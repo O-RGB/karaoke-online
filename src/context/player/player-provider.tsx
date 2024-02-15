@@ -32,60 +32,105 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
       value: 100,
       level: 0,
       control: 0,
+      fun: () => {},
     },
     {
       channel: 2,
       value: 100,
       level: 0,
       control: 0,
+      fun: () => {},
     },
     {
       channel: 3,
       value: 100,
       level: 0,
       control: 0,
+      fun: () => {},
     },
     {
       channel: 4,
       value: 100,
       level: 0,
       control: 0,
+      fun: () => {},
     },
     {
       channel: 5,
       value: 100,
       level: 0,
       control: 0,
+      fun: () => {},
     },
     {
       channel: 6,
       value: 100,
       level: 0,
       control: 0,
+      fun: () => {},
     },
     {
       channel: 7,
       value: 100,
       level: 0,
       control: 0,
+      fun: () => {},
     },
     {
       channel: 8,
       value: 100,
       level: 0,
       control: 0,
+      fun: () => {},
     },
     {
       channel: 9,
       value: 100,
       level: 0,
       control: 0,
+      fun: () => {},
     },
     {
       channel: 10,
       value: 100,
       level: 0,
       control: 0,
+      fun: () => {},
+    },
+    {
+      channel: 11,
+      value: 100,
+      level: 0,
+      control: 0,
+      fun: () => {},
+    },
+    {
+      channel: 12,
+      value: 100,
+      level: 0,
+      control: 0,
+      fun: () => {},
+    },
+    {
+      channel: 13,
+      value: 100,
+      level: 0,
+      control: 0,
+      fun: () => {},
+    },
+    {
+      channel: 14,
+      value: 100,
+      level: 0,
+      control: 0,
+      fun: () => {},
+    },
+    {
+      channel: 15,
+      value: 100,
+      level: 0,
+      control: 0,
+      fun: () => {},
     },
   ]);
 
@@ -159,6 +204,13 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
   const settingSound = (channel: number, value: number) => {
     let clone = sound;
     clone[channel].value = value;
+    clone[channel].fun(value);
+    setSoundSetting(clone);
+  };
+
+  const setSoundFun = (channel: number, fun: any) => {
+    let clone = sound;
+    clone[channel].fun = fun;
     setSoundSetting(clone);
   };
 
@@ -244,33 +296,18 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
     if (playing)
       synthesizer?.hookPlayerMIDIEvents(function (s, type, event) {
         let nomalValue = event.getValue();
-        let nomalVelocity = event.getVelocity();
-
-        // if (nomalValue > 100) {
-        //   nomalValue = 100;
-        // }
-        // if (nomalVelocity > 100) {
-        //   nomalVelocity = 100;
-        // }
-
-        let ch = event.getChannel() - 1;
-        // console.log(event.getChannel())
+        let ch = event.getChannel() ;
         let getData = sound[ch];
         if (getData) {
           if (event.getValue() == 0) {
             event.setVelocity(0);
-            // settingUpdateLevel(ch, 0, 0);
           } else {
-            let sound = nomalValue * (getData.value / 100);
-            event.setVelocity(sound);
+            let sounds = nomalValue * (getData.value / 100);
+            event.setVelocity(sounds);
             settingUpdateLevel(ch, event.getValue(), event.getControl());
-
-            // if (ch == 8) {
-            //   console.log("event.getValue()", event.getValue());
-            // }
+            sound[ch].fun(sounds)
           }
         }
-
         return false;
       });
   }, [playing, sound]);
@@ -324,6 +361,7 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
         totalTicks,
         seek: seekPlayer,
         settingSound,
+        setSoundFun,
         setPlaying,
         sound,
         soundFont,
