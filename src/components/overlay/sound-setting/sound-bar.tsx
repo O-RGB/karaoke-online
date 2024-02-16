@@ -22,15 +22,14 @@ const SoundBar: React.FC<SoundBarProps> = ({
     setLevel(number);
     setvelocity(velocity);
 
-    if ( velocity == 0) {
+    if (velocity == 0) {
       setLevel(undefined);
       setvelocity(undefined);
     } else {
       setTimeout(() => {
-        // countBack();
         setLevel(undefined);
         setvelocity(undefined);
-      }, 1000);
+      }, 10);
     }
   };
 
@@ -38,8 +37,8 @@ const SoundBar: React.FC<SoundBarProps> = ({
     callback?.(funcCallBack);
   }, [callback]);
   return (
-    <div className="relative h-full">
-      <div className="sm:p-2 h-full z-50 relative ">
+    <div className="relative h-full pt-2">
+      <div className=" h-full z-50 relative ">
         <Slider
           vertical
           defaultValue={100}
@@ -49,7 +48,7 @@ const SoundBar: React.FC<SoundBarProps> = ({
         />
       </div>
 
-      <div className={`absolute flex bottom-0 w-full h-full z-10 duration-300`}>
+      <div className={`absolute flex -bottom-1.5 w-full h-full z-10 duration-300`}>
         <LevelMeter
           up={velocity != undefined}
           inputVolume={velocity}

@@ -34,7 +34,7 @@ const MobileInput: React.FC<MobileInputProps> = ({
           }}
           onPressEnter={() => {
             console.log("input enter");
-            desktop.setSearchInput(false);
+            desktop.setSearchInputModile(false);
           }}
           value={search}
           placeholder="ค้นหา"
@@ -42,7 +42,7 @@ const MobileInput: React.FC<MobileInputProps> = ({
         <ButtonCommon>ตกลง</ButtonCommon>
         <ButtonCommon
           onClick={() => {
-            desktop.setSearchInput(false);
+            desktop.setSearchInputModile(false);
           }}
         >
           ยกเลิก

@@ -132,6 +132,13 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
       control: 0,
       fun: () => {},
     },
+    {
+      channel: 16,
+      value: 127,
+      level: 0,
+      control: 0,
+      fun: () => {},
+    },
   ]);
 
   // Check if the source is a file.

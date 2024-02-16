@@ -103,7 +103,7 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
         <div className="flex">
           <ButtonPlayer
             onClick={() => {
-              desktop.setSearchInput(true);
+              desktop.setSearchInputModile(true);
             }}
           >
             <FaKeyboard className="text-[10px] md:text-base"></FaKeyboard>

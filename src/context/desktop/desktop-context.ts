@@ -5,15 +5,22 @@ export interface DesktopHook {
   setSearchBox: (open: boolean) => void;
   QueueBox: boolean | undefined;
   setQueueBox: (open: boolean) => void;
-  SearchInput: boolean | undefined;
-  setSearchInput: (open: boolean) => void;
+  SearchInputMobile: boolean | undefined;
+  setSearchInputModile: (open: boolean) => void;
+  QueueSelect: number | undefined;
+  setQueueSelect: (index: number) => void;
 }
+
+
+
 
 export const DesktopContext = React.createContext<DesktopHook>({
   SearchBox: false,
-  setSearchBox: (open: boolean) => {},
+  setSearchBox: () => {},
   QueueBox: false,
-  setQueueBox: (open: boolean) => {},
-  SearchInput: false,
-  setSearchInput: (open: boolean) => {},
+  setQueueBox: () => {},
+  SearchInputMobile: false,
+  setSearchInputModile: () => {},
+  QueueSelect: undefined,
+  setQueueSelect: () => {},
 });

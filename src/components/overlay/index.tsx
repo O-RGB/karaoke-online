@@ -17,6 +17,7 @@ import { PiVinylRecordFill } from "react-icons/pi";
 import { BsImageFill } from "react-icons/bs";
 import { FaGithub } from "react-icons/fa";
 import SoundSetting from "./sound-setting";
+import QueueLists from "./queue";
 
 interface OverlayProps {
   children: React.ReactNode;
@@ -109,11 +110,15 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
   const [searchIndex, setSearchIndex] = useState<number>(0);
   const [search, setSearch] = useState<string | undefined>(undefined);
 
+  const [queueIndex, setQueueIndex] = useState<number>(0);
+  const [queue, setQueue] = useState<number[] | undefined>([1, 2]);
+
   const onArrowInput = (
     onArrows: "Left" | "Right" | "Up" | "Down" | "Reset" | undefined
   ) => {
-    if (result) {
+    if (desktop.SearchBox) {
       if (onArrows == "Left") {
+        desktop.setQueueBox(false);
         desktop.setSearchBox(true);
         setSearchIndex((value) => {
           let test = value - 1;
@@ -124,16 +129,43 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
           }
         });
       } else if (onArrows == "Right") {
+        desktop.setQueueBox(false);
         desktop.setSearchBox(true);
         setSearchIndex((value) => {
           let test = value + 1;
-          if (test > result.length - 1) {
-            return result.length - 1;
+          if (test > (result ? result.length : 0) - 1) {
+            return (result ? result.length : 0) - 1;
           } else {
             return test;
           }
         });
       }
+    }
+
+    if (onArrows == "Down") {
+      setResult(undefined);
+      desktop.setQueueBox(true);
+      desktop.setSearchBox(false);
+      setQueueIndex((value) => {
+        let test = value + 1;
+        if (test > (queue ? queue.length : 0) - 1) {
+          return (queue ? queue.length : 0) - 1;
+        } else {
+          return test;
+        }
+      });
+    } else if (onArrows == "Up") {
+      setResult(undefined);
+      desktop.setQueueBox(true);
+      desktop.setSearchBox(false);
+      setQueueIndex((value) => {
+        let test = value - 1;
+        if (test <= 0) {
+          return 0;
+        } else {
+          return test;
+        }
+      });
     }
   };
 
@@ -160,6 +192,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
       setSearch(undefined);
       onArrowInput(undefined);
       setSearchIndex(0);
+      setQueueIndex(0);
     };
 
     if (timeoutIdRef.current !== null) {
@@ -167,6 +200,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
     }
     if (event.key.length == 1) {
       desktop.setSearchBox(true);
+      desktop.setQueueBox(false);
       setSearch((value) => {
         let newValue = value == undefined ? event.key : value + event.key;
         let search = TestLoadFolder.Trie?.search(newValue);
@@ -216,9 +250,9 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
     } else if (event.key === "ArrowRight") {
       onArrowInput("Right");
     } else if (event.key === "ArrowUp") {
-      desktop.setQueueBox(true);
-      desktop.setSearchBox(false);
       onArrowInput("Up");
+    } else if (event.key === "ArrowDown") {
+      onArrowInput("Down");
     }
 
     timeoutIdRef.current = setTimeout(() => {
@@ -239,7 +273,13 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
         window.removeEventListener("keydown", handleKeyPress);
       };
     }
-  }, [search, searchIndex, TestLoadFolder.SongList]);
+  }, [
+    desktop.QueueBox,
+    search,
+    searchIndex,
+    queueIndex,
+    TestLoadFolder.SongList,
+  ]);
 
   return (
     <>
@@ -258,7 +298,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
           <div className="fixed top-0 left-0 z-50  w-full h-[30%]">
             <div
               className={`absolute  ${
-                !desktop.SearchInput
+                !desktop.SearchInputMobile
                   ? "top-16 md:top-24"
                   : "top-[6.5rem] md:top-[8.5rem]"
               }  left-2 right-2 z-50 duration-300`}
@@ -279,7 +319,7 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
 
             <div
               className={`absolute right-2 ${
-                !desktop.SearchInput ? "top-2" : "top-12"
+                !desktop.SearchInputMobile ? "top-2" : "top-12"
               } flex gap-2 duration-300`}
             >
               <TimeHeader
@@ -300,9 +340,11 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
           </div>
 
           <div
-            className={`fixed left-2 top-2 -translate-x-full xl:translate-x-0 opacity-0 xl:opacity-100 flex gap-2 duration-500  ${
+            className={`fixed left-2  -translate-x-full xl:translate-x-0 opacity-0 xl:opacity-100 flex gap-2 duration-300  ${
               desktop.SearchBox ? "z-[30]" : "z-[60]"
-            } right-2`}
+            } ${
+              !desktop.SearchInputMobile ? "top-2" : "top-12"
+            }  right-2`}
           >
             <SoundSetting
               bgOverLay={bgOverLay}
@@ -314,8 +356,23 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
           </div>
 
           <div
+            className={`fixed top-16 md:top-24 left-2 right-2  ${
+              !desktop.QueueBox ? "" : "z-[60]"
+            } duration-300`}
+          >
+            <QueueLists
+              select={queueIndex}
+              bgOverLay={bgOverLay}
+              blur={blur}
+              rounded={rounded}
+              textColor={textColor}
+              open={desktop.QueueBox}
+              borderColor={borderColor}
+            ></QueueLists>
+          </div>
+          <div
             className={`fixed top-2 left-2 right-2 z-[60] ${
-              !desktop.SearchInput ? "-translate-y-12" : "translate-y-0"
+              !desktop.SearchInputMobile ? "-translate-y-12" : "translate-y-0"
             } duration-300`}
           >
             <MobileInput
