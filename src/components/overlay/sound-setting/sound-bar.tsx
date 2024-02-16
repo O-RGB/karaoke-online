@@ -6,7 +6,7 @@ interface SoundBarProps {
   onChangeValueBar?: (ch: number, value: number) => void;
   index: number;
   soundPlayer: IChannel;
-  callback?: (funcCallBack: (number: number) => void) => void;
+  callback?: (funcCallBack: (number: number, velocity: number) => void) => void;
 }
 
 const SoundBar: React.FC<SoundBarProps> = ({
@@ -16,21 +16,30 @@ const SoundBar: React.FC<SoundBarProps> = ({
   callback,
 }) => {
   const [level, setLevel] = useState<number | undefined>(undefined);
+  const [velocity, setvelocity] = useState<number | undefined>(undefined);
 
-  const funcCallBack = (number: number) => {
+  const funcCallBack = (number: number, velocity: number) => {
     setLevel(number);
-    setTimeout(() => {
-      // countBack();
+    setvelocity(velocity);
+
+    if ( velocity == 0) {
       setLevel(undefined);
-    }, 100);
+      setvelocity(undefined);
+    } else {
+      setTimeout(() => {
+        // countBack();
+        setLevel(undefined);
+        setvelocity(undefined);
+      }, 1000);
+    }
   };
 
   useEffect(() => {
     callback?.(funcCallBack);
   }, [callback]);
   return (
-    <>
-      <div className="sm:p-2 h-full z-50 ">
+    <div className="relative h-full">
+      <div className="sm:p-2 h-full z-50 relative ">
         <Slider
           vertical
           defaultValue={100}
@@ -39,14 +48,14 @@ const SoundBar: React.FC<SoundBarProps> = ({
           }}
         />
       </div>
-      <div>{index + 1}</div>
 
-      <div
-        className={`absolute flex bottom-6 w-full h-full bg-neutral-700 z-10 duration-300`}
-      >
-        <LevelMeter up={level != undefined} inputVolume={level}></LevelMeter>
+      <div className={`absolute flex bottom-0 w-full h-full z-10 duration-300`}>
+        <LevelMeter
+          up={velocity != undefined}
+          inputVolume={velocity}
+        ></LevelMeter>
       </div>
-    </>
+    </div>
   );
 };
 

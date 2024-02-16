@@ -21,23 +21,11 @@ const SoundSetting: React.FC<SoundSettingProps> = ({
 }) => {
   const player = usePlayer();
   const channel = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-  const [level, setleevel] = useState<number | undefined>(undefined);
   return (
     <div
-      className={`w-full border ${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} p-2 relative`}
+      className={`w-fit h-full border ${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} p-2 relative`}
     >
-      <div
-        onClick={() => {
-          setleevel(0.5);
-          setTimeout(() => {
-            setleevel(undefined);
-          }, 100);
-        }}
-      >
-        test
-      </div>
-
-      <div className="flex h-24 md:h-36 z-50 w-full">
+      <div className="flex h-36 z-50 w-fit ">
         {channel.map((data, index) => {
           return (
             <div
@@ -56,6 +44,7 @@ const SoundSetting: React.FC<SoundSettingProps> = ({
                   }}
                 ></SoundBar>
               )}
+              {index + 1}
             </div>
           );
         })}

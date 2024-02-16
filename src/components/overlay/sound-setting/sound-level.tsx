@@ -28,15 +28,19 @@ const LevelMeter: React.FC<LevelMeterProps> = ({ inputVolume, up }) => {
         style={{
           width: "100%",
           height: up
-            ? `${inputVolume ? (inputVolume > 100 ? 100 : inputVolume) : 0}%`
+            ? `${inputVolume ? Math.ceil((inputVolume / 127) * 100) : 0}%`
             : "0%",
+          // height: "100%",
           backgroundColor: "gray",
           position: "absolute",
           bottom: 0,
-          transitionDuration: up ? "" : "1000ms",
+          transitionDuration: up ? "" : "3000ms",
           opacity: 0.5,
+          textAlign: "center",
         }}
-      ></div>
+      >
+        {inputVolume ? Math.ceil((inputVolume / 127) * 100) : ""}
+      </div>
     </div>
   );
 };

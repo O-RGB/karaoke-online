@@ -29,105 +29,105 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
   const [sound, setSoundSetting] = useState<IChannel[]>([
     {
       channel: 1,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 2,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 3,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 4,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 5,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 6,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 7,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 8,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 9,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 10,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 11,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 12,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 13,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 14,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
     },
     {
       channel: 15,
-      value: 100,
+      value: 127,
       level: 0,
       control: 0,
       fun: () => {},
@@ -204,7 +204,7 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
   const settingSound = (channel: number, value: number) => {
     let clone = sound;
     clone[channel].value = value;
-    clone[channel].fun(value);
+    clone[channel].fun(value, 0);
     setSoundSetting(clone);
   };
 
@@ -261,25 +261,25 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
     const ticks = (await synthesizer?.retrievePlayerTotalTicks()) || 0;
     const tempo = (await synthesizer?.retrievePlayerMIDITempo()) || 0;
 
-    const node = synthesizer?.createAudioNode(new AudioContext(), 8192);
-    const ctx = node?.context;
-    const sampleRate = ctx?.sampleRate || 44100;
+    // const node = synthesizer?.createAudioNode(new AudioContext(), 8192);
+    // const ctx = node?.context;
+    // const sampleRate = ctx?.sampleRate || 44100;
 
     console.log("BPM:", bpm);
     console.log("Ticks:", ticks);
-    console.log("Sample Rate:", sampleRate);
+    // console.log("Sample Rate:", sampleRate);
     console.log("Tempo:", tempo);
 
     const duration = getMidiDuration();
     console.log("Duration:", duration);
-    const buffer = buffAlloc(duration, 2, sampleRate);
-    synthesizer?.render(buffer);
+    // const buffer = buffAlloc(duration, 2, sampleRate);
+    // synthesizer?.render(buffer);
 
-    const wav = wavFromAudioBuffer(buffer);
-    const url = URL.createObjectURL(wav);
+    // const wav = wavFromAudioBuffer(buffer);
+    // const url = URL.createObjectURL(wav);
 
     const link = document.createElement("a");
-    link.href = url;
+    // link.href = url;
     link.download = "audio.wav";
     link.click();
 
@@ -294,22 +294,42 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     if (playing)
-      synthesizer?.hookPlayerMIDIEvents(function (s, type, event) {
-        let nomalValue = event.getValue();
-        let ch = event.getChannel() ;
-        let getData = sound[ch];
-        if (getData) {
-          if (event.getValue() == 0) {
-            event.setVelocity(0);
-          } else {
-            let sounds = nomalValue * (getData.value / 100);
-            event.setVelocity(sounds);
-            settingUpdateLevel(ch, event.getValue(), event.getControl());
-            sound[ch].fun(sounds)
-          }
+      console.log(
+        "retrievePlayerMIDITempo",
+        synthesizer?.retrievePlayerMIDITempo()
+      );
+    console.log("retrievePlayerBpm", synthesizer?.retrievePlayerBpm());
+synthesizer?.setReverbDamp(20)
+    synthesizer?.hookPlayerMIDIEvents(function (s, type, event) {
+      let nomalValue = event.getValue();
+      let nomalVelocity = event.getVelocity();
+
+      // event.setPitch(2)
+
+      let ch = event.getChannel();
+
+     
+
+      let getData = sound[ch];
+      if (getData) {
+
+        
+        if (event.getValue() == 0) {
+          event.setVelocity(0);
+        } else {
+          let sounds = Math.ceil(nomalValue * (getData.value / 127));
+          let velocity = Math.ceil(nomalVelocity * (getData.value / 127));
+          event.setVelocity(sounds);
+          settingUpdateLevel(ch, event.getValue(), event.getControl());
+          sound[ch].fun(sounds, velocity);
         }
-        return false;
-      });
+
+        // if(ch != 9 && ch != 10){
+        //   event.setPitch(event.getPitch() + 1)
+        // }
+      }
+      return false;
+    });
   }, [playing, sound]);
 
   // Play or stop the player when the playing state changes.

@@ -300,7 +300,9 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
           </div>
 
           <div
-            className={`fixed left-2 top-16 md:top-24 flex gap-2 duration-300 z-[60] right-2`}
+            className={`fixed left-2 top-2 -translate-x-full xl:translate-x-0 opacity-0 xl:opacity-100 flex gap-2 duration-500  ${
+              desktop.SearchBox ? "z-[30]" : "z-[60]"
+            } right-2`}
           >
             <SoundSetting
               bgOverLay={bgOverLay}
