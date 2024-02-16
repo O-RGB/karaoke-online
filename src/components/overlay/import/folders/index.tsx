@@ -115,8 +115,8 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
   const handleOk = (value?: string) => {
     console.log(value);
     if (value == "SongList") {
-      config.setApiServer("http://127.0.0.1:8080");
-      TestLoadFolder.setApiProgram("http://127.0.0.1:8080");
+      config.setApiServer(value);
+      TestLoadFolder.setApiProgram(value);
     } else {
     }
 
