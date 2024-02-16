@@ -115,8 +115,8 @@ const ImportFolders: React.FC<ImportFoldersProps> = ({
   const handleOk = (value?: string) => {
     console.log(value);
     if (value == "SongList") {
-      config.setApiServer(value);
-      TestLoadFolder.setApiProgram(value);
+      config.setApiServer(InputApi);
+      TestLoadFolder.setApiProgram(InputApi);
     } else {
     }
 
