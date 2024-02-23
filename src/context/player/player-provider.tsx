@@ -29,115 +29,83 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
   const [sound, setSoundSetting] = useState<IChannel[]>([
     {
       channel: 1,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 2,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 3,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 4,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 5,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 6,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 7,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 8,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 9,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 10,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 11,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 12,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 13,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 14,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 15,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
     {
       channel: 16,
-      value: 127,
-      level: 0,
-      control: 0,
-      fun: () => {},
+      level: 127,
+      callBack: () => {},
     },
   ]);
 
@@ -182,6 +150,8 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
       await synthesizer?.addSMFDataToPlayer(buffer);
 
       const bpm = await synthesizer?.retrievePlayerBpm();
+      console.log(synthesizer);
+      console.log(bpm, "in load midi");
       setBPM(bpm || 0);
 
       setMidi({ midi, buffer });
@@ -208,32 +178,21 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
-  const settingSound = (channel: number, value: number) => {
+  const updateLevelControl = (channel: number, level: number) => {
     let clone = sound;
-    clone[channel].value = value;
-    clone[channel].fun(value, 0);
-    setSoundSetting(clone);
-  };
-
-  const setSoundFun = (channel: number, fun: any) => {
-    let clone = sound;
-    clone[channel].fun = fun;
-    setSoundSetting(clone);
-  };
-
-  const settingUpdateLevel = (
-    channel: number,
-    level: number,
-    control: number
-  ) => {
-    let clone = sound;
-
-    clone[channel].level = undefined;
-    clone[channel].control = 0;
-    setSoundSetting(clone);
-
     clone[channel].level = level;
-    clone[channel].control = control;
+    setSoundSetting(clone);
+  };
+
+  const resetLevelControl = () => {
+    let clone = sound;
+    clone.map((con) => (con.level = 127));
+    setSoundSetting(clone);
+  };
+
+  const initCallBackControl = (channel: number, callBack: any) => {
+    let clone = sound;
+    clone[channel].callBack = callBack;
     setSoundSetting(clone);
   };
 
@@ -300,43 +259,63 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
   }, [midi, soundFont]);
 
   useEffect(() => {
-    if (playing)
-      console.log(
-        "retrievePlayerMIDITempo",
-        synthesizer?.retrievePlayerMIDITempo()
-      );
-    console.log("retrievePlayerBpm", synthesizer?.retrievePlayerBpm());
-synthesizer?.setReverbDamp(20)
-    synthesizer?.hookPlayerMIDIEvents(function (s, type, event) {
-      let nomalValue = event.getValue();
-      let nomalVelocity = event.getVelocity();
+    if (playing) {
+      // resetLevelControl();
 
-      // event.setPitch(2)
+      synthesizer?.hookPlayerMIDIEvents(function (s, type, event) {
+        console.log("TYPE == " + type);
+        console.log("getChannel", event.getChannel());
+        console.log("getValue", event.getValue());
+        console.log("getVelocity", event.getVelocity());
+        console.log("getControl", event.getControl());
+        console.log("getProgram", event.getProgram());
+        console.log("###########");
 
-      let ch = event.getChannel();
+        // if (type === 0xc0) {
+        //   // if the 'program' value is 0, use another SoundFont
 
-     
-
-      let getData = sound[ch];
-      if (getData) {
-
-        
-        if (event.getValue() == 0) {
-          event.setVelocity(0);
-        } else {
-          let sounds = Math.ceil(nomalValue * (getData.value / 127));
-          let velocity = Math.ceil(nomalVelocity * (getData.value / 127));
-          event.setVelocity(sounds);
-          settingUpdateLevel(ch, event.getValue(), event.getControl());
-          sound[ch].fun(sounds, velocity);
-        }
-
-        // if(ch != 9 && ch != 10){
-        //   event.setPitch(event.getPitch() + 1)
+        //   if (event.getProgram() === 0) {
+        //     // s.midiProgramSelect(event.getChannel(), secondSFont, 0, 0);
+        //     return true;
+        //   }
+        // } else {
+        //   console.log(type);
         // }
-      }
-      return false;
-    });
+
+        if (type === 192) {
+          // เครื่องดนตรี
+        } else if (type == 176) {
+          const conrtol = event.getControl();
+          const channel = event.getChannel();
+          if (conrtol == 7) {
+            //ระดับเสียง
+            let getData = sound[channel];
+            if (getData) {
+              updateLevelControl(channel, event.getValue());
+            }
+          }
+        }
+        let nomalValue = event.getValue();
+        let nomalVelocity = event.getVelocity();
+        let ch = event.getChannel();
+
+        let getData = sound[ch];
+        if (getData) {
+          if (event.getValue() == 0) {
+            event.setVelocity(0);
+          } else {
+            let nValue = Math.ceil(nomalValue * (getData.level / 127));
+            // let nVelocity = Math.ceil(nomalVelocity * (getData.level / 127));
+            // let velocity = Math.ceil(nomalVelocity * (getData.level / 127));
+            // settingUpdateLevel(ch, event.getValue());
+            event.setValue(nValue);
+            // event.setVelocity(nVelocity);
+            sound[ch].callBack(nValue);
+          }
+        }
+        return false;
+      });
+    }
   }, [playing, sound]);
 
   // Play or stop the player when the playing state changes.
@@ -387,8 +366,8 @@ synthesizer?.setReverbDamp(20)
         currentTick,
         totalTicks,
         seek: seekPlayer,
-        settingSound,
-        setSoundFun,
+        settingSound: updateLevelControl,
+        setSoundFun: initCallBackControl,
         setPlaying,
         sound,
         soundFont,

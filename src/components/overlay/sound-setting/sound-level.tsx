@@ -42,7 +42,7 @@ const LevelMeter: React.FC<LevelMeterProps> = ({ inputVolume, up }) => {
           position: "absolute",
           borderRadius: "5px 5px 0px 0px",
           bottom: 0,
-          transitionDuration: up ? "30ms" : "3000ms",
+          transitionDuration: up ? "" : "3000ms",
           opacity: 0.7,
           textAlign: "center",
         }}
