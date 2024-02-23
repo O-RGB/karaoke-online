@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FaPlay,
   FaPause,
@@ -9,12 +9,14 @@ import {
   FaKeyboard,
 } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
+import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 
 import usePlayer from "../../../hooks/usePlayer";
 import useDesktop from "../../../hooks/useDesktop";
 import ButtonCommon from "../../common/button";
 
 import { Dropdown } from "antd";
+import { useFullScreenHandle } from "react-full-screen";
 
 interface FooterPlayerProps {
   children?: React.ReactNode;
@@ -24,6 +26,7 @@ interface FooterPlayerProps {
   textColor?: string;
   borderColor?: string;
   items: any[] | undefined;
+  fullScreen?: any;
 }
 
 const FooterPlayer: React.FC<FooterPlayerProps> = ({
@@ -34,6 +37,7 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
   textColor,
   borderColor,
   items,
+  fullScreen,
 }) => {
   const player = usePlayer();
   const desktop = useDesktop();
@@ -58,9 +62,7 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
     );
   }
 
-  function ValueBar({ children }: { children: React.ReactNode }) {
-    return <div></div>;
-  }
+  const [onFullScreen, setFullScreen] = useState<boolean>(false);
 
   return (
     <div className="h-8 md:h-12 w-full group">
@@ -96,7 +98,7 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
           <ButtonPlayer>
             <FaForward className="text-[10px] md:text-base"></FaForward>
           </ButtonPlayer>
-          {/* <ButtonPlayer>
+          {/* <ButtonPlayer onClick={handle.enter}>
             <FaRecordVinyl className="text-[10px] md:text-base"></FaRecordVinyl>
           </ButtonPlayer> */}
         </div>
@@ -114,6 +116,22 @@ const FooterPlayer: React.FC<FooterPlayerProps> = ({
               <IoMdSettings className="text-[10px] md:text-base"></IoMdSettings>
             </ButtonPlayer>
           </Dropdown>
+          <ButtonPlayer
+            onClick={() => {
+              if (!onFullScreen) {
+                fullScreen.enter();
+              } else {
+                fullScreen.exit();
+              }
+              setFullScreen(!onFullScreen);
+            }}
+          >
+            {!onFullScreen ? (
+              <AiOutlineFullscreen className="text-[10px] md:text-base"></AiOutlineFullscreen>
+            ) : (
+              <AiOutlineFullscreenExit className="text-[10px] md:text-base"></AiOutlineFullscreenExit>
+            )}
+          </ButtonPlayer>
         </div>
       </div>
     </div>
