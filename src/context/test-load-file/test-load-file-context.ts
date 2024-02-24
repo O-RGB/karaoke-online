@@ -12,7 +12,7 @@ export interface LoadFileHook {
   SongList: SearchNCN[] | undefined;
   Trie: TrieSearch<SearchNCN> | undefined;
   extractZipByPath: (path: string[]) => Promise<File | undefined>;
-  readNCNByPath: (filename: string, path: string[]) => any;
+  readNCNByPath: (filename: string, path: string[], type: "NCN" | "EMK") => any;
   loadSongListInApi: () => void;
   loadFileInApi: (input: MiniApiNCNInput) => void;
   setApiProgram: (input: string) => void;

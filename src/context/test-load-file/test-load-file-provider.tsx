@@ -106,13 +106,19 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
     setSongListLoad(true);
     GetSongList(`${input ? input : config.ApiServer}/lists`).then((data) => {
       if (data) {
+        console.log(data.data[0].name);
         setSongListLoad(false);
         songListApiToJson(data.data);
       }
     });
   };
 
-  const readNCNByPath = async (filename: string, path: string[]) => {
+  const readNCNByPath = async (
+    filename: string,
+    path: string[],
+    type: "NCN" | "EMK"
+  ) => {
+    console.log(type)
     if (!loadType) return undefined;
 
     setSongLoad(true);
@@ -166,7 +172,7 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
         filename: filename,
         path: firstPath,
         path_category: path[path.length - 1],
-        type: "NCN",
+        type: type,
       });
       setSongLoad(false);
       return {

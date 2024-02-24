@@ -11,6 +11,7 @@ interface SearchNCN {
   artist: string;
   path: string[];
   filename: string;
+  type: "NCN" | "EMK";
 }
 
 interface Folder {

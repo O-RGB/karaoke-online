@@ -225,7 +225,8 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
           if (result[searchIndex]?.path) {
             let path = result[searchIndex]?.path;
             let filename = result[searchIndex]?.filename;
-            TestLoadFolder.readNCNByPath(filename, path).then(
+            let type = result[searchIndex]?.type;
+            TestLoadFolder.readNCNByPath(filename, path, type).then(
               (getSong: any) => {
                 if (getSong) {
                   if (getSong.lyr && getSong.mid) {
@@ -286,123 +287,123 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
 
   return (
     <>
-      <FullScreen handle={handle}>
-        <Modal
-          footer={<></>}
-          open={isModalOpen}
-          onCancel={() => {
-            setIsModalOpen(false);
-          }}
-          title={"Select SoundFont"}
-        >
-          {SoundFountSetting}
-        </Modal>
-        <Dropdown menu={{ items }} trigger={["contextMenu"]}>
-          <div className="relative w-full h-full overflow-hidden z-50">
-            <div className="fixed top-0 left-0 z-50  w-full h-[30%]">
-              <div
-                className={`absolute  ${
-                  !desktop.SearchInputMobile
-                    ? "top-16 md:top-24"
-                    : "top-[6.5rem] md:top-[8.5rem]"
-                }  left-2 right-2 z-50 duration-300`}
-              >
-                <SearchSong
-                  searchIndex={searchIndex}
-                  result={result}
-                  bgOverLay={bgOverLay}
-                  blur={blur}
-                  rounded={rounded}
-                  textColor={textColor}
-                  input={search}
-                  open={desktop.SearchBox}
-                  borderColor={borderColor}
-                  loading={TestLoadFolder.songLoading}
-                ></SearchSong>
-              </div>
-
-              <div
-                className={`absolute right-2 ${
-                  !desktop.SearchInputMobile ? "top-2" : "top-12"
-                } flex gap-2 duration-300`}
-              >
-                <TimeHeader
-                  bgOverLay={bgOverLay}
-                  blur={blur}
-                  rounded={rounded}
-                  textColor={textColor}
-                  borderColor={borderColor}
-                ></TimeHeader>
-                <Tempo
-                  bgOverLay={bgOverLay}
-                  blur={blur}
-                  rounded={rounded}
-                  textColor={textColor}
-                  borderColor={borderColor}
-                ></Tempo>
-              </div>
+      <Modal
+        footer={<></>}
+        open={isModalOpen}
+        onCancel={() => {
+          setIsModalOpen(false);
+        }}
+        title={"Select SoundFont"}
+      >
+        {SoundFountSetting}
+      </Modal>
+      {/* <FullScreen handle={handle} className="z-10"> */}
+      <Dropdown menu={{ items }} trigger={["contextMenu"]}>
+        <div className="relative w-full h-full overflow-hidden z-50">
+          <div className="fixed top-0 left-0 z-50  w-full h-[30%]">
+            <div
+              className={`absolute  ${
+                !desktop.SearchInputMobile
+                  ? "top-16 md:top-24"
+                  : "top-[6.5rem] md:top-[8.5rem]"
+              }  left-2 right-2 z-50 duration-300`}
+            >
+              <SearchSong
+                searchIndex={searchIndex}
+                result={result}
+                bgOverLay={bgOverLay}
+                blur={blur}
+                rounded={rounded}
+                textColor={textColor}
+                input={search}
+                open={desktop.SearchBox}
+                borderColor={borderColor}
+                loading={TestLoadFolder.songLoading}
+              ></SearchSong>
             </div>
 
             <div
-              className={`fixed left-2  -translate-x-full xl:translate-x-0 opacity-0 xl:opacity-100 flex gap-2 duration-300  ${
-                desktop.SearchBox ? "z-[30]" : "z-[60]"
-              } ${!desktop.SearchInputMobile ? "top-2" : "top-12"}  right-2`}
+              className={`absolute right-2 ${
+                !desktop.SearchInputMobile ? "top-2" : "top-12"
+              } flex gap-2 duration-300`}
             >
-              <SoundSetting
+              <TimeHeader
                 bgOverLay={bgOverLay}
                 blur={blur}
                 rounded={rounded}
                 textColor={textColor}
                 borderColor={borderColor}
-              ></SoundSetting>
-            </div>
-
-            <div
-              className={`fixed top-16 md:top-24 left-2 right-2  ${
-                !desktop.QueueBox ? "" : "z-[60]"
-              } duration-300`}
-            >
-              <QueueLists
-                select={queueIndex}
-                bgOverLay={bgOverLay}
-                blur={blur}
-                rounded={rounded}
-                textColor={textColor}
-                open={desktop.QueueBox}
-                borderColor={borderColor}
-              ></QueueLists>
-            </div>
-
-            <div
-              className={`fixed top-2 left-2 right-2 z-[60] ${
-                !desktop.SearchInputMobile ? "-translate-y-12" : "translate-y-0"
-              } duration-300`}
-            >
-              <MobileInput
+              ></TimeHeader>
+              <Tempo
                 bgOverLay={bgOverLay}
                 blur={blur}
                 rounded={rounded}
                 textColor={textColor}
                 borderColor={borderColor}
-                search={search}
-              ></MobileInput>
+              ></Tempo>
             </div>
+          </div>
 
-            <div
-              className={`fixed w-full h-full flex justify-center items-center z-50`}
-            >
-              {!TestLoadFolder.SongList && (
-                <ImportFolders
-                  bgOverLay={bgOverLay}
-                  blur={blur}
-                  rounded={rounded}
-                  textColor={textColor}
-                  borderColor={borderColor}
-                ></ImportFolders>
-              )}
-            </div>
+          <div
+            className={`fixed left-2  -translate-x-full xl:translate-x-0 opacity-0 xl:opacity-100 flex gap-2 duration-300  ${
+              desktop.SearchBox ? "z-[30]" : "z-[60]"
+            } ${!desktop.SearchInputMobile ? "top-2" : "top-12"}  right-2`}
+          >
+            <SoundSetting
+              bgOverLay={bgOverLay}
+              blur={blur}
+              rounded={rounded}
+              textColor={textColor}
+              borderColor={borderColor}
+            ></SoundSetting>
+          </div>
 
-            {/* <div
+          <div
+            className={`fixed top-16 md:top-24 left-2 right-2  ${
+              !desktop.QueueBox ? "" : "z-[60]"
+            } duration-300`}
+          >
+            <QueueLists
+              select={queueIndex}
+              bgOverLay={bgOverLay}
+              blur={blur}
+              rounded={rounded}
+              textColor={textColor}
+              open={desktop.QueueBox}
+              borderColor={borderColor}
+            ></QueueLists>
+          </div>
+
+          <div
+            className={`fixed top-2 left-2 right-2 z-[60] ${
+              !desktop.SearchInputMobile ? "-translate-y-12" : "translate-y-0"
+            } duration-300`}
+          >
+            <MobileInput
+              bgOverLay={bgOverLay}
+              blur={blur}
+              rounded={rounded}
+              textColor={textColor}
+              borderColor={borderColor}
+              search={search}
+            ></MobileInput>
+          </div>
+
+          <div
+            className={`fixed w-full h-full flex justify-center items-center z-50`}
+          >
+            {!TestLoadFolder.SongList && (
+              <ImportFolders
+                bgOverLay={bgOverLay}
+                blur={blur}
+                rounded={rounded}
+                textColor={textColor}
+                borderColor={borderColor}
+              ></ImportFolders>
+            )}
+          </div>
+
+          {/* <div
             className={`fixed top-16 md:top-24 right-2 ${
               desktop.SearchBox ? "z-40" : "z-50"
             }  duration-300`}
@@ -416,34 +417,34 @@ const Overlay: React.FC<OverlayProps> = ({ children }) => {
             ></ReadMidiFileAndSound>
           </div> */}
 
-            {player.lyrics && (
-              <div className="fixed bottom-10 md:bottom-14 right-2 left-2 z-50 duration-300">
-                <LyricsBox
-                  bgOverLay={bgOverLay}
-                  blur={blur}
-                  rounded={rounded}
-                  textColor={textColor}
-                  borderColor={borderColor}
-                ></LyricsBox>
-              </div>
-            )}
-
-            <div className="relative z-0">{children}</div>
-
-            <div className="fixed bottom-0 z-50 w-full ">
-              <FooterPlayer
+          {player.lyrics && (
+            <div className="fixed bottom-10 md:bottom-14 right-2 left-2 z-50 duration-300">
+              <LyricsBox
                 bgOverLay={bgOverLay}
                 blur={blur}
                 rounded={rounded}
                 textColor={textColor}
                 borderColor={borderColor}
-                items={items}
-                fullScreen={handle}
-              ></FooterPlayer>
+              ></LyricsBox>
             </div>
+          )}
+
+          <div className="relative z-0">{children}</div>
+
+          <div className="fixed bottom-0 z-50 w-full ">
+            <FooterPlayer
+              bgOverLay={bgOverLay}
+              blur={blur}
+              rounded={rounded}
+              textColor={textColor}
+              borderColor={borderColor}
+              items={items}
+              fullScreen={handle}
+            ></FooterPlayer>
           </div>
-        </Dropdown>
-      </FullScreen>
+        </div>
+      </Dropdown>
+      {/* </FullScreen> */}
     </>
   );
 };
