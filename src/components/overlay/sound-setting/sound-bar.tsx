@@ -25,7 +25,7 @@ const SoundBar: React.FC<SoundBarProps> = ({
     } else {
       setTimeout(() => {
         setLevel(undefined);
-      }, 10000);
+      }, 150);
     }
   };
 

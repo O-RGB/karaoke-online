@@ -31,96 +31,112 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
     {
       channel: 1,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 2,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 3,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 4,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 5,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 6,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 7,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 8,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 9,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 10,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 11,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 12,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 13,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 14,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 15,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
     {
       channel: 16,
       level: 127,
+      instrumental: 0,
       callBack: () => {},
       velocity: 127,
     },
@@ -206,6 +222,11 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
     clone[channel].velocity = velocity;
     setSoundSetting(clone);
   };
+  const updateInstrumentalControl = (channel: number, instrumental: number) => {
+    let clone = sound;
+    clone[channel].instrumental = instrumental;
+    setSoundSetting(clone);
+  };
 
   const resetLevelControl = () => {
     let clone = sound;
@@ -288,43 +309,34 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
 
     const duration = (ticks / (_bpm * 1000)) * 60;
     setBPM(_bpm);
-    console.log("_bpm:", _bpm);
+    // console.log("_bpm:", _bpm);
   };
 
   useEffect(() => {
     if (playing) {
       // resetLevelControl();
-
+      // synthesizer?.setReverbOn(true)
       synthesizer?.hookPlayerMIDIEvents(function (s, type, event) {
         if (!bpm) {
         }
         testData(s);
-        if (event.getChannel() == 12) {
-          console.log("TYPE == " + type);
-          console.log("getChannel", event.getChannel());
-          console.log("getValue", event.getValue());
-          console.log("getVelocity", event.getVelocity());
-          console.log("getControl", event.getControl());
-          console.log("getProgram", event.getProgram());
-          console.log("###########");
-        }
-
-        // if (type === 0xc0) {
-        //   // if the 'program' value is 0, use another SoundFont
-
-        //   if (event.getProgram() === 0) {
-        //     // s.midiProgramSelect(event.getChannel(), secondSFont, 0, 0);
-        //     return true;
-        //   }
-        // } else {
-        //   console.log(type);
+        // if (event.getChannel() == 12) {
+        console.log("TYPE == " + type);
+        console.log("getChannel", event.getChannel());
+        console.log("getValue", event.getValue());
+        console.log("getVelocity", event.getVelocity());
+        console.log("getControl", event.getControl());
+        console.log("getProgram", event.getProgram());
+        console.log("###########");
         // }
+
+        const conrtol = event.getControl();
+        const channel = event.getChannel();
 
         if (type === 192) {
           // เครื่องดนตรี
+          updateInstrumentalControl(channel, event.getProgram());
         } else if (type == 176) {
-          const conrtol = event.getControl();
-          const channel = event.getChannel();
           if (conrtol == 7) {
             //ระดับเสียง
             let getData = sound[channel];
@@ -332,7 +344,7 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
               updateLevelControl(channel, event.getValue());
             }
           } else if (conrtol == 10) {
-            updateVelocityControl(channel, event.getVelocity());
+            // updateVelocityControl(channel, event.getVelocity());
           }
         }
         let nomalValue = event.getValue();
@@ -341,12 +353,15 @@ export const PlayerProvider = ({ children }: PropsWithChildren) => {
 
         let getData = sound[ch];
         if (getData) {
-          let nValue = Math.ceil(nomalValue * (getData.level / 127));
-          // let nVelocity =
-          //   nomalVelocity > getData.velocity ? getData.velocity : nomalVelocity;
+          let nValue = Math.ceil(
+            (((nomalValue * nomalVelocity) / 127) * getData.level) / 100
+          );
+          event.setValue(nomalValue * (getData.level / 127));
 
-          event.setValue(nValue);
-          // event.setVelocity(nVelocity);
+          if(nomalVelocity == 0){
+            event.setVelocity(0)
+          }
+
           sound[ch].callBack(nValue);
         }
         return false;

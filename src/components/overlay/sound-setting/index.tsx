@@ -25,13 +25,14 @@ const SoundSetting: React.FC<SoundSettingProps> = ({
     <div
       className={`w-fit h-full border ${rounded} ${bgOverLay} ${blur} ${textColor} ${borderColor} p-2 relative`}
     >
-      <div className="flex h-36 z-50 w-fit p-2">
+      <div className="flex h-40 z-50 w-fit p-2">
         {channel.map((data, index) => {
           return (
             <div
               key={`ch-${index}`}
               className="flex flex-col justify-center items-center  relative"
             >
+              <div className="pt-2 text-sm">{index + 1}</div>
               {player.sound && (
                 <SoundBar
                   index={index}
@@ -44,7 +45,7 @@ const SoundSetting: React.FC<SoundSettingProps> = ({
                   }}
                 ></SoundBar>
               )}
-              <div className="pt-2">{index + 1}</div>
+              {player.sound && <div className="pt-2">{player.sound[index].instrumental}</div>}
             </div>
           );
         })}

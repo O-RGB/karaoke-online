@@ -118,7 +118,6 @@ export const LoadFileProvider = ({ children }: PropsWithChildren) => {
     path: string[],
     type: "NCN" | "EMK"
   ) => {
-    console.log(type)
     if (!loadType) return undefined;
 
     setSongLoad(true);
