@@ -8,12 +8,16 @@ import VolumePanel from "../tools/volume-panel";
 import SoundfontManager from "../tools/sound-font-manager";
 import { MIDI } from "spessasynth_lib";
 import PlayerPanel from "../tools/player-panel";
+import { useRemote } from "@/app/hooks/remote-hooks";
+import StartRemote from "../remote/start-remote";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { gainNode, setupSpessasynth, synth, player, audio, AudioPlay } =
     useSynth();
+
+  const { startConnection, myKey, connection, answer, send } = useRemote();
 
   useLayoutEffect(() => {
     setupSpessasynth();
@@ -47,6 +51,23 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       ></UpdateFile>
       <VolumePanel synth={synth} gainNode={gainNode}></VolumePanel>
       <PlayerPanel player={player}></PlayerPanel>
+
+      <StartRemote
+        send={send}
+        myKey={myKey}
+        answer={answer}
+        getMyKey={startConnection}
+        onSaveKey={connection}
+      ></StartRemote>
+
+      {/* <Button onClick={() => startConnection(true)}>Start Connection</Button>
+      <Button onClick={() => startConnection(false)}>Join</Button>
+      <div className="p-2 border">
+        HOST KEY
+        <br />
+        {hostKey}
+      </div>
+      {hostKey && <input type="text" />} */}
     </div>
   );
 };
