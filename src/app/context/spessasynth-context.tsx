@@ -52,7 +52,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     source.buffer = audioBuffer;
     source.connect(audio.destination);
     source.start();
-    audio.resume()
+    audio.resume();
   };
 
   const LoadPlayer = async (synth: Synthetizer) => {
@@ -115,15 +115,6 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     };
     render();
   };
-
-  //   const loadMidi = async (file: File) => {
-  //     if (!file) {
-  //       return;
-  //     }
-  //     const midiFileArrayBuffer = await file.arrayBuffer();
-  //     const parsedMidi = new MIDI(midiFileArrayBuffer, file.name);
-  //     player?.loadNewSongList([parsedMidi]);
-  //   };
 
   const setup = async () => {
     const myAudio = await LoadAudioContext();

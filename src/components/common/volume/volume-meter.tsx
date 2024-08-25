@@ -4,12 +4,14 @@ import { channel } from "diagnostics_channel";
 import RangeBar from "../range-bar";
 
 interface VolumeMeterProps {
+  value: number;
   level: number;
   channel: number;
   onChange?: (channel: number, value: number) => void;
 }
 
 const VolumeMeter: React.FC<VolumeMeterProps> = ({
+  value,
   level,
   channel,
   onChange,
@@ -28,6 +30,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
       </div>
       <div className="flex gap-1.5 p-2 bg-slate-700">
         <RangeBar
+          value={value}
           defaultValue={100}
           max={127}
           min={0}

@@ -1,8 +1,12 @@
 "use client";
 
 import { createContext, FC, useRef, useState } from "react";
+import { useSynth } from "../hooks/spessasynth-hooks";
+import { volumeChange } from "@/lib/mixer";
+import { useMixer } from "../hooks/mixer-hooks";
 
 type RemoteContextType = {
+  receivedMessage: string | undefined;
   connect: boolean | undefined;
   myKey: string[] | undefined;
   answer: string | undefined;
@@ -16,6 +20,7 @@ type RemoteProviderProps = {
 };
 
 export const RemoteContext = createContext<RemoteContextType>({
+  receivedMessage: undefined,
   connect: undefined,
   myKey: undefined,
   answer: undefined,
@@ -27,20 +32,14 @@ export const RemoteContext = createContext<RemoteContextType>({
 export const RemoteProvider: FC<RemoteProviderProps> = ({ children }) => {
   // RESULT
   const [connect, setConnect] = useState<boolean>(false);
+  const [receivedMessage, setReceivedMessage] = useState<string>();
 
   // KEY
   const [myKey, setMyKey] = useState<string[]>([]);
   const [answer, setAnswer] = useState<string>();
 
-  // ROLES
-  //   const [isHost, setIsHost] = useState<boolean>(true);
-
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const dataChannel = useRef<RTCDataChannel | null>(null);
-
-  //   const setUserRoles = (isHost: boolean) => () => {
-  //     setIsHost(isHost);
-  //   };
 
   const startConnection = async (isHost: boolean = true) => {
     peerConnection.current = new RTCPeerConnection();
@@ -50,10 +49,8 @@ export const RemoteProvider: FC<RemoteProviderProps> = ({ children }) => {
       dataChannel.current = peerConnection.current.createDataChannel("color");
       dataChannel.current.onopen = () => console.log("Data channel opened");
       dataChannel.current.onmessage = (event) => {
-        const newColor = event.data;
-
-        console.log(event);
-        // setColor(newColor); // Change the background color
+        const number = event.data;
+        setReceivedMessage(number);
       };
 
       peerConnection.current.onicecandidate = async (event) => {
@@ -118,6 +115,7 @@ export const RemoteProvider: FC<RemoteProviderProps> = ({ children }) => {
   return (
     <RemoteContext.Provider
       value={{
+        receivedMessage: receivedMessage,
         connect: connect,
         answer: answer,
         myKey: myKey,

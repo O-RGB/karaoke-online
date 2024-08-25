@@ -14,10 +14,10 @@ import StartRemote from "../remote/start-remote";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
-  const { gainNode, setupSpessasynth, synth, player, audio, AudioPlay } =
-    useSynth();
+  const { gainNode, setupSpessasynth, synth, player, AudioPlay } = useSynth();
 
-  const { startConnection, myKey, connection, answer, send } = useRemote();
+  const { startConnection, myKey, connection, answer, send, receivedMessage } =
+    useRemote();
 
   useLayoutEffect(() => {
     setupSpessasynth();
@@ -49,7 +49,11 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         }}
         accept=".mid,.midi"
       ></UpdateFile>
-      <VolumePanel synth={synth} gainNode={gainNode}></VolumePanel>
+      <VolumePanel
+        control={receivedMessage}
+        synth={synth}
+        gainNode={gainNode}
+      ></VolumePanel>
       <PlayerPanel player={player}></PlayerPanel>
 
       <StartRemote

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Button from "../common/button/button";
+import RangeBar from "../common/range-bar";
 
 interface JoinConnectProps {
   onSaveKey?: (value?: string[]) => void;
@@ -35,14 +36,12 @@ const JoinConnect: React.FC<JoinConnectProps> = ({
       </Button>
       <br />
       {answer && <textarea name="" id="" value={answer}></textarea>}
-      <br /> <br /> <br /> <br />
-      <input
-        type="text"
-        onChange={(e) => {
-          const value = e.target.value;
-          send?.(value);
-        }}
-      />
+
+      <RangeBar
+        min={0}
+        max={127}
+        onRangeChange={(v) => send?.(String(v))}
+      ></RangeBar>
     </div>
   );
 };
