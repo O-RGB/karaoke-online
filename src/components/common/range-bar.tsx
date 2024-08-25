@@ -1,11 +1,14 @@
-import React, { CSSProperties } from "react";
+import React, { CSSProperties, useEffect } from "react";
 
+type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 interface RangeBarProps {
   layout?: "vertical" | "horizontal";
   min?: number;
   max?: number;
   defaultValue?: number;
   onRangeChange?: (value: number) => void;
+  inputProps?: InputProps;
+  value?: number;
 }
 
 const RangeBar: React.FC<RangeBarProps> = ({
@@ -14,6 +17,8 @@ const RangeBar: React.FC<RangeBarProps> = ({
   max,
   defaultValue,
   onRangeChange,
+  inputProps,
+  value,
 }) => {
   var setLayout: CSSProperties =
     layout == "vertical"
@@ -21,6 +26,8 @@ const RangeBar: React.FC<RangeBarProps> = ({
           writingMode: "vertical-lr",
           direction: "rtl",
           verticalAlign: "middle",
+          height: 90,
+          width: 20,
         }
       : {};
 
@@ -32,17 +39,19 @@ const RangeBar: React.FC<RangeBarProps> = ({
     }
   };
 
+  useEffect(() => {}, [value]);
+
   return (
-    <div>
-      <input
-        style={{ ...setLayout, height: 90, width: 20 }}
-        onChange={onChangeHandler}
-        type="range"
-        defaultValue={defaultValue}
-        min={min}
-        max={max}
-      ></input>
-    </div>
+    <input
+      {...inputProps}
+      style={{ ...setLayout, ...inputProps?.style }}
+      onChange={onChangeHandler}
+      type="range"
+      defaultValue={defaultValue}
+      min={min}
+      max={max}
+      value={value}
+    ></input>
   );
 };
 

@@ -1,11 +1,12 @@
 import React from "react";
-import RangeBar from "../common/range-bar";
+
 import { channel } from "diagnostics_channel";
+import RangeBar from "../range-bar";
 
 interface VolumeMeterProps {
   level: number;
   channel: number;
-  onChange?: (value: number, channel: number) => void;
+  onChange?: (channel: number, value: number) => void;
 }
 
 const VolumeMeter: React.FC<VolumeMeterProps> = ({
@@ -14,10 +15,10 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
   onChange,
 }) => {
   const maxLevel = 15;
-  const filledBars = Math.round((level / 160) * maxLevel);
+  const filledBars = Math.round((level / 127) * maxLevel);
 
   const onVolumeMeterChange = (value: number = 0) => {
-    onChange?.(value, channel);
+    onChange?.(channel - 1, value);
   };
 
   return (
