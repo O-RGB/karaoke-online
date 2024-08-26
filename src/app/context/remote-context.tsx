@@ -61,7 +61,15 @@ export const RemoteProvider: FC<RemoteProviderProps> = ({ children }) => {
       };
       const offer = await peerConnection.current.createOffer();
       await peerConnection.current.setLocalDescription(offer);
+      console.log("full",offer.sdp )
+      const modifiedSdp =
+        offer.sdp ??
+        ""
+          .replace(/a=extmap:\d+ .+\r\n/g, "") // Remove extmap lines (extension maps)
+          .replace(/a=mid:.+\r\n/g, "") // Remove mid lines (if not needed)
+          .replace(/a=rtcp-mux\r\n/g, ""); // Remove rtcp-mux (if you don't use it)
 
+      console.log("reducer", modifiedSdp);
       setMyKey([JSON.stringify(offer)]);
     } else if (isHost === false) {
       // Joiner waits for the data channel to be created

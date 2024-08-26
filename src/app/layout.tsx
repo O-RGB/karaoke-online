@@ -5,6 +5,7 @@ import { SpessasynthProvider } from "./context/spessasynth-context";
 import AllowSound from "@/components/tools/allow-sound";
 import { RemoteProvider } from "./context/remote-context";
 import { MixerProvider } from "./context/mixer-context";
+import { PeerProvider } from "./context/Peer-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,11 +23,13 @@ export default function RootLayout({
     <html lang="en">
       <AllowSound>
         <SpessasynthProvider>
-          <RemoteProvider>
-            <MixerProvider>
-              <body className={inter.className}>{children}</body>
-            </MixerProvider>
-          </RemoteProvider>
+          <PeerProvider>
+            <RemoteProvider>
+              <MixerProvider>
+                <body className={inter.className}>{children}</body>
+              </MixerProvider>
+            </RemoteProvider>
+          </PeerProvider>
         </SpessasynthProvider>
       </AllowSound>
     </html>
