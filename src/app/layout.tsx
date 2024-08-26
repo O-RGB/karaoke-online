@@ -3,9 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { SpessasynthProvider } from "./context/spessasynth-context";
 import AllowSound from "@/components/tools/allow-sound";
-import { RemoteProvider } from "./context/remote-context";
 import { MixerProvider } from "./context/mixer-context";
-import { PeerProvider } from "./context/Peer-context";
+import { PeerProvider } from "./context/remote-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,15 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <AllowSound>
-        <SpessasynthProvider>
-          <PeerProvider>
-            <RemoteProvider>
-              <MixerProvider>
-                <body className={inter.className}>{children}</body>
-              </MixerProvider>
-            </RemoteProvider>
-          </PeerProvider>
-        </SpessasynthProvider>
+        <PeerProvider>
+          <SpessasynthProvider>
+            <MixerProvider>
+              <body className={inter.className}>{children}</body>
+            </MixerProvider>
+          </SpessasynthProvider>
+        </PeerProvider>
       </AllowSound>
     </html>
   );

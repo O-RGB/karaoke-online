@@ -1,138 +1,91 @@
 "use client";
-
-import { createContext, FC, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import Peer, { DataConnection } from "peerjs";
 import { useSynth } from "../hooks/spessasynth-hooks";
-import { volumeChange } from "@/lib/mixer";
-import { useMixer } from "../hooks/mixer-hooks";
+import { remoteDecodeMessage, remoteEncodeMessage } from "@/lib/remote";
 
-type RemoteContextType = {
-  receivedMessage: string | undefined;
-  connect: boolean | undefined;
-  myKey: string[] | undefined;
-  answer: string | undefined;
-  startConnection: (isHost: boolean) => Promise<void>;
-  connection: (isHost: boolean, value?: string[]) => Promise<void>;
-  send: (text: string) => void;
-};
+interface PeerContextType {
+  peer?: Peer;
+  connectToPeer: (peerId: string) => void;
+  connections: DataConnection[];
+  sendMessage: (message: any, type: SendType) => void;
+  messages?: { from: string; content: RemoteEncode };
+  generateQRCode: () => string;
+}
 
-type RemoteProviderProps = {
-  children: React.ReactNode;
-};
-
-export const RemoteContext = createContext<RemoteContextType>({
-  receivedMessage: undefined,
-  connect: undefined,
-  myKey: undefined,
-  answer: undefined,
-  startConnection: async () => undefined,
-  connection: async () => undefined,
-  send: () => {},
+export const PeerContext = createContext<PeerContextType>({
+  connectToPeer: () => {},
+  connections: [],
+  sendMessage: () => {},
+  messages: undefined,
+  generateQRCode: () => "",
 });
 
-export const RemoteProvider: FC<RemoteProviderProps> = ({ children }) => {
-  // RESULT
-  const [connect, setConnect] = useState<boolean>(false);
-  const [receivedMessage, setReceivedMessage] = useState<string>();
+export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [peer, setPeer] = useState<Peer>();
+  const [connections, setConnections] = useState<DataConnection[]>([]);
+  const [messages, setMessages] = useState<{ from: string; content: any }>();
 
-  // KEY
-  const [myKey, setMyKey] = useState<string[]>([]);
-  const [answer, setAnswer] = useState<string>();
+  useEffect(() => {
+    const newPeer = new Peer();
+    newPeer.on("open", (id) => {
+      setPeer(newPeer);
+      newPeer.on("connection", (conn) => {
+        setConnections((prev) => [...prev, conn]);
+        conn.on("data", (data) => {
+          setMessages({ from: conn.peer, content: data });
+        });
+      });
+    });
 
-  const peerConnection = useRef<RTCPeerConnection | null>(null);
-  const dataChannel = useRef<RTCDataChannel | null>(null);
+    return () => {
+      newPeer.destroy();
+    };
+  }, []);
 
-  const startConnection = async (isHost: boolean = true) => {
-    peerConnection.current = new RTCPeerConnection();
+  const connectToPeer = (peerId: string) => {
+    if (peer) {
+      const conn = peer.connect(peerId);
+      setConnections((prev) => [...prev, conn]);
 
-    if (isHost === true) {
-      // Host creates the data channel
-      dataChannel.current = peerConnection.current.createDataChannel("color");
-      dataChannel.current.onopen = () => console.log("Data channel opened");
-      dataChannel.current.onmessage = (event) => {
-        const number = event.data;
-        setReceivedMessage(number);
-      };
+      conn.on("open", () => {
+        conn.send("Hello from " + peer.id);
+      });
 
-      peerConnection.current.onicecandidate = async (event) => {
-        if (event.candidate) {
-          const candidate = JSON.stringify(event.candidate);
-          setMyKey((prev) => [...prev, candidate]);
-        }
-      };
-      const offer = await peerConnection.current.createOffer();
-      await peerConnection.current.setLocalDescription(offer);
-      console.log("full",offer.sdp )
-      const modifiedSdp =
-        offer.sdp ??
-        ""
-          .replace(/a=extmap:\d+ .+\r\n/g, "") // Remove extmap lines (extension maps)
-          .replace(/a=mid:.+\r\n/g, "") // Remove mid lines (if not needed)
-          .replace(/a=rtcp-mux\r\n/g, ""); // Remove rtcp-mux (if you don't use it)
-
-      console.log("reducer", modifiedSdp);
-      setMyKey([JSON.stringify(offer)]);
-    } else if (isHost === false) {
-      // Joiner waits for the data channel to be created
-      peerConnection.current.ondatachannel = (event) => {
-        dataChannel.current = event.channel;
-        dataChannel.current.onopen = () => console.log("Data channel opened");
-        dataChannel.current.onmessage = (event) => {
-          const newColor = event.data;
-          //   setColor(newColor); // Change the background color
-        };
-      };
-      //   peerConnection.current.onicecandidate = (event) => {
-      //     if (event.candidate) {
-      //       const candidate = JSON.stringify(event.candidate);
-      //       setJoinKey((prev) => prev + candidate + ",");
-      //     }
-      //   };
+      conn.on("data", (data) => {
+        setMessages({ from: conn.peer, content: data });
+      });
     }
   };
 
-  const connection = async (isHost: boolean, value?: string[]) => {
-    if (!peerConnection.current || !value) return;
-
-    console.log(value);
-
-    const offer = JSON.parse(value[0]);
-
-    await peerConnection.current.setRemoteDescription(
-      new RTCSessionDescription(offer)
-    );
-    if (!isHost) {
-      const ca = JSON.parse(value[1]);
-
-      const candidate = new RTCIceCandidate(ca);
-      await peerConnection.current.addIceCandidate(candidate);
-    }
-
-    if (!isHost) {
-      const answer = await peerConnection.current.createAnswer();
-      await peerConnection.current.setLocalDescription(answer);
-      setAnswer(JSON.stringify(answer));
-    }
+  const sendMessage = (message: any, type: SendType) => {
+    connections.forEach((conn) => {
+      conn.send(remoteEncodeMessage(message, type));
+      // setMessages({
+      //   from: conn.peer,
+      //   content: remoteEncodeMessage(message, type),
+      // });
+    });
   };
 
-  const send = (newColor: string) => {
-    if (dataChannel.current && dataChannel.current.readyState === "open") {
-      dataChannel.current.send(newColor);
-    }
+  const generateQRCode = () => {
+    return peer?.id || "";
   };
 
   return (
-    <RemoteContext.Provider
+    <PeerContext.Provider
       value={{
-        receivedMessage: receivedMessage,
-        connect: connect,
-        answer: answer,
-        myKey: myKey,
-        startConnection: startConnection,
-        connection: connection,
-        send: send,
+        peer,
+        connectToPeer,
+        connections,
+        sendMessage,
+        messages,
+        generateQRCode,
       }}
     >
-      <>{children}</>
-    </RemoteContext.Provider>
+      {children}
+    </PeerContext.Provider>
   );
 };

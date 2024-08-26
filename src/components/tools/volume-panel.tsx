@@ -3,35 +3,33 @@ import VolumeMeter from "../common/volume/volume-meter";
 import { Synthetizer } from "spessasynth_lib";
 import { volumeChange } from "@/lib/mixer";
 import { useMixer } from "@/app/hooks/mixer-hooks";
+import { useRemote } from "@/app/hooks/peer-hooks";
 
 interface VolumePanelProps {
   gainNode: number[];
-  synth: Synthetizer;
-  control?: string;
-  //   onChangeVolume?: (channel: number, value: number) => void;
+  synth?: Synthetizer;
+  onVolumeChange?: (channel: number, value: number) => void;
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
   gainNode,
   synth,
-  control,
-  //   onChangeVolume,
+  onVolumeChange,
 }) => {
   const { updateVolume, volumeController } = useMixer();
 
   const onVolumeMeterChange = (channel: number, value: number) => {
-    volumeChange(channel, value, synth);
-    updateVolume(channel, value);
+    if (synth) {
+      volumeChange(channel, value, synth);
+      updateVolume(channel, value);
+    } else {
+      onVolumeChange?.(channel, value);
+    }
   };
-
-  useEffect(() => {
-    onVolumeMeterChange(9, Number(control));
-    console.log(control);
-  }, [control]);
 
   return (
     <>
-      <div className="flex divide-x border">
+      <div className="flex flex-wrap lg:flex-row  ">
         {gainNode.map((data, index) => {
           return (
             <div className="relative" key={`gin-${index}`}>

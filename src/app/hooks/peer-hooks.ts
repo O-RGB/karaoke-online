@@ -1,4 +1,4 @@
 import { useContext } from "react";
-import { PeerContext } from "../context/Peer-context";
+import { PeerContext } from "../context/remote-context";
 
-export const usePeer = () => useContext(PeerContext);
+export const useRemote = () => useContext(PeerContext);

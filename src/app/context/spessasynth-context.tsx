@@ -1,6 +1,13 @@
 "use client";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
-import { createContext, FC, useEffect, useLayoutEffect, useState } from "react";
+import {
+  createContext,
+  FC,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   MIDI,
   midiControllers,
@@ -8,6 +15,7 @@ import {
   Synthetizer,
   WORKLET_URL_ABSOLUTE,
 } from "spessasynth_lib";
+import { useRemote } from "../hooks/peer-hooks";
 
 type SpessasynthContextType = {
   setupSpessasynth: () => Promise<void>;
@@ -34,6 +42,7 @@ export const SpessasynthContext = createContext<SpessasynthContextType>({
 export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   children,
 }) => {
+  const { sendMessage, peer } = useRemote();
   const [synth, setSynth] = useState<Synthetizer>();
   const [player, setPlayer] = useState<Sequencer>();
   const [audio, setAudio] = useState<AudioContext>();
@@ -115,6 +124,12 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     };
     render();
   };
+
+  useEffect(() => {
+    if (peer) {
+      sendMessage(gainNode, "GIND_NODE");
+    }
+  }, [gainNode]);
 
   const setup = async () => {
     const myAudio = await LoadAudioContext();
