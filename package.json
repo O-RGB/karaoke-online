@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/peerjs": "^1.1.0",
+    "libarchive.js": "^2.0.2",
     "next": "14.2.6",
     "next-qrcode": "^2.5.1",
     "peerjs": "^1.5.4",

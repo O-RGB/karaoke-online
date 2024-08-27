@@ -12,6 +12,8 @@ import HostRemote from "../remote/host-connect";
 
 import { addSongList, onSearchList } from "@/lib/trie-search";
 import TrieSearch from "trie-search";
+import FetchFileComponent from "../tools/test";
+import MyComponent from "../tools/read-tar";
 
 interface KaraokePageProps {}
 
@@ -34,7 +36,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   };
 
   return (
-    <div className="min-h-dvh flex flex-col gap-2 justify-center items-center bg-slate-800">
+    <div className="min-h-dvh py-20 px-10 flex flex-col gap-2 justify-center items-center bg-slate-900">
       <div className="text-white text-2xl ">Karaoke Demo</div>
       <div
         className="p-2 border text-white"
@@ -76,6 +78,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           }
         }}
       />
+      <FetchFileComponent></FetchFileComponent>
+      {/* <MyComponent></MyComponent> */}
     </div>
   );
 };
