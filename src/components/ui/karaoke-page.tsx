@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import UpdateFile from "../common/upload";
 
 import { useSynth } from "@/app/hooks/spessasynth-hooks";
@@ -9,12 +9,15 @@ import SoundfontManager from "../tools/sound-font-manager";
 import { MIDI } from "spessasynth_lib";
 import PlayerPanel from "../tools/player-panel";
 import HostRemote from "../remote/host-connect";
-import { useRemote } from "@/app/hooks/peer-hooks";
+
+import { addSongList, onSearchList } from "@/lib/trie-search";
+import TrieSearch from "trie-search";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { gainNode, setupSpessasynth, synth, player, AudioPlay } = useSynth();
+  const [songList, setSongList] = useState<TrieSearch<any>>();
 
   useLayoutEffect(() => {
     setupSpessasynth();
@@ -23,6 +26,12 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   if (!synth || !player) {
     return <></>;
   }
+
+  const setSongListjson = async (file: File) => {
+    console.log(file);
+    const trie = await addSongList(file);
+    setSongList(trie);
+  };
 
   return (
     <div className="min-h-dvh flex flex-col gap-2 justify-center items-center bg-slate-800">
@@ -50,14 +59,23 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <PlayerPanel player={player}></PlayerPanel>
       <HostRemote></HostRemote>
 
-      {/* <Button onClick={() => startConnection(true)}>Start Connection</Button>
-      <Button onClick={() => startConnection(false)}>Join</Button>
-      <div className="p-2 border">
-        HOST KEY
-        <br />
-        {hostKey}
-      </div>
-      {hostKey && <input type="text" />} */}
+      <UpdateFile
+        className="text-white flex flex-col gap-2 border p-2 rounded-md"
+        label="Upload your SongList"
+        onSelectFile={setSongListjson}
+        accept=".json"
+      ></UpdateFile>
+
+      <input
+        type="text"
+        onChange={(e) => {
+          if (songList) {
+            const value = e.target.value;
+            const se = onSearchList(value, songList);
+            console.log(se);
+          }
+        }}
+      />
     </div>
   );
 };
