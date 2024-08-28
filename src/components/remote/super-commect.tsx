@@ -1,41 +1,41 @@
 import React, { useEffect, useState } from "react";
 import Button from "../common/button/button";
-import { useRemote } from "@/app/hooks/peer-hooks";
+import { useRemote } from "@/app/hooks/peer-hooks"; // Updated hook
 import VolumePanel from "../tools/volume-panel";
-import { useMixer } from "@/app/hooks/mixer-hooks";
 
-interface JoinConnectProps {
+interface SuperJoinConnectProps {
   hostId: string;
 }
 
-const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
-  const { normalPeer, connectToPeer, sendMessage, messages } = useRemote();
+const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
+  const { superUserPeer, connectToPeer, sendSuperUserMessage, messages } =
+    useRemote();
   const [message, setMessage] = useState("");
   const [gainNode, setGainNode] = useState<number[]>([]);
 
   const handleConnect = () => {
     if (hostId) {
-      connectToPeer(hostId, false);
+      connectToPeer(hostId, true);
     }
   };
 
   const handleSendMessage = () => {
-    if (sendMessage && message) {
-      sendMessage(message, "GIND_NODE");
+    if (sendSuperUserMessage && message) {
+      sendSuperUserMessage(message, "GIND_NODE");
       setMessage("");
     }
   };
 
   const changeVol = (value: ISetChannelGain) => {
     console.log(value);
-    if (sendMessage) {
-      sendMessage(value, "SET_CHANNEL");
+    if (sendSuperUserMessage) {
+      sendSuperUserMessage(value, "SET_CHANNEL");
     }
   };
 
   useEffect(() => {
     handleConnect();
-  }, [normalPeer]);
+  }, [superUserPeer]);
 
   useEffect(() => {
     if (messages?.content.type === "GIND_NODE") {
@@ -80,4 +80,4 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
   );
 };
 
-export default JoinConnect;
+export default SuperJoinConnect;

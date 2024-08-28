@@ -42,14 +42,13 @@ export const SpessasynthContext = createContext<SpessasynthContextType>({
 export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   children,
 }) => {
-  const { sendMessage, peer } = useRemote();
+  const { sendMessage, superUserPeer } = useRemote();
   const [synth, setSynth] = useState<Synthetizer>();
   const [player, setPlayer] = useState<Sequencer>();
   const [audio, setAudio] = useState<AudioContext>();
   const [gainNode, setGainNode] = useState<number[]>([]);
 
   const AudioPlay = async (url: string) => {
-    console.log(!audio);
     if (!audio) {
       return;
     }
@@ -76,7 +75,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     const synthInstance = new Synthetizer(audio.destination, ab);
 
     // Default Setting
-    synthInstance.muteChannel(8, true);
+    // synthInstance.muteChannel(8, true);
     synthInstance.setMainVolume(0.5);
     synthInstance.highPerformanceMode = true;
 
@@ -90,8 +89,6 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
       await audio.audioWorklet.addModule(
         new URL(WORKLET_URL_ABSOLUTE, window.location.origin).toString()
       );
-      //   setAudio(audio);
-
       return audio;
     } else {
       return undefined;
@@ -102,7 +99,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     const newAnalysers: AnalyserNode[] = [];
     for (let i = 0; i < 16; i++) {
       const analyser = audio.createAnalyser();
-      analyser.fftSize = 256; // Adjust FFT size for better performance
+      analyser.fftSize = 256;
       newAnalysers.push(analyser);
       synth.lockController(i, midiControllers.mainVolume, false);
     }
@@ -126,7 +123,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   };
 
   useEffect(() => {
-    if (peer) {
+    if (superUserPeer) {
       sendMessage(gainNode, "GIND_NODE");
     }
   }, [gainNode]);
@@ -143,6 +140,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     const player = await LoadPlayer(spessasynth);
     LoadSoundMeter(spessasynth, myAudio);
     setAudio(myAudio);
+    spessasynth._highPerformanceMode = true;
     setSynth(spessasynth);
     setPlayer(player);
     await myAudio.resume();

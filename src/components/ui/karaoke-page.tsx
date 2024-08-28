@@ -13,6 +13,7 @@ import TrieSearch from "trie-search";
 import FetchFileComponent from "../tools/test";
 import SearchSong from "../tools/search-song";
 import FileUploadComponent from "../tools/worker-test";
+import SuperHostRemote from "../remote/super-host.connect";
 
 interface KaraokePageProps {}
 
@@ -67,22 +68,21 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       ></UpdateFile> */}
       <VolumePanel synth={synth} gainNode={gainNode}></VolumePanel>
       <PlayerPanel player={player}></PlayerPanel>
+      User
       <HostRemote></HostRemote>
-
+      Super User
+      <SuperHostRemote></SuperHostRemote>
       <UpdateFile
         className="text-white flex flex-col gap-2 border p-2 rounded-md"
         label="Upload your SongList"
         onSelectFile={setSongListjson}
         accept=".json"
       ></UpdateFile>
-
       <SearchSong songList={songList} onClickSong={setSelectSong}></SearchSong>
-
       <FetchFileComponent
         onSelectSong={onSelectSong}
         onLoadSong={onLoadSong}
       ></FetchFileComponent>
-
       <FileUploadComponent></FileUploadComponent>
       {/* <MyComponent></MyComponent> */}
     </div>

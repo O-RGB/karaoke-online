@@ -1,44 +1,47 @@
 import React, { useEffect, useState } from "react";
 import Button from "../common/button/button";
-
 import { useQRCode } from "next-qrcode";
-import { useRemote } from "@/app/hooks/peer-hooks";
+import { useRemote } from "@/app/hooks/peer-hooks"; // Updated hook for super user
 
-interface HostRemoteProps {
+interface SuperHostRemoteProps {
   myKey?: string[];
   onSaveKey?: (key: string) => void;
   send?: (value: string) => void;
 }
 
-const HostRemote: React.FC<HostRemoteProps> = ({ onSaveKey, myKey, send }) => {
+const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({
+  onSaveKey,
+  myKey,
+  send,
+}) => {
   const {
-    normalPeer,
-    connectToPeer,
-    connections,
-    sendMessage,
-    messages,
+    superUserPeer,
     generateQRCode,
+    sendMessage,
+    superUserConnections,
+    messages,
   } = useRemote();
 
   const [hostId, setHostId] = useState<string>();
   const { Canvas } = useQRCode();
 
   useEffect(() => {
-    setHostId(normalPeer?.id);
-  }, [normalPeer]);
+    setHostId(superUserPeer?.id);
+  }, [superUserPeer]);
 
   return (
     <div className="p-4 bg-gray-100 flex gap-2">
       <div className="mb-4">
         <a
-          href={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
+          href={`http://localhost:3000/remote/super/${hostId}`}
           target="_blank"
+          rel="noopener noreferrer"
         >
-          open link
+          Open Link
         </a>
         {hostId && (
           <Canvas
-            text={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
+            text={`http://localhost:3000/remote/super/${hostId}`}
             options={{
               errorCorrectionLevel: "M",
               margin: 3,
@@ -54,6 +57,7 @@ const HostRemote: React.FC<HostRemoteProps> = ({ onSaveKey, myKey, send }) => {
         <h2 className="text-xl p-1 font-semibold mb-2">Messages</h2>
         <div className="rounded shadow">
           <div className="">
+            {/* Display messages if needed */}
             {/* {messages.map((msg, index) => (
               <div key={index} className="mb-2 p-2 bg-gray-200 rounded">
                 <p>{msg.content}</p>
@@ -67,7 +71,7 @@ const HostRemote: React.FC<HostRemoteProps> = ({ onSaveKey, myKey, send }) => {
         <h2 className="text-xl font-semibold mb-2">Connections</h2>
         <div className="bg-white p-4 rounded shadow">
           <ul>
-            {connections.map((conn, index) => (
+            {superUserConnections.map((conn, index) => (
               <li key={index} className="mb-2 p-2 bg-gray-200 rounded">
                 {conn.connectionId}
               </li>
@@ -75,21 +79,8 @@ const HostRemote: React.FC<HostRemoteProps> = ({ onSaveKey, myKey, send }) => {
           </ul>
         </div>
       </div>
-
-      {/* <div className="fixed bottom-0 left-0 p-4 bg-gray-100 w-full border-t">
-        <textarea
-          className="w-full p-2 border rounded"
-          rows={4}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message here..."
-        />
-        <Button onClick={handleSendMessage} className="mt-2">
-          Send
-        </Button>
-      </div> */}
     </div>
   );
 };
 
-export default HostRemote;
+export default SuperHostRemote;
