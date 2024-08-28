@@ -20,14 +20,14 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
     <div className="p-4 bg-gray-100 flex gap-2">
       <div className="mb-4">
         <a
-          href={`http://localhost:3000/remote/${hostId}`}
+          href={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
           target="_blank"
         >
           open link
         </a>
         {hostId && (
           <Canvas
-            text={`http://localhost:3000/remote/${hostId}`}
+            text={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
             options={{
               errorCorrectionLevel: "M",
               margin: 3,
