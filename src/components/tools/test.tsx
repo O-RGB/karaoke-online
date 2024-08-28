@@ -36,11 +36,11 @@ const FetchFileComponent: React.FC<FetchFileComponentProps> = ({
       }
 
       const blob = await response.blob();
+      console.log("decoding");
       var decoded = await ExtractFile(new File([blob], obj.fileId));
       var filenames: string[] = [];
       var song: Partial<SongFiles> = {};
-      Object.keys(decoded).map((key) => {
-        const file: File = decoded[key];
+      decoded.map((file) => {
         console.log(file);
         if (file.name.endsWith("mid")) {
           song.mid = file;
@@ -51,6 +51,8 @@ const FetchFileComponent: React.FC<FetchFileComponentProps> = ({
         }
         filenames.push(file.name);
       });
+      console.log("decoded", decoded);
+
       onLoadSong?.(song as SongFiles);
       setExtractedFiles(filenames);
     } catch (error) {

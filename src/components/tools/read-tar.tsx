@@ -12,12 +12,12 @@ const ArchiveExtractor = () => {
 
     const file = files[0];
     var decoded = await ExtractFile(file);
-    var filenames: string[] = [];
-    Object.keys(decoded).map((key) => {
-      const file: File = decoded[key];
-      filenames.push(file.name);
-    });
-    setExtractedFiles(filenames);
+    // var filenames: string[] = [];
+    // Object.keys(decoded).map((key) => {
+    //   const file: File = decoded[key];
+    //   filenames.push(file.name);
+    // });
+    setExtractedFiles(decoded.map((data) => data.name));
   };
 
   return (

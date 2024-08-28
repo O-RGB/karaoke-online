@@ -12,6 +12,7 @@ import { addSongList } from "@/lib/trie-search";
 import TrieSearch from "trie-search";
 import FetchFileComponent from "../tools/test";
 import SearchSong from "../tools/search-song";
+import FileUploadComponent from "../tools/worker-test";
 
 interface KaraokePageProps {}
 
@@ -36,7 +37,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   };
 
   const onLoadSong = async (files: SongFiles) => {
-    console.log(files)
+    console.log(files);
     const midiFileArrayBuffer = await files.mid.arrayBuffer();
     const parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
     player.loadNewSongList([parsedMidi]);
@@ -81,6 +82,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         onSelectSong={onSelectSong}
         onLoadSong={onLoadSong}
       ></FetchFileComponent>
+
+      <FileUploadComponent></FileUploadComponent>
       {/* <MyComponent></MyComponent> */}
     </div>
   );
