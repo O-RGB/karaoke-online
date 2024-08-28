@@ -44,16 +44,30 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
     }
   }, [messages?.content]);
 
+  if (!normalPeer.id) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center text-lg">
+        กำลังเชื่อมต่อ...
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
-      <div>
+      <input
+        type="text"
+        className="w-full p-2 border rounded"
+        onChange={(e) => handleSendMessage(e.target.value)}
+        placeholder="ค้นหาเพลง"
+      />
+      <div className="pt-1">
         {gainNode.map((data, index) => {
           return (
             <div
               onClick={() => {
                 handleSetSong(data);
               }}
-              className="p-2 border hover:bg-slate-200 duration-300 flex items-center  gap-2 cursor-pointer"
+              className="p-2 border bg-slate-200 hover:bg-slate-400 duration-300 flex items-center  gap-2 cursor-pointer"
               key={`song-list-${index}`}
             >
               <TbNote></TbNote>
@@ -61,16 +75,6 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
             </div>
           );
         })}
-      </div>
-
-      <div className="fixed bottom-0 left-0 p-4 bg-gray-100 w-full border-t">
-        <textarea
-          className="w-full p-2 border rounded"
-          rows={4}
-          // value={message}
-          onChange={(e) => handleSendMessage(e.target.value)}
-          placeholder="Type your message here..."
-        />
       </div>
     </div>
   );
