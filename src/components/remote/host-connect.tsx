@@ -4,21 +4,10 @@ import Button from "../common/button/button";
 import { useQRCode } from "next-qrcode";
 import { useRemote } from "@/app/hooks/peer-hooks";
 
-interface HostRemoteProps {
-  myKey?: string[];
-  onSaveKey?: (key: string) => void;
-  send?: (value: string) => void;
-}
+interface HostRemoteProps {}
 
-const HostRemote: React.FC<HostRemoteProps> = ({ onSaveKey, myKey, send }) => {
-  const {
-    normalPeer,
-    connectToPeer,
-    connections,
-    sendMessage,
-    messages,
-    generateQRCode,
-  } = useRemote();
+const HostRemote: React.FC<HostRemoteProps> = ({}) => {
+  const { normalPeer, connections } = useRemote();
 
   const [hostId, setHostId] = useState<string>();
   const { Canvas } = useQRCode();
@@ -31,14 +20,14 @@ const HostRemote: React.FC<HostRemoteProps> = ({ onSaveKey, myKey, send }) => {
     <div className="p-4 bg-gray-100 flex gap-2">
       <div className="mb-4">
         <a
-          href={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
+          href={`http://localhost:3000/remote/${hostId}`}
           target="_blank"
         >
           open link
         </a>
         {hostId && (
           <Canvas
-            text={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
+            text={`http://localhost:3000/remote/${hostId}`}
             options={{
               errorCorrectionLevel: "M",
               margin: 3,

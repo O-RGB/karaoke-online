@@ -16,10 +16,10 @@ export async function addSongList<T = any>(file: File): Promise<TrieSearch<T>> {
   });
 }
 
-export const onSearchList = (
+export async function onSearchList<T = any>(
   value: string,
-  trie: TrieSearch<any>,
+  trie: TrieSearch<T>,
   limit: number = 10
-) => {
+) {
   return trie?.search(value, undefined, limit);
-};
+}

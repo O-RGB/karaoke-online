@@ -19,10 +19,10 @@ const SearchSong: React.FC<SearchSongProps> = ({ songList, onClickSong }) => {
         <input
           className="border"
           type="text"
-          onChange={(e) => {
+          onChange={async (e) => {
             if (songList) {
               const value = e.target.value;
-              const se = onSearchList(value, songList);
+              const se = await onSearchList<SearchResult>(value, songList);
               setSearchResult(se);
             }
           }}

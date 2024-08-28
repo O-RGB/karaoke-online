@@ -42,7 +42,7 @@ export const SpessasynthContext = createContext<SpessasynthContextType>({
 export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   children,
 }) => {
-  const { sendMessage, superUserPeer } = useRemote();
+  const { sendMessage, superUserPeer, superUserConnections } = useRemote();
   const [synth, setSynth] = useState<Synthetizer>();
   const [player, setPlayer] = useState<Sequencer>();
   const [audio, setAudio] = useState<AudioContext>();
@@ -123,7 +123,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   };
 
   useEffect(() => {
-    if (superUserPeer) {
+    if (superUserConnections.length > 0 && !player?.paused) {
       sendMessage(gainNode, "GIND_NODE");
     }
   }, [gainNode]);

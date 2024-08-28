@@ -8,20 +8,18 @@ import SoundfontManager from "../tools/sound-font-manager";
 import { MIDI } from "spessasynth_lib";
 import PlayerPanel from "../tools/player-panel";
 import HostRemote from "../remote/host-connect";
-import { addSongList } from "@/lib/trie-search";
-import TrieSearch from "trie-search";
 import FetchFileComponent from "../tools/test";
 import SearchSong from "../tools/search-song";
 import FileUploadComponent from "../tools/worker-test";
 import SuperHostRemote from "../remote/super-host.connect";
+import { useMixer } from "@/app/hooks/mixer-hooks";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { gainNode, setupSpessasynth, synth, player, AudioPlay } = useSynth();
-  const [songList, setSongList] = useState<TrieSearch<any>>();
-  const [onSelectSong, setSelectSong] = useState<SearchResult>();
-  // const [onLoadSong, setOnLoadSong] = useState<SongFiles>();
+  const { setSongListFile, setSongEventHandle, songList, songEvent } =
+    useMixer();
 
   useLayoutEffect(() => {
     setupSpessasynth();
@@ -30,12 +28,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   if (!synth || !player) {
     return <></>;
   }
-
-  const setSongListjson = async (file: File) => {
-    console.log(file);
-    const trie = await addSongList(file);
-    setSongList(trie);
-  };
 
   const onLoadSong = async (files: SongFiles) => {
     console.log(files);
@@ -56,16 +48,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         Open Audio
       </div>
       <SoundfontManager synth={synth}></SoundfontManager>
-      {/* <UpdateFile
-        className="text-white flex flex-col gap-2 border p-2 rounded-md"
-        label="Upload your Midi"
-        onSelectFile={async (file) => {
-          const midiFileArrayBuffer = await file.arrayBuffer();
-          const parsedMidi = new MIDI(midiFileArrayBuffer, file.name);
-          player.loadNewSongList([parsedMidi]);
-        }}
-        accept=".mid,.midi"
-      ></UpdateFile> */}
       <VolumePanel synth={synth} gainNode={gainNode}></VolumePanel>
       <PlayerPanel player={player}></PlayerPanel>
       User
@@ -75,12 +57,15 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <UpdateFile
         className="text-white flex flex-col gap-2 border p-2 rounded-md"
         label="Upload your SongList"
-        onSelectFile={setSongListjson}
+        onSelectFile={setSongListFile}
         accept=".json"
       ></UpdateFile>
-      <SearchSong songList={songList} onClickSong={setSelectSong}></SearchSong>
+      <SearchSong
+        songList={songList}
+        onClickSong={setSongEventHandle}
+      ></SearchSong>
       <FetchFileComponent
-        onSelectSong={onSelectSong}
+        onSelectSong={songEvent}
         onLoadSong={onLoadSong}
       ></FetchFileComponent>
       <FileUploadComponent></FileUploadComponent>
