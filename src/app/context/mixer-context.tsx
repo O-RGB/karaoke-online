@@ -6,12 +6,17 @@ import { useRemote } from "../hooks/peer-hooks";
 import { volumeChange } from "@/lib/mixer";
 import TrieSearch from "trie-search";
 import { addSongList, onSearchList } from "@/lib/trie-search";
+import { FileWithDirectoryAndFileHandle } from "browser-fs-access";
 
 type MixerContextType = {
   updateVolume: (index: number, value: number) => void;
   onSearchStrList: (str: string) => Promise<SearchResult[]> | undefined;
   setSongListFile: (file: File) => Promise<void>;
-  setSongEventHandle: (value: SearchResult) => void
+  setSongEventHandle: (value: SearchResult) => void;
+  setSongStoreHandle: (
+    files: Map<string, FileWithDirectoryAndFileHandle>
+  ) => void;
+  songStore: Map<string, FileWithDirectoryAndFileHandle>;
   songList: TrieSearch<SearchResult> | undefined;
   songEvent: SearchResult | undefined;
   volumeController: number[];
@@ -26,6 +31,8 @@ export const MixerContext = createContext<MixerContextType>({
   onSearchStrList: async () => [],
   setSongListFile: async () => {},
   setSongEventHandle: async () => {},
+  setSongStoreHandle: async () => {},
+  songStore: new Map(),
   songList: undefined,
   songEvent: undefined,
   volumeController: [],
@@ -45,6 +52,17 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
 
   // Song Event
   const [songEvent, setSongEvent] = useState<SearchResult>();
+
+  // Song File System
+  const [songStore, setSongStore] = useState<
+    Map<string, FileWithDirectoryAndFileHandle>
+  >(new Map());
+
+  const setSongStoreHandle = (
+    files: Map<string, FileWithDirectoryAndFileHandle>
+  ) => {
+    setSongStore(files);
+  };
 
   const setSongEventHandle = (value: SearchResult) => {
     setSongEvent(value);
@@ -117,6 +135,8 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
         setSongListFile: setSongListFile,
         onSearchStrList: onSearchStrList,
         setSongEventHandle: setSongEventHandle,
+        setSongStoreHandle: setSongStoreHandle,
+        songStore: songStore,
         songList: songList,
         songEvent: songEvent,
       }}

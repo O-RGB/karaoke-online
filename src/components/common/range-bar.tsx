@@ -26,7 +26,7 @@ const RangeBar: React.FC<RangeBarProps> = ({
           writingMode: "vertical-lr",
           direction: "rtl",
           verticalAlign: "middle",
-          height: 90,
+          height: 150,
           width: 20,
         }
       : {};

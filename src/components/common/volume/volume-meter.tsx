@@ -56,7 +56,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
             return (
               <div
                 key={index}
-                className={`w-3 h-0.5 mb-[0.1rem] ${bgColor}`}
+                className={`w-3 h-[0.18rem] mb-[0.2rem] ${bgColor}`}
                 style={{ opacity: index >= maxLevel - filledBars ? 1 : 0.2 }}
               />
             );

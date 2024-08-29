@@ -14,13 +14,21 @@ import FileUploadComponent from "../tools/worker-test";
 import SuperHostRemote from "../remote/super-host.connect";
 import { useMixer } from "@/app/hooks/mixer-hooks";
 import KaraokePlayer from "../tools/cur-read";
+import FolderReader from "../tools/folder-reader";
+import LoadSongInZip from "../tools/load-song-in-zip";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { gainNode, setupSpessasynth, synth, player, AudioPlay } = useSynth();
-  const { setSongListFile, setSongEventHandle, songList, songEvent } =
-    useMixer();
+  const {
+    setSongListFile,
+    setSongEventHandle,
+    setSongStoreHandle,
+    songList,
+    songEvent,
+    songStore,
+  } = useMixer();
 
   useLayoutEffect(() => {
     setupSpessasynth();
@@ -49,30 +57,35 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         Open Audio
       </div>
       <SoundfontManager synth={synth}></SoundfontManager>
+      <FolderReader
+        setSongListFile={setSongListFile}
+        onSelectFileSystem={setSongStoreHandle}
+      ></FolderReader>
       <VolumePanel synth={synth} gainNode={gainNode}></VolumePanel>
       <PlayerPanel player={player}></PlayerPanel>
       User
       <HostRemote></HostRemote>
       Super User
       <SuperHostRemote></SuperHostRemote>
-      <UpdateFile
+      {/* <UpdateFile
         className="text-white flex flex-col gap-2 border p-2 rounded-md"
         label="Upload your SongList"
         onSelectFile={setSongListFile}
         accept=".json"
-      ></UpdateFile>
+      ></UpdateFile> */}
       <SearchSong
         songList={songList}
         onClickSong={setSongEventHandle}
       ></SearchSong>
-      <FetchFileComponent
-        onSelectSong={songEvent}
+      <LoadSongInZip
+        songStore={songStore}
         onLoadSong={onLoadSong}
-      ></FetchFileComponent>
+        onSelectSong={songEvent}
+      ></LoadSongInZip>
+      <FetchFileComponent></FetchFileComponent>
       <FileUploadComponent></FileUploadComponent>
       <div className="p-2 border">
-
-      <KaraokePlayer></KaraokePlayer>
+        <KaraokePlayer></KaraokePlayer>
       </div>
       {/* <MyComponent></MyComponent> */}
     </div>

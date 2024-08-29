@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/peerjs": "^1.1.0",
+    "browser-fs-access": "^0.35.0",
     "jszip": "^3.10.1",
     "next": "14.2.6",
     "next-qrcode": "^2.5.1",
