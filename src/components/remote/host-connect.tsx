@@ -17,14 +17,12 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
   }, [normalPeer]);
 
   return (
-    <div className="p-4 bg-gray-100 flex gap-2">
-      <div className="mb-4">
-        <a
-          href={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
-          target="_blank"
-        >
-          open link
-        </a>
+    <div className="p-2 blur-overlay flex flex-col gap-2 w-fit fixed right-0 bottom-0">
+      <div className="text-center text-white">สแกนเพื่อขอเพลง</div>
+      <a
+        href={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
+        target="_blank"
+      >
         {hostId && (
           <Canvas
             text={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
@@ -32,7 +30,7 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
               errorCorrectionLevel: "M",
               margin: 3,
               scale: 4,
-              width: 200,
+              width: 130,
               color: {
                 dark: "#010599FF",
                 light: "#FFBF60FF",
@@ -40,19 +38,13 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
             }}
           />
         )}
-        <h2 className="text-xl p-1 font-semibold mb-2">Messages</h2>
+      </a>
+      {/* <h2 className="text-xl p-1 font-semibold mb-2">Messages</h2>
         <div className="rounded shadow">
-          <div className="">
-            {/* {messages.map((msg, index) => (
-              <div key={index} className="mb-2 p-2 bg-gray-200 rounded">
-                <p>{msg.content}</p>
-              </div>
-            ))} */}
-          </div>
-        </div>
-      </div>
+          <div className=""></div>
+        </div> */}
 
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <h2 className="text-xl font-semibold mb-2">Connections</h2>
         <div className="bg-white p-4 rounded shadow">
           <ul>
@@ -63,7 +55,7 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
             ))}
           </ul>
         </div>
-      </div>
+      </div> */}
 
       {/* <div className="fixed bottom-0 left-0 p-4 bg-gray-100 w-full border-t">
         <textarea

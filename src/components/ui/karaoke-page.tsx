@@ -11,6 +11,7 @@ import { useMixer } from "@/app/hooks/mixer-hooks";
 import FolderReader from "../tools/folder-reader";
 import { loadSuperZipAndExtractSong } from "@/lib/zip";
 import LyricsPanel from "../tools/lyrics-panel";
+import HostRemote from "../remote/host-connect";
 
 interface KaraokePageProps {}
 
@@ -81,6 +82,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <LyricsPanel lyrics={lyrics}></LyricsPanel>
 
       <PlayerPanel player={player}></PlayerPanel>
+
+      <HostRemote></HostRemote>
       {/* <LoadSongInZip
         songStore={songStore}
         onLoadSong={onLoadSong}
