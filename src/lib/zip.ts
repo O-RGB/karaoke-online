@@ -50,7 +50,11 @@ export const loadSuperZipAndExtractSong = async (
     const superFile = songStore.get(superId);
     if (superFile) {
       const superUnzip = await ExtractFile(superFile);
-      const zip = superUnzip[parseInt(fileId)];
+      const index = parseInt(fileId);
+      if (!Number(index)) {
+        return;
+      }
+      const zip = superUnzip[index];
       const songUnzip = await ExtractFile(zip);
 
       var song: Partial<SongFilesDecode> = {};

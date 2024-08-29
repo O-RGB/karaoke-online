@@ -7,6 +7,8 @@ import { volumeChange } from "@/lib/mixer";
 import TrieSearch from "trie-search";
 import { addSongList, onSearchList } from "@/lib/trie-search";
 import { FileWithDirectoryAndFileHandle } from "browser-fs-access";
+import { MIDI } from "spessasynth_lib";
+import { loadSuperZipAndExtractSong } from "@/lib/zip";
 
 type MixerContextType = {
   updateVolume: (index: number, value: number) => void;
@@ -17,6 +19,8 @@ type MixerContextType = {
     files: Map<string, FileWithDirectoryAndFileHandle>
   ) => void;
   setLyricsHandle: (lyr: string[]) => void;
+  setSongPlaying: (files: SongFilesDecode) => Promise<void>;
+  onSelectKaraokeFolder: (value: SearchResult) => Promise<void>;
   lyrics: string[];
   songStore: Map<string, FileWithDirectoryAndFileHandle>;
   songList: TrieSearch<SearchResult> | undefined;
@@ -35,6 +39,8 @@ export const MixerContext = createContext<MixerContextType>({
   setSongEventHandle: async () => {},
   setSongStoreHandle: async () => {},
   setLyricsHandle: () => {},
+  setSongPlaying: async () => {},
+  onSelectKaraokeFolder: async () => {},
   lyrics: [],
   songStore: new Map(),
   songList: undefined,
@@ -43,7 +49,7 @@ export const MixerContext = createContext<MixerContextType>({
 });
 
 export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
-  const { synth } = useSynth();
+  const { synth, player } = useSynth();
   const { messages, sendMessage } = useRemote();
 
   // Volume Control
@@ -98,6 +104,23 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
     });
   };
 
+  const setSongPlaying = async (files: SongFilesDecode) => {
+    if (!player) {
+      return;
+    }
+    const midiFileArrayBuffer = await files.mid.arrayBuffer();
+    const parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
+    player?.loadNewSongList([parsedMidi]);
+    setLyricsHandle(files.lyr);
+  };
+
+  const onSelectKaraokeFolder = async (value: SearchResult) => {
+    const song = await loadSuperZipAndExtractSong(songStore, value);
+    if (song) {
+      setSongPlaying(song);
+    }
+  };
+
   const eventRemote = async (from?: string, content?: RemoteEncode) => {
     const type = content?.type;
     const data = content?.data;
@@ -127,6 +150,7 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
 
       case "SET_SONG":
         const song = data as SearchResult;
+        onSelectKaraokeFolder(song);
         setSongEventHandle(song);
 
       default:
@@ -141,17 +165,19 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
   return (
     <MixerContext.Provider
       value={{
-        updateVolume: updateVolume,
-        volumeController: volumeController,
-        setSongListFile: setSongListFile,
-        onSearchStrList: onSearchStrList,
-        setSongEventHandle: setSongEventHandle,
-        setSongStoreHandle: setSongStoreHandle,
-        setLyricsHandle: setLyricsHandle,
-        lyrics: lyrics,
-        songStore: songStore,
-        songList: songList,
-        songEvent: songEvent,
+        updateVolume,
+        volumeController,
+        setSongListFile,
+        onSearchStrList,
+        setSongEventHandle,
+        setSongStoreHandle,
+        setLyricsHandle,
+        setSongPlaying,
+        lyrics,
+        songStore,
+        songList,
+        songEvent,
+        onSelectKaraokeFolder,
       }}
     >
       <>{children}</>

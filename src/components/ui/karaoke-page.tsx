@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { useSynth } from "@/app/hooks/spessasynth-hooks";
 import VolumePanel from "../tools/volume-panel";
 import SoundfontManager from "../tools/sound-font-manager";
@@ -20,10 +20,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const {
     setSongListFile,
     setSongStoreHandle,
+    onSelectKaraokeFolder,
     lyrics,
-    setLyricsHandle,
     songList,
-    songStore,
   } = useMixer();
 
   useLayoutEffect(() => {
@@ -33,20 +32,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   if (!synth || !player) {
     return <></>;
   }
-
-  const onLoadSong = async (files: SongFilesDecode) => {
-    const midiFileArrayBuffer = await files.mid.arrayBuffer();
-    const parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
-    player.loadNewSongList([parsedMidi]);
-    setLyricsHandle(files.lyr);
-  };
-
-  const onSelectKaraokeFolder = async (value: SearchResult) => {
-    const song = await loadSuperZipAndExtractSong(songStore, value);
-    if (song) {
-      onLoadSong(song);
-    }
-  };
 
   return (
     <div className="">
