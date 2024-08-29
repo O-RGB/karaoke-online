@@ -29,7 +29,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
 
   return (
     <>
-      <div className="flex flex-wrap lg:flex-row  ">
+      <div className="flex flex-wrap lg:flex-row divide-x divide-slate-600">
         {gainNode.map((data, index) => {
           return (
             <div className="relative" key={`gin-${index}`}>
@@ -39,7 +39,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                 channel={index + 1}
                 onChange={onVolumeMeterChange}
               ></VolumeMeter>
-              {data}
             </div>
           );
         })}

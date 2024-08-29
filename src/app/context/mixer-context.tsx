@@ -16,6 +16,8 @@ type MixerContextType = {
   setSongStoreHandle: (
     files: Map<string, FileWithDirectoryAndFileHandle>
   ) => void;
+  setLyricsHandle: (lyr: string[]) => void;
+  lyrics: string[];
   songStore: Map<string, FileWithDirectoryAndFileHandle>;
   songList: TrieSearch<SearchResult> | undefined;
   songEvent: SearchResult | undefined;
@@ -32,6 +34,8 @@ export const MixerContext = createContext<MixerContextType>({
   setSongListFile: async () => {},
   setSongEventHandle: async () => {},
   setSongStoreHandle: async () => {},
+  setLyricsHandle: () => {},
+  lyrics: [],
   songStore: new Map(),
   songList: undefined,
   songEvent: undefined,
@@ -50,13 +54,20 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
   // Trie Search
   const [songList, setSongList] = useState<TrieSearch<SearchResult>>();
 
-  // Song Event
-  const [songEvent, setSongEvent] = useState<SearchResult>();
-
   // Song File System
   const [songStore, setSongStore] = useState<
     Map<string, FileWithDirectoryAndFileHandle>
   >(new Map());
+
+  // Playing Song
+  // --- Song
+  const [songEvent, setSongEvent] = useState<SearchResult>();
+  // --- Lyrics
+  const [lyrics, setLyrics] = useState<string[]>([]);
+
+  const setLyricsHandle = (lyr: string[]) => {
+    setLyrics(lyr);
+  };
 
   const setSongStoreHandle = (
     files: Map<string, FileWithDirectoryAndFileHandle>
@@ -136,6 +147,8 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
         onSearchStrList: onSearchStrList,
         setSongEventHandle: setSongEventHandle,
         setSongStoreHandle: setSongStoreHandle,
+        setLyricsHandle: setLyricsHandle,
+        lyrics: lyrics,
         songStore: songStore,
         songList: songList,
         songEvent: songEvent,

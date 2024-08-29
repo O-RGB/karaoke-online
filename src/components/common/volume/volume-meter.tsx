@@ -17,7 +17,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
   channel,
   onChange,
 }) => {
-  const maxLevel = 25;
+  const maxLevel = 30;
 
   const [filledBars, setFilledBars] = useState<number>(0);
   const [volume, setVolume] = useState<number>(0);
@@ -28,7 +28,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
   };
 
   useEffect(() => {
-    setFilledBars(Math.round((level / 127) * maxLevel));
+    setFilledBars(Math.round((level / 150) * maxLevel));
   }, [level]);
 
   useEffect(() => {
@@ -40,28 +40,33 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
       <div className="w-full bg-slate-600 text-center text-white font-bold ">
         {channel}
       </div>
-      <div className="flex gap-1.5 p-2 bg-slate-700">
-        <RangeBar
-          value={volume}
-          max={127}
-          min={0}
-          onRangeChange={onVolumeMeterChange}
-        ></RangeBar>
+      <div className="flex gap-1 p-1 bg-slate-700 h-24">
+        <div>
+          <RangeBar
+            value={volume}
+            max={127}
+            min={0}
+            onRangeChange={onVolumeMeterChange}
+          ></RangeBar>
+        </div>
         <div className="flex flex-col items-center">
           {[...Array(maxLevel)].map((_, index) => {
             let bgColor = "bg-red-500";
-            if (index >= maxLevel - 14) bgColor = "bg-green-500";
+            if (index >= maxLevel - 10) bgColor = "bg-green-500";
             else if (index >= maxLevel - 20) bgColor = "bg-yellow-500";
 
             return (
               <div
                 key={index}
-                className={`w-3 h-[0.18rem] mb-[0.2rem] ${bgColor}`}
+                className={`w-3.5 h-[0.18rem] ${bgColor}`}
                 style={{ opacity: index >= maxLevel - filledBars ? 1 : 0.2 }}
               />
             );
           })}
         </div>
+      </div>
+      <div className="w-full bg-slate-600 text-center text-white font-bold ">
+        0{channel}
       </div>
     </div>
   );

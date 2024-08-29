@@ -18,44 +18,51 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ player }) => {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        {!player.paused ? (
-          <Button
-            onClick={() => player.pause()}
-            shape={false}
-            icon={<TbPlayerPauseFilled className="text-white" />}
-          ></Button>
-        ) : (
-          <Button
-            onClick={() => player.play()}
-            shape={false}
-            icon={<TbPlayerPlayFilled className="text-white" />}
-          ></Button>
-        )}
-
-        <Button
+      <div className="fixed bottom-0 w-full left-0 blur-overlay">
+        <div className="flex items-center">
+          {!player.paused ? (
+            <Button
+              padding="p-4"
+              color=""
+              onClick={() => player.pause()}
+              shape={false}
+              icon={<TbPlayerPauseFilled className="text-white" />}
+            ></Button>
+          ) : (
+            <Button
+              color=""
+              padding="p-4"
+              onClick={() => player.play()}
+              shape={false}
+              icon={<TbPlayerPlayFilled className="text-white" />}
+            ></Button>
+          )}
+          {/* <Button
           onClick={() => player.stop()}
           shape={false}
           icon={<TbPlayerStopFilled className="text-white" />}
-        ></Button>
-        <Button
-          onClick={() => player.nextSong()}
-          shape={false}
-          icon={<TbPlayerSkipForwardFilled className="text-white" />}
-        ></Button>
-        <RangeBar
-          min={0}
-          max={100}
-          // defaultValue={0}
-          value={timer}
-          layout="horizontal"
-          inputProps={{
-            style: {
-              width: 400,
-            },
-            disabled: true,
-          }}
-        ></RangeBar>
+        ></Button> */}
+          <Button
+            color=""
+            padding="p-4"
+            onClick={() => player.nextSong()}
+            shape={false}
+            icon={<TbPlayerSkipForwardFilled className="text-white" />}
+          ></Button>
+          <div className="px-2 flex items-center w-full">
+            <RangeBar
+              min={0}
+              max={100}
+              // defaultValue={0}
+              value={timer}
+              layout="horizontal"
+              inputProps={{
+                className: "w-full lg:w-72",
+                disabled: true,
+              }}
+            ></RangeBar>
+          </div>
+        </div>
       </div>
     </>
   );

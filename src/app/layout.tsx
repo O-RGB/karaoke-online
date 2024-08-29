@@ -50,7 +50,15 @@ export default function RootLayout({
       <PeerProvider>
         <SpessasynthProvider>
           <MixerProvider>
-            <body className={inter.className}>{children}</body>
+            <body
+              style={{
+                backgroundImage: "url(https://picsum.photos/1920/1080)",
+                objectFit: "cover",
+              }}
+              className={`${inter.className} p-2.5 bg-slate-500`}
+            >
+              {children}
+            </body>
           </MixerProvider>
         </SpessasynthProvider>
       </PeerProvider>

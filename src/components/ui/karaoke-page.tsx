@@ -1,32 +1,27 @@
 "use client";
 
-import React, { useLayoutEffect, useState } from "react";
-import UpdateFile from "../common/upload";
+import React, { useLayoutEffect } from "react";
 import { useSynth } from "@/app/hooks/spessasynth-hooks";
 import VolumePanel from "../tools/volume-panel";
 import SoundfontManager from "../tools/sound-font-manager";
 import { MIDI } from "spessasynth_lib";
 import PlayerPanel from "../tools/player-panel";
-import HostRemote from "../remote/host-connect";
-import FetchFileComponent from "../tools/test";
 import SearchSong from "../tools/search-song";
-import FileUploadComponent from "../tools/worker-test";
-import SuperHostRemote from "../remote/super-host.connect";
 import { useMixer } from "@/app/hooks/mixer-hooks";
-import KaraokePlayer from "../tools/cur-read";
 import FolderReader from "../tools/folder-reader";
-import LoadSongInZip from "../tools/load-song-in-zip";
+import { loadSuperZipAndExtractSong } from "@/lib/zip";
+import LyricsPanel from "../tools/lyrics-panel";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
-  const { gainNode, setupSpessasynth, synth, player, AudioPlay } = useSynth();
+  const { gainNode, setupSpessasynth, synth, player } = useSynth();
   const {
     setSongListFile,
-    setSongEventHandle,
     setSongStoreHandle,
+    lyrics,
+    setLyricsHandle,
     songList,
-    songEvent,
     songStore,
   } = useMixer();
 
@@ -38,16 +33,23 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     return <></>;
   }
 
-  const onLoadSong = async (files: SongFiles) => {
-    console.log(files);
+  const onLoadSong = async (files: SongFilesDecode) => {
     const midiFileArrayBuffer = await files.mid.arrayBuffer();
     const parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
     player.loadNewSongList([parsedMidi]);
+    setLyricsHandle(files.lyr);
+  };
+
+  const onSelectKaraokeFolder = async (value: SearchResult) => {
+    const song = await loadSuperZipAndExtractSong(songStore, value);
+    if (song) {
+      onLoadSong(song);
+    }
   };
 
   return (
-    <div className="min-h-dvh py-20 px-10 flex flex-col gap-2 justify-center items-center bg-slate-900">
-      <div className="text-white text-2xl ">Karaoke Demo</div>
+    <div className="">
+      {/* <div className="text-white text-2xl ">Karaoke Demo</div>
       <div
         className="p-2 border text-white"
         onClick={() => {
@@ -55,39 +57,40 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         }}
       >
         Open Audio
-      </div>
-      <SoundfontManager synth={synth}></SoundfontManager>
-      <FolderReader
-        setSongListFile={setSongListFile}
-        onSelectFileSystem={setSongStoreHandle}
-      ></FolderReader>
+      </div> */}
+
       <VolumePanel synth={synth} gainNode={gainNode}></VolumePanel>
-      <PlayerPanel player={player}></PlayerPanel>
-      User
-      <HostRemote></HostRemote>
-      Super User
-      <SuperHostRemote></SuperHostRemote>
-      {/* <UpdateFile
-        className="text-white flex flex-col gap-2 border p-2 rounded-md"
-        label="Upload your SongList"
-        onSelectFile={setSongListFile}
-        accept=".json"
-      ></UpdateFile> */}
+      <div className="fixed top-2.5 right-2.5">
+        <FolderReader
+          setSongListFile={setSongListFile}
+          onSelectFileSystem={setSongStoreHandle}
+        ></FolderReader>
+        <SoundfontManager synth={synth}></SoundfontManager>
+      </div>
+
       <SearchSong
         songList={songList}
-        onClickSong={setSongEventHandle}
+        onClickSong={onSelectKaraokeFolder}
       ></SearchSong>
-      <LoadSongInZip
+
+      {/* User
+      <HostRemote></HostRemote>
+      Super User
+      <SuperHostRemote></SuperHostRemote> */}
+
+      <LyricsPanel lyrics={lyrics}></LyricsPanel>
+
+      <PlayerPanel player={player}></PlayerPanel>
+      {/* <LoadSongInZip
         songStore={songStore}
         onLoadSong={onLoadSong}
         onSelectSong={songEvent}
-      ></LoadSongInZip>
-      <FetchFileComponent></FetchFileComponent>
+      ></LoadSongInZip> */}
+      {/* <FetchFileComponent></FetchFileComponent>
       <FileUploadComponent></FileUploadComponent>
       <div className="p-2 border">
         <KaraokePlayer></KaraokePlayer>
-      </div>
-      {/* <MyComponent></MyComponent> */}
+      </div> */}
     </div>
   );
 };

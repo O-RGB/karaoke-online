@@ -6,20 +6,25 @@ interface ButtonProps extends buttonProps {
   icon?: React.ReactNode;
   color?: string;
   shape?: boolean;
+  padding?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
   icon,
-  color,
+  color = "blur-overlay",
   shape = true,
+  padding = "p-3",
   ...props
 }) => {
-  const butStyle = "p-2";
-  const colorStyle = "bg-blue-500 hover:bg-blue-500/90 active:bg-blue-500/80";
-  const animation = "duration-300 transition-all";
+  var butStyle = `${padding}`;
+  var colorStyle = ""; //bg-blue-500 hover:bg-blue-500/90 active:bg-blue-500/80
+  var animation = "duration-300 transition-all";
   var shapeStyle = "";
   if (shape) {
     shapeStyle = "rounded-md";
+  }
+  if (color) {
+    colorStyle = color;
   }
   return (
     <>

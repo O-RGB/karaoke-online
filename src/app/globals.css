@@ -1,4 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
+html,
+body {
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: none;
+  @apply min-h-dvh;
+}
+
+.blur-overlay {
+  @apply bg-white/5 backdrop-blur-xl backdrop-brightness-75
+}

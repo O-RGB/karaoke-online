@@ -26,7 +26,7 @@ const RangeBar: React.FC<RangeBarProps> = ({
           writingMode: "vertical-lr",
           direction: "rtl",
           verticalAlign: "middle",
-          height: 150,
+          height: "100%",
           width: 20,
         }
       : {};
@@ -40,7 +40,7 @@ const RangeBar: React.FC<RangeBarProps> = ({
   };
 
   useEffect(() => {
-    console.log("RangeBar")
+    console.log("RangeBar");
   }, [value]);
 
   return (

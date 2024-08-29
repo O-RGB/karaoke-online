@@ -35,8 +35,8 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ synth }) => {
   }, [synth]);
 
   return (
-    <div className="p-2 border border-white w-fit flex flex-col gap-2 ">
-      <div>
+    <div className="p-2 border border-white w-fit flex flex-col gap-2 overflow-hidden">
+      <div className="-mr-32">
         <UpdateFile
           accept=".sf2"
           onSelectFile={(file) => {

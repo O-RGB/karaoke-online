@@ -11,12 +11,10 @@ interface SearchSongProps {
 const SearchSong: React.FC<SearchSongProps> = ({ songList, onClickSong }) => {
   const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
   return (
-    <>
-      <div className="w-full p-2 bg-white flex flex-col">
-        <label htmlFor="" className="text-sm text-gray-500">
-          Search Song:
-        </label>
+    <div className="fixed left-0 top-44 px-2 w-full">
+      <div className=" w-[85%]  blur-overlay flex flex-col">
         <input
+          placeholder="ค้นหาเพลง"
           className="border"
           type="text"
           onChange={async (e) => {
@@ -44,7 +42,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ songList, onClickSong }) => {
           );
         })}
       </div>
-    </>
+    </div>
   );
 };
 

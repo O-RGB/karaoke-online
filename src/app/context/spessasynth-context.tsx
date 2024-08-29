@@ -109,7 +109,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
       });
 
       setGainNode(newVolumeLevels);
-      requestAnimationFrame(() => setTimeout(() => render(), 100));
+      requestAnimationFrame(() => setTimeout(() => render(), 50));
     };
     render();
   };

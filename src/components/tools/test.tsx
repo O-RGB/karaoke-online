@@ -1,4 +1,4 @@
-import { ExtractFile } from "@/lib/extract-file";
+import { ExtractFile } from "@/lib/zip";
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { FaFile } from "react-icons/fa";

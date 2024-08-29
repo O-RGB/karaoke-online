@@ -3,8 +3,9 @@ import {
   directoryOpen,
   FileWithDirectoryAndFileHandle,
 } from "browser-fs-access";
-import { ExtractFile } from "@/lib/extract-file";
+import { ExtractFile } from "@/lib/zip";
 import UpdateFile from "../common/upload";
+import Button from "../common/button/button";
 
 interface FolderReaderProps {
   onSelectFileSystem?: (
@@ -55,13 +56,10 @@ const FolderReader: React.FC<FolderReaderProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-center w-full ">
-      <button
-        onClick={handleOpenFolder}
-        className="px-4 py-2 bg-blue-500 text-white rounded"
-      >
-        Open Folder Karaoke online
-      </button>
+    <div className="flex items-center justify-center w-full">
+      <Button color="blur-overlay" onClick={handleOpenFolder}>
+        <div className="text-white">Open Folder Karaoke online</div>
+      </Button>
     </div>
   );
 };

@@ -10,3 +10,9 @@ interface SongFiles {
   cur: File;
   lyr: File;
 }
+
+interface SongFilesDecode {
+  mid: File;
+  cur: number[];
+  lyr: string[];
+}
