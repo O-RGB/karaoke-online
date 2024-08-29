@@ -1,5 +1,5 @@
 "use client";
-import JoinConnect from "@/components/remote/join-connect";
+import JoinConnect from "@/components/remote/join";
 import React from "react";
 
 interface RemoteProps {

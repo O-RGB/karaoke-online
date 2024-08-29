@@ -10,5 +10,5 @@ body {
 }
 
 .blur-overlay {
-  @apply bg-white/5 backdrop-blur-xl backdrop-brightness-75
+  @apply bg-white/5 backdrop-blur-xl 
 }

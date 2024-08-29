@@ -1,5 +1,5 @@
 "use client";
-import SuperJoinConnect from "@/components/remote/super-commect";
+import SuperJoinConnect from "@/components/remote/super-join";
 import React from "react";
 
 interface RemoteProps {

@@ -34,7 +34,7 @@ export const SpessasynthContext = createContext<SpessasynthContextType>({
 export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   children,
 }) => {
-  const { sendMessage, superUserPeer, superUserConnections } = useRemote();
+  const { sendSuperUserMessage, superUserConnections } = useRemote();
   const [synth, setSynth] = useState<Synthetizer>();
   const [player, setPlayer] = useState<Sequencer>();
   const [audio, setAudio] = useState<AudioContext>();
@@ -109,16 +109,16 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
       });
 
       setGainNode(newVolumeLevels);
-      requestAnimationFrame(() => setTimeout(() => render(), 50));
+      requestAnimationFrame(() => setTimeout(() => render(), 100));
     };
     render();
   };
 
   useEffect(() => {
-    if (superUserConnections.length > 0 && !player?.paused) {
-      sendMessage(gainNode, "GIND_NODE");
+    if (superUserConnections.length > 0) {
+      sendSuperUserMessage(gainNode, "GIND_NODE");
     }
-  }, [gainNode, superUserConnections, player?.paused]);
+  }, [gainNode, superUserConnections]);
 
   const setup = async () => {
     const myAudio = await LoadAudioContext();
@@ -132,7 +132,6 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     const player = await LoadPlayer(spessasynth);
     LoadSoundMeter(spessasynth, myAudio);
     setAudio(myAudio);
-    spessasynth._highPerformanceMode = true;
     setSynth(spessasynth);
     setPlayer(player);
     await myAudio.resume();
