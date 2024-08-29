@@ -1,5 +1,4 @@
 "use client";
-import JoinConnect from "@/components/remote/join-connect";
 import SuperJoinConnect from "@/components/remote/super-commect";
 import React from "react";
 

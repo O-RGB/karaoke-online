@@ -13,6 +13,7 @@ import SearchSong from "../tools/search-song";
 import FileUploadComponent from "../tools/worker-test";
 import SuperHostRemote from "../remote/super-host.connect";
 import { useMixer } from "@/app/hooks/mixer-hooks";
+import KaraokePlayer from "../tools/cur-read";
 
 interface KaraokePageProps {}
 
@@ -69,6 +70,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         onLoadSong={onLoadSong}
       ></FetchFileComponent>
       <FileUploadComponent></FileUploadComponent>
+      <div className="p-2 border">
+
+      <KaraokePlayer></KaraokePlayer>
+      </div>
       {/* <MyComponent></MyComponent> */}
     </div>
   );

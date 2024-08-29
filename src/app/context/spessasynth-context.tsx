@@ -1,15 +1,7 @@
 "use client";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
+import { createContext, FC, useEffect, useState } from "react";
 import {
-  createContext,
-  FC,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from "react";
-import {
-  MIDI,
   midiControllers,
   Sequencer,
   Synthetizer,
@@ -126,7 +118,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     if (superUserConnections.length > 0 && !player?.paused) {
       sendMessage(gainNode, "GIND_NODE");
     }
-  }, [gainNode]);
+  }, [gainNode, superUserConnections, player?.paused]);
 
   const setup = async () => {
     const myAudio = await LoadAudioContext();
