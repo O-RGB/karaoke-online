@@ -1,3 +1,4 @@
+"use client"
 import React, { useEffect, useState } from "react";
 import Button from "../common/button/button";
 import { useRemote } from "@/hooks/peer-hooks";

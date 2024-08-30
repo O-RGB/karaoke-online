@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import { SpessasynthProvider } from "../context/spessasynth-context";
+import "../globals.css";
+import { SpessasynthProvider } from "../../context/spessasynth-context";
 import AllowSound from "@/components/tools/allow-sound";
-import { MixerProvider } from "../context/mixer-context";
-import { PeerProvider } from "../context/remote-context";
+import { MixerProvider } from "../../context/mixer-context";
+import { PeerProvider } from "../../context/remote-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -46,18 +46,18 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       </head>
-      {/* <AllowSound> */}
-      <PeerProvider>
-        <SpessasynthProvider>
-          <MixerProvider>
-            <body className={`${inter.className} p-2.5 bg-slate-500 `}>
-              <div className="fixed w-screen h-screen top-0 left-0 -z-20 bg-[url('https://picsum.photos/1920/1080')] object-cover object-center brightness-50"></div>
-              {children}
-            </body>
-          </MixerProvider>
-        </SpessasynthProvider>
-      </PeerProvider>
-      {/* </AllowSound> */}
+      <AllowSound>
+        <PeerProvider>
+          <SpessasynthProvider>
+            <MixerProvider>
+              <body className={`${inter.className} p-2.5 bg-slate-500 `}>
+                <div className="fixed w-screen h-screen top-0 left-0 -z-20 bg-[url('https://picsum.photos/1920/1080')] object-cover object-center brightness-50"></div>
+                {children}
+              </body>
+            </MixerProvider>
+          </SpessasynthProvider>
+        </PeerProvider>
+      </AllowSound>
     </html>
   );
 }
