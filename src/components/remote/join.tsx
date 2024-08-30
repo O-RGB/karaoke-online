@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Button from "../common/button/button";
-import { useRemote } from "@/app/hooks/peer-hooks";
+import { useRemote } from "@/hooks/peer-hooks";
 import VolumePanel from "../tools/volume-panel";
-import { useMixer } from "@/app/hooks/mixer-hooks";
+import { useMixer } from "@/hooks/mixer-hooks";
 import { TbNote } from "react-icons/tb";
 
 interface JoinConnectProps {

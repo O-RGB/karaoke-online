@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useLayoutEffect } from "react";
-import { useSynth } from "@/app/hooks/spessasynth-hooks";
+import { useSynth } from "@/hooks/spessasynth-hooks";
 import VolumePanel from "../tools/volume-panel";
 import SoundfontManager from "../tools/sound-font-manager";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song";
-import { useMixer } from "@/app/hooks/mixer-hooks";
+import { useMixer } from "@/hooks/mixer-hooks";
 import FolderReader from "../tools/folder-reader";
 import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Button from "../common/button/button";
-import { useRemote } from "@/app/hooks/peer-hooks"; // Updated hook
+import { useRemote } from "@/hooks/peer-hooks"; // Updated hook
 import VolumePanel from "../tools/volume-panel";
 
 interface SuperJoinConnectProps {
@@ -10,7 +10,7 @@ interface SuperJoinConnectProps {
 const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   const { superUserPeer, connectToPeer, sendSuperUserMessage, messages } =
     useRemote();
-  const [message, setMessage] = useState("");
+  // const [message, setMessage] = useState("");
   const [gainNode, setGainNode] = useState<number[]>([]);
 
   const handleConnect = () => {
@@ -19,15 +19,15 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
     }
   };
 
-  const handleSendMessage = () => {
-    if (sendSuperUserMessage && message) {
-      sendSuperUserMessage(message, "GIND_NODE");
-      setMessage("");
-    }
-  };
+  // const handleSendMessage = () => {
+  //   if (sendSuperUserMessage && message) {
+  //     sendSuperUserMessage(message, "GIND_NODE");
+  //     setMessage("");
+  //   }
+  // };
 
   const changeVol = (value: ISetChannelGain) => {
-    console.log(value);
+    // console.log(value);
     if (sendSuperUserMessage) {
       sendSuperUserMessage(value, "SET_CHANNEL");
     }

@@ -31,7 +31,7 @@ export const ExtractFile = async (zipFile: File): Promise<File[]> => {
 const getPathSuperZip = (selected?: SearchResult) => {
   let superId = undefined;
   let fileId = undefined;
-  if (selected) {
+  if (selected?.fileId) {
     const path = selected.fileId.split("/");
     if (path.length === 2) {
       superId = path[0];

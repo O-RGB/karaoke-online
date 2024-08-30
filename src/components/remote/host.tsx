@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Button from "../common/button/button";
 
 import { useQRCode } from "next-qrcode";
-import { useRemote } from "@/app/hooks/peer-hooks";
+import { useRemote } from "@/hooks/peer-hooks";
 
 interface HostRemoteProps {}
 

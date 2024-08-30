@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { channel } from "diagnostics_channel";
 import RangeBar from "../range-bar";
-import { useMixer } from "@/app/hooks/mixer-hooks";
+import { useMixer } from "@/hooks/mixer-hooks";
 
 interface VolumeMeterProps {
   value?: number;

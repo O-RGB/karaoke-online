@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 import VolumeMeter from "../common/volume/volume-meter";
 import { Synthetizer } from "spessasynth_lib";
 import { volumeChange } from "@/lib/mixer";
-import { useMixer } from "@/app/hooks/mixer-hooks";
-import { useRemote } from "@/app/hooks/peer-hooks";
+import { useMixer } from "@/hooks/mixer-hooks";
+import { useRemote } from "@/hooks/peer-hooks";
 
 interface VolumePanelProps {
   gainNode: number[];

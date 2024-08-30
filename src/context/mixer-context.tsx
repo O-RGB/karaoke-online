@@ -150,8 +150,10 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
 
       case "SET_SONG":
         const song = data as SearchResult;
-        onSelectKaraokeFolder(song);
-        setSongEventHandle(song);
+        if(song){
+          onSelectKaraokeFolder(song);
+          setSongEventHandle(song);
+        }
 
       default:
         return data;
