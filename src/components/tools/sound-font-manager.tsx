@@ -42,7 +42,9 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ synth }) => {
           onSelectFile={(file) => {
             setSoundFont(file, synth);
           }}
-        ></UpdateFile>
+        >
+          upload
+        </UpdateFile>
       </div>
       {soundFontList.map((data, index) => {
         return (

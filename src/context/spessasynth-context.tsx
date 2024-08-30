@@ -11,8 +11,7 @@ import { useRemote } from "../hooks/peer-hooks";
 
 type SpessasynthContextType = {
   setupSpessasynth: () => Promise<void>;
-  AudioPlay: (url: string) => Promise<void>;
-  gainNode: number[];
+  audioGain: number[];
   synth: Synthetizer | undefined;
   player: Sequencer | undefined;
   audio: AudioContext | undefined;
@@ -24,8 +23,7 @@ type SpessasynthProviderProps = {
 
 export const SpessasynthContext = createContext<SpessasynthContextType>({
   setupSpessasynth: async () => undefined,
-  AudioPlay: async () => undefined,
-  gainNode: [],
+  audioGain: [],
   synth: undefined,
   player: undefined,
   audio: undefined,
@@ -38,22 +36,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   const [synth, setSynth] = useState<Synthetizer>();
   const [player, setPlayer] = useState<Sequencer>();
   const [audio, setAudio] = useState<AudioContext>();
-  const [gainNode, setGainNode] = useState<number[]>([]);
-
-  const AudioPlay = async (url: string) => {
-    if (!audio) {
-      return;
-    }
-    const source = audio.createBufferSource();
-    const audioBuffer = await fetch(url)
-      .then((res) => res.arrayBuffer())
-      .then((ArrayBuffer) => audio.decodeAudioData(ArrayBuffer));
-
-    source.buffer = audioBuffer;
-    source.connect(audio.destination);
-    source.start();
-    audio.resume();
-  };
+  const [audioGain, setAudioGain] = useState<number[]>([]);
 
   const LoadPlayer = async (synth: Synthetizer) => {
     const seq = new Sequencer([], synth);
@@ -108,7 +91,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
         return value;
       });
 
-      setGainNode(newVolumeLevels);
+      setAudioGain(newVolumeLevels);
       requestAnimationFrame(() => setTimeout(() => render(), 100));
     };
     render();
@@ -116,9 +99,9 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
 
   useEffect(() => {
     if (superUserConnections.length > 0) {
-      sendSuperUserMessage(gainNode, "GIND_NODE");
+      sendSuperUserMessage(audioGain, "GIND_NODE");
     }
-  }, [gainNode, superUserConnections]);
+  }, [audioGain, superUserConnections]);
 
   const setup = async () => {
     const myAudio = await LoadAudioContext();
@@ -140,9 +123,8 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   return (
     <SpessasynthContext.Provider
       value={{
-        AudioPlay: AudioPlay,
         audio: audio,
-        gainNode: gainNode,
+        audioGain: audioGain,
         setupSpessasynth: setup,
         synth: synth,
         player: player,

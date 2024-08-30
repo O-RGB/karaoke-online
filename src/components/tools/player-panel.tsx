@@ -18,19 +18,17 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ player }) => {
 
   return (
     <>
-      <div className="fixed bottom-0 w-full left-0 blur-overlay">
+      <div className="fixed bottom-0 w-full left-0 blur-overlay border-t blur-border">
         <div className="flex items-center">
           {!player.paused ? (
             <Button
               padding="p-4"
-              color=""
               onClick={() => player.pause()}
               shape={false}
               icon={<TbPlayerPauseFilled className="text-white" />}
             ></Button>
           ) : (
             <Button
-              color=""
               padding="p-4"
               onClick={() => player.play()}
               shape={false}
@@ -43,7 +41,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ player }) => {
           icon={<TbPlayerStopFilled className="text-white" />}
         ></Button> */}
           <Button
-            color=""
             padding="p-4"
             onClick={() => player.nextSong()}
             shape={false}

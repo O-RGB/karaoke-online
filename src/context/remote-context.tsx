@@ -1,5 +1,10 @@
 "use client";
-import React, { createContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import Peer, { DataConnection } from "peerjs";
 import { remoteEncodeMessage } from "@/lib/remote";
 
@@ -12,7 +17,6 @@ interface PeerContextType {
   sendMessage: (message: any, type: SendType, clientId?: string) => void;
   sendSuperUserMessage: (message: any, type: SendType) => void;
   messages?: { from: string; content: RemoteEncode };
-  generateQRCode: (isSuperUser: boolean) => string;
 }
 
 export const PeerContext = createContext<PeerContextType>({
@@ -24,7 +28,6 @@ export const PeerContext = createContext<PeerContextType>({
   sendMessage: () => {},
   sendSuperUserMessage: () => {},
   messages: undefined,
-  generateQRCode: () => "",
 });
 
 export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -38,7 +41,7 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
   >([]);
   const [messages, setMessages] = useState<{ from: string; content: any }>();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     console.log("Initializing peers...");
 
     const newPeer = new Peer();
@@ -283,13 +286,6 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  const generateQRCode = (isSuperUser: boolean) => {
-    const peerType = isSuperUser ? "superUserPeer" : "normalPeer";
-    const peerId = (isSuperUser ? superUserPeer : normalPeer)?.id || "";
-    console.log(`Generating QR Code for ${peerType} with ID:`, peerId);
-    return peerId;
-  };
-
   return (
     <PeerContext.Provider
       value={{
@@ -301,7 +297,6 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
         sendMessage,
         sendSuperUserMessage,
         messages,
-        generateQRCode,
       }}
     >
       {children}

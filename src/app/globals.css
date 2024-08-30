@@ -10,5 +10,9 @@ body {
 }
 
 .blur-overlay {
-  @apply bg-white/5 backdrop-blur-xl 
+  @apply bg-white/0 backdrop-blur-md;
+}
+
+.blur-border{
+  @apply border-white/50
 }

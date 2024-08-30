@@ -6,6 +6,10 @@ import {
 import { ExtractFile } from "@/lib/zip";
 import UpdateFile from "../common/upload";
 import Button from "../common/button/button";
+import { saveSongToStorage } from "@/lib/storage";
+import Modal from "../common/modal";
+import { RiFolderMusicFill } from "react-icons/ri";
+import { PiMusicNotesPlusFill } from "react-icons/pi";
 
 interface FolderReaderProps {
   onSelectFileSystem?: (
@@ -19,6 +23,7 @@ const FolderReader: React.FC<FolderReaderProps> = ({
   setSongListFile,
 }) => {
   const [files, setFiles] = useState<FileWithDirectoryAndFileHandle[]>([]);
+  const [open, setOpen] = useState<boolean>(false);
 
   const handleOpenFolder = async () => {
     try {
@@ -49,6 +54,7 @@ const FolderReader: React.FC<FolderReaderProps> = ({
 
         onSelectFileSystem?.(filesMap);
         setFiles(fileList);
+        saveSongToStorage(filesMap);
       }
     } catch (error) {
       console.error("Error reading folder:", error);
@@ -56,11 +62,31 @@ const FolderReader: React.FC<FolderReaderProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-center w-full">
-      <Button color="blur-overlay" onClick={handleOpenFolder}>
-        <div className="text-white">Open Folder Karaoke online</div>
+    <>
+      <Modal
+        title="เพิ่มเพลง"
+        isOpen={open}
+        onClose={() => {
+          setOpen(false);
+        }}
+      >
+        <></>
+      </Modal>
+      <Button
+        icon={
+          <PiMusicNotesPlusFill className="text-5xl"></PiMusicNotesPlusFill>
+        }
+        color="white"
+        onClick={() => setOpen(!open)}
+      >
+        เพิ่มเพลง
       </Button>
-    </div>
+      <div className="flex items-center justify-center w-full">
+        <Button onClick={handleOpenFolder}>
+          <div className="text-white">Open Folder Karaoke online</div>
+        </Button>
+      </div>
+    </>
   );
 };
 

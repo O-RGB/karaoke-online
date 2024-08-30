@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
 import Button from "../common/button/button";
 import { useRemote } from "@/hooks/peer-hooks"; // Updated hook
@@ -11,8 +11,7 @@ interface SuperJoinConnectProps {
 const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   const { superUserPeer, connectToPeer, sendSuperUserMessage, messages } =
     useRemote();
-  // const [message, setMessage] = useState("");
-  const [gainNode, setGainNode] = useState<number[]>([]);
+  const [audioGain, setAudioGain] = useState<number[]>([]);
 
   const handleConnect = () => {
     if (hostId) {
@@ -20,15 +19,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
     }
   };
 
-  // const handleSendMessage = () => {
-  //   if (sendSuperUserMessage && message) {
-  //     sendSuperUserMessage(message, "GIND_NODE");
-  //     setMessage("");
-  //   }
-  // };
-
   const changeVol = (value: ISetChannelGain) => {
-    // console.log(value);
     if (sendSuperUserMessage) {
       sendSuperUserMessage(value, "SET_CHANNEL");
     }
@@ -39,8 +30,10 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   }, [superUserPeer]);
 
   useEffect(() => {
-    if (messages?.content.type === "GIND_NODE") {
-      setGainNode(messages?.content.data);
+    const type = messages?.content.type;
+    const data = messages?.content.data;
+    if (type === "GIND_NODE") {
+      setAudioGain(data);
     }
   }, [messages?.content]);
 
@@ -55,7 +48,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       <VolumePanel
-        gainNode={gainNode}
+        audioGain={audioGain}
         onVolumeChange={(c, v) => changeVol({ channel: c, value: v })}
       ></VolumePanel>
     </div>

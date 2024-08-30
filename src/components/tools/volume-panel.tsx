@@ -6,13 +6,13 @@ import { useMixer } from "@/hooks/mixer-hooks";
 import { useRemote } from "@/hooks/peer-hooks";
 
 interface VolumePanelProps {
-  gainNode: number[];
+  audioGain: number[];
   synth?: Synthetizer;
   onVolumeChange?: (channel: number, value: number) => void;
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
-  gainNode,
+  audioGain,
   synth,
   onVolumeChange,
 }) => {
@@ -30,7 +30,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   return (
     <>
       <div className="flex flex-wrap lg:flex-row divide-x divide-slate-600">
-        {gainNode.map((data, index) => {
+        {audioGain.map((data, index) => {
           return (
             <div className="relative" key={`gin-${index}`}>
               <VolumeMeter

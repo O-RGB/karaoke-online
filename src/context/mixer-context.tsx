@@ -6,25 +6,23 @@ import { useRemote } from "../hooks/peer-hooks";
 import { volumeChange } from "@/lib/mixer";
 import TrieSearch from "trie-search";
 import { addSongList, onSearchList } from "@/lib/trie-search";
-import { FileWithDirectoryAndFileHandle } from "browser-fs-access";
+
 import { MIDI } from "spessasynth_lib";
 import { loadSuperZipAndExtractSong } from "@/lib/zip";
 
 type MixerContextType = {
   updateVolume: (index: number, value: number) => void;
   onSearchStrList: (str: string) => Promise<SearchResult[]> | undefined;
-  setSongListFile: (file: File) => Promise<void>;
-  setSongEventHandle: (value: SearchResult) => void;
-  setSongStoreHandle: (
-    files: Map<string, FileWithDirectoryAndFileHandle>
-  ) => void;
+  setTracklistFile: (file: File) => Promise<void>;
+  setPlayingTrackFile: (value: SearchResult) => void;
+  setMusicLibraryFile: (files: Map<string, File>) => void;
   setLyricsHandle: (lyr: string[]) => void;
   setSongPlaying: (files: SongFilesDecode) => Promise<void>;
-  onSelectKaraokeFolder: (value: SearchResult) => Promise<void>;
+  loadAndPlaySong: (value: SearchResult) => Promise<void>;
   lyrics: string[];
-  songStore: Map<string, FileWithDirectoryAndFileHandle>;
-  songList: TrieSearch<SearchResult> | undefined;
-  songEvent: SearchResult | undefined;
+  musicLibrary: Map<string, File>;
+  tracklist: TrieSearch<SearchResult> | undefined;
+  playingTrack: SearchResult | undefined;
   volumeController: number[];
 };
 
@@ -35,16 +33,16 @@ type MixerProviderProps = {
 export const MixerContext = createContext<MixerContextType>({
   updateVolume: () => {},
   onSearchStrList: async () => [],
-  setSongListFile: async () => {},
-  setSongEventHandle: async () => {},
-  setSongStoreHandle: async () => {},
+  setTracklistFile: async () => {},
+  setPlayingTrackFile: async () => {},
+  setMusicLibraryFile: async () => {},
   setLyricsHandle: () => {},
   setSongPlaying: async () => {},
-  onSelectKaraokeFolder: async () => {},
+  loadAndPlaySong: async () => {},
   lyrics: [],
-  songStore: new Map(),
-  songList: undefined,
-  songEvent: undefined,
+  musicLibrary: new Map(),
+  tracklist: undefined,
+  playingTrack: undefined,
   volumeController: [],
 });
 
@@ -58,16 +56,16 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
     useState<number[]>(VolChannel);
 
   // Trie Search
-  const [songList, setSongList] = useState<TrieSearch<SearchResult>>();
+  const [tracklist, setTracklist] = useState<TrieSearch<SearchResult>>();
 
   // Song File System
-  const [songStore, setSongStore] = useState<
-    Map<string, FileWithDirectoryAndFileHandle>
-  >(new Map());
+  const [musicLibrary, setMusicLibrary] = useState<Map<string, File>>(
+    new Map()
+  );
 
   // Playing Song
   // --- Song
-  const [songEvent, setSongEvent] = useState<SearchResult>();
+  const [playingTrack, setPlayingTrack] = useState<SearchResult>();
   // --- Lyrics
   const [lyrics, setLyrics] = useState<string[]>([]);
 
@@ -75,26 +73,24 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
     setLyrics(lyr);
   };
 
-  const setSongStoreHandle = (
-    files: Map<string, FileWithDirectoryAndFileHandle>
-  ) => {
-    setSongStore(files);
+  const setMusicLibraryFile = (files: Map<string, File>) => {
+    setMusicLibrary(files);
   };
 
-  const setSongEventHandle = (value: SearchResult) => {
-    setSongEvent(value);
+  const setPlayingTrackFile = (value: SearchResult) => {
+    setPlayingTrack(value);
   };
 
   const onSearchStrList = (str: string) => {
-    if (!songList) {
+    if (!tracklist) {
       return;
     }
-    return onSearchList<SearchResult>(str, songList);
+    return onSearchList<SearchResult>(str, tracklist);
   };
 
-  const setSongListFile = async (file: File) => {
+  const setTracklistFile = async (file: File) => {
     const trie = await addSongList<SearchResult>(file);
-    setSongList(trie);
+    setTracklist(trie);
   };
 
   const updateVolume = (index: number, value: number) => {
@@ -114,8 +110,8 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
     setLyricsHandle(files.lyr);
   };
 
-  const onSelectKaraokeFolder = async (value: SearchResult) => {
-    const song = await loadSuperZipAndExtractSong(songStore, value);
+  const loadAndPlaySong = async (value: SearchResult) => {
+    const song = await loadSuperZipAndExtractSong(musicLibrary, value);
     if (song) {
       setSongPlaying(song);
     }
@@ -142,7 +138,7 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
         return data as ISetChannelGain;
 
       case "SEARCH_SONG":
-        if (songList !== undefined) {
+        if (tracklist !== undefined) {
           const search = data as string;
           const res = await onSearchStrList(search);
           sendMessage(res, "SEND_SONG_LIST", from);
@@ -150,9 +146,9 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
 
       case "SET_SONG":
         const song = data as SearchResult;
-        if(song){
-          onSelectKaraokeFolder(song);
-          setSongEventHandle(song);
+        if (song) {
+          loadAndPlaySong(song);
+          setPlayingTrackFile(song);
         }
 
       default:
@@ -169,17 +165,17 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
       value={{
         updateVolume,
         volumeController,
-        setSongListFile,
+        setTracklistFile,
         onSearchStrList,
-        setSongEventHandle,
-        setSongStoreHandle,
+        setPlayingTrackFile,
+        setMusicLibraryFile,
         setLyricsHandle,
         setSongPlaying,
         lyrics,
-        songStore,
-        songList,
-        songEvent,
-        onSelectKaraokeFolder,
+        musicLibrary,
+        tracklist,
+        playingTrack,
+        loadAndPlaySong,
       }}
     >
       <>{children}</>

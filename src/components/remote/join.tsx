@@ -1,9 +1,6 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
-import Button from "../common/button/button";
 import { useRemote } from "@/hooks/peer-hooks";
-import VolumePanel from "../tools/volume-panel";
-import { useMixer } from "@/hooks/mixer-hooks";
 import { TbNote } from "react-icons/tb";
 
 interface JoinConnectProps {
@@ -12,8 +9,7 @@ interface JoinConnectProps {
 
 const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
   const { normalPeer, connectToPeer, sendMessage, messages } = useRemote();
-  const [message, setMessage] = useState("");
-  const [gainNode, setGainNode] = useState<SearchResult[]>([]);
+  const [audioGain, setAudioGain] = useState<SearchResult[]>([]);
 
   const handleConnect = () => {
     if (hostId) {
@@ -24,14 +20,12 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
   const handleSendMessage = (str: string) => {
     if (sendMessage) {
       sendMessage(str, "SEARCH_SONG");
-      setMessage("");
     }
   };
 
   const handleSetSong = (value: SearchResult) => {
     if (sendMessage) {
       sendMessage(value, "SET_SONG");
-      setMessage("");
     }
   };
 
@@ -40,8 +34,10 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
   }, [normalPeer]);
 
   useEffect(() => {
-    if (messages?.content.type === "SEND_SONG_LIST") {
-      setGainNode(messages?.content.data);
+    const type = messages?.content.type;
+    const data = messages?.content.data;
+    if (type === "SEND_SONG_LIST") {
+      setAudioGain(data);
     }
   }, [messages?.content]);
 
@@ -62,7 +58,7 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
         placeholder="ค้นหาเพลง"
       />
       <div className="pt-1">
-        {gainNode.map((data, index) => {
+        {audioGain.map((data, index) => {
           return (
             <div
               onClick={() => {

@@ -7,26 +7,49 @@ import SoundfontManager from "../tools/sound-font-manager";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song";
 import { useMixer } from "@/hooks/mixer-hooks";
-import FolderReader from "../tools/folder-reader";
 import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super-host";
+import { loadFileSystem, loadFileZip, storageIsEmpty } from "@/lib/storage";
+import WallcomeModal from "../modal/wallcome";
+import SongStorageProcessor from "../modal/song-storage-processor";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
-  const { gainNode, setupSpessasynth, synth, player } = useSynth();
+  const { audioGain, setupSpessasynth, synth, player } = useSynth();
   const {
-    setSongListFile,
-    setSongStoreHandle,
-    onSelectKaraokeFolder,
+    setTracklistFile,
+    loadAndPlaySong,
+    setMusicLibraryFile,
     lyrics,
-    songList,
+    tracklist,
   } = useMixer();
 
   useLayoutEffect(() => {
     setupSpessasynth();
   }, []);
+
+  const onLoadFileSystem = async () => {
+    const fileSystem = await loadFileSystem();
+    if (fileSystem) {
+      setTracklistFile(fileSystem.tracklist);
+      setMusicLibraryFile(fileSystem.musicLibrary);
+      return true;
+    }
+    return false;
+  };
+
+  const onLoadFileZip = async (fileList: FileList) => {
+    const fileSystem = await loadFileZip(fileList);
+    console.log(fileSystem)
+    if (fileSystem) {
+      setTracklistFile(fileSystem.tracklist);
+      setMusicLibraryFile(fileSystem.musicLibrary);
+      return true;
+    }
+    return false;
+  };
 
   if (!synth || !player) {
     return <></>;
@@ -34,18 +57,33 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
   return (
     <div className="">
-      <VolumePanel synth={synth} gainNode={gainNode}></VolumePanel>
+      <WallcomeModal
+        onLoadFileSystem={onLoadFileSystem}
+        onLoadZip={onLoadFileZip}
+      ></WallcomeModal>
+      <SongStorageProcessor></SongStorageProcessor>
+      {/* <div
+        onClick={async () => {
+          console.log(await storageIsEmpty());
+          // const file = await getSongBySuperKey("103.zip");
+          // if (file) {
+          //   const unzip = await ExtractFile(file);
+
+          //   console.log(unzip);
+          // }
+        }}
+        className="fixed z-50 top-7 left-7 p-2 rounded-lg bg-white"
+      >
+        test
+      </div> */}
+      <VolumePanel synth={synth} audioGain={audioGain}></VolumePanel>
       <div className="fixed top-2.5 right-2.5">
-        <FolderReader
-          setSongListFile={setSongListFile}
-          onSelectFileSystem={setSongStoreHandle}
-        ></FolderReader>
         <SoundfontManager synth={synth}></SoundfontManager>
       </div>
 
       <SearchSong
-        songList={songList}
-        onClickSong={onSelectKaraokeFolder}
+        tracklist={tracklist}
+        onClickSong={loadAndPlaySong}
       ></SearchSong>
 
       <LyricsPanel lyrics={lyrics}></LyricsPanel>
@@ -53,16 +91,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
       <HostRemote></HostRemote>
       <SuperHostRemote></SuperHostRemote>
-      {/* <LoadSongInZip
-        songStore={songStore}
-        onLoadSong={onLoadSong}
-        onSelectSong={songEvent}
-      ></LoadSongInZip> */}
-      {/* <FetchFileComponent></FetchFileComponent>
-      <FileUploadComponent></FileUploadComponent>
-      <div className="p-2 border">
-        <KaraokePlayer></KaraokePlayer>
-      </div> */}
     </div>
   );
 };

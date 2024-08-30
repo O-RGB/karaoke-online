@@ -4,11 +4,11 @@ import { FaSearch } from "react-icons/fa";
 import TrieSearch from "trie-search";
 
 interface SearchSongProps {
-  songList: TrieSearch<SearchResult> | undefined;
+  tracklist: TrieSearch<SearchResult> | undefined;
   onClickSong?: (value: SearchResult) => void;
 }
 
-const SearchSong: React.FC<SearchSongProps> = ({ songList, onClickSong }) => {
+const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
   const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
   return (
     <div className="fixed left-0 top-44 px-2 w-full">
@@ -18,9 +18,9 @@ const SearchSong: React.FC<SearchSongProps> = ({ songList, onClickSong }) => {
           className="border"
           type="text"
           onChange={async (e) => {
-            if (songList) {
+            if (tracklist) {
               const value = e.target.value;
-              const se = await onSearchList<SearchResult>(value, songList);
+              const se = await onSearchList<SearchResult>(value, tracklist);
               setSearchResult(se);
             }
           }}
