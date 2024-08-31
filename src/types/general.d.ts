@@ -2,15 +2,17 @@ type ButtonProps = Partial<React.ButtonHTMLAttributes<HTMLButtonElement>> &
   CommonStyle &
   IconsProps;
 
+type InputProps = React.InputHTMLAttributes<HTMLInputElement> & CommonStyle;
+
 type ColorType = "default" | "white" | "blue";
 type IconPosition = "default" | "top" | "right" | "left" | "bottom";
 
 interface CommonStyle {
   color?: ColorType;
-  shape?: boolean;
-  padding?: string;
-  shadow?: string;
-  border?: string;
+  shape?: boolean | string;
+  padding?: boolean | string;
+  shadow?: boolean | string;
+  border?: boolean | string;
 }
 
 interface IconsProps {

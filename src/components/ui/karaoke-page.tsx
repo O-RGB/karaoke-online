@@ -40,21 +40,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         setMusicLibraryFile={setMusicLibraryFile}
         musicLibrary={musicLibrary}
       ></WallcomeModal>
-      {/* <SongStorageProcessor musicLibrary={musicLibrary}></SongStorageProcessor> */}
-      {/* <div
-        onClick={async () => {
-          console.log(await storageIsEmpty());
-          // const file = await getSongBySuperKey("103.zip");
-          // if (file) {
-          //   const unzip = await ExtractFile(file);
 
-          //   console.log(unzip);
-          // }
-        }}
-        className="fixed z-50 top-7 left-7 p-2 rounded-lg bg-white"
-      >
-        test
-      </div> */}
       <VolumePanel synth={synth} audioGain={audioGain}></VolumePanel>
       <div className="fixed top-2.5 right-2.5">
         <SoundfontManager synth={synth}></SoundfontManager>

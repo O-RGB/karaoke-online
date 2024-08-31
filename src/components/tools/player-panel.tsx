@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
   TbPlayerSkipForwardFilled,
-  TbPlayerStopFilled,
 } from "react-icons/tb";
 import Button from "../common/button/button";
 import RangeBar from "../common/range-bar";
@@ -22,6 +21,8 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ player }) => {
         <div className="flex items-center">
           {!player.paused ? (
             <Button
+              border=""
+              shadow=""
               padding="p-4"
               onClick={() => player.pause()}
               shape={false}
@@ -29,18 +30,17 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ player }) => {
             ></Button>
           ) : (
             <Button
+              border=""
+              shadow=""
               padding="p-4"
               onClick={() => player.play()}
               shape={false}
               icon={<TbPlayerPlayFilled className="text-white" />}
             ></Button>
           )}
-          {/* <Button
-          onClick={() => player.stop()}
-          shape={false}
-          icon={<TbPlayerStopFilled className="text-white" />}
-        ></Button> */}
           <Button
+            border=""
+            shadow=""
             padding="p-4"
             onClick={() => player.nextSong()}
             shape={false}
@@ -50,7 +50,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ player }) => {
             <RangeBar
               min={0}
               max={100}
-              // defaultValue={0}
               value={timer}
               layout="horizontal"
               inputProps={{
