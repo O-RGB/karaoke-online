@@ -1,28 +1,18 @@
-import React, { ButtonHTMLAttributes } from "react";
+import React from "react";
 
-type buttonProps = ButtonHTMLAttributes<HTMLButtonElement>;
-type ColorType = "default" | "white";
-type IconPosition = "default" | "top" | "right" | "left" | "bottom";
+interface ButtonCommonProps extends ButtonProps {}
 
-interface ButtonProps extends buttonProps {
-  icon?: React.ReactNode;
-  color?: ColorType;
-  iconPosition?: IconPosition;
-  shape?: boolean;
-  padding?: string;
-  shadow?: string;
-}
-
-const Button: React.FC<ButtonProps> = ({
+const Button: React.FC<ButtonCommonProps> = ({
   icon,
   color = "default",
   shape = true,
   iconPosition = "default",
   padding = "p-3",
   shadow = "shadow-md",
+  border = "border",
   ...props
 }) => {
-  var butStyle = `${padding} ${shadow} flex items-center justify-center gap-2`;
+  var butStyle = `${padding} ${shadow} ${border} flex items-center justify-center gap-2`;
   var colorStyle = ""; //bg-blue-500 hover:bg-blue-500/90 active:bg-blue-500/80
   var animation = "duration-300 transition-all";
   var shapeStyle = "blur-overlay";
@@ -34,7 +24,12 @@ const Button: React.FC<ButtonProps> = ({
 
   switch (color) {
     case "white":
-      colorStyle = "bg-white hover:bg-gray-200/50 active:bg-white/90 disabled:bg-white";
+      colorStyle =
+        "bg-white hover:bg-gray-200/50 active:bg-white/90 disabled:bg-white";
+      break;
+    case "blue":
+      colorStyle =
+        "bg-blue-600 hover:bg-blue-500/80 active:bg-blue-500 disabled:bg-gray-200";
       break;
 
     default:
@@ -74,7 +69,7 @@ const Button: React.FC<ButtonProps> = ({
           "",
         ].join(" ")}
       >
-        <span>{icon}</span>
+        {icon && <span>{icon}</span>}
         {props.children}
       </button>
     </>

@@ -54,7 +54,7 @@ const FolderReader: React.FC<FolderReaderProps> = ({
 
         onSelectFileSystem?.(filesMap);
         setFiles(fileList);
-        saveSongToStorage(filesMap);
+        // saveSongToStorage(filesMap);
       }
     } catch (error) {
       console.error("Error reading folder:", error);

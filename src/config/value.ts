@@ -4,3 +4,4 @@ export const CUR_FILE_TYPE = "cur";
 export const LYR_FILE_TYPE = "lyr";
 
 export const STORAGE_NAME = "Song";
+export const TRACKLIST_FILENAME = "song.json";

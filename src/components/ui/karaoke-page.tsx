@@ -11,7 +11,6 @@ import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super-host";
 import WallcomeModal from "../modal/wallcome";
-import SongStorageProcessor from "../modal/song-storage-processor";
 
 interface KaraokePageProps {}
 
@@ -23,6 +22,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     setMusicLibraryFile,
     lyrics,
     tracklist,
+    musicLibrary,
   } = useMixer();
 
   useLayoutEffect(() => {
@@ -38,8 +38,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <WallcomeModal
         setTracklistFile={setTracklistFile}
         setMusicLibraryFile={setMusicLibraryFile}
+        musicLibrary={musicLibrary}
       ></WallcomeModal>
-      <SongStorageProcessor></SongStorageProcessor>
+      {/* <SongStorageProcessor musicLibrary={musicLibrary}></SongStorageProcessor> */}
       {/* <div
         onClick={async () => {
           console.log(await storageIsEmpty());
