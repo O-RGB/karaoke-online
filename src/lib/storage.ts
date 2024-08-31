@@ -6,7 +6,7 @@ import { ExtractFile } from "./zip";
 // ON RAM
 
 const filterFileUse = (fileList: File[]) => {
-    console.log(fileList)
+  console.log(fileList);
   let tracklist: File | undefined = undefined;
   const musicLibrary = new Map<string, File>();
   fileList.map((item) => {
@@ -18,7 +18,7 @@ const filterFileUse = (fileList: File[]) => {
       musicLibrary.set(filename, item);
     }
   });
-  console.log("tracklist ", tracklist)
+  console.log("tracklist ", tracklist);
   if (tracklist) {
     return { musicLibrary, tracklist: tracklist as File };
   } else {
@@ -45,9 +45,12 @@ export const loadFileSystem = async () => {
   return undefined;
 };
 
-export const loadFileZip = async (fileList: FileList) => {
-  const db = await getDB(STORAGE_NAME);
-  const splitLibrary: File[] = [];
+export const loadFileZip = async (
+  fileList: FileList,
+  onProgress?: (progress?: IProgressBar) => void
+) => {
+  //   const db = await getDB(STORAGE_NAME);
+  //   const splitLibrary: File[] = [];
 
   // Collect all the files first
   const allMusicFiles = [];
@@ -57,9 +60,11 @@ export const loadFileZip = async (fileList: FileList) => {
       const music = await ExtractFile(data);
       allMusicFiles.push(...music);
     }
+    onProgress?.({
+      progress: Math.round(((i + 1) / fileList.length) * 100),
+      processing: data?.name,
+    });
   }
-
-  console.log("len", allMusicFiles.length);
 
   // // Start a transaction after all files have been processed
   // const tx = db.transaction(STORAGE_NAME, "readwrite");
@@ -97,14 +102,13 @@ export const getSongBySuperKey = async (
 };
 
 export const saveSongToStorage = async (files: Map<string, File>) => {
-//   const countSuperZip = files.values();
-//   const db = await getDB(STORAGE_NAME);
-//   const tx = db.transaction(STORAGE_NAME, "readwrite");
-
-//   countSuperZip.forEach(async (file) => {
-//     await tx.objectStore(STORAGE_NAME).add(file, file.name);
-//   });
-//   await tx.done;
+  //   const countSuperZip = files.values();
+  //   const db = await getDB(STORAGE_NAME);
+  //   const tx = db.transaction(STORAGE_NAME, "readwrite");
+  //   countSuperZip.forEach(async (file) => {
+  //     await tx.objectStore(STORAGE_NAME).add(file, file.name);
+  //   });
+  //   await tx.done;
 };
 
 export const saveSongFromZipToStorage = async (files: File[]) => {

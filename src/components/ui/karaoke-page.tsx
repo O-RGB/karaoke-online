@@ -10,7 +10,6 @@ import { useMixer } from "@/hooks/mixer-hooks";
 import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super-host";
-import { loadFileSystem, loadFileZip, storageIsEmpty } from "@/lib/storage";
 import WallcomeModal from "../modal/wallcome";
 import SongStorageProcessor from "../modal/song-storage-processor";
 
@@ -30,27 +29,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     setupSpessasynth();
   }, []);
 
-  const onLoadFileSystem = async () => {
-    const fileSystem = await loadFileSystem();
-    if (fileSystem) {
-      setTracklistFile(fileSystem.tracklist);
-      setMusicLibraryFile(fileSystem.musicLibrary);
-      return true;
-    }
-    return false;
-  };
-
-  const onLoadFileZip = async (fileList: FileList) => {
-    const fileSystem = await loadFileZip(fileList);
-    console.log(fileSystem)
-    if (fileSystem) {
-      setTracklistFile(fileSystem.tracklist);
-      setMusicLibraryFile(fileSystem.musicLibrary);
-      return true;
-    }
-    return false;
-  };
-
   if (!synth || !player) {
     return <></>;
   }
@@ -58,8 +36,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   return (
     <div className="">
       <WallcomeModal
-        onLoadFileSystem={onLoadFileSystem}
-        onLoadZip={onLoadFileZip}
+        setTracklistFile={setTracklistFile}
+        setMusicLibraryFile={setMusicLibraryFile}
       ></WallcomeModal>
       <SongStorageProcessor></SongStorageProcessor>
       {/* <div

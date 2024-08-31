@@ -34,7 +34,7 @@ const Button: React.FC<ButtonProps> = ({
 
   switch (color) {
     case "white":
-      colorStyle = "bg-white hover:bg-gray-200/50 active:bg-white/90";
+      colorStyle = "bg-white hover:bg-gray-200/50 active:bg-white/90 disabled:bg-white";
       break;
 
     default:
