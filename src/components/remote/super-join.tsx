@@ -11,7 +11,8 @@ interface SuperJoinConnectProps {
 const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   const { superUserPeer, connectToPeer, sendSuperUserMessage, messages } =
     useRemote();
-  const [audioGain, setAudioGain] = useState<number[]>([]);
+  const [audioGain, setAudioGain] = useState<IAudioGain[]>([]);
+  const [instrument, setInstrument] = useState<number[]>([]);
 
   const handleConnect = () => {
     if (hostId) {
@@ -49,6 +50,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
     <div className="p-4 bg-gray-100 min-h-screen">
       <VolumePanel
         audioGain={audioGain}
+        instrument={instrument}
         onVolumeChange={(c, v) => changeVol({ channel: c, value: v })}
       ></VolumePanel>
     </div>

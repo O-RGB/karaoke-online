@@ -126,16 +126,16 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
     }
     switch (type) {
       case "GIND_NODE":
-        return data as number[];
+        return data as IAudioGain[];
 
       case "SET_CHANNEL":
         if (!synth) {
           return;
         }
-        const vol = data as ISetChannelGain;
-        updateVolume(vol.channel, vol.value);
-        volumeChange(vol.channel, vol.value, synth);
-        return data as ISetChannelGain;
+        const vol = data as IAudioGain;
+        updateVolume(vol.channel, vol.channel);
+        volumeChange(vol.channel, vol.channel, synth);
+        return data as IAudioGain;
 
       case "SEARCH_SONG":
         if (tracklist !== undefined) {

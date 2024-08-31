@@ -20,6 +20,13 @@ interface IconsProps {
   iconPosition?: IconPosition;
 }
 
+interface IOptions<T = any> {
+  label: string | React.ReactNode;
+  value: string;
+  render?: React.ReactNode;
+  option?: T;
+}
+
 interface IProgressBar {
   progress?: number;
   processing?: string;

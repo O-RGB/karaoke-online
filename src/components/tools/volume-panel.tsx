@@ -1,18 +1,19 @@
-import React, { useEffect } from "react";
+import React from "react";
 import VolumeMeter from "../common/volume/volume-meter";
 import { Synthetizer } from "spessasynth_lib";
 import { volumeChange } from "@/lib/mixer";
 import { useMixer } from "@/hooks/mixer-hooks";
-import { useRemote } from "@/hooks/peer-hooks";
 
 interface VolumePanelProps {
-  audioGain: number[];
+  audioGain: IAudioGain[];
+  instrument: number[];
   synth?: Synthetizer;
   onVolumeChange?: (channel: number, value: number) => void;
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
   audioGain,
+  instrument,
   synth,
   onVolumeChange,
 }) => {
@@ -28,22 +29,26 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   };
 
   return (
-    <>
-      <div className="flex flex-wrap lg:flex-row divide-x divide-slate-600">
-        {audioGain.map((data, index) => {
+    <div className="fixed w-full top-16 lg:top-4 left-0 px-5">
+      <div className="grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit blur-overlay border blur-border rounded-md p-2">
+        {audioGain.map((data, ch) => {
           return (
-            <div className="relative" key={`gin-${index}`}>
+            <div
+              className="flex w-full items-center justify-center"
+              key={`gin-${ch}`}
+            >
               <VolumeMeter
-                value={volumeController[index]}
-                level={data}
-                channel={index + 1}
+                instruments={instrument[ch]}
+                value={volumeController[ch]}
+                level={data.gain}
+                channel={ch + 1}
                 onChange={onVolumeMeterChange}
               ></VolumeMeter>
             </div>
           );
         })}
       </div>
-    </>
+    </div>
   );
 };
 

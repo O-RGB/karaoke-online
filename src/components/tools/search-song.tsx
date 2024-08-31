@@ -2,7 +2,11 @@ import { onSearchList } from "@/lib/trie-search";
 import React, { useState, useEffect, useRef } from "react";
 import { FaSearch } from "react-icons/fa";
 import TrieSearch from "trie-search";
-import Input from "../common/input";
+import Input from "../common/input-data/input";
+import Select from "../common/input-data/select";
+import { toOptions } from "@/lib/general";
+import { SONG_TYPE } from "@/config/value";
+
 
 interface SearchSongProps {
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -12,28 +16,58 @@ interface SearchSongProps {
 const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
   const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
   const [value, setValue] = useState<string>("");
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  // const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setSearchResult([]);
-      }
-    };
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     if (
+  //       dropdownRef.current &&
+  //       !dropdownRef.current.contains(event.target as Node)
+  //     ) {
+  //       setSearchResult([]);
+  //     }
+  //   };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
 
   return (
-    <div className="fixed z-50 left-0 top-44 px-5 w-full">
+    <div className="fixed z-50 left-0 top-4 lg:top-48 px-5 w-full">
       <div className="w-full blur-overlay flex flex-col">
-        <Input
+        <Select
+          onSelectItem={(value: IOptions<SearchResult>) => {
+            if (value.option) {
+              onClickSong?.(value.option);
+              setSearchResult([]);
+              setValue("");
+            }
+          }}
+          onSearch={async (value) => {
+            if (tracklist) {
+              setValue(value);
+              const se = await onSearchList<SearchResult>(value, tracklist);
+              const op = toOptions<SearchResult>({
+                render: (value) => (
+                  <div className="flex justify-between w-full">
+                    <span>
+                      {value.name} - {value.artist}
+                    </span>
+                    <span className=" rounded-md">
+                      {SONG_TYPE[value.type as 0 | 1]}
+                    </span>
+                  </div>
+                ),
+                list: se,
+              });
+              return op;
+            }
+            return [];
+          }}
+        ></Select>
+        {/* <Input
           style={{
             backgroundColor: "transparent",
           }}
@@ -74,7 +108,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
               </div>
             );
           })}
-        </div>
+        </div> */}
       </div>
     </div>
   );

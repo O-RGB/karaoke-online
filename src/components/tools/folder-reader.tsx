@@ -4,7 +4,7 @@ import {
   FileWithDirectoryAndFileHandle,
 } from "browser-fs-access";
 import { ExtractFile } from "@/lib/zip";
-import UpdateFile from "../common/upload";
+import UpdateFile from "../common/input-data/upload";
 import Button from "../common/button/button";
 import { saveSongToStorage } from "@/lib/storage";
 import Modal from "../common/modal";

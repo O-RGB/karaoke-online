@@ -3,7 +3,6 @@
 import React, { useLayoutEffect } from "react";
 import { useSynth } from "@/hooks/spessasynth-hooks";
 import VolumePanel from "../tools/volume-panel";
-import SoundfontManager from "../tools/sound-font-manager";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song";
 import { useMixer } from "@/hooks/mixer-hooks";
@@ -15,7 +14,7 @@ import WallcomeModal from "../modal/wallcome";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
-  const { audioGain, setupSpessasynth, synth, player } = useSynth();
+  const { audioGain, setupSpessasynth, synth, player, instrument } = useSynth();
   const {
     setTracklistFile,
     loadAndPlaySong,
@@ -41,10 +40,14 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         musicLibrary={musicLibrary}
       ></WallcomeModal>
 
-      <VolumePanel synth={synth} audioGain={audioGain}></VolumePanel>
-      <div className="fixed top-2.5 right-2.5">
+      <VolumePanel
+        synth={synth}
+        audioGain={audioGain}
+        instrument={instrument}
+      ></VolumePanel>
+      {/* <div className="fixed top-2.5 right-2.5">
         <SoundfontManager synth={synth}></SoundfontManager>
-      </div>
+      </div> */}
 
       <SearchSong
         tracklist={tracklist}
@@ -54,8 +57,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <LyricsPanel lyrics={lyrics}></LyricsPanel>
       <PlayerPanel player={player}></PlayerPanel>
 
-      <HostRemote></HostRemote>
-      <SuperHostRemote></SuperHostRemote>
+      {/* <HostRemote></HostRemote>
+      <SuperHostRemote></SuperHostRemote> */}
     </div>
   );
 };

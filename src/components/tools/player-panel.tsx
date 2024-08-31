@@ -5,7 +5,7 @@ import {
   TbPlayerSkipForwardFilled,
 } from "react-icons/tb";
 import Button from "../common/button/button";
-import RangeBar from "../common/range-bar";
+import RangeBar from "../common/input-data/range-bar";
 import { Sequencer } from "spessasynth_lib";
 
 interface PlayerPanelProps {

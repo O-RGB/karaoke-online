@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import UpdateFile from "../common/upload";
+import UpdateFile from "../common/input-data/upload";
 interface CharTiming {
   char: string;
   timing: number;

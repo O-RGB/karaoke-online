@@ -5,10 +5,10 @@ import {
   deleteSoundFont,
   getSoundFontList,
   setSoundFont,
-} from "@/lib/sound-font";
+} from "@/lib/spssasynth/sound-font";
 import { Synthetizer } from "spessasynth_lib";
 import Button from "../common/button/button";
-import UpdateFile from "../common/upload";
+import UpdateFile from "../common/input-data/upload";
 
 interface SoundfontManagerProps {
   synth: Synthetizer;

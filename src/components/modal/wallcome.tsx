@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import Modal from "../common/modal";
 import Button from "../common/button/button";
 import { FaComputer, FaRegFileZipper } from "react-icons/fa6";
-import Upload from "../common/upload";
+import Upload from "../common/input-data/upload";
 import ProgressBar from "../common/progress-bar";
 import SongStorageProcessor from "./song-storage";
 import { TRACKLIST_FILENAME } from "@/config/value";

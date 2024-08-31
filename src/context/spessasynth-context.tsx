@@ -11,7 +11,8 @@ import { useRemote } from "../hooks/peer-hooks";
 
 type SpessasynthContextType = {
   setupSpessasynth: () => Promise<void>;
-  audioGain: number[];
+  audioGain: IAudioGain[];
+  instrument: number[];
   synth: Synthetizer | undefined;
   player: Sequencer | undefined;
   audio: AudioContext | undefined;
@@ -24,6 +25,7 @@ type SpessasynthProviderProps = {
 export const SpessasynthContext = createContext<SpessasynthContextType>({
   setupSpessasynth: async () => undefined,
   audioGain: [],
+  instrument: [],
   synth: undefined,
   player: undefined,
   audio: undefined,
@@ -36,7 +38,10 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   const [synth, setSynth] = useState<Synthetizer>();
   const [player, setPlayer] = useState<Sequencer>();
   const [audio, setAudio] = useState<AudioContext>();
-  const [audioGain, setAudioGain] = useState<number[]>([]);
+
+  // Display
+  const [audioGain, setAudioGain] = useState<IAudioGain[]>([]);
+  const [instrument, setInstrument] = useState<number[]>([]);
 
   const LoadPlayer = async (synth: Synthetizer) => {
     const seq = new Sequencer([], synth);
@@ -70,19 +75,31 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     }
   };
 
+  const ProgramChangeEvent = (synth: Synthetizer) => {
+    synth.eventHandler.addEvent("programchange", "", (e) => {
+      const channel: number = e.channel;
+      const program: number = e.program;
+      setInstrument((value) => {
+        value[channel] = program;
+        return value;
+      });
+    });
+  };
+
   const LoadSoundMeter = async (synth: Synthetizer, audio: AudioContext) => {
     const newAnalysers: AnalyserNode[] = [];
+    let createChannel: IAudioGain[] = [];
     for (let i = 0; i < 16; i++) {
       const analyser = audio.createAnalyser();
       analyser.fftSize = 256;
       newAnalysers.push(analyser);
       synth.lockController(i, midiControllers.mainVolume, false);
+      createChannel.push({ channel: i, gain: 0 });
     }
-
     synth.connectIndividualOutputs(newAnalysers);
 
     const render = () => {
-      const newVolumeLevels = newAnalysers.map((analyser, index) => {
+      const newVolumeLevels = newAnalysers.map((analyser) => {
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(dataArray);
         const value = Math.round(
@@ -91,7 +108,11 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
         return value;
       });
 
-      setAudioGain(newVolumeLevels);
+      newVolumeLevels.map((gain: number, channel) => {
+        createChannel[channel].gain = gain;
+      });
+
+      setAudioGain(createChannel);
       requestAnimationFrame(() => setTimeout(() => render(), 100));
     };
     render();
@@ -114,6 +135,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     }
     const player = await LoadPlayer(spessasynth);
     LoadSoundMeter(spessasynth, myAudio);
+    ProgramChangeEvent(spessasynth);
     setAudio(myAudio);
     setSynth(spessasynth);
     setPlayer(player);
@@ -128,6 +150,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
         setupSpessasynth: setup,
         synth: synth,
         player: player,
+        instrument: instrument,
       }}
     >
       <>{children}</>

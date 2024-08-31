@@ -51,10 +51,6 @@ export const loadFileZip = async (
   fileList: FileList,
   onProgress?: (progress?: IProgressBar) => void
 ) => {
-  //   const db = await getDB(STORAGE_NAME);
-  //   const splitLibrary: File[] = [];
-
-  // Collect all the files first
   const allMusicFiles: File[] = [];
   for (let i = 0; i < fileList.length; i++) {
     let error: string | undefined = undefined;
@@ -64,7 +60,6 @@ export const loadFileZip = async (
       await ExtractFile(data)
         .then((music) => {
           allMusicFiles.push(...music);
-          console.log(music);
         })
         .catch((e) => {
           error = e;
@@ -77,17 +72,6 @@ export const loadFileZip = async (
       error: error,
     });
   }
-
-  // // Start a transaction after all files have been processed
-  // const tx = db.transaction(STORAGE_NAME, "readwrite");
-  // const objectStore = tx.objectStore(STORAGE_NAME);
-
-  // for (const file of allMusicFiles) {
-  //   await objectStore.add(file, file.name);
-  // }
-
-  // await tx.done;
-  // console.log("Transaction completed.");
 
   return filterFileUse(allMusicFiles);
 };
