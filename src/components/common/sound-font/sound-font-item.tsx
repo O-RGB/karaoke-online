@@ -19,12 +19,13 @@ const SoundFontItem: React.FC<SoundFontItemProps> = ({
   };
   return (
     <>
-      <div className="flex gap-2 items-center justify-center p-2 bg-white w-full select-none">
+      <div className="flex gap-2 items-center justify-center  bg-white w-full select-none border p-2 pl-3 rounded-md">
         <GrDocumentSound></GrDocumentSound>
         <div className="w-full">{title}</div>
         <Button
+          shadow={false}
           onClick={onClickDelete}
-          icon={<MdDelete className="text-white" />}
+          icon={<MdDelete />}
         ></Button>
       </div>
     </>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useLayoutEffect } from "react";
+import React, { ReactNode, useLayoutEffect } from "react";
 import { useSynth } from "@/hooks/spessasynth-hooks";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
@@ -12,6 +12,7 @@ import SuperHostRemote from "../remote/super-host";
 import WallcomeModal from "../modal/wallcome";
 import SoundfontManager from "../tools/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
+import ContextModal from "../modal/context-modal";
 
 interface KaraokePageProps {}
 
@@ -34,8 +35,14 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     return <></>;
   }
 
+  const modalMap = new Map<ModalType, ReactNode>([
+    ["SOUNDFONT_MODEL", <SoundfontManager synth={synth}></SoundfontManager>],
+    ["JOIN", <HostRemote></HostRemote>],
+    ["SUPER_JOIN", <SuperHostRemote></SuperHostRemote>],
+  ]);
+
   return (
-    <div className="">
+    <ContextModal modal={modalMap}>
       <WallcomeModal
         setTracklistFile={setTracklistFile}
         setMusicLibraryFile={setMusicLibraryFile}
@@ -48,10 +55,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         instrument={instrument}
       ></VolumePanel>
       <ClockPanel></ClockPanel>
-      <div className="fixed top-2.5 right-2.5">
-        <SoundfontManager synth={synth}></SoundfontManager>
-      </div>
-
       <SearchSong
         tracklist={tracklist}
         onClickSong={loadAndPlaySong}
@@ -59,10 +62,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
       <LyricsPanel lyrics={lyrics}></LyricsPanel>
       <PlayerPanel player={player}></PlayerPanel>
-
-      {/* <HostRemote></HostRemote>
-      <SuperHostRemote></SuperHostRemote> */}
-    </div>
+    </ContextModal>
   );
 };
 

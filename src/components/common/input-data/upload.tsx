@@ -35,7 +35,7 @@ const UpdateFile: React.FC<UpdateFileProps> = ({
   };
 
   return (
-    <div className={className}>
+    <div className={[className, "cursor-pointer"].join(" ")}>
       {label && <label>{label}</label>}
       <div>
         <div onClick={handleChildClick}>

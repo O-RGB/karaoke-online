@@ -73,7 +73,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
       </div>
       <div className=" min-w-full lg:min-w-7  border  border-white/20">
         <div className="w-full blur-overlay text-center text-white font-bold text-[9px]">
-          {instruments}
+          {instruments ?? 0}
         </div>
 
         {/* <div className="flex items-center justify-center p-1 hover:bg-white/30 duration-300 cursor-pointer border-white/30">

@@ -15,9 +15,10 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
   }, [superUserPeer]);
 
   return (
-    <div className="p-2 blur-overlay flex flex-col gap-2 w-fit fixed right-40 bottom-0">
+    <div className="">
       <div className="text-center text-white">สแกนเพื่อควบคุม</div>
       <a
+        className="flex items-center justify-center"
         href={`https://my-test-project-seven.vercel.app/remote/super/${hostId}`}
         target="_blank"
         rel="noopener noreferrer"
@@ -29,7 +30,7 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
               errorCorrectionLevel: "M",
               margin: 3,
               scale: 4,
-              width: 130,
+              width: 300,
               color: {
                 light: "#76dfff",
               },

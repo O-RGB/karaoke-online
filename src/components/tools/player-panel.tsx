@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
@@ -14,6 +14,8 @@ interface PlayerPanelProps {
 
 const PlayerPanel: React.FC<PlayerPanelProps> = ({ player }) => {
   const timer = Math.round((player.currentTime / player.duration) * 100);
+
+  useEffect(() => {}, [player.paused]);
 
   return (
     <>

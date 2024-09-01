@@ -11,7 +11,7 @@ interface SuperJoinConnectProps {
 const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   const { superUserPeer, connectToPeer, sendSuperUserMessage, messages } =
     useRemote();
-  const [audioGain, setAudioGain] = useState<IAudioGain[]>([]);
+  const [audioGain, setAudioGain] = useState<number[]>([]);
   const [instrument, setInstrument] = useState<number[]>([]);
 
   const handleConnect = () => {

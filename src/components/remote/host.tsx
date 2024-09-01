@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Button from "../common/button/button";
 
 import { useQRCode } from "next-qrcode";
 import { useRemote } from "@/hooks/peer-hooks";
@@ -17,9 +16,10 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
   }, [normalPeer]);
 
   return (
-    <div className="p-2 blur-overlay flex flex-col gap-2 w-fit fixed right-0 bottom-0">
+    <div className="">
       <div className="text-center text-white">สแกนเพื่อขอเพลง</div>
       <a
+        className="flex items-center justify-center"
         href={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
         target="_blank"
       >
@@ -30,7 +30,7 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
               errorCorrectionLevel: "M",
               margin: 3,
               scale: 4,
-              width: 130,
+              width: 300,
               color: {
                 dark: "#010599FF",
                 light: "#FFBF60FF",

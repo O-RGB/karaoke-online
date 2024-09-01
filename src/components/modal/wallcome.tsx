@@ -47,7 +47,6 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
   };
 
   const loadTracklistStorage = async () => {
-    console.log("load tracklist in store");
     const file = await getSongBySuperKey(TRACKLIST_FILENAME);
     if (file) {
       setTracklistFile(file);

@@ -11,7 +11,7 @@ import { useRemote } from "../hooks/peer-hooks";
 
 type SpessasynthContextType = {
   setupSpessasynth: () => Promise<void>;
-  audioGain: IAudioGain[];
+  audioGain: number[];
   instrument: number[];
   synth: Synthetizer | undefined;
   player: Sequencer | undefined;
@@ -40,7 +40,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   const [audio, setAudio] = useState<AudioContext>();
 
   // Display
-  const [audioGain, setAudioGain] = useState<IAudioGain[]>([]);
+  const [audioGain, setAudioGain] = useState<number[]>([]);
   const [instrument, setInstrument] = useState<number[]>([]);
 
   const LoadPlayer = async (synth: Synthetizer) => {
@@ -88,13 +88,11 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
 
   const LoadSoundMeter = async (synth: Synthetizer, audio: AudioContext) => {
     const newAnalysers: AnalyserNode[] = [];
-    let createChannel: IAudioGain[] = [];
     for (let i = 0; i < 16; i++) {
       const analyser = audio.createAnalyser();
       analyser.fftSize = 256;
       newAnalysers.push(analyser);
       synth.lockController(i, midiControllers.mainVolume, false);
-      createChannel.push({ channel: i, gain: 0 });
     }
     synth.connectIndividualOutputs(newAnalysers);
 
@@ -108,21 +106,11 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
         return value;
       });
 
-      newVolumeLevels.map((gain: number, channel) => {
-        createChannel[channel].gain = gain;
-      });
-
-      setAudioGain(createChannel);
+      setAudioGain(newVolumeLevels);
       requestAnimationFrame(() => setTimeout(() => render(), 100));
     };
     render();
   };
-
-  useEffect(() => {
-    if (superUserConnections.length > 0) {
-      sendSuperUserMessage(audioGain, "GIND_NODE");
-    }
-  }, [audioGain, superUserConnections]);
 
   const setup = async () => {
     const myAudio = await LoadAudioContext();
@@ -141,6 +129,12 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     ProgramChangeEvent(spessasynth);
     await myAudio.resume();
   };
+
+  useEffect(() => {
+    if (superUserConnections.length > 0) {
+      sendSuperUserMessage(audioGain, "GIND_NODE");
+    }
+  }, [audioGain, superUserConnections]);
 
   return (
     <SpessasynthContext.Provider

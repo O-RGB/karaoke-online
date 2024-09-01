@@ -1195,6 +1195,11 @@ undici-types@~6.19.2:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.19.8.tgz#35111c9d1437ab83a7cdc0abae2f26d88eda0a02"
   integrity sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==
 
+use-context-menu@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/use-context-menu/-/use-context-menu-0.5.0.tgz#2e87d9753272e1c4c79ec656838a48a23c6a483f"
+  integrity sha512-elusnTAtObU++ftaMcthDibLa3e2HeJw5QOfLFgcXqfMbuoU0IPt0Mth+oBPENdbVW119X/GfgvQKALu6tACfw==
+
 util-deprecate@^1.0.2, util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"

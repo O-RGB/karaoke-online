@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import VolumeMeter from "../common/volume/volume-meter";
 import { Synthetizer } from "spessasynth_lib";
 import { volumeChange } from "@/lib/mixer";
 import { useMixer } from "@/hooks/mixer-hooks";
 
 interface VolumePanelProps {
-  audioGain: IAudioGain[];
+  audioGain: number[];
   instrument: number[];
   synth?: Synthetizer;
   onVolumeChange?: (channel: number, value: number) => void;
@@ -28,6 +28,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     }
   };
 
+  useEffect(() => {}, [audioGain]);
+
   return (
     <div className="fixed w-full top-16 lg:top-4 left-0 px-5">
       <div className="grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-1 blur-overlay border blur-border rounded-md p-2">
@@ -40,7 +42,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
               <VolumeMeter
                 instruments={instrument[ch]}
                 value={volumeController[ch]}
-                level={data.gain}
+                level={data}
                 channel={ch + 1}
                 onChange={onVolumeMeterChange}
               ></VolumeMeter>

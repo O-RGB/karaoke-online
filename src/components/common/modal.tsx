@@ -5,21 +5,6 @@ import Button from "./button/button";
 
 const delay = 100;
 
-type ModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onOk?: () => void;
-  okButtonProps?: ButtonProps;
-  cancelProps?: ButtonProps;
-  children: React.ReactNode;
-  title?: string | React.ReactNode;
-  width?: string;
-  footer?: React.ReactNode;
-  cancelText?: string;
-  okText?: string;
-  closable?: boolean;
-};
-
 export default function Modal({
   isOpen,
   onClose,
@@ -79,7 +64,7 @@ export default function Modal({
             } transition-transform duration-300`}
           >
             <div
-              className={`sticky top-0 left-0 p-6 flex justify-between items-center ${padding}`}
+              className={`sticky z-10 top-0 left-0 p-6 flex justify-between items-center bg-white shadow-sm ${padding}`}
             >
               <div className="text-lg">{title}</div>
               {closable && (
@@ -88,25 +73,35 @@ export default function Modal({
                 </div>
               )}
             </div>
-            <hr />
-            <div className={`${padding} h-full`}>{children}</div>
-            <div className={`flex gap-2 justify-end pb-6 px-6`}>
+            <div className={`${padding} h-full relative z-0`}>{children}</div>
+            <div
+              className={`sticky bottom-0 flex gap-2 justify-end bg-white p-6 border-t border-t-gray-100`}
+            >
               {footer ? (
                 footer
               ) : (
                 <>
-                  <Button {...okButtonProps} shadow="" className="px-6">
-                    {cancelText}
-                  </Button>
-                  <Button
-                    {...cancelProps}
-                    onClick={onOk}
-                    shadow=""
-                    color="blue"
-                    className="text-white px-6"
-                  >
-                    {okText}
-                  </Button>
+                  {!cancelProps?.hidden && (
+                    <Button
+                      {...cancelProps}
+                      onClick={handleClose}
+                      shadow=""
+                      padding={"p-2 px-4"}
+                    >
+                      {cancelText}
+                    </Button>
+                  )}
+                  {!okButtonProps?.hidden && (
+                    <Button
+                      {...okButtonProps}
+                      onClick={onOk}
+                      shadow=""
+                      color="blue"
+                      className="text-white px-6"
+                    >
+                      {okText}
+                    </Button>
+                  )}
                 </>
               )}
             </div>
