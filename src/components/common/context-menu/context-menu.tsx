@@ -18,7 +18,7 @@ const ContextMenuCommon: React.FC<ContextMenuProps> = ({
   className,
   leftClick = false,
 }) => {
-  const { contextMenu, onContextMenu, onKeyDown } = useContextMenu(
+  const { contextMenu, onContextMenu } = useContextMenu(
     <ContextMenuForm items={items}></ContextMenuForm>
   );
 
@@ -29,12 +29,10 @@ const ContextMenuCommon: React.FC<ContextMenuProps> = ({
   return (
     <>
       <div
-        className={className}
+        className={[className, "select-none"].join(" ")}
         data-test-name="click-target"
         onContextMenu={handleContextMenu}
-        onKeyDown={onKeyDown}
         onClick={leftClick ? handleContextMenu : undefined}
-        tabIndex={0}
       >
         {children}
       </div>

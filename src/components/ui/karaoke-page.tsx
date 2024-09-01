@@ -51,7 +51,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         setMusicLibraryFile={setMusicLibraryFile}
         musicLibrary={musicLibrary}
       ></WallcomeModal>
-
       <VolumePanel
         synth={synth}
         audioGain={audioGain}
@@ -62,7 +61,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         tracklist={tracklist}
         onClickSong={loadAndPlaySong}
       ></SearchSong>
-
       <LyricsPanel lyrics={lyrics}></LyricsPanel>
       <PlayerPanel modalMap={modalMap} player={player}></PlayerPanel>
     </ContextModal>
