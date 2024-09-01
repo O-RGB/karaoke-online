@@ -7,7 +7,12 @@ type InputProps = React.InputHTMLAttributes<HTMLInputElement> & CommonStyle;
 type ColorType = "default" | "white" | "blue";
 type IconPosition = "default" | "top" | "right" | "left" | "bottom";
 
-type ModalType = "SOUNDFONT_MODEL" | "JOIN" | "SUPER_JOIN";
+type ModalType =
+  | "SOUNDFONT_MODEL"
+  | "JOIN"
+  | "SUPER_JOIN"
+  | "MUSIC_LOADED"
+  | "MUSIC_STORE";
 
 type ModalProps = {
   isOpen: boolean;

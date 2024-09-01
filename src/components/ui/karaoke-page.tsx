@@ -39,6 +39,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     ["SOUNDFONT_MODEL", <SoundfontManager synth={synth}></SoundfontManager>],
     ["JOIN", <HostRemote></HostRemote>],
     ["SUPER_JOIN", <SuperHostRemote></SuperHostRemote>],
+    ["SUPER_JOIN", <SuperHostRemote></SuperHostRemote>],
+    ["MUSIC_LOADED", <SuperHostRemote></SuperHostRemote>],
+    ["MUSIC_STORE", <SuperHostRemote></SuperHostRemote>],
   ]);
 
   return (
@@ -61,7 +64,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       ></SearchSong>
 
       <LyricsPanel lyrics={lyrics}></LyricsPanel>
-      <PlayerPanel player={player}></PlayerPanel>
+      <PlayerPanel modalMap={modalMap} player={player}></PlayerPanel>
     </ContextModal>
   );
 };

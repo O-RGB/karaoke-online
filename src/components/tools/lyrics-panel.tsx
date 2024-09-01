@@ -31,7 +31,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({ lyrics }) => {
 
   // ทำ UI เทสเท่านั้น
   return (
-    <div className="fixed bottom-16 left-0 w-full px-5 ">
+    <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 ">
       <div className=" w-full h-56 lg:h-72 blur-overlay border blur-border rounded-lg p-2  text-xl md:text-3xl lg:text-6xl text-center overflow-auto">
         {lyrScreen?.map((data, index) => {
           const [top, bottom] = data;

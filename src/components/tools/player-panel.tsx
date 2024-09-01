@@ -7,19 +7,22 @@ import {
 import Button from "../common/button/button";
 import RangeBar from "../common/input-data/range-bar";
 import { Sequencer } from "spessasynth_lib";
+import ContextModal from "../modal/context-modal";
+import { FiSettings } from "react-icons/fi";
 
 interface PlayerPanelProps {
   player: Sequencer;
+  modalMap: Map<ModalType, React.ReactNode>;
 }
 
-const PlayerPanel: React.FC<PlayerPanelProps> = ({ player }) => {
+const PlayerPanel: React.FC<PlayerPanelProps> = ({ player, modalMap }) => {
   const timer = Math.round((player.currentTime / player.duration) * 100);
 
   useEffect(() => {}, [player.paused]);
 
   return (
     <>
-      <div className="fixed bottom-0 w-full left-0 blur-overlay border-t blur-border">
+      <div className="fixed bottom-0 w-full left-0 blur-overlay border-t blur-border flex justify-between p-2 lg:p-0">
         <div className="flex items-center">
           {!player.paused ? (
             <Button
@@ -60,6 +63,17 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ player }) => {
               }}
             ></RangeBar>
           </div>
+        </div>
+        <div>
+          <ContextModal leftClick modal={modalMap} className="">
+            <Button
+              border=""
+              shadow=""
+              padding="p-4"
+              shape={false}
+              icon={<FiSettings className="text-white" />}
+            ></Button>
+          </ContextModal>
         </div>
       </div>
     </>
