@@ -10,6 +10,8 @@ import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super-host";
 import WallcomeModal from "../modal/wallcome";
+import SoundfontManager from "../tools/sound-font-manager";
+import ClockPanel from "../tools/clock-panel";
 
 interface KaraokePageProps {}
 
@@ -45,9 +47,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         audioGain={audioGain}
         instrument={instrument}
       ></VolumePanel>
-      {/* <div className="fixed top-2.5 right-2.5">
+      <ClockPanel></ClockPanel>
+      <div className="fixed top-2.5 right-2.5">
         <SoundfontManager synth={synth}></SoundfontManager>
-      </div> */}
+      </div>
 
       <SearchSong
         tracklist={tracklist}

@@ -135,10 +135,10 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     }
     const player = await LoadPlayer(spessasynth);
     LoadSoundMeter(spessasynth, myAudio);
-    ProgramChangeEvent(spessasynth);
     setAudio(myAudio);
     setSynth(spessasynth);
     setPlayer(player);
+    ProgramChangeEvent(spessasynth);
     await myAudio.resume();
   };
 

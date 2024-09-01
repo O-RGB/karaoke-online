@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import RangeBar from "../input-data/range-bar";
-import { MdPiano } from "react-icons/md";
 import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
 
 interface VolumeMeterProps {
@@ -38,12 +37,12 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
 
   return (
     <div className="flex flex-col items-center justify-center w-full lg:w-fit">
-      <div className="w-full text-center text-white font-bold  text-xs">
+      <div className="w-full text-center text-white font-bold  text-xs ">
         {channel}
       </div>
       <div className="relative w-full max-w-20">
         <div className="flex gap-1 p-1 h-24 w-full justify-center">
-          <div className="absolute left-0 bottom-0 w-full">
+          <div className="absolute left-0 bottom-0 w-full rounded-t-md overflow-hidden">
             <div className="flex flex-col items-center w-full">
               {[...Array(maxLevel)].map((_, index) => {
                 let bgColor = "bg-white"; // บน
@@ -72,16 +71,16 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
           </div>
         </div>
       </div>
-      <div className="border border-white/20 min-w-full lg:min-w-7 h-10">
-        <div className="w-full blur-overlay text-center text-white font-bold text-xs">
+      <div className=" min-w-full lg:min-w-7  border  border-white/20">
+        <div className="w-full blur-overlay text-center text-white font-bold text-[9px]">
           {instruments}
         </div>
 
-        <div className="flex items-center justify-center p-1 hover:bg-white/30 duration-300 cursor-pointer border-white/30">
-          <div className="text-xs text-white">
+        {/* <div className="flex items-center justify-center p-1 hover:bg-white/30 duration-300 cursor-pointer border-white/30">
+          <div className="text-[7px] text-white">
             {instruments ? getIconInstruments(instruments)?.icon : <></>}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
