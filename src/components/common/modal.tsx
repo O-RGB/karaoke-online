@@ -59,7 +59,7 @@ export default function Modal({
           ></div>
           <div
             style={{ width }}
-            className={`relative bg-white rounded-lg shadow-lg z-10 transform max-h-[90%] overflow-auto ${
+            className={`relative bg-white rounded-lg shadow-lg z-10 transform max-h-[70dvh] overflow-auto ${
               showModal ? "scale-100" : "scale-95"
             } transition-transform duration-300`}
           >

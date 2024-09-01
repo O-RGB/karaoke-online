@@ -43,12 +43,12 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   const [audioGain, setAudioGain] = useState<number[]>([]);
   const [instrument, setInstrument] = useState<number[]>([]);
 
-  const LoadPlayer = async (synth: Synthetizer) => {
+  const loadPlayer = async (synth: Synthetizer) => {
     const seq = new Sequencer([], synth);
     return seq;
   };
 
-  const LoadSoundFontPlayer = async (audio: AudioContext) => {
+  const loadSoundFontPlayer = async (audio: AudioContext) => {
     const res = await fetch(DEFAULT_SOUND_FONT);
     const ab = await res.arrayBuffer();
 
@@ -63,7 +63,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     return synthInstance;
   };
 
-  const LoadAudioContext = async () => {
+  const loadAudioContext = async () => {
     if (typeof window !== "undefined") {
       const audio = new AudioContext();
       await audio.audioWorklet.addModule(
@@ -75,7 +75,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     }
   };
 
-  const ProgramChangeEvent = (synth: Synthetizer) => {
+  const synthProgramChange = (synth: Synthetizer) => {
     synth.eventHandler.addEvent("programchange", "", (e) => {
       const channel: number = e.channel;
       const program: number = e.program;
@@ -86,7 +86,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     });
   };
 
-  const LoadSoundMeter = async (synth: Synthetizer, audio: AudioContext) => {
+  const loadSoundMeter = async (synth: Synthetizer, audio: AudioContext) => {
     const newAnalysers: AnalyserNode[] = [];
     for (let i = 0; i < 16; i++) {
       const analyser = audio.createAnalyser();
@@ -113,20 +113,20 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   };
 
   const setup = async () => {
-    const myAudio = await LoadAudioContext();
+    const myAudio = await loadAudioContext();
     if (!myAudio) {
       return;
     }
-    const spessasynth = await LoadSoundFontPlayer(myAudio);
+    const spessasynth = await loadSoundFontPlayer(myAudio);
     if (!spessasynth) {
       return;
     }
-    const player = await LoadPlayer(spessasynth);
-    LoadSoundMeter(spessasynth, myAudio);
+    const player = await loadPlayer(spessasynth);
+    loadSoundMeter(spessasynth, myAudio);
     setAudio(myAudio);
     setSynth(spessasynth);
     setPlayer(player);
-    ProgramChangeEvent(spessasynth);
+    synthProgramChange(spessasynth);
     await myAudio.resume();
   };
 

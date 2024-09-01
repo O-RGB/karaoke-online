@@ -47,7 +47,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   }
 
   return (
-    <div className="p-4 bg-gray-100 min-h-screen">
+    <div className="p-4 bg-slate-800 min-h-screen">
       <VolumePanel
         audioGain={audioGain}
         instrument={instrument}

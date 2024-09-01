@@ -19,13 +19,13 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
       <div className="text-center text-white">สแกนเพื่อควบคุม</div>
       <a
         className="flex items-center justify-center"
-        href={`https://my-test-project-seven.vercel.app/remote/super/${hostId}`}
+        href={`http://localhost:3000/remote/super/${hostId}`}
         target="_blank"
         rel="noopener noreferrer"
       >
         {hostId && (
           <Canvas
-            text={`https://my-test-project-seven.vercel.app/remote/super/${hostId}`}
+            text={`http://localhost:3000/remote/super/${hostId}`}
             options={{
               errorCorrectionLevel: "M",
               margin: 3,

@@ -38,7 +38,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({ lyrics }) => {
           return (
             <div
               key={`lyr-index-${index}`}
-              className="flex flex-col py-7 items-center justify-center text-white"
+              className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg"
             >
               <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
                 {top}

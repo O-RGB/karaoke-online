@@ -52,7 +52,7 @@ export default function RootLayout({
           <SpessasynthProvider>
             <MixerProvider>
               <body className={`${inter.className} p-2.5 bg-slate-500 `}>
-                <div className="fixed w-screen h-screen top-0 left-0 -z-20 bg-[url('https://picsum.photos/1920/1080')] object-cover object-center opacity-50"></div>
+                <div className="fixed w-screen h-screen top-0 left-0 -z-20  bg-[url('/test.png')] bg-cover bg-center opacity-50"></div>
                 {children}
               </body>
             </MixerProvider>

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, FC, useEffect, useRef, useState } from "react";
+import { createContext, FC, useEffect, useState } from "react";
 import { useSynth } from "../hooks/spessasynth-hooks";
 import { useRemote } from "../hooks/peer-hooks";
 import { volumeChange } from "@/lib/mixer";
@@ -69,6 +69,18 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
   // --- Lyrics
   const [lyrics, setLyrics] = useState<string[]>([]);
 
+  const synthEventController = () => {
+    // synth?.eventHandler.addEvent("controllerchange", "", (e) => {
+    //   const controllerNumber = e.controllerNumber;
+    //   const controllerValue = e.controllerValue;
+    //   const channel = e.channel;
+
+    //   if (controllerNumber === 7) {
+    //     // updateVolume(channel, controllerValue);
+    //     // volumeChange(channel, controllerValue, synth);
+    //   }
+    // });
+  };
   const setLyricsHandle = (lyr: string[]) => {
     setLyrics(lyr);
   };
@@ -159,6 +171,10 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
   useEffect(() => {
     eventRemote(messages?.from, messages?.content);
   }, [messages?.content]);
+
+  useEffect(() => {
+    synthEventController();
+  }, [synth]);
 
   return (
     <MixerContext.Provider
