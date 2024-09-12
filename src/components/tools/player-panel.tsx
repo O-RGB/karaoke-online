@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
@@ -9,16 +9,40 @@ import RangeBar from "../common/input-data/range-bar";
 import { Sequencer } from "spessasynth_lib";
 import ContextModal from "../modal/context-modal";
 import { FiSettings } from "react-icons/fi";
+import { getMidiInfo, getTicks } from "@/lib/mixer";
 
 interface PlayerPanelProps {
   player: Sequencer;
-  modalMap: Map<ModalType, React.ReactNode>;
+  modalMap: ModalComponents;
 }
 
-const PlayerPanel: React.FC<PlayerPanelProps> = ({ player, modalMap }) => {
+const PlayerPanel: React.FC<PlayerPanelProps> = ({
+  player,
+  modalMap,
+  // cursor,
+}) => {
+  // const [ticks, setTicks] = useState<number>(0);
+  // const [curTime, setCur] = useState<number>(0);
   const timer = Math.round((player.currentTime / player.duration) * 100);
 
-  useEffect(() => {}, [player.paused]);
+  // const calculateTicksFromCur = () => {
+  //   const midInfo = getMidiInfo(player);
+  //   cursor = cursor.map((data) => data * ((midInfo?.ticksPerBeat ?? 0) / 24));
+  //   console.log(cursor);
+  // };
+
+  // const MidiTickCalculator = () => {
+  //   const tick = getTicks(player);
+  //   setTicks(tick ?? 0);
+  // };
+
+  // useEffect(() => {
+  //   MidiTickCalculator();
+  // }, [player.currentTime]);
+
+  // useEffect(() => {
+  //   calculateTicksFromCur();
+  // }, [player.paused]);
 
   return (
     <>
@@ -63,7 +87,22 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ player, modalMap }) => {
               }}
             ></RangeBar>
           </div>
+          {/* <div className="flex gap-2">
+            <div className="p-1 border text-white overflow-hidden text-nowrap">
+              currentTime: {Math.round(player.currentTime)}
+            </div>
+            <div className="p-1 border text-white overflow-hidden text-nowrap">
+              duration: {Math.round(player.duration)}
+            </div>
+            <div className="p-1 border text-white overflow-hidden text-nowrap">
+              ticks: {Math.round(ticks)}
+            </div>
+            <div className="p-1 border text-white overflow-hidden text-nowrap">
+              curTime: {Math.round(curTime)}
+            </div>
+          </div> */}
         </div>
+
         <div>
           <ContextModal leftClick modal={modalMap} className="">
             <Button

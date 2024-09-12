@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useLayoutEffect } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { useSynth } from "@/hooks/spessasynth-hooks";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
@@ -22,7 +22,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     setTracklistFile,
     loadAndPlaySong,
     setMusicLibraryFile,
+    ticks,
+    cursorIndices,
     lyrics,
+    cursorTicks,
     tracklist,
     musicLibrary,
   } = useMixer();
@@ -35,14 +38,13 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     return <></>;
   }
 
-  const modalMap = new Map<ModalType, ReactNode>([
-    ["SOUNDFONT_MODEL", <SoundfontManager synth={synth}></SoundfontManager>],
-    ["JOIN", <HostRemote></HostRemote>],
-    ["SUPER_JOIN", <SuperHostRemote></SuperHostRemote>],
-    ["SUPER_JOIN", <SuperHostRemote></SuperHostRemote>],
-    ["MUSIC_LOADED", <SuperHostRemote></SuperHostRemote>],
-    ["MUSIC_STORE", <SuperHostRemote></SuperHostRemote>],
-  ]);
+  const modalMap: ModalComponents = {
+    SOUNDFONT_MODEL: <SoundfontManager synth={synth}></SoundfontManager>,
+    JOIN: <HostRemote></HostRemote>,
+    SUPER_JOIN: <SuperHostRemote></SuperHostRemote>,
+    MUSIC_LOADED: <SuperHostRemote></SuperHostRemote>,
+    MUSIC_STORE: <SuperHostRemote></SuperHostRemote>,
+  };
 
   return (
     <ContextModal modal={modalMap}>
@@ -61,8 +63,18 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         tracklist={tracklist}
         onClickSong={loadAndPlaySong}
       ></SearchSong>
-      <LyricsPanel lyrics={lyrics}></LyricsPanel>
-      <PlayerPanel modalMap={modalMap} player={player}></PlayerPanel>
+      <LyricsPanel
+        lyrics={lyrics}
+        cursorIndices={cursorIndices}
+        cursorTicks={cursorTicks}
+        player={player}
+        // ticks={ticks}
+      ></LyricsPanel>
+      <PlayerPanel
+        modalMap={modalMap}
+        player={player}
+        // cursor={cursor}
+      ></PlayerPanel>
     </ContextModal>
   );
 };

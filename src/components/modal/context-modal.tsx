@@ -10,7 +10,7 @@ import { BiFolder } from "react-icons/bi";
 
 interface ContextModalProps {
   children?: ReactNode;
-  modal?: Map<ModalType, ReactNode>;
+  modal?: ModalComponents;
   className?: string | undefined;
   leftClick?: boolean;
 }
@@ -25,7 +25,7 @@ const ContextModal: React.FC<ContextModalProps> = ({
   const [RenderModal, setRenderModal] = useState<React.ReactNode>();
   const [title, setTitle] = useState<ReactNode>();
   const handleSelectContext = (name: ModalType, title: ReactNode) => {
-    const render = modal?.get(name);
+    const render = modal ? modal[name] : undefined;
     if (render) {
       setRenderModal(render);
       setOpen(true);

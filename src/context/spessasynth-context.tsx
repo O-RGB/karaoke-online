@@ -51,7 +51,6 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   const loadSoundFontPlayer = async (audio: AudioContext) => {
     const res = await fetch(DEFAULT_SOUND_FONT);
     const ab = await res.arrayBuffer();
-
     const synthInstance = new Synthetizer(audio.destination, ab);
 
     // Default Setting

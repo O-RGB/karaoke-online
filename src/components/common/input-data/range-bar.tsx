@@ -40,7 +40,6 @@ const RangeBar: React.FC<RangeBarProps> = ({
   };
 
   useEffect(() => {
-    console.log("RangeBar");
   }, [value]);
 
   return (

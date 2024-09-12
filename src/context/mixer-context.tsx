@@ -3,12 +3,13 @@
 import { createContext, FC, useEffect, useState } from "react";
 import { useSynth } from "../hooks/spessasynth-hooks";
 import { useRemote } from "../hooks/peer-hooks";
-import { volumeChange } from "@/lib/mixer";
+import { getMidiInfo, getTicks, volumeChange } from "@/lib/mixer";
 import TrieSearch from "trie-search";
 import { addSongList, onSearchList } from "@/lib/trie-search";
 
-import { MIDI } from "spessasynth_lib";
+import { MIDI, Sequencer } from "spessasynth_lib";
 import { loadSuperZipAndExtractSong } from "@/lib/zip";
+import { convertCursorToTicks, mapCursorToIndices } from "@/lib/karaoke/cur";
 
 type MixerContextType = {
   updateVolume: (index: number, value: number) => void;
@@ -16,14 +17,17 @@ type MixerContextType = {
   setTracklistFile: (file: File) => Promise<void>;
   setPlayingTrackFile: (value: SearchResult) => void;
   setMusicLibraryFile: (files: Map<string, File>) => void;
-  setLyricsHandle: (lyr: string[]) => void;
+  handleSetLyrics: (lyr: string[]) => void;
   setSongPlaying: (files: SongFilesDecode) => Promise<void>;
   loadAndPlaySong: (value: SearchResult) => Promise<void>;
-  lyrics: string[];
   musicLibrary: Map<string, File>;
   tracklist: TrieSearch<SearchResult> | undefined;
   playingTrack: SearchResult | undefined;
   volumeController: number[];
+  cursorIndices: Map<number, number[]> | undefined;
+  lyrics: string[];
+  cursorTicks: number[];
+  ticks: number;
 };
 
 type MixerProviderProps = {
@@ -36,11 +40,14 @@ export const MixerContext = createContext<MixerContextType>({
   setTracklistFile: async () => {},
   setPlayingTrackFile: async () => {},
   setMusicLibraryFile: async () => {},
-  setLyricsHandle: () => {},
+  handleSetLyrics: () => {},
   setSongPlaying: async () => {},
   loadAndPlaySong: async () => {},
   lyrics: [],
+  cursorTicks: [],
+  ticks: 0,
   musicLibrary: new Map(),
+  cursorIndices: new Map(),
   tracklist: undefined,
   playingTrack: undefined,
   volumeController: [],
@@ -68,21 +75,36 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
   const [playingTrack, setPlayingTrack] = useState<SearchResult>();
   // --- Lyrics
   const [lyrics, setLyrics] = useState<string[]>([]);
+  const [cursorTicks, setCursor] = useState<number[]>([]);
+  const [cursorIndices, setCursorIndices] = useState<Map<number, number[]>>();
+  const [ticks, setTicks] = useState<number>(0);
 
   const synthEventController = () => {
-    // synth?.eventHandler.addEvent("controllerchange", "", (e) => {
-    //   const controllerNumber = e.controllerNumber;
-    //   const controllerValue = e.controllerValue;
-    //   const channel = e.channel;
-
-    //   if (controllerNumber === 7) {
-    //     // updateVolume(channel, controllerValue);
-    //     // volumeChange(channel, controllerValue, synth);
-    //   }
-    // });
+    synth?.eventHandler.addEvent("controllerchange", "", (e) => {
+      const controllerNumber = e.controllerNumber;
+      const controllerValue = e.controllerValue;
+      const channel = e.channel;
+      if (controllerNumber === 7) {
+        // updateVolume(channel, controllerValue);
+        // volumeChange(channel, controllerValue, synth);
+      }
+    });
   };
-  const setLyricsHandle = (lyr: string[]) => {
+  const handleSetLyrics = (lyr: string[]) => {
+    console.log(lyr)
     setLyrics(lyr);
+  };
+
+  const handleSetCursor = (ticksPerBeat: number, cursor: number[]) => {
+    if (!player) {
+      return;
+    }
+
+    const cur = convertCursorToTicks(ticksPerBeat, cursor);
+    console.log(player);
+    const curMapping = mapCursorToIndices(cur);
+    setCursorIndices(curMapping);
+    setCursor(cur);
   };
 
   const setMusicLibraryFile = (files: Map<string, File>) => {
@@ -118,8 +140,12 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
     }
     const midiFileArrayBuffer = await files.mid.arrayBuffer();
     const parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
-    player?.loadNewSongList([parsedMidi]);
-    setLyricsHandle(files.lyr);
+    player.loadNewSongList([parsedMidi]);
+
+    const timeDivision = parsedMidi.timeDivision;
+    handleSetLyrics([]);
+    handleSetLyrics(files.lyr);
+    handleSetCursor(timeDivision, files.cur);
   };
 
   const loadAndPlaySong = async (value: SearchResult) => {
@@ -180,18 +206,21 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
     <MixerContext.Provider
       value={{
         updateVolume,
-        volumeController,
         setTracklistFile,
         onSearchStrList,
         setPlayingTrackFile,
         setMusicLibraryFile,
-        setLyricsHandle,
+        handleSetLyrics,
         setSongPlaying,
+        loadAndPlaySong,
+        volumeController,
         lyrics,
+        ticks,
+        cursorTicks,
         musicLibrary,
         tracklist,
         playingTrack,
-        loadAndPlaySong,
+        cursorIndices,
       }}
     >
       <>{children}</>

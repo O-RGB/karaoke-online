@@ -1,55 +1,78 @@
 "use client";
+import { convertCursorToTicks, mapCursorToIndices } from "@/lib/karaoke/cur";
+import { getTicks } from "@/lib/mixer";
 import React, { useEffect, useState } from "react";
+import { Sequencer } from "spessasynth_lib";
 
 interface LyricsPanelProps {
   lyrics?: string[];
+  player: Sequencer;
+  cursorIndices?: Map<number, number[]>;
+  cursorTicks?: number[];
 }
 
-const LyricsPanel: React.FC<LyricsPanelProps> = ({ lyrics }) => {
-  const [lyrScreen, setLyrScreen] = useState<string[][]>([]);
+const LyricsPanel: React.FC<LyricsPanelProps> = ({
+  lyrics,
+  player,
+  cursorIndices,
+  cursorTicks = [],
+}) => {
+  const [lyricsDisplay, setLyricsDisplay] = useState<string>("");
+  const [currentLyricIndex, setCurrentLyricIndex] = useState<number>(0);
 
-  function splitArrayIntoPairs<T>(array: T[]): T[][] {
-    const result: T[][] = [];
+  const updateTick = () => {
+    const tick = getTicks(player) ?? 0;
 
-    for (let i = 0; i < array.length; i += 2) {
-      result.push(array.slice(i, i + 2));
-    }
+    const targetTick = cursorTicks[currentLyricIndex];
+    if (targetTick <= tick) {
+      setCurrentLyricIndex((prevIndex) => prevIndex + 1);
 
-    return result;
-  }
+      const charIndices = cursorIndices?.get(targetTick);
+      if (lyrics) {
+        charIndices?.forEach((charIndex) => {
+          let lineIndex = 0;
+          let adjustedCharIndex = charIndex;
+          const lyricLines = lyrics.slice(4);
 
-  const testRun = () => {
-    if (lyrics) {
-      const res = splitArrayIntoPairs(lyrics);
-      setLyrScreen(res);
+          while (adjustedCharIndex >= lyricLines[lineIndex].length) {
+            adjustedCharIndex -= lyricLines[lineIndex].length + 1;
+            lineIndex++;
+          }
+
+          setLyricsDisplay(lyricLines[lineIndex]);
+        });
+      }
     }
   };
+  useEffect(() => {
+    if (cursorTicks && cursorIndices) {
+      const intervalId = setInterval(updateTick, 100);
+
+      if (player.paused) {
+        clearInterval(intervalId);
+        return;
+      }
+      return () => clearInterval(intervalId);
+    }
+  }, [player.paused, currentLyricIndex, cursorTicks, cursorIndices]);
 
   useEffect(() => {
-    testRun();
+    if (lyrics) {
+      if (lyrics.length > 0) {
+        setLyricsDisplay(lyrics[0]);
+      }
+    }
   }, [lyrics]);
 
-  // ทำ UI เทสเท่านั้น
   return (
-    <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 ">
-      <div className=" w-full h-56 lg:h-72 blur-overlay border blur-border rounded-lg p-2  text-xl md:text-3xl lg:text-6xl text-center overflow-auto">
-        {lyrScreen?.map((data, index) => {
-          const [top, bottom] = data;
-          return (
-            <div
-              key={`lyr-index-${index}`}
-              className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg"
-            >
-              <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
-                {top}
-              </span>{" "}
-              <br />
-              <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
-                {bottom}
-              </span>
-            </div>
-          );
-        })}
+    <div className="fixed  bottom-20 lg:bottom-16 left-0 w-full px-5 ">
+      <div className="text-[8px] w-64"></div>
+      <div className="relative w-full h-56 lg:h-72 blur-overlay border blur-border rounded-lg p-2  text-xl md:text-3xl lg:text-6xl text-center overflow-auto [&::-webkit-scrollbar]:hidden">
+        <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
+          <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
+            {lyricsDisplay}
+          </span>{" "}
+        </div>
       </div>
     </div>
   );

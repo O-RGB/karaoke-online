@@ -14,6 +14,10 @@ type ModalType =
   | "MUSIC_LOADED"
   | "MUSIC_STORE";
 
+type ModalComponents = {
+  [key in ModalType]?: React.ReactNode;
+};
+
 type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
