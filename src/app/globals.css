@@ -13,6 +13,18 @@ body {
   @apply bg-white/0 backdrop-blur-md;
 }
 
-.blur-border{
-  @apply border-white/50
+.blur-border {
+  @apply border-white/50;
+}
+
+@layer base {
+  .font-outline-2 {
+    -webkit-text-stroke: 2px black;
+  }
+  .font-outline-4 {
+    -webkit-text-stroke: 4px ;
+  }
+  .font-outline-8 {
+    -webkit-text-stroke: 8px ;
+  }
 }
