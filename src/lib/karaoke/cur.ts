@@ -1,6 +1,3 @@
-import { Sequencer } from "spessasynth_lib";
-import { getMidiInfo } from "../mixer";
-
 export const readCursorFile = async (file: File) => {
   try {
     const data = await file.arrayBuffer();
@@ -34,11 +31,12 @@ export const convertCursorToTicks = (
   cursor: number[]
 ) => {
   // const midInfo = getMidiInfo(player);
-  // if (midInfo?.ticksPerBeat === 0) {
-  //   console.error(midInfo)
-  //   return [];
-  // }
-  let curOnTick = cursor.map((data) => data * ((ticksPerBeat ?? 1) / 24));
+  if (ticksPerBeat === 0) {
+    console.error("ticksPerBeat = 0");
+    return [];
+  }
+
+  let curOnTick = cursor.map((data) => data * (ticksPerBeat / 24));
   return curOnTick;
 };
 
