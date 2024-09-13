@@ -1,7 +1,6 @@
 "use client";
 import { groupThaiCharacters } from "@/lib/karaoke/ncn";
 import { getTicks } from "@/lib/mixer";
-import { lengthOfThaiString } from "@praphan.o/thai-sentence-cut";
 import React, { useEffect, useState } from "react";
 import { Sequencer } from "spessasynth_lib";
 import LyricsAnimation from "../common/lyrics-animation";
