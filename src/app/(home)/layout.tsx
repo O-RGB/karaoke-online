@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_Thai_Looped } from "next/font/google";
 import "../globals.css";
 import { SpessasynthProvider } from "../../context/spessasynth-context";
 import AllowSound from "@/components/tools/allow-sound";
@@ -7,7 +7,10 @@ import AllowSound from "@/components/tools/allow-sound";
 import { PeerProvider } from "../../context/remote-context";
 import { AppControlProvider } from "@/context/app-control-context";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Noto_Sans_Thai_Looped({
+  weight: "400",
+  subsets: ["latin", "thai", "latin-ext"],
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -48,18 +51,16 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       </head>
 
-      <AllowSound>
-        <PeerProvider>
-          <SpessasynthProvider>
-            <AppControlProvider>
-              <body className={`${inter.className} p-2.5 bg-slate-500 `}>
-                <div className="fixed w-screen h-screen top-0 left-0 -z-20  bg-[url('/wallpaper-2.jpeg')] bg-cover bg-center opacity-50"></div>
-                {children}
-              </body>
-            </AppControlProvider>
-          </SpessasynthProvider>
-        </PeerProvider>
-      </AllowSound>
+      <body className={`relative ${inter.className} p-2.5 bg-slate-500 `}>
+        <div className="fixed w-screen h-screen top-0 left-0 -z-20  bg-[url('/wallpaper-2.jpeg')] bg-cover bg-center opacity-50"></div>
+        <AllowSound>
+          <PeerProvider>
+            <SpessasynthProvider>
+              <AppControlProvider>{children}</AppControlProvider>
+            </SpessasynthProvider>
+          </PeerProvider>
+        </AllowSound>
+      </body>
     </html>
   );
 }

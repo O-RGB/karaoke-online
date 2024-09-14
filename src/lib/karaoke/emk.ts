@@ -2,7 +2,7 @@ import * as zlib from "zlib";
 
 export async function parseEMKFile(
   file: File
-): Promise<{ mid: string; lyr: string; cur: Uint8Array | null }> {
+): Promise<{ mid?: File; lyr?: File; cur?: File }> {
   const arrayBuffer = await file.arrayBuffer();
   const data = new Uint8Array(arrayBuffer);
   const xorKey = new Uint8Array([
@@ -88,9 +88,9 @@ export async function parseEMKFile(
     }
   };
 
-  let mid = "";
-  let lyr = "";
-  let cur: Uint8Array | null = null;
+  let mid: File | undefined = undefined;
+  let lyr: File | undefined = undefined;
+  let cur: File | undefined = undefined;
 
   const extractData = (): void => {
     const magic = new Uint8Array([0x53, 0x46, 0x44, 0x53]); // SFDS
@@ -116,13 +116,15 @@ export async function parseEMKFile(
 
       switch (tag) {
         case "MIDI_DATA":
-          mid = Buffer.from(rawData).toString("base64");
+          mid = new File([rawData], "midi_data.mid", { type: "audio/midi" });
           break;
         case "LYRIC_DATA":
-          lyr = new TextDecoder("windows-874").decode(rawData);
+          lyr = new File([rawData], "lyric_data.lyr", { type: "text/plain" });
           break;
         case "CURSOR_DATA":
-          cur = new Uint8Array(rawData);
+          cur = new File([rawData], "cursor_data.cur", {
+            type: "application/octet-stream",
+          });
           break;
       }
     }

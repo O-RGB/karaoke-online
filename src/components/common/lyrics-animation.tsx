@@ -11,21 +11,21 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
 }) => {
   useEffect(() => {}, [display, charIndex]);
   return (
-    <div className="flex">
+    <div className="flex gap-[1px] text-lg md:text-3xl lg:text-6xl">
       {display.map((data, index) => {
         const lyrInx =
           display.slice(0, index).reduce((a, b) => a + b.length, 0) + 1;
         return (
           <div className="relative" key={`char-${index}`}>
             <div
-              className={`absolute top-0 left-0 font-outline-4 transition-all  ${
+              className={`absolute top-0 left-0 font-outline-2 sm:font-outline-4 transition-all ${
                 lyrInx <= charIndex ? "text-white" : "text-black"
               }`}
             >
               {data.join("")}
             </div>
             <div
-              className={`relative flex flex-col text-center transition-all `}
+              className={`relative flex flex-col text-center transition-all`}
               style={{
                 color: lyrInx <= charIndex ? "blue" : "yellow",
               }}

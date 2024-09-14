@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect } from "react";
 import { useSynth } from "@/hooks/spessasynth-hooks";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
@@ -23,7 +23,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     setTracklistFile,
     loadAndPlaySong,
     setMusicLibraryFile,
-    ticks,
+    setSongPlaying,
     cursorIndices,
     lyrics,
     cursorTicks,
@@ -70,13 +70,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         cursorIndices={cursorIndices}
         cursorTicks={cursorTicks}
         player={player}
-        // ticks={ticks}
+        setSongPlaying={setSongPlaying}
       ></LyricsPanel>
-      <PlayerPanel
-        modalMap={modalMap}
-        player={player}
-        // cursor={cursor}
-      ></PlayerPanel>
+      <PlayerPanel modalMap={modalMap} player={player}></PlayerPanel>
     </ContextModal>
   );
 };

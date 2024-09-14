@@ -29,7 +29,7 @@ type AppControlContextType = {
   cursorIndices: Map<number, number[]> | undefined;
   lyrics: string[];
   cursorTicks: number[];
-  ticks: number;
+  // ticks: number;
 };
 
 type AppControlProviderProps = {
@@ -47,7 +47,7 @@ export const AppControlContext = createContext<AppControlContextType>({
   loadAndPlaySong: async () => {},
   lyrics: [],
   cursorTicks: [],
-  ticks: 0,
+  // ticks: 0,
   musicLibrary: new Map(),
   cursorIndices: new Map(),
   tracklist: undefined,
@@ -55,7 +55,9 @@ export const AppControlContext = createContext<AppControlContextType>({
   volumeController: [],
 });
 
-export const AppControlProvider: FC<AppControlProviderProps> = ({ children }) => {
+export const AppControlProvider: FC<AppControlProviderProps> = ({
+  children,
+}) => {
   const { synth, player } = useSynth();
   const { messages, sendMessage } = useRemote();
 
@@ -79,7 +81,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({ children }) =>
   const [lyrics, setLyrics] = useState<string[]>([]);
   const [cursorTicks, setCursor] = useState<number[]>([]);
   const [cursorIndices, setCursorIndices] = useState<Map<number, number[]>>();
-  const [ticks, setTicks] = useState<number>(0);
+  // const [ticks, setTicks] = useState<number>(0);
 
   const synthEventController = () => {
     synth?.eventHandler.addEvent("controllerchange", "", (e) => {
@@ -217,7 +219,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({ children }) =>
         loadAndPlaySong,
         volumeController,
         lyrics,
-        ticks,
+        // ticks,
         cursorTicks,
         musicLibrary,
         tracklist,
