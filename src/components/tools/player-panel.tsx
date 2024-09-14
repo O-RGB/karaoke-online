@@ -9,7 +9,7 @@ import RangeBar from "../common/input-data/range-bar";
 import { Sequencer } from "spessasynth_lib";
 import ContextModal from "../modal/context-modal";
 import { FiSettings } from "react-icons/fi";
-import { getMidiInfo, getTicks } from "@/lib/mixer";
+import { getMidiInfo, getTicks } from "@/lib/app-control";
 
 interface PlayerPanelProps {
   player: Sequencer;

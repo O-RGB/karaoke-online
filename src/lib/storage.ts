@@ -2,7 +2,6 @@ import { STORAGE_NAME } from "@/config/value";
 import { getDB } from "@/utils/database/db";
 import { directoryOpen } from "browser-fs-access";
 import { ExtractFile } from "./zip";
-import TrieSearch from "trie-search";
 
 // ON RAM
 
@@ -20,13 +19,7 @@ const filterFileUse = (fileList: File[]) => {
       musicLibrary.set(filename, item);
     }
   });
-  console.log("tracklist ", tracklist);
   return { musicLibrary, tracklist: tracklist };
-  // if (tracklist) {
-  //   return { musicLibrary, tracklist: tracklist as File };
-  // } else {
-  //   return undefined;
-  // }
 };
 
 export const loadFileSystem = async () => {

@@ -1,7 +1,7 @@
 import { Viewport, Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
-import { MixerProvider } from "@/context/mixer-context";
+import { AppControlProvider } from "@/context/app-control-context";
 import { PeerProvider } from "@/context/remote-context";
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,9 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <PeerProvider>
-        <MixerProvider>
+        <AppControlProvider>
           <body>{children}</body>
-        </MixerProvider>
+        </AppControlProvider>
       </PeerProvider>
     </html>
   );

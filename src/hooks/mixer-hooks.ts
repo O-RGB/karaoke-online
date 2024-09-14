@@ -1,4 +1,5 @@
+import { AppControlContext } from "@/context/app-control-context";
 import { useContext } from "react";
-import { MixerContext } from "../context/mixer-context";
 
-export const useMixer = () => useContext(MixerContext);
+
+export const useMixer = () => useContext(AppControlContext);

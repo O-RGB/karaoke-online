@@ -1,7 +1,6 @@
 import { MID_FILE_TYPE, CUR_FILE_TYPE, LYR_FILE_TYPE } from "@/config/value";
 import JSZip from "jszip";
-import { readCursorFile } from "./karaoke/cur";
-import { readLyricsFile } from "./karaoke/ncn";
+import { readCursorFile, readLyricsFile } from "./karaoke/ncn";
 import { getSongBySuperKey } from "./storage";
 
 export const ExtractFile = async (zipFile: File): Promise<File[]> => {

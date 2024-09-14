@@ -1,12 +1,6 @@
 "use client";
-import React, {
-  createContext,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import React, { createContext, useLayoutEffect, useState } from "react";
 import Peer, { DataConnection } from "peerjs";
-import { remoteEncodeMessage } from "@/lib/remote";
 
 interface PeerContextType {
   normalPeer: Peer;
@@ -40,6 +34,13 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
     DataConnection[]
   >([]);
   const [messages, setMessages] = useState<{ from: string; content: any }>();
+
+  const remoteEncodeMessage = (data: any, type: SendType) => {
+    return {
+      data,
+      type,
+    };
+  };
 
   useLayoutEffect(() => {
     console.log("Initializing peers...");

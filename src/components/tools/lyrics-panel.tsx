@@ -1,9 +1,10 @@
 "use client";
-import { groupThaiCharacters } from "@/lib/karaoke/ncn";
-import { getTicks } from "@/lib/mixer";
+import { getTicks, groupThaiCharacters } from "@/lib/app-control";
 import React, { useEffect, useState } from "react";
 import { Sequencer } from "spessasynth_lib";
 import LyricsAnimation from "../common/lyrics-animation";
+import Upload from "../common/input-data/upload";
+import { parseEMKFile } from "@/lib/karaoke/emk";
 
 interface LyricsPanelProps {
   player: Sequencer;
@@ -87,6 +88,14 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
 
   return (
     <div className="fixed  bottom-20 lg:bottom-16 left-0 w-full px-5 ">
+      <Upload
+        onSelectFile={async (file) => {
+          const data = await parseEMKFile(file);
+          console.log(data);
+        }}
+      >
+        เลือก EMK FILE
+      </Upload>
       <div className="text-[8px] w-64"></div>
       <div className="relative w-full h-56 lg:h-72 blur-overlay border blur-border rounded-lg p-2  text-xl md:text-3xl lg:text-6xl text-center overflow-auto [&::-webkit-scrollbar]:hidden">
         <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">

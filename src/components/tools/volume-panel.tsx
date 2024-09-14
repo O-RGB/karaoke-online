@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import VolumeMeter from "../common/volume/volume-meter";
 import { Synthetizer } from "spessasynth_lib";
-import { volumeChange } from "@/lib/mixer";
+import { volumeChange } from "@/lib/app-control";
 import { useMixer } from "@/hooks/mixer-hooks";
 
 interface VolumePanelProps {

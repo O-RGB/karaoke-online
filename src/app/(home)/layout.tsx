@@ -3,8 +3,9 @@ import { Inter } from "next/font/google";
 import "../globals.css";
 import { SpessasynthProvider } from "../../context/spessasynth-context";
 import AllowSound from "@/components/tools/allow-sound";
-import { MixerProvider } from "../../context/mixer-context";
+
 import { PeerProvider } from "../../context/remote-context";
+import { AppControlProvider } from "@/context/app-control-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -50,12 +51,12 @@ export default function RootLayout({
       <AllowSound>
         <PeerProvider>
           <SpessasynthProvider>
-            <MixerProvider>
+            <AppControlProvider>
               <body className={`${inter.className} p-2.5 bg-slate-500 `}>
                 <div className="fixed w-screen h-screen top-0 left-0 -z-20  bg-[url('/wallpaper-2.jpeg')] bg-cover bg-center opacity-50"></div>
                 {children}
               </body>
-            </MixerProvider>
+            </AppControlProvider>
           </SpessasynthProvider>
         </PeerProvider>
       </AllowSound>

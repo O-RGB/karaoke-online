@@ -1,0 +1,97 @@
+import { MIDI, midiControllers, Sequencer, Synthetizer } from "spessasynth_lib";
+
+export const volumeChange = (
+  channel: number,
+  vol: number,
+  synth: Synthetizer
+) => {
+  synth.controllerChange(channel, midiControllers.mainVolume, vol);
+};
+
+export const getMidiInfo = (player: Sequencer) => {
+  const ticksPerBeat = player.midiData.timeDivision;
+  const tempoChanges = player.midiData.tempoChanges;
+  if (tempoChanges !== undefined && ticksPerBeat !== undefined) {
+    const tempo = tempoChanges[0].tempo;
+    return {
+      ticksPerBeat,
+      tempoChanges,
+      tempo,
+    };
+  }
+};
+
+export const getTicks = (player: Sequencer) => {
+  const midiInfo = getMidiInfo(player);
+  if (!midiInfo) {
+    return;
+  }
+  let secondsPerBeat = 60.0 / midiInfo.tempo;
+  let ticksPerSecond = midiInfo.ticksPerBeat / secondsPerBeat;
+  let ticks = player.currentTime * ticksPerSecond;
+  return Math.round(ticks);
+};
+
+export function groupThaiCharacters(text: string): string[][] {
+  const groups: string[][] = [];
+  let currentGroup: string[] = [];
+
+  // Regular expressions to match Thai consonants, vowels, and tonal marks
+  const consonantPattern = /[\u0E01-\u0E2E]/; // พยัญชนะไทย
+  const vowelPattern = /[\u0E31-\u0E3A]/; // สระและวรรณยุกต์ที่อยู่บนล่างหรือข้างพยัญชนะ
+  const toneMarkPattern = /[\u0E47-\u0E4C]/; // วรรณยุกต์ต่างๆ
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    // If character is a consonant, start a new group
+    if (consonantPattern.test(char)) {
+      if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+      }
+      currentGroup = [char];
+    }
+    // If character is a vowel or tone mark, add it to the current group
+    else if (vowelPattern.test(char) || toneMarkPattern.test(char)) {
+      currentGroup.push(char);
+    } else {
+      // In case of non-Thai characters, treat them separately
+      if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+        currentGroup = [];
+      }
+      groups.push([char]);
+    }
+  }
+
+  // Push the last group if there's any
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
+
+  return groups;
+}
+export const convertCursorToTicks = (
+  ticksPerBeat: number,
+  cursor: number[]
+) => {
+  if (ticksPerBeat === 0) {
+    console.error("ticksPerBeat = 0");
+    return [];
+  }
+
+  let curOnTick = cursor.map((data) => data * (ticksPerBeat / 24));
+  return curOnTick;
+};
+
+export const mapCursorToIndices = (cursorPositions: number[]) => {
+  const cursorMap = new Map<number, number[]>();
+
+  cursorPositions.forEach((tick, charIndex) => {
+    const indices = cursorMap.get(tick) || [];
+    indices.push(charIndex);
+    cursorMap.set(tick, indices);
+  });
+
+  return cursorMap;
+};

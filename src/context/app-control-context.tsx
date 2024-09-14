@@ -3,15 +3,17 @@
 import { createContext, FC, useEffect, useState } from "react";
 import { useSynth } from "../hooks/spessasynth-hooks";
 import { useRemote } from "../hooks/peer-hooks";
-import { getMidiInfo, getTicks, volumeChange } from "@/lib/mixer";
+import {
+  convertCursorToTicks,
+  mapCursorToIndices,
+  volumeChange,
+} from "@/lib/app-control";
 import TrieSearch from "trie-search";
 import { addSongList, onSearchList } from "@/lib/trie-search";
-
-import { MIDI, Sequencer } from "spessasynth_lib";
+import { MIDI } from "spessasynth_lib";
 import { loadSuperZipAndExtractSong } from "@/lib/zip";
-import { convertCursorToTicks, mapCursorToIndices } from "@/lib/karaoke/cur";
 
-type MixerContextType = {
+type AppControlContextType = {
   updateVolume: (index: number, value: number) => void;
   onSearchStrList: (str: string) => Promise<SearchResult[]> | undefined;
   setTracklistFile: (file: File) => Promise<void>;
@@ -30,11 +32,11 @@ type MixerContextType = {
   ticks: number;
 };
 
-type MixerProviderProps = {
+type AppControlProviderProps = {
   children: React.ReactNode;
 };
 
-export const MixerContext = createContext<MixerContextType>({
+export const AppControlContext = createContext<AppControlContextType>({
   updateVolume: () => {},
   onSearchStrList: async () => [],
   setTracklistFile: async () => {},
@@ -53,7 +55,7 @@ export const MixerContext = createContext<MixerContextType>({
   volumeController: [],
 });
 
-export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
+export const AppControlProvider: FC<AppControlProviderProps> = ({ children }) => {
   const { synth, player } = useSynth();
   const { messages, sendMessage } = useRemote();
 
@@ -91,7 +93,7 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
     });
   };
   const handleSetLyrics = (lyr: string[]) => {
-    console.log(lyr)
+    console.log(lyr);
     setLyrics(lyr);
   };
 
@@ -203,7 +205,7 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
   }, [synth]);
 
   return (
-    <MixerContext.Provider
+    <AppControlContext.Provider
       value={{
         updateVolume,
         setTracklistFile,
@@ -224,6 +226,6 @@ export const MixerProvider: FC<MixerProviderProps> = ({ children }) => {
       }}
     >
       <>{children}</>
-    </MixerContext.Provider>
+    </AppControlContext.Provider>
   );
 };

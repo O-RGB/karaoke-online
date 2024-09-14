@@ -7,42 +7,30 @@ export const readLyricsFile = async (file: File) => {
   return lines;
 };
 
-export function groupThaiCharacters(text: string): string[][] {
-  const groups: string[][] = [];
-  let currentGroup: string[] = [];
+export const readCursorFile = async (file: File) => {
+  try {
+    const data = await file.arrayBuffer();
+    const cursorData: number[] = [];
+    const view = new DataView(data);
 
-  // Regular expressions to match Thai consonants, vowels, and tonal marks
-  const consonantPattern = /[\u0E01-\u0E2E]/; // พยัญชนะไทย
-  const vowelPattern = /[\u0E31-\u0E3A]/; // สระและวรรณยุกต์ที่อยู่บนล่างหรือข้างพยัญชนะ
-  const toneMarkPattern = /[\u0E47-\u0E4C]/; // วรรณยุกต์ต่างๆ
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-
-    // If character is a consonant, start a new group
-    if (consonantPattern.test(char)) {
-      if (currentGroup.length > 0) {
-        groups.push(currentGroup);
+    let offset = 0;
+    while (offset < view.byteLength) {
+      const tmpByte1 = view.getUint8(offset);
+      if (offset + 1 < view.byteLength) {
+        const tmpByte2 = view.getUint8(offset + 1);
+        if (tmpByte2 === 0xff) {
+          break;
+        }
+        const value = tmpByte1 + tmpByte2 * 256;
+        cursorData.push(value);
+        offset += 2;
+      } else {
+        cursorData.push(tmpByte1);
+        offset += 1;
       }
-      currentGroup = [char];
     }
-    // If character is a vowel or tone mark, add it to the current group
-    else if (vowelPattern.test(char) || toneMarkPattern.test(char)) {
-      currentGroup.push(char);
-    } else {
-      // In case of non-Thai characters, treat them separately
-      if (currentGroup.length > 0) {
-        groups.push(currentGroup);
-        currentGroup = [];
-      }
-      groups.push([char]);
-    }
+    return cursorData;
+  } catch (error) {
+    console.error("Error loading cursor:", error);
   }
-
-  // Push the last group if there's any
-  if (currentGroup.length > 0) {
-    groups.push(currentGroup);
-  }
-
-  return groups;
-}
+};
