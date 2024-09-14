@@ -55,7 +55,7 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
 
   const onLoadFileSystem = async () => {
     const loaded = await loadFileSystem();
-    if (loaded) {
+    if (loaded && loaded.tracklist) {
       setTracklistFile(loaded.tracklist);
       setSongFile(loaded.tracklist);
       setMusicLibraryFile(loaded.musicLibrary);
@@ -66,7 +66,7 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
   const onLoadFileZip = async (_: File, fileList: FileList) => {
     setFileSystem(false);
     const loaded = await loadFileZip(fileList, setProgress);
-    if (loaded) {
+    if (loaded && loaded.tracklist) {
       setTracklistFile(loaded.tracklist);
       setSongFile(loaded.tracklist);
       setMusicLibraryFile(loaded.musicLibrary);

@@ -53,17 +53,23 @@ const ContextModal: React.FC<ContextModalProps> = ({
       type: "SUPER_JOIN",
     },
     {
-      icon: <BiFolder />,
-      text: "เพลง",
+      icon: <VscSettings />,
+      text: "เพิ่มเพลง",
       onClick: handleSelectContext,
-      type: "MUSIC_LOADED",
+      type: "ADD_MUSIC",
     },
-    {
-      icon: <BsDatabase />,
-      text: "ฐานข้อมูล",
-      onClick: handleSelectContext,
-      type: "MUSIC_LOADED",
-    },
+    // {
+    //   icon: <BiFolder />,
+    //   text: "เพลง",
+    //   onClick: handleSelectContext,
+    //   type: "MUSIC_LOADED",
+    // },
+    // {
+    //   icon: <BsDatabase />,
+    //   text: "ฐานข้อมูล",
+    //   onClick: handleSelectContext,
+    //   type: "MUSIC_LOADED",
+    // },
   ];
   return (
     <>

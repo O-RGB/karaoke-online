@@ -13,6 +13,7 @@ import WallcomeModal from "../modal/wallcome";
 import SoundfontManager from "../tools/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
+import AppendSongModal from "../modal/append-song";
 
 interface KaraokePageProps {}
 
@@ -44,6 +45,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     SUPER_JOIN: <SuperHostRemote></SuperHostRemote>,
     MUSIC_LOADED: <SuperHostRemote></SuperHostRemote>,
     MUSIC_STORE: <SuperHostRemote></SuperHostRemote>,
+    ADD_MUSIC: <AppendSongModal></AppendSongModal>,
   };
 
   return (

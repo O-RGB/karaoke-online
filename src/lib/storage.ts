@@ -21,11 +21,12 @@ const filterFileUse = (fileList: File[]) => {
     }
   });
   console.log("tracklist ", tracklist);
-  if (tracklist) {
-    return { musicLibrary, tracklist: tracklist as File };
-  } else {
-    return undefined;
-  }
+  return { musicLibrary, tracklist: tracklist };
+  // if (tracklist) {
+  //   return { musicLibrary, tracklist: tracklist as File };
+  // } else {
+  //   return undefined;
+  // }
 };
 
 export const loadFileSystem = async () => {
@@ -99,7 +100,7 @@ export const getSongBySuperKey = async (
 
 export const saveSongToStorage = async (
   files: Map<string, File>,
-  tracklist: File,
+  tracklist?: File,
   onProgress?: (progress?: IProgressBar) => void
 ) => {
   const countSuperZip = Array.from(files.values());
@@ -123,7 +124,9 @@ export const saveSongToStorage = async (
       error: error,
     });
   });
-  await objectStore.add(tracklist, tracklist.name);
+  if (tracklist) {
+    await objectStore.add(tracklist, tracklist.name);
+  }
   await tx.done;
   return true;
 };
