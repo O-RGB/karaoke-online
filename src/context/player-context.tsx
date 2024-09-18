@@ -70,7 +70,7 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
   const position = useRef<boolean>(true);
   const display = useRef<string[][]>([]);
   const displayBottom = useRef<string[][]>([]);
-  const interval = 0;
+  const interval = 80;
 
   const updateTick = (player: Sequencer, midi: MIDI) => {
     const tempoList = midi.tempoChanges.slice(0, -1).reverse();
@@ -123,7 +123,7 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
               lyricsIndex.current = lineIndex;
               position.current = !position.current;
             }
-            charIndex.current = adjustedCharIndex ;
+            charIndex.current = adjustedCharIndex + 1;
           });
         }
       }
@@ -131,12 +131,12 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
   };
 
   const loop = (currentTime: number) => {
-    // if (currentTime - lastTimeRef.current > interval) {
+    if (currentTime - lastTimeRef.current > interval) {
       if (player && midiPlaying) {
         updateTick(player, midiPlaying);
       }
       lastTimeRef.current = currentTime;
-    // }
+    }
     rafRef.current = requestAnimationFrame(loop);
   };
 
