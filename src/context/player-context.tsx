@@ -130,23 +130,37 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
     }
   };
 
-  const loop = (currentTime: number) => {
-    if (currentTime - lastTimeRef.current > interval) {
-      if (player && midiPlaying) {
-        updateTick(player, midiPlaying);
-      }
-      lastTimeRef.current = currentTime;
-    }
-    rafRef.current = requestAnimationFrame(loop);
-  };
+  // const loop = (currentTime: number) => {
+  //   if (currentTime - lastTimeRef.current > interval) {
+  //     if (player && midiPlaying) {
+  //       updateTick(player, midiPlaying);
+  //     }
+  //     lastTimeRef.current = currentTime;
+  //   }
+  //   rafRef.current = requestAnimationFrame(loop);
+  // };
 
+  // useEffect(() => {
+  //   loop(0);
+  //   return () => {
+  //     if (rafRef.current) {
+  //       cancelAnimationFrame(rafRef.current);
+  //     }
+  //   };
+  // }, [player?.paused === false]);
   useEffect(() => {
-    loop(0);
-    return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
+    let interval: NodeJS.Timeout;
+  
+    if (player && midiPlaying && player?.paused === false) {
+      const updateTickWithDelay = () => {
+        updateTick(player, midiPlaying); // ฟังก์ชันที่คุณต้องการเรียกใช้งาน
+        interval = setTimeout(updateTickWithDelay, 80); // รอ 1 วินาทีก่อนอัปเดตครั้งถัดไป
+      };
+  
+      updateTickWithDelay(); // เริ่มต้นการอัปเดตครั้งแรก
+    }
+  
+    return () => clearTimeout(interval); // เคลียร์ timeout เมื่อ useEffect ถูกทำลายหรือตัวแปรที่สังเกตการณ์เปลี่ยนแปลง
   }, [player?.paused === false]);
 
   useEffect(() => {
