@@ -18,6 +18,17 @@ interface IAudioGain {
   gain: number;
 }
 
+// Define types
+interface ITempoChange {
+  ticks: number;
+  tempo: number;
+}
+
+interface ITempoTimeChange {
+  time: number;
+  tempo: number;
+}
+
 type InstrumentsType =
   | "MdPiano"
   | "FaGuitar"

@@ -32,32 +32,15 @@ export const getTimeFromTicks = (
   return timeInSeconds;
 };
 
-export const getTicks = (
+export function getTicks(
   timeDivision: number,
   currentTime: number,
   tempo: number
-) => {
-  let secondsPerBeat = 60.0 / tempo;
-  let ticksPerSecond = timeDivision / secondsPerBeat;
-  let ticks = currentTime * ticksPerSecond;
-  console.log(`${ticks} = ${currentTime} * ${ticksPerSecond}, ${timeDivision}`);
-
-  return Math.round(ticks);
-};
-
- export const getTicksWithTempoChange = (
-  timeDivision: number,
-  currentTime: number,
-  tempo: number,
-  lastTempoChangeTime: number,
-  previousTick: number
-) => {
-  let elapsedTime = currentTime - lastTempoChangeTime;
-  let secondsPerBeat = 60.0 / tempo;
-  let ticksPerSecond = timeDivision / secondsPerBeat;
-  let ticksSinceLastTempoChange = elapsedTime * ticksPerSecond;
-  return Math.round(previousTick + ticksSinceLastTempoChange);
-};
+): number {
+  const secondsPerBeat = 60.0 / tempo;
+  const ticksPerSecond = timeDivision / secondsPerBeat;
+  return currentTime * ticksPerSecond;
+}
 
 export function groupThaiCharacters(text: string): string[][] {
   const groups: string[][] = [];
@@ -123,85 +106,47 @@ export const mapCursorToIndices = (cursorPositions: number[]) => {
   return cursorMap;
 };
 
-type TempoChange = {
-  ticks: number;
-  tempo: number;
-};
-
-export const sortTempoChanges = (tempoChanges: TempoChange[]): TempoChange[] => {
+export const sortTempoChanges = (
+  tempoChanges: ITempoChange[]
+): ITempoChange[] => {
   return [...tempoChanges].sort((a, b) => a.ticks - b.ticks);
 };
 
-const getTempoAtIndex = (sortedChanges: TempoChange[], index: number): number => {
-  return sortedChanges[Math.min(index, sortedChanges.length - 1)].tempo;
-};
-
-const convertBetweenTickAndTime = (
-  value: number,
-  tempo: number,
+export const ticksToTime = (
   timeDivision: number,
-  fromTicks: boolean
-): number => {
-  const secondsPerBeat = 60.0 / tempo;
-  return fromTicks
-    ? (value / timeDivision) * secondsPerBeat
-    : (value / secondsPerBeat) * timeDivision;
-};
-
-export const calculateTimeAtTick = (
-  targetTick: number,
-  sortedChanges: TempoChange[],
-  timeDivision: number
-): { time: number; tempo: number } => {
-  let currentTick = 0;
-  let currentTime = 0;
-  let currentTempoIndex = 0;
-
-  while (currentTempoIndex < sortedChanges.length && targetTick > currentTick) {
-    const nextChange = sortedChanges[currentTempoIndex];
-    const ticksToNextChange = Math.min(nextChange.ticks - currentTick, targetTick - currentTick);
-
-    const currentTempo = getTempoAtIndex(sortedChanges, currentTempoIndex);
-    currentTime += convertBetweenTickAndTime(ticksToNextChange, currentTempo, timeDivision, true);
-    currentTick += ticksToNextChange;
-
-    if (currentTick === nextChange.ticks) currentTempoIndex++;
+  tempoChanges: ITempoChange[]
+) => {
+  let timeChange: ITempoTimeChange[] = [];
+  for (let list of tempoChanges) {
+    const time = getTimeFromTicks(timeDivision, list.ticks, list.tempo);
+    timeChange.push({
+      tempo: list.tempo,
+      time: time,
+    });
   }
-
-  return {
-    time: currentTime,
-    tempo: getTempoAtIndex(sortedChanges, currentTempoIndex)
-  };
+  return timeChange;
 };
 
-export const calculateTickAtTime = (
-  targetTime: number,
-  sortedChanges: TempoChange[],
-  timeDivision: number
-): { tick: number; tempo: number } => {
-  let currentTick = 0;
-  let currentTime = 0;
-  let currentTempoIndex = 0;
+// Function to calculate ticks
+export function calculateTicks(
+  timeDivision: number,
+  currentTime: number,
+  tempoChanges: ITempoTimeChange[]
+) {
+  let ticks = 0;
+  let lastTime = 0;
+  let lastTempo = tempoChanges[0].tempo;
 
-  while (currentTempoIndex < sortedChanges.length && targetTime > currentTime) {
-    const currentTempo = getTempoAtIndex(sortedChanges, currentTempoIndex);
-    const nextChangeTick = sortedChanges[currentTempoIndex + 1]?.ticks ?? Infinity;
-
-    const timeToNextChange = convertBetweenTickAndTime(nextChangeTick - currentTick, currentTempo, timeDivision, true);
-
-    if (currentTime + timeToNextChange > targetTime) {
-      const remainingTime = targetTime - currentTime;
-      currentTick += convertBetweenTickAndTime(remainingTime, currentTempo, timeDivision, false);
-      return { tick: Math.round(currentTick), tempo: currentTempo };
+  for (const change of tempoChanges) {
+    if (currentTime > change.time) {
+      ticks += getTicks(timeDivision, change.time - lastTime, lastTempo);
+      lastTime = change.time;
+      lastTempo = change.tempo;
+    } else {
+      break;
     }
-
-    currentTime += timeToNextChange;
-    currentTick = nextChangeTick;
-    currentTempoIndex++;
   }
 
-  return {
-    tick: Math.round(currentTick),
-    tempo: getTempoAtIndex(sortedChanges, currentTempoIndex)
-  };
-};
+  ticks += getTicks(timeDivision, currentTime - lastTime, lastTempo);
+  return { tick: Math.round(ticks), tempo: lastTempo };
+}

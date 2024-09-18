@@ -1,9 +1,5 @@
 "use client";
-import {
-  calculateTickAtTime,
-  getTicks,
-  groupThaiCharacters,
-} from "@/lib/app-control";
+
 import React, { useEffect, useState } from "react";
 import { Sequencer } from "spessasynth_lib";
 import LyricsAnimation from "../common/lyrics-animation";
@@ -150,12 +146,14 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
             Char: {displayLyrics?.charIndex} <br />
             LyrTop:{" "}
             {JSON.stringify(
-              displayLyrics?.display.map((data) => data.join("")).join("").length
+              displayLyrics?.display.map((data) => data.join("")).join("")
+                .length
             )}{" "}
             <br />
             LyrBottom:{" "}
             {JSON.stringify(
-              displayLyrics?.displayBottom.map((data) => data.join("")).join("").length
+              displayLyrics?.displayBottom.map((data) => data.join("")).join("")
+                .length
             )}
           </div>
 
@@ -213,19 +211,25 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
           </div>
         )}
 
-       {displayLyrics &&  <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
-          <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
+        {displayLyrics && (
+          <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
+            <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
+              <LyricsAnimation
+                charIndex={
+                  displayLyrics.position === true ? displayLyrics.charIndex : -1
+                }
+                display={displayLyrics.display}
+              ></LyricsAnimation>
+            </span>
+            <br />
             <LyricsAnimation
-              charIndex={displayLyrics.position === true ? displayLyrics.charIndex : -1}
-              display={displayLyrics.display}
+              charIndex={
+                displayLyrics.position === false ? displayLyrics.charIndex : -1
+              }
+              display={displayLyrics.displayBottom}
             ></LyricsAnimation>
-          </span>
-          <br />
-          <LyricsAnimation
-            charIndex={displayLyrics.position === false ? displayLyrics.charIndex : -1}
-            display={displayLyrics.displayBottom}
-          ></LyricsAnimation>
-        </div>}
+          </div>
+        )}
 
         {/* {JSON.stringify(displayLyrics)} */}
       </div>

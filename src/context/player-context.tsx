@@ -2,9 +2,10 @@
 import { useAppControl } from "@/hooks/app-control-hook";
 import { useSynth } from "@/hooks/spessasynth-hook";
 import {
-  calculateTickAtTime,
+  calculateTicks,
   groupThaiCharacters,
   sortTempoChanges,
+  ticksToTime,
 } from "@/lib/app-control";
 import { createContext, FC, useEffect, useRef, useState } from "react";
 import { MIDI, Sequencer } from "spessasynth_lib";
@@ -40,18 +41,21 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
   const position = useRef<boolean>(true);
   const display = useRef<string[][]>([]);
   const displayBottom = useRef<string[][]>([]);
-  const interval = 80;
+  const interval = 200;
+
+  const tempoChanges = useRef<ITempoChange[]>([]);
+  const timeList = useRef<ITempoTimeChange[]>([]);
+  const timeDivision = useRef<number>(0);
 
   const updateTick = (player: Sequencer, midi: MIDI) => {
-    const tempoList = midi.tempoChanges.slice(0, -1).reverse();
-    if (tempoList.length > 0) {
-      const timeDivision = midi.timeDivision;
+    if (tempoChanges.current.length > 0) {
+      // const timeDivision = midi.timeDivision;
       const currentTime = player.currentTime;
-      const tempoChanges = sortTempoChanges(tempoList);
-      const { tick, tempo } = calculateTickAtTime(
+
+      const { tick, tempo } = calculateTicks(
+        timeDivision.current,
         currentTime,
-        tempoChanges,
-        timeDivision
+        timeList.current
       );
       setTick(tick);
       setTempo(tempo);
@@ -95,39 +99,55 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
     }
   };
 
-  const loop = (currentTime: number) => {
-    if (currentTime - lastTimeRef.current > interval) {
-      if (player && midiPlaying) {
-        updateTick(player, midiPlaying);
-      }
-      lastTimeRef.current = currentTime;
-    }
-    rafRef.current = requestAnimationFrame(loop);
-  };
+  // const loop = (currentTime: number) => {
+  //   if (currentTime - lastTimeRef.current > interval) {
+  //     if (player && midiPlaying) {
+  //       updateTick(player, midiPlaying);
+  //     }
+  //     lastTimeRef.current = currentTime;
+  //   }
+  //   rafRef.current = requestAnimationFrame(loop);
+  // };
+
+  // useEffect(() => {
+  //   loop(0);
+  //   return () => {
+  //     if (rafRef.current) {
+  //       cancelAnimationFrame(rafRef.current);
+  //     }
+  //   };
+  // }, [player?.paused === false]);
 
   useEffect(() => {
-    loop(0);
-    return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
+    let interval: NodeJS.Timeout;
+
+    if (player && midiPlaying && player?.paused === false) {
+      const updateTickWithDelay = () => {
+        updateTick(player, midiPlaying); // ฟังก์ชันที่คุณต้องการเรียกใช้งาน
+        interval = setTimeout(updateTickWithDelay, 100); // รอ 1 วินาทีก่อนอัปเดตครั้งถัดไป
+      };
+
+      updateTickWithDelay(); // เริ่มต้นการอัปเดตครั้งแรก
+    }
+
+    return () => clearTimeout(interval); // เคลียร์ timeout เมื่อ useEffect ถูกทำลายหรือตัวแปรที่สังเกตการณ์เปลี่ยนแปลง
   }, [player?.paused === false]);
 
   useEffect(() => {
     if (lyrics.length > 0) {
-      // setLyrDisplay([[lyrics[0]]]);
       display.current = [[lyrics[0]]];
     }
-    // setCurIdIndex(0);
     curIdIndex.current = 0;
     position.current = false;
     lyricsIndex.current = 0;
     charIndex.current = 0;
-    // setCharIndex(0);
-    // setPosition(false);
-    // setLyricsIndex(0);
-  }, [lyrics]);
+    timeDivision.current = midiPlaying?.timeDivision ?? 0;
+    let tempos = midiPlaying?.tempoChanges ?? [];
+    tempos = tempos.slice(0, -1).reverse();
+    tempos = sortTempoChanges(tempos);
+    tempoChanges.current = tempos;
+    timeList.current = ticksToTime(timeDivision.current, tempos);
+  }, [lyrics, midiPlaying]);
 
   return (
     <PlayerContext.Provider
