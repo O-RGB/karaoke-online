@@ -3,29 +3,13 @@ import { useAppControl } from "@/hooks/app-control-hook";
 import { useSynth } from "@/hooks/spessasynth-hook";
 import {
   calculateTickAtTime,
-  getTicks,
-  getTicksWithTempoChange,
-  getTimeFromTicks,
   groupThaiCharacters,
   sortTempoChanges,
 } from "@/lib/app-control";
-import {
-  createContext,
-  FC,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, FC, useEffect, useRef, useState } from "react";
 import { MIDI, Sequencer } from "spessasynth_lib";
 
 type PlayerContextType = {
-  //   handleSetLyrics: (lyr: string[]) => void;
-  //   setSongPlaying: (files: SongFilesDecode) => Promise<void>;
-  //   loadAndPlaySong: (value: SearchResult) => Promise<void>;
-  //   cursorIndices: Map<number, number[]> | undefined;
-  //   lyrics: string[];
-  //   cursorTicks: number[];
   tick: number;
   tempo: number;
   displayLyrics?: DisplayLyrics;
@@ -36,12 +20,6 @@ type PlayerProviderProps = {
 };
 
 export const PlayerContext = createContext<PlayerContextType>({
-  //   cursorIndices: undefined,
-  //   lyrics: [],
-  //   cursorTicks: [],
-  //   handleSetLyrics: () => undefined,
-  //   setSongPlaying: async () => undefined,
-  //   loadAndPlaySong: async () => undefined,
   displayLyrics: undefined,
   tick: 0,
   tempo: 0,
@@ -53,14 +31,6 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
 
   const [tick, setTick] = useState<number>(0);
   const [tempo, setTempo] = useState<number>(0);
-
-  // const [display, setLyrDisplay] = useState<string[][]>([[]]);
-  // const [displayBottom, setLyrDisplayBottom] = useState<string[][]>([[]]);
-
-  // const [position, setPosition] = useState<boolean>(true);
-  // const [lyricsIndex, setLyricsIndex] = useState<number>(0);
-  // const [curIdIndex, setCurIdIndex] = useState<number>(0);
-  // const [charIndex, setCharIndex] = useState<number>(0);
 
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
@@ -85,15 +55,11 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
       );
       setTick(tick);
       setTempo(tempo);
-      console.log("cursorTicks", cursorTicks);
       const targetTick = cursorTicks[curIdIndex.current];
-      console.log("targetTick", targetTick);
       if (targetTick <= tick) {
-        // setCurIdIndex((prevIndex) => prevIndex + 1);
         curIdIndex.current = curIdIndex.current + 1;
 
         const charIndices = cursorIndices?.get(targetTick);
-        console.log("charIndices", charIndices);
 
         if (charIndices) {
           charIndices.forEach((__charIndex) => {
@@ -119,7 +85,6 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
                   lyricLines[lineIndex + 1]
                 );
               }
-              // setLyricsIndex(lineIndex);
               lyricsIndex.current = lineIndex;
               position.current = !position.current;
             }
@@ -130,24 +95,24 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
     }
   };
 
-  // const loop = (currentTime: number) => {
-  //   if (currentTime - lastTimeRef.current > interval) {
-  //     if (player && midiPlaying) {
-  //       updateTick(player, midiPlaying);
-  //     }
-  //     lastTimeRef.current = currentTime;
-  //   }
-  //   rafRef.current = requestAnimationFrame(loop);
-  // };
+  const loop = (currentTime: number) => {
+    if (currentTime - lastTimeRef.current > interval) {
+      if (player && midiPlaying) {
+        updateTick(player, midiPlaying);
+      }
+      lastTimeRef.current = currentTime;
+    }
+    rafRef.current = requestAnimationFrame(loop);
+  };
 
-  // useEffect(() => {
-  //   loop(0);
-  //   return () => {
-  //     if (rafRef.current) {
-  //       cancelAnimationFrame(rafRef.current);
-  //     }
-  //   };
-  // }, [player?.paused === false]);
+  useEffect(() => {
+    loop(0);
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, [player?.paused === false]);
 
   useEffect(() => {
     if (lyrics.length > 0) {

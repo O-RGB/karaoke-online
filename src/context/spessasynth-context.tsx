@@ -62,17 +62,45 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     return synthInstance;
   };
 
-  const loadAudioContext = async () => {
+  // const loadAudioContext = async () => {
+  //   if (typeof window !== "undefined") {
+  //     const audio = new AudioContext();
+  //     await audio.audioWorklet.addModule(
+  //       new URL(WORKLET_URL_ABSOLUTE, window.location.origin).toString()
+  //     );
+  //     return audio;
+  //   } else {
+  //     return undefined;
+  //   }
+  // };
+
+  const loadAudioContext = async (): Promise<AudioContext | undefined> => {
     if (typeof window !== "undefined") {
-      const audio = new AudioContext();
-      await audio.audioWorklet.addModule(
-        new URL(WORKLET_URL_ABSOLUTE, window.location.origin).toString()
-      );
-      return audio;
+      try {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  
+        // Handle cases where the context is suspended initially (especially on mobile browsers)
+        if (audioContext.state === "suspended") {
+          await audioContext.resume();
+        }
+  
+        // Add the audio worklet module
+        await audioContext.audioWorklet.addModule(
+          new URL(WORKLET_URL_ABSOLUTE, window.location.origin).toString()
+        );
+  
+        return audioContext;
+      } catch (error) {
+        console.error("Error loading AudioContext or adding audio worklet:", error);
+        return undefined;
+      }
     } else {
+      console.warn("AudioContext cannot be loaded in this environment (not in browser).");
       return undefined;
     }
   };
+  
+  
 
   const synthProgramChange = (synth: Synthetizer) => {
     synth.eventHandler.addEvent("programchange", "", (e) => {
@@ -126,7 +154,10 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     setSynth(spessasynth);
     setPlayer(player);
     synthProgramChange(spessasynth);
-    await myAudio.resume();
+
+    if (myAudio.state === "suspended") {
+      await myAudio.resume();
+    }
   };
 
   useEffect(() => {

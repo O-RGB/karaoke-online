@@ -24,9 +24,9 @@ interface LyricsPanelProps {
   cursorIndices?: Map<number, number[]>;
   cursorTicks?: number[];
   setSongPlaying: (files: SongFilesDecode) => Promise<void>;
-  // tick: number;
+  tick: number;
   temp: number;
-  // displayLyrics?: DisplayLyrics;
+  displayLyrics?: DisplayLyrics;
 }
 
 const LyricsPanel: React.FC<LyricsPanelProps> = ({
@@ -35,92 +35,80 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
   cursorIndices,
   cursorTicks = [],
   setSongPlaying,
-  // tick,
+  tick,
   temp,
-  // displayLyrics,
+  displayLyrics,
 }) => {
-  const [display, setLyrDisplay] = useState<string[][]>([[]]);
-  const [displayBottom, setLyrDisplayBottom] = useState<string[][]>([[]]);
-  const [position, setPosition] = useState<boolean>(true);
-  const [lyricsIndex, setLyricsIndex] = useState<number>(0);
-  const [curIdIndex, setCurIdIndex] = useState<number>(0);
-  const [charIndex, setCharIndex] = useState<number>(0);
-  const [tick, settick] = useState<number>(0);
-  // const [ticktest, setticktest] = useState<number>(0);
+  // const [display, setLyrDisplay] = useState<string[][]>([[]]);
+  // const [displayBottom, setLyrDisplayBottom] = useState<string[][]>([[]]);
+  // const [position, setPosition] = useState<boolean>(true);
+  // const [lyricsIndex, setLyricsIndex] = useState<number>(0);
+  // const [curIdIndex, setCurIdIndex] = useState<number>(0);
+  // const [charIndex, setCharIndex] = useState<number>(0);
+  // const [tick, settick] = useState<number>(0);
 
-  const updateTick = () => {
-    let tempoChnge = player.midiData.tempoChanges;
-    tempoChnge = tempoChnge.slice(0, tempoChnge.length - 1);
-    const { tick, tempo } = calculateTickAtTime(
-      player.currentTime,
-      tempoChnge,
-      player.midiData.timeDivision
-    );
-    // const tick = getTicks(player, 0) ?? 0;
-    settick(tick);
-    //CurTime = MIDI Time * Tempo * 24 / 60
+  // const updateTick = () => {
+  //   let tempoChnge = player.midiData.tempoChanges;
+  //   tempoChnge = tempoChnge.slice(0, tempoChnge.length - 1);
+  //   const { tick, tempo } = calculateTickAtTime(
+  //     player.currentTime,
+  //     tempoChnge,
+  //     player.midiData.timeDivision
+  //   );
+  //   settick(tick);
+  //   const targetTick = cursorTicks[curIdIndex];
+  //   if (targetTick <= tick) {
+  //     setCurIdIndex((prevIndex) => prevIndex + 1);
 
-    // setticktest(
-    //   (tick *
-    //     player.midiData.tempoChanges[player.midiData.tempoChanges.length - 2]
-    //       .tempo *
-    //     24) /
-    //     60
-    // );
+  //     const charIndices = cursorIndices?.get(targetTick);
+  //     if (charIndices) {
+  //       charIndices.forEach((charIndex) => {
+  //         let lineIndex = 0;
+  //         let adjustedCharIndex = charIndex;
+  //         const lyricLines = lyrics.slice(3);
 
-    const targetTick = cursorTicks[curIdIndex];
-    if (targetTick <= tick) {
-      setCurIdIndex((prevIndex) => prevIndex + 1);
+  //         while (adjustedCharIndex >= lyricLines[lineIndex].length) {
+  //           adjustedCharIndex -= lyricLines[lineIndex].length + 1;
+  //           lineIndex++;
+  //         }
+  //         if (lineIndex > lyricsIndex) {
+  //           if (position === true) {
+  //             setLyrDisplay(groupThaiCharacters(lyricLines[lineIndex + 1]));
+  //             setLyrDisplayBottom(groupThaiCharacters(lyricLines[lineIndex]));
+  //           } else {
+  //             setLyrDisplay(groupThaiCharacters(lyricLines[lineIndex]));
+  //             setLyrDisplayBottom(
+  //               groupThaiCharacters(lyricLines[lineIndex + 1])
+  //             );
+  //           }
+  //           setLyricsIndex(lineIndex);
+  //           setPosition(!position);
+  //         }
+  //         setCharIndex(adjustedCharIndex + 1);
+  //       });
+  //     }
+  //   }
+  // };
+  // useEffect(() => {
+  //   if (cursorTicks && cursorIndices) {
+  //     const intervalId = setInterval(updateTick, 70);
+  //     if (player.paused) {
+  //       clearInterval(intervalId);
+  //       return;
+  //     }
+  //     return () => clearInterval(intervalId);
+  //   }
+  // }, [player.paused, curIdIndex, position, cursorTicks, cursorIndices]);
 
-      const charIndices = cursorIndices?.get(targetTick);
-      if (charIndices) {
-        charIndices.forEach((charIndex) => {
-          let lineIndex = 0;
-          let adjustedCharIndex = charIndex;
-          const lyricLines = lyrics.slice(3);
-
-          while (adjustedCharIndex >= lyricLines[lineIndex].length) {
-            adjustedCharIndex -= lyricLines[lineIndex].length + 1;
-            lineIndex++;
-          }
-          if (lineIndex > lyricsIndex) {
-            if (position === true) {
-              setLyrDisplay(groupThaiCharacters(lyricLines[lineIndex + 1]));
-              setLyrDisplayBottom(groupThaiCharacters(lyricLines[lineIndex]));
-            } else {
-              setLyrDisplay(groupThaiCharacters(lyricLines[lineIndex]));
-              setLyrDisplayBottom(
-                groupThaiCharacters(lyricLines[lineIndex + 1])
-              );
-            }
-            setLyricsIndex(lineIndex);
-            setPosition(!position);
-          }
-          setCharIndex(adjustedCharIndex + 1);
-        });
-      }
-    }
-  };
-  useEffect(() => {
-    if (cursorTicks && cursorIndices) {
-      const intervalId = setInterval(updateTick, 70);
-      if (player.paused) {
-        clearInterval(intervalId);
-        return;
-      }
-      return () => clearInterval(intervalId);
-    }
-  }, [player.paused, curIdIndex, position, cursorTicks, cursorIndices]);
-
-  useEffect(() => {
-    if (lyrics.length > 0) {
-      setLyrDisplay([[lyrics[0]]]);
-    }
-    setCurIdIndex(0);
-    setCharIndex(0);
-    setPosition(false);
-    setLyricsIndex(0);
-  }, [lyrics]);
+  // useEffect(() => {
+  //   if (lyrics.length > 0) {
+  //     setLyrDisplay([[lyrics[0]]]);
+  //   }
+  //   setCurIdIndex(0);
+  //   setCharIndex(0);
+  //   setPosition(false);
+  //   setLyricsIndex(0);
+  // }, [lyrics]);
 
   const onSelectTestMusic = async (_: File, FileList: FileList) => {
     if (FileList.length === 1) {
@@ -159,15 +147,15 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
           <div>
             Time Division: {player.midiData.timeDivision} <br />
             Tick: {tick} <br />
-            Char: {charIndex} <br />
+            Char: {displayLyrics?.charIndex} <br />
             LyrTop:{" "}
             {JSON.stringify(
-              display.map((data) => data.join("")).join("").length
+              displayLyrics?.display.map((data) => data.join("")).join("").length
             )}{" "}
             <br />
             LyrBottom:{" "}
             {JSON.stringify(
-              displayBottom.map((data) => data.join("")).join("").length
+              displayLyrics?.displayBottom.map((data) => data.join("")).join("").length
             )}
           </div>
 
@@ -225,19 +213,19 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
           </div>
         )}
 
-        <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
+       {displayLyrics &&  <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
           <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
             <LyricsAnimation
-              charIndex={position === true ? charIndex : -1}
-              display={display}
+              charIndex={displayLyrics.position === true ? displayLyrics.charIndex : -1}
+              display={displayLyrics.display}
             ></LyricsAnimation>
           </span>
           <br />
           <LyricsAnimation
-            charIndex={position === false ? charIndex : -1}
-            display={displayBottom}
+            charIndex={displayLyrics.position === false ? displayLyrics.charIndex : -1}
+            display={displayLyrics.displayBottom}
           ></LyricsAnimation>
-        </div>
+        </div>}
 
         {/* {JSON.stringify(displayLyrics)} */}
       </div>
