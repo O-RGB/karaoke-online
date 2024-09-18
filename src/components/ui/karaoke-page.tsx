@@ -69,14 +69,14 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         onClickSong={loadAndPlaySong}
       ></SearchSong>
       <LyricsPanel
-        displayLyrics={displayLyrics}
+        // displayLyrics={displayLyrics}
         lyrics={lyrics}
         cursorIndices={cursorIndices}
         cursorTicks={cursorTicks}
         player={player}
         setSongPlaying={setSongPlaying}
         temp={tempo}
-        tick={tick}
+        // tick={tick}
       ></LyricsPanel>
       <PlayerPanel modalMap={modalMap} player={player}></PlayerPanel>
     </ContextModal>

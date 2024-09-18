@@ -1,5 +1,9 @@
 "use client";
-import { getTicks, groupThaiCharacters } from "@/lib/app-control";
+import {
+  calculateTickAtTime,
+  getTicks,
+  groupThaiCharacters,
+} from "@/lib/app-control";
 import React, { useEffect, useState } from "react";
 import { Sequencer } from "spessasynth_lib";
 import LyricsAnimation from "../common/lyrics-animation";
@@ -20,9 +24,9 @@ interface LyricsPanelProps {
   cursorIndices?: Map<number, number[]>;
   cursorTicks?: number[];
   setSongPlaying: (files: SongFilesDecode) => Promise<void>;
-  tick: number;
+  // tick: number;
   temp: number;
-  displayLyrics?: DisplayLyrics;
+  // displayLyrics?: DisplayLyrics;
 }
 
 const LyricsPanel: React.FC<LyricsPanelProps> = ({
@@ -31,91 +35,93 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
   cursorIndices,
   cursorTicks = [],
   setSongPlaying,
-  tick,
+  // tick,
   temp,
-  displayLyrics,
+  // displayLyrics,
 }) => {
-  // const [display, setLyrDisplay] = useState<string[][]>([[]]);
-  // const [displayBottom, setLyrDisplayBottom] = useState<string[][]>([[]]);
-  // const [position, setPosition] = useState<boolean>(true);
-  // const [lyricsIndex, setLyricsIndex] = useState<number>(0);
-  // const [curIdIndex, setCurIdIndex] = useState<number>(0);
-  // const [charIndex, setCharIndex] = useState<number>(0);
-  // const [tick, settick] = useState<number>(0);
+  const [display, setLyrDisplay] = useState<string[][]>([[]]);
+  const [displayBottom, setLyrDisplayBottom] = useState<string[][]>([[]]);
+  const [position, setPosition] = useState<boolean>(true);
+  const [lyricsIndex, setLyricsIndex] = useState<number>(0);
+  const [curIdIndex, setCurIdIndex] = useState<number>(0);
+  const [charIndex, setCharIndex] = useState<number>(0);
+  const [tick, settick] = useState<number>(0);
   // const [ticktest, setticktest] = useState<number>(0);
 
-  const [test, setTest] = useState<number>(0);
+  const updateTick = () => {
+    let tempoChnge = player.midiData.tempoChanges;
+    tempoChnge = tempoChnge.slice(0, tempoChnge.length - 1);
+    const { tick, tempo } = calculateTickAtTime(
+      player.currentTime,
+      tempoChnge,
+      player.midiData.timeDivision
+    );
+    // const tick = getTicks(player, 0) ?? 0;
+    settick(tick);
+    //CurTime = MIDI Time * Tempo * 24 / 60
 
-  // const updateTick = () => {
-  //   const tick = getTicks(player, 0) ?? 0;
-  //   settick(tick);
-  //   //CurTime = MIDI Time * Tempo * 24 / 60
+    // setticktest(
+    //   (tick *
+    //     player.midiData.tempoChanges[player.midiData.tempoChanges.length - 2]
+    //       .tempo *
+    //     24) /
+    //     60
+    // );
 
-  //   setticktest(
-  //     (tick *
-  //       player.midiData.tempoChanges[player.midiData.tempoChanges.length - 2]
-  //         .tempo *
-  //       24) /
-  //       60
-  //   );
+    const targetTick = cursorTicks[curIdIndex];
+    if (targetTick <= tick) {
+      setCurIdIndex((prevIndex) => prevIndex + 1);
 
-  //   const targetTick = cursorTicks[curIdIndex];
-  //   if (targetTick <= tick) {
-  //     setCurIdIndex((prevIndex) => prevIndex + 1);
+      const charIndices = cursorIndices?.get(targetTick);
+      if (charIndices) {
+        charIndices.forEach((charIndex) => {
+          let lineIndex = 0;
+          let adjustedCharIndex = charIndex;
+          const lyricLines = lyrics.slice(3);
 
-  //     const charIndices = cursorIndices?.get(targetTick);
-  //     if (charIndices) {
-  //       charIndices.forEach((charIndex) => {
-  //         let lineIndex = 0;
-  //         let adjustedCharIndex = charIndex;
-  //         const lyricLines = lyrics.slice(3);
-
-  //         while (adjustedCharIndex >= lyricLines[lineIndex].length) {
-  //           adjustedCharIndex -= lyricLines[lineIndex].length + 1;
-  //           lineIndex++;
-  //         }
-  //         if (lineIndex > lyricsIndex) {
-  //           if (position === true) {
-  //             setLyrDisplay(groupThaiCharacters(lyricLines[lineIndex + 1]));
-  //             setLyrDisplayBottom(groupThaiCharacters(lyricLines[lineIndex]));
-  //           } else {
-  //             setLyrDisplay(groupThaiCharacters(lyricLines[lineIndex]));
-  //             setLyrDisplayBottom(
-  //               groupThaiCharacters(lyricLines[lineIndex + 1])
-  //             );
-  //           }
-  //           setLyricsIndex(lineIndex);
-  //           setPosition(!position);
-  //         }
-  //         setCharIndex(adjustedCharIndex + 1);
-  //       });
-  //     }
-  //   }
-  // };
-  // useEffect(() => {
-  //   if (cursorTicks && cursorIndices) {
-  //     const intervalId = setInterval(updateTick, 70);
-  //     if (player.paused) {
-  //       clearInterval(intervalId);
-  //       return;
-  //     }
-  //     return () => clearInterval(intervalId);
-  //   }
-  // }, [player.paused, curIdIndex, position, cursorTicks, cursorIndices]);
-
-  // useEffect(() => {
-  //   if (lyrics.length > 0) {
-  //     setLyrDisplay([[lyrics[0]]]);
-  //   }
-  //   setCurIdIndex(0);
-  //   setCharIndex(0);
-  //   setPosition(false);
-  //   setLyricsIndex(0);
-  // }, [lyrics]);
+          while (adjustedCharIndex >= lyricLines[lineIndex].length) {
+            adjustedCharIndex -= lyricLines[lineIndex].length + 1;
+            lineIndex++;
+          }
+          if (lineIndex > lyricsIndex) {
+            if (position === true) {
+              setLyrDisplay(groupThaiCharacters(lyricLines[lineIndex + 1]));
+              setLyrDisplayBottom(groupThaiCharacters(lyricLines[lineIndex]));
+            } else {
+              setLyrDisplay(groupThaiCharacters(lyricLines[lineIndex]));
+              setLyrDisplayBottom(
+                groupThaiCharacters(lyricLines[lineIndex + 1])
+              );
+            }
+            setLyricsIndex(lineIndex);
+            setPosition(!position);
+          }
+          setCharIndex(adjustedCharIndex + 1);
+        });
+      }
+    }
+  };
+  useEffect(() => {
+    if (cursorTicks && cursorIndices) {
+      const intervalId = setInterval(updateTick, 70);
+      if (player.paused) {
+        clearInterval(intervalId);
+        return;
+      }
+      return () => clearInterval(intervalId);
+    }
+  }, [player.paused, curIdIndex, position, cursorTicks, cursorIndices]);
 
   useEffect(() => {
-    setTest(tick);
-  }, [temp, tick, displayLyrics, displayLyrics?.charIndex]);
+    if (lyrics.length > 0) {
+      setLyrDisplay([[lyrics[0]]]);
+    }
+    setCurIdIndex(0);
+    setCharIndex(0);
+    setPosition(false);
+    setLyricsIndex(0);
+  }, [lyrics]);
+
   const onSelectTestMusic = async (_: File, FileList: FileList) => {
     if (FileList.length === 1) {
       const file = FileList.item(0);
@@ -153,17 +159,15 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
           <div>
             Time Division: {player.midiData.timeDivision} <br />
             Tick: {tick} <br />
-            Char: {displayLyrics?.charIndex} <br />
+            Char: {charIndex} <br />
             LyrTop:{" "}
             {JSON.stringify(
-              displayLyrics?.display.map((data) => data.join("")).join("")
-                .length
+              display.map((data) => data.join("")).join("").length
             )}{" "}
             <br />
             LyrBottom:{" "}
             {JSON.stringify(
-              displayLyrics?.displayBottom.map((data) => data.join("")).join("")
-                .length
+              displayBottom.map((data) => data.join("")).join("").length
             )}
           </div>
 
@@ -172,10 +176,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
             Tempo Changes:{" "}
             {player.midiData.tempoChanges.map((data, ti) => {
               return (
-                <div
-                  key={`${ti}-tempo-change-key`}
-                  className="pl-2  "
-                >
+                <div key={`${ti}-tempo-change-key`} className="pl-2  ">
                   {ti + 1}. tempo: {Math.round(data.tempo)}
                 </div>
               );
@@ -223,25 +224,21 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
             </Button>
           </div>
         )}
-        {displayLyrics && (
-          <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
-            <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
-              <LyricsAnimation
-                charIndex={
-                  displayLyrics.position === true ? displayLyrics.charIndex : -1
-                }
-                display={displayLyrics.display}
-              ></LyricsAnimation>
-            </span>
-            <br />
+
+        <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
+          <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
             <LyricsAnimation
-              charIndex={
-                displayLyrics.position === false ? displayLyrics.charIndex : -1
-              }
-              display={displayLyrics.displayBottom}
+              charIndex={position === true ? charIndex : -1}
+              display={display}
             ></LyricsAnimation>
-          </div>
-        )}
+          </span>
+          <br />
+          <LyricsAnimation
+            charIndex={position === false ? charIndex : -1}
+            display={displayBottom}
+          ></LyricsAnimation>
+        </div>
+
         {/* {JSON.stringify(displayLyrics)} */}
       </div>
     </div>
