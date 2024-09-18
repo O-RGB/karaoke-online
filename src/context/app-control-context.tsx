@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, FC, useEffect, useState } from "react";
-import { useSynth } from "../hooks/spessasynth-hooks";
-import { useRemote } from "../hooks/peer-hooks";
+import { useSynth } from "../hooks/spessasynth-hook";
+import { useRemote } from "../hooks/peer-hook";
 import {
   convertCursorToTicks,
   mapCursorToIndices,
@@ -29,6 +29,7 @@ type AppControlContextType = {
   cursorIndices: Map<number, number[]> | undefined;
   lyrics: string[];
   cursorTicks: number[];
+  midiPlaying: MIDI | undefined;
   // ticks: number;
 };
 
@@ -53,6 +54,7 @@ export const AppControlContext = createContext<AppControlContextType>({
   tracklist: undefined,
   playingTrack: undefined,
   volumeController: [],
+  midiPlaying: undefined,
 });
 
 export const AppControlProvider: FC<AppControlProviderProps> = ({
@@ -77,6 +79,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   // Playing Song
   // --- Song
   const [playingTrack, setPlayingTrack] = useState<SearchResult>();
+  const [midiPlaying, setMidiPlaying] = useState<MIDI>();
   // --- Lyrics
   const [lyrics, setLyrics] = useState<string[]>([]);
   const [cursorTicks, setCursor] = useState<number[]>([]);
@@ -103,7 +106,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     if (!player) {
       return;
     }
-
     const cur = convertCursorToTicks(ticksPerBeat, cursor);
     console.log(player);
     const curMapping = mapCursorToIndices(cur);
@@ -145,6 +147,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     const midiFileArrayBuffer = await files.mid.arrayBuffer();
     const parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
     player.loadNewSongList([parsedMidi]);
+    setMidiPlaying(parsedMidi);
 
     const timeDivision = parsedMidi.timeDivision;
     handleSetLyrics([]);
@@ -225,6 +228,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         tracklist,
         playingTrack,
         cursorIndices,
+        midiPlaying
       }}
     >
       <>{children}</>

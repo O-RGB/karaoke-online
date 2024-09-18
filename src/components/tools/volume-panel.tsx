@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import VolumeMeter from "../common/volume/volume-meter";
 import { Synthetizer } from "spessasynth_lib";
 import { volumeChange } from "@/lib/app-control";
-import { useMixer } from "@/hooks/mixer-hooks";
+import { useAppControl } from "@/hooks/app-control-hook";
 
 interface VolumePanelProps {
   audioGain: number[];
@@ -17,7 +17,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   synth,
   onVolumeChange,
 }) => {
-  const { updateVolume, volumeController } = useMixer();
+  const { updateVolume, volumeController } = useAppControl();
 
   const onVolumeMeterChange = (channel: number, value: number) => {
     if (synth) {

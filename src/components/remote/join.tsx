@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useRemote } from "@/hooks/peer-hooks";
+import { useRemote } from "@/hooks/peer-hook";
 import { TbNote } from "react-icons/tb";
 
 interface JoinConnectProps {

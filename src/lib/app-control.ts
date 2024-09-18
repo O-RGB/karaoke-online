@@ -21,15 +21,42 @@ export const getMidiInfo = (player: Sequencer) => {
   }
 };
 
-export const getTicks = (player: Sequencer) => {
-  const midiInfo = getMidiInfo(player);
-  if (!midiInfo) {
-    return;
-  }
-  let secondsPerBeat = 60.0 / midiInfo.tempo;
-  let ticksPerSecond = midiInfo.ticksPerBeat / secondsPerBeat;
-  let ticks = player.currentTime * ticksPerSecond;
+export const getTimeFromTicks = (
+  timeDivision: number,
+  ticks: number,
+  tempo: number
+) => {
+  let secondsPerBeat = 60.0 / tempo;
+  let ticksPerSecond = timeDivision / secondsPerBeat;
+  let timeInSeconds = ticks / ticksPerSecond;
+  return timeInSeconds;
+};
+
+export const getTicks = (
+  timeDivision: number,
+  currentTime: number,
+  tempo: number
+) => {
+  let secondsPerBeat = 60.0 / tempo;
+  let ticksPerSecond = timeDivision / secondsPerBeat;
+  let ticks = currentTime * ticksPerSecond;
+  console.log(`${ticks} = ${currentTime} * ${ticksPerSecond}, ${timeDivision}`);
+
   return Math.round(ticks);
+};
+
+ export const getTicksWithTempoChange = (
+  timeDivision: number,
+  currentTime: number,
+  tempo: number,
+  lastTempoChangeTime: number,
+  previousTick: number
+) => {
+  let elapsedTime = currentTime - lastTempoChangeTime;
+  let secondsPerBeat = 60.0 / tempo;
+  let ticksPerSecond = timeDivision / secondsPerBeat;
+  let ticksSinceLastTempoChange = elapsedTime * ticksPerSecond;
+  return Math.round(previousTick + ticksSinceLastTempoChange);
 };
 
 export function groupThaiCharacters(text: string): string[][] {
@@ -94,4 +121,87 @@ export const mapCursorToIndices = (cursorPositions: number[]) => {
   });
 
   return cursorMap;
+};
+
+type TempoChange = {
+  ticks: number;
+  tempo: number;
+};
+
+export const sortTempoChanges = (tempoChanges: TempoChange[]): TempoChange[] => {
+  return [...tempoChanges].sort((a, b) => a.ticks - b.ticks);
+};
+
+const getTempoAtIndex = (sortedChanges: TempoChange[], index: number): number => {
+  return sortedChanges[Math.min(index, sortedChanges.length - 1)].tempo;
+};
+
+const convertBetweenTickAndTime = (
+  value: number,
+  tempo: number,
+  timeDivision: number,
+  fromTicks: boolean
+): number => {
+  const secondsPerBeat = 60.0 / tempo;
+  return fromTicks
+    ? (value / timeDivision) * secondsPerBeat
+    : (value / secondsPerBeat) * timeDivision;
+};
+
+export const calculateTimeAtTick = (
+  targetTick: number,
+  sortedChanges: TempoChange[],
+  timeDivision: number
+): { time: number; tempo: number } => {
+  let currentTick = 0;
+  let currentTime = 0;
+  let currentTempoIndex = 0;
+
+  while (currentTempoIndex < sortedChanges.length && targetTick > currentTick) {
+    const nextChange = sortedChanges[currentTempoIndex];
+    const ticksToNextChange = Math.min(nextChange.ticks - currentTick, targetTick - currentTick);
+
+    const currentTempo = getTempoAtIndex(sortedChanges, currentTempoIndex);
+    currentTime += convertBetweenTickAndTime(ticksToNextChange, currentTempo, timeDivision, true);
+    currentTick += ticksToNextChange;
+
+    if (currentTick === nextChange.ticks) currentTempoIndex++;
+  }
+
+  return {
+    time: currentTime,
+    tempo: getTempoAtIndex(sortedChanges, currentTempoIndex)
+  };
+};
+
+export const calculateTickAtTime = (
+  targetTime: number,
+  sortedChanges: TempoChange[],
+  timeDivision: number
+): { tick: number; tempo: number } => {
+  let currentTick = 0;
+  let currentTime = 0;
+  let currentTempoIndex = 0;
+
+  while (currentTempoIndex < sortedChanges.length && targetTime > currentTime) {
+    const currentTempo = getTempoAtIndex(sortedChanges, currentTempoIndex);
+    const nextChangeTick = sortedChanges[currentTempoIndex + 1]?.ticks ?? Infinity;
+
+    const timeToNextChange = convertBetweenTickAndTime(nextChangeTick - currentTick, currentTempo, timeDivision, true);
+
+    if (currentTime + timeToNextChange > targetTime) {
+      const remainingTime = targetTime - currentTime;
+      currentTick += convertBetweenTickAndTime(remainingTime, currentTempo, timeDivision, false);
+      return { tick: Math.round(currentTick), tempo: currentTempo };
+    }
+
+    currentTime += timeToNextChange;
+    currentTick = nextChangeTick;
+    currentTempoIndex++;
+  }
+
+  return {
+    tick: Math.round(currentTick),
+    tempo: getTempoAtIndex(sortedChanges, currentTempoIndex)
+  };
 };

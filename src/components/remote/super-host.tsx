@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useQRCode } from "next-qrcode";
-import { useRemote } from "@/hooks/peer-hooks"; // Updated hook for super user
+import { useRemote } from "@/hooks/peer-hook"; // Updated hook for super user
 
 interface SuperHostRemoteProps {}
 

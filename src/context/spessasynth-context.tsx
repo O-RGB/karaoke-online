@@ -7,7 +7,7 @@ import {
   Synthetizer,
   WORKLET_URL_ABSOLUTE,
 } from "spessasynth_lib";
-import { useRemote } from "../hooks/peer-hooks";
+import { useRemote } from "../hooks/peer-hook";
 
 type SpessasynthContextType = {
   setupSpessasynth: () => Promise<void>;
@@ -54,7 +54,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     const synthInstance = new Synthetizer(audio.destination, ab);
 
     // Default Setting
-    synthInstance.muteChannel(8, true);
+    // synthInstance.muteChannel(8, true);
     synthInstance.setMainVolume(0.5);
     synthInstance.highPerformanceMode = true;
 

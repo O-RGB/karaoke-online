@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Button from "../common/button/button";
-import { useRemote } from "@/hooks/peer-hooks"; // Updated hook
+import { useRemote } from "@/hooks/peer-hook"; // Updated hook
 import VolumePanel from "../tools/volume-panel";
 
 interface SuperJoinConnectProps {

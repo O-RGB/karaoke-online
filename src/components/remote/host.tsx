@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { useQRCode } from "next-qrcode";
-import { useRemote } from "@/hooks/peer-hooks";
+import { useRemote } from "@/hooks/peer-hook";
 
 interface HostRemoteProps {}
 

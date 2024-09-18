@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useLayoutEffect } from "react";
-import { useSynth } from "@/hooks/spessasynth-hooks";
+import { useSynth } from "@/hooks/spessasynth-hook";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song";
-import { useMixer } from "@/hooks/mixer-hooks";
+import { useAppControl } from "@/hooks/app-control-hook";
 import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super-host";
@@ -14,6 +14,7 @@ import SoundfontManager from "../tools/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
 import AppendSongModal from "../modal/append-song";
+import { usePlayer } from "@/hooks/player-hook";
 
 interface KaraokePageProps {}
 
@@ -29,7 +30,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     cursorTicks,
     tracklist,
     musicLibrary,
-  } = useMixer();
+  } = useAppControl();
+
+  const { tempo, tick, displayLyrics } = usePlayer();
 
   useLayoutEffect(() => {
     setupSpessasynth();
@@ -66,11 +69,14 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         onClickSong={loadAndPlaySong}
       ></SearchSong>
       <LyricsPanel
+        displayLyrics={displayLyrics}
         lyrics={lyrics}
         cursorIndices={cursorIndices}
         cursorTicks={cursorTicks}
         player={player}
         setSongPlaying={setSongPlaying}
+        temp={tempo}
+        tick={tick}
       ></LyricsPanel>
       <PlayerPanel modalMap={modalMap} player={player}></PlayerPanel>
     </ContextModal>

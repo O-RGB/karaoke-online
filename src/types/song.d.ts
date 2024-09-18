@@ -16,3 +16,19 @@ interface SongFilesDecode {
   cur: number[];
   lyr: string[];
 }
+
+interface CursorTick {
+  tick: number;
+}
+
+interface CursorList {
+  tempo: number;
+  ticks: CursorTick[];
+}
+
+interface DisplayLyrics {
+  display: string[][];
+  displayBottom: string[][];
+  position: boolean;
+  charIndex: number;
+}
