@@ -18,11 +18,13 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
     lyrList: string[];
     keyValue: string;
   }) {
-    return lyrList.map((x, i) => (
-      <React.Fragment key={`${keyValue}-${i}`}>
-        {x === " " ? <span className="px-0.5 lg:px-1.5"></span> : x}
-      </React.Fragment>
-    ));
+    const group = lyrList.map((data) => (data === " " ? "&nbsp;" : data));
+    return (
+      <div
+        className="flex flex-wrap gap-2 whitespace-pre-wrap"
+        dangerouslySetInnerHTML={{ __html: group.join("") }}
+      ></div>
+    );
   }
   return (
     <div className="flex gap-[1px] text-lg md:text-3xl lg:text-6xl">

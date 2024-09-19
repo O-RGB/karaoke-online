@@ -31,7 +31,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   useEffect(() => {}, [audioGain]);
 
   return (
-    <div className="fixed w-full top-16 lg:top-4 left-0 px-5">
+    <div className="fixed w-full top-16 lg:top-[4.2rem] left-0 px-5">
       <div className="grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-1 blur-overlay border blur-border rounded-md p-2">
         {audioGain.map((data, ch) => {
           return (

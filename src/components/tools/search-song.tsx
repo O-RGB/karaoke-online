@@ -12,7 +12,7 @@ interface SearchSongProps {
 
 const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
   return (
-    <div className="fixed z-50 left-0 top-4 lg:top-[10.3rem] px-5 w-full">
+    <div className="fixed z-50 left-0 top-4 lg:top-4 px-5 w-full">
       <div className="w-full blur-overlay flex flex-col">
         <Select
           onSelectItem={(value: IOptions<SearchResult>) => {

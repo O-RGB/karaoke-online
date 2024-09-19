@@ -56,23 +56,21 @@ const Button: React.FC<ButtonCommonProps> = ({
   }
 
   return (
-    <>
-      <button
-        {...props}
-        className={[
-          butStyle,
-          colorStyle,
-          animation,
-          shapeStyle,
-          props.className,
-          position,
-          "",
-        ].join(" ")}
-      >
-        {icon && <span>{icon}</span>}
-        {props.children}
-      </button>
-    </>
+    <button
+      {...props}
+      className={[
+        butStyle,
+        colorStyle,
+        animation,
+        shapeStyle,
+        props.className,
+        position,
+        "",
+      ].join(" ")}
+    >
+      {icon && <span>{icon}</span>}
+      {props.children}
+    </button>
   );
 };
 

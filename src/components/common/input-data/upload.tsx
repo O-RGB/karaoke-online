@@ -35,21 +35,19 @@ const UpdateFile: React.FC<UpdateFileProps> = ({
   };
 
   return (
-    <div className={[className, "cursor-pointer w-fit"].join(" ")}>
-      {label && <label>{label}</label>}
-      <div>
-        <div onClick={handleChildClick}>
-          <input
-            {...inputProps}
-            ref={inputRef}
-            onChange={selectFileHandler}
-            type="file"
-            accept={accept}
-            style={{ display: "none" }} // ซ่อน input
-          />
-          {children}
-        </div>
-      </div>
+    <div
+      onClick={handleChildClick}
+      className={[className, "cursor-pointer"].join(" ")}
+    >
+      <input
+        {...inputProps}
+        ref={inputRef}
+        onChange={selectFileHandler}
+        type="file"
+        accept={accept}
+        style={{ display: "none" }}
+      />
+      {children}
     </div>
   );
 };

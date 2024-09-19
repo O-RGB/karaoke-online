@@ -171,14 +171,14 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
           </div> */}
         </div>
         {player.paused && (
-          <div className="absolute top-0 left-0 p-2 h-full flex gap-2 items-center justify-center z-30">
+          <div className="absolute top-0 left-0 p-2 h-full flex gap-2 items-center justify-center w-full z-30">
             <Upload
               onSelectFile={onSelectTestMusic}
               inputProps={{
                 multiple: true,
               }}
               // accept=".emk, .mid, .lyr, .cur"
-              className="relative flex w-full h-full"
+              className="relative  w-full"
             >
               <Button
                 border="border !border-white/20"

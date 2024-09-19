@@ -41,7 +41,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ synth }) => {
       <div className=" ">
         <UpdateFile
           accept=".sf2"
-          className="border w-full p-3 rounded-md hover:bg-gray-50 duration-300"
+          className="border p-3 rounded-md hover:bg-gray-50 duration-300"
           onSelectFile={(file) => {
             setSoundFont(file, synth);
           }}
@@ -49,8 +49,8 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ synth }) => {
           <span className="w-full text-sm flex items-center gap-2">
             <span>
               <TbMusicPlus></TbMusicPlus>
-            </span>{" "}
-            <span>อัปโหลดไฟล์</span>{" "}
+            </span>
+            <span>อัปโหลดไฟล์</span>
             <span className="text-gray-300">(ไม่เกิน 2GB)</span>
           </span>
         </UpdateFile>
