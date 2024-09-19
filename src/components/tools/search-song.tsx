@@ -15,6 +15,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
     <div className="fixed z-50 left-0 top-4 lg:top-4 px-5 w-full">
       <div className="w-full blur-overlay flex flex-col">
         <Select
+          className={"!placeholder-white"}
           onSelectItem={(value: IOptions<SearchResult>) => {
             if (value.option) {
               onClickSong?.(value.option);

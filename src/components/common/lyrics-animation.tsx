@@ -27,7 +27,7 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
     );
   }
   return (
-    <div className="flex gap-[1px] text-lg md:text-3xl lg:text-6xl">
+    <div className="flex    text-lg md:text-3xl lg:text-6xl">
       {display.map((data, index) => {
         const lyrInx =
           display.slice(0, index).reduce((a, b) => a + b.length, 0) + 1;

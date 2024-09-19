@@ -2,13 +2,18 @@ import React, { useState, useEffect, useRef } from "react";
 import Dropdown from "./dropdown";
 import Input from "./input";
 
-interface SelectProps {
+interface SelectProps extends InputProps {
   options?: IOptions[];
   onSearch?: (value: string) => Promise<IOptions[]>;
   onSelectItem?: (value: IOptions) => void;
 }
 
-const Select: React.FC<SelectProps> = ({ options, onSearch, onSelectItem }) => {
+const Select: React.FC<SelectProps> = ({
+  options,
+  onSearch,
+  onSelectItem,
+  ...props
+}) => {
   const [Options, setOptions] = useState<IOptions[]>([]);
   const [OptionsSearch, setOptionsSearch] = useState<IOptions[]>([]);
   const [value, setValue] = useState<string>("");
@@ -57,6 +62,7 @@ const Select: React.FC<SelectProps> = ({ options, onSearch, onSelectItem }) => {
   return (
     <div className="w-full blur-overlay flex flex-col" ref={dropdownRef}>
       <Input
+        {...props}
         style={{
           backgroundColor: "transparent",
         }}

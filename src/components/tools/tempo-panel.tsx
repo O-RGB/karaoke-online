@@ -7,7 +7,7 @@ interface TempoPanelProps {
 }
 
 const TempoPanel: React.FC<TempoPanelProps> = ({
-  tempo,
+  tempo = 0,
   tick,
   timeDivision,
 }) => {
@@ -38,9 +38,12 @@ const TempoPanel: React.FC<TempoPanelProps> = ({
   const throttledTick = useThrottle(tick, 100);
 
   useEffect(() => {
-    const currentTickInBar = throttledTick % ticksPerBar;
-    const beatInBar = Math.floor(currentTickInBar / timeDivision) + 1;
-    setCurrentBeatInBar(beatInBar);
+    if (tick > 0) {
+      const currentTickInBar = throttledTick % ticksPerBar;
+      const beatInBar = Math.floor(currentTickInBar / timeDivision) + 1;
+      console.log("beatInBar", beatInBar);
+      setCurrentBeatInBar(beatInBar);
+    }
   }, [throttledTick, ticksPerBar]);
 
   useEffect(() => {

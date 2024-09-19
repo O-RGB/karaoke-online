@@ -78,5 +78,7 @@ export function getIconInstruments(id: number) {
       default:
         return null;
     }
+  } else {
+    return { name: "0", icon: "0" };
   }
 }

@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import RangeBar from "../input-data/range-bar";
+import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
+import { FaDrum } from "react-icons/fa";
+import { PiMicrophoneStageFill } from "react-icons/pi";
 
 interface VolumeMeterProps {
   value?: number;
@@ -66,8 +69,16 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
         </div>
       </div>
       <div className="min-w-full lg:min-w-7 border border-white/20">
-        <div className="w-full blur-overlay text-center text-white font-bold text-[9px]">
-          {instruments ?? 0}
+        <div className="w-full blur-overlay text-center text-white font-bold text-[10px] p-1 flex justify-center items-center h-3.5">
+          <>
+            {channel === 10 ? (
+              <FaDrum></FaDrum>
+            ) : channel === 9 ? (
+              <PiMicrophoneStageFill></PiMicrophoneStageFill>
+            ) : (
+              <>{getIconInstruments(instruments ?? 0)?.icon}</>
+            )}
+          </>
         </div>
       </div>
     </div>

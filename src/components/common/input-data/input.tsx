@@ -10,7 +10,7 @@ const Input: React.FC<InputCommonProps> = ({ border = "border", ...props }) => {
     <>
       <input
         {...props}
-        className={[inputStyle, removeFocus, shape, ""].join(" ")}
+        className={[props.className, inputStyle, removeFocus, shape, ""].join(" ")}
         type="text"
       />
     </>
