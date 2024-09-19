@@ -15,6 +15,7 @@ import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
 import AppendSongModal from "../modal/append-song";
 import { usePlayer } from "@/hooks/player-hook";
+import TempoPanel from "../tools/tempo-panel";
 
 interface KaraokePageProps {}
 
@@ -63,6 +64,11 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         audioGain={audioGain}
         instrument={instrument}
       ></VolumePanel>
+      <TempoPanel
+        tempo={tempo}
+        tick={tick}
+        timeDivision={player.midiData.timeDivision}
+      ></TempoPanel>
       <ClockPanel></ClockPanel>
       <SearchSong
         tracklist={tracklist}
