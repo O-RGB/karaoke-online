@@ -10,6 +10,20 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
   charIndex,
 }) => {
   useEffect(() => {}, [display, charIndex]);
+
+  function LyrTextRender({
+    lyrList,
+    keyValue,
+  }: {
+    lyrList: string[];
+    keyValue: string;
+  }) {
+    return lyrList.map((x, i) => (
+      <React.Fragment key={`${keyValue}-${i}`}>
+        {x === " " ? <span className="px-0.5 lg:px-1.5"></span> : x}
+      </React.Fragment>
+    ));
+  }
   return (
     <div className="flex gap-[1px] text-lg md:text-3xl lg:text-6xl">
       {display.map((data, index) => {
@@ -22,7 +36,7 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
                 lyrInx <= charIndex ? "text-white" : "text-black"
               }`}
             >
-              {data.join("")}
+              <LyrTextRender keyValue="top-lyr" lyrList={data}></LyrTextRender>
             </div>
             <div
               className={`relative flex flex-col text-center transition-all`}
@@ -30,7 +44,10 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
                 color: lyrInx <= charIndex ? "blue" : "yellow",
               }}
             >
-              <span>{data.join("")}</span>
+              <LyrTextRender
+                keyValue="bottom-lyr"
+                lyrList={data}
+              ></LyrTextRender>
             </div>
           </div>
         );

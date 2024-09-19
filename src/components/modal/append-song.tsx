@@ -20,7 +20,6 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     setCommitToDB(false);
     setProgress(undefined);
     setLoadZip(false);
-    console.log("fin");
   };
 
   const onLoadFileZip = async (_: File, fileList: FileList) => {

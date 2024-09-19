@@ -5,7 +5,7 @@ export const readLyricsFile = async (file: File) => {
   const decoder = new TextDecoder("windows-874");
   const contentUtf8 = decoder.decode(arrayBuffer);
   var lines = contentUtf8.split("\r\n"); // หรือ '\r\n' ตามที่เหมาะสม
-  lines = lines.map((data) => data.trim());
+  // lines = lines.map((data) => data.trim());
   return lines;
 };
 export const readCursorFile = async (file: File) => {
@@ -70,3 +70,37 @@ export const validateSongFileTypes = (
     return undefined;
   }
 };
+export function fixMidiHeader(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    const fixedFileName = file.name;
+
+    reader.onload = (e) => {
+      if (e.target?.result instanceof ArrayBuffer) {
+        let arrayBuffer = e.target.result;
+        let data = new Uint8Array(arrayBuffer);
+
+        const incorrectHeader = new TextDecoder().decode(data.slice(0, 4));
+        if (incorrectHeader !== "MThd") {
+          const correctedHeader = new TextEncoder().encode("MThd");
+          data.set(correctedHeader, 0);
+        }
+
+        const correctedBlob = new Blob([data], { type: "audio/midi" });
+        const correctedFile = new File([correctedBlob], fixedFileName, {
+          type: "audio/midi",
+        });
+
+        resolve(correctedFile);
+      } else {
+        reject(new Error("Failed to read file as ArrayBuffer"));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error("Failed to read file"));
+    };
+
+    reader.readAsArrayBuffer(file);
+  });
+}

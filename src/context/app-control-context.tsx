@@ -12,6 +12,7 @@ import TrieSearch from "trie-search";
 import { addSongList, onSearchList } from "@/lib/trie-search";
 import { MIDI } from "spessasynth_lib";
 import { loadSuperZipAndExtractSong } from "@/lib/zip";
+import { fixMidiHeader } from "@/lib/karaoke/ncn";
 
 type AppControlContextType = {
   updateVolume: (index: number, value: number) => void;
@@ -98,7 +99,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     });
   };
   const handleSetLyrics = (lyr: string[]) => {
-    console.log(lyr);
     setLyrics(lyr);
   };
 
@@ -107,7 +107,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
       return;
     }
     const cur = convertCursorToTicks(ticksPerBeat, cursor);
-    console.log(player);
     const curMapping = mapCursorToIndices(cur);
     setCursorIndices(curMapping);
     setCursor(cur);
@@ -145,14 +144,29 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
       return;
     }
     const midiFileArrayBuffer = await files.mid.arrayBuffer();
-    const parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
-    player.loadNewSongList([parsedMidi]);
-    setMidiPlaying(parsedMidi);
+    let parsedMidi = null;
+    try {
+      parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
+    } catch (e) {
+      let error: string = (e as string).toString();
+      let typeError: string = `SyntaxError: Invalid MIDI Header! Expected "MThd", got`;
+      console.error(error)
+      // if (error === typeError) {
+        const fix = await fixMidiHeader(files.mid);
+        const fixArrayBuffer = await fix.arrayBuffer();
+        parsedMidi = new MIDI(fixArrayBuffer, fix.name);
+      // }
+    }
 
-    const timeDivision = parsedMidi.timeDivision;
-    handleSetLyrics([]);
-    handleSetLyrics(files.lyr);
-    handleSetCursor(timeDivision, files.cur);
+    if (parsedMidi) {
+      player.loadNewSongList([parsedMidi]);
+      setMidiPlaying(parsedMidi);
+
+      const timeDivision = parsedMidi.timeDivision;
+      handleSetLyrics([]);
+      handleSetLyrics(files.lyr);
+      handleSetCursor(timeDivision, files.cur);
+    }
   };
 
   const loadAndPlaySong = async (value: SearchResult) => {
@@ -228,7 +242,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         tracklist,
         playingTrack,
         cursorIndices,
-        midiPlaying
+        midiPlaying,
       }}
     >
       <>{children}</>

@@ -112,20 +112,57 @@ export const sortTempoChanges = (
   return [...tempoChanges].sort((a, b) => a.ticks - b.ticks);
 };
 
-export const ticksToTime = (
+// export const ticksToTime = (
+//   timeDivision: number,
+//   tempoChanges: ITempoChange[]
+// ) => {
+//   let timeChange: ITempoTimeChange[] = [];
+//   for (let list of tempoChanges) {
+//     const time = getTimeFromTicks(timeDivision, list.ticks, list.tempo);
+//     timeChange.push({
+//       tempo: list.tempo,
+//       time: time,
+//     });
+//   }
+//   return timeChange;
+// };
+
+// Function to convert ticks to time
+export function convertTicksToTime(
   timeDivision: number,
   tempoChanges: ITempoChange[]
-) => {
-  let timeChange: ITempoTimeChange[] = [];
-  for (let list of tempoChanges) {
-    const time = getTimeFromTicks(timeDivision, list.ticks, list.tempo);
-    timeChange.push({
-      tempo: list.tempo,
-      time: time,
-    });
+): ITempoTimeChange[] {
+  if (tempoChanges.length === 0) {
+    return []
   }
-  return timeChange;
-};
+  let time = 0;
+  let lastTicks = 0;
+  let lastTempo = tempoChanges[0].tempo;
+
+  const tempoTimeChanges: ITempoTimeChange[] = [];
+
+  for (const change of tempoChanges) {
+    // Calculate time for each tick change
+    time += getTime(timeDivision, change.ticks - lastTicks, lastTempo);
+
+    // Store the calculated time and tempo
+    tempoTimeChanges.push({
+      time: Math.round(time * 100) / 100,
+      tempo: change.tempo,
+    });
+
+    lastTicks = change.ticks;
+    lastTempo = change.tempo;
+  }
+
+  return tempoTimeChanges;
+}
+
+function getTime(timeDivision: number, ticks: number, tempo: number): number {
+  const secondsPerBeat = 60.0 / tempo; // Seconds per beat (quarter note)
+  const ticksPerSecond = timeDivision / secondsPerBeat; // Ticks per second
+  return ticks / ticksPerSecond; // Convert ticks to seconds
+}
 
 // Function to calculate ticks
 export function calculateTicks(
@@ -146,6 +183,7 @@ export function calculateTicks(
       break;
     }
   }
+
 
   ticks += getTicks(timeDivision, currentTime - lastTime, lastTempo);
   return { tick: Math.round(ticks), tempo: lastTempo };

@@ -3,9 +3,9 @@ import { useAppControl } from "@/hooks/app-control-hook";
 import { useSynth } from "@/hooks/spessasynth-hook";
 import {
   calculateTicks,
+  convertTicksToTime,
   groupThaiCharacters,
   sortTempoChanges,
-  ticksToTime,
 } from "@/lib/app-control";
 import { createContext, FC, useEffect, useRef, useState } from "react";
 import { MIDI, Sequencer } from "spessasynth_lib";
@@ -41,7 +41,7 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
   const position = useRef<boolean>(true);
   const display = useRef<string[][]>([]);
   const displayBottom = useRef<string[][]>([]);
-  const interval = 200;
+  const interval = 50;
 
   const tempoChanges = useRef<ITempoChange[]>([]);
   const timeList = useRef<ITempoTimeChange[]>([]);
@@ -49,7 +49,6 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
 
   const updateTick = (player: Sequencer, midi: MIDI) => {
     if (tempoChanges.current.length > 0) {
-      // const timeDivision = midi.timeDivision;
       const currentTime = player.currentTime;
 
       const { tick, tempo } = calculateTicks(
@@ -99,15 +98,15 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
     }
   };
 
-  // const loop = (currentTime: number) => {
-  //   if (currentTime - lastTimeRef.current > interval) {
-  //     if (player && midiPlaying) {
-  //       updateTick(player, midiPlaying);
-  //     }
-  //     lastTimeRef.current = currentTime;
-  //   }
-  //   rafRef.current = requestAnimationFrame(loop);
-  // };
+  const loop = (currentTime: number) => {
+    if (currentTime - lastTimeRef.current > interval) {
+      if (player && midiPlaying) {
+        updateTick(player, midiPlaying);
+      }
+      lastTimeRef.current = currentTime;
+    }
+    rafRef.current = requestAnimationFrame(loop);
+  };
 
   // useEffect(() => {
   //   loop(0);
@@ -124,7 +123,7 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
     if (player && midiPlaying && player?.paused === false) {
       const updateTickWithDelay = () => {
         updateTick(player, midiPlaying); // ฟังก์ชันที่คุณต้องการเรียกใช้งาน
-        interval = setTimeout(updateTickWithDelay, 100); // รอ 1 วินาทีก่อนอัปเดตครั้งถัดไป
+        interval = setTimeout(updateTickWithDelay, 50); // รอ 1 วินาทีก่อนอัปเดตครั้งถัดไป
       };
 
       updateTickWithDelay(); // เริ่มต้นการอัปเดตครั้งแรก
@@ -146,7 +145,7 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
     tempos = tempos.slice(0, -1).reverse();
     tempos = sortTempoChanges(tempos);
     tempoChanges.current = tempos;
-    timeList.current = ticksToTime(timeDivision.current, tempos);
+    timeList.current = convertTicksToTime(timeDivision.current, tempos);
   }, [lyrics, midiPlaying]);
 
   return (

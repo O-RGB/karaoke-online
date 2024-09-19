@@ -137,10 +137,10 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
 
   return (
     <div className="fixed  bottom-20 lg:bottom-16 left-0 w-full px-5 ">
-      <div className="text-[8px] w-64"></div>
+      {/* <div className="text-[8px] w-64">{JSON.stringify(cursorTicks[0])} {JSON.stringify(cursorTicks[cursorTicks.length -1])}</div> */}
       <div className="flex items-center justify-center relative w-full h-56 lg:h-72 blur-overlay border blur-border rounded-lg p-2  text-center overflow-auto [&::-webkit-scrollbar]:hidden">
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2">
-          <div>
+          {/* <div>
             Time Division: {player.midiData.timeDivision} <br />
             Tick: {tick} <br />
             Char: {displayLyrics?.charIndex} <br />
@@ -155,9 +155,9 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
               displayLyrics?.displayBottom.map((data) => data.join("")).join("")
                 .length
             )}
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             Tempo Selected: {Math.round(temp)} <br />
             Tempo Changes:{" "}
             {player.midiData.tempoChanges.map((data, ti) => {
@@ -168,7 +168,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
               );
             })}{" "}
             <br />
-          </div>
+          </div> */}
         </div>
         {player.paused && (
           <div className="absolute top-0 left-0 p-2 h-full flex gap-2 items-center justify-center z-30">
