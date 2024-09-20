@@ -38,7 +38,6 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   const [synth, setSynth] = useState<Synthetizer>();
   const [player, setPlayer] = useState<Sequencer>();
   const [audio, setAudio] = useState<AudioContext>();
-
   // Display
   const [audioGain, setAudioGain] = useState<number[]>([]);
   const [instrument, setInstrument] = useState<number[]>([]);

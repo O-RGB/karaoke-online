@@ -10,7 +10,7 @@ body {
 }
 
 .blur-overlay {
-  @apply bg-white/0 backdrop-blur-md;
+  @apply backdrop-blur-sm;
 }
 
 .blur-border {

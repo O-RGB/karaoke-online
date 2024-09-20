@@ -41,7 +41,6 @@ const TempoPanel: React.FC<TempoPanelProps> = ({
     if (tick > 0) {
       const currentTickInBar = throttledTick % ticksPerBar;
       const beatInBar = Math.floor(currentTickInBar / timeDivision) + 1;
-      console.log("beatInBar", beatInBar);
       setCurrentBeatInBar(beatInBar);
     }
   }, [throttledTick, ticksPerBar]);

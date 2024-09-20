@@ -16,6 +16,7 @@ import ContextModal from "../modal/context-modal";
 import AppendSongModal from "../modal/append-song";
 import { usePlayer } from "@/hooks/player-hook";
 import TempoPanel from "../tools/tempo-panel";
+import StatusPanel from "../tools/status-panel";
 
 interface KaraokePageProps {}
 
@@ -26,11 +27,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     loadAndPlaySong,
     setMusicLibraryFile,
     setSongPlaying,
-    cursorIndices,
-    lyrics,
-    cursorTicks,
     tracklist,
     musicLibrary,
+    notification,
+    lyrics,
   } = useAppControl();
 
   const { tempo, tick, displayLyrics } = usePlayer();
@@ -59,6 +59,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         setMusicLibraryFile={setMusicLibraryFile}
         musicLibrary={musicLibrary}
       ></WallcomeModal>
+      <StatusPanel text={notification}></StatusPanel>
       <VolumePanel
         synth={synth}
         audioGain={audioGain}
@@ -76,15 +77,14 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       ></SearchSong>
       <LyricsPanel
         displayLyrics={displayLyrics}
-        lyrics={lyrics}
-        cursorIndices={cursorIndices}
-        cursorTicks={cursorTicks}
         player={player}
         setSongPlaying={setSongPlaying}
-        temp={tempo}
-        tick={tick}
       ></LyricsPanel>
-      <PlayerPanel modalMap={modalMap} player={player}></PlayerPanel>
+      <PlayerPanel
+        lyrics={lyrics}
+        modalMap={modalMap}
+        player={player}
+      ></PlayerPanel>
     </ContextModal>
   );
 };

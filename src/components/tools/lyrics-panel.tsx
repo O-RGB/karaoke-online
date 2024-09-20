@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Sequencer } from "spessasynth_lib";
 import LyricsAnimation from "../common/lyrics-animation";
 import Upload from "../common/input-data/upload";
@@ -16,96 +16,15 @@ import { EMK_FILE_TYPE } from "@/config/value";
 
 interface LyricsPanelProps {
   player: Sequencer;
-  lyrics: string[];
-  cursorIndices?: Map<number, number[]>;
-  cursorTicks?: number[];
   setSongPlaying: (files: SongFilesDecode) => Promise<void>;
-  tick: number;
-  temp: number;
   displayLyrics?: DisplayLyrics;
 }
 
 const LyricsPanel: React.FC<LyricsPanelProps> = ({
   player,
-  lyrics,
-  cursorIndices,
-  cursorTicks = [],
   setSongPlaying,
-  tick,
-  temp,
   displayLyrics,
 }) => {
-  // const [display, setLyrDisplay] = useState<string[][]>([[]]);
-  // const [displayBottom, setLyrDisplayBottom] = useState<string[][]>([[]]);
-  // const [position, setPosition] = useState<boolean>(true);
-  // const [lyricsIndex, setLyricsIndex] = useState<number>(0);
-  // const [curIdIndex, setCurIdIndex] = useState<number>(0);
-  // const [charIndex, setCharIndex] = useState<number>(0);
-  // const [tick, settick] = useState<number>(0);
-
-  // const updateTick = () => {
-  //   let tempoChnge = player.midiData.tempoChanges;
-  //   tempoChnge = tempoChnge.slice(0, tempoChnge.length - 1);
-  //   const { tick, tempo } = calculateTickAtTime(
-  //     player.currentTime,
-  //     tempoChnge,
-  //     player.midiData.timeDivision
-  //   );
-  //   settick(tick);
-  //   const targetTick = cursorTicks[curIdIndex];
-  //   if (targetTick <= tick) {
-  //     setCurIdIndex((prevIndex) => prevIndex + 1);
-
-  //     const charIndices = cursorIndices?.get(targetTick);
-  //     if (charIndices) {
-  //       charIndices.forEach((charIndex) => {
-  //         let lineIndex = 0;
-  //         let adjustedCharIndex = charIndex;
-  //         const lyricLines = lyrics.slice(3);
-
-  //         while (adjustedCharIndex >= lyricLines[lineIndex].length) {
-  //           adjustedCharIndex -= lyricLines[lineIndex].length + 1;
-  //           lineIndex++;
-  //         }
-  //         if (lineIndex > lyricsIndex) {
-  //           if (position === true) {
-  //             setLyrDisplay(groupThaiCharacters(lyricLines[lineIndex + 1]));
-  //             setLyrDisplayBottom(groupThaiCharacters(lyricLines[lineIndex]));
-  //           } else {
-  //             setLyrDisplay(groupThaiCharacters(lyricLines[lineIndex]));
-  //             setLyrDisplayBottom(
-  //               groupThaiCharacters(lyricLines[lineIndex + 1])
-  //             );
-  //           }
-  //           setLyricsIndex(lineIndex);
-  //           setPosition(!position);
-  //         }
-  //         setCharIndex(adjustedCharIndex + 1);
-  //       });
-  //     }
-  //   }
-  // };
-  // useEffect(() => {
-  //   if (cursorTicks && cursorIndices) {
-  //     const intervalId = setInterval(updateTick, 70);
-  //     if (player.paused) {
-  //       clearInterval(intervalId);
-  //       return;
-  //     }
-  //     return () => clearInterval(intervalId);
-  //   }
-  // }, [player.paused, curIdIndex, position, cursorTicks, cursorIndices]);
-
-  // useEffect(() => {
-  //   if (lyrics.length > 0) {
-  //     setLyrDisplay([[lyrics[0]]]);
-  //   }
-  //   setCurIdIndex(0);
-  //   setCharIndex(0);
-  //   setPosition(false);
-  //   setLyricsIndex(0);
-  // }, [lyrics]);
-
   const onSelectTestMusic = async (_: File, FileList: FileList) => {
     if (FileList.length === 1) {
       const file = FileList.item(0);
@@ -137,64 +56,23 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
 
   return (
     <div className="fixed  bottom-20 lg:bottom-16 left-0 w-full px-5 ">
-      {/* <div className="text-[8px] w-64">{JSON.stringify(cursorTicks[0])} {JSON.stringify(cursorTicks[cursorTicks.length -1])}</div> */}
-      <div className="flex items-center justify-center relative w-full h-56 lg:h-72 blur-overlay border blur-border rounded-lg p-2  text-center overflow-auto [&::-webkit-scrollbar]:hidden">
-        <div className="text-sm gap-2 absolute text-white text-start top-2 left-2">
-          {/* <div>
-            Time Division: {player.midiData.timeDivision} <br />
-            Tick: {tick} <br />
-            Char: {displayLyrics?.charIndex} <br />
-            LyrTop:{" "}
-            {JSON.stringify(
-              displayLyrics?.display.map((data) => data.join("")).join("")
-                .length
-            )}{" "}
-            <br />
-            LyrBottom:{" "}
-            {JSON.stringify(
-              displayLyrics?.displayBottom.map((data) => data.join("")).join("")
-                .length
-            )}
-          </div> */}
+      <div className="flex items-center justify-center relative w-full h-56 lg:h-72  rounded-lg p-2  text-center overflow-auto [&::-webkit-scrollbar]:hidden">
+        <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
 
-          {/* <div>
-            Tempo Selected: {Math.round(temp)} <br />
-            Tempo Changes:{" "}
-            {player.midiData.tempoChanges.map((data, ti) => {
-              return (
-                <div key={`${ti}-tempo-change-key`} className="pl-2  ">
-                  {ti + 1}. tempo: {Math.round(data.tempo)}
-                </div>
-              );
-            })}{" "}
-            <br />
-          </div> */}
-        </div>
-        {player.paused && (
-          <div className="absolute top-0 left-0 p-2 h-full flex gap-2 items-center justify-center w-full z-30">
-            <Upload
-              onSelectFile={onSelectTestMusic}
-              inputProps={{
-                multiple: true,
-              }}
-              // accept=".emk, .mid, .lyr, .cur"
-              className="relative  w-full"
-            >
-              <Button
-                border="border !border-white/20"
-                shadow=""
-                className={"text-white w-full h-full"}
-                icon={
-                  <BsFileEarmarkMusic className="text-3xl text-white"></BsFileEarmarkMusic>
-                }
-              >
-                <span>เล่นเพลง</span>
-                <span className="text-sm text-gray-400">
-                  โหลดเพลงจากไฟล์ .emk, (.mid, .lyr, .cur) <br />
-                </span>
-              </Button>
-            </Upload>
+        <div
+          className={`${
+            player.paused ? "z-30 opacity-100" : "z-10 opacity-0"
+          } absolute top-0 left-0 p-2 h-full flex gap-2 items-center justify-center w-full duration-300 `}
+        >
+          <Upload
+            onSelectFile={onSelectTestMusic}
+            inputProps={{
+              multiple: true,
+            }}
+            className="relative  w-full h-full"
+          >
             <Button
+              blur
               border="border !border-white/20"
               shadow=""
               className={"text-white w-full h-full"}
@@ -202,14 +80,27 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
                 <BsFileEarmarkMusic className="text-3xl text-white"></BsFileEarmarkMusic>
               }
             >
-              <span>ติดตั้งเพลง</span>
-              <span className="text-sm text-gray-400">
-                โหลดเพลงจาก .zip <br />
-                หรือโฟลเดอร์ Karaoke <br />
+              <span>เล่นเพลง</span>
+              <span className="text-sm">
+                โหลดเพลงจากไฟล์ .emk, (.mid, .lyr, .cur) <br />
               </span>
             </Button>
-          </div>
-        )}
+          </Upload>
+          <Button
+            border="border !border-white/20"
+            shadow=""
+            className={"text-white w-full h-full"}
+            icon={
+              <BsFileEarmarkMusic className="text-3xl text-white"></BsFileEarmarkMusic>
+            }
+          >
+            <span>ติดตั้งเพลง</span>
+            <span className="text-sm">
+              โหลดเพลงจาก .zip <br />
+              หรือโฟลเดอร์ Karaoke <br />
+            </span>
+          </Button>
+        </div>
 
         {displayLyrics && (
           <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
@@ -230,8 +121,6 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
             ></LyricsAnimation>
           </div>
         )}
-
-        {/* {JSON.stringify(displayLyrics)} */}
       </div>
     </div>
   );

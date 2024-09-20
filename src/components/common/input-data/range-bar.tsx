@@ -39,13 +39,16 @@ const RangeBar: React.FC<RangeBarProps> = ({
     }
   };
 
-  useEffect(() => {
-  }, [value]);
+  useEffect(() => {}, [value]);
 
   return (
     <input
       {...inputProps}
-      style={{ ...setLayout, ...inputProps?.style }}
+      style={{
+        ...setLayout,
+        ...inputProps?.style,
+        transition: "all 0.3s ease",
+      }}
       onChange={onChangeHandler}
       type="range"
       defaultValue={defaultValue}

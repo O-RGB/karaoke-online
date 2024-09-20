@@ -1,12 +1,6 @@
 import { MIDI, midiControllers, Sequencer, Synthetizer } from "spessasynth_lib";
 
-export const volumeChange = (
-  channel: number,
-  vol: number,
-  synth: Synthetizer
-) => {
-  synth.controllerChange(channel, midiControllers.mainVolume, vol);
-};
+
 
 export const getMidiInfo = (player: Sequencer) => {
   const ticksPerBeat = player.midiData.timeDivision;

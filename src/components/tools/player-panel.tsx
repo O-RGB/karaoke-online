@@ -9,47 +9,27 @@ import RangeBar from "../common/input-data/range-bar";
 import { Sequencer } from "spessasynth_lib";
 import ContextModal from "../modal/context-modal";
 import { FiSettings } from "react-icons/fi";
-import { getMidiInfo, getTicks } from "@/lib/app-control";
-
+import Marquee from "react-fast-marquee";
 interface PlayerPanelProps {
   player: Sequencer;
+  lyrics: string[];
   modalMap: ModalComponents;
 }
 
 const PlayerPanel: React.FC<PlayerPanelProps> = ({
   player,
+  lyrics,
   modalMap,
-  // cursor,
 }) => {
-  // const [ticks, setTicks] = useState<number>(0);
-  // const [curTime, setCur] = useState<number>(0);
   const timer = Math.round((player.currentTime / player.duration) * 100);
-
-  // const calculateTicksFromCur = () => {
-  //   const midInfo = getMidiInfo(player);
-  //   cursor = cursor.map((data) => data * ((midInfo?.ticksPerBeat ?? 0) / 24));
-  //   console.log(cursor);
-  // };
-
-  // const MidiTickCalculator = () => {
-  //   const tick = getTicks(player);
-  //   setTicks(tick ?? 0);
-  // };
-
-  // useEffect(() => {
-  //   MidiTickCalculator();
-  // }, [player.currentTime]);
-
-  // useEffect(() => {
-  //   calculateTicksFromCur();
-  // }, [player.paused]);
 
   return (
     <>
-      <div className="fixed bottom-0 w-full left-0 blur-overlay border-t blur-border flex justify-between p-2 lg:p-0">
-        <div className="flex items-center">
+      <div className="fixed bottom-0 w-full left-0 blur-overlay bg-black/10 border-t blur-border flex justify-between p-2 lg:p-0">
+        <div className="flex items-center w-full">
           {!player.paused ? (
             <Button
+              blur={false}
               border=""
               shadow=""
               padding="p-4"
@@ -59,6 +39,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             ></Button>
           ) : (
             <Button
+              blur={false}
               border=""
               shadow=""
               padding="p-4"
@@ -68,6 +49,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             ></Button>
           )}
           <Button
+            blur={false}
             border=""
             shadow=""
             padding="p-4"
@@ -75,7 +57,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             shape={false}
             icon={<TbPlayerSkipForwardFilled className="text-white" />}
           ></Button>
-          <div className="px-2 flex items-center w-full">
+          <div className="w-full lg:w-fit px-2 flex items-center pt-0.5">
             <RangeBar
               min={0}
               max={100}
@@ -87,25 +69,33 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               }}
             ></RangeBar>
           </div>
-          {/* <div className="flex gap-2">
-            <div className="p-1 border text-white overflow-hidden text-nowrap">
-              currentTime: {Math.round(player.currentTime)}
+          <div className="w-40 lg:w-full h-full p-1.5">
+            <div className="rounded-md bg-black/15 h-full flex items-center py-1 text-white">
+              {lyrics.length > 3 && (
+                <Marquee className="flex gap-2">
+                  {lyrics[0]}&nbsp;
+                  {lyrics[1]}&nbsp;
+                  {lyrics[2]}&nbsp;
+                  {lyrics[3]}&nbsp;
+                  {lyrics.length > 6 ? (
+                    <>
+                      {lyrics[4]}&nbsp;
+                      {lyrics[5]}&nbsp;
+                      {lyrics[6]}&nbsp;
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </Marquee>
+              )}
             </div>
-            <div className="p-1 border text-white overflow-hidden text-nowrap">
-              duration: {Math.round(player.duration)}
-            </div>
-            <div className="p-1 border text-white overflow-hidden text-nowrap">
-              ticks: {Math.round(ticks)}
-            </div>
-            <div className="p-1 border text-white overflow-hidden text-nowrap">
-              curTime: {Math.round(curTime)}
-            </div>
-          </div> */}
+          </div>
         </div>
 
         <div>
           <ContextModal leftClick modal={modalMap} className="">
             <Button
+              blur={false}
               border=""
               shadow=""
               padding="p-4"

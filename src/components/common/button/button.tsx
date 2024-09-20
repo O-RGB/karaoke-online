@@ -1,6 +1,8 @@
 import React from "react";
 
-interface ButtonCommonProps extends ButtonProps {}
+interface ButtonCommonProps extends ButtonProps {
+  blur?: boolean;
+}
 
 const Button: React.FC<ButtonCommonProps> = ({
   icon,
@@ -10,22 +12,26 @@ const Button: React.FC<ButtonCommonProps> = ({
   padding = "p-3",
   shadow = "shadow-md",
   border = "border",
+  blur = true,
+
   ...props
 }) => {
   var butStyle = `${padding} ${shadow} ${border} flex items-center justify-center gap-2`;
   var colorStyle = ""; //bg-blue-500 hover:bg-blue-500/90 active:bg-blue-500/80
   var animation = "duration-300 transition-all";
-  var shapeStyle = "blur-overlay";
+  var shapeStyle = "";
   var position = "";
 
   if (shape) {
     shapeStyle = "rounded-md";
   }
 
+  shapeStyle += blur ? " blur-overlay bg-white/10 hover:bg-white/20" : "";
+
   switch (color) {
     case "white":
       colorStyle =
-        "bg-white hover:bg-gray-200/50 active:bg-white/90 disabled:bg-white";
+        "bg-white hover:bg-gray-200/50 active:bg-white/90 disabled:bg-white ";
       break;
     case "blue":
       colorStyle =

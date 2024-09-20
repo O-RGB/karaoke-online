@@ -1,21 +1,21 @@
 "use client";
 
-import { createContext, FC, useEffect, useState } from "react";
+import { createContext, FC, useCallback, useEffect, useState } from "react";
 import { useSynth } from "../hooks/spessasynth-hook";
 import { useRemote } from "../hooks/peer-hook";
 import {
   convertCursorToTicks,
   mapCursorToIndices,
-  volumeChange,
+  // volumeChange,
 } from "@/lib/app-control";
 import TrieSearch from "trie-search";
 import { addSongList, onSearchList } from "@/lib/trie-search";
-import { MIDI } from "spessasynth_lib";
+import { MIDI, midiControllers } from "spessasynth_lib";
 import { loadSuperZipAndExtractSong } from "@/lib/zip";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 
 type AppControlContextType = {
-  updateVolume: (index: number, value: number) => void;
+  updateVolumeSysth: (index: number, value: number) => void;
   onSearchStrList: (str: string) => Promise<SearchResult[]> | undefined;
   setTracklistFile: (file: File) => Promise<void>;
   setPlayingTrackFile: (value: SearchResult) => void;
@@ -23,6 +23,10 @@ type AppControlContextType = {
   handleSetLyrics: (lyr: string[]) => void;
   setSongPlaying: (files: SongFilesDecode) => Promise<void>;
   loadAndPlaySong: (value: SearchResult) => Promise<void>;
+  updateVolumeHeld: (held: boolean) => void;
+  updatePitch: (semitones: number, channel?: number) => void;
+  addNotification: (text: string) => void;
+  notification: string | undefined;
   musicLibrary: Map<string, File>;
   tracklist: TrieSearch<SearchResult> | undefined;
   playingTrack: SearchResult | undefined;
@@ -39,7 +43,7 @@ type AppControlProviderProps = {
 };
 
 export const AppControlContext = createContext<AppControlContextType>({
-  updateVolume: () => {},
+  updateVolumeSysth: () => {},
   onSearchStrList: async () => [],
   setTracklistFile: async () => {},
   setPlayingTrackFile: async () => {},
@@ -47,9 +51,12 @@ export const AppControlContext = createContext<AppControlContextType>({
   handleSetLyrics: () => {},
   setSongPlaying: async () => {},
   loadAndPlaySong: async () => {},
+  updateVolumeHeld: () => {},
+  updatePitch: () => {},
+  addNotification: () => {},
   lyrics: [],
   cursorTicks: [],
-  // ticks: 0,
+  notification: undefined,
   musicLibrary: new Map(),
   cursorIndices: new Map(),
   tracklist: undefined,
@@ -68,6 +75,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   const VolChannel = Array(16).fill(100);
   const [volumeController, setVolumeController] =
     useState<number[]>(VolChannel);
+  const [isVolumeHeld, setIsVolumeHeld] = useState<boolean>(false);
 
   // Trie Search
   const [tracklist, setTracklist] = useState<TrieSearch<SearchResult>>();
@@ -77,27 +85,64 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     new Map()
   );
 
+  // Notification
+  const [notification, setNotification] = useState<string>();
   // Playing Song
   // --- Song
   const [playingTrack, setPlayingTrack] = useState<SearchResult>();
   const [midiPlaying, setMidiPlaying] = useState<MIDI>();
+
   // --- Lyrics
   const [lyrics, setLyrics] = useState<string[]>([]);
   const [cursorTicks, setCursor] = useState<number[]>([]);
   const [cursorIndices, setCursorIndices] = useState<Map<number, number[]>>();
-  // const [ticks, setTicks] = useState<number>(0);
 
-  const synthEventController = () => {
-    synth?.eventHandler.addEvent("controllerchange", "", (e) => {
-      const controllerNumber = e.controllerNumber;
-      const controllerValue = e.controllerValue;
-      const channel = e.channel;
-      if (controllerNumber === 7) {
-        // updateVolume(channel, controllerValue);
-        // volumeChange(channel, controllerValue, synth);
-      }
+  const addNotification = (text: string) => {
+    setNotification(text);
+  };
+
+  const updateVolumeHeld = (held: boolean) => {
+    setIsVolumeHeld(held);
+  };
+
+  const updatePitch = (semitones: number = 1, channel?: number) => {
+    const PITCH_CENTER = 8192;
+    const SEMITONE_STEP = PITCH_CENTER / 2;
+
+    const pitchValue = PITCH_CENTER + semitones * SEMITONE_STEP;
+    const MSB = (pitchValue >> 7) & 0x7f;
+    const LSB = pitchValue & 0x7f;
+
+    const sendPitch = (channel: number) => {
+      synth?.pitchWheel(channel, MSB, LSB);
+    };
+
+    if (channel !== undefined) {
+      sendPitch(channel);
+    } else {
+      Array.from({ length: 16 }, (_, i) => {
+        sendPitch(i);
+      });
+    }
+  };
+
+  const updateVolumeSysth = (channel: number, vol: number) => {
+    synth?.controllerChange(channel, midiControllers.mainVolume, vol);
+    setVolumeController((ch) => {
+      ch[channel] = vol;
+      return ch;
     });
   };
+
+  const synthEventController = useCallback(
+    (controllerNumber: number, controllerValue: number, channel: number) => {
+      if (controllerNumber === 7 && isVolumeHeld === false) {
+        updateVolumeSysth(channel, controllerValue);
+      }
+    },
+    [isVolumeHeld]
+  );
+
   const handleSetLyrics = (lyr: string[]) => {
     setLyrics(lyr);
   };
@@ -132,13 +177,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     setTracklist(trie);
   };
 
-  const updateVolume = (index: number, value: number) => {
-    setVolumeController((ch) => {
-      ch[index] = value;
-      return ch;
-    });
-  };
-
   const setSongPlaying = async (files: SongFilesDecode) => {
     if (!player) {
       return;
@@ -150,11 +188,11 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     } catch (e) {
       let error: string = (e as string).toString();
       let typeError: string = `SyntaxError: Invalid MIDI Header! Expected "MThd", got`;
-      console.error(error)
+      console.error(error);
       // if (error === typeError) {
-        const fix = await fixMidiHeader(files.mid);
-        const fixArrayBuffer = await fix.arrayBuffer();
-        parsedMidi = new MIDI(fixArrayBuffer, fix.name);
+      const fix = await fixMidiHeader(files.mid);
+      const fixArrayBuffer = await fix.arrayBuffer();
+      parsedMidi = new MIDI(fixArrayBuffer, fix.name);
       // }
     }
 
@@ -192,8 +230,8 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
           return;
         }
         const vol = data as ISetChannelGain;
-        updateVolume(vol.channel, vol.value);
-        volumeChange(vol.channel, vol.value, synth);
+        updateVolumeSysth(vol.channel, vol.value);
+        // volumeChange(vol.channel, vol.value, synth);
         return data as ISetChannelGain;
 
       case "SEARCH_SONG":
@@ -220,13 +258,18 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   }, [messages?.content]);
 
   useEffect(() => {
-    synthEventController();
+    synth?.eventHandler.addEvent("controllerchange", "", (e) => {
+      const controllerNumber = e.controllerNumber;
+      const controllerValue = e.controllerValue;
+      const channel = e.channel;
+      synthEventController(controllerNumber, controllerValue, channel);
+    });
   }, [synth]);
 
   return (
     <AppControlContext.Provider
       value={{
-        updateVolume,
+        updateVolumeSysth,
         setTracklistFile,
         onSearchStrList,
         setPlayingTrackFile,
@@ -234,6 +277,10 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         handleSetLyrics,
         setSongPlaying,
         loadAndPlaySong,
+        updateVolumeHeld,
+        updatePitch,
+        addNotification,
+        notification,
         volumeController,
         lyrics,
         // ticks,

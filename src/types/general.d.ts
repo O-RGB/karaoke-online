@@ -77,3 +77,8 @@ interface ContextMenuProps<T = any> {
   children?: React.ReactNode;
   items?: ContextMenuItem<T>[];
 }
+
+interface INotification {
+  id: number;
+  text: string;
+}
