@@ -13,7 +13,7 @@ interface VolumeMeterProps {
   channel: number;
   instruments: number;
   isLock: boolean;
-  perset: IPersetSoundfont[];
+  perset?: IPersetSoundfont[];
   onChange?: (channel: number, value: number) => void;
   onLock?: (channel: number) => void;
   onMouseUp?: () => void;
@@ -106,7 +106,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
         onChange={(value) => {
           onPersetChange?.(channel, parseInt(value));
         }}
-        options={perset.map((data) => {
+        options={perset?.map((data) => {
           return {
             label: data.program.toString() + " : " + data.presetName,
             value: data.program.toString(),

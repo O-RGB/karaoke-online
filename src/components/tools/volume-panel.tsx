@@ -17,7 +17,7 @@ interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
   analysers?: AnalyserNode[];
   audioGain?: number[];
-  perset: IPersetSoundfont[];
+  perset?: IPersetSoundfont[];
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
