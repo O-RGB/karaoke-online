@@ -1,5 +1,4 @@
 import React, { CSSProperties, useEffect, useState } from "react";
-import InputRange from "react-input-range";
 import RangeBarClone from "./range-bar-clone";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
