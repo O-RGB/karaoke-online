@@ -21,7 +21,8 @@ import StatusPanel from "../tools/status-panel";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
-  const { audioGain, setupSpessasynth, synth, player, instrument } = useSynth();
+  const { audioGain, setupSpessasynth, synth, player, instrument, analysers } =
+    useSynth();
   const {
     setTracklistFile,
     loadAndPlaySong,
@@ -31,6 +32,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     musicLibrary,
     notification,
     lyrics,
+    cursorIndices,
+    cursorTicks,
   } = useAppControl();
 
   const { tempo, tick, displayLyrics } = usePlayer();
@@ -62,7 +65,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <StatusPanel text={notification}></StatusPanel>
       <VolumePanel
         synth={synth}
-        audioGain={audioGain}
+        analysers={analysers}
         instrument={instrument}
       ></VolumePanel>
       <TempoPanel
@@ -76,7 +79,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         onClickSong={loadAndPlaySong}
       ></SearchSong>
       <LyricsPanel
-        displayLyrics={displayLyrics}
+        cursorIndices={cursorIndices}
+        cursorTicks={cursorTicks}
+        lyrics={lyrics}
+        tick={tick}
         player={player}
         setSongPlaying={setSongPlaying}
       ></LyricsPanel>

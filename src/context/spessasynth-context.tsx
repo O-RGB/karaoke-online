@@ -1,12 +1,7 @@
 "use client";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
-import { createContext, FC, useEffect, useState } from "react";
-import {
-  midiControllers,
-  Sequencer,
-  Synthetizer,
-  WORKLET_URL_ABSOLUTE,
-} from "spessasynth_lib";
+import { createContext, FC, useEffect, useRef, useState } from "react";
+import { Sequencer, Synthetizer, WORKLET_URL_ABSOLUTE } from "spessasynth_lib";
 import { useRemote } from "../hooks/peer-hook";
 
 type SpessasynthContextType = {
@@ -16,6 +11,7 @@ type SpessasynthContextType = {
   synth: Synthetizer | undefined;
   player: Sequencer | undefined;
   audio: AudioContext | undefined;
+  analysers: AnalyserNode[];
 };
 
 type SpessasynthProviderProps = {
@@ -29,6 +25,7 @@ export const SpessasynthContext = createContext<SpessasynthContextType>({
   synth: undefined,
   player: undefined,
   audio: undefined,
+  analysers: [],
 });
 
 export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
@@ -39,11 +36,13 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   const [player, setPlayer] = useState<Sequencer>();
   const [audio, setAudio] = useState<AudioContext>();
   // Display
-  const [audioGain, setAudioGain] = useState<number[]>([]);
+  const audioGain = useRef<number[]>([]);
   const [instrument, setInstrument] = useState<number[]>([]);
+  const [analysers, setAnalysers] = useState<AnalyserNode[]>([]);
 
   const loadPlayer = async (synth: Synthetizer) => {
     const seq = new Sequencer([], synth);
+    seq.loop = false
     return seq;
   };
 
@@ -53,7 +52,6 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     const synthInstance = new Synthetizer(audio.destination, ab);
 
     // Default Setting
-    // synthInstance.muteChannel(8, true);
     synthInstance.setMainVolume(0.5);
     synthInstance.highPerformanceMode = true;
 
@@ -61,30 +59,16 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     return synthInstance;
   };
 
-  // const loadAudioContext = async () => {
-  //   if (typeof window !== "undefined") {
-  //     const audio = new AudioContext();
-  //     await audio.audioWorklet.addModule(
-  //       new URL(WORKLET_URL_ABSOLUTE, window.location.origin).toString()
-  //     );
-  //     return audio;
-  //   } else {
-  //     return undefined;
-  //   }
-  // };
-
   const loadAudioContext = async (): Promise<AudioContext | undefined> => {
     if (typeof window !== "undefined") {
       try {
         const audioContext = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
 
-        // Handle cases where the context is suspended initially (especially on mobile browsers)
         if (audioContext.state === "suspended") {
           await audioContext.resume();
         }
 
-        // Add the audio worklet module
         await audioContext.audioWorklet.addModule(
           new URL(WORKLET_URL_ABSOLUTE, window.location.origin).toString()
         );
@@ -122,24 +106,9 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
       const analyser = audio.createAnalyser();
       analyser.fftSize = 256;
       newAnalysers.push(analyser);
-      synth.lockController(i, midiControllers.mainVolume, false);
     }
     synth.connectIndividualOutputs(newAnalysers);
-
-    const render = () => {
-      const newVolumeLevels = newAnalysers.map((analyser) => {
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(dataArray);
-        const value = Math.round(
-          dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
-        );
-        return value;
-      });
-
-      setAudioGain(newVolumeLevels);
-      requestAnimationFrame(() => setTimeout(() => render(), 100));
-    };
-    render();
+    setAnalysers(newAnalysers);
   };
 
   const setup = async () => {
@@ -158,9 +127,11 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     setPlayer(player);
     synthProgramChange(spessasynth);
 
-    if (myAudio.state === "suspended") {
-      await myAudio.resume();
-    }
+    console.log("setup");
+
+    // if (myAudio.state === "suspended") {
+    //   await myAudio.resume();
+    // }
   };
 
   useEffect(() => {
@@ -172,12 +143,13 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   return (
     <SpessasynthContext.Provider
       value={{
-        audio: audio,
-        audioGain: audioGain,
         setupSpessasynth: setup,
+        audio: audio,
+        audioGain: audioGain.current,
         synth: synth,
         player: player,
         instrument: instrument,
+        analysers: analysers,
       }}
     >
       <>{children}</>

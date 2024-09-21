@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Sequencer } from "spessasynth_lib";
 import LyricsAnimation from "../common/lyrics-animation";
 import Upload from "../common/input-data/upload";
@@ -13,18 +13,43 @@ import {
   validateSongFileTypes,
 } from "@/lib/karaoke/ncn";
 import { EMK_FILE_TYPE } from "@/config/value";
+import { groupThaiCharacters } from "@/lib/app-control";
 
 interface LyricsPanelProps {
   player: Sequencer;
   setSongPlaying: (files: SongFilesDecode) => Promise<void>;
-  displayLyrics?: DisplayLyrics;
+  lyrics: string[];
+  tick: number;
+  cursorTicks: number[];
+  cursorIndices?: Map<number, number[]>;
 }
 
 const LyricsPanel: React.FC<LyricsPanelProps> = ({
   player,
   setSongPlaying,
-  displayLyrics,
+  lyrics,
+  tick,
+  cursorTicks,
+  cursorIndices,
 }) => {
+  const charIndex = useRef<number>(0);
+  const display = useRef<string[][]>([]);
+  const displayBottom = useRef<string[][]>([]);
+  const position = useRef<boolean>(true);
+
+  const curIdIndex = useRef<number>(0);
+  const lyricsIndex = useRef<number>(0);
+
+  const reset = () => {
+    if (lyrics.length > 0) {
+      display.current = [[lyrics[0]]];
+    }
+    curIdIndex.current = 0;
+    position.current = false;
+    lyricsIndex.current = 0;
+    charIndex.current = 0;
+  };
+
   const onSelectTestMusic = async (_: File, FileList: FileList) => {
     if (FileList.length === 1) {
       const file = FileList.item(0);
@@ -53,6 +78,54 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
       setSongPlaying(song);
     }
   };
+
+  const renderLyricsDisplay = () => {
+    const targetTick = cursorTicks[curIdIndex.current];
+    if (targetTick <= tick) {
+      curIdIndex.current = curIdIndex.current + 1;
+
+      const charIndices = cursorIndices?.get(targetTick);
+
+      if (charIndices) {
+        charIndices.forEach((__charIndex) => {
+          let lineIndex = 0;
+          let adjustedCharIndex = __charIndex;
+          const lyricLines = lyrics.slice(3);
+
+          while (adjustedCharIndex >= lyricLines[lineIndex].length) {
+            adjustedCharIndex -= lyricLines[lineIndex].length + 1;
+            lineIndex++;
+          }
+          if (lineIndex > lyricsIndex.current) {
+            if (position.current === true) {
+              display.current = groupThaiCharacters(lyricLines[lineIndex + 1]);
+              displayBottom.current = groupThaiCharacters(
+                lyricLines[lineIndex]
+              );
+            } else {
+              display.current = groupThaiCharacters(lyricLines[lineIndex]);
+              displayBottom.current = groupThaiCharacters(
+                lyricLines[lineIndex + 1]
+              );
+            }
+            lyricsIndex.current = lineIndex;
+            position.current = !position.current;
+          }
+          charIndex.current = adjustedCharIndex + 1;
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    renderLyricsDisplay();
+  }, [tick, cursorTicks, cursorIndices, lyrics]);
+
+  useEffect(() => {
+    if (lyrics) {
+      reset();
+    }
+  }, [lyrics]);
 
   return (
     <div className="fixed  bottom-20 lg:bottom-16 left-0 w-full px-5 ">
@@ -102,25 +175,19 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
           </Button>
         </div>
 
-        {displayLyrics && (
-          <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
-            <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
-              <LyricsAnimation
-                charIndex={
-                  displayLyrics.position === true ? displayLyrics.charIndex : -1
-                }
-                display={displayLyrics.display}
-              ></LyricsAnimation>
-            </span>
-            <br />
+        <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
+          <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
             <LyricsAnimation
-              charIndex={
-                displayLyrics.position === false ? displayLyrics.charIndex : -1
-              }
-              display={displayLyrics.displayBottom}
+              charIndex={position.current === true ? charIndex.current : -1}
+              display={display.current}
             ></LyricsAnimation>
-          </div>
-        )}
+          </span>
+          <br />
+          <LyricsAnimation
+            charIndex={position.current === false ? charIndex.current : -1}
+            display={displayBottom.current}
+          ></LyricsAnimation>
+        </div>
       </div>
     </div>
   );

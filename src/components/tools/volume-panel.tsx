@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import VolumeMeter from "../common/volume/volume-meter";
 import { Synthetizer } from "spessasynth_lib";
 import { useAppControl } from "@/hooks/app-control-hook";
@@ -12,17 +12,19 @@ import NumberButton from "../common/input-data/number-button";
 import SwitchButton from "../common/input-data/switch-button";
 
 interface VolumePanelProps {
-  audioGain: number[];
   instrument: number[];
   synth?: Synthetizer;
   onVolumeChange?: (channel: number, value: number) => void;
+  analysers?: AnalyserNode[];
+  audioGain?: number[];
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
-  audioGain,
   instrument,
   synth,
   onVolumeChange,
+  analysers,
+  audioGain,
 }) => {
   const VOCAL_CHANNEL = 8;
   const {
@@ -33,6 +35,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     volumeController,
   } = useAppControl();
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
+  const gain = useRef<number[]>([]);
 
   const onVolumeMeterChange = (channel: number, value: number) => {
     if (synth) {
@@ -62,12 +65,36 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     }
   };
 
-  useEffect(() => {}, [audioGain]);
+  const render = () => {
+    if (analysers) {
+      const newVolumeLevels = analysers?.map((analyser) => {
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(dataArray);
+        const value = Math.round(
+          dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
+        );
+        return value;
+      });
+      gain.current = newVolumeLevels;
+    }
+  };
+
+  useEffect(() => {
+    if (analysers) {
+      setInterval(() => render(), 100);
+    }
+  }, [analysers]);
+
+  useEffect(() => {
+    if (audioGain) {
+      gain.current = audioGain;
+    }
+  }, [audioGain]);
 
   return (
     <div className="fixed w-full top-16 lg:top-[4.2rem] left-0 px-5 flex flex-col gap-2 ">
       <div className="grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-1 blur-overlay border blur-border rounded-md p-2">
-        {audioGain.map((data, ch) => {
+        {gain.current.map((data, ch) => {
           return (
             <div
               className="flex w-full items-center justify-center"
@@ -92,7 +119,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
 
       <div className="flex gap-2">
         <NumberButton
-          onChange={(value) => { 
+          onChange={(value) => {
             updatePitch(value);
             addNotification(`Pitch ${value}`);
           }}

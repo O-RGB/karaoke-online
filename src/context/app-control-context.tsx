@@ -231,7 +231,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         }
         const vol = data as ISetChannelGain;
         updateVolumeSysth(vol.channel, vol.value);
-        // volumeChange(vol.channel, vol.value, synth);
         return data as ISetChannelGain;
 
       case "SEARCH_SONG":
@@ -283,7 +282,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         notification,
         volumeController,
         lyrics,
-        // ticks,
         cursorTicks,
         musicLibrary,
         tracklist,
