@@ -1,7 +1,5 @@
 import { MIDI, midiControllers, Sequencer, Synthetizer } from "spessasynth_lib";
 
-
-
 export const getMidiInfo = (player: Sequencer) => {
   const ticksPerBeat = player.midiData.timeDivision;
   const tempoChanges = player.midiData.tempoChanges;
@@ -36,7 +34,10 @@ export function getTicks(
   return currentTime * ticksPerSecond;
 }
 
-export function groupThaiCharacters(text: string): string[][] {
+export function groupThaiCharacters(text?: string): string[][] {
+  if (!text) {
+    return [];
+  }
   const groups: string[][] = [];
   let currentGroup: string[] = [];
 
@@ -127,7 +128,7 @@ export function convertTicksToTime(
   tempoChanges: ITempoChange[]
 ): ITempoTimeChange[] {
   if (tempoChanges.length === 0) {
-    return []
+    return [];
   }
   let time = 0;
   let lastTicks = 0;
@@ -177,7 +178,6 @@ export function calculateTicks(
       break;
     }
   }
-
 
   ticks += getTicks(timeDivision, currentTime - lastTime, lastTempo);
   return { tick: Math.round(ticks), tempo: lastTempo };

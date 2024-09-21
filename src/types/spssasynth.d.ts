@@ -53,3 +53,9 @@ type InstrumentsType =
   | "FaHelicopter"
   | "FaHandsClapping"
   | "FaBomb";
+
+interface IPersetSoundfont {
+  bank: number;
+  presetName: string;
+  program: number;
+}

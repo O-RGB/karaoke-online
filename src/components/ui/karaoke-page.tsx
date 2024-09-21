@@ -21,7 +21,7 @@ import StatusPanel from "../tools/status-panel";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
-  const { audioGain, setupSpessasynth, synth, player, instrument, analysers } =
+  const { perset, setupSpessasynth, synth, player, instrument, analysers } =
     useSynth();
   const {
     setTracklistFile,
@@ -65,6 +65,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <StatusPanel text={notification}></StatusPanel>
       <VolumePanel
         synth={synth}
+        perset={perset}
         analysers={analysers}
         instrument={instrument}
       ></VolumePanel>

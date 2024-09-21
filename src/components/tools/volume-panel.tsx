@@ -17,6 +17,7 @@ interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
   analysers?: AnalyserNode[];
   audioGain?: number[];
+  perset: IPersetSoundfont[];
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
@@ -25,6 +26,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   onVolumeChange,
   analysers,
   audioGain,
+  perset,
 }) => {
   const VOCAL_CHANNEL = 8;
   const {
@@ -32,6 +34,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     updateVolumeHeld,
     updatePitch,
     addNotification,
+    updatePerset,
     volumeController,
   } = useAppControl();
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
@@ -63,6 +66,10 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     if (mute === vocal) {
       onLockVolume(VOCAL_CHANNEL + 1);
     }
+  };
+
+  const onPersetChange = (channel: number, value: number) => {
+    updatePerset(channel - 1, value);
   };
 
   const render = () => {
@@ -101,12 +108,14 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
               key={`gin-${ch}`}
             >
               <VolumeMeter
+                perset={perset}
                 onLock={onLockVolume}
                 isLock={lock[ch]}
                 instruments={instrument[ch]}
                 value={volumeController[ch]}
                 level={data}
                 channel={ch + 1}
+                onPersetChange={onPersetChange}
                 onChange={onVolumeMeterChange}
                 onMouseUp={() => updateVolumeHeld(true)}
                 onTouchEnd={() => updateVolumeHeld(false)}

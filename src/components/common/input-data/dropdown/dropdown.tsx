@@ -1,12 +1,14 @@
 import React from "react";
-import { FaSearch } from "react-icons/fa";
 
-interface DropdownProps {
+interface DropdownContainerProps {
   options: IOptions[];
   onClickItem: (value: IOptions) => void;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ options, onClickItem }) => {
+const DropdownContainer: React.FC<DropdownContainerProps> = ({
+  options,
+  onClickItem,
+}) => {
   return (
     <div
       className={`border divide-y divide-white/30 text-white rounded-md ${
@@ -26,4 +28,4 @@ const Dropdown: React.FC<DropdownProps> = ({ options, onClickItem }) => {
   );
 };
 
-export default Dropdown;
+export default DropdownContainer;

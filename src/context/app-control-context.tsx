@@ -25,6 +25,7 @@ type AppControlContextType = {
   loadAndPlaySong: (value: SearchResult) => Promise<void>;
   updateVolumeHeld: (held: boolean) => void;
   updatePitch: (semitones: number, channel?: number) => void;
+  updatePerset: (channel: number, value: number) => void;
   addNotification: (text: string) => void;
   notification: string | undefined;
   musicLibrary: Map<string, File>;
@@ -53,6 +54,7 @@ export const AppControlContext = createContext<AppControlContextType>({
   loadAndPlaySong: async () => {},
   updateVolumeHeld: () => {},
   updatePitch: () => {},
+  updatePerset: () => {},
   addNotification: () => {},
   lyrics: [],
   cursorTicks: [],
@@ -101,6 +103,12 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     setNotification(text);
   };
 
+  const updatePerset = (channel: number, value: number) => {
+    console.log("update perset", channel);
+    // synth?.controllerChange(channel, midiControllers.bankSelect, value);
+    synth?.programChange(channel, value);
+  };
+
   const updateVolumeHeld = (held: boolean) => {
     setIsVolumeHeld(held);
   };
@@ -115,6 +123,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 
     const sendPitch = (channel: number) => {
       synth?.pitchWheel(channel, MSB, LSB);
+      synth?.setPitchBendRange(channel, semitones);
     };
 
     if (channel !== undefined) {
@@ -124,6 +133,11 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         sendPitch(i);
       });
     }
+  };
+  const resetVolume = () => {
+    Array.from({ length: 16 }, (_, i) => {
+      updateVolumeSysth(i, 100);
+    });
   };
 
   const updateVolumeSysth = (channel: number, vol: number) => {
@@ -181,30 +195,40 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     if (!player) {
       return;
     }
-    const midiFileArrayBuffer = await files.mid.arrayBuffer();
-    let parsedMidi = null;
-    try {
-      parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
-    } catch (e) {
-      let error: string = (e as string).toString();
-      let typeError: string = `SyntaxError: Invalid MIDI Header! Expected "MThd", got`;
-      console.error(error);
-      // if (error === typeError) {
-      const fix = await fixMidiHeader(files.mid);
-      const fixArrayBuffer = await fix.arrayBuffer();
-      parsedMidi = new MIDI(fixArrayBuffer, fix.name);
-      // }
-    }
+    resetVolume();
+    player.pause();
+    setLyrics([]);
+    setCursor([]);
+    setCursorIndices(undefined);
+    setTimeout(async () => {
+      const midiFileArrayBuffer = await files.mid.arrayBuffer();
+      let parsedMidi = null;
+      try {
+        parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
+      } catch (e) {
+        let error: string = (e as string).toString();
+        let typeError: string = `SyntaxError: Invalid MIDI Header! Expected "MThd", got`;
+        console.error(error);
+        // if (error === typeError) {
+        const fix = await fixMidiHeader(files.mid);
+        const fixArrayBuffer = await fix.arrayBuffer();
+        parsedMidi = new MIDI(fixArrayBuffer, fix.name);
+        // }
+      }
 
-    if (parsedMidi) {
-      player.loadNewSongList([parsedMidi]);
-      setMidiPlaying(parsedMidi);
+      if (parsedMidi) {
+        player.loadNewSongList([parsedMidi]);
 
-      const timeDivision = parsedMidi.timeDivision;
-      handleSetLyrics([]);
-      handleSetLyrics(files.lyr);
-      handleSetCursor(timeDivision, files.cur);
-    }
+        setMidiPlaying(parsedMidi);
+
+        const timeDivision = parsedMidi.timeDivision;
+        handleSetLyrics([]);
+        handleSetLyrics(files.lyr);
+        handleSetCursor(timeDivision, files.cur);
+
+        player.play();
+      }
+    }, 500);
   };
 
   const loadAndPlaySong = async (value: SearchResult) => {
@@ -279,6 +303,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         updateVolumeHeld,
         updatePitch,
         addNotification,
+        updatePerset,
         notification,
         volumeController,
         lyrics,

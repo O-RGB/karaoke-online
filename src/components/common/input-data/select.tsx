@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import Dropdown from "./dropdown";
+
 import Input from "./input";
+import Dropdown from "./dropdown";
 
 interface SelectProps extends InputProps {
   options?: IOptions[];
@@ -43,22 +44,6 @@ const Select: React.FC<SelectProps> = ({
     setOptionsSearch([]);
   };
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target as Node)
-    ) {
-      setOptionsSearch([]); // Close the dropdown
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   return (
     <div className="w-full blur-overlay flex flex-col" ref={dropdownRef}>
       <Input
@@ -76,7 +61,14 @@ const Select: React.FC<SelectProps> = ({
           handleSearch(value);
         }}
       />
-      <Dropdown options={OptionsSearch} onClickItem={handleItemClick} />
+      <Dropdown
+        dropdownRef={dropdownRef}
+        resetOption={() => {
+          setOptionsSearch([]);
+        }}
+        options={OptionsSearch}
+        onClickItem={handleItemClick}
+      />
     </div>
   );
 };

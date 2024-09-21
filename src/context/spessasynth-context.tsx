@@ -12,6 +12,7 @@ type SpessasynthContextType = {
   player: Sequencer | undefined;
   audio: AudioContext | undefined;
   analysers: AnalyserNode[];
+  perset: IPersetSoundfont[];
 };
 
 type SpessasynthProviderProps = {
@@ -26,6 +27,7 @@ export const SpessasynthContext = createContext<SpessasynthContextType>({
   player: undefined,
   audio: undefined,
   analysers: [],
+  perset: [],
 });
 
 export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
@@ -35,6 +37,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   const [synth, setSynth] = useState<Synthetizer>();
   const [player, setPlayer] = useState<Sequencer>();
   const [audio, setAudio] = useState<AudioContext>();
+  const [perset, setPerset] = useState<IPersetSoundfont[]>([]);
   // Display
   const audioGain = useRef<number[]>([]);
   const [instrument, setInstrument] = useState<number[]>([]);
@@ -42,7 +45,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
 
   const loadPlayer = async (synth: Synthetizer) => {
     const seq = new Sequencer([], synth);
-    seq.loop = false
+    seq.loop = false;
     return seq;
   };
 
@@ -50,6 +53,16 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     const res = await fetch(DEFAULT_SOUND_FONT);
     const ab = await res.arrayBuffer();
     const synthInstance = new Synthetizer(audio.destination, ab);
+
+    synthInstance.eventHandler.addEvent(
+      "presetlistchange",
+      "",
+      (event: IPersetSoundfont[]) => {
+        let sort = event.sort((a, b) => a.program - b.program);
+        sort = sort.filter((x, i) => i !== 1);
+        setPerset(sort);
+      }
+    );
 
     // Default Setting
     synthInstance.setMainVolume(0.5);
@@ -127,8 +140,6 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     setPlayer(player);
     synthProgramChange(spessasynth);
 
-    console.log("setup");
-
     // if (myAudio.state === "suspended") {
     //   await myAudio.resume();
     // }
@@ -150,6 +161,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
         player: player,
         instrument: instrument,
         analysers: analysers,
+        perset: perset,
       }}
     >
       <>{children}</>

@@ -1,4 +1,6 @@
-import React, { CSSProperties, useEffect } from "react";
+import React, { CSSProperties, useEffect, useState } from "react";
+import InputRange from "react-input-range";
+import RangeBarClone from "./range-bar-clone";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 interface RangeBarProps {
@@ -20,6 +22,12 @@ const RangeBar: React.FC<RangeBarProps> = ({
   inputProps,
   value,
 }) => {
+  const [range, setRange] = useState<number>(100);
+  useEffect(() => {
+    if (defaultValue) {
+      setRange(defaultValue);
+    }
+  }, [defaultValue]);
   var setLayout: CSSProperties =
     layout == "vertical"
       ? {
@@ -31,6 +39,10 @@ const RangeBar: React.FC<RangeBarProps> = ({
         }
       : {};
 
+  const onChange = (value: number) => {
+    setRange(value);
+    onRangeChange?.(value);
+  };
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     const target = event.target;
     const num = parseInt(target.value);
@@ -41,22 +53,35 @@ const RangeBar: React.FC<RangeBarProps> = ({
 
   useEffect(() => {}, [value]);
 
-  return (
-    <input
-      {...inputProps}
-      style={{
-        ...setLayout,
-        ...inputProps?.style,
-        transition: "all 0.3s ease",
-      }}
-      onChange={onChangeHandler}
-      type="range"
-      defaultValue={defaultValue}
-      min={min}
-      max={max}
-      value={value}
-    ></input>
-  );
+  if (layout === "vertical") {
+    return (
+      <RangeBarClone
+        onChange={onRangeChange}
+        defaultValue={defaultValue}
+        min={min}
+        max={max}
+        value={value}
+      ></RangeBarClone>
+    );
+  } else {
+    return (
+      <input
+        {...inputProps}
+        style={{
+          ...setLayout,
+          ...inputProps?.style,
+          transition: "all 0.3s ease",
+        }}
+        onChange={onChangeHandler}
+        type="range"
+        defaultValue={defaultValue}
+        className="transition duration-300"
+        min={min}
+        max={max}
+        value={value}
+      ></input>
+    );
+  }
 };
 
 export default RangeBar;

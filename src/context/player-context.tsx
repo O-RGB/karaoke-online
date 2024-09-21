@@ -71,7 +71,7 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
       setTick(tick);
       setTempo(tempo);
 
-      console.log(currentTime)
+
       // const targetTick = cursorTicks[curIdIndex.current];
       // if (targetTick <= tick) {
       //   curIdIndex.current = curIdIndex.current + 1;

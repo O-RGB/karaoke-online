@@ -14,6 +14,7 @@ import {
 } from "@/lib/karaoke/ncn";
 import { EMK_FILE_TYPE } from "@/config/value";
 import { groupThaiCharacters } from "@/lib/app-control";
+// import EMKFileConverter from "./test";
 
 interface LyricsPanelProps {
   player: Sequencer;
@@ -129,9 +130,9 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
 
   return (
     <div className="fixed  bottom-20 lg:bottom-16 left-0 w-full px-5 ">
+        
       <div className="flex items-center justify-center relative w-full h-56 lg:h-72  rounded-lg p-2  text-center overflow-auto [&::-webkit-scrollbar]:hidden">
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
-
         <div
           className={`${
             player.paused ? "z-30 opacity-100" : "z-10 opacity-0"
@@ -189,6 +190,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
           ></LyricsAnimation>
         </div>
       </div>
+      {/* <EMKFileConverter></EMKFileConverter> */}
     </div>
   );
 };
