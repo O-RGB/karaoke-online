@@ -20,6 +20,10 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
     }
   }, [normalPeer]);
 
+  if (!hostUrl && !hostId) {
+    return;
+  }
+
   return (
     <div className="flex  justify-center gap-5">
       <a href={`${hostUrl}/remote/${hostId}`} target="_blank">
@@ -47,8 +51,8 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
         <div className="flex flex-col">
           <span>Remote URL:</span>
           <Input
+            defaultValue={`${hostUrl}/remote/${hostId}`}
             className="!text-black"
-            value={`${hostUrl}/remote/${hostId}`}
           ></Input>
         </div>
       </div>

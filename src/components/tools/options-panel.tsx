@@ -11,7 +11,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({}) => {
   const [onRemoteSet, setRemoteSet] = useState<boolean>(false);
   return (
     <>
-      <div className="fixed top-52 right-5 z-50">
+      <div className="fixed top-[40%] right-5 z-50">
         <div className="flex flex-col gap-1">
           <RemoteFunction></RemoteFunction>
 

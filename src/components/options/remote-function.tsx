@@ -21,20 +21,40 @@ const RemoteFunction: React.FC<RemoteFunctionProps> = ({}) => {
   };
 
   useEffect(() => {
+    const paused = player?.paused;
+    console.log(paused);
     if (onRemoteOpen) {
-      if (player?.paused) {
+      let end: number = player?.midiData.duration ?? 0;
+      let currentTime: number = player?.currentTime ?? 0;
+
+      end = Math.floor(end);
+      currentTime = Math.floor(currentTime);
+
+      console.log(end, currentTime);
+      if (paused === true && end === currentTime) {
         hanndleOnChange();
       }
     }
+
+    if (paused === false) {
+      setOpen(false);
+    }
+
+    console.log("use effect");
   }, [player?.paused]);
 
   return (
     <>
-      <Modal title={"ขอเพลงผ่านมือถือ"} isOpen={open} onClose={hanndleOnChange}>
+      <Modal
+        footer={<></>}
+        title={"ขอเพลงผ่านมือถือ"}
+        isOpen={open}
+        onClose={hanndleOnChange}
+      >
         <HostRemote></HostRemote>
       </Modal>
       <Button
-        color={onRemoteOpen ? "blue" : "default"}
+        color={onRemoteOpen ? "amber" : "default"}
         blur={!onRemoteOpen}
         onClick={setRemote}
         icon={

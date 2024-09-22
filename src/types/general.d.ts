@@ -4,7 +4,7 @@ type ButtonProps = Partial<React.ButtonHTMLAttributes<HTMLButtonElement>> &
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & CommonStyle;
 
-type ColorType = "default" | "white" | "blue";
+type ColorType = "default" | "white" | "blue" | "green" | "yellow" | "amber";
 type IconPosition = "default" | "top" | "right" | "left" | "bottom";
 
 type ModalType =
@@ -14,7 +14,7 @@ type ModalType =
   | "MUSIC_LOADED"
   | "MUSIC_STORE"
   | "ADD_MUSIC"
-  | "WALLPAPER"
+  | "WALLPAPER";
 
 type ModalComponents = {
   [key in ModalType]?: React.ReactNode;

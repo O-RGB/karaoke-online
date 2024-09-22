@@ -48,7 +48,7 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
 
   if (!normalPeer.id) {
     return (
-      <div className="bg-slate-700 min-h-dvh flex items-center justify-center text-lg">
+      <div className="bg-slate-700 min-h-dvh flex items-center justify-center text-lg text-white">
         <div className="flex items-center gap-2 font-bold">
           <AiOutlineLoading3Quarters className="text-lg animate-spin"></AiOutlineLoading3Quarters>
           กำลังเชื่อมต่อ...
