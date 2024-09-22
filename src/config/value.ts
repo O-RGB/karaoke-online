@@ -1,3 +1,4 @@
+export const WALLPAPER = "wallpaper-3.png";
 export const DEFAULT_SOUND_FONT = "default-sound-font.sf2";
 export const MID_FILE_TYPE = "mid";
 export const CUR_FILE_TYPE = "cur";

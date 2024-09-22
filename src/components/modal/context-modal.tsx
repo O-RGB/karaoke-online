@@ -7,6 +7,7 @@ import { TbDeviceMobileShare } from "react-icons/tb";
 import { VscSettings } from "react-icons/vsc";
 import { BsDatabase } from "react-icons/bs";
 import { BiFolder } from "react-icons/bi";
+import { FaImage } from "react-icons/fa";
 
 interface ContextModalProps {
   children?: ReactNode;
@@ -57,6 +58,12 @@ const ContextModal: React.FC<ContextModalProps> = ({
       text: "เพิ่มเพลง",
       onClick: handleSelectContext,
       type: "ADD_MUSIC",
+    },
+    {
+      icon: <FaImage />,
+      text: "ภาพพื้นหลัง",
+      onClick: handleSelectContext,
+      type: "WALLPAPER",
     },
     // {
     //   icon: <BiFolder />,

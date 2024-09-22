@@ -13,6 +13,9 @@ import { addSongList, onSearchList } from "@/lib/trie-search";
 import { MIDI, midiControllers } from "spessasynth_lib";
 import { loadSuperZipAndExtractSong } from "@/lib/zip";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
+import { WALLPAPER } from "@/config/value";
+import { getLocalWallpaper, setLocalWallpaper } from "@/lib/local-storage";
+import { base64ToImage, imageToBase64 } from "@/lib/image";
 
 type AppControlContextType = {
   updateVolumeSysth: (index: number, value: number) => void;
@@ -27,6 +30,8 @@ type AppControlContextType = {
   updatePitch: (semitones: number, channel?: number) => void;
   updatePerset: (channel: number, value: number) => void;
   addNotification: (text: string) => void;
+  changeWallpaper: (file: File) => Promise<void>;
+  loadWallpaper: () => Promise<void>;
   notification: string | undefined;
   musicLibrary: Map<string, File>;
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -36,6 +41,7 @@ type AppControlContextType = {
   lyrics: string[];
   cursorTicks: number[];
   midiPlaying: MIDI | undefined;
+  wallpaper: string | undefined;
   // ticks: number;
 };
 
@@ -56,6 +62,8 @@ export const AppControlContext = createContext<AppControlContextType>({
   updatePitch: () => {},
   updatePerset: () => {},
   addNotification: () => {},
+  changeWallpaper: async (file: File) => {},
+  loadWallpaper: async () => {},
   lyrics: [],
   cursorTicks: [],
   notification: undefined,
@@ -65,6 +73,7 @@ export const AppControlContext = createContext<AppControlContextType>({
   playingTrack: undefined,
   volumeController: [],
   midiPlaying: undefined,
+  wallpaper: undefined,
 });
 
 export const AppControlProvider: FC<AppControlProviderProps> = ({
@@ -99,13 +108,32 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   const [cursorTicks, setCursor] = useState<number[]>([]);
   const [cursorIndices, setCursorIndices] = useState<Map<number, number[]>>();
 
+  // --- Wallpaper
+  const [wallpaper, setWallpaper] = useState<string>(WALLPAPER);
+
+  const changeWallpaper = async (file: File) => {
+    const base64 = await imageToBase64(file);
+    const imgUrl = URL.createObjectURL(file);
+    if (base64.length > 0) {
+      setLocalWallpaper(base64);
+      setWallpaper(imgUrl);
+    }
+  };
+
+  const loadWallpaper = async () => {
+    const wallpaper = getLocalWallpaper(); // base64
+    if (wallpaper) {
+      const file = await base64ToImage(wallpaper);
+      const imgUrl = URL.createObjectURL(file);
+      setWallpaper(imgUrl);
+    }
+  };
+
   const addNotification = (text: string) => {
     setNotification(text);
   };
 
   const updatePerset = (channel: number, value: number) => {
-    console.log("update perset", channel);
-    // synth?.controllerChange(channel, midiControllers.bankSelect, value);
     synth?.programChange(channel, value);
   };
 
@@ -304,6 +332,8 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         updatePitch,
         addNotification,
         updatePerset,
+        changeWallpaper,
+        loadWallpaper,
         notification,
         volumeController,
         lyrics,
@@ -313,6 +343,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         playingTrack,
         cursorIndices,
         midiPlaying,
+        wallpaper,
       }}
     >
       <>{children}</>

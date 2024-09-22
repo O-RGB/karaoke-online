@@ -23,18 +23,16 @@ const ButtonDropdown: React.FC<ButtonDropdownProps> = ({
     <div className="relative cursor-pointer w-full group">
       <div className="w-full">{children}</div>
       <select
-        defaultValue={value}
         onChange={hanndleOnChange}
         className="absolute top-0 w-full h-5 bg-transparent cursor-pointer opacity-0"
         name=""
         id="test"
+        value={value}
       >
         {options?.map((data, index) => {
           return (
             <React.Fragment key={`option-key-${index}`}>
-              <option value={data.value} selected={data.value === value}>
-                {data.label}
-              </option>
+              <option value={data.value}>{data.label}</option>
             </React.Fragment>
           );
         })}

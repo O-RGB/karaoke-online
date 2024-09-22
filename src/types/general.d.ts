@@ -13,7 +13,8 @@ type ModalType =
   | "SUPER_JOIN"
   | "MUSIC_LOADED"
   | "MUSIC_STORE"
-  | "ADD_MUSIC";
+  | "ADD_MUSIC"
+  | "WALLPAPER"
 
 type ModalComponents = {
   [key in ModalType]?: React.ReactNode;

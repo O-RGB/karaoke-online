@@ -53,7 +53,6 @@ export default function RootLayout({
       </head>
 
       <body className={`relative ${inter.className} p-2.5 bg-slate-500 `}>
-        <div className="fixed w-screen h-screen top-0 left-0 -z-20  bg-[url('/wallpaper-3.png')] bg-cover bg-center  "></div>
         <AllowSound>
           <PeerProvider>
             <SpessasynthProvider>
