@@ -16,6 +16,7 @@ interface VolumeMeterProps {
   perset?: IPersetSoundfont[];
   onChange?: (channel: number, value: number) => void;
   onLock?: (channel: number) => void;
+  onUnLock?: (channel: number) => void;
   onMouseUp?: () => void;
   onTouchEnd?: () => void;
   onPersetChange?: (channel: number, value: number) => void;
@@ -30,6 +31,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
   perset,
   onChange,
   onLock,
+  onUnLock,
   onMouseUp,
   onTouchEnd,
   onPersetChange,
@@ -62,7 +64,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
         onClick={onLockVolume}
         className={`${
           isLock ? "bg-red-500 hover:bg-red-500/50" : "hover:bg-white/30"
-        } w-full text-center text-white font-bold text-[10px] flex items-center justify-center gap-[1px] rounded-t-md  duration-300 cursor-pointer border-t border-x border-white/20 `}
+        } w-full text-center text-white font-bold text-[10px] flex items-center justify-center gap-[2px] rounded-t-md  duration-300 cursor-pointer border-t border-x border-white/20 `}
       >
         <span className="pt-0.5">
           {isLock ? (
@@ -86,7 +88,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
               height: isLock ? "" : `${(filledBars / maxLevel) * 100}%`,
             }}
           />
-          <div className="relative z-20 flex items-center justify-center h-full">
+          <div className="relative z-20 flex items-center justify-center h-full lg:w-7">
             <RangeBar
               value={volume}
               max={127}
@@ -103,6 +105,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
         </div>
       </div>
       <ButtonDropdown
+        value={`${instruments ?? 0}`}
         onChange={(value) => {
           onPersetChange?.(channel, parseInt(value));
         }}
@@ -114,8 +117,8 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
         })}
       >
         <div className="w-full lg:min-w-7 border-b border-x border-white/20 cursor-pointer  group-hover:bg-white/20 duration-300">
-          <div className="w-full blur-overlay text-center text-white font-bold text-[10px] p-1 flex justify-center items-center h-4">
-            <>
+          <div className="w-full blur-overlay text-center text-white font-bold text-[10px] p-1 flex gap-0.5 justify-center items-center h-5">
+            <span>
               {channel === 10 ? (
                 <FaDrum></FaDrum>
               ) : channel === 9 ? (
@@ -123,7 +126,10 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
               ) : (
                 <>{getIconInstruments(instruments ?? 0)?.icon}</>
               )}
-            </>
+            </span>
+            <span className="text-[8px] pb-[1px] font-bold text-white/70">
+              {`${instruments ?? 0}`.padStart(3, "0")}
+            </span>
           </div>
         </div>
       </ButtonDropdown>

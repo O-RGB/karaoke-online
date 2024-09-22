@@ -57,19 +57,18 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             shape={false}
             icon={<TbPlayerSkipForwardFilled className="text-white" />}
           ></Button>
-          <div className="w-full lg:w-fit px-2 flex items-center pt-0.5">
+          <div className="w-full lg:w-[300px] px-2 flex items-center pt-0.5">
             <RangeBar
               min={0}
               max={100}
               value={timer}
               layout="horizontal"
               inputProps={{
-                className: "w-full lg:w-72",
                 disabled: true,
               }}
             ></RangeBar>
           </div>
-          <div className="w-40 lg:w-full h-full p-1.5">
+          <div className="hidden lg:block lg:w-full h-full p-1.5">
             <div className="rounded-md bg-black/15 h-full flex items-center py-1 text-white">
               {lyrics.length > 3 && (
                 <Marquee className="flex gap-2">

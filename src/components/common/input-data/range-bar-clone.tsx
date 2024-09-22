@@ -1,107 +1,128 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 interface RangeBarCloneProps {
+  onChange?: (value: number) => void;
   min?: number;
   max?: number;
   value?: number;
-  className?: string;
   disabled?: boolean;
-  height?: string | number;
-  width?: number;
-  defaultValue?: number;
-  layout?: "vertical" | "horizontal";
-  onChange?: (value: number) => void;
+  onMouseUp?: () => void;
+  onTouchEnd?: () => void;
 }
 
 const RangeBarClone: React.FC<RangeBarCloneProps> = ({
   min = 0,
   max = 100,
-  value = 100, // Start with 100
-  height = "100%",
-  width = 25,
-  defaultValue,
-  layout = "vertical",
   onChange,
+  value,
+  disabled,
+  onMouseUp,
+  onTouchEnd,
 }) => {
-  const [range, setRange] = useState<number>(100); // Set initial state to 100
-  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [internalValue, setInternalValue] = useState(value ?? min);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
 
-  // Initialize range based on value prop
+  const valueToPercentage = useCallback(
+    (val: number) => {
+      return ((val - min) / (max - min)) * 100;
+    },
+    [min, max]
+  );
+
+  const percentageToValue = useCallback(
+    (percentage: number) => {
+      return min + (percentage / 100) * (max - min);
+    },
+    [min, max]
+  );
+
+  const updateValue = useCallback(
+    (clientY: number) => {
+      if (sliderRef.current) {
+        const rect = sliderRef.current.getBoundingClientRect();
+        const newPercentage = 100 - ((clientY - rect.top) / rect.height) * 100;
+        const clampedPercentage = Math.max(0, Math.min(100, newPercentage));
+        const newValue = percentageToValue(clampedPercentage);
+        setInternalValue(newValue);
+        onChange?.(newValue);
+      }
+    },
+    [percentageToValue, onChange]
+  );
+
   useEffect(() => {
-    const normalizedValue = ((value - min) / (max - min)) * 100;
-    setRange(normalizedValue);
-  }, [value, min, max]);
+    const handleMove = (clientY: number) => {
+      if (isDragging.current) {
+        updateValue(clientY);
+      }
+    };
+
+    const handleMouseMove = (e: MouseEvent) => handleMove(e.clientY);
+    const handleTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientY);
+
+    const handleEnd = () => {
+      isDragging.current = false;
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("mouseup", handleEnd);
+    document.addEventListener("touchend", handleEnd);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("mouseup", handleEnd);
+      document.removeEventListener("touchend", handleEnd);
+    };
+  }, [updateValue]);
 
   useEffect(() => {
-    if (defaultValue) {
-      setRange(defaultValue);
+    if (value !== undefined && isDragging) {
+      setInternalValue(value);
     }
-  }, [defaultValue]);
+  }, [value]);
 
-  const updateRange = (clientX: number, clientY: number, rect: DOMRect) => {
-    let newRange = 0;
-
-    if (layout === "vertical") {
-      const relativeY = clientY - rect.top;
-      newRange = (relativeY / rect.height) * 100;
-
-      // Invert range for vertical layout (0 at the bottom, 100 at the top)
-      newRange = 100 - newRange;
-    } else {
-      const relativeX = clientX - rect.left;
-      newRange = (relativeX / rect.width) * 100;
-    }
-
-    // Clamp the value between 0 and 100
-    newRange = Math.max(0, Math.min(newRange, 100));
-
-    setRange(newRange);
-
-    // Call onChange with the actual value
-    const newValue = (newRange / 100) * (max - min) + min;
-    if (onChange) onChange(Math.round(newValue));
+  const handleStart = (clientY: number) => {
+    isDragging.current = true;
+    updateValue(clientY);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    updateRange(e.clientX, e.clientY, rect);
-  };
-
-  const handleMouseDown = () => {
-    setIsDragging(true);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleClick = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    updateRange(e.clientX, e.clientY, rect);
-  };
+  const displayPercentage = valueToPercentage(internalValue);
 
   return (
     <div
-      style={{ height: height, width: width }}
-      className="relative flex justify-center items-center z-50 cursor-pointer"
-      onMouseMove={isDragging ? handleMouseMove : undefined}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onClick={handleClick} // Add click event here
+      style={{
+        opacity: !disabled ? 1 : 0.5,
+        pointerEvents: disabled ? "none" : undefined,
+      }}
+      className="h-full w-0.5 flex items-center justify-center bg-white/50 touch-none rounded-full"
     >
-      <div className="absolute w-1 h-full bg-black/50 rounded-full"></div>
       <div
-        style={{
-          top: layout === "vertical" ? `${100 - range}%` : undefined,
-          left: layout === "horizontal" ? `${range}%` : undefined,
+        ref={sliderRef}
+        className="h-[85%] w-4 rounded-full relative"
+        onMouseDown={(e) => {
+          onMouseUp?.();
+          handleStart(e.clientY);
         }}
-        className={`${
-          isDragging ? "" : "duration-1000"
-        } absolute z-50 rounded-full bg-white hover:bg-gray-200 shadow-sm`}
-        onMouseDown={handleMouseDown}
+        onTouchStart={(e) => {
+          onTouchEnd?.();
+          handleStart(e.touches[0].clientY);
+        }}
       >
-        <div className="absolute -top-2 -left-2 w-4 h-4 bg-white rounded-full"></div>
+        <div
+          className="absolute bottom-0 left-0 right-0 rounded-full"
+          style={{ height: `${displayPercentage}%` }}
+        />
+        <div
+          className={`${
+            isDragging.current ? "" : "duration-1000"
+          } absolute w-4 h-4 flex items-center justify-center bg-white border-[0.01rem] border-gray-400 rounded-full shadow-md -left-[0.43rem] -translate-y-1/2 cursor-pointer`}
+          style={{ top: `${100 - displayPercentage}%` }}
+        >
+          <div className="p-4"></div>
+        </div>
       </div>
     </div>
   );

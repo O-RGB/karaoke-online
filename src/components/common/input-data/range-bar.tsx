@@ -36,7 +36,9 @@ const RangeBar: React.FC<RangeBarProps> = ({
           height: "100%",
           width: 20,
         }
-      : {};
+      : {
+          width: "100%",
+        };
 
   const onChange = (value: number) => {
     setRange(value);
@@ -56,10 +58,10 @@ const RangeBar: React.FC<RangeBarProps> = ({
     return (
       <RangeBarClone
         onChange={onRangeChange}
-        defaultValue={defaultValue}
         min={min}
         max={max}
         value={value}
+        disabled={inputProps?.disabled}
       ></RangeBarClone>
     );
   } else {

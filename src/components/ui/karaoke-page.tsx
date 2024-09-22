@@ -17,6 +17,7 @@ import AppendSongModal from "../modal/append-song";
 import { usePlayer } from "@/hooks/player-hook";
 import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status-panel";
+import OptionsPanel from "../tools/options-panel";
 
 interface KaraokePageProps {}
 
@@ -36,7 +37,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     cursorTicks,
   } = useAppControl();
 
-  const { tempo, tick, displayLyrics } = usePlayer();
+  const { tempo, tick } = usePlayer();
 
   useLayoutEffect(() => {
     setupSpessasynth();
@@ -62,6 +63,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         setMusicLibraryFile={setMusicLibraryFile}
         musicLibrary={musicLibrary}
       ></WallcomeModal>
+      <OptionsPanel></OptionsPanel>
       <StatusPanel text={notification}></StatusPanel>
       <VolumePanel
         synth={synth}

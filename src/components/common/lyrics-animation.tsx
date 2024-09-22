@@ -22,7 +22,7 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
     return <div dangerouslySetInnerHTML={{ __html: group.join("") }}></div>;
   }
   return (
-    <div className="flex text-lg md:text-3xl lg:text-6xl">
+    <div className="flex text-2xl md:text-3xl lg:text-6xl">
       {display.map((data, index) => {
         const lyrInx =
           display.slice(0, index).reduce((a, b) => a + b.length, 0) + 1;

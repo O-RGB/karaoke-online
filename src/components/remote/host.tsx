@@ -2,30 +2,30 @@ import React, { useEffect, useState } from "react";
 
 import { useQRCode } from "next-qrcode";
 import { useRemote } from "@/hooks/peer-hook";
+import Input from "../common/input-data/input";
 
 interface HostRemoteProps {}
 
 const HostRemote: React.FC<HostRemoteProps> = ({}) => {
-  const { normalPeer, connections } = useRemote();
+  const { normalPeer } = useRemote();
 
+  const [hostUrl, setHostUrl] = useState<string>();
   const [hostId, setHostId] = useState<string>();
   const { Canvas } = useQRCode();
 
   useEffect(() => {
     setHostId(normalPeer?.id);
+    if (typeof window !== "undefined") {
+      setHostUrl(window.location.origin);
+    }
   }, [normalPeer]);
 
   return (
-    <div className="">
-      <div className="text-center text-white">สแกนเพื่อขอเพลง</div>
-      <a
-        className="flex items-center justify-center"
-        href={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
-        target="_blank"
-      >
+    <div className="flex  justify-center gap-5">
+      <a href={`${hostUrl}/remote/${hostId}`} target="_blank">
         {hostId && (
           <Canvas
-            text={`https://my-test-project-seven.vercel.app/remote/${hostId}`}
+            text={`${hostUrl}/remote/${hostId}`}
             options={{
               errorCorrectionLevel: "M",
               margin: 3,
@@ -39,36 +39,19 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
           />
         )}
       </a>
-      {/* <h2 className="text-xl p-1 font-semibold mb-2">Messages</h2>
-        <div className="rounded shadow">
-          <div className=""></div>
-        </div> */}
 
-      {/* <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Connections</h2>
-        <div className="bg-white p-4 rounded shadow">
-          <ul>
-            {connections.map((conn, index) => (
-              <li key={index} className="mb-2 p-2 bg-gray-200 rounded">
-                {conn.connectionId}
-              </li>
-            ))}
-          </ul>
+      <div className="flex flex-col justify-between">
+        <div>
+          <span className="text-3xl">ขอเพลงผ่านมือถือ</span>
         </div>
-      </div> */}
-
-      {/* <div className="fixed bottom-0 left-0 p-4 bg-gray-100 w-full border-t">
-        <textarea
-          className="w-full p-2 border rounded"
-          rows={4}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message here..."
-        />
-        <Button onClick={handleSendMessage} className="mt-2">
-          Send
-        </Button>
-      </div> */}
+        <div className="flex flex-col">
+          <span>Remote URL:</span>
+          <Input
+            className="!text-black"
+            value={`${hostUrl}/remote/${hostId}`}
+          ></Input>
+        </div>
+      </div>
     </div>
   );
 };
