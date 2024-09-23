@@ -3,12 +3,7 @@
 import { createContext, FC, useCallback, useEffect, useState } from "react";
 import { useSynth } from "../hooks/spessasynth-hook";
 import { useRemote } from "../hooks/peer-hook";
-import {
-  convertCursorToTicks,
-  mapCursorToIndices,
-  // volumeChange,
-} from "@/lib/app-control";
-import TrieSearch from "trie-search";
+import { convertCursorToTicks, mapCursorToIndices } from "@/lib/app-control";
 import { addSongList, onSearchList } from "@/lib/trie-search";
 import { MIDI, midiControllers } from "spessasynth_lib";
 import { loadSuperZipAndExtractSong } from "@/lib/zip";
@@ -16,6 +11,7 @@ import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { WALLPAPER } from "@/config/value";
 import { getLocalWallpaper, setLocalWallpaper } from "@/lib/local-storage";
 import { base64ToImage, imageToBase64 } from "@/lib/image";
+import TrieSearch from "trie-search";
 
 type AppControlContextType = {
   updateVolumeSysth: (index: number, value: number) => void;
@@ -42,7 +38,6 @@ type AppControlContextType = {
   cursorTicks: number[];
   midiPlaying: MIDI | undefined;
   wallpaper: string | undefined;
-  // ticks: number;
 };
 
 type AppControlProviderProps = {

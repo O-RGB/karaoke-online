@@ -7,7 +7,7 @@ import Input from "../common/input-data/input";
 interface HostRemoteProps {}
 
 const HostRemote: React.FC<HostRemoteProps> = ({}) => {
-  const { normalPeer } = useRemote();
+  const { normalPeer, connections } = useRemote();
 
   const [hostUrl, setHostUrl] = useState<string>();
   const [hostId, setHostId] = useState<string>();
@@ -25,8 +25,34 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
   }
 
   return (
-    <div className="flex  justify-center gap-5">
-      <a href={`${hostUrl}/remote/${hostId}`} target="_blank">
+    <div className="flex flex-col lg:flex-row justify-center items-center gap-6">
+      <a
+        className="block lg:hidden"
+        href={`${hostUrl}/remote/${hostId}`}
+        target="_blank"
+      >
+        {hostId && (
+          <Canvas
+            text={`${hostUrl}/remote/${hostId}`}
+            options={{
+              errorCorrectionLevel: "M",
+              margin: 3,
+              scale: 4,
+              width: 150,
+              color: {
+                dark: "#010599FF",
+                light: "#FFBF60FF",
+              },
+            }}
+          />
+        )}
+      </a>
+
+      <a
+        className="hidden lg:block"
+        href={`${hostUrl}/remote/${hostId}`}
+        target="_blank"
+      >
         {hostId && (
           <Canvas
             text={`${hostUrl}/remote/${hostId}`}
@@ -47,6 +73,15 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
       <div className="flex flex-col justify-between">
         <div>
           <span className="text-3xl">ขอเพลงผ่านมือถือ</span>
+        </div>
+        <div className="flex flex-col  gap-1 h-full divide-x">
+          {connections.map((data, index) => {
+            return (
+              <div key={`connecttion-key-${index}`} className="p-1">
+                {data.connectionId}
+              </div>
+            );
+          })}
         </div>
         <div className="flex flex-col">
           <span>Remote URL:</span>

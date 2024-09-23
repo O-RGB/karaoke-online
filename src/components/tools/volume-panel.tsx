@@ -4,7 +4,6 @@ import { Synthetizer } from "spessasynth_lib";
 import { useAppControl } from "@/hooks/app-control-hook";
 import {
   PiMicrophoneStageFill,
-  PiTimerFill,
   PiUserMinusFill,
   PiUserSoundFill,
 } from "react-icons/pi";
@@ -18,6 +17,7 @@ interface VolumePanelProps {
   analysers?: AnalyserNode[];
   audioGain?: number[];
   perset?: IPersetSoundfont[];
+  options?: React.ReactNode;
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
@@ -27,6 +27,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   analysers,
   audioGain,
   perset,
+  options,
 }) => {
   const VOCAL_CHANNEL = 8;
   const {
@@ -126,28 +127,28 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
         })}
       </div>
 
-      <div className="flex gap-2">
-        <NumberButton
-          onChange={(value) => {
-            updatePitch(value);
-            addNotification(`Pitch ${value}`);
-          }}
-          value={0}
-          icon={
-            <PiMicrophoneStageFill className="text-[15px]"></PiMicrophoneStageFill>
-          }
-        ></NumberButton>
-        {/* <NumberButton
-          value={100}
-          icon={<PiTimerFill className="text-[15px]"></PiTimerFill>}
-        ></NumberButton> */}
-        <SwitchButton
-          onChange={onLockVocal}
-          iconOpen={<PiUserSoundFill></PiUserSoundFill>}
-          iconClose={<PiUserMinusFill></PiUserMinusFill>}
-          labelOpen="Vocal"
-          labelClose="Vocal"
-        ></SwitchButton>
+      <div className="flex justify-between">
+        <div className="flex gap-2">
+          <NumberButton
+            onChange={(value) => {
+              updatePitch(value);
+              addNotification(`Pitch ${value}`);
+            }}
+            value={0}
+            icon={
+              <PiMicrophoneStageFill className="text-[15px]"></PiMicrophoneStageFill>
+            }
+          ></NumberButton>
+
+          <SwitchButton
+            onChange={onLockVocal}
+            iconOpen={<PiUserSoundFill></PiUserSoundFill>}
+            iconClose={<PiUserMinusFill></PiUserMinusFill>}
+            labelOpen="Vocal"
+            labelClose="Vocal"
+          ></SwitchButton>
+        </div>
+        <div>{options}</div>
       </div>
     </div>
   );

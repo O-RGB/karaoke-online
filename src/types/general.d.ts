@@ -4,7 +4,14 @@ type ButtonProps = Partial<React.ButtonHTMLAttributes<HTMLButtonElement>> &
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & CommonStyle;
 
-type ColorType = "default" | "white" | "blue" | "green" | "yellow" | "amber";
+type ColorType =
+  | "default"
+  | "white"
+  | "blue"
+  | "green"
+  | "yellow"
+  | "amber"
+  | "red";
 type IconPosition = "default" | "top" | "right" | "left" | "bottom";
 
 type ModalType =

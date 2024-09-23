@@ -54,7 +54,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   }
 
   const modalMap: ModalComponents = {
-    SOUNDFONT_MODEL: <SoundfontManager synth={synth}></SoundfontManager>,
+    SOUNDFONT_MODEL: <SoundfontManager></SoundfontManager>,
     JOIN: <HostRemote></HostRemote>,
     SUPER_JOIN: <SuperHostRemote></SuperHostRemote>,
     MUSIC_LOADED: <SuperHostRemote></SuperHostRemote>,
@@ -75,7 +75,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           setMusicLibraryFile={setMusicLibraryFile}
           musicLibrary={musicLibrary}
         ></WallcomeModal>
-        <OptionsPanel></OptionsPanel>
+        <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5 z-50"></OptionsPanel>
         <StatusPanel text={notification}></StatusPanel>
         <VolumePanel
           synth={synth}

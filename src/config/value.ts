@@ -6,6 +6,9 @@ export const LYR_FILE_TYPE = "lyr";
 export const EMK_FILE_TYPE = "emk";
 
 export const STORAGE_NAME = "Song";
+export const STORAGE_SOUNDFONT = "soundfont";
+export const STORAGE_NAME_DIC = "song_dic";
+export const STORAGE_SOUNDFONT_DIC = "soundfont_dic";
 export const TRACKLIST_FILENAME = "song.json";
 
 export const EMK_TYPE = "EMK";

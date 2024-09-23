@@ -49,6 +49,10 @@ const Button: React.FC<ButtonCommonProps> = ({
       colorStyle =
         "bg-amber-500 hover:bg-amber-500/80 active:bg-amber-500 disabled:bg-gray-200";
       break;
+    case "red":
+      colorStyle =
+        "bg-red-500 hover:bg-red-500/80 active:bg-red-500 disabled:bg-gray-200";
+      break;
 
     default:
       break;

@@ -65,19 +65,8 @@ const ContextModal: React.FC<ContextModalProps> = ({
       onClick: handleSelectContext,
       type: "WALLPAPER",
     },
-    // {
-    //   icon: <BiFolder />,
-    //   text: "เพลง",
-    //   onClick: handleSelectContext,
-    //   type: "MUSIC_LOADED",
-    // },
-    // {
-    //   icon: <BsDatabase />,
-    //   text: "ฐานข้อมูล",
-    //   onClick: handleSelectContext,
-    //   type: "MUSIC_LOADED",
-    // },
   ];
+
   return (
     <>
       <Modal
@@ -93,6 +82,7 @@ const ContextModal: React.FC<ContextModalProps> = ({
       >
         {RenderModal}
       </Modal>
+
       <ContextMenuCommon
         leftClick={leftClick}
         className={className}

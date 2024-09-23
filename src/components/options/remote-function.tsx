@@ -5,9 +5,11 @@ import Modal from "../common/modal";
 import HostRemote from "../remote/host";
 import { useSynth } from "@/hooks/spessasynth-hook";
 
-interface RemoteFunctionProps {}
+interface RemoteFunctionProps {
+  buttonClass?: string;
+}
 
-const RemoteFunction: React.FC<RemoteFunctionProps> = ({}) => {
+const RemoteFunction: React.FC<RemoteFunctionProps> = ({ buttonClass }) => {
   const [onRemoteOpen, setRemoteOpen] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const { player } = useSynth();
@@ -54,6 +56,8 @@ const RemoteFunction: React.FC<RemoteFunctionProps> = ({}) => {
         <HostRemote></HostRemote>
       </Modal>
       <Button
+        padding={""}
+        className={buttonClass}
         color={onRemoteOpen ? "amber" : "default"}
         blur={!onRemoteOpen}
         onClick={setRemote}

@@ -87,34 +87,38 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
 
       const charIndices = cursorIndices?.get(targetTick);
 
-      if (charIndices) {
-        charIndices.forEach((__charIndex) => {
-          let lineIndex = 0;
-          let adjustedCharIndex = __charIndex;
-          const lyricLines = lyrics.slice(3);
+      try {
+        if (charIndices) {
+          charIndices.forEach((__charIndex) => {
+            let lineIndex = 0;
+            let adjustedCharIndex = __charIndex;
+            const lyricLines = lyrics.slice(3);
 
-          while (adjustedCharIndex >= lyricLines[lineIndex].length) {
-            adjustedCharIndex -= lyricLines[lineIndex].length + 1;
-            lineIndex++;
-          }
-          if (lineIndex > lyricsIndex.current) {
-            if (position.current === true) {
-              display.current = groupThaiCharacters(lyricLines[lineIndex + 1]);
-              displayBottom.current = groupThaiCharacters(
-                lyricLines[lineIndex]
-              );
-            } else {
-              display.current = groupThaiCharacters(lyricLines[lineIndex]);
-              displayBottom.current = groupThaiCharacters(
-                lyricLines[lineIndex + 1]
-              );
+            while (adjustedCharIndex >= lyricLines[lineIndex].length) {
+              adjustedCharIndex -= lyricLines[lineIndex].length + 1;
+              lineIndex++;
             }
-            lyricsIndex.current = lineIndex;
-            position.current = !position.current;
-          }
-          charIndex.current = adjustedCharIndex + 1;
-        });
-      }
+            if (lineIndex > lyricsIndex.current) {
+              if (position.current === true) {
+                display.current = groupThaiCharacters(
+                  lyricLines[lineIndex + 1]
+                );
+                displayBottom.current = groupThaiCharacters(
+                  lyricLines[lineIndex]
+                );
+              } else {
+                display.current = groupThaiCharacters(lyricLines[lineIndex]);
+                displayBottom.current = groupThaiCharacters(
+                  lyricLines[lineIndex + 1]
+                );
+              }
+              lyricsIndex.current = lineIndex;
+              position.current = !position.current;
+            }
+            charIndex.current = adjustedCharIndex + 1;
+          });
+        }
+      } catch (error) {}
     }
   };
 
@@ -130,7 +134,6 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
 
   return (
     <div className="fixed  bottom-20 lg:bottom-16 left-0 w-full px-5 ">
-        
       <div className="flex items-center justify-center relative w-full h-48 md:h-56 lg:h-72  rounded-lg p-2  text-center overflow-auto [&::-webkit-scrollbar]:hidden">
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
         <div

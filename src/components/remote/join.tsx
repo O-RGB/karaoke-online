@@ -1,9 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRemote } from "@/hooks/peer-hook";
-import { TbNote } from "react-icons/tb";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { FaSearch } from "react-icons/fa";
 import Select from "../common/input-data/select";
 import { toOptions } from "@/lib/general";
 import { SONG_TYPE } from "@/config/value";
@@ -13,7 +11,8 @@ interface JoinConnectProps {
 }
 
 const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
-  const { normalPeer, connectToPeer, sendMessage, messages } = useRemote();
+  const { normalPeer, connectToPeer, sendMessage, messages, connections } =
+    useRemote();
   const [songList, setSongList] = useState<SearchResult[]>([]);
 
   const handleConnect = () => {
