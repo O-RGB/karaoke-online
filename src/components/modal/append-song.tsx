@@ -27,24 +27,60 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     const loaded = await loadFileZip(fileList, setProgress);
     if (loaded) {
       setLoadZip(false);
-      await onPrepareStorage(loaded.musicLibrary);
+      await onPrepareStorage(loaded);
     }
   };
 
   return (
     <>
-      <div className="flex flex-col gap-2">
-        onCommitToDB: [{JSON.stringify(onCommitToDB)}] <br />
-        onLoadZip: [{JSON.stringify(onLoadZip)}] <br />
-        progress: [{progress?.progress}] <br />
-        processing: [{progress?.processing}] <br />
-        error: [{progress?.error}] <br />
+      <div className="flex flex-col gap-4  ">
+        <Upload onSelectFile={onLoadFileZip} inputProps={{}}>
+          <Button>
+            <div>เลือกไฟล์</div>
+          </Button>
+        </Upload>
+
+        <div className="text-sm text-gray-700">
+          <span className="font-semibold">onCommitToDB:</span>
+          <span className="text-gray-500 break-words">
+            {JSON.stringify(onCommitToDB)}
+          </span>
+        </div>
+
+        <div className="text-sm text-gray-700">
+          <span className="font-semibold">onLoadZip:</span>
+          <span className="text-gray-500 break-words">
+            {JSON.stringify(onLoadZip)}
+          </span>
+        </div>
+
+        <div className="text-sm text-gray-700">
+          <span className="font-semibold">Progress:</span>
+          <span
+            className={`font-bold ${
+              progress?.progress ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {progress?.progress || "No progress"}
+          </span>
+        </div>
+
+        <div className="text-sm text-gray-700">
+          <span className="font-semibold">Processing:</span>
+          <span
+            className={`font-bold ${
+              progress?.processing ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {progress?.processing}
+          </span>
+        </div>
+
+        <div className="text-sm text-gray-700">
+          <span className="font-semibold">Error:</span>
+          <span className="text-red-500">{progress?.error || "No errors"}</span>
+        </div>
       </div>
-      <Upload onSelectFile={onLoadFileZip} inputProps={{}}>
-        <Button>
-          <div className="">เลือกไฟล์</div>
-        </Button>
-      </Upload>
     </>
   );
 };

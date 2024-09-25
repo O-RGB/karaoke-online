@@ -6,6 +6,7 @@ import { useRemote } from "../hooks/peer-hook";
 
 type SpessasynthContextType = {
   setupSpessasynth: () => Promise<void>;
+  setSoundFontName: (name: string) => void;
   audioGain: number[];
   instrument: number[];
   synth: Synthetizer | undefined;
@@ -13,6 +14,8 @@ type SpessasynthContextType = {
   audio: AudioContext | undefined;
   analysers: AnalyserNode[];
   perset: IPersetSoundfont[];
+  defaultSoundFont: File | undefined;
+  SFname: string | undefined;
 };
 
 type SpessasynthProviderProps = {
@@ -21,6 +24,7 @@ type SpessasynthProviderProps = {
 
 export const SpessasynthContext = createContext<SpessasynthContextType>({
   setupSpessasynth: async () => undefined,
+  setSoundFontName: () => undefined,
   audioGain: [],
   instrument: [],
   synth: undefined,
@@ -28,6 +32,8 @@ export const SpessasynthContext = createContext<SpessasynthContextType>({
   audio: undefined,
   analysers: [],
   perset: [],
+  defaultSoundFont: undefined,
+  SFname: undefined,
 });
 
 export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
@@ -42,11 +48,17 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   const audioGain = useRef<number[]>([]);
   const [instrument, setInstrument] = useState<number[]>([]);
   const [analysers, setAnalysers] = useState<AnalyserNode[]>([]);
+  const [defaultSoundFont, setDefaultSoundFont] = useState<File>();
+  const [SFname, setSFName] = useState<string>();
 
   const loadPlayer = async (synth: Synthetizer) => {
     const seq = new Sequencer([], synth);
     seq.loop = false;
     return seq;
+  };
+
+  const setSoundFontName = (name: string) => {
+    setSFName(name);
   };
 
   const loadSoundFontPlayer = async (audio: AudioContext) => {
@@ -67,6 +79,15 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     // Default Setting
     synthInstance.setMainVolume(0.5);
     synthInstance.highPerformanceMode = true;
+
+    const blob = new Blob([ab], { type: "application/octet-stream" });
+
+    let sf = new File([blob], "soundfont.sf2", {
+      type: "application/octet-stream",
+    });
+    setDefaultSoundFont(sf);
+
+    setSoundFontName("soundfont เริ่มต้น.sf2");
 
     await synthInstance.isReady;
     return synthInstance;
@@ -155,6 +176,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     <SpessasynthContext.Provider
       value={{
         setupSpessasynth: setup,
+        setSoundFontName: setSoundFontName,
         audio: audio,
         audioGain: audioGain.current,
         synth: synth,
@@ -162,6 +184,8 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
         instrument: instrument,
         analysers: analysers,
         perset: perset,
+        defaultSoundFont: defaultSoundFont,
+        SFname: SFname,
       }}
     >
       <>{children}</>

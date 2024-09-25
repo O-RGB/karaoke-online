@@ -12,6 +12,7 @@ import Upload from "../common/input-data/upload";
 import ProgressBar from "../common/progress-bar";
 import SongStorageProcessor from "./song-storage";
 import { TRACKLIST_FILENAME } from "@/config/value";
+import { IoDocumentText } from "react-icons/io5";
 interface WallcomeModalProps {
   setTracklistFile: (file: File) => Promise<void>;
   setMusicLibraryFile: (files: Map<string, File>) => void;
@@ -53,23 +54,31 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
     }
   };
 
-  const onLoadFileSystem = async () => {
-    const loaded = await loadFileSystem();
-    if (loaded && loaded.tracklist) {
-      setTracklistFile(loaded.tracklist);
-      setSongFile(loaded.tracklist);
-      setMusicLibraryFile(loaded.musicLibrary);
-      handleClose(1000);
+  // const onLoadFileSystem = async () => {
+  //   const loaded = await loadFileSystem();
+  //   if (loaded) {
+  //     // setTracklistFile(loaded.tracklist);
+  //     // setSongFile(loaded.tracklist);
+  //     setMusicLibraryFile(loaded);
+  //     handleClose(1000);
+  //   }
+  // };
+
+  const onLoadMusicLibrary = async (_: File, fileList: FileList) => {
+    if (fileList.length === 1) {
+      const file = fileList.item(0);
+      if (file?.type === "application/json") {
+        setTracklistFile(file);
+        setSongFile(file);
+      }
     }
   };
 
   const onLoadFileZip = async (_: File, fileList: FileList) => {
     setFileSystem(false);
     const loaded = await loadFileZip(fileList, setProgress);
-    if (loaded && loaded.tracklist) {
-      setTracklistFile(loaded.tracklist);
-      setSongFile(loaded.tracklist);
-      setMusicLibraryFile(loaded.musicLibrary);
+    if (loaded) {
+      setMusicLibraryFile(loaded);
       handleClose(1000);
       setZipFinsh(true);
     }
@@ -91,7 +100,60 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
         onClose={handleClose}
         footer={<></>}
       >
-        <div className="flex flex-col lg:flex-row gap-3 w-full h-full">
+        {!fileSystem ? (
+          <>
+            {progress?.error ? (
+              <div className="text-sm text-red-500">
+                Error: {progress.error}
+              </div>
+            ) : (
+              <ProgressBar
+                progress={progress?.progress ?? 0}
+                title={progress?.processing}
+              ></ProgressBar>
+            )}
+          </>
+        ) : (
+          <div className="flex gap-2">
+            <Upload
+              inputProps={{
+                multiple: true,
+              }}
+              className={butSize}
+              onSelectFile={onLoadMusicLibrary}
+            >
+              <Button
+                border=""
+                color="white"
+                shadow=""
+                className={butSize}
+                icon={<IoDocumentText className="text-4xl" />}
+              >
+                SONG
+              </Button>
+            </Upload>
+            <Upload
+              inputProps={{
+                multiple: true,
+              }}
+              className={butSize}
+              onSelectFile={onLoadFileZip}
+            >
+              <Button
+                border=""
+                // onClick={onLoadFileSystem}
+                color="white"
+                shadow=""
+                className={butSize}
+                icon={<FaComputer className="text-4xl" />}
+              >
+                SONG
+              </Button>
+            </Upload>
+          </div>
+        )}
+
+        {/* <div className="flex flex-col lg:flex-row gap-3 w-full h-full">
           {fileSystem && (
             <Button
               border=""
@@ -148,7 +210,7 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
               </>
             )}
           </div>
-        </div>
+        </div> */}
       </Modal>
     </>
   );

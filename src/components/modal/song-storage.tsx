@@ -29,7 +29,7 @@ const SongStorageProcessor: React.FC<SongStorageProcessorProps> = ({
   };
 
   const onPrepareStorage = async () => {
-    if (musicLibrary && tracklist) {
+    if (musicLibrary) {
       const onStorage = await saveSongToStorage(
         musicLibrary,
         tracklist,
@@ -40,10 +40,10 @@ const SongStorageProcessor: React.FC<SongStorageProcessorProps> = ({
   };
 
   useEffect(() => {
-    if (musicLibrary && tracklist) {
+    if (musicLibrary) {
       setOpen(true);
     }
-  }, [musicLibrary, tracklist]);
+  }, [musicLibrary]);
 
   useEffect(() => {
     if (visible !== undefined) {

@@ -1,10 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  deleteSoundFont,
-  getSoundFontList,
-  setSoundFont,
-} from "@/lib/spssasynth/sound-font";
+import { setSoundFont } from "@/lib/spssasynth/sound-font";
 import UpdateFile from "../common/input-data/upload";
 import { TbMusicPlus } from "react-icons/tb";
 import { useSynth } from "@/hooks/spessasynth-hook";
@@ -18,7 +14,6 @@ import { FaRegFileAudio } from "react-icons/fa";
 import Button from "../common/button/button";
 import { IoMdAddCircle } from "react-icons/io";
 import { RiDeleteBin5Line } from "react-icons/ri";
-import { MdUploadFile } from "react-icons/md";
 import { FaCircleCheck } from "react-icons/fa6";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
 import { ImFilePlay } from "react-icons/im";
@@ -27,26 +22,24 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 interface SoundfontManagerProps {}
 
 const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
-  const defaultsf = "soundfont เริ่มต้น.sf2";
-  const { synth, player } = useSynth();
+  const { synth, player, defaultSoundFont, SFname, setSoundFontName } =
+    useSynth();
   const [soundFontStorage, setSoundFontStorage] = useState<
     {
       filename: string;
       size: number;
     }[]
   >([]);
-  const [activeSf, setActiveSf] = useState<string>(defaultsf);
   const [loading, setLoading] = useState<boolean>(false);
-  const [onFetchFile, setFetchFile] = useState<File>();
 
   const getSF2LocalList = async () => {
     let sf = await getAllSoundFontDicStorage();
 
     if (sf.length === 0) {
-      let file: File | undefined = await backToSfDefault();
+      let file: File | undefined = defaultSoundFont;
       if (file && synth) {
         setSoundFont(file, synth);
-        setActiveSf(defaultsf);
+        setSoundFontName(file.name);
       }
     }
 
@@ -58,13 +51,12 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
     await getSF2LocalList();
   };
 
-  const updateSoundFont = async (filename: string) => {
+  const updateSoundFont = async (file: File) => {
     setLoading(true);
     if (player) player.pause();
-    const loadFromLocal = await getSoundFontStorage(filename);
-    if (loadFromLocal && synth) {
-      await setSoundFont(loadFromLocal, synth);
-      setActiveSf(filename);
+    if (file && synth) {
+      await setSoundFont(file, synth);
+      setSoundFontName(file.name);
     }
 
     setTimeout(() => {
@@ -73,27 +65,9 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
     }, 500);
   };
 
-  const backToSfDefault = async () => {
-    let sf: File | undefined = undefined;
-    if (!onFetchFile) {
-      const res = await fetch(DEFAULT_SOUND_FONT);
-      const ab = await res.arrayBuffer();
-
-      // สร้าง Blob จาก ArrayBuffer
-      const blob = new Blob([ab], { type: "application/octet-stream" });
-
-      // สร้าง File จาก Blob
-      sf = new File([blob], "soundfont.sf2", {
-        type: "application/octet-stream",
-      });
-      setFetchFile(sf);
-    }
-    return sf;
-  };
-
   useEffect(() => {
     getSF2LocalList();
-  }, [synth?.soundfontManager]);
+  }, [synth?.soundfontManager, SFname]);
 
   return (
     <div className="p-2 border border-white w-full flex flex-col gap-2 overflow-hidden">
@@ -103,7 +77,6 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
           className="border p-3 rounded-md hover:bg-gray-50 duration-300"
           onSelectFile={async (file) => {
             if (synth) {
-              setSoundFont(file, synth);
               await saveSoundFontStorage(file);
               await getSF2LocalList();
             }
@@ -131,7 +104,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
               <ImFilePlay className="text-4xl"></ImFilePlay>
             )}
           </div>
-          <div className="text-sm">{activeSf}</div>
+          <div className="text-sm">{SFname}</div>
         </div>
       </div>
       {/* <div className="flex flex-col gap-2">
@@ -148,21 +121,26 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
         })}
       </div> */}
       โฟลเดอร์
-      <div className="flex flex-col divide-y border rounded-md">
+      <div className="grid  grid-cols-2  md:flex flex-col gap-3 md:gap-0 md:divide-y md:border rounded-md">
         {soundFontStorage.length === 0 && (
           <div className="w-full min-h-20 flex items-center justify-center text-xs text-gray-300">
             ไม่มีไฟล์
           </div>
         )}
 
-        {soundFontStorage.map((sf) => {
+        {soundFontStorage.map((sf, k) => {
           return (
-            <div className="flex gap-2 items-center justify-between p-2">
-              <div className="flex gap-2 items-center">
+            <div
+              key={`sf-storage-${k}`}
+              className="flex flex-col md:flex-row gap-2 items-center justify-between p-2 border md:border-none"
+            >
+              <div className="flex flex-col md:flex-row gap-2 items-center">
                 <div>
-                  <FaRegFileAudio className="text-xl"></FaRegFileAudio>
+                  <FaRegFileAudio className="text-2xl md:text-xl"></FaRegFileAudio>
                 </div>
-                <div className="text-sm">{sf.filename}</div>
+                <div className="text-sm break-all w-[80%] md:w-full">
+                  {sf.filename}
+                </div>
               </div>
               <div className="flex gap-2 items-center justify-center">
                 <div className="text-sm">
@@ -171,11 +149,12 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
                 <Button
                   padding=""
                   className="w-7 h-7"
-                  onClick={() => {
-                    if (activeSf === sf.filename) {
-                      backToSfDefault();
-                    } else {
-                      updateSoundFont(sf.filename);
+                  onClick={async () => {
+                    if (SFname !== sf.filename) {
+                      const loadSf = await getSoundFontStorage(sf.filename);
+                      if (loadSf) {
+                        updateSoundFont(loadSf);
+                      }
                     }
                   }}
                   color="default"
@@ -183,7 +162,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
                   icon={
                     loading ? (
                       <AiOutlineLoading3Quarters className="animate-spin"></AiOutlineLoading3Quarters>
-                    ) : activeSf === sf.filename ? (
+                    ) : SFname === sf.filename ? (
                       <FaCircleCheck className="text-green-500"></FaCircleCheck>
                     ) : (
                       <IoMdAddCircle></IoMdAddCircle>

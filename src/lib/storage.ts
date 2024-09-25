@@ -54,20 +54,13 @@ async function getAll<T = any[]>(
 }
 
 // ON RAM
-
 const filterFileUse = (fileList: File[]) => {
-  let tracklist: File | undefined = undefined;
   const musicLibrary = new Map<string, File>();
   fileList.map((item) => {
-    if (item.name.endsWith(".json")) {
-      tracklist = item;
-    }
-    if (item.name.endsWith(".zip")) {
-      let filename = item.name.replace(".zip", "");
-      musicLibrary.set(filename, item);
-    }
+    let filename = item.name.replace(".zip", "");
+    musicLibrary.set(filename, item);
   });
-  return { musicLibrary, tracklist: tracklist };
+  return musicLibrary;
 };
 
 export const loadFileSystem = async () => {
@@ -98,7 +91,7 @@ export const loadFileZip = async (
     let error: string | undefined = undefined;
     const data = fileList.item(i);
 
-    if (data) {
+    if (data?.name.endsWith("zip")) {
       await ExtractFile(data)
         .then((music) => {
           allMusicFiles.push(...music);
@@ -123,21 +116,6 @@ export const getSongBySuperKey = async (
   key: string
 ): Promise<File | undefined> => {
   return await getByKey(key, STORAGE_NAME);
-  // try {
-  //   const db = await getDB(STORAGE_NAME);
-  //   const tx = db.transaction(STORAGE_NAME, "readonly");
-  //   const store = tx.objectStore(STORAGE_NAME);
-  //   const data = await store.get(key);
-
-  //   await tx.done;
-  //   if (data) {
-  //     return data;
-  //   } else {
-  //     return undefined;
-  //   }
-  // } catch (error) {
-  //   return undefined;
-  // }
 };
 
 export const saveSongToStorage = async (
@@ -152,11 +130,13 @@ export const saveSongToStorage = async (
   const objectStore = tx.objectStore(STORAGE_NAME);
 
   countSuperZip.map(async (data, i) => {
+    console.log(data.name, i);
     let error: string | undefined = undefined;
     try {
       await objectStore.add(data, data.name);
     } catch (e) {
       error = JSON.stringify(e);
+      console.log(error);
     }
     onProgress?.({
       progress: Math.round(((i + 1) / countSuperZip.length) * 100),

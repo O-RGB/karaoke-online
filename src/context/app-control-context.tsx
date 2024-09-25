@@ -8,7 +8,7 @@ import { addSongList, onSearchList } from "@/lib/trie-search";
 import { MIDI, midiControllers } from "spessasynth_lib";
 import { loadSuperZipAndExtractSong } from "@/lib/zip";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
-import { WALLPAPER } from "@/config/value";
+import { MID_FILE_TYPE, WALLPAPER } from "@/config/value";
 import { getLocalWallpaper, setLocalWallpaper } from "@/lib/local-storage";
 import { base64ToImage, imageToBase64 } from "@/lib/image";
 import TrieSearch from "trie-search";
@@ -220,38 +220,33 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     }
     resetVolume();
     player.pause();
-    setLyrics([]);
-    setCursor([]);
-    setCursorIndices(undefined);
-    setTimeout(async () => {
-      const midiFileArrayBuffer = await files.mid.arrayBuffer();
-      let parsedMidi = null;
-      try {
-        parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
-      } catch (e) {
-        let error: string = (e as string).toString();
-        let typeError: string = `SyntaxError: Invalid MIDI Header! Expected "MThd", got`;
-        console.error(error);
-        // if (error === typeError) {
-        const fix = await fixMidiHeader(files.mid);
-        const fixArrayBuffer = await fix.arrayBuffer();
-        parsedMidi = new MIDI(fixArrayBuffer, fix.name);
-        // }
-      }
+    handleSetLyrics([]);
+    handleSetCursor(0, []);
+    const midiFileArrayBuffer = await files.mid.arrayBuffer();
+    let parsedMidi = null;
+    try {
+      parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
+    } catch (e) {
+      let error: string = (e as string).toString();
+      let typeError: string = `SyntaxError: Invalid MIDI Header! Expected "MThd", got`;
+      console.error(error);
+      // if (error === typeError) {
+      const fix = await fixMidiHeader(files.mid);
+      const fixArrayBuffer = await fix.arrayBuffer();
+      parsedMidi = new MIDI(fixArrayBuffer, fix.name);
+      // }
+    }
 
-      if (parsedMidi) {
-        player.loadNewSongList([parsedMidi]);
-
+    if (parsedMidi) {
+      setTimeout(async () => {
         setMidiPlaying(parsedMidi);
-
         const timeDivision = parsedMidi.timeDivision;
-        handleSetLyrics([]);
         handleSetLyrics(files.lyr);
         handleSetCursor(timeDivision, files.cur);
-
+        player.loadNewSongList([parsedMidi]);
         player.play();
-      }
-    }, 500);
+      }, 500);
+    }
   };
 
   const loadAndPlaySong = async (value: SearchResult) => {

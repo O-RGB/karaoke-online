@@ -2,6 +2,7 @@ import { MID_FILE_TYPE, CUR_FILE_TYPE, LYR_FILE_TYPE } from "@/config/value";
 import JSZip from "jszip";
 import { readCursorFile, readLyricsFile } from "./karaoke/ncn";
 import { getSongBySuperKey } from "./storage";
+import { parseEMKFile } from "./karaoke/emk";
 
 export const ExtractFile = async (zipFile: File): Promise<File[]> => {
   const zip = new JSZip();
@@ -55,7 +56,16 @@ export const loadSuperZipAndExtractSong = async (
         return;
       }
       const zip = superUnzip[index];
-      const songUnzip = await ExtractFile(zip);
+
+      let songUnzip: File[] = [];
+      if (zip.name.toLowerCase().endsWith("emk")) {
+        const decodeed = await parseEMKFile(zip);
+        if (decodeed.mid && decodeed.cur && decodeed.lyr) {
+          songUnzip = [decodeed.mid, decodeed.cur, decodeed.lyr];
+        }
+      } else {
+        songUnzip = await ExtractFile(zip);
+      }
 
       var song: Partial<SongFilesDecode> = {};
       songUnzip.map(async (file) => {
