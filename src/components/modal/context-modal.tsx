@@ -65,6 +65,12 @@ const ContextModal: React.FC<ContextModalProps> = ({
       onClick: handleSelectContext,
       type: "WALLPAPER",
     },
+    {
+      icon: <FaImage />,
+      text: "เนื้อเพลง",
+      onClick: handleSelectContext,
+      type: "LYRICS",
+    },
   ];
 
   return (

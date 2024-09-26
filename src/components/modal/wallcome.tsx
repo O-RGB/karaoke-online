@@ -152,65 +152,6 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
             </Upload>
           </div>
         )}
-
-        {/* <div className="flex flex-col lg:flex-row gap-3 w-full h-full">
-          {fileSystem && (
-            <Button
-              border=""
-              onClick={onLoadFileSystem}
-              color="white"
-              shadow=""
-              className={butSize}
-              icon={<FaComputer className="text-4xl" />}
-            >
-              <span>File System</span>
-              <span className="text-sm text-gray-400">
-                โหลด Folder เพลงจากคอมพิวเตอร์ <br />
-                โดยไม่โหลดเข้า Ram <br />
-                (รองรับ Google chrome เท่านั้น)
-              </span>
-            </Button>
-          )}
-          <div className="w-full">
-            <Upload
-              inputProps={{
-                multiple: true,
-              }}
-              className={butSize}
-              onSelectFile={onLoadFileZip}
-            >
-              <Button
-                border=""
-                disabled={!fileSystem}
-                color="white"
-                shadow=""
-                className={butSize}
-                icon={<FaRegFileZipper className="text-4xl" />}
-              >
-                <span>Zip File</span>
-                <span className="text-sm text-gray-400">
-                  โหลดเพลงจากไฟล์ .zip <br />
-                  โดยการโหลดเข้า Ram <br />
-                  (ต้องแบ่งไฟล์ Part ละไม่เกิน 2GB)
-                </span>
-              </Button>
-            </Upload>
-            {!fileSystem && (
-              <>
-                {progress?.error ? (
-                  <div className="text-sm text-red-500">
-                    Error: {progress.error}
-                  </div>
-                ) : (
-                  <ProgressBar
-                    progress={progress?.progress ?? 0}
-                    title={progress?.processing}
-                  ></ProgressBar>
-                )}
-              </>
-            )}
-          </div>
-        </div> */}
       </Modal>
     </>
   );

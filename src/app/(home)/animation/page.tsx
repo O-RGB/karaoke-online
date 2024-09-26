@@ -2,26 +2,36 @@
 import Button from "@/components/common/button/button";
 import TextAnimation from "@/components/common/lyrics/text-animtaion";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 interface AnimationProps {}
 
 const Animation: React.FC<AnimationProps> = ({}) => {
-  const [show, setShow] = useState<boolean>(false);
+  const [show, setShow] = useState<boolean>();
+  const [color, setColor] = useState<string>("#dc3444");
 
-  //   useEffect(() => {
-  //     setTimeout(() => {
-  //       setShow(true);
-  //     }, 1000);
-  //   }, []);
   return (
-    <div className="flex justify-center items-center h-screen">
+    <>
       <Button onClick={() => setShow((value) => !value)}>Show</Button>
-      <TextAnimation
-        show={show}
-        text="test iwejgoawiegj oawiehgoawieghow"
-      ></TextAnimation>
-    </div>
+      <Button
+        onClick={() =>
+          setColor(
+            "#" +
+              (((1 << 24) * Math.random()) | 0).toString(16).padStart(6, "0")
+          )
+        }
+      >
+        color
+      </Button>
+      <div className="flex justify-center items-center h-screen">
+        <br />
+        <TextAnimation
+          color={color}
+          show={show}
+          text="เอิ้นอ้ายแหน่เด้อยามเธอมีแฮง"
+        ></TextAnimation>
+      </div>
+    </>
   );
 };
 

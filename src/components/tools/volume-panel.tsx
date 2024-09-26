@@ -9,6 +9,7 @@ import {
 } from "react-icons/pi";
 import NumberButton from "../common/input-data/number-button";
 import SwitchButton from "../common/input-data/switch-button";
+import { useNotification } from "@/hooks/notification-hook";
 
 interface VolumePanelProps {
   instrument: number[];
@@ -29,12 +30,12 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   perset,
   options,
 }) => {
+  const { addNotification } = useNotification();
   const VOCAL_CHANNEL = 8;
   const {
     updateVolumeSysth,
     updateVolumeHeld,
     updatePitch,
-    addNotification,
     updatePerset,
     volumeController,
   } = useAppControl();

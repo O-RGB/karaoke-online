@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { Sequencer } from "spessasynth_lib";
-import LyricsAnimation from "../common/lyrics-animation";
+import LyricsAnimation from "../common/lyrics/cut-animation";
 import Upload from "../common/input-data/upload";
 import { parseEMKFile } from "@/lib/karaoke/emk";
 import Button from "../common/button/button";
@@ -14,6 +14,8 @@ import {
 } from "@/lib/karaoke/ncn";
 import { EMK_FILE_TYPE } from "@/config/value";
 import { groupThaiCharacters } from "@/lib/app-control";
+import SelectLyrics from "../lyrics";
+import { useLyrics } from "@/hooks/lyrics-hook";
 // import EMKFileConverter from "./test";
 
 interface LyricsPanelProps {
@@ -33,6 +35,8 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
   cursorTicks,
   cursorIndices,
 }) => {
+  const { lyricsDisplay } = useLyrics();
+
   const charIndex = useRef<number>(0);
   const display = useRef<string[][]>([]);
   const displayBottom = useRef<string[][]>([]);
@@ -82,7 +86,8 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
 
   const renderLyricsDisplay = () => {
     const targetTick = cursorTicks[curIdIndex.current];
-    if (targetTick <= tick) {
+    let tickUpdated = lyricsDisplay === "random" ? tick + 100 : tick;
+    if (targetTick <= tickUpdated) {
       curIdIndex.current = curIdIndex.current + 1;
 
       const charIndices = cursorIndices?.get(targetTick);
@@ -132,14 +137,16 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
     }
   }, [lyrics]);
 
+  useEffect(() => {}, [lyricsDisplay]);
+
   return (
-    <div className="fixed  bottom-20 lg:bottom-16 left-0 w-full px-5 ">
-      <div className="flex items-center justify-center relative w-full h-48 md:h-56 lg:h-72  rounded-lg p-2  text-center overflow-auto [&::-webkit-scrollbar]:hidden">
+    <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5">
+      <div className="flex items-center lg:items-end justify-center relative w-full h-[300px] lg:h-[450px]  rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden">
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
         <div
           className={`${
             player.paused ? "z-30 opacity-100" : "z-10 opacity-0"
-          } absolute top-0 left-0 p-2 h-full flex gap-2 items-center justify-center w-full duration-300 `}
+          } absolute bottom-0 left-0 h-full lg:h-[60%] flex gap-2 items-center justify-center w-full duration-300 `}
         >
           <Upload
             onSelectFile={onSelectTestMusic}
@@ -179,21 +186,14 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
           </Button>
         </div>
 
-        <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
-          <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
-            <LyricsAnimation
-              charIndex={position.current === true ? charIndex.current : -1}
-              display={display.current}
-            ></LyricsAnimation>
-          </span>
-          <br />
-          <LyricsAnimation
-            charIndex={position.current === false ? charIndex.current : -1}
-            display={displayBottom.current}
-          ></LyricsAnimation>
-        </div>
+        <SelectLyrics
+          display={display.current}
+          displayBottom={displayBottom.current}
+          options={lyricsDisplay}
+          position={position.current}
+          charIndex={charIndex.current}
+        ></SelectLyrics>
       </div>
-      {/* <EMKFileConverter></EMKFileConverter> */}
     </div>
   );
 };

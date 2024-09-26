@@ -1,0 +1,1 @@
+type LyricsOptions = "default" | "random";

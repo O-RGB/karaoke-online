@@ -1,12 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Noto_Sans_Thai_Looped } from "next/font/google";
+import { Noto_Sans_Thai_Looped } from "next/font/google";
 import "../globals.css";
 import { SpessasynthProvider } from "../../context/spessasynth-context";
-import AllowSound from "@/components/tools/allow-sound";
 
 import { PeerProvider } from "../../context/remote-context";
-import { AppControlProvider } from "@/context/app-control-context";
-import { PlayerProvider } from "@/context/player-context";
+import ToolsProvider from "../provider";
 
 const inter = Noto_Sans_Thai_Looped({
   weight: "400",
@@ -53,15 +51,16 @@ export default function RootLayout({
       </head>
 
       <body className={`relative ${inter.className} p-2.5 bg-slate-500 `}>
-        <AllowSound>
-          <PeerProvider>
-            <SpessasynthProvider>
-              <AppControlProvider>
-                <PlayerProvider>{children}</PlayerProvider>
-              </AppControlProvider>
-            </SpessasynthProvider>
-          </PeerProvider>
-        </AllowSound>
+        {/* <AllowSound> */}
+        <PeerProvider>
+          <SpessasynthProvider>
+            <ToolsProvider>{children}</ToolsProvider>
+            {/* <AppControlProvider>
+              <PlayerProvider>{children}</PlayerProvider>
+            </AppControlProvider> */}
+          </SpessasynthProvider>
+        </PeerProvider>
+        {/* </AllowSound> */}
       </body>
     </html>
   );

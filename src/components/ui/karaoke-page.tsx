@@ -19,6 +19,8 @@ import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status-panel";
 import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper";
+import LyricsModal from "../modal/lyrics";
+import { useNotification } from "@/hooks/notification-hook";
 
 interface KaraokePageProps {}
 
@@ -30,24 +32,19 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     loadAndPlaySong,
     setMusicLibraryFile,
     setSongPlaying,
-    loadWallpaper,
     tracklist,
     musicLibrary,
-    notification,
     lyrics,
     cursorIndices,
     cursorTicks,
-    wallpaper,
   } = useAppControl();
 
   const { tempo, tick } = usePlayer();
+  const { notification } = useNotification();
 
   useLayoutEffect(() => {
     setupSpessasynth();
-    loadWallpaper();
   }, []);
-
-  useEffect(() => {}, [wallpaper]);
 
   if (!synth || !player) {
     return <></>;
@@ -61,14 +58,15 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     MUSIC_STORE: <SuperHostRemote></SuperHostRemote>,
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
+    LYRICS: <LyricsModal></LyricsModal>,
   };
 
   return (
     <>
-      <div
+      {/* <div
         style={{ backgroundImage: "url(" + wallpaper + ")" }}
         className="fixed w-screen h-screen top-0 left-0 -z-20 bg-cover bg-center"
-      ></div>
+      ></div> */}
       <ContextModal modal={modalMap}>
         <WallcomeModal
           setTracklistFile={setTracklistFile}

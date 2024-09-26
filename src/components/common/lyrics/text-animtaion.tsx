@@ -1,67 +1,71 @@
 // components/TextAnimation.tsx
 
-import { useEffect, useRef } from "react";
-import anime from "animejs";
+import {
+  animateBounceIn,
+  animateCharactersOut,
+  animateFadeFromBottom,
+  animateRainbowIn,
+  animateRotateIn,
+  animateScaleIn,
+  animateTypewriter,
+  animateWaveIn,
+  panRight,
+  zoomIn,
+} from "@/lib/animations/text-animations";
+import { useEffect, useRef, useState } from "react";
+import BackgroundTransition from "./bg-animation";
 
 interface TextAnimationProps {
-  show: boolean;
+  show?: boolean;
   text: string;
+  split?: boolean;
+  color?: string;
 }
 
-const TextAnimation: React.FC<TextAnimationProps> = ({ show, text }) => {
+const TextAnimation: React.FC<TextAnimationProps> = ({
+  show,
+  text,
+  color,
+  split = false,
+}) => {
   const textRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (show) {
-      // ถ้า show เป็น true ให้แสดงข้อความ
-      if (textRef.current) {
-        // textRef.current.style.opacity = "0"; // ตั้งค่า opacity เป็น 0 ก่อน
-        // textRef.current.style.display = "block"; // แสดงข้อความ
-        anime
-          .timeline()
-          .add({
-            targets: textRef.current.children,
-            scale: [4, 1],
-            opacity: [0, 1],
-            translateZ: 0,
-            easing: "easeOutExpo",
-            duration: 950,
-            delay: (el, i) => 70 * i,
-          })
-          .add({
-            targets: textRef.current.children,
-            opacity: 0,
-            duration: 1000,
-            easing: "easeOutExpo",
-            delay: 1000,
-          });
-      }
-    } else {
-      // ถ้า show เป็น false ให้ซ่อนข้อความ
-      if (textRef.current) {
-        anime({
-          targets: textRef.current,
-          opacity: 0,
-          duration: 1000,
-          easing: "easeInOutQuad",
-          complete: () => {
-            if (textRef.current) {
-              textRef.current.style.display = "none"; // ซ่อนข้อความหลังจากอนิเมชัน
-            }
-          },
-        });
+    if (textRef.current) {
+      if (show === true) {
+        // Reset transform ก่อนเริ่ม animation ใหม่
+        textRef.current.style.transform = "none";
+
+        // รอเล็กน้อยเพื่อให้การ reset เสร็จสมบูรณ์
+        setTimeout(() => {
+          // เริ่ม animation ใหม่
+          animateWaveIn(textRef);
+          zoomIn(textRef);
+        }, 50); // ใช้ 50ms เพื่อให้ reset เสร็จก่อน
+      } else if (show === false) {
+        animateCharactersOut(textRef);
       }
     }
   }, [show]);
 
   return (
-    <div className="text-4xl font-bold text-white" ref={textRef}>
-      {text.split("").map((char, index) => (
-        <span key={index} className="inline-block">
-          {char}
-        </span>
-      ))}
-    </div>
+    <>
+      <BackgroundTransition
+        transitionType="fadeInZoomTransition"
+        targetColor={color}
+      ></BackgroundTransition>
+      <div className="text-4xl font-bold text-white" ref={textRef}>
+        {split ? (
+          <span className="inline-block opacity-0">{text}</span>
+        ) : (
+          text.split("").map((char, index) => (
+            <span key={index} className="inline-block opacity-0">
+              {char}
+            </span>
+          ))
+        )}
+      </div>
+    </>
   );
 };
 

@@ -8,9 +8,6 @@ import { addSongList, onSearchList } from "@/lib/trie-search";
 import { MIDI, midiControllers } from "spessasynth_lib";
 import { loadSuperZipAndExtractSong } from "@/lib/zip";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
-import { MID_FILE_TYPE, WALLPAPER } from "@/config/value";
-import { getLocalWallpaper, setLocalWallpaper } from "@/lib/local-storage";
-import { base64ToImage, imageToBase64 } from "@/lib/image";
 import TrieSearch from "trie-search";
 
 type AppControlContextType = {
@@ -25,10 +22,6 @@ type AppControlContextType = {
   updateVolumeHeld: (held: boolean) => void;
   updatePitch: (semitones: number, channel?: number) => void;
   updatePerset: (channel: number, value: number) => void;
-  addNotification: (text: string) => void;
-  changeWallpaper: (file: File) => Promise<void>;
-  loadWallpaper: () => Promise<void>;
-  notification: string | undefined;
   musicLibrary: Map<string, File>;
   tracklist: TrieSearch<SearchResult> | undefined;
   playingTrack: SearchResult | undefined;
@@ -37,7 +30,6 @@ type AppControlContextType = {
   lyrics: string[];
   cursorTicks: number[];
   midiPlaying: MIDI | undefined;
-  wallpaper: string | undefined;
 };
 
 type AppControlProviderProps = {
@@ -56,19 +48,14 @@ export const AppControlContext = createContext<AppControlContextType>({
   updateVolumeHeld: () => {},
   updatePitch: () => {},
   updatePerset: () => {},
-  addNotification: () => {},
-  changeWallpaper: async (file: File) => {},
-  loadWallpaper: async () => {},
   lyrics: [],
   cursorTicks: [],
-  notification: undefined,
   musicLibrary: new Map(),
   cursorIndices: new Map(),
   tracklist: undefined,
   playingTrack: undefined,
   volumeController: [],
   midiPlaying: undefined,
-  wallpaper: undefined,
 });
 
 export const AppControlProvider: FC<AppControlProviderProps> = ({
@@ -92,7 +79,8 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   );
 
   // Notification
-  const [notification, setNotification] = useState<string>();
+  // const [notification, setNotification] = useState<string>();
+
   // Playing Song
   // --- Song
   const [playingTrack, setPlayingTrack] = useState<SearchResult>();
@@ -102,31 +90,18 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   const [lyrics, setLyrics] = useState<string[]>([]);
   const [cursorTicks, setCursor] = useState<number[]>([]);
   const [cursorIndices, setCursorIndices] = useState<Map<number, number[]>>();
+  // const [lyricsDisplay, setLyricsDisplay] = useState<LyricsOptions>("default");
 
   // --- Wallpaper
-  const [wallpaper, setWallpaper] = useState<string>(WALLPAPER);
+  // const [wallpaper, setWallpaper] = useState<string>(WALLPAPER);
 
-  const changeWallpaper = async (file: File) => {
-    const base64 = await imageToBase64(file);
-    const imgUrl = URL.createObjectURL(file);
-    if (base64.length > 0) {
-      setLocalWallpaper(base64);
-      setWallpaper(imgUrl);
-    }
-  };
+  // const setLyricsOptions = (mode: LyricsOptions) => {
+  //   setLyricsDisplay(mode);
+  // };
 
-  const loadWallpaper = async () => {
-    const wallpaper = getLocalWallpaper(); // base64
-    if (wallpaper) {
-      const file = await base64ToImage(wallpaper);
-      const imgUrl = URL.createObjectURL(file);
-      setWallpaper(imgUrl);
-    }
-  };
-
-  const addNotification = (text: string) => {
-    setNotification(text);
-  };
+  // const addNotification = (text: string) => {
+  //   setNotification(text);
+  // };
 
   const updatePerset = (channel: number, value: number) => {
     synth?.programChange(channel, value);
@@ -320,11 +295,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         loadAndPlaySong,
         updateVolumeHeld,
         updatePitch,
-        addNotification,
         updatePerset,
-        changeWallpaper,
-        loadWallpaper,
-        notification,
         volumeController,
         lyrics,
         cursorTicks,
@@ -333,7 +304,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         playingTrack,
         cursorIndices,
         midiPlaying,
-        wallpaper,
       }}
     >
       <>{children}</>
