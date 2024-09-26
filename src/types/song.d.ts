@@ -3,6 +3,7 @@ interface SearchResult {
   fileId: string;
   name: string;
   type: number;
+  id: string;
 }
 
 interface SongFiles {

@@ -10,7 +10,7 @@ body {
 }
 
 .blur-overlay {
-  @apply backdrop-blur-sm;
+  @apply backdrop-blur-md;
 }
 
 .blur-border {
@@ -28,3 +28,5 @@ body {
     -webkit-text-stroke: 8px ;
   }
 }
+
+ 

@@ -1,7 +1,7 @@
 import React from "react";
 
 interface ButtonCommonProps extends ButtonProps {
-  blur?: boolean;
+  blur?: boolean | string;
 }
 
 const Button: React.FC<ButtonCommonProps> = ({
@@ -26,7 +26,12 @@ const Button: React.FC<ButtonCommonProps> = ({
     shapeStyle = "rounded-md";
   }
 
-  shapeStyle += blur ? " blur-overlay bg-white/10 hover:bg-white/20" : "";
+  shapeStyle +=
+    typeof blur === "boolean"
+      ? blur
+        ? " blur-overlay bg-white/10 hover:bg-white/20"
+        : ""
+      : ` ${blur}`;
 
   switch (color) {
     case "white":

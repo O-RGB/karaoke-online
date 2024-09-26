@@ -2,6 +2,7 @@ import {
   STORAGE_NAME,
   STORAGE_SOUNDFONT,
   STORAGE_SOUNDFONT_DIC,
+  STORAGE_WALLPAPER,
 } from "@/config/value";
 import { getDB } from "@/utils/database/db";
 import { directoryOpen } from "browser-fs-access";
@@ -219,4 +220,19 @@ export const getAllSoundFontDicStorage = async () => {
   return await getAll<{ filename: string; size: number }[]>(
     STORAGE_SOUNDFONT_DIC
   );
+};
+
+export const saveWallpaperStorage = async (file: File) => {
+  try {
+    const db = await getDB(STORAGE_WALLPAPER);
+    const tx = db.transaction(STORAGE_WALLPAPER, "readwrite");
+    await tx.objectStore(STORAGE_WALLPAPER).add(file, file.name);
+    await tx.done;
+    return true
+  } catch (error) {
+    return false
+  }
+};
+export const getWallpaperStorage = async (key: string) => {
+  return await getByKey<File>(key, STORAGE_WALLPAPER);
 };

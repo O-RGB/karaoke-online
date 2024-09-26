@@ -59,7 +59,7 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
   }, [value]);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full lg:w-fit">
+    <div className="flex flex-col items-center justify-center w-full lg:w-[34px] ">
       <div
         onClick={onLockVolume}
         className={`${

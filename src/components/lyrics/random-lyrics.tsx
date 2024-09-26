@@ -110,7 +110,7 @@ const RandomLyrics: React.FC<RandomLyricsProps> = ({
     <>
       <div className="relative w-full h-full flex flex-col gap-14 items-center justify-center">
         <div
-          className="text-2xl sm:text-3xl lg:text-5xl   text-white "
+          className="text-2xl sm:text-4xl lg:text-6xl   text-white "
           ref={textTopRef}
         >
           {displayTop?.map((_, i) => {
@@ -126,7 +126,7 @@ const RandomLyrics: React.FC<RandomLyricsProps> = ({
           })}
         </div>
         <div
-          className="text-2xl sm:text-3xl lg:text-5xl  text-white "
+          className="text-2xl sm:text-4xl lg:text-6xl  text-white "
           ref={textBotRef}
         >
           {displayBot?.map((_, i) => {

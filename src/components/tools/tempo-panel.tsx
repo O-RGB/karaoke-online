@@ -50,7 +50,7 @@ const TempoPanel: React.FC<TempoPanelProps> = ({
   }, [timeDivision]);
 
   return (
-    <div className="fixed z-30 right-5 top-[4.2rem] blur-overlay blur-border border rounded-md p-2 w-44 hidden lg:block text-white">
+    <div className="fixed z-30 right-5 lg:top-6 blur-overlay blur-border border rounded-md p-2 w-44 hidden lg:block text-white">
       <div className="flex justify-between items-center mb-1">
         <span className=" text-xl font-bold">{Math.round(tempo)}</span>
 

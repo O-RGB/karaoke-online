@@ -1,4 +1,5 @@
 import { AppControlProvider } from "@/context/app-control-context";
+import { KeyUpProvider } from "@/context/keyup-context";
 import { LyricsDisplayProvider } from "@/context/lyrics-context";
 import { NotificationProvider } from "@/context/notification-context";
 import { PlayerProvider } from "@/context/player-context";
@@ -15,7 +16,9 @@ const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       <AppControlProvider>
         <NotificationProvider>
           <PlayerProvider>
-            <LyricsDisplayProvider>{children}</LyricsDisplayProvider>
+            <KeyUpProvider>
+              <LyricsDisplayProvider>{children}</LyricsDisplayProvider>
+            </KeyUpProvider>
           </PlayerProvider>
         </NotificationProvider>
       </AppControlProvider>

@@ -29,7 +29,12 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({
   return (
     <Button
       shadow=""
-      blur={false}
+      border="border blur-border"
+      blur={
+        !open
+          ? "blur-overlay bg-red-500/80 hover:bg-red-500/50"
+          : "blur-overlay bg-white/10 hover:bg-white/20"
+      }
       onClick={handleOnClick}
       className={[open ? " hover:bg-white/30" : colorClose].join(" ")}
       padding="p-1 px-2"

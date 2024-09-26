@@ -86,7 +86,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
 
   const renderLyricsDisplay = () => {
     const targetTick = cursorTicks[curIdIndex.current];
-    let tickUpdated = lyricsDisplay === "random" ? tick + 100 : tick;
+    let tickUpdated = lyricsDisplay === "random" ? tick + 200 : tick;
     if (targetTick <= tickUpdated) {
       curIdIndex.current = curIdIndex.current + 1;
 
@@ -141,7 +141,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
 
   return (
     <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5">
-      <div className="flex items-center lg:items-end justify-center relative w-full h-[300px] lg:h-[450px]  rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden">
+      <div className="flex items-center   justify-center relative w-full h-[300px] lg:h-[450px]  rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden">
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
         <div
           className={`${

@@ -10,6 +10,8 @@ import {
 import NumberButton from "../common/input-data/number-button";
 import SwitchButton from "../common/input-data/switch-button";
 import { useNotification } from "@/hooks/notification-hook";
+import Button from "../common/button/button";
+import { MdArrowDropUp } from "react-icons/md";
 
 interface VolumePanelProps {
   instrument: number[];
@@ -40,6 +42,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     volumeController,
   } = useAppControl();
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
+  const [hideVolume, setHideVolume] = useState<boolean>(false);
   const gain = useRef<number[]>([]);
 
   const onVolumeMeterChange = (channel: number, value: number) => {
@@ -74,6 +77,10 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     updatePerset(channel - 1, value);
   };
 
+  const onHideVolume = (hide: boolean) => {
+    setHideVolume(hide);
+  };
+
   const render = () => {
     if (analysers) {
       const newVolumeLevels = analysers?.map((analyser) => {
@@ -101,12 +108,12 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   }, [audioGain]);
 
   return (
-    <div className="fixed w-full top-16 lg:top-[4.2rem] left-0 px-5 flex flex-col gap-2 ">
-      <div className="grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-y-2 lg:gap-y-0 gap-1 blur-overlay border blur-border rounded-md p-2">
+    <div className="fixed w-full top-16 lg:top-6 left-0 px-5 flex flex-col gap-2 ">
+      <div className="relative grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-y-2 lg:gap-y-0 gap-0.5 blur-overlay border blur-border rounded-md p-2 duration-300">
         {gain.current.map((data, ch) => {
           return (
             <div
-              className="flex w-full items-center justify-center"
+              className=" flex w-full items-center justify-center"
               key={`gin-${ch}`}
             >
               <VolumeMeter
@@ -127,8 +134,19 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           );
         })}
       </div>
+      <div className="relative flex lg:hidden w-full justify-center items-center h-0">
+        <div className="absolute bottom-0.5">
+          <Button
+            onClick={() => onHideVolume(!hideVolume)}
+            border="border blur-border"
+            padding=""
+            className="px-3 h-3"
+            icon={<MdArrowDropUp className="text-white"></MdArrowDropUp>}
+          ></Button>
+        </div>
+      </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between -mt-3 lg:-mt-0">
         <div className="flex gap-2">
           <NumberButton
             onChange={(value) => {
