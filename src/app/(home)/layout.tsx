@@ -5,6 +5,7 @@ import { SpessasynthProvider } from "../../context/spessasynth-context";
 
 import { PeerProvider } from "../../context/remote-context";
 import ToolsProvider from "../provider";
+import AllowSound from "@/components/tools/allow-sound";
 
 const inter = Noto_Sans_Thai_Looped({
   weight: "400",
@@ -51,16 +52,13 @@ export default function RootLayout({
       </head>
 
       <body className={`relative ${inter.className} p-2.5 bg-slate-500 `}>
-        {/* <AllowSound> */}
-        <PeerProvider>
-          <SpessasynthProvider>
-            <ToolsProvider>{children}</ToolsProvider>
-            {/* <AppControlProvider>
-              <PlayerProvider>{children}</PlayerProvider>
-            </AppControlProvider> */}
-          </SpessasynthProvider>
-        </PeerProvider>
-        {/* </AllowSound> */}
+        <AllowSound>
+          <PeerProvider>
+            <SpessasynthProvider>
+              <ToolsProvider>{children}</ToolsProvider>
+            </SpessasynthProvider>
+          </PeerProvider>
+        </AllowSound>
       </body>
     </html>
   );
