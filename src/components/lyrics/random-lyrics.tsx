@@ -118,7 +118,7 @@ const RandomLyrics: React.FC<RandomLyricsProps> = ({
             let lyr = text === " " ? "&nbsp;" : text;
             return (
               <span
-                className="opacity-0"
+                className="opacity-0 drop-shadow-lg outline-8"
                 key={`top-lyr-${i}`}
                 dangerouslySetInnerHTML={{ __html: lyr }}
               ></span>
@@ -134,7 +134,7 @@ const RandomLyrics: React.FC<RandomLyricsProps> = ({
             let lyr = text === " " ? "&nbsp;" : text;
             return (
               <span
-                className="opacity-0"
+                className="opacity-0 drop-shadow-lg outline-1"
                 key={`top-lyr-${i}`}
                 dangerouslySetInnerHTML={{ __html: lyr }}
               ></span>

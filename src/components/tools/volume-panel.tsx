@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import VolumeMeter from "../common/volume/volume-meter";
 import { Synthetizer } from "spessasynth_lib";
 import { useAppControl } from "@/hooks/app-control-hook";
@@ -39,11 +39,14 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     updateVolumeHeld,
     updatePitch,
     updatePerset,
+    updateHideVolume,
     volumeController,
+    hideVolume,
   } = useAppControl();
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
-  const [hideVolume, setHideVolume] = useState<boolean>(false);
+
   const gain = useRef<number[]>([]);
+  const gainMain = useRef<number>(0);
 
   const onVolumeMeterChange = (channel: number, value: number) => {
     if (synth) {
@@ -78,10 +81,9 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   };
 
   const onHideVolume = (hide: boolean) => {
-    setHideVolume(hide);
+    updateHideVolume(hide);
   };
-
-  const render = () => {
+  const render = useCallback(() => {
     if (analysers) {
       const newVolumeLevels = analysers?.map((analyser) => {
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -91,15 +93,26 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
         );
         return value;
       });
-      gain.current = newVolumeLevels;
+
+      if (hideVolume) {
+        const totalGain = newVolumeLevels.reduce(
+          (sum, value) => sum + value,
+          0
+        );
+        const mainVolume = (totalGain / (newVolumeLevels.length * 100)) * 500;
+        gainMain.current = mainVolume;
+      } else {
+        gain.current = newVolumeLevels;
+      }
     }
-  };
+  }, [analysers, hideVolume]); // เพิ่ม analysers และ hideVolume เป็น dependencies
 
   useEffect(() => {
     if (analysers) {
-      setInterval(() => render(), 100);
+      const intervalId = setInterval(() => render(), 100);
+      return () => clearInterval(intervalId); // ล้าง interval เมื่อ component ถูก unmount
     }
-  }, [analysers]);
+  }, [analysers, render]); // เพิ่ม render เป็น dependencies
 
   useEffect(() => {
     if (audioGain) {
@@ -108,12 +121,28 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   }, [audioGain]);
 
   return (
-    <div className="fixed w-full top-16 lg:top-6 left-0 px-5 flex flex-col gap-2 ">
-      <div className="relative grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-y-2 lg:gap-y-0 gap-0.5 blur-overlay border blur-border rounded-md p-2 duration-300">
+    <div className="fixed w-full top-16 lg:top-6 left-0 px-5 flex flex-col gap-2">
+      <div
+        style={{
+          maxHeight: hideVolume ? "30px" : "300px",
+        }}
+        className="relative grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-y-2 lg:gap-y-0 gap-0.5 blur-overlay border blur-border rounded-md p-2 duration-300 overflow-hidden"
+      >
+        {hideVolume && (
+          <div
+            className="absolute top-0 left-0 h-full bg-white/40 duration-300 transition-all"
+            style={{
+              width: `${gainMain.current}%`, // เพิ่ม % หลังค่า gainMain.current
+            }}
+          ></div>
+        )}
         {gain.current.map((data, ch) => {
           return (
             <div
-              className=" flex w-full items-center justify-center"
+              style={{
+                opacity: hideVolume ? 0 : 1,
+              }}
+              className=" flex w-full items-center justify-center duration-100"
               key={`gin-${ch}`}
             >
               <VolumeMeter
@@ -134,19 +163,29 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           );
         })}
       </div>
-      <div className="relative flex lg:hidden w-full justify-center items-center h-0">
-        <div className="absolute bottom-0.5">
+      <div className="relative flex w-full lg:w-[592px] justify-center items-center h-0">
+        <div className="absolute bottom-0.5 right-4">
           <Button
+            tabIndex={-1}
             onClick={() => onHideVolume(!hideVolume)}
-            border="border blur-border"
+            onKeyDown={(event) =>
+              event.key === "Enter" && event.preventDefault()
+            }
+            border="border blur-border focus:outline-none"
             padding=""
             className="px-3 h-3"
-            icon={<MdArrowDropUp className="text-white"></MdArrowDropUp>}
+            icon={
+              <MdArrowDropUp
+                className={`${
+                  hideVolume ? "rotate-180" : "rotate-0"
+                } text-white duration-300`}
+              ></MdArrowDropUp>
+            }
           ></Button>
         </div>
       </div>
 
-      <div className="flex justify-between -mt-3 lg:-mt-0">
+      <div className="flex justify-between -mt-2.5 lg:-mt-2">
         <div className="flex gap-2">
           <NumberButton
             onChange={(value) => {

@@ -22,6 +22,8 @@ type AppControlContextType = {
   updateVolumeHeld: (held: boolean) => void;
   updatePitch: (semitones: number, channel?: number) => void;
   updatePerset: (channel: number, value: number) => void;
+  updateHideVolume: (hide: boolean) => void;
+  hideVolume: boolean;
   musicLibrary: Map<string, File>;
   tracklist: TrieSearch<SearchResult> | undefined;
   playingTrack: SearchResult | undefined;
@@ -48,6 +50,8 @@ export const AppControlContext = createContext<AppControlContextType>({
   updateVolumeHeld: () => {},
   updatePitch: () => {},
   updatePerset: () => {},
+  updateHideVolume: () => {},
+  hideVolume: false,
   lyrics: [],
   cursorTicks: [],
   musicLibrary: new Map(),
@@ -69,6 +73,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   const [volumeController, setVolumeController] =
     useState<number[]>(VolChannel);
   const [isVolumeHeld, setIsVolumeHeld] = useState<boolean>(false);
+  const [hideVolume, setHideVolume] = useState<boolean>(false);
 
   // Trie Search
   const [tracklist, setTracklist] = useState<TrieSearch<SearchResult>>();
@@ -102,6 +107,10 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   // const addNotification = (text: string) => {
   //   setNotification(text);
   // };
+
+  const updateHideVolume = (hide: boolean) => {
+    setHideVolume(hide);
+  };
 
   const updatePerset = (channel: number, value: number) => {
     synth?.programChange(channel, value);
@@ -296,6 +305,8 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         updateVolumeHeld,
         updatePitch,
         updatePerset,
+        updateHideVolume,
+        hideVolume,
         volumeController,
         lyrics,
         cursorTicks,

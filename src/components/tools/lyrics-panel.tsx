@@ -16,6 +16,7 @@ import { EMK_FILE_TYPE } from "@/config/value";
 import { groupThaiCharacters } from "@/lib/app-control";
 import SelectLyrics from "../lyrics";
 import { useLyrics } from "@/hooks/lyrics-hook";
+import { useAppControl } from "@/hooks/app-control-hook";
 // import EMKFileConverter from "./test";
 
 interface LyricsPanelProps {
@@ -36,6 +37,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
   cursorIndices,
 }) => {
   const { lyricsDisplay } = useLyrics();
+  const { hideVolume } = useAppControl();
 
   const charIndex = useRef<number>(0);
   const display = useRef<string[][]>([]);
@@ -140,8 +142,12 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
   useEffect(() => {}, [lyricsDisplay]);
 
   return (
-    <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5">
-      <div className="flex items-center   justify-center relative w-full h-[300px] lg:h-[450px]  rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden">
+    <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 -z-10">
+      <div
+        className={`${
+          hideVolume ? "h-[82dvh]" : "h-[300px] lg:h-[450px]"
+        } flex items-center   justify-center relative w-full   rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden`}
+      >
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
         {/* <div
           className={`${

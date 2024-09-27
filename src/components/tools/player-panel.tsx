@@ -10,6 +10,7 @@ import { Sequencer } from "spessasynth_lib";
 import ContextModal from "../modal/context-modal";
 import { FiSettings } from "react-icons/fi";
 import Marquee from "react-fast-marquee";
+import { FaSearch } from "react-icons/fa";
 interface PlayerPanelProps {
   player: Sequencer;
   lyrics: string[];
@@ -71,7 +72,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <div className="hidden lg:block lg:w-full h-full p-1.5">
             <div className="rounded-md bg-black/15 h-full flex items-center py-1 text-white">
               {lyrics.length > 3 && (
-                <Marquee className="flex gap-2" speed={10}>
+                <Marquee className="flex gap-2 opacity-40" speed={10}>
                   {lyrics[0]}&nbsp;
                   {lyrics[1]}&nbsp;
                   {lyrics[2]}&nbsp;
@@ -91,7 +92,15 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           </div>
         </div>
 
-        <div>
+        <div className="flex">
+          <Button
+            blur={false}
+            border=""
+            shadow=""
+            padding="p-4"
+            shape={false}
+            icon={<FaSearch className="text-white" />}
+          ></Button>
           <ContextModal leftClick modal={modalMap} className="">
             <Button
               blur={false}

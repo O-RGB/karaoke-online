@@ -5,6 +5,7 @@ import Select from "../common/input-data/select";
 import { toOptions } from "@/lib/general";
 import { SONG_TYPE } from "@/config/value";
 import { useKeyUp } from "@/hooks/keyup-hook";
+import { useAppControl } from "@/hooks/app-control-hook";
 
 interface SearchSongProps {
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -13,6 +14,7 @@ interface SearchSongProps {
 
 const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
   const { searching, onEnter, arrowRight, arrowLeft } = useKeyUp();
+  const { hideVolume } = useAppControl();
 
   const [searchResult, setSearchResult] = useState<IOptions<SearchResult>[]>(
     []
@@ -84,7 +86,11 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
   return (
     <div>
       {searching.length > 0 && (
-        <div className="fixed hidden lg:block text-white top-56 w-full px-5">
+        <div
+          className={`${
+            hideVolume ? "top-[100px]" : "top-56"
+          } fixed hidden lg:block text-white w-full px-5 duration-300`}
+        >
           <div className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2">
             <div className="p-2 bg-white/20 w-64 overflow-hidden rounded-md">
               <span className="text-2xl">{searching}</span>
