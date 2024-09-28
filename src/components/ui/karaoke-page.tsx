@@ -22,6 +22,7 @@ import WallpaperModal from "../modal/wallpaper";
 import LyricsModal from "../modal/lyrics";
 import { useNotification } from "@/hooks/notification-hook";
 import MusicStoreModal from "../modal/music-store";
+import MidiSettingModal from "../modal/midi-setting-modal";
 
 interface KaraokePageProps {}
 
@@ -36,8 +37,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     cursorIndices,
     cursorTicks,
     setTracklistFile,
-setMusicLibraryFile,
-musicLibrary
+    setMusicLibraryFile,
+    musicLibrary,
   } = useAppControl();
 
   const { tempo, tick } = usePlayer();
@@ -60,6 +61,7 @@ musicLibrary
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     LYRICS: <LyricsModal></LyricsModal>,
+    MIDI_SETTING: <MidiSettingModal></MidiSettingModal>,
   };
 
   return (

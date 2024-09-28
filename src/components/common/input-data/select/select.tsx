@@ -33,13 +33,13 @@ const Select = <T,>({
       </div>
       <select
         {...props}
-        className="appearance-none cursor-pointer w-full bg-transparent border rounded-md focus:outline-none p-1 border-black hover:border-gray-400 duration-300 disabled:opacity-20 disabled:pointer-events-none disabled:!cursor-not-allowed"
+        className="appearance-none cursor-pointer w-full bg-transparent border rounded-md focus:outline-none p-1 border-black/50 hover:border-gray-400 duration-300 disabled:opacity-20 disabled:pointer-events-none disabled:!cursor-not-allowed"
         value={defaultValue}
         onChange={handleChange}
       >
         {options?.map((option, index) => (
           <option key={index} value={option.value}>
-            <Label>{option.label}</Label>
+            {option.label}
           </option>
         ))}
       </select>

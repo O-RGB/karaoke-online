@@ -9,6 +9,7 @@ import { BsDatabase } from "react-icons/bs";
 import { BiFolder } from "react-icons/bi";
 import { FaImage } from "react-icons/fa";
 import { ImDatabase } from "react-icons/im";
+import { SiMidi } from "react-icons/si";
 
 interface ContextModalProps {
   children?: ReactNode;
@@ -77,6 +78,12 @@ const ContextModal: React.FC<ContextModalProps> = ({
       text: "ฐานข้อมูลเพลง",
       onClick: handleSelectContext,
       type: "MUSIC_STORE",
+    },
+    {
+      icon: <SiMidi />,
+      text: "ตั้งค่ามิดี้",
+      onClick: handleSelectContext,
+      type: "MIDI_SETTING",
     },
   ];
 

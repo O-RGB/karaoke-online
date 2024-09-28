@@ -22,7 +22,8 @@ type ModalType =
   | "MUSIC_STORE"
   | "ADD_MUSIC"
   | "WALLPAPER"
-  | "LYRICS";
+  | "LYRICS"
+  | "MIDI_SETTING"
 
 type ModalComponents = {
   [key in ModalType]?: React.ReactNode;

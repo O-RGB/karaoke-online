@@ -13,6 +13,21 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioLoopRef = useRef<HTMLAudioElement>(null);
 
+  const requestMIDIAccess = async () => {
+    if (navigator.requestMIDIAccess) {
+      try {
+        const access = await navigator.requestMIDIAccess();
+        return access; // ส่งกลับ MIDI access
+      } catch (error) {
+        console.error("Error accessing MIDI devices:", error);
+        return null; // ส่งกลับ null ถ้ามีข้อผิดพลาด
+      }
+    } else {
+      console.log("Web MIDI API is not supported in this browser.");
+      return null; // ส่งกลับ null ถ้าไม่รองรับ
+    }
+  };
+
   const handleClick = () => {
     if (audioRef.current && audioLoopRef.current) {
       const audio = audioRef.current;
@@ -28,6 +43,10 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
       });
     }
   };
+
+  useLayoutEffect(() => {
+    requestMIDIAccess();
+  }, []);
 
   return (
     <>
