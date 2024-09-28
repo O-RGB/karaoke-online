@@ -25,7 +25,7 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row justify-center items-center gap-6">
+    <div className="flex flex-col lg:flex-row justify-center items-center gap-6 h-full">
       <a
         className="block lg:hidden"
         href={`${hostUrl}/remote/${hostId}`}

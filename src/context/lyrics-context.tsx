@@ -44,6 +44,7 @@ type LyricsDisplayContextType = {
   ActiveColor: string;
   ActiveBorderColor: string;
   Font: NextFont | undefined;
+  FontName: SystemFont;
   setLyricsOptions: (mode: LyricsOptions) => void;
   setLyricsColorBorder: (color: string) => void;
   setLyricsColor: (color: string) => void;
@@ -63,8 +64,9 @@ export const LyricsDisplayContext = createContext<LyricsDisplayContextType>({
   ColorBorder: "#0000FF",
   // Active
   ActiveColor: "#000",
-  ActiveBorderColor: "#fff",
+  ActiveBorderColor: "#ffffff",
   Font: undefined,
+  FontName: "notoSansThaiLooped",
   setLyricsOptions: () => undefined,
   setLyricsColor: () => undefined,
   setLyricsColorBorder: () => undefined,
@@ -83,9 +85,10 @@ export const LyricsDisplayProvider: FC<LyricsDisplayProviderProps> = ({
 
   // Active
   const [ActiveColor, setActiveColor] = useState<string>("#000");
-  const [ActiveBorderColor, setActiveBorderColor] = useState<string>("#fff");
+  const [ActiveBorderColor, setActiveBorderColor] = useState<string>("#ffffff");
 
   const [Font, setFont] = useState<NextFont>(notoSansThaiLooped);
+  const [FontName, setFontName] = useState<SystemFont>("notoSansThaiLooped");
 
   const setLyricsOptions = (mode: LyricsOptions) => {
     setDisplayLyrics(mode);
@@ -108,28 +111,36 @@ export const LyricsDisplayProvider: FC<LyricsDisplayProviderProps> = ({
 
   const setFontChange = (set: SystemFont) => {
     let font = notoSansThaiLooped;
+    let fontName: SystemFont = "notoSansThaiLooped";
     switch (set) {
       case "inter":
         font = inter;
+        fontName = "inter";
         break;
       case "lora":
         font = lora;
+        fontName = "lora";
         break;
       case "notoSansThaiLooped":
         font = notoSansThaiLooped;
+        fontName = "notoSansThaiLooped";
         break;
       case "roboto":
         font = roboto;
+        fontName = "roboto";
         break;
       case "krub":
         font = krub;
+        fontName = "krub";
         break;
 
       default:
         font = notoSansThaiLooped;
+        fontName = "notoSansThaiLooped";
         break;
     }
     setFont(font);
+    setFontName(fontName);
   };
 
   return (
@@ -141,6 +152,7 @@ export const LyricsDisplayProvider: FC<LyricsDisplayProviderProps> = ({
         ActiveColor,
         ActiveBorderColor,
         Font,
+        FontName,
         setLyricsOptions,
         setLyricsColor,
         setLyricsActiveColor,

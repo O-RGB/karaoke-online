@@ -1,14 +1,30 @@
 "use client";
 import { WALLPAPER } from "@/config/value";
 import { getLocalWallpaper, setLocalWallpaper } from "@/lib/local-storage";
-import { getWallpaperStorage, saveWallpaperStorage } from "@/lib/storage";
-import { createContext, FC, useEffect, useState, useRef } from "react";
+import {
+  deleteWallpaperStorage,
+  getAllWallpaperStorage,
+  getWallpaperStorage,
+  saveWallpaperStorage,
+} from "@/lib/storage";
+import {
+  createContext,
+  FC,
+  useEffect,
+  useState,
+  useRef,
+  useLayoutEffect,
+} from "react";
 
 type WallpaperContextType = {
   wallpaper: string | undefined;
+  wallpaperName: string | undefined;
   isVideo: boolean;
-  changeWallpaper: (file: File) => Promise<void>;
+  addWallpaper: (file: File) => Promise<void>;
   loadWallpaper: () => Promise<void>;
+  getAllWallpaper: () => Promise<File[] | undefined>;
+  changeWallpaper: (filename: string) => Promise<void>;
+  deleteWallaper: (filename: string) => Promise<void>;
 };
 
 type WallpaperProviderProps = {
@@ -17,23 +33,48 @@ type WallpaperProviderProps = {
 
 export const WallpaperContext = createContext<WallpaperContextType>({
   wallpaper: undefined,
+  wallpaperName: undefined,
   isVideo: false,
-  changeWallpaper: async () => undefined,
+  addWallpaper: async () => undefined,
   loadWallpaper: async () => undefined,
+  getAllWallpaper: async () => undefined,
+  changeWallpaper: async () => undefined,
+  deleteWallaper: async () => undefined,
 });
 
 export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
   const [wallpaper, setWallpaper] = useState<string>(WALLPAPER);
+  const [wallpaperName, setWallpaperName] = useState<string>("");
   const [isVideo, setIsVideo] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const changeWallpaper = async (file: File) => {
+  const addWallpaper = async (file: File) => {
     const res = await saveWallpaperStorage(file);
     const mediaUrl = URL.createObjectURL(file);
     if (res) {
       setLocalWallpaper(file.name);
       setWallpaper(mediaUrl);
       setIsVideo(file.type.startsWith("video/"));
+      setWallpaperName(file.name);
+    }
+  };
+
+  const changeWallpaper = async (filename: string) => {
+    setLocalWallpaper(filename);
+    const localfile = await getWallpaperStorage(filename);
+    if (localfile) {
+      setIsVideo(localfile.type.startsWith("video/"));
+      const mediaUrl = URL.createObjectURL(localfile);
+      setWallpaper(mediaUrl);
+      setWallpaperName(localfile.name);
+    }
+  };
+
+  const deleteWallaper = async (filename: string) => {
+    const res = await deleteWallpaperStorage(filename);
+    if (res) {
+      setWallpaper(WALLPAPER);
+      setWallpaperName("");
     }
   };
 
@@ -45,16 +86,21 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
         const mediaUrl = URL.createObjectURL(wallpaper);
         setWallpaper(mediaUrl);
         setIsVideo(wallpaper.type.startsWith("video/"));
+        setWallpaperName(wallpaper.name);
       }
     }
+  };
+
+  const getAllWallpaper = async () => {
+    return await getAllWallpaperStorage();
   };
 
   useEffect(() => {
     loadWallpaper();
   }, []);
 
-  useEffect(() => {
-    if (videoRef.current) {
+  useLayoutEffect(() => {
+    if (videoRef.current && isVideo) {
       videoRef.current
         .play()
         .catch((error) => console.error("Video autoplay failed:", error));
@@ -64,10 +110,14 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
   return (
     <WallpaperContext.Provider
       value={{
+        wallpaperName,
         wallpaper,
         isVideo,
-        changeWallpaper,
+        addWallpaper,
         loadWallpaper,
+        changeWallpaper,
+        getAllWallpaper,
+        deleteWallaper,
       }}
     >
       {isVideo ? (

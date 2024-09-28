@@ -1,7 +1,9 @@
 import {
   getSongBySuperKey,
+  getTrackList,
   loadFileSystem,
   loadFileZip,
+  saveTrackList,
   storageIsEmpty,
 } from "@/lib/storage";
 import React, { useEffect, useState } from "react";
@@ -32,26 +34,38 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
   const [songFile, setSongFile] = useState<File>();
   const [open, setOpen] = useState<boolean>(false);
 
-  const dataIsEmpty = async () => {
-    const isEmpty = await storageIsEmpty();
-    setTimeout(() => {
-      setOpen(isEmpty);
-    }, 100);
-    if (!isEmpty) {
+  // const dataIsEmpty = async () => {
+  //   const isEmpty = await storageIsEmpty();
+  //   setTimeout(() => {
+  //     setOpen(isEmpty);
+  //   }, 100);
+  //   if (!isEmpty) {
+  //     loadTracklistStorage();
+  //   }
+  // };
+
+  const loadTracklistStorage = async () => {
+    const file = await getTrackList();
+    if (file) {
+      setTracklistFile(file);
+    }
+  };
+
+  const checkTracklist = async () => {
+    const res = await getTrackList();
+    if (!res) {
+      setTimeout(() => {
+        setOpen(true);
+      }, 100);
+    } else {
       loadTracklistStorage();
     }
   };
+
   const handleClose = (delay: number = 0) => {
     setTimeout(() => {
       setOpen(false);
     }, delay);
-  };
-
-  const loadTracklistStorage = async () => {
-    const file = await getSongBySuperKey(TRACKLIST_FILENAME);
-    if (file) {
-      setTracklistFile(file);
-    }
   };
 
   // const onLoadFileSystem = async () => {
@@ -68,8 +82,11 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
     if (fileList.length === 1) {
       const file = fileList.item(0);
       if (file?.type === "application/json") {
-        setTracklistFile(file);
-        setSongFile(file);
+        const saved = await saveTrackList(file);
+        if (saved) {
+          setTracklistFile(file);
+          setSongFile(file);
+        }
       }
     }
   };
@@ -85,22 +102,22 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
   };
 
   useEffect(() => {
-    dataIsEmpty();
+    checkTracklist();
   }, []);
   return (
     <>
-      <SongStorageProcessor
-        tracklist={songFile}
+      {/* <SongStorageProcessor
+        // tracklist={songFile}
         musicLibrary={musicLibrary}
         visible={onZipFinish}
-      ></SongStorageProcessor>
+      ></SongStorageProcessor> */}
       <Modal
         title="ตั้งค่าเพลง"
         isOpen={open}
         onClose={handleClose}
         footer={<></>}
       >
-        {!fileSystem ? (
+        {/* {!fileSystem ? (
           <>
             {progress?.error ? (
               <div className="text-sm text-red-500">
@@ -151,7 +168,24 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
               </Button>
             </Upload>
           </div>
-        )}
+        )} */}
+        <Upload
+          inputProps={{
+            multiple: true,
+          }}
+          className={butSize}
+          onSelectFile={onLoadMusicLibrary}
+        >
+          <Button
+            border=""
+            color="white"
+            shadow=""
+            className={butSize}
+            icon={<IoDocumentText className="text-4xl" />}
+          >
+            SONG
+          </Button>
+        </Upload>
       </Modal>
     </>
   );

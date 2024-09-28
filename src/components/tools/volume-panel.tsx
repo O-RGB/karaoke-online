@@ -8,7 +8,7 @@ import {
   PiUserSoundFill,
 } from "react-icons/pi";
 import NumberButton from "../common/input-data/number-button";
-import SwitchButton from "../common/input-data/switch-button";
+import SwitchButton from "../common/input-data/switch/switch-button";
 import { useNotification } from "@/hooks/notification-hook";
 import Button from "../common/button/button";
 import { MdArrowDropUp } from "react-icons/md";
@@ -45,7 +45,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   } = useAppControl();
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
 
-  const gain = useRef<number[]>([]);
+  const gain = useRef<number[]>(Array(16).fill(0));
   const gainMain = useRef<number>(0);
 
   const onVolumeMeterChange = (channel: number, value: number) => {
@@ -121,28 +121,29 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   }, [audioGain]);
 
   return (
-    <div className="fixed w-full top-16 lg:top-6 left-0 px-5 flex flex-col gap-2">
+    <div
+      className={`fixed w-full top-16 lg:top-6 left-0 px-5 flex flex-col gap-2 overflow-hidden`}
+    >
       <div
-        style={{
-          maxHeight: hideVolume ? "30px" : "300px",
-        }}
-        className="relative grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-y-2 lg:gap-y-0 gap-0.5 blur-overlay border blur-border rounded-md p-2 duration-300 overflow-hidden"
+        className={`relative grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-y-2 lg:gap-y-0 gap-0.5 blur-overlay border blur-border rounded-md p-2 duration-300 overflow-hidden ${
+          hideVolume ? "h-[30px] lg:h-[30px]" : "h-[292px] lg:h-[150px]"
+        }`}
       >
-        {hideVolume && (
-          <div
-            className="absolute top-0 left-0 h-full bg-white/40 duration-300 transition-all"
-            style={{
-              width: `${gainMain.current}%`, // เพิ่ม % หลังค่า gainMain.current
-            }}
-          ></div>
-        )}
+        <div
+          className="absolute top-0 left-0 h-full bg-white/40 duration-100 transition-all"
+          style={{
+            width: `${gainMain.current}%`,
+            opacity: !hideVolume ? 0 : 1,
+          }}
+        ></div>
+
         {gain.current.map((data, ch) => {
           return (
             <div
               style={{
                 opacity: hideVolume ? 0 : 1,
               }}
-              className=" flex w-full items-center justify-center duration-100"
+              className=" flex w-full items-center justify-center duration-500"
               key={`gin-${ch}`}
             >
               <VolumeMeter
@@ -167,6 +168,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
         <div className="absolute bottom-0.5 right-4">
           <Button
             tabIndex={-1}
+            shadow={""}
             onClick={() => onHideVolume(!hideVolume)}
             onKeyDown={(event) =>
               event.key === "Enter" && event.preventDefault()

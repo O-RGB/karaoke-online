@@ -1,18 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import Input from "./input";
-import Dropdown from "./dropdown";
+import Input from "../input";
+import Dropdown from "../dropdown";
 
-interface SelectProps extends InputProps {
+interface SearchSelectProps extends InputProps {
   options?: IOptions[];
   onSearch?: (value: string) => Promise<IOptions[]>;
   onSelectItem?: (value: IOptions) => void;
+  optionsStyle?: {
+    className: string;
+    itemHoverColor: string;
+    textColor: string;
+  };
 }
 
-const Select: React.FC<SelectProps> = ({
+const SearchSelect: React.FC<SearchSelectProps> = ({
   options,
   onSearch,
   onSelectItem,
+  optionsStyle,
   ...props
 }) => {
   const [Options, setOptions] = useState<IOptions[]>([]);
@@ -62,6 +68,7 @@ const Select: React.FC<SelectProps> = ({
         }}
       />
       <Dropdown
+        {...optionsStyle}
         dropdownRef={dropdownRef}
         resetOption={() => {
           setOptionsSearch([]);
@@ -73,4 +80,4 @@ const Select: React.FC<SelectProps> = ({
   );
 };
 
-export default Select;
+export default SearchSelect;

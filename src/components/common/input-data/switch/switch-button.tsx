@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import Button from "../button/button";
+import Button from "../../button/button";
 
 interface SwitchButtonProps {
   iconOpen?: React.ReactNode;

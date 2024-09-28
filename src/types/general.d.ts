@@ -41,6 +41,7 @@ type ModalProps = {
   cancelText?: string;
   okText?: string;
   closable?: boolean;
+  removeFooter?: boolean;
 };
 
 interface CommonStyle {

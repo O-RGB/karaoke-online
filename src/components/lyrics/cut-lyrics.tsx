@@ -16,7 +16,7 @@ const CutLyrics: React.FC<CutLyricsProps> = ({
 }) => {
   return (
     <>
-      <div className="flex flex-col py-7 items-center justify-center text-white drop-shadow-lg">
+      <div className="flex flex-col py-7 lg:gap-3 items-center justify-center text-white drop-shadow-lg">
         <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
           <LyricsAnimation
             charIndex={position === true ? charIndex : -1}

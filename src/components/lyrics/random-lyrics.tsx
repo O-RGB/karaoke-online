@@ -108,7 +108,7 @@ const RandomLyrics: React.FC<RandomLyricsProps> = ({
   }, [position]);
   return (
     <>
-      <div className="relative w-full h-full flex flex-col gap-14 items-center justify-center">
+      <div className="relative w-full h-full flex flex-col gap-6 lg:gap-14 items-center justify-center">
         <div
           className="text-2xl sm:text-4xl lg:text-6xl   text-white "
           ref={textTopRef}

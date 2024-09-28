@@ -1,0 +1,71 @@
+import React, { ReactNode, useState, useEffect } from "react";
+import { FaCheck } from "react-icons/fa";
+
+interface SwitchRadioOption<T> {
+  label?: string;
+  value: T;
+  children: ReactNode;
+}
+
+interface SwitchRadioProps<T> {
+  value?: T;
+  onChange?: (value: T) => void;
+  options: SwitchRadioOption<T>[];
+}
+
+const SwitchRadio = <T,>({ value, onChange, options }: SwitchRadioProps<T>) => {
+  const [selectedValue, setSelectedValue] = useState<T>(
+    value || options[0]?.value
+  );
+
+  useEffect(() => {
+    if (value !== undefined) {
+      setSelectedValue(value);
+    }
+  }, [value]);
+
+  const handleChange = (newValue: T) => {
+    setSelectedValue(newValue);
+    if (onChange) {
+      onChange(newValue);
+    }
+  };
+
+  return (
+    <div className="flex gap-2 flex-wrap">
+      {options.map((option, index) => {
+        const isChecked = option.value === selectedValue;
+        return (
+          <div
+            className="flex items-center gap-2"
+            key={index}
+            onClick={() => handleChange(option.value)}
+            style={{
+              cursor: "pointer",
+              padding: "10px",
+              border: isChecked ? "2px solid #22c55e" : "2px solid gray",
+              borderRadius: "5px",
+              backgroundColor: "white",
+            }}
+          >
+            <div
+              style={{
+                height: "18px",
+                width: isChecked ? "18px" : "0px",
+                overflow: "hidden",
+                opacity: isChecked ? 1 : 0,
+              }}
+              className="flex items-center justify-center bg-green-500 rounded-full duration-300"
+            >
+              <FaCheck className="text-xs text-white"></FaCheck>
+            </div>
+
+            {option.label ? option.label : option.children}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+export default SwitchRadio;

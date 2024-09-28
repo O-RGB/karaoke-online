@@ -18,10 +18,11 @@ export default function Modal({
   cancelText = "ยกเลิก",
   okText = "ตกลง",
   closable = true,
+  removeFooter = true,
 }: ModalProps) {
   const [showModal, setShowModal] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(isOpen);
-  var padding = "p-6";
+  var padding = "p-3";
 
   const handleOpen = (open: boolean) => {
     if (open) {
@@ -59,12 +60,12 @@ export default function Modal({
           ></div>
           <div
             style={{ width }}
-            className={`relative bg-white rounded-lg shadow-lg z-10 transform max-h-[70dvh] overflow-auto ${
+            className={`relative bg-white rounded-lg shadow-lg z-10 transform  overflow-auto ${
               showModal ? "scale-100" : "scale-95"
             } transition-transform duration-300`}
           >
             <div
-              className={`sticky z-10 top-0 left-0 p-6 flex justify-between items-center bg-white shadow-sm ${padding}`}
+              className={`sticky z-10 top-0 left-0 flex justify-between items-center bg-white shadow-sm ${padding}`}
             >
               <div className="text-lg">{title}</div>
               {closable && (
@@ -73,38 +74,45 @@ export default function Modal({
                 </div>
               )}
             </div>
-            <div className={`${padding} h-full relative z-0`}>{children}</div>
-            <div
-              className={`sticky bottom-0 flex gap-2 justify-end bg-white p-6 border-t border-t-gray-100`}
-            >
-              {footer ? (
-                footer
-              ) : (
-                <>
-                  {!cancelProps?.hidden && (
-                    <Button
-                      {...cancelProps}
-                      onClick={handleClose}
-                      shadow=""
-                      padding={"p-2 px-4"}
-                    >
-                      {cancelText}
-                    </Button>
-                  )}
-                  {!okButtonProps?.hidden && (
-                    <Button
-                      {...okButtonProps}
-                      onClick={onOk}
-                      shadow=""
-                      color="blue"
-                      className="text-white px-6"
-                    >
-                      {okText}
-                    </Button>
-                  )}
-                </>
-              )}
+            <div className={`p-3 md:p-4 h-[500px] relative z-0`}>
+              {children}
+              <div className="sticky bottom-0 z-50 pb-4 bg-white"></div>
             </div>
+            {!removeFooter ? (
+              <div className=" "></div>
+            ) : (
+              <div
+                className={`sticky bottom-0 flex gap-2 justify-end bg-white p-6 border-t border-t-gray-100`}
+              >
+                {footer ? (
+                  footer
+                ) : (
+                  <>
+                    {!cancelProps?.hidden && (
+                      <Button
+                        {...cancelProps}
+                        onClick={handleClose}
+                        shadow=""
+                        padding={"p-2 px-4"}
+                      >
+                        {cancelText}
+                      </Button>
+                    )}
+                    {!okButtonProps?.hidden && (
+                      <Button
+                        {...okButtonProps}
+                        onClick={onOk}
+                        shadow=""
+                        color="blue"
+                        className="text-white px-6"
+                      >
+                        {okText}
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -10,7 +10,7 @@ import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super-host";
 import WallcomeModal from "../modal/wallcome";
-import SoundfontManager from "../tools/sound-font-manager";
+import SoundfontManager from "../modal/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
 import AppendSongModal from "../modal/append-song";
@@ -21,6 +21,7 @@ import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper";
 import LyricsModal from "../modal/lyrics";
 import { useNotification } from "@/hooks/notification-hook";
+import MusicStoreModal from "../modal/music-store";
 
 interface KaraokePageProps {}
 
@@ -28,15 +29,15 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { perset, setupSpessasynth, synth, player, instrument, analysers } =
     useSynth();
   const {
-    setTracklistFile,
     loadAndPlaySong,
-    setMusicLibraryFile,
     setSongPlaying,
     tracklist,
-    musicLibrary,
     lyrics,
     cursorIndices,
     cursorTicks,
+    setTracklistFile,
+setMusicLibraryFile,
+musicLibrary
   } = useAppControl();
 
   const { tempo, tick } = usePlayer();
@@ -55,7 +56,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     JOIN: <HostRemote></HostRemote>,
     SUPER_JOIN: <SuperHostRemote></SuperHostRemote>,
     MUSIC_LOADED: <SuperHostRemote></SuperHostRemote>,
-    MUSIC_STORE: <SuperHostRemote></SuperHostRemote>,
+    MUSIC_STORE: <MusicStoreModal></MusicStoreModal>,
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     LYRICS: <LyricsModal></LyricsModal>,
@@ -63,10 +64,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
   return (
     <>
-      {/* <div
-        style={{ backgroundImage: "url(" + wallpaper + ")" }}
-        className="fixed w-screen h-screen top-0 left-0 -z-20 bg-cover bg-center"
-      ></div> */}
       <ContextModal modal={modalMap}>
         <WallcomeModal
           setTracklistFile={setTracklistFile}

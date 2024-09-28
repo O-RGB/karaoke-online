@@ -144,9 +144,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
   return (
     <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 -z-10">
       <div
-        className={`${
-          hideVolume ? "h-[82dvh]" : "h-[300px] lg:h-[450px]"
-        } flex items-center   justify-center relative w-full   rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden`}
+        className={`${!hideVolume ? "h-[30dvh] lg:h-[400px]" : "h-[80dvh] lg:h-[400px]"} flex items-center   justify-center relative w-full   rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`}
       >
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
         {/* <div

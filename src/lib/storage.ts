@@ -1,8 +1,10 @@
 import {
   STORAGE_NAME,
+  STORAGE_NAME_DIC,
   STORAGE_SOUNDFONT,
   STORAGE_SOUNDFONT_DIC,
   STORAGE_WALLPAPER,
+  TRACKLIST_FILENAME,
 } from "@/config/value";
 import { getDB } from "@/utils/database/db";
 import { directoryOpen } from "browser-fs-access";
@@ -51,6 +53,107 @@ async function getAll<T = any[]>(
   } catch (error) {
     console.error(error);
     return [] as T;
+  }
+}
+
+export async function getAllKeys(storage_name: string) {
+  try {
+    const db = await getDB(storage_name);
+    const tx = db.transaction(storage_name, "readonly");
+    const store = tx.objectStore(storage_name);
+    const keys = await store.getAllKeys();
+
+    await tx.done;
+    return keys;
+  } catch (error) {
+    console.error("Error retrieving keys:", error);
+    return [];
+  }
+}
+
+async function deleteByKey(
+  key: string,
+  storage_name: string,
+  mode: "readwrite" = "readwrite"
+) {
+  try {
+    const db = await getDB(storage_name);
+    const tx = db.transaction(storage_name, mode);
+    const store = tx.objectStore(storage_name);
+    await store.delete(key);
+
+    await tx.done;
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function save(
+  key: string,
+  value: any,
+  storage_name: string,
+  mode: "readwrite" = "readwrite"
+) {
+  try {
+    const db = await getDB(storage_name);
+    const tx = db.transaction(storage_name, mode);
+    const store = tx.objectStore(storage_name);
+    await store.add(value, key);
+
+    await tx.done;
+    return true;
+  } catch (error) {
+    console.error("Error saving data:", error);
+    return false;
+  }
+}
+
+async function saveList(
+  list: { key: string; value: any }[],
+  storage_name: string,
+  onProgress?: (progress?: IProgressBar) => void,
+  mode: "readwrite" = "readwrite"
+) {
+  const db = await getDB(storage_name);
+  const tx = db.transaction(storage_name, mode);
+  const store = tx.objectStore(storage_name);
+  let error = undefined;
+  for (let i = 0; i < list.length; i++) {
+    try {
+      await store.add(list[i].value, list[i].key);
+    } catch (e) {
+      error = JSON.stringify(e);
+      if (error === "{}") {
+        error = undefined;
+      }
+    }
+    onProgress?.({
+      progress: Math.round(((i + 1) / list.length) * 100),
+      processing: list[i]?.key,
+      error: error,
+    });
+  }
+
+  await tx.done;
+  return true;
+}
+
+async function deleteAll(
+  storage_name: string,
+  mode: "readwrite" = "readwrite"
+) {
+  try {
+    const db = await getDB(storage_name);
+    const tx = db.transaction(storage_name, mode);
+    const store = tx.objectStore(storage_name);
+    await store.clear();
+
+    await tx.done;
+    return true;
+  } catch (error) {
+    console.error("Error deleting all data:", error);
+    return false;
   }
 }
 
@@ -121,47 +224,26 @@ export const getSongBySuperKey = async (
 
 export const saveSongToStorage = async (
   files: Map<string, File>,
-  tracklist?: File,
   onProgress?: (progress?: IProgressBar) => void
 ) => {
-  const countSuperZip = Array.from(files.values());
-  const db = await getDB(STORAGE_NAME);
-
-  const tx = db.transaction(STORAGE_NAME, "readwrite");
-  const objectStore = tx.objectStore(STORAGE_NAME);
-
-  countSuperZip.map(async (data, i) => {
-    console.log(data.name, i);
-    let error: string | undefined = undefined;
-    try {
-      await objectStore.add(data, data.name);
-    } catch (e) {
-      error = JSON.stringify(e);
-      console.log(error);
-    }
-    onProgress?.({
-      progress: Math.round(((i + 1) / countSuperZip.length) * 100),
-      processing: data?.name,
-      error: error,
-    });
-  });
-  if (tracklist) {
-    await objectStore.add(tracklist, tracklist.name);
-  }
-  await tx.done;
-  return true;
+  const countSuperZip = Array.from(files.entries()).map(([key, value]) => ({
+    key: value.name,
+    value,
+  }));
+  await saveList(countSuperZip, STORAGE_NAME, onProgress);
+  return { result: true };
 };
 
-export const saveSongFromZipToStorage = async (files: File[]) => {
-  const db = await getDB(STORAGE_NAME);
-  const tx = db.transaction(STORAGE_NAME, "readwrite");
+// export const saveSongFromZipToStorage = async (files: File[]) => {
+//   const db = await getDB(STORAGE_NAME);
+//   const tx = db.transaction(STORAGE_NAME, "readwrite");
 
-  files.forEach(async (file) => {
-    await tx.objectStore(STORAGE_NAME).add(file, file.name);
-  });
-  await tx.done;
-  return true;
-};
+//   files.forEach(async (file) => {
+//     await tx.objectStore(STORAGE_NAME).add(file, file.name);
+//   });
+//   await tx.done;
+//   return true;
+// };
 
 export const storageIsEmpty = async () => {
   const db = await getDB(STORAGE_NAME);
@@ -169,6 +251,14 @@ export const storageIsEmpty = async () => {
   const store = transaction.objectStore(STORAGE_NAME);
   const count = await store.count();
   return count <= 0;
+};
+
+export const saveTrackList = async (file: File) => {
+  return await save(TRACKLIST_FILENAME, file, STORAGE_NAME_DIC);
+};
+
+export const getTrackList = async () => {
+  return await getByKey<File>(TRACKLIST_FILENAME, STORAGE_NAME_DIC);
 };
 
 // Soundfont
@@ -228,11 +318,25 @@ export const saveWallpaperStorage = async (file: File) => {
     const tx = db.transaction(STORAGE_WALLPAPER, "readwrite");
     await tx.objectStore(STORAGE_WALLPAPER).add(file, file.name);
     await tx.done;
-    return true
+    return true;
   } catch (error) {
-    return false
+    return false;
   }
 };
 export const getWallpaperStorage = async (key: string) => {
   return await getByKey<File>(key, STORAGE_WALLPAPER);
+};
+export const getAllWallpaperStorage = async () => {
+  return await getAll<File[]>(STORAGE_WALLPAPER);
+};
+export const deleteWallpaperStorage = async (key: string) => {
+  return await deleteByKey(key, STORAGE_WALLPAPER);
+};
+
+export const getAllKeysSong = async () => {
+  return await getAllKeys(STORAGE_NAME);
+};
+
+export const deleteAllSong = async () => {
+  return await deleteAll(STORAGE_NAME);
 };

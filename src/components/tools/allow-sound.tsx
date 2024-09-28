@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import Button from "../common/button/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
@@ -49,8 +49,8 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
                   </span>
                 </div>
-                <Button  blur={false} color="white" onClick={handleClick}>
-                  <div className="px-2 ">Allow Sound</div>
+                <Button blur={false} color="white" onClick={handleClick}>
+                  <div className="px-2">Allow Sound</div>
                 </Button>
               </>
             )}

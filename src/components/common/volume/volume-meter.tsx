@@ -4,7 +4,7 @@ import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
 import { FaDrum } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { BiSolidVolumeFull, BiSolidVolumeMute } from "react-icons/bi";
-import Select from "../input-data/select";
+import SearchSelect from "../input-data/select/search-select";
 import ButtonDropdown from "../button/button-dropdown";
 
 interface VolumeMeterProps {

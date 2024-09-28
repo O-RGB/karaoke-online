@@ -6,6 +6,9 @@ interface DropdownProps {
   options: IOptions[];
   onClickItem: (value: IOptions) => void;
   resetOption?: () => void;
+  className?: string;
+  textColor?: string;
+  itemHoverColor?: string;
   children?: React.ReactNode;
 }
 
@@ -14,6 +17,9 @@ const Dropdown: React.FC<DropdownProps> = ({
   options,
   onClickItem,
   resetOption,
+  className,
+  itemHoverColor,
+  textColor,
   children,
 }) => {
   const Ref = dropdownRef ? dropdownRef : useRef<HTMLDivElement>(null);
@@ -35,6 +41,9 @@ const Dropdown: React.FC<DropdownProps> = ({
       <DropdownContainer
         options={options}
         onClickItem={onClickItem}
+        className={className}
+        itemHoverColor={itemHoverColor}
+        textColor={textColor}
       ></DropdownContainer>
     </>
   );

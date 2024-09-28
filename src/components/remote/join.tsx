@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRemote } from "@/hooks/peer-hook";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import Select from "../common/input-data/select";
+import SearchSelect from "../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
 import { SONG_TYPE } from "@/config/value";
 
@@ -65,7 +65,7 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
         placeholder="ค้นหาเพลง"
       /> */}
       <div className="pt-1">
-        <Select
+        <SearchSelect
           className={"!placeholder-white"}
           onSelectItem={(value: IOptions<SearchResult>) => {
             if (value.option) {
@@ -93,7 +93,7 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
             }
             return [];
           }}
-        ></Select>
+        ></SearchSelect>
       </div>
     </div>
   );

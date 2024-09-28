@@ -1,7 +1,7 @@
 import { onSearchList } from "@/lib/trie-search";
 import React, { useEffect, useState } from "react";
 import TrieSearch from "trie-search";
-import Select from "../common/input-data/select";
+import SearchSelect from "../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
 import { SONG_TYPE } from "@/config/value";
 import { useKeyUp } from "@/hooks/keyup-hook";
@@ -122,7 +122,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
       )}
       <div className="fixed z-50 left-0 top-4 lg:top-4 px-5 w-full block lg:hidden">
         <div className="w-full blur-overlay flex flex-col">
-          <Select
+          <SearchSelect
             className={"!placeholder-white"}
             onSelectItem={(value: IOptions<SearchResult>) => {
               if (value.option) {
@@ -130,7 +130,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
               }
             }}
             onSearch={onSearch}
-          ></Select>
+          ></SearchSelect>
         </div>
       </div>
     </div>

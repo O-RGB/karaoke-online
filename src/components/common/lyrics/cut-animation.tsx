@@ -4,11 +4,13 @@ import React, { useEffect } from "react";
 interface LyricsAnimationProps {
   display: string[][];
   charIndex: number;
+  fontSize?: string;
 }
 
 const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
   display,
   charIndex,
+  fontSize = "text-2xl md:text-3xl lg:text-6xl",
 }) => {
   const { Color, ColorBorder, ActiveColor, ActiveBorderColor, Font } =
     useLyrics();
@@ -25,10 +27,7 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
     return <div dangerouslySetInnerHTML={{ __html: group.join("") }}></div>;
   }
   return (
-    <div
-      style={{ ...Font?.style }}
-      className={`flex text-2xl md:text-3xl lg:text-6xl`}
-    >
+    <div style={{ ...Font?.style }} className={`flex ${fontSize}`}>
       {display.map((data, index) => {
         const lyrInx =
           display.slice(0, index).reduce((a, b) => a + b.length, 0) + 1;

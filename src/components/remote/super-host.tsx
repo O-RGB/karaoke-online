@@ -1,31 +1,59 @@
 import React, { useEffect, useState } from "react";
 import { useQRCode } from "next-qrcode";
 import { useRemote } from "@/hooks/peer-hook"; // Updated hook for super user
+import Input from "../common/input-data/input";
 
 interface SuperHostRemoteProps {}
 
 const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
   const { superUserPeer, superUserConnections } = useRemote();
 
+  const [hostUrl, setHostUrl] = useState<string>();
   const [hostId, setHostId] = useState<string>();
   const { Canvas } = useQRCode();
 
   useEffect(() => {
     setHostId(superUserPeer?.id);
+    if (typeof window !== "undefined") {
+      setHostUrl(window.location.origin);
+    }
   }, [superUserPeer]);
 
+  if (!hostUrl && !hostId) {
+    return;
+  }
+
   return (
-    <div className="">
-      <div className="text-center text-white">สแกนเพื่อควบคุม</div>
+    <div className="flex flex-col lg:flex-row justify-center items-center gap-6 h-full">
       <a
-        className="flex items-center justify-center"
-        href={`https://my-test-project-seven.vercel.app/remote/super/${hostId}`}
+        className="block lg:hidden"
+        href={`${hostUrl}/remote/super/${hostId}`}
         target="_blank"
-        rel="noopener noreferrer"
       >
         {hostId && (
           <Canvas
-            text={`https://my-test-project-seven.vercel.app/remote/super/${hostId}`}
+            text={`${hostUrl}/remote/super/${hostId}`}
+            options={{
+              errorCorrectionLevel: "M",
+              margin: 3,
+              scale: 4,
+              width: 150,
+              color: {
+                light: "#76dfff",
+              },
+            }}
+          />
+        )}
+      </a>
+
+      <a
+        className="hidden lg:block"
+        href={`${hostUrl}/remote/super/${hostId}`}
+        target="_blank"
+      >
+        {hostId && (
+          <Canvas
+            text={`${hostUrl}/remote/super/${hostId}`}
             options={{
               errorCorrectionLevel: "M",
               margin: 3,
@@ -36,20 +64,29 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
               },
             }}
           />
-        )}{" "}
+        )}
       </a>
-      {/* <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Connections</h2>
-        <div className="bg-white p-4 rounded shadow">
-          <ul>
-            {superUserConnections.map((conn, index) => (
-              <li key={index} className="mb-2 p-2 bg-gray-200 rounded">
-                {conn.connectionId}
-              </li>
-            ))}
-          </ul>
+      <div className="flex flex-col justify-between">
+        <div>
+          <span className="text-3xl">ควบคุมผ่านมือถือ</span>
         </div>
-      </div> */}
+        <div className="flex flex-col  gap-1 h-full divide-x">
+          {superUserConnections.map((data, index) => {
+            return (
+              <div key={`connecttion-key-${index}`} className="p-1">
+                {data.connectionId}
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex flex-col">
+          <span>Remote URL:</span>
+          <Input
+            defaultValue={`${hostUrl}/remote/super/${hostId}`}
+            className="!text-black"
+          ></Input>
+        </div>
+      </div>
     </div>
   );
 };

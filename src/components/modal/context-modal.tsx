@@ -1,13 +1,14 @@
 "use client";
 import React, { ReactNode, useState } from "react";
-import { MdOutlinePiano } from "react-icons/md";
+import { MdOutlinePiano, MdOutlineTextFields } from "react-icons/md";
 import ContextMenuCommon from "../common/context-menu/context-menu";
 import Modal from "../common/modal";
-import { TbDeviceMobileShare } from "react-icons/tb";
+import { TbDeviceMobileShare, TbMusicPlus } from "react-icons/tb";
 import { VscSettings } from "react-icons/vsc";
 import { BsDatabase } from "react-icons/bs";
 import { BiFolder } from "react-icons/bi";
 import { FaImage } from "react-icons/fa";
+import { ImDatabase } from "react-icons/im";
 
 interface ContextModalProps {
   children?: ReactNode;
@@ -54,7 +55,7 @@ const ContextModal: React.FC<ContextModalProps> = ({
       type: "SUPER_JOIN",
     },
     {
-      icon: <VscSettings />,
+      icon: <TbMusicPlus />,
       text: "เพิ่มเพลง",
       onClick: handleSelectContext,
       type: "ADD_MUSIC",
@@ -66,10 +67,16 @@ const ContextModal: React.FC<ContextModalProps> = ({
       type: "WALLPAPER",
     },
     {
-      icon: <FaImage />,
+      icon: <MdOutlineTextFields />,
       text: "เนื้อเพลง",
       onClick: handleSelectContext,
       type: "LYRICS",
+    },
+    {
+      icon: <ImDatabase />,
+      text: "ฐานข้อมูลเพลง",
+      onClick: handleSelectContext,
+      type: "MUSIC_STORE",
     },
   ];
 
@@ -78,6 +85,7 @@ const ContextModal: React.FC<ContextModalProps> = ({
       <Modal
         title={title}
         isOpen={open}
+        removeFooter={false}
         cancelText="ปิด"
         okButtonProps={{
           hidden: true,
