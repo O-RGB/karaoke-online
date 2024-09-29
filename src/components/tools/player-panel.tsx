@@ -70,9 +70,9 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             ></RangeBar>
           </div>
           <div className="hidden lg:block lg:w-full h-full p-1.5">
-            <div className="rounded-md bg-black/15 h-full flex items-center py-1 text-white">
+            <div className="rounded-md bg-black/15 h-full flex items-center py-1 text-white overflow-">
               {lyrics.length > 3 && (
-                <Marquee className="flex gap-2 opacity-40" speed={10}>
+                <Marquee className="flex gap-2 opacity-40 text-sm overflow-hidden" speed={10}>
                   {lyrics[0]}&nbsp;
                   {lyrics[1]}&nbsp;
                   {lyrics[2]}&nbsp;

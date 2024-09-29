@@ -12,7 +12,7 @@ import Button from "../common/button/button";
 import { FaComputer, FaRegFileZipper } from "react-icons/fa6";
 import Upload from "../common/input-data/upload";
 import ProgressBar from "../common/progress-bar";
-import SongStorageProcessor from "./song-storage";
+import SongStorageProcessor from "./song-storage-modal";
 import { TRACKLIST_FILENAME } from "@/config/value";
 import { IoDocumentText } from "react-icons/io5";
 interface WallcomeModalProps {

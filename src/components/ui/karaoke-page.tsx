@@ -9,26 +9,30 @@ import { useAppControl } from "@/hooks/app-control-hook";
 import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super-host";
-import WallcomeModal from "../modal/wallcome";
+import WallcomeModal from "../modal/wallcome-modal";
 import SoundfontManager from "../modal/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
-import AppendSongModal from "../modal/append-song";
+import AppendSongModal from "../modal/append-song-modal";
 import { usePlayer } from "@/hooks/player-hook";
 import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status-panel";
 import OptionsPanel from "../tools/options-panel";
-import WallpaperModal from "../modal/wallpaper";
-import LyricsModal from "../modal/lyrics";
+import WallpaperModal from "../modal/wallpaper-modal";
+import LyricsModal from "../modal/lyrics-modal";
 import { useNotification } from "@/hooks/notification-hook";
-import MusicStoreModal from "../modal/music-store";
+import MusicStoreModal from "../modal/music-store-modal";
 import MidiSettingModal from "../modal/midi-setting-modal";
+import SongListModal from "../modal/song-list.modal";
+import { useDragDrop } from "@/hooks/drag-drop-hook";
+import { onSelectTestMusic } from "@/lib/karaoke/read";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
-  const { perset, setupSpessasynth, synth, player, instrument, analysers } =
+  const { perset, synth, player, instrument, analysers, setupSpessasynth } =
     useSynth();
+  const { filesDragging } = useDragDrop();
   const {
     loadAndPlaySong,
     setSongPlaying,
@@ -44,9 +48,22 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { tempo, tick } = usePlayer();
   const { notification } = useNotification();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     setupSpessasynth();
   }, []);
+
+  const decodeFile = async (files: FileList) => {
+    const song = await onSelectTestMusic(undefined, files);
+    if (song) {
+      setSongPlaying(song);
+    }
+  };
+
+  useEffect(() => {
+    if (filesDragging) {
+      decodeFile(filesDragging);
+    }
+  }, [filesDragging]);
 
   if (!synth || !player) {
     return <></>;
@@ -56,12 +73,12 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     SOUNDFONT_MODEL: <SoundfontManager></SoundfontManager>,
     JOIN: <HostRemote></HostRemote>,
     SUPER_JOIN: <SuperHostRemote></SuperHostRemote>,
-    MUSIC_LOADED: <SuperHostRemote></SuperHostRemote>,
     MUSIC_STORE: <MusicStoreModal></MusicStoreModal>,
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     LYRICS: <LyricsModal></LyricsModal>,
     MIDI_SETTING: <MidiSettingModal></MidiSettingModal>,
+    SONG_LIST: <SongListModal></SongListModal>,
   };
 
   return (

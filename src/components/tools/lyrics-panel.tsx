@@ -57,35 +57,6 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
     charIndex.current = 0;
   };
 
-  const onSelectTestMusic = async (_: File, FileList: FileList) => {
-    if (FileList.length === 1) {
-      const file = FileList.item(0);
-      if (!file?.name.endsWith(EMK_FILE_TYPE)) {
-        return;
-      }
-      const decode = await parseEMKFile(file);
-      if (decode.cur && decode.lyr && decode.mid) {
-        var song: SongFilesDecode = {
-          mid: decode.mid,
-          cur: (await readCursorFile(decode.cur)) ?? [],
-          lyr: await readLyricsFile(decode.lyr),
-        };
-        setSongPlaying(song);
-      }
-    } else if (FileList.length === 3) {
-      const valid = validateSongFileTypes(FileList);
-      if (!valid) {
-        return;
-      }
-      var song: SongFilesDecode = {
-        mid: valid.mid,
-        cur: (await readCursorFile(valid.cur)) ?? [],
-        lyr: await readLyricsFile(valid.lyr),
-      };
-      setSongPlaying(song);
-    }
-  };
-
   const renderLyricsDisplay = () => {
     const targetTick = cursorTicks[curIdIndex.current];
     let tickUpdated = lyricsDisplay === "random" ? tick + 200 : tick;
@@ -144,7 +115,9 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
   return (
     <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 -z-10">
       <div
-        className={`${!hideVolume ? "h-[30dvh] lg:h-[400px]" : "h-[80dvh] lg:h-[400px]"} flex items-center   justify-center relative w-full   rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`}
+        className={`${
+          !hideVolume ? "h-[30dvh] lg:h-[400px]" : "h-[80dvh] lg:h-[400px]"
+        } flex items-center   justify-center relative w-full   rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`}
       >
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
         {/* <div

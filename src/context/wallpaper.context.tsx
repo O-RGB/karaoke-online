@@ -47,6 +47,22 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
   const [wallpaperName, setWallpaperName] = useState<string>("");
   const [isVideo, setIsVideo] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const renderLogo = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        // ตั้งค่าสีฟอนต์
+        ctx.fillStyle = "blue";
+        // ตั้งค่าฟอนต์และขนาด
+        ctx.font = "30px Arial";
+        // วาดตัวอักษรลงบน Canvas
+        ctx.fillText("Hello Canvas in Next.js!", 50, 100);
+      }
+    }
+  };
 
   const addWallpaper = async (file: File) => {
     const res = await saveWallpaperStorage(file);
@@ -96,6 +112,7 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
+    renderLogo();
     loadWallpaper();
   }, []);
 
@@ -120,6 +137,18 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
         deleteWallaper,
       }}
     >
+      <div
+        style={{
+          position: "fixed",
+          bottom: 60,
+          right: 20,
+          zIndex: -10,
+          opacity: 0.7,
+        }}
+        className="w-fit h-fit text-white font-bold text-3xl drop-shadow-md"
+      >
+        NEXT KARAOKE
+      </div>
       {isVideo ? (
         <>
           <video

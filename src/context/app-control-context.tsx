@@ -198,9 +198,9 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     const trie = await addSongList<SearchResult>(file);
     setTracklist(trie);
   };
-
   const setSongPlaying = async (files: SongFilesDecode) => {
     if (!player) {
+      console.log("page");
       return;
     }
     resetVolume();

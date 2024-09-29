@@ -271,7 +271,6 @@ export const createSoundFontDic = async (filename: string, size: number) => {
 
 export const saveSoundFontStorage = async (file: File) => {
   try {
-    await createSoundFontDic(file.name, file.size);
     const db = await getDB(STORAGE_SOUNDFONT);
     const tx = db.transaction(STORAGE_SOUNDFONT, "readwrite");
     await tx.objectStore(STORAGE_SOUNDFONT).add(file, file.name);
@@ -310,6 +309,10 @@ export const getAllSoundFontDicStorage = async () => {
   return await getAll<{ filename: string; size: number }[]>(
     STORAGE_SOUNDFONT_DIC
   );
+};
+
+export const getAllKeySoundfont = async () => {
+  return await getAllKeys(STORAGE_SOUNDFONT);
 };
 
 export const saveWallpaperStorage = async (file: File) => {

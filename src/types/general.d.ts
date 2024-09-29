@@ -18,12 +18,12 @@ type ModalType =
   | "SOUNDFONT_MODEL"
   | "JOIN"
   | "SUPER_JOIN"
-  | "MUSIC_LOADED"
   | "MUSIC_STORE"
   | "ADD_MUSIC"
   | "WALLPAPER"
   | "LYRICS"
   | "MIDI_SETTING"
+  | "SONG_LIST"
 
 type ModalComponents = {
   [key in ModalType]?: React.ReactNode;

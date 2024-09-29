@@ -1,4 +1,5 @@
 import { AppControlProvider } from "@/context/app-control-context";
+import { DragDropProvider } from "@/context/drag-drop-context";
 import { KeyUpProvider } from "@/context/keyup-context";
 import { LyricsDisplayProvider } from "@/context/lyrics-context";
 import { NotificationProvider } from "@/context/notification-context";
@@ -12,17 +13,19 @@ interface ToolsProviderProps {
 
 const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   return (
-    <WallpaperProvider>
-      <AppControlProvider>
+    <AppControlProvider>
+      <WallpaperProvider>
         <NotificationProvider>
           <PlayerProvider>
             <KeyUpProvider>
-              <LyricsDisplayProvider>{children}</LyricsDisplayProvider>
+              <DragDropProvider>
+                <LyricsDisplayProvider>{children}</LyricsDisplayProvider>
+              </DragDropProvider>
             </KeyUpProvider>
           </PlayerProvider>
         </NotificationProvider>
-      </AppControlProvider>
-    </WallpaperProvider>
+      </WallpaperProvider>
+    </AppControlProvider>
   );
 };
 

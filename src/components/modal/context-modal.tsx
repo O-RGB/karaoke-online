@@ -10,6 +10,7 @@ import { BiFolder } from "react-icons/bi";
 import { FaImage } from "react-icons/fa";
 import { ImDatabase } from "react-icons/im";
 import { SiMidi } from "react-icons/si";
+import { LuListMusic } from "react-icons/lu";
 
 interface ContextModalProps {
   children?: ReactNode;
@@ -55,6 +56,13 @@ const ContextModal: React.FC<ContextModalProps> = ({
       onClick: handleSelectContext,
       type: "SUPER_JOIN",
     },
+
+    {
+      icon: <MdOutlineTextFields />,
+      text: "เนื้อเพลง",
+      onClick: handleSelectContext,
+      type: "LYRICS",
+    },
     {
       icon: <TbMusicPlus />,
       text: "เพิ่มเพลง",
@@ -62,16 +70,16 @@ const ContextModal: React.FC<ContextModalProps> = ({
       type: "ADD_MUSIC",
     },
     {
-      icon: <FaImage />,
-      text: "ภาพพื้นหลัง",
+      icon: <LuListMusic />,
+      text: "รายชื่อเพลง",
       onClick: handleSelectContext,
-      type: "WALLPAPER",
+      type: "SONG_LIST",
     },
     {
-      icon: <MdOutlineTextFields />,
-      text: "เนื้อเพลง",
+      icon: <SiMidi />,
+      text: "Midi Output",
       onClick: handleSelectContext,
-      type: "LYRICS",
+      type: "MIDI_SETTING",
     },
     {
       icon: <ImDatabase />,
@@ -80,10 +88,10 @@ const ContextModal: React.FC<ContextModalProps> = ({
       type: "MUSIC_STORE",
     },
     {
-      icon: <SiMidi />,
-      text: "ตั้งค่ามิดี้",
+      icon: <FaImage />,
+      text: "ภาพพื้นหลัง",
       onClick: handleSelectContext,
-      type: "MIDI_SETTING",
+      type: "WALLPAPER",
     },
   ];
 

@@ -34,7 +34,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
       const audioLoop = audioLoopRef.current;
 
       setPressed(true);
-      audio.volume = 0.2;
+      audio.volume = 0.5;
       audioLoop.volume = 0.2;
       audio.play();
       audioLoop.play();
@@ -77,14 +77,14 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
         </div>
       )}
       <audio
-        src="/windows-7.mp3"
+        src="/sound/startup.ogg"
         controls={false}
         autoPlay={false}
         ref={audioRef}
       />
       <audio
         loop
-        src="/e.mp3"
+        src="/sound/allow-sound.ogg"
         controls={false}
         autoPlay={false}
         ref={audioLoopRef}

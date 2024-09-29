@@ -6,7 +6,7 @@ import { useSynth } from "@/hooks/spessasynth-hook";
 interface MidiSettingModalProps {}
 
 const MidiSettingModal: React.FC<MidiSettingModalProps> = () => {
-  const defaultOutput = { label: "my-next-karaoke", value: "my-next-karaoke" };
+  const defaultOutput = { label: "Next Karaoke", value: "Next Karaoke" };
   const { synth, player } = useSynth();
   const [midiAccess, setMidiAccess] = useState<MIDIAccess | null>(null);
   const [inputs, setInputs] = useState<MIDIInput[]>([]);

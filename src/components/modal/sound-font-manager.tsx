@@ -5,7 +5,9 @@ import UpdateFile from "../common/input-data/upload";
 import { TbMusicPlus } from "react-icons/tb";
 import { useSynth } from "@/hooks/spessasynth-hook";
 import {
+  createSoundFontDic,
   deleteSoundFontStorage,
+  getAllKeySoundfont,
   getAllSoundFontDicStorage,
   getSoundFontStorage,
   saveSoundFontStorage,
@@ -25,16 +27,12 @@ interface SoundfontManagerProps {}
 const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
   const { synth, player, defaultSoundFont, SFname, setSoundFontName } =
     useSynth();
-  const [soundFontStorage, setSoundFontStorage] = useState<
-    {
-      filename: string;
-      size: number;
-    }[]
-  >([]);
+  const [soundFontStorage, setSoundFontStorage] = useState<IDBValidKey[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const getSF2LocalList = async () => {
-    let sf = await getAllSoundFontDicStorage();
+    let sf = await getAllKeySoundfont();
+    console.log("getSD", sf);
 
     if (sf.length === 0) {
       let file: File | undefined = defaultSoundFont;
@@ -81,8 +79,10 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
               className="border p-3 rounded-md hover:bg-gray-50 duration-300"
               onSelectFile={async (file) => {
                 if (synth) {
+                  setLoading(true);
                   await saveSoundFontStorage(file);
                   await getSF2LocalList();
+                  setLoading(false);
                 }
               }}
             >
@@ -132,18 +132,20 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
                       <FaRegFileAudio className="text-xl"></FaRegFileAudio>
                     </div>
                     <div className="text-sm break-all w-full line-clamp-1">
-                      {sf.filename}
+                      {sf.toString()}
                     </div>
                   </div>
                   <div className="flex gap-2 items-center justify-center text-nowrap">
-                    <Label> {Math.round(sf.size / 1000000)} Mb.</Label>
+                    {/* <Label> {Math.round(sf.size / 1000000)} Mb.</Label> */}
 
                     <Button
                       padding=""
                       className="w-7 h-7"
                       onClick={async () => {
-                        if (SFname !== sf.filename) {
-                          const loadSf = await getSoundFontStorage(sf.filename);
+                        if (SFname !== sf.toString()) {
+                          const loadSf = await getSoundFontStorage(
+                            sf.toString()
+                          );
                           if (loadSf) {
                             updateSoundFont(loadSf);
                           }
@@ -154,7 +156,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
                       icon={
                         loading ? (
                           <AiOutlineLoading3Quarters className="animate-spin"></AiOutlineLoading3Quarters>
-                        ) : SFname === sf.filename ? (
+                        ) : SFname === sf.toString() ? (
                           <FaCircleCheck className="text-green-500"></FaCircleCheck>
                         ) : (
                           <IoMdAddCircle></IoMdAddCircle>
@@ -162,7 +164,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
                       }
                     ></Button>
                     <Button
-                      onClick={() => removeSF2Local(sf.filename)}
+                      onClick={() => removeSF2Local(sf.toString())}
                       padding=""
                       className="w-7 h-7"
                       color="red"
@@ -176,7 +178,6 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
               );
             })}
           </div>
-          
         </div>
       </div>
     </div>
