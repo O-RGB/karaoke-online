@@ -77,14 +77,14 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
         </div>
       )}
       <audio
-        src="/sound/startup.ogg"
+        src="/sound/startup.mp3"
         controls={false}
         autoPlay={false}
         ref={audioRef}
       />
       <audio
         loop
-        src="/sound/allow-sound.ogg"
+        src="/sound/allow-sound.mp3"
         controls={false}
         autoPlay={false}
         ref={audioLoopRef}
