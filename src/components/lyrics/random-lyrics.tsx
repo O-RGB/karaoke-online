@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   animateBounceIn,
   animateCharactersIn,
@@ -13,17 +19,6 @@ import {
   animateCharactersOut,
   panLeft,
 } from "@/lib/animations/text-animations";
-
-const transitionTypes = [
-  "circle",
-  "topToBottom",
-  "leftToRight",
-  "diagonalTransition",
-  "fadeInZoomTransition",
-  "fadeOutRotateTransition",
-  "waveTransition",
-  "spiralTransition",
-];
 
 const effects = [
   animateScaleIn,
@@ -44,106 +39,81 @@ interface RandomLyricsProps {
   displayBottom: string[][];
 }
 
-const RandomLyrics: React.FC<RandomLyricsProps> = ({
-  position,
-  display,
-  displayBottom,
-}) => {
-  const textTopRef = useRef<HTMLDivElement | null>(null);
-  const textBotRef = useRef<HTMLDivElement | null>(null);
+const RandomLyrics: React.FC<RandomLyricsProps> = React.memo(
+  ({ position, display, displayBottom }) => {
+    const textTopRef = useRef<HTMLDivElement | null>(null);
+    const textBotRef = useRef<HTMLDivElement | null>(null);
 
-  const [transition, setTransition] = useState<any>();
-  const [color, setColor] = useState<any>();
+    const [displayTop, setDisplayTop] = useState<string[][]>();
+    const [displayBot, setDisplayBot] = useState<string[][]>();
 
-  const [displayTop, setDisplayTop] = useState<string[][]>();
-  const [displayBot, setDisplayBot] = useState<string[][]>();
+    const initPosition = useCallback((ref: React.RefObject<HTMLDivElement>) => {
+      if (ref.current) {
+        const EffectIn = effects[Math.floor(Math.random() * effects.length)];
+        const Camera = camera[Math.floor(Math.random() * camera.length)];
+        requestAnimationFrame(() => {
+          EffectIn(ref);
+          Camera(ref);
+        });
+      }
+    }, []);
 
-  // ฟังก์ชันเพื่อสุ่มสีพาสเทลที่เข้มขึ้น
-  const getRandomPastelColor = () => {
-    const random = () => Math.floor(Math.random() * 128 + 64); // ค่าสี RGB 64-192 เพื่อให้เป็นสีพาสเทลเข้ม
-    const r = random();
-    const g = random();
-    const b = random();
-    return `rgb(${r}, ${g}, ${b})`;
-  };
+    useEffect(() => {
+      let animationFrameId: number;
+      if (position) {
+        const EffectOut =
+          effectsOut[Math.floor(Math.random() * effectsOut.length)];
+        EffectOut(textBotRef);
+        setDisplayTop(display);
+        animationFrameId = requestAnimationFrame(() => {
+          initPosition(textTopRef);
+        });
+      } else {
+        const EffectOut =
+          effectsOut[Math.floor(Math.random() * effectsOut.length)];
+        EffectOut(textTopRef);
+        setDisplayBot(displayBottom);
+        animationFrameId = requestAnimationFrame(() => {
+          initPosition(textBotRef);
+        });
+      }
+      return () => cancelAnimationFrame(animationFrameId);
+    }, [position, display, displayBottom, initPosition]);
 
-  // ฟังก์ชันเพื่อสุ่ม transitionType
-  const getRandomTransitionType = () => {
-    const index = Math.floor(Math.random() * transitionTypes.length);
-    return transitionTypes[index];
-  };
+    const renderLyrics = useMemo(
+      () => (lyrics: string[][] | undefined, prefix: string) => {
+        return lyrics?.map((line, i) => {
+          const text = line.join("");
+          const lyr = text === " " ? "&nbsp;" : text;
+          return (
+            <span
+              className="opacity-0 drop-shadow-lg outline-8"
+              key={`${prefix}-lyr-${i}`}
+              dangerouslySetInnerHTML={{ __html: lyr }}
+            />
+          );
+        });
+      },
+      []
+    );
 
-  const initPosition = (ref: any) => {
-    const InIndex = Math.floor(Math.random() * effects.length);
-    const EffectIn = effects[InIndex];
-    const CameraIndex = Math.floor(Math.random() * camera.length);
-    const Camera = camera[CameraIndex];
-    EffectIn(ref);
-    Camera(ref);
-  };
-
-  useEffect(() => {
-    if (position === true) {
-      const OutIndex = Math.floor(Math.random() * effectsOut.length);
-      const EffectOut = effectsOut[OutIndex];
-      EffectOut(textBotRef);
-      setDisplayTop(display);
-      setTimeout(() => {
-        initPosition(textTopRef);
-      }, 300);
-    }
-  }, [position]);
-
-  useEffect(() => {
-    if (position === false) {
-      const OutIndex = Math.floor(Math.random() * effectsOut.length);
-      const EffectOut = effectsOut[OutIndex];
-      EffectOut(textTopRef);
-
-      setDisplayBot(displayBottom);
-      setTimeout(() => {
-        initPosition(textBotRef);
-      }, 300);
-    }
-  }, [position]);
-  return (
-    <>
+    return (
       <div className="relative w-full h-full flex flex-col gap-6 lg:gap-14 items-center justify-center">
         <div
-          className="text-2xl sm:text-4xl lg:text-6xl   text-white "
+          className="text-2xl sm:text-4xl lg:text-6xl text-white"
           ref={textTopRef}
         >
-          {displayTop?.map((_, i) => {
-            let text = _.join("");
-            let lyr = text === " " ? "&nbsp;" : text;
-            return (
-              <span
-                className="opacity-0 drop-shadow-lg outline-8"
-                key={`top-lyr-${i}`}
-                dangerouslySetInnerHTML={{ __html: lyr }}
-              ></span>
-            );
-          })}
+          {renderLyrics(displayTop, "top")}
         </div>
         <div
-          className="text-2xl sm:text-4xl lg:text-6xl  text-white "
+          className="text-2xl sm:text-4xl lg:text-6xl text-white"
           ref={textBotRef}
         >
-          {displayBot?.map((_, i) => {
-            let text = _.join("");
-            let lyr = text === " " ? "&nbsp;" : text;
-            return (
-              <span
-                className="opacity-0 drop-shadow-lg outline-1"
-                key={`top-lyr-${i}`}
-                dangerouslySetInnerHTML={{ __html: lyr }}
-              ></span>
-            );
-          })}
+          {renderLyrics(displayBot, "bot")}
         </div>
       </div>
-    </>
-  );
-};
+    );
+  }
+);
 
 export default RandomLyrics;

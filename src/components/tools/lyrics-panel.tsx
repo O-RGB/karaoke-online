@@ -20,8 +20,6 @@ import { useAppControl } from "@/hooks/app-control-hook";
 // import EMKFileConverter from "./test";
 
 interface LyricsPanelProps {
-  player: Sequencer;
-  setSongPlaying: (files: SongFilesDecode) => Promise<void>;
   lyrics: string[];
   tick: number;
   cursorTicks: number[];
@@ -29,8 +27,6 @@ interface LyricsPanelProps {
 }
 
 const LyricsPanel: React.FC<LyricsPanelProps> = ({
-  player,
-  setSongPlaying,
   lyrics,
   tick,
   cursorTicks,
@@ -113,55 +109,16 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
   useEffect(() => {}, [lyricsDisplay]);
 
   return (
-    <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 -z-10">
+    <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 -z-40">
       <div
         className={`${
-          !hideVolume ? "h-[30dvh] lg:h-[400px]" : "h-[80dvh] lg:h-[400px]"
+          !hideVolume ? "h-[30dvh] lg:h-[400px]" : "h-[75dvh] lg:h-[400px]"
         } flex items-center   justify-center relative w-full   rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`}
       >
-        <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
-        {/* <div
-          className={`${
-            player.paused ? "z-30 opacity-100" : "z-10 opacity-0"
-          } absolute bottom-0 left-0 h-full lg:h-[60%] flex gap-2 items-center justify-center w-full duration-300 `}
-        >
-          <Upload
-            onSelectFile={onSelectTestMusic}
-            inputProps={{
-              multiple: true,
-            }}
-            className="relative  w-full h-full"
-          >
-            <Button
-              blur
-              border="border !border-white/20"
-              shadow=""
-              className={"text-white w-full h-full"}
-              icon={
-                <BsFileEarmarkMusic className="text-3xl text-white"></BsFileEarmarkMusic>
-              }
-            >
-              <span>เล่นเพลง</span>
-              <span className="text-sm">
-                โหลดเพลงจากไฟล์ .emk, (.mid, .lyr, .cur) <br />
-              </span>
-            </Button>
-          </Upload>
-          <Button
-            border="border !border-white/20"
-            shadow=""
-            className={"text-white w-full h-full"}
-            icon={
-              <BsFileEarmarkMusic className="text-3xl text-white"></BsFileEarmarkMusic>
-            }
-          >
-            <span>ติดตั้งเพลง</span>
-            <span className="text-sm">
-              โหลดเพลงจาก .zip <br />
-              หรือโฟลเดอร์ Karaoke <br />
-            </span>
-          </Button>
+        {/* <div className="absolute w-full h-full">
+          <div className="bg-white/10 blur-overlay w-full h-full rounded-lg border border-overlay"></div>
         </div> */}
+        <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
 
         <SelectLyrics
           display={display.current}

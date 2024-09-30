@@ -23,7 +23,7 @@ type ModalType =
   | "WALLPAPER"
   | "LYRICS"
   | "MIDI_SETTING"
-  | "SONG_LIST"
+  | "SONG_LIST";
 
 type ModalComponents = {
   [key in ModalType]?: React.ReactNode;
@@ -74,19 +74,25 @@ interface IProgressBar {
 interface MapContextMenu {
   render: React.ReactNode;
   modalProps?: ModalProps;
-  contextProps?: ContextMenuItem;
+  contextProps?: IContextMenuItem;
 }
 
-interface ContextMenuItem<T = any> {
+interface IContextMenuGroup<T = any> {
+  contextMenus: IContextMenuItem<T>[];
+  name?: string;
+  icon?: React.ReactNode;
+}
+interface IContextMenuItem<T = any> {
   onClick?: (type: T, title: ReactNode) => void;
   type: T;
   text: string;
   icon?: React.ReactNode;
+  submanu?: IContextMenuItem[];
 }
 
 interface ContextMenuProps<T = any> {
   children?: React.ReactNode;
-  items?: ContextMenuItem<T>[];
+  items?: IContextMenuItem<T>[];
 }
 
 interface INotification {

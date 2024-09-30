@@ -1,44 +1,102 @@
-import React, { ReactNode } from "react";
-import { useContextMenu } from "use-context-menu";
-import "use-context-menu/styles.css";
-import "./menu-style-test.css"; // Ensure these styles work well with Tailwind
-import ContextMenuForm from "@/components/form/context-form";
-// import "./menu-style.css";
+import React from "react";
+import "./menu-style.css";
+import { MenuItem, MenuDivider, MenuHeader } from "@szhsin/react-menu";
 
 interface ContextMenuProps {
-  children: ReactNode;
-  items: ContextMenuItem[];
-  className?: string;
-  leftClick?: boolean;
+  items: IContextMenuGroup<ModalType>[];
 }
 
-const ContextMenuCommon: React.FC<ContextMenuProps> = ({
-  children,
-  items,
-  className,
-  leftClick = false,
-}) => {
-  const { contextMenu, onContextMenu } = useContextMenu(
-    <ContextMenuForm items={items}></ContextMenuForm>
-  );
+const ContextMenuCommon: React.FC<ContextMenuProps> = ({ items }) => {
+  function MenuRender({
+    icon,
+    title,
+    size = "15px",
+    gap = "gap-2",
+  }: {
+    icon: React.ReactNode;
+    title: React.ReactNode;
+    size?: string;
+    gap?: string;
+  }) {
+    return (
+      <span className={`flex items-center ${gap}`}>
+        <span
+          style={{
+            fontSize: size,
+          }}
+        >
+          {icon}
+        </span>
+        <span className="pb-1">{title}</span>
+      </span>
+    );
+  }
 
-  const handleContextMenu = (event: React.MouseEvent) => {
-    onContextMenu(event);
-  };
-
-  return (
-    <>
-      <div
-        className={[className, "select-none"].join(" ")}
-        data-test-name="click-target"
-        onContextMenu={handleContextMenu}
-        onClick={leftClick ? handleContextMenu : undefined}
-      >
-        {children}
-      </div>
-      {contextMenu}
-    </>
-  );
+  return items.map((data, i) => {
+    return (
+      <React.Fragment key={`menu-item-${i}`}>
+        {data.contextMenus.length > 1 ? (
+          <>
+            <MenuDivider />
+            {data.name && (
+              <MenuHeader
+                style={{
+                  fontSize: 10,
+                }}
+              >
+                {data.name}
+              </MenuHeader>
+            )}
+            {data.contextMenus.map((group, j) => (
+              <React.Fragment key={`menu-item-${i}-${j}`}>
+                <MenuItem
+                  onClick={() =>
+                    group.onClick?.(
+                      group.type,
+                      <MenuRender
+                        icon={group.icon}
+                        title={group.text}
+                        size="25px"
+                        gap="gap-3"
+                      ></MenuRender>
+                    )
+                  }
+                  style={{
+                    fontSize: 14,
+                    gap: 10,
+                  }}
+                >
+                  <i>{group.icon}</i>
+                  <span>{group.text}</span>
+                </MenuItem>
+              </React.Fragment>
+            ))}
+          </>
+        ) : (
+          <MenuItem
+            onClick={() =>
+              data.contextMenus[0].onClick?.(
+                data.contextMenus[0].type,
+                <MenuRender
+                  icon={data.contextMenus[0].icon}
+                  title={data.contextMenus[0].text}
+                  size="25px"
+                  gap="gap-3"
+                ></MenuRender>
+              )
+            }
+            style={{
+              fontSize: 14,
+              gap: 10,
+            }}
+          >
+            <i>{data.contextMenus[0].icon}</i>
+            <span>{data.contextMenus[0].text}</span>
+          </MenuItem>
+        )}
+      </React.Fragment>
+    );
+  });
 };
 
 export default ContextMenuCommon;

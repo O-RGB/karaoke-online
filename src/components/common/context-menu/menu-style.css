@@ -1,35 +1,12 @@
-:root {
-  --context-menu-background-color: "#fffff";
-  --context-menu-border-color: #ffffff;
-  --context-menu-border-radius: 0.5rem;
-  --context-menu-border-size: 1px;
-  --context-menu-filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.5));
-  --context-menu-font-family: Arial, Helvetica, sans-serif;
-  --context-menu-padding: 0.25rem 0;
-  --context-menu-transition-duration: 300ms;
-  --context-menu-z-index: 25;
-  --context-menu-max-height: 0;
-  --context-menu-animation: slideDown var(--context-menu-transition-duration)
-    ease-in-out forwards;
-}
-
-@keyframes slideDown {
-  from {
-    max-height: 0;
-    opacity: 0;
-  }
-  to {
-    max-height: 500px; /* กำหนดค่า max-height ที่คุณคาดว่าพอเพียง */
-    opacity: 1;
-  }
-}
-
-/* เมนู context */
-.useContextMenu_ContextMenu {
-  max-height: var(--context-menu-max-height);
+.context-menu {
   opacity: 0;
-  overflow: hidden;
-  animation: var(--context-menu-animation);
-  transition: max-height var(--context-menu-transition-duration),
-    opacity var(--context-menu-transition-duration);
+  transform: scale(0.95);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  display: none; /* ซ่อนเมนูก่อน */
+}
+
+.context-menu.active {
+  display: block;
+  opacity: 1;
+  transform: scale(1);
 }

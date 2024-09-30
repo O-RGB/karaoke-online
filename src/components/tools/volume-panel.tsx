@@ -12,10 +12,10 @@ import SwitchButton from "../common/input-data/switch/switch-button";
 import { useNotification } from "@/hooks/notification-hook";
 import Button from "../common/button/button";
 import { MdArrowDropUp } from "react-icons/md";
+import { useSynth } from "@/hooks/spessasynth-hook";
 
 interface VolumePanelProps {
   instrument: number[];
-  synth?: Synthetizer;
   onVolumeChange?: (channel: number, value: number) => void;
   analysers?: AnalyserNode[];
   audioGain?: number[];
@@ -25,7 +25,6 @@ interface VolumePanelProps {
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
   instrument,
-  synth,
   onVolumeChange,
   analysers,
   audioGain,
@@ -43,6 +42,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     volumeController,
     hideVolume,
   } = useAppControl();
+  const { synth, player } = useSynth();
+
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
 
   const gain = useRef<number[]>(Array(16).fill(0));
@@ -85,6 +86,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   };
   const render = useCallback(() => {
     if (analysers) {
+      console.log("vol run");
       const newVolumeLevels = analysers?.map((analyser) => {
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(dataArray);
@@ -108,11 +110,17 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   }, [analysers, hideVolume]); // เพิ่ม analysers และ hideVolume เป็น dependencies
 
   useEffect(() => {
-    if (analysers) {
+    if (analysers && !player?.paused) {
       const intervalId = setInterval(() => render(), 100);
       return () => clearInterval(intervalId); // ล้าง interval เมื่อ component ถูก unmount
     }
-  }, [analysers, render]); // เพิ่ม render เป็น dependencies
+  }, [analysers, render, player?.paused]); // เพิ่ม render เป็น dependencies
+
+  useEffect(() => {
+    if (!hideVolume) {
+      gainMain.current = 0;
+    }
+  }, [hideVolume]);
 
   useEffect(() => {
     if (audioGain) {
@@ -126,7 +134,9 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     >
       <div
         className={`relative grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-y-2 lg:gap-y-0 gap-0.5 blur-overlay border blur-border rounded-md p-2 duration-300 overflow-hidden ${
-          hideVolume ? "h-[30px] lg:h-[30px]" : "h-[292px] lg:h-[150px]"
+          hideVolume
+            ? "h-[30px] lg:h-[30px] pointer-events-none !cursor-none"
+            : "h-[292px] lg:h-[150px]"
         }`}
       >
         <div

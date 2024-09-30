@@ -72,7 +72,10 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <div className="hidden lg:block lg:w-full h-full p-1.5">
             <div className="rounded-md bg-black/15 h-full flex items-center py-1 text-white overflow-">
               {lyrics.length > 3 && (
-                <Marquee className="flex gap-2 opacity-40 text-sm overflow-hidden" speed={10}>
+                <Marquee
+                  className="flex gap-2 opacity-40 text-sm overflow-hidden"
+                  speed={10}
+                >
                   {lyrics[0]}&nbsp;
                   {lyrics[1]}&nbsp;
                   {lyrics[2]}&nbsp;
@@ -101,16 +104,20 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             shape={false}
             icon={<FaSearch className="text-white" />}
           ></Button>
-          <ContextModal leftClick modal={modalMap} className="">
-            <Button
-              blur={false}
-              border=""
-              shadow=""
-              padding="p-4"
-              shape={false}
-              icon={<FiSettings className="text-white" />}
-            ></Button>
-          </ContextModal>
+          <ContextModal
+            buttonMenu={
+              <Button
+                blur={false}
+                border=""
+                shadow=""
+                padding="p-4"
+                shape={false}
+                icon={<FiSettings className="text-white" />}
+              ></Button>
+            }
+            modal={modalMap}
+            className=""
+          ></ContextModal>
         </div>
       </div>
     </>

@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Upload from "../common/input-data/upload";
-import Button from "../common/button/button";
 import { useWallpaper } from "@/hooks/wallpaper.hook";
-import Image from "next/image";
 import { FaCheck, FaImage } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
@@ -83,6 +81,7 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
               </div>
               {data.type === "video/mp4" ? (
                 <video
+                  autoPlay
                   src={src}
                   className={`${imageBox} ${isSet ? "border-green-500" : ""}`}
                 />

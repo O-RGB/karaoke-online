@@ -145,6 +145,14 @@
     "@swc/counter" "^0.1.3"
     tslib "^2.4.0"
 
+"@szhsin/react-menu@^4.2.2":
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/@szhsin/react-menu/-/react-menu-4.2.2.tgz#a98d66161971e2802baa5123cc96fc9ef9b9b5b3"
+  integrity sha512-xI1LlPlOAmyjcnBxEwhathJs3YV0U+4hbEKMbR2CXK2O9X+r7g02l5EqB9Slsjj1poVMpgQvf81vOZuCw1HUjg==
+  dependencies:
+    prop-types "^15.7.2"
+    react-transition-state "^2.1.0"
+
 "@types/animejs@^3.1.12":
   version "3.1.12"
   resolved "https://registry.yarnpkg.com/@types/animejs/-/animejs-3.1.12.tgz#78fcc3df03ac07cbaef50fd37512e5031826dc42"
@@ -641,7 +649,7 @@ locate-path@^5.0.0:
   dependencies:
     p-locate "^4.1.0"
 
-loose-envify@^1.1.0:
+loose-envify@^1.1.0, loose-envify@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/loose-envify/-/loose-envify-1.4.0.tgz#71ee51fa7be4caec1a63839f7e682d8132d30caf"
   integrity sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==
@@ -727,7 +735,7 @@ normalize-path@^3.0.0, normalize-path@~3.0.0:
   resolved "https://registry.yarnpkg.com/normalize-path/-/normalize-path-3.0.0.tgz#0dcd69ff23a1c9b11fd0978316644a0388216a65"
   integrity sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==
 
-object-assign@^4.0.1:
+object-assign@^4.0.1, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
   integrity sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==
@@ -901,6 +909,15 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
+prop-types@^15.7.2:
+  version "15.8.1"
+  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
+  integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
+  dependencies:
+    loose-envify "^1.4.0"
+    object-assign "^4.1.1"
+    react-is "^16.13.1"
+
 qrcode@^1.5.3:
   version "1.5.4"
   resolved "https://registry.yarnpkg.com/qrcode/-/qrcode-1.5.4.tgz#5cb81d86eb57c675febb08cf007fff963405da88"
@@ -933,6 +950,11 @@ react-icons@^5.3.0:
   resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-5.3.0.tgz#ccad07a30aebd40a89f8cfa7d82e466019203f1c"
   integrity sha512-DnUk8aFbTyQPSkCfF8dbX6kQjXA9DktMeJqfjrg6cK9vwQVMxmcA3BfP4QoiztVmEHtwlTgLFsPuH2NskKT6eg==
 
+react-is@^16.13.1:
+  version "16.13.1"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
+  integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+
 react-qr-reader@^3.0.0-beta-1:
   version "3.0.0-beta-1"
   resolved "https://registry.yarnpkg.com/react-qr-reader/-/react-qr-reader-3.0.0-beta-1.tgz#e04a20876409313439959d8e0ea6df3ba6e36d68"
@@ -941,6 +963,11 @@ react-qr-reader@^3.0.0-beta-1:
     "@zxing/browser" "0.0.7"
     "@zxing/library" "^0.18.3"
     rollup "^2.67.2"
+
+react-transition-state@^2.1.0:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/react-transition-state/-/react-transition-state-2.1.2.tgz#e89c51573e6221acbcacc8df0ed996c3796d70fc"
+  integrity sha512-RkDYBkj1V1ZqBA5AwQPrMt2Uagwsx6b//GVJdRDhs/t0o66w2nhQiyHyFGQEI60mgtbaIdLm8yhBRCvhA+FxEg==
 
 react@^18:
   version "18.3.1"
@@ -1219,11 +1246,6 @@ undici-types@~6.19.2:
   version "6.19.8"
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.19.8.tgz#35111c9d1437ab83a7cdc0abae2f26d88eda0a02"
   integrity sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==
-
-use-context-menu@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/use-context-menu/-/use-context-menu-0.5.0.tgz#2e87d9753272e1c4c79ec656838a48a23c6a483f"
-  integrity sha512-elusnTAtObU++ftaMcthDibLa3e2HeJw5QOfLFgcXqfMbuoU0IPt0Mth+oBPENdbVW119X/GfgvQKALu6tACfw==
 
 util-deprecate@^1.0.2, util-deprecate@~1.0.1:
   version "1.0.2"

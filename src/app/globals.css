@@ -4,6 +4,7 @@
 
 html,
 body {
+  user-select: none;
   overscroll-behavior: none;
   -webkit-text-size-adjust: none;
   @apply min-h-dvh;
@@ -19,14 +20,12 @@ body {
 
 @layer base {
   .font-outline-2 {
-    -webkit-text-stroke: 2px ;
+    -webkit-text-stroke: 2px;
   }
   .font-outline-4 {
-    -webkit-text-stroke: 4px ;
+    -webkit-text-stroke: 4px;
   }
   .font-outline-8 {
-    -webkit-text-stroke: 8px ;
+    -webkit-text-stroke: 8px;
   }
 }
-
- 

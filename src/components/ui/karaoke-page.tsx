@@ -89,10 +89,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           setMusicLibraryFile={setMusicLibraryFile}
           musicLibrary={musicLibrary}
         ></WallcomeModal>
-        <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5 z-50"></OptionsPanel>
+        <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel>
         <StatusPanel text={notification}></StatusPanel>
         <VolumePanel
-          synth={synth}
           perset={perset}
           analysers={analysers}
           instrument={instrument}
@@ -112,8 +111,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           cursorTicks={cursorTicks}
           lyrics={lyrics}
           tick={tick}
-          player={player}
-          setSongPlaying={setSongPlaying}
         ></LyricsPanel>
         <PlayerPanel
           lyrics={lyrics}
