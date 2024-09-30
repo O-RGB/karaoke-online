@@ -14,6 +14,7 @@ import { onSearchList } from "@/lib/trie-search";
 import { useAppControl } from "@/hooks/app-control-hook";
 import Button from "../common/button/button";
 import Popconfirm from "../common/popconfirm";
+import { FaUser } from "react-icons/fa";
 
 interface MusicStoreModalProps {}
 
@@ -57,11 +58,26 @@ const MusicStoreModal: React.FC<MusicStoreModalProps> = ({}) => {
       const op = toOptions<SearchResult>({
         render: (value) => (
           <div className="flex justify-between w-full">
-            <span>
-              {value.name} - {value.artist}
+            <span className="flex gap-2 items-center justify-between ">
+              <span>{value.name}</span>
+              <span className="flex gap-1 items-center text-sm p-1 px-1.5 bg-gray-200 rounded-md">
+                <span>
+                  <FaUser className="text-xs"></FaUser>
+                </span>
+                <span>{value.artist}</span>
+              </span>
             </span>
-            <span className=" rounded-md">
-              {SONG_TYPE[value.type as 0 | 1]}
+            <span className="rounded-md text-white">
+              {value.type === 0 && (
+                <span className="text-sm font-bold p-1  rounded-md bg-red-500/80">
+                  EMK
+                </span>
+              )}
+              {value.type === 1 && (
+                <span className="text-sm font-bold p-1  rounded-md bg-green-500/80">
+                  NCN
+                </span>
+              )}
             </span>
           </div>
         ),

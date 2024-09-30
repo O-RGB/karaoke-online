@@ -6,6 +6,7 @@ import { toOptions } from "@/lib/general";
 import { SONG_TYPE } from "@/config/value";
 import { useKeyUp } from "@/hooks/keyup-hook";
 import { useAppControl } from "@/hooks/app-control-hook";
+import { FaUser } from "react-icons/fa";
 
 interface SearchSongProps {
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -27,11 +28,26 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
       const op = toOptions<SearchResult>({
         render: (value) => (
           <div className="flex justify-between w-full">
-            <span>
-              {value.name} - {value.artist}
+            <span className="flex gap-2 items-center justify-between ">
+              <span>{value.name}</span>
+              <span className="flex gap-1 items-center text-sm p-1 px-1.5 bg-white/20 rounded-md">
+                <span>
+                  <FaUser className="text-xs"></FaUser>
+                </span>
+                <span>{value.artist}</span>
+              </span>
             </span>
-            <span className=" rounded-md">
-              {SONG_TYPE[value.type as 0 | 1]}
+            <span className="rounded-md">
+              {value.type === 0 && (
+                <span className="text-sm font-bold p-1  rounded-md bg-red-500/80">
+                  EMK
+                </span>
+              )}
+              {value.type === 1 && (
+                <span className="text-sm font-bold p-1  rounded-md bg-green-500/80">
+                  NCN
+                </span>
+              )}
             </span>
           </div>
         ),
@@ -83,6 +99,25 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
     });
   }, [arrowLeft]);
 
+  function ArtistRender({
+    artist = "",
+    className,
+  }: {
+    artist?: string;
+    className?: string;
+  }) {
+    return (
+      <div
+        className={`flex gap-2 items-center bg-white/20 rounded-md p-1 px-1.5 ${className}`}
+      >
+        <span className="pt-1">
+          <FaUser className="text-white text-lg"></FaUser>
+        </span>
+        <span>{artist}</span>
+      </div>
+    );
+  }
+
   return (
     <div>
       {searching.length > 0 && (
@@ -91,32 +126,37 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
             hideVolume ? "top-[100px]" : "top-56"
           } fixed hidden lg:block text-white w-full px-5 duration-300`}
         >
-          <div className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2">
-            <div className="p-2 bg-white/20 w-64 overflow-hidden rounded-md">
-              <span className="text-2xl">{searching}</span>
+          <div className="w-full h-full blur-overlay flex gap-2 blur-border border rounded-md p-2">
+            <div className="p-2 bg-white/20 w-[256px] overflow-hidden rounded-md flex-none">
+              <span className="text-2xl flex items-center h-full">
+                {searching}
+              </span>
             </div>
-            <div className="text-2xl flex gap-2 items-center">
-              {searchResult.length > 0 && (
-                <>
-                  {searchResult[indexSelect].option?.type === 0 && (
-                    <span className="text-lg font-bold p-1  rounded-md bg-red-500/80">
-                      EMK
-                    </span>
-                  )}
-                  {searchResult[indexSelect].option?.type === 1 && (
-                    <span className="text-lg font-bold p-1  rounded-md bg-green-500/80">
-                      NCN
-                    </span>
-                  )}
-                  <span className="uppercase">
-                    {searchResult[indexSelect].option?.id}{" "}
+
+            {searchResult.length > 0 && (
+              <div className="flex flex-wrap gap-3 items-center text-2xl duration-300 transition-all ">
+                {searchResult[indexSelect].option?.type === 0 && (
+                  <span className="text-lg font-bold p-1  rounded-md bg-red-500/80">
+                    EMK
                   </span>
-                  <span>{searchResult[indexSelect].option?.name} </span>
-                  <span>-</span>
-                  <span> {searchResult[indexSelect].option?.artist}</span>
-                </>
-              )}
-            </div>
+                )}
+                {searchResult[indexSelect].option?.type === 1 && (
+                  <span className="text-lg font-bold p-1  rounded-md bg-green-500/80">
+                    NCN
+                  </span>
+                )}
+                <span className="uppercase">
+                  {searchResult[indexSelect].option?.id}{" "}
+                </span>
+
+                <span className="">
+                  {searchResult[indexSelect].option?.name}{" "}
+                </span>
+                <ArtistRender
+                  artist={searchResult[indexSelect].option?.artist}
+                ></ArtistRender>
+              </div>
+            )}
           </div>
         </div>
       )}
