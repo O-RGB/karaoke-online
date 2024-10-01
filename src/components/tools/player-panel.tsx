@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
@@ -23,6 +23,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   modalMap,
 }) => {
   const timer = Math.round((player.currentTime / player.duration) * 100);
+  const inputRef = useRef<any>(null);
 
   return (
     <>
@@ -96,7 +97,24 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
         </div>
 
         <div className="flex">
+          <div className="absolute -z-50 opacity-0 pointer-events-none">
+            <input
+              type="text"
+              ref={inputRef}
+              onBlur={() => {
+                if (inputRef.current) {
+                  inputRef.current.value = "";
+                }
+              }}
+            />
+          </div>
           <Button
+            className="hidden lg:block"
+            onClick={() => {
+              if (inputRef.current) {
+                inputRef.current.focus();
+              }
+            }}
             blur={false}
             border=""
             shadow=""

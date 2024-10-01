@@ -8,6 +8,7 @@ import {
   Noto_Sans_Thai_Looped,
   Roboto,
 } from "next/font/google";
+import React from "react";
 import { createContext, FC, useState } from "react";
 
 const notoSansThaiLooped = Noto_Sans_Thai_Looped({

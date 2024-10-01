@@ -27,10 +27,10 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
       const se = await onSearchList<SearchResult>(value, tracklist);
       const op = toOptions<SearchResult>({
         render: (value) => (
-          <div className="flex justify-between w-full">
-            <span className="flex gap-2 items-center justify-between ">
-              <span>{value.name}</span>
-              <span className="flex gap-1 items-center text-sm p-1 px-1.5 bg-white/20 rounded-md">
+          <div className="flex justify-between w-full gap-4">
+            <span className="flex flex-col md:flex-row gap-2 md:items-center justify-between ">
+              <span className="text-lg">{value.name}</span>
+              <span className="flex gap-1 items-center text-sm p-1 px-1.5 bg-white/20 rounded-md w-fit">
                 <span>
                   <FaUser className="text-xs"></FaUser>
                 </span>
@@ -161,9 +161,9 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
         </div>
       )}
       <div className="fixed z-50 left-0 top-4 lg:top-4 px-5 w-full block lg:hidden">
-        <div className="w-full blur-overlay flex flex-col">
+        <div className="w-full blur-overlay flex flex-col rounded-md overflow-hidden">
           <SearchSelect
-            className={"!placeholder-white"}
+            className={"!placeholder-white appearance-none !bg-transparent"}
             onSelectItem={(value: IOptions<SearchResult>) => {
               if (value.option) {
                 onClickSong?.(value.option);

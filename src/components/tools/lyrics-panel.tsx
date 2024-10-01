@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Sequencer } from "spessasynth_lib";
 import LyricsAnimation from "../common/lyrics/cut-animation";
 import Upload from "../common/input-data/upload";
@@ -32,6 +32,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
   cursorTicks,
   cursorIndices,
 }) => {
+  const [closeLyr, setCloseLyr] = useState<boolean>(true);
   const { lyricsDisplay } = useLyrics();
   const { hideVolume } = useAppControl();
 
@@ -115,10 +116,17 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
           !hideVolume ? "h-[30dvh] lg:h-[400px]" : "h-[75dvh] lg:h-[400px]"
         } flex items-center   justify-center relative w-full   rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`}
       >
-        {/* <div className="absolute w-full h-full">
-          <div className="bg-white/10 blur-overlay w-full h-full rounded-lg border border-overlay"></div>
-        </div> */}
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
+
+        {/* <div
+          onClick={() => {
+            console.log("test");
+            setCloseLyr((v) => !v);
+          }}
+          className="z-50 absolute bg-red-500 top-9 left-16 w-10 h-10 cursor-pointer"
+        >
+          {JSON.stringify(closeLyr)}
+        </div> */}
 
         <SelectLyrics
           display={display.current}

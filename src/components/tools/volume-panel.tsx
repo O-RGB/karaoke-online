@@ -174,30 +174,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           );
         })}
       </div>
-      <div className="relative flex w-full lg:w-[592px] justify-center items-center h-0">
-        <div className="absolute bottom-0.5 right-4">
-          <Button
-            tabIndex={-1}
-            shadow={""}
-            onClick={() => onHideVolume(!hideVolume)}
-            onKeyDown={(event) =>
-              event.key === "Enter" && event.preventDefault()
-            }
-            border="border blur-border focus:outline-none"
-            padding=""
-            className="px-3 h-3"
-            icon={
-              <MdArrowDropUp
-                className={`${
-                  hideVolume ? "rotate-180" : "rotate-0"
-                } text-white duration-300`}
-              ></MdArrowDropUp>
-            }
-          ></Button>
-        </div>
-      </div>
 
-      <div className="flex justify-between -mt-2.5 lg:-mt-2">
+      <div className="relative flex justify-between ">
         <div className="flex gap-2">
           <NumberButton
             onChange={(value) => {
@@ -219,6 +197,29 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           ></SwitchButton>
         </div>
         <div>{options}</div>
+      </div>
+
+      <div className="relative flex w-full lg:w-[592px] justify-center items-center h-0">
+        <div className="absolute bottom-11 right-4">
+          <Button
+            tabIndex={-1}
+            shadow={""}
+            onClick={() => onHideVolume(!hideVolume)}
+            onKeyDown={(event) =>
+              event.key === "Enter" && event.preventDefault()
+            }
+            border="border blur-border focus:outline-none"
+            padding=""
+            className="px-3 h-3"
+            icon={
+              <MdArrowDropUp
+                className={`${
+                  hideVolume ? "rotate-180" : "rotate-0"
+                } text-white duration-300`}
+              ></MdArrowDropUp>
+            }
+          ></Button>
+        </div>
       </div>
     </div>
   );

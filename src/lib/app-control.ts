@@ -107,21 +107,6 @@ export const sortTempoChanges = (
   return [...tempoChanges].sort((a, b) => a.ticks - b.ticks);
 };
 
-// export const ticksToTime = (
-//   timeDivision: number,
-//   tempoChanges: ITempoChange[]
-// ) => {
-//   let timeChange: ITempoTimeChange[] = [];
-//   for (let list of tempoChanges) {
-//     const time = getTimeFromTicks(timeDivision, list.ticks, list.tempo);
-//     timeChange.push({
-//       tempo: list.tempo,
-//       time: time,
-//     });
-//   }
-//   return timeChange;
-// };
-
 // Function to convert ticks to time
 export function convertTicksToTime(
   timeDivision: number,

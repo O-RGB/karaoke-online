@@ -51,7 +51,7 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
   };
 
   return (
-    <div className="w-full blur-overlay flex flex-col" ref={dropdownRef}>
+    <div className=" w-full blur-overlay flex flex-col" ref={dropdownRef}>
       <Input
         {...props}
         style={{

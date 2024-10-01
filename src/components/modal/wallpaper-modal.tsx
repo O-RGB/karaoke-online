@@ -82,6 +82,10 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
               {data.type === "video/mp4" ? (
                 <video
                   autoPlay
+                  loop
+                  muted
+                  playsInline
+                  disableRemotePlayback
                   src={src}
                   className={`${imageBox} ${isSet ? "border-green-500" : ""}`}
                 />
