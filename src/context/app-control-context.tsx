@@ -10,6 +10,7 @@ import { loadSuperZipAndExtractSong } from "@/lib/zip";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import TrieSearch from "trie-search";
 import { getTrackList } from "@/lib/storage";
+import React from "react";
 
 type AppControlContextType = {
   updateVolumeSysth: (index: number, value: number) => void;

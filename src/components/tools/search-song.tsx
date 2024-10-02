@@ -7,6 +7,7 @@ import { SONG_TYPE } from "@/config/value";
 import { useKeyUp } from "@/hooks/keyup-hook";
 import { useAppControl } from "@/hooks/app-control-hook";
 import { FaUser } from "react-icons/fa";
+import { useOrientation } from "@/hooks/orientation-hook";
 
 interface SearchSongProps {
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -14,9 +15,11 @@ interface SearchSongProps {
 }
 
 const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
+  const { orientation } = useOrientation();
   const { searching, onEnter, arrowRight, arrowLeft } = useKeyUp();
   const { hideVolume } = useAppControl();
 
+  const [fullUi, setFullUi] = useState<boolean>(false);
   const [searchResult, setSearchResult] = useState<IOptions<SearchResult>[]>(
     []
   );
@@ -62,6 +65,17 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
     const options = await onSearch<IOptions<SearchResult>[]>(value);
     setSearchResult(options);
   };
+
+  const handleSearchFocus = () => {
+    setFullUi(true);
+    console.log("fuoce");
+  };
+
+  const handleSearchBlur = () => {
+    setFullUi(false);
+    console.log("blur");
+  };
+
   useEffect(() => {
     if (searching !== "") {
       onKeyUpSearch(searching);
@@ -120,6 +134,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
 
   return (
     <div>
+      {/* // Default UI */}
       {searching.length > 0 && (
         <div
           className={`${
@@ -160,9 +175,20 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
           </div>
         </div>
       )}
-      <div className="fixed z-50 left-0 top-4 lg:top-4 px-5 w-full block lg:hidden">
+
+      {/* // Mobile UI */}
+      <div
+        className={`fixed z-50 px-5 block lg:hidden ${
+          orientation === "landscape"
+            ? `right-0 top-4 lg:top-4 ${fullUi ? "w-full" : "w-40"}`
+            : "left-0 top-4 lg:top-4 w-full"
+        } duration-300`}
+      >
         <div className="w-full blur-overlay flex flex-col rounded-md overflow-hidden">
           <SearchSelect
+            border="blur-border border"
+            onBlur={handleSearchBlur}
+            onFocus={handleSearchFocus}
             className={"!placeholder-white appearance-none !bg-transparent"}
             onSelectItem={(value: IOptions<SearchResult>) => {
               if (value.option) {

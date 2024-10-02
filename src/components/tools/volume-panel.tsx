@@ -13,6 +13,7 @@ import { useNotification } from "@/hooks/notification-hook";
 import Button from "../common/button/button";
 import { MdArrowDropUp } from "react-icons/md";
 import { useSynth } from "@/hooks/spessasynth-hook";
+import { useOrientation } from "@/hooks/orientation-hook";
 
 interface VolumePanelProps {
   instrument: number[];
@@ -31,6 +32,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   perset,
   options,
 }) => {
+  const { orientation } = useOrientation();
   const { addNotification } = useNotification();
   const VOCAL_CHANNEL = 8;
   const {
@@ -130,13 +132,17 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
 
   return (
     <div
-      className={`fixed w-full top-16 lg:top-6 left-0 px-5 flex flex-col gap-2 overflow-hidden`}
+      className={`fixed left-0 px-5 flex flex-col gap-1.5 overflow-hidden ${
+        orientation === "landscape" ? " top-[18px] w-70" : " top-14 lg:top-6 w-full"
+      }`}
     >
       <div
         className={`relative grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-y-2 lg:gap-y-0 gap-0.5 blur-overlay border blur-border rounded-md p-2 duration-300 overflow-hidden ${
           hideVolume
             ? "h-[30px] lg:h-[30px] pointer-events-none !cursor-none"
-            : "h-[292px] lg:h-[150px]"
+            : `${
+                orientation === "landscape" ? "h-[230px]" : "h-[292px]"
+              } lg:h-[150px]`
         }`}
       >
         <div
@@ -157,6 +163,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
               key={`gin-${ch}`}
             >
               <VolumeMeter
+                height={`${orientation === "landscape" ? "4rem" : "6rem"}`}
                 perset={perset}
                 onLock={onLockVolume}
                 isLock={lock[ch]}
@@ -175,8 +182,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
         })}
       </div>
 
-      <div className="relative flex justify-between ">
-        <div className="flex gap-2">
+      <div>
+        <div className="flex gap-1.5">
           <NumberButton
             onChange={(value) => {
               updatePitch(value);
@@ -200,7 +207,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
       </div>
 
       <div className="relative flex w-full lg:w-[592px] justify-center items-center h-0">
-        <div className="absolute bottom-11 right-4">
+        <div className="absolute bottom-[38px] right-4">
           <Button
             tabIndex={-1}
             shadow={""}

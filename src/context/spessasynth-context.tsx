@@ -3,6 +3,7 @@ import { DEFAULT_SOUND_FONT } from "@/config/value";
 import { createContext, FC, useEffect, useRef, useState } from "react";
 import { Sequencer, Synthetizer, WORKLET_URL_ABSOLUTE } from "spessasynth_lib";
 import { useRemote } from "../hooks/peer-hook";
+import React from "react";
 
 type SpessasynthContextType = {
   setupSpessasynth: () => Promise<void>;
@@ -78,7 +79,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
 
     // Default Setting
     synthInstance.setMainVolume(0.5);
-    synthInstance.highPerformanceMode = true;
+    synthInstance.highPerformanceMode = false;
 
     const blob = new Blob([ab], { type: "application/octet-stream" });
 

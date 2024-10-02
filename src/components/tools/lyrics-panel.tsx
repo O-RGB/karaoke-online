@@ -1,23 +1,11 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Sequencer } from "spessasynth_lib";
-import LyricsAnimation from "../common/lyrics/cut-animation";
-import Upload from "../common/input-data/upload";
-import { parseEMKFile } from "@/lib/karaoke/emk";
-import Button from "../common/button/button";
-import { BsFileEarmarkMusic } from "react-icons/bs";
-import {
-  readCursorFile,
-  readLyricsFile,
-  validateSongFileTypes,
-} from "@/lib/karaoke/ncn";
-import { EMK_FILE_TYPE } from "@/config/value";
 import { groupThaiCharacters } from "@/lib/app-control";
 import SelectLyrics from "../lyrics";
 import { useLyrics } from "@/hooks/lyrics-hook";
 import { useAppControl } from "@/hooks/app-control-hook";
-// import EMKFileConverter from "./test";
+import { useOrientation } from "@/hooks/orientation-hook";
 
 interface LyricsPanelProps {
   lyrics: string[];
@@ -32,7 +20,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
   cursorTicks,
   cursorIndices,
 }) => {
-  const [closeLyr, setCloseLyr] = useState<boolean>(true);
+  const { orientation } = useOrientation();
   const { lyricsDisplay } = useLyrics();
   const { hideVolume } = useAppControl();
 
@@ -109,24 +97,20 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
 
   useEffect(() => {}, [lyricsDisplay]);
 
+  const height = hideVolume
+    ? orientation === "landscape"
+      ? "h-[55dvh]"
+      : "h-[75dvh]"
+    : orientation === "landscape"
+    ? "h-[55dvh]"
+    : "h-[30dvh]";
+
+  const className = `${height} lg:h-[400px] flex items-center justify-center relative w-full rounded-lg text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`;
+
   return (
     <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 -z-40">
-      <div
-        className={`${
-          !hideVolume ? "h-[30dvh] lg:h-[400px]" : "h-[75dvh] lg:h-[400px]"
-        } flex items-center   justify-center relative w-full   rounded-lg   text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`}
-      >
+      <div className={className}>
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
-
-        {/* <div
-          onClick={() => {
-            console.log("test");
-            setCloseLyr((v) => !v);
-          }}
-          className="z-50 absolute bg-red-500 top-9 left-16 w-10 h-10 cursor-pointer"
-        >
-          {JSON.stringify(closeLyr)}
-        </div> */}
 
         <SelectLyrics
           display={display.current}

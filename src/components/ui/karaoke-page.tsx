@@ -26,6 +26,7 @@ import MidiSettingModal from "../modal/midi-setting-modal";
 import SongListModal from "../modal/song-list.modal";
 import { useDragDrop } from "@/hooks/drag-drop-hook";
 import { onSelectTestMusic } from "@/lib/karaoke/read";
+import AudioRecorder from "../tools/test";
 
 interface KaraokePageProps {}
 

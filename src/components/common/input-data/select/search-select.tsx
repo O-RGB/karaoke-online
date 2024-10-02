@@ -59,8 +59,9 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
         }}
         value={value}
         placeholder="ค้นหาเพลง"
-        onFocus={() => {
+        onFocus={(event) => {
           handleSearch(value);
+          props.onFocus?.(event);
         }}
         onChange={(e) => {
           const value = e.target.value;

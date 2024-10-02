@@ -4,11 +4,11 @@ import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
 import { FaDrum } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { BiSolidVolumeFull, BiSolidVolumeMute } from "react-icons/bi";
-import SearchSelect from "../input-data/select/search-select";
 import ButtonDropdown from "../button/button-dropdown";
 
 interface VolumeMeterProps {
   value?: number;
+  height: string;
   level: number;
   channel: number;
   instruments: number;
@@ -24,6 +24,7 @@ interface VolumeMeterProps {
 
 const VolumeMeter: React.FC<VolumeMeterProps> = ({
   value = 100,
+  height = "6rem",
   level,
   channel,
   instruments,
@@ -76,8 +77,14 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
         <span>{channel}</span>
       </div>
       <div className="relative w-full lg:max-w-20">
-        <div className="relative flex gap-1 p-1 h-24 w-full justify-center">
-          <div className="absolute z-20 left-0 bottom-0 w-full h-24 grid opacity-30  overflow-hidden">
+        <div
+          style={{ height }}
+          className="relative flex gap-1 p-1 w-full justify-center"
+        >
+          <div
+            style={{ height }}
+            className="absolute z-20 left-0 bottom-0 w-full grid opacity-30  overflow-hidden"
+          >
             <div className="bg-white/90 w-full"></div>
             <div className="bg-white/60 w-full"></div>
             <div className="bg-white/30 w-full"></div>
