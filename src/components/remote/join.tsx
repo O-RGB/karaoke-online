@@ -5,6 +5,8 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import SearchSelect from "../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
 import { SONG_TYPE } from "@/config/value";
+import { onSearchList } from "@/lib/trie-search";
+import SearchDropdown from "../tools/search-song/search-dropdown";
 
 interface JoinConnectProps {
   hostId: string;
@@ -33,6 +35,18 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
     }
   };
 
+  async function onSearch(value: string) {
+    handleSendMessage(value);
+    if (songList) {
+      const op = toOptions<SearchResult>({
+        render: (value) => <SearchDropdown value={value}></SearchDropdown>,
+        list: songList,
+      });
+      return op;
+    }
+    return [];
+  }
+
   useEffect(() => {
     handleConnect();
   }, [normalPeer]);
@@ -58,12 +72,6 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
 
   return (
     <div className="p-4 bg-slate-700 min-h-screen">
-      {/* <input
-        type="text"
-        className="w-full p-2 border rounded"
-        onChange={(e) => handleSendMessage(e.target.value)}
-        placeholder="ค้นหาเพลง"
-      /> */}
       <div className="pt-1">
         <SearchSelect
           className={"!placeholder-white"}
@@ -73,26 +81,7 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
             }
           }}
           onChange={(e) => handleSendMessage(e.target.value)}
-          onSearch={async (value) => {
-            handleSendMessage(value);
-            if (songList) {
-              const op = toOptions<SearchResult>({
-                render: (value) => (
-                  <div className="flex justify-between w-full">
-                    <span>
-                      {value.name} - {value.artist}
-                    </span>
-                    <span className=" rounded-md">
-                      {SONG_TYPE[value.type as 0 | 1]}
-                    </span>
-                  </div>
-                ),
-                list: songList,
-              });
-              return op;
-            }
-            return [];
-          }}
+          onSearch={onSearch}
         ></SearchSelect>
       </div>
     </div>

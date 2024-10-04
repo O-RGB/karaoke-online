@@ -73,7 +73,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   children,
 }) => {
   const { synth, player } = useSynth();
-  const { messages, sendMessage } = useRemote();
+  const { messages, sendMessage,  } = useRemote();
 
   // Volume Control
   const VolChannel = Array(16).fill(100);
@@ -306,6 +306,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 
   useEffect(() => {
     eventRemote(messages?.from, messages?.content);
+    console.log(messages)
   }, [messages?.content]);
 
   useEffect(() => {

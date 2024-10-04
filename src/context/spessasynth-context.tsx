@@ -167,11 +167,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     // }
   };
 
-  useEffect(() => {
-    if (superUserConnections.length > 0) {
-      sendSuperUserMessage(audioGain, "GIND_NODE");
-    }
-  }, [audioGain, superUserConnections]);
+
 
   return (
     <SpessasynthContext.Provider

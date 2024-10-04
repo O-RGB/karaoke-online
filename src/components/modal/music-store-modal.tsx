@@ -13,6 +13,7 @@ import {
   deleteAllSong,
   getSongByKey,
 } from "@/lib/storage/song";
+import SearchDropdown from "../tools/search-song/search-dropdown";
 
 interface MusicStoreModalProps {}
 
@@ -54,31 +55,7 @@ const MusicStoreModal: React.FC<MusicStoreModalProps> = ({}) => {
     if (tracklist) {
       const se = await onSearchList<SearchResult>(value, tracklist);
       const op = toOptions<SearchResult>({
-        render: (value) => (
-          <div className="flex justify-between w-full">
-            <span className="flex gap-2 items-center justify-between ">
-              <span>{value.name}</span>
-              <span className="flex gap-1 items-center text-sm p-1 px-1.5 bg-gray-200 rounded-md">
-                <span>
-                  <FaUser className="text-xs"></FaUser>
-                </span>
-                <span>{value.artist}</span>
-              </span>
-            </span>
-            <span className="rounded-md text-white">
-              {value.type === 0 && (
-                <span className="text-sm font-bold p-1  rounded-md bg-red-500/80">
-                  EMK
-                </span>
-              )}
-              {value.type === 1 && (
-                <span className="text-sm font-bold p-1  rounded-md bg-green-500/80">
-                  NCN
-                </span>
-              )}
-            </span>
-          </div>
-        ),
+        render: (value) => <SearchDropdown value={value}></SearchDropdown>,
         list: se,
       });
       return op as T;

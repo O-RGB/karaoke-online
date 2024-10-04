@@ -14,6 +14,7 @@ import Button from "../common/button/button";
 import { MdArrowDropUp } from "react-icons/md";
 import { useSynth } from "@/hooks/spessasynth-hook";
 import { useOrientation } from "@/hooks/orientation-hook";
+import { useRemote } from "@/hooks/peer-hook";
 
 interface VolumePanelProps {
   instrument: number[];
@@ -22,6 +23,7 @@ interface VolumePanelProps {
   audioGain?: number[];
   perset?: IPersetSoundfont[];
   options?: React.ReactNode;
+  className?: string;
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
@@ -31,6 +33,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   audioGain,
   perset,
   options,
+  className,
 }) => {
   const { orientation } = useOrientation();
   const { addNotification } = useNotification();
@@ -45,6 +48,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     hideVolume,
   } = useAppControl();
   const { synth, player } = useSynth();
+  const { superUserConnections, sendSuperUserMessage } = useRemote();
 
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
 
@@ -88,7 +92,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   };
   const render = useCallback(() => {
     if (analysers) {
-      console.log("vol run");
       const newVolumeLevels = analysers?.map((analyser) => {
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(dataArray);
@@ -108,15 +111,19 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
       } else {
         gain.current = newVolumeLevels;
       }
+
+      if (superUserConnections.length > 0) {
+        sendSuperUserMessage(newVolumeLevels, "GIND_NODE");
+      }
     }
-  }, [analysers, hideVolume]); // เพิ่ม analysers และ hideVolume เป็น dependencies
+  }, [analysers, hideVolume, superUserConnections]);
 
   useEffect(() => {
     if (analysers && !player?.paused) {
       const intervalId = setInterval(() => render(), 100);
-      return () => clearInterval(intervalId); // ล้าง interval เมื่อ component ถูก unmount
+      return () => clearInterval(intervalId);
     }
-  }, [analysers, render, player?.paused]); // เพิ่ม render เป็น dependencies
+  }, [analysers, render, player?.paused]);
 
   useEffect(() => {
     if (!hideVolume) {
@@ -132,9 +139,15 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
 
   return (
     <div
-      className={`fixed left-0 px-5 flex flex-col gap-1.5 overflow-hidden ${
-        orientation === "landscape" ? " top-[18px] w-70" : " top-14 lg:top-6 w-full"
-      }`}
+      className={
+        className
+          ? className
+          : `fixed left-0 px-5 flex flex-col gap-1.5 overflow-hidden ${
+              orientation === "landscape"
+                ? " top-[18px] w-70"
+                : " top-14 lg:top-6 w-full"
+            }`
+      }
     >
       <div
         className={`relative grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-y-2 lg:gap-y-0 gap-0.5 blur-overlay border blur-border rounded-md p-2 duration-300 overflow-hidden ${

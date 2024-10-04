@@ -51,13 +51,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     }
   };
 
-  // const loadTrackListFile = async () => {
-  //   const file = await getTrackList();
-  //   if (file) {
-  //     setMusicFilename(file.name);
-  //   }
-  // };
-
+ 
   const onLoadFileJson = async (_: File, fileList: FileList) => {
     if (fileList.length === 0) {
       return;

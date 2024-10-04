@@ -1,13 +1,14 @@
 import { onSearchList } from "@/lib/trie-search";
 import React, { useEffect, useState } from "react";
 import TrieSearch from "trie-search";
-import SearchSelect from "../common/input-data/select/search-select";
+import SearchSelect from "../../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
 import { SONG_TYPE } from "@/config/value";
 import { useKeyUp } from "@/hooks/keyup-hook";
 import { useAppControl } from "@/hooks/app-control-hook";
 import { FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
+import SearchDropdown from "./search-dropdown";
 
 interface SearchSongProps {
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -29,31 +30,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
     if (tracklist) {
       const se = await onSearchList<SearchResult>(value, tracklist);
       const op = toOptions<SearchResult>({
-        render: (value) => (
-          <div className="flex justify-between w-full gap-4">
-            <span className="flex flex-col md:flex-row gap-2 md:items-center justify-between ">
-              <span className="text-lg">{value.name}</span>
-              <span className="flex gap-1 items-center text-sm p-1 px-1.5 bg-white/20 rounded-md w-fit">
-                <span>
-                  <FaUser className="text-xs"></FaUser>
-                </span>
-                <span>{value.artist}</span>
-              </span>
-            </span>
-            <span className="rounded-md">
-              {value.type === 0 && (
-                <span className="text-sm font-bold p-1  rounded-md bg-red-500/80">
-                  EMK
-                </span>
-              )}
-              {value.type === 1 && (
-                <span className="text-sm font-bold p-1  rounded-md bg-green-500/80">
-                  NCN
-                </span>
-              )}
-            </span>
-          </div>
-        ),
+        render: (value) => <SearchDropdown value={value}></SearchDropdown>,
         list: se,
       });
       return op as T;
@@ -68,12 +45,10 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
 
   const handleSearchFocus = () => {
     setFullUi(true);
-    console.log("fuoce");
   };
 
   const handleSearchBlur = () => {
     setFullUi(false);
-    console.log("blur");
   };
 
   useEffect(() => {

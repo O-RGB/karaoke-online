@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { useSynth } from "@/hooks/spessasynth-hook";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
-import SearchSong from "../tools/search-song";
+import SearchSong from "../tools/search-song/search-song";
 import { useAppControl } from "@/hooks/app-control-hook";
 import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
