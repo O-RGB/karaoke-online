@@ -8,9 +8,9 @@ interface PeerContextType {
   connectToPeer: (peerId: string, isSuperUser: boolean) => void;
   connections: DataConnection[];
   superUserConnections: DataConnection[];
-  sendMessage: (message: any, type: SendType, clientId?: string) => void;
-  sendSuperUserMessage: (message: any, type: SendType) => void;
-  messages?: { from: string; content: RemoteEncode };
+  sendMessage: (info: RemoteSendMessage) => void;
+  sendSuperUserMessage: (info: RemoteSendMessage) => void;
+  received?: RemoteReceivedMessages;
 }
 
 export const PeerContext = createContext<PeerContextType>({
@@ -21,26 +21,24 @@ export const PeerContext = createContext<PeerContextType>({
   superUserConnections: [],
   sendMessage: () => {},
   sendSuperUserMessage: () => {},
-  messages: undefined,
+  received: undefined,
 });
 
 export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  // NORMAL
   const [normalPeer, setNormalPeer] = useState<Peer>(new Peer());
-  const [superUserPeer, setSuperUserPeer] = useState<Peer>(new Peer());
   const [connections, setConnections] = useState<DataConnection[]>([]);
+
+  // SUPER
+  const [superUserPeer, setSuperUserPeer] = useState<Peer>(new Peer());
   const [superUserConnections, setSuperUserConnections] = useState<
     DataConnection[]
   >([]);
-  const [messages, setMessages] = useState<{ from: string; content: any }>();
 
-  const remoteEncodeMessage = (data: any, type: SendType) => {
-    return {
-      data,
-      type,
-    };
-  };
+  // RECEIVED
+  const [received, setReceived] = useState<RemoteReceivedMessages>();
 
   useLayoutEffect(() => {
     console.log("Initializing peers...");
@@ -59,9 +57,9 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
           return [...prev, conn];
         });
 
-        conn.on("data", (data) => {
+        conn.on("data", (data: any) => {
           console.log(`normalPeer received data from ${conn.peer}:`, data);
-          setMessages({ from: conn.peer, content: data });
+          setReceived({ from: conn.peer, content: data, user: "NORMAL" });
         });
 
         conn.on("open", () => {
@@ -101,9 +99,9 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
           return [...prev, conn];
         });
 
-        conn.on("data", (data) => {
+        conn.on("data", (data: any) => {
           console.log(`superUserPeer received data from ${conn.peer}:`, data);
-          setMessages({ from: conn.peer, content: data });
+          setReceived({ from: conn.peer, content: data, user: "SUPER" });
         });
 
         conn.on("open", () => {
@@ -215,9 +213,13 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
       conn.send(`Hello from ${peer.id}`);
     });
 
-    conn.on("data", (data) => {
+    conn.on("data", (data: any) => {
       console.log(`Received data from ${peerId} on ${peerType}:`, data);
-      setMessages({ from: conn.peer, content: data });
+      setReceived({
+        from: conn.peer,
+        content: data,
+        user: isSuperUser ? "SUPER" : "NORMAL",
+      });
     });
 
     conn.on("close", () => {
@@ -251,39 +253,43 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
     setupConnectionTimeout(conn, isSuperUser);
   };
 
-  const sendMessage = (message: any, type: SendType, clientId?: string) => {
+  const sendMessage = (info: RemoteSendMessage) => {
     console.log(
       `Sending message to all normalPeer connections:`,
-      message,
+      info.message,
       `with type:`,
-      type
+      info.type
     );
-    if (clientId) {
-      const hostConnection = connections.find((conn) => conn.peer === clientId);
-      if (hostConnection) {
-        console.log(
-          `Sending message to Fixed Client ID ${hostConnection.peer} on normalPeer.`
-        );
-        hostConnection.send(remoteEncodeMessage(message, type));
+    if (info.clientId) {
+      var connection: DataConnection | undefined = undefined;
+
+      var userConnections = [];
+      if (info.user == "NORMAL") {
+        userConnections = connections;
+      } else {
+        userConnections = superUserConnections;
       }
+      connection = userConnections.find((conn) => conn.peer === info.clientId);
+
+      connection?.send(info);
     } else {
       connections.forEach((conn) => {
         console.log(`Sending message to ${conn.peer} on normalPeer.`);
-        conn.send(remoteEncodeMessage(message, type));
+        conn.send(info);
       });
     }
   };
 
-  const sendSuperUserMessage = (message: any, type: SendType) => {
+  const sendSuperUserMessage = (info: RemoteSendMessage) => {
     console.log(
       `Sending message to all superUserPeer connections:`,
-      message,
+      info.message,
       `with type:`,
-      type
+      info.type
     );
     superUserConnections.forEach((conn) => {
       console.log(`Sending message to ${conn.peer} on superUserPeer.`);
-      conn.send(remoteEncodeMessage(message, type));
+      conn.send(info);
     });
   };
 
@@ -297,7 +303,7 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
         superUserConnections,
         sendMessage,
         sendSuperUserMessage,
-        messages,
+        received: received,
       }}
     >
       {children}

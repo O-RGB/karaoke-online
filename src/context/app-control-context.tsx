@@ -73,7 +73,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   children,
 }) => {
   const { synth, player } = useSynth();
-  const { messages, sendMessage,  } = useRemote();
+  const { received: messages, sendMessage } = useRemote();
 
   // Volume Control
   const VolChannel = Array(16).fill(100);
@@ -104,17 +104,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   const [cursorIndices, setCursorIndices] = useState<Map<number, number[]>>();
   // const [lyricsDisplay, setLyricsDisplay] = useState<LyricsOptions>("default");
 
-  // --- Wallpaper
-  // const [wallpaper, setWallpaper] = useState<string>(WALLPAPER);
-
-  // const setLyricsOptions = (mode: LyricsOptions) => {
-  //   setLyricsDisplay(mode);
-  // };
-
-  // const addNotification = (text: string) => {
-  //   setNotification(text);
-  // };
-
   const updateHideVolume = (hide: boolean) => {
     setHideVolume(hide);
   };
@@ -129,23 +118,24 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 
   const updatePitch = (semitones: number = 1, channel?: number) => {
     const PITCH_CENTER = 8192;
-    const SEMITONE_STEP = PITCH_CENTER / 2;
+    const SEMITONE_STEP = PITCH_CENTER / 12; // แก้ไขเป็น 12 แทน 2
 
     const pitchValue = PITCH_CENTER + semitones * SEMITONE_STEP;
     const MSB = (pitchValue >> 7) & 0x7f;
     const LSB = pitchValue & 0x7f;
 
     const sendPitch = (channel: number) => {
+      synth?.setPitchBendRange(channel, 12); // ตั้งค่า pitch bend range เป็น 12 semitones
       synth?.pitchWheel(channel, MSB, LSB);
-      synth?.setPitchBendRange(channel, semitones);
+      // synth?.lockController(channel, midiControllers.effects3Depth, true);
     };
 
     if (channel !== undefined) {
       sendPitch(channel);
     } else {
-      Array.from({ length: 16 }, (_, i) => {
+      for (let i = 0; i < 16; i++) {
         sendPitch(i);
-      });
+      }
     }
   };
   const resetVolume = () => {
@@ -266,9 +256,10 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     }
   };
 
-  const eventRemote = async (from?: string, content?: RemoteEncode) => {
+  const eventRemote = async (from?: string, content?: RemoteSendMessage) => {
     const type = content?.type;
-    const data = content?.data;
+    const data = content?.message;
+    const user = content?.user;
 
     if (!type) {
       return;
@@ -287,9 +278,15 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 
       case "SEARCH_SONG":
         if (tracklist !== undefined) {
+          console.log(data);
           const search = data as string;
           const res = await onSearchStrList(search);
-          sendMessage(res, "SEND_SONG_LIST", from);
+          sendMessage({
+            message: res,
+            type: "SEND_SONG_LIST",
+            user: user ?? "NORMAL",
+            clientId: from,
+          });
         }
 
       case "SET_SONG":
@@ -306,7 +303,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 
   useEffect(() => {
     eventRemote(messages?.from, messages?.content);
-    console.log(messages)
+    console.log(messages);
   }, [messages?.content]);
 
   useEffect(() => {

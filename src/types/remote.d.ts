@@ -5,8 +5,23 @@ type TypeFormJoiner =
   | "SET_SONG"
   | "SEARCH_SONG";
 type SendType = TypeFormJoiner | TypeFormHost;
+type TypeUserControl = "NORMAL" | "SUPER";
 
-interface RemoteEncode<T = any> {
+// interface RemoteEncode<T = any> {
+//   type: SendType;
+//   message: T;
+//   user: TypeUserControl;
+// }
+
+interface RemoteReceivedMessages {
+  from: string;
+  content: RemoteSendMessage;
+  user: TypeUserControl;
+}
+
+interface RemoteSendMessage {
+  message: any;
   type: SendType;
-  data: T;
+  user: TypeUserControl;
+  clientId?: string;
 }

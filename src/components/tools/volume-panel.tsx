@@ -113,7 +113,12 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
       }
 
       if (superUserConnections.length > 0) {
-        sendSuperUserMessage(newVolumeLevels, "GIND_NODE");
+        sendSuperUserMessage({
+          message: newVolumeLevels,
+          type: "GIND_NODE",
+          user: "SUPER",
+        });
+        // sendSuperUserMessage(newVolumeLevels, "GIND_NODE");
       }
     }
   }, [analysers, hideVolume, superUserConnections]);

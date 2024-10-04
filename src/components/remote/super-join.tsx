@@ -12,7 +12,7 @@ interface SuperJoinConnectProps {
 }
 
 const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
-  const { superUserPeer, connectToPeer, sendSuperUserMessage, messages } =
+  const { superUserPeer, connectToPeer, sendSuperUserMessage, received } =
     useRemote();
   const [audioGain, setAudioGain] = useState<number[]>(Array(16).fill(0));
   const [instrument, setInstrument] = useState<number[]>([]);
@@ -26,19 +26,34 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
 
   const changeVol = (value: ISetChannelGain) => {
     if (sendSuperUserMessage) {
-      sendSuperUserMessage(value, "SET_CHANNEL");
+      sendSuperUserMessage({
+        message: value,
+        type: "SET_CHANNEL",
+        user: "SUPER",
+        clientId: superUserPeer.id,
+      });
     }
   };
 
   const handleSendMessage = (str: string) => {
     if (sendSuperUserMessage && str.length > 0) {
-      sendSuperUserMessage(str, "SEARCH_SONG");
+      sendSuperUserMessage({
+        message: str,
+        type: "SEARCH_SONG",
+        user: "SUPER",
+        clientId: superUserPeer.id,
+      });
     }
   };
 
   const handleSetSong = (value: SearchResult) => {
     if (sendSuperUserMessage) {
-      sendSuperUserMessage(value, "SET_SONG");
+      sendSuperUserMessage({
+        message: value,
+        type: "SET_SONG",
+        user: "SUPER",
+        clientId: superUserPeer.id,
+      });
     }
   };
 
@@ -59,15 +74,18 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   }, [superUserPeer]);
 
   useEffect(() => {
-    const type = messages?.content.type;
-    const data = messages?.content.data;
+    if (received) {
+      const type = received.content.type;
+      const data = received?.content.message;
 
-    if (type === "GIND_NODE") {
-      setAudioGain(data);
-    } else if (type === "SEND_SONG_LIST") {
-      setSongList(data);
+      if (type === "GIND_NODE") {
+        setAudioGain(data);
+      } else if (type === "SEND_SONG_LIST") {
+        console.log("set song list");
+        setSongList(data);
+      }
     }
-  }, [messages?.content]);
+  }, [received?.content]);
 
   if (!superUserPeer.id) {
     return (

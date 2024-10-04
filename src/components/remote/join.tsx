@@ -13,8 +13,13 @@ interface JoinConnectProps {
 }
 
 const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
-  const { normalPeer, connectToPeer, sendMessage, messages, connections } =
-    useRemote();
+  const {
+    normalPeer,
+    connectToPeer,
+    sendMessage,
+    received: messages,
+    connections,
+  } = useRemote();
   const [songList, setSongList] = useState<SearchResult[]>([]);
 
   const handleConnect = () => {
@@ -25,13 +30,24 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
 
   const handleSendMessage = (str: string) => {
     if (sendMessage && str.length > 0) {
-      sendMessage(str, "SEARCH_SONG");
+      sendMessage({
+        message: str,
+        type: "SEARCH_SONG",
+        user: "NORMAL",
+        clientId: normalPeer.id,
+      });
+      // sendMessage(str, "SEARCH_SONG", "NORMAL");
     }
   };
 
   const handleSetSong = (value: SearchResult) => {
     if (sendMessage) {
-      sendMessage(value, "SET_SONG");
+      sendMessage({
+        message: value,
+        type: "SET_SONG",
+        user: "NORMAL",
+        clientId: normalPeer.id,
+      });
     }
   };
 
@@ -53,7 +69,7 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
 
   useEffect(() => {
     const type = messages?.content.type;
-    const data = messages?.content.data;
+    const data = messages?.content.message;
     if (type === "SEND_SONG_LIST") {
       setSongList(data);
     }
