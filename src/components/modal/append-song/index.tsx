@@ -7,8 +7,7 @@ import AddFormKaraokeExtreme from "./taps/add-form-karaoke-extreme";
 import { readSong } from "@/lib/karaoke/read";
 import {
   addTracklistsToDatabase,
-  getTrackList,
-  saveTrackList,
+  jsonTracklistToDatabase,
   saveTracklistToStorage,
 } from "@/lib/storage/tracklist";
 import {
@@ -52,12 +51,12 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     }
   };
 
-  const loadTrackListFile = async () => {
-    const file = await getTrackList();
-    if (file) {
-      setMusicFilename(file.name);
-    }
-  };
+  // const loadTrackListFile = async () => {
+  //   const file = await getTrackList();
+  //   if (file) {
+  //     setMusicFilename(file.name);
+  //   }
+  // };
 
   const onLoadFileJson = async (_: File, fileList: FileList) => {
     if (fileList.length === 0) {
@@ -66,7 +65,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     const file = fileList.item(0);
 
     if (file?.type === "application/json") {
-      const saved = await saveTrackList(file);
+      const saved = await jsonTracklistToDatabase(file);
       if (saved) {
         setTracklistFile(file);
         setMusicFilename(file?.name);
@@ -105,7 +104,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
   };
 
   useEffect(() => {
-    loadTrackListFile();
+    // loadTrackListFile();
   }, []);
 
   return (

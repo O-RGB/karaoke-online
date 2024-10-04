@@ -1,6 +1,6 @@
 import {
   STORAGE_KARAOKE_EXTREME,
-  STORAGE_NAME_DIC,
+  // STORAGE_NAME_DIC,
   STORAGE_TRACKLIST,
   TRACKLIST_FILENAME,
 } from "@/config/value";
@@ -33,7 +33,7 @@ export const createTrackList = (
 export const jsonTracklistToDatabase = async (
   file: File
 ): Promise<SearchResult[] | undefined> => {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     const reader = new FileReader();
 
     reader.onload = async (event) => {
@@ -42,22 +42,9 @@ export const jsonTracklistToDatabase = async (
       if (typeof jsonData === "string") {
         try {
           const data: SearchResult[] = JSON.parse(jsonData);
-          const { store, tx, loaded } = await TracklistModel();
+          console.log(data);
+          await addTracklistsToDatabase(data);
 
-          if (!loaded) {
-            return false;
-          }
-
-          if (Array.isArray(data)) {
-            for (let item of data) {
-              item.id = item.id.toUpperCase();
-              await store?.put(item);
-            }
-          } else {
-            await store?.put(data);
-          }
-
-          await tx?.done;
           console.log("Data saved successfully");
           resolve(data);
         } catch (error) {
@@ -106,7 +93,7 @@ export const addTracklistsToDatabase = async (objs: SearchResult[]) => {
     }
 
     for (const obj of objs) {
-      console.log("obj",obj)
+      console.log("obj", obj);
       if (obj.id) {
         obj.id = obj.id.toUpperCase();
       }
@@ -158,10 +145,10 @@ export const saveTracklistToStorage = async (
   return { result: true };
 };
 
-export const saveTrackList = async (file: File) => {
-  return await storageAdd(TRACKLIST_FILENAME, file, STORAGE_NAME_DIC);
-};
+// export const saveTrackList = async (file: File) => {
+//   return await storageAdd(TRACKLIST_FILENAME, file, STORAGE_NAME_DIC);
+// };
 
-export const getTrackList = async () => {
-  return await storageGet<File>(TRACKLIST_FILENAME, STORAGE_NAME_DIC);
-};
+// export const getTrackList = async () => {
+//   return await storageGet<File>(TRACKLIST_FILENAME, STORAGE_NAME_DIC);
+// };

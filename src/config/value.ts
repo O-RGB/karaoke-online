@@ -13,7 +13,7 @@ export const STORAGE_SOUNDFONT_DIC = "soundfont_dic";
 export const STORAGE_WALLPAPER = "wallpaper";
 
 export const TRACKLIST_FILENAME = "song.json";
-export const STORAGE_NAME_DIC = "song_dic";
+// export const STORAGE_NAME_DIC = "song_dic";
 
 export const EMK_TYPE = "EMK";
 export const NCN_TYPE = "NCN";

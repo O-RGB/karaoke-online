@@ -23,6 +23,7 @@ export const TracklistModel = async () => {
     const store = tx.objectStore(STORAGE_TRACKLIST);
     return { store, tx, db, loaded: true };
   } catch (error) {
+    console.log("tracklist error" ,error)
     return { store: null, tx: null, db: null, loaded: false };
   }
 };

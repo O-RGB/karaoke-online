@@ -9,7 +9,7 @@ import { useAppControl } from "@/hooks/app-control-hook";
 import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super-host";
-import WallcomeModal from "../modal/wallcome-modal";
+
 import SoundfontManager from "../modal/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
@@ -97,11 +97,11 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         {/* <div className="fixed top-44">
           <LargeJsonEditor></LargeJsonEditor>
         </div> */}
-        <WallcomeModal
+        {/* <WallcomeModal
           setTracklistFile={setTracklistFile}
           setMusicLibraryFile={setMusicLibraryFile}
           musicLibrary={musicLibrary}
-        ></WallcomeModal>
+        ></WallcomeModal> */}
         <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel>
         <StatusPanel text={notification}></StatusPanel>
         <VolumePanel
