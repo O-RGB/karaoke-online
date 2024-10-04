@@ -4,14 +4,7 @@ import { setSoundFont } from "@/lib/spssasynth/sound-font";
 import UpdateFile from "../common/input-data/upload";
 import { TbMusicPlus } from "react-icons/tb";
 import { useSynth } from "@/hooks/spessasynth-hook";
-import {
-  createSoundFontDic,
-  deleteSoundFontStorage,
-  getAllKeySoundfont,
-  getAllSoundFontDicStorage,
-  getSoundFontStorage,
-  saveSoundFontStorage,
-} from "@/lib/storage";
+ 
 import { FaRegFileAudio } from "react-icons/fa";
 import Button from "../common/button/button";
 import { IoMdAddCircle } from "react-icons/io";
@@ -21,6 +14,7 @@ import { DEFAULT_SOUND_FONT } from "@/config/value";
 import { ImFilePlay } from "react-icons/im";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import Label from "../common/label";
+import { deleteSoundFontStorage, getAllKeySoundfont, getSoundFontStorage, saveSoundFontStorage } from "@/lib/storage/soundfont";
 
 interface SoundfontManagerProps {}
 

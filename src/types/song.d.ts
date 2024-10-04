@@ -6,6 +6,15 @@ interface SearchResult {
   id: string;
 }
 
+interface FileGroup extends Partial<SongFiles> {
+  emk?: File;
+}
+
+interface SongFiltsEncodeAndDecode extends SongFilesDecode {
+  encode?: SongFiles;
+  emk?: File;
+}
+
 interface SongFiles {
   mid: File;
   cur: File;

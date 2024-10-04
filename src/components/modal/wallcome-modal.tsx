@@ -1,11 +1,4 @@
-import {
-  getSongBySuperKey,
-  getTrackList,
-  loadFileSystem,
-  loadFileZip,
-  saveTrackList,
-  storageIsEmpty,
-} from "@/lib/storage";
+ 
 import React, { useEffect, useState } from "react";
 import Modal from "../common/modal";
 import Button from "../common/button/button";
@@ -15,6 +8,7 @@ import ProgressBar from "../common/progress-bar";
 import SongStorageProcessor from "./song-storage-modal";
 import { TRACKLIST_FILENAME } from "@/config/value";
 import { IoDocumentText } from "react-icons/io5";
+import { getTrackList, saveTrackList } from "@/lib/storage/tracklist";
 interface WallcomeModalProps {
   setTracklistFile: (file: File) => Promise<void>;
   setMusicLibraryFile: (files: Map<string, File>) => void;
@@ -91,19 +85,19 @@ const WallcomeModal: React.FC<WallcomeModalProps> = ({
     }
   };
 
-  const onLoadFileZip = async (_: File, fileList: FileList) => {
-    setFileSystem(false);
-    const loaded = await loadFileZip(fileList, setProgress);
-    if (loaded) {
-      setMusicLibraryFile(loaded);
-      handleClose(1000);
-      setZipFinsh(true);
-    }
-  };
+  // const onLoadFileZip = async (_: File, fileList: FileList) => {
+  //   setFileSystem(false);
+  //   const loaded = await loadFileZip(fileList, setProgress);
+  //   if (loaded) {
+  //     setMusicLibraryFile(loaded);
+  //     handleClose(1000);
+  //     setZipFinsh(true);
+  //   }
+  // };
 
-  useEffect(() => {
-    checkTracklist();
-  }, []);
+  // useEffect(() => {
+  //   // checkTracklist();
+  // }, []);
   return (
     <>
       {/* <SongStorageProcessor

@@ -33,3 +33,75 @@ export const onSelectTestMusic = async (
     return song;
   }
 };
+
+export const readSong = async (
+  file: FileList
+): Promise<SongFiltsEncodeAndDecode[]> => {
+  let song: SongFiltsEncodeAndDecode[] = [];
+  const groups = groupFileTrackList(file);
+
+  await Promise.all(
+    Object.values(groups).map(async (group) => {
+      if (group.emk) {
+        const decode = await parseEMKFile(group.emk);
+        if (decode.cur && decode.lyr && decode.mid) {
+          const read: SongFiltsEncodeAndDecode = {
+            mid: decode.mid,
+            cur: (await readCursorFile(decode.cur)) ?? [],
+            lyr: await readLyricsFile(decode.lyr),
+            emk: group.emk,
+          };
+          song.push(read);
+        }
+      } else if (group.mid && group.cur && group.lyr) {
+        const read: SongFiltsEncodeAndDecode = {
+          mid: group.mid,
+          cur: (await readCursorFile(group.cur)) ?? [],
+          lyr: await readLyricsFile(group.lyr),
+          encode: {
+            cur: group.cur,
+            lyr: group.lyr,
+            mid: group.mid,
+          },
+        };
+        song.push(read);
+      }
+    })
+  );
+
+  return song;
+};
+
+export const groupFileTrackList = (fileList: FileList): FileGroup[] => {
+  const files: File[] = Array.from(fileList);
+  const groups: FileGroup[] = [];
+  const fileMap: { [key: string]: FileGroup } = {};
+
+  files.map((file) => {
+    const fileNameParts = file.name.split(".");
+    const fileExtension = fileNameParts.pop()?.toLowerCase();
+    const fileName = fileNameParts.join(".");
+
+    if (fileExtension === "emk") {
+      groups.push({ emk: file });
+    } else {
+      if (!fileMap[fileName]) {
+        fileMap[fileName] = {};
+      }
+
+      if (fileExtension === "mid") {
+        fileMap[fileName].mid = file;
+      } else if (fileExtension === "lyr") {
+        fileMap[fileName].lyr = file;
+      } else if (fileExtension === "cur") {
+        fileMap[fileName].cur = file;
+      }
+    }
+  });
+
+  Object.values(fileMap).map((group) => {
+    groups.push(group);
+  });
+
+  return groups;
+};

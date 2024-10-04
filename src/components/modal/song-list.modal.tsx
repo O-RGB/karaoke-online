@@ -1,4 +1,5 @@
-import { getTrackList } from "@/lib/storage";
+
+import { getTrackList } from "@/lib/storage/tracklist";
 import React, { useEffect, useState } from "react";
 
 interface SongListModalProps {}

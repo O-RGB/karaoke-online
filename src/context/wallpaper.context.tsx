@@ -1,12 +1,8 @@
 "use client";
 import { WALLPAPER } from "@/config/value";
 import { getLocalWallpaper, setLocalWallpaper } from "@/lib/local-storage";
-import {
-  deleteWallpaperStorage,
-  getAllWallpaperStorage,
-  getWallpaperStorage,
-  saveWallpaperStorage,
-} from "@/lib/storage";
+import { saveWallpaperStorage, getWallpaperStorage, deleteWallpaperStorage, getAllWallpaperStorage } from "@/lib/storage/wallpaper";
+ 
 import React from "react";
 import {
   createContext,
@@ -148,7 +144,7 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
         }}
         className="hidden lg:block w-fit h-fit text-white font-bold text-2xl drop-shadow-md"
       >
-        NEXT KARAOKE
+        {/* NEXT KARAOKE */}
       </div>
       <div
         style={{
@@ -160,7 +156,7 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
         }}
         className="block lg:hidden w-fit h-fit text-white font-bold text-lg drop-shadow-md"
       >
-        NEXT KARAOKE
+        {/* NEXT KARAOKE */}
       </div>
       {isVideo ? (
         <>

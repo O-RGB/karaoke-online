@@ -1,20 +1,18 @@
-import {
-  deleteAllSong,
-  getAllKeysSong,
-  getSongBySuperKey,
-} from "@/lib/storage";
 import React, { useEffect, useState } from "react";
 import Label from "../common/label";
-import { ExtractFile } from "@/lib/zip";
+import { extractFile } from "@/lib/zip";
 import SearchSelect from "../common/input-data/select/search-select";
 import TableList from "../common/table/table-list";
-import { SONG_TYPE } from "@/config/value";
 import { toOptions } from "@/lib/general";
 import { onSearchList } from "@/lib/trie-search";
 import { useAppControl } from "@/hooks/app-control-hook";
 import Button from "../common/button/button";
-import Popconfirm from "../common/popconfirm";
 import { FaUser } from "react-icons/fa";
+import {
+  getAllKeysSong,
+  deleteAllSong,
+  getSongByKey,
+} from "@/lib/storage/song";
 
 interface MusicStoreModalProps {}
 
@@ -36,12 +34,12 @@ const MusicStoreModal: React.FC<MusicStoreModalProps> = ({}) => {
   };
 
   const onClickFolder = async (filename: string, notFocus: boolean = false) => {
-    const res = await getSongBySuperKey(filename);
+    const res = await getSongByKey(filename);
     if (res) {
       if (res.name.endsWith(".zip")) {
         setSongs([]);
         setUnzipLoading(true);
-        const unzip = await ExtractFile(res);
+        const unzip = await extractFile(res);
         setSongs(unzip);
         setUnzipLoading(false);
         setSongFucos(undefined);

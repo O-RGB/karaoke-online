@@ -116,13 +116,13 @@ export async function parseEMKFile(
 
       switch (tag) {
         case "MIDI_DATA":
-          mid = new File([rawData], "midi_data.mid", { type: "audio/midi" });
+          mid = new File([rawData], `${file.name}.mid`, { type: "audio/midi" });
           break;
         case "LYRIC_DATA":
-          lyr = new File([rawData], "lyric_data.lyr", { type: "text/plain" });
+          lyr = new File([rawData], `${file.name}.lyr`, { type: "text/plain" });
           break;
         case "CURSOR_DATA":
-          cur = new File([rawData], "cursor_data.cur", {
+          cur = new File([rawData], `${file.name}.cur`, {
             type: "application/octet-stream",
           });
           break;

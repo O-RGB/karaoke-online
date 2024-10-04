@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect } from "react";
 import { useSynth } from "@/hooks/spessasynth-hook";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
@@ -13,7 +13,7 @@ import WallcomeModal from "../modal/wallcome-modal";
 import SoundfontManager from "../modal/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
-import AppendSongModal from "../modal/append-song-modal";
+import AppendSongModal from "../modal/append-song";
 import { usePlayer } from "@/hooks/player-hook";
 import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status-panel";
@@ -26,7 +26,8 @@ import MidiSettingModal from "../modal/midi-setting-modal";
 import SongListModal from "../modal/song-list.modal";
 import { useDragDrop } from "@/hooks/drag-drop-hook";
 import { onSelectTestMusic } from "@/lib/karaoke/read";
-import AudioRecorder from "../tools/test";
+import { LoadDatabase } from "@/utils/database/model";
+import { getTracklistToJson } from "@/lib/storage/tracklist";
 
 interface KaraokePageProps {}
 
@@ -42,6 +43,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     cursorIndices,
     cursorTicks,
     setTracklistFile,
+    addTracklist,
     setMusicLibraryFile,
     musicLibrary,
   } = useAppControl();
@@ -49,8 +51,15 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { tempo, tick } = usePlayer();
   const { notification } = useNotification();
 
+  const startup = async () => {
+    await setupSpessasynth();
+    await LoadDatabase();
+    const tl = await getTracklistToJson();
+    addTracklist(tl);
+  };
+
   useEffect(() => {
-    setupSpessasynth();
+    startup();
   }, []);
 
   const decodeFile = async (files: FileList) => {
@@ -85,6 +94,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   return (
     <>
       <ContextModal modal={modalMap}>
+        {/* <div className="fixed top-44">
+          <LargeJsonEditor></LargeJsonEditor>
+        </div> */}
         <WallcomeModal
           setTracklistFile={setTracklistFile}
           setMusicLibraryFile={setMusicLibraryFile}

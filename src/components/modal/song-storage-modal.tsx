@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../common/modal";
 import { BsDatabaseAdd } from "react-icons/bs";
-import { saveSongToStorage } from "@/lib/storage";
 import ProgressBar from "../common/progress-bar";
+import { saveTracklistToStorage } from "@/lib/storage/tracklist";
 
 interface SongStorageProcessorProps {
   musicLibrary?: Map<string, File>;
@@ -27,7 +27,7 @@ const SongStorageProcessor: React.FC<SongStorageProcessorProps> = ({
 
   const onPrepareStorage = async () => {
     if (musicLibrary) {
-      const onStorage = await saveSongToStorage(musicLibrary, setProgress);
+      const onStorage = await saveTracklistToStorage(musicLibrary, setProgress);
       setFinsh(onStorage.result);
     }
   };

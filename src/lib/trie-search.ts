@@ -16,6 +16,12 @@ export async function addSongList<T = any>(file: File): Promise<TrieSearch<T>> {
   });
 }
 
+export function addAllTrie<T = any>(list: any[]) {
+  const trie = new TrieSearch<T>(["name", "artist"]);
+  trie.addAll(list);
+  return trie;
+}
+
 export async function onSearchList<T = any>(
   value: string,
   trie: TrieSearch<T>,

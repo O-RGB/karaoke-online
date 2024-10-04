@@ -1,4 +1,5 @@
-import { INSTRUMENTS } from "@/config/value";
+
+import { INSTRUMENTS } from "@/config/instruments";
 import {
   FaBell,
   FaBomb,

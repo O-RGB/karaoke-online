@@ -1,10 +1,6 @@
-import { MID_FILE_TYPE, CUR_FILE_TYPE, LYR_FILE_TYPE } from "@/config/value";
 import JSZip from "jszip";
-import { readCursorFile, readLyricsFile } from "./karaoke/ncn";
-import { getSongBySuperKey } from "./storage";
-import { parseEMKFile } from "./karaoke/emk";
 
-export const ExtractFile = async (zipFile: File): Promise<File[]> => {
+export const extractFile = async (zipFile: File): Promise<File[]> => {
   const zip = new JSZip();
   const fileList: File[] = [];
 
@@ -24,61 +20,44 @@ export const ExtractFile = async (zipFile: File): Promise<File[]> => {
   return fileList;
 };
 
-const getPathSuperZip = (selected?: SearchResult) => {
-  let superId = undefined;
-  let fileId = undefined;
-  if (selected?.fileId) {
-    const path = selected.fileId.split("/");
-    if (path.length === 2) {
-      superId = path[0];
-      fileId = path[1];
-    }
+export const zipFiles = async (
+  files: File[],
+  zipName: string
+): Promise<File | undefined> => {
+  const zip = new JSZip();
+
+  files.forEach((file) => {
+    zip.file(file.name, file, {
+      compression: "DEFLATE",
+      compressionOptions: { level: 9 },
+    });
+  });
+
+  try {
+    const content = await zip.generateAsync({ type: "blob" });
+    const zipFile = new File([content], `${zipName}.zip`, {
+      type: "application/zip",
+    });
+
+    return zipFile;
+  } catch (error) {
+    console.error("Error while zipping files:", error);
+    return undefined;
   }
-  return { superId, fileId };
 };
 
-export const loadSuperZipAndExtractSong = async (
-  songStore: Map<string, File>,
-  selected?: SearchResult
-) => {
-  const { superId, fileId } = getPathSuperZip(selected);
-  if (superId && fileId) {
-    var superFile: File | undefined = undefined;
-    if (songStore.size === 0) {
-      superFile = await getSongBySuperKey(`${superId}.zip`);
-    } else {
-      superFile = songStore.get(superId);
-    }
-    if (superFile) {
-      const superUnzip = await ExtractFile(superFile);
-      const index = parseInt(fileId);
-      if (!Number(index)) {
-        return;
-      }
-      const zip = superUnzip[index];
+export const addFilesInZip = async (zipFile: File, files: File[]) => {
+  const zip = new JSZip();
+  try {
+    const zipContent = await zip.loadAsync(zipFile);
+    files.forEach((file) => {
+      zipContent.file(file.name, file);
+    });
 
-      let songUnzip: File[] = [];
-      if (zip.name.toLowerCase().endsWith("emk")) {
-        const decodeed = await parseEMKFile(zip);
-        if (decodeed.mid && decodeed.cur && decodeed.lyr) {
-          songUnzip = [decodeed.mid, decodeed.cur, decodeed.lyr];
-        }
-      } else {
-        songUnzip = await ExtractFile(zip);
-      }
+    const updatedZip = await zipContent.generateAsync({ type: "blob" });
 
-      var song: Partial<SongFilesDecode> = {};
-      songUnzip.map(async (file) => {
-        if (file.name.endsWith(MID_FILE_TYPE)) {
-          song.mid = file;
-        } else if (file.name.endsWith(CUR_FILE_TYPE)) {
-          song.cur = await readCursorFile(file);
-        } else if (file.name.endsWith(LYR_FILE_TYPE)) {
-          song.lyr = await readLyricsFile(file);
-        }
-      });
-
-      return song as SongFilesDecode;
-    }
+    return updatedZip;
+  } catch (error) {
+    console.error("Error while adding files to ZIP:", error);
   }
 };

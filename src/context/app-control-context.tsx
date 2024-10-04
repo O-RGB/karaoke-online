@@ -4,18 +4,20 @@ import { createContext, FC, useCallback, useEffect, useState } from "react";
 import { useSynth } from "../hooks/spessasynth-hook";
 import { useRemote } from "../hooks/peer-hook";
 import { convertCursorToTicks, mapCursorToIndices } from "@/lib/app-control";
-import { addSongList, onSearchList } from "@/lib/trie-search";
+import { addAllTrie, onSearchList } from "@/lib/trie-search";
 import { MIDI, midiControllers } from "spessasynth_lib";
-import { loadSuperZipAndExtractSong } from "@/lib/zip";
+
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import TrieSearch from "trie-search";
-import { getTrackList } from "@/lib/storage";
 import React from "react";
+import { jsonTracklistToDatabase } from "@/lib/storage/tracklist";
+import { getSong } from "@/lib/storage/song";
 
 type AppControlContextType = {
   updateVolumeSysth: (index: number, value: number) => void;
   onSearchStrList: (str: string) => Promise<SearchResult[]> | undefined;
   setTracklistFile: (file: File) => Promise<void>;
+  setRemoveTracklistFile: () => Promise<void>;
   setPlayingTrackFile: (value: SearchResult) => void;
   setMusicLibraryFile: (files: Map<string, File>) => void;
   handleSetLyrics: (lyr: string[]) => void;
@@ -25,6 +27,7 @@ type AppControlContextType = {
   updatePitch: (semitones: number, channel?: number) => void;
   updatePerset: (channel: number, value: number) => void;
   updateHideVolume: (hide: boolean) => void;
+  addTracklist: (item: SearchResult[]) => void;
   hideVolume: boolean;
   musicLibrary: Map<string, File>;
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -44,6 +47,7 @@ export const AppControlContext = createContext<AppControlContextType>({
   updateVolumeSysth: () => {},
   onSearchStrList: async () => [],
   setTracklistFile: async () => {},
+  setRemoveTracklistFile: async () => {},
   setPlayingTrackFile: async () => {},
   setMusicLibraryFile: async () => {},
   handleSetLyrics: () => {},
@@ -53,6 +57,7 @@ export const AppControlContext = createContext<AppControlContextType>({
   updatePitch: () => {},
   updatePerset: () => {},
   updateHideVolume: () => {},
+  addTracklist: () => {},
   hideVolume: false,
   lyrics: [],
   cursorTicks: [],
@@ -196,9 +201,28 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   };
 
   const setTracklistFile = async (file: File) => {
-    const trie = await addSongList<SearchResult>(file);
-    setTracklist(trie);
+    const toDatabase = await jsonTracklistToDatabase(file);
+    if (toDatabase) {
+      const trie = addAllTrie(toDatabase);
+      setTracklist(trie);
+    }
   };
+
+  const addTracklist = (items: SearchResult[]) => {
+    if (tracklist) {
+      const updatedTrie = tracklist;
+      items.forEach((item) => updatedTrie.add(item));
+      setTracklist(updatedTrie);
+    } else {
+      const trie = addAllTrie(items);
+      setTracklist(trie);
+    }
+  };
+
+  const setRemoveTracklistFile = async () => {
+    setTracklist(undefined);
+  };
+
   const setSongPlaying = async (files: SongFilesDecode) => {
     if (!player) {
       console.log("page");
@@ -236,7 +260,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   };
 
   const loadAndPlaySong = async (value: SearchResult) => {
-    const song = await loadSuperZipAndExtractSong(musicLibrary, value);
+    const song = await getSong(musicLibrary, value);
     if (song) {
       setSongPlaying(song);
     }
@@ -300,6 +324,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         setTracklistFile,
         onSearchStrList,
         setPlayingTrackFile,
+        setRemoveTracklistFile,
         setMusicLibraryFile,
         handleSetLyrics,
         setSongPlaying,
@@ -308,6 +333,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         updatePitch,
         updatePerset,
         updateHideVolume,
+        addTracklist,
         hideVolume,
         volumeController,
         lyrics,
