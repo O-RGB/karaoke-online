@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRemote } from "@/hooks/peer-hook"; // Updated hook
-import VolumePanel from "../tools/volume-panel";
+import VolumePanel from "../tools/volume-panel/volume-panel";
 import { toOptions } from "@/lib/general";
 import { onSearchList } from "@/lib/trie-search";
 import SearchDropdown from "../tools/search-song/search-dropdown";

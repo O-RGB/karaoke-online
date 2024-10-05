@@ -25,6 +25,8 @@ type ModalType =
   | "MIDI_SETTING"
   | "SONG_LIST";
 
+type InputBarLayout = "vertical" | "horizontal";
+
 type ModalComponents = {
   [key in ModalType]?: React.ReactNode;
 };
@@ -98,4 +100,18 @@ interface ContextMenuProps<T = any> {
 interface INotification {
   id: number;
   text: string;
+}
+
+interface RangeBarProps extends InputProps {
+  layout?: InputBarLayout;
+
+  min?: number;
+  max?: number;
+  defaultValue?: number;
+  value?: number;
+  onChange?: (value: number) => void;
+  // inputProps?: InputProps;
+
+  onMouseUp?: () => void;
+  onTouchEnd?: () => void;
 }

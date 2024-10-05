@@ -6,6 +6,8 @@ import SelectLyrics from "../lyrics";
 import { useLyrics } from "@/hooks/lyrics-hook";
 import { useAppControl } from "@/hooks/app-control-hook";
 import { useOrientation } from "@/hooks/orientation-hook";
+import LyricsAnimation from "../common/lyrics/cut-animation";
+import RandomLyrics from "../lyrics/random-lyrics";
 
 interface LyricsPanelProps {
   lyrics: string[];
@@ -112,13 +114,39 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
       <div className={className}>
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
 
-        <SelectLyrics
+        {/* <SelectLyrics
           display={display.current}
           displayBottom={displayBottom.current}
           options={lyricsDisplay}
           position={position.current}
           charIndex={charIndex.current}
-        ></SelectLyrics>
+        ></SelectLyrics> */}
+
+        <div className="flex flex-col py-7 lg:gap-3 items-center justify-center text-white drop-shadow-lg">
+          {lyricsDisplay === "default" ? (
+            <>
+              <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
+                <LyricsAnimation
+                  charIndex={position.current === true ? charIndex.current : -1}
+                  display={display.current}
+                ></LyricsAnimation>
+              </span>
+              <br />
+              <LyricsAnimation
+                charIndex={position.current === false ? charIndex.current : -1}
+                display={displayBottom.current}
+              ></LyricsAnimation>
+            </>
+          ) : (
+            <>
+              <RandomLyrics
+                display={display.current}
+                displayBottom={displayBottom.current}
+                position={position.current}
+              ></RandomLyrics>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

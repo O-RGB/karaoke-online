@@ -1,11 +1,21 @@
+import React, { useMemo, useCallback } from "react";
 import { useLyrics } from "@/hooks/lyrics-hook";
-import React, { useEffect } from "react";
 
 interface LyricsAnimationProps {
   display: string[][];
   charIndex: number;
   fontSize?: string;
 }
+
+const LyrTextRender: React.FC<{ lyrList: string[] }> = React.memo(
+  ({ lyrList }) => {
+    const text = useMemo(
+      () => lyrList.map((char) => (char === " " ? "\u00A0" : char)).join(""),
+      [lyrList]
+    );
+    return <div>{text}</div>;
+  }
+);
 
 const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
   display,
@@ -14,43 +24,37 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
 }) => {
   const { Color, ColorBorder, ActiveColor, ActiveBorderColor, Font } =
     useLyrics();
-  useEffect(() => {}, [display, charIndex]);
 
-  function LyrTextRender({
-    lyrList,
-    keyValue,
-  }: {
-    lyrList: string[];
-    keyValue: string;
-  }) {
-    const group = lyrList.map((data) => (data === " " ? "&nbsp;" : data));
-    return <div dangerouslySetInnerHTML={{ __html: group.join("") }}></div>;
-  }
+  const getCharIndexForGroup = useCallback(
+    (index: number) => {
+      return display.slice(0, index).reduce((a, b) => a + b.length, 0) + 1;
+    },
+    [display]
+  );
+
   return (
     <div style={{ ...Font?.style }} className={`flex ${fontSize}`}>
       {display.map((data, index) => {
-        const lyrInx =
-          display.slice(0, index).reduce((a, b) => a + b.length, 0) + 1;
+        const lyrInx = getCharIndexForGroup(index);
+        const isActive = lyrInx <= charIndex;
+
         return (
           <div className="relative" key={`char-${index}`}>
             <div
-              className={`absolute top-0 left-0 font-outline-2 sm:font-outline-4 transition-all `}
+              className="absolute top-0 left-0 font-outline-2 sm:font-outline-4 transition-all"
               style={{
-                color: lyrInx <= charIndex ? ActiveBorderColor : ActiveColor,
+                color: isActive ? ActiveBorderColor : ActiveColor,
               }}
             >
-              <LyrTextRender keyValue="top-lyr" lyrList={data}></LyrTextRender>
+              <LyrTextRender lyrList={data} />
             </div>
             <div
-              className={`relative flex flex-col text-center transition-all`}
+              className="relative flex flex-col text-center transition-all"
               style={{
-                color: lyrInx <= charIndex ? ColorBorder : Color,
+                color: isActive ? ColorBorder : Color,
               }}
             >
-              <LyrTextRender
-                keyValue="bottom-lyr"
-                lyrList={data}
-              ></LyrTextRender>
+              <LyrTextRender lyrList={data} />
             </div>
           </div>
         );
@@ -59,4 +63,4 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
   );
 };
 
-export default LyricsAnimation;
+export default React.memo(LyricsAnimation);

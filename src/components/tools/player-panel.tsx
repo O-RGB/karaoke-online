@@ -65,9 +65,10 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               max={100}
               value={timer}
               layout="horizontal"
-              inputProps={{
-                disabled: true,
-              }}
+              disabled={true}
+              // inputProps={{
+              //   disabled: true,
+              // }}
             ></RangeBar>
           </div>
           <div className="hidden lg:block lg:w-full h-full p-1.5">

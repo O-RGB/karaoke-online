@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import VolumeMeter from "../common/volume/volume-meter";
+import VolumeMeter from "../../common/volume/volume-meter";
 import { Synthetizer } from "spessasynth_lib";
 import { useAppControl } from "@/hooks/app-control-hook";
 import {
@@ -7,14 +7,18 @@ import {
   PiUserMinusFill,
   PiUserSoundFill,
 } from "react-icons/pi";
-import NumberButton from "../common/input-data/number-button";
-import SwitchButton from "../common/input-data/switch/switch-button";
+import NumberButton from "../../common/input-data/number-button";
+import SwitchButton from "../../common/input-data/switch/switch-button";
 import { useNotification } from "@/hooks/notification-hook";
-import Button from "../common/button/button";
+import Button from "../../common/button/button";
 import { MdArrowDropUp } from "react-icons/md";
 import { useSynth } from "@/hooks/spessasynth-hook";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { useRemote } from "@/hooks/peer-hook";
+import RangeBarClone from "../../common/input-data/range-bar-clone";
+import VolumeMeterV from "../../common/volume/volume-meter-v";
+import InstrumentsButton from "./instruments-button";
+import VolumeAction from "./volume-action";
 
 interface VolumePanelProps {
   instrument: number[];
@@ -177,28 +181,56 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
               style={{
                 opacity: hideVolume ? 0 : 1,
               }}
-              className=" flex w-full items-center justify-center duration-500"
-              key={`gin-${ch}`}
+              className="flex flex-col"
             >
-              <VolumeMeter
-                height={`${orientation === "landscape" ? "4rem" : "6rem"}`}
-                perset={perset}
+              <VolumeAction
+                channel={ch + 1}
                 onLock={onLockVolume}
                 isLock={lock[ch]}
-                instruments={instrument[ch]}
-                value={volumeController[ch]}
-                level={data}
+              ></VolumeAction>
+              <div
+                className="relative flex items-center justify-center duration-500 w-full lg:w-[34px] h-full"
+                key={`gin-${ch}`}
+              >
+                <RangeBarClone
+                  value={volumeController[ch]}
+                  className="z-20"
+                  max={127}
+                  onMouseUp={() => updateVolumeHeld(true)}
+                  onTouchEnd={() => updateVolumeHeld(false)}
+                  onChange={(v) => onVolumeMeterChange(ch, v)}
+                ></RangeBarClone>
+
+                <VolumeMeterV
+                  height={`${orientation === "landscape" ? "4rem" : "6rem"}`}
+                  className="z-10 w-full absolute bottom-0 left-0 h-full"
+                  level={data}
+                ></VolumeMeterV>
+              </div>
+              <InstrumentsButton
                 channel={ch + 1}
+                instruments={instrument[ch]}
                 onPersetChange={onPersetChange}
-                onChange={onVolumeMeterChange}
-                onMouseUp={() => updateVolumeHeld(true)}
-                onTouchEnd={() => updateVolumeHeld(false)}
-              ></VolumeMeter>
-              <br />
+                perset={perset}
+              ></InstrumentsButton>
             </div>
           );
         })}
       </div>
+      {/* <VolumeMeter
+          height={`${orientation === "landscape" ? "4rem" : "6rem"}`}
+          perset={perset}
+          onLock={onLockVolume}
+          isLock={lock[ch]}
+          instruments={instrument[ch]}
+          value={volumeController[ch]}
+          level={data}
+          channel={ch + 1}
+          onPersetChange={onPersetChange}
+          onChange={onVolumeMeterChange}
+          onMouseUp={() => updateVolumeHeld(true)}
+          onTouchEnd={() => updateVolumeHeld(false)}
+        ></VolumeMeter> */}
 
       <div>
         <div className="flex gap-1.5">

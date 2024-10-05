@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+} from "react";
 import RangeBar from "../input-data/range-bar";
 import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
 import { FaDrum } from "react-icons/fa";
@@ -40,62 +46,88 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
   const maxLevel = 100;
 
   const [filledBars, setFilledBars] = useState<number>(0);
-  const [volume, setVolume] = useState<number>(0);
+  const [volume, setVolume] = useState<number>(value);
 
-  const onVolumeMeterChange = (value: number = 0) => {
-    onChange?.(channel - 1, value);
-    setVolume(value);
-  };
+  const onVolumeMeterChange = useCallback(
+    (newValue: number = 0) => {
+      onChange?.(channel - 1, newValue);
+      setVolume(newValue);
+    },
+    [onChange, channel]
+  );
 
-  const onLockVolume = () => {
+  const onLockVolume = useCallback(() => {
     onLock?.(channel);
-  };
+  }, [onLock, channel]);
 
-  useEffect(() => {
-    setFilledBars(Math.round((level / 150) * maxLevel));
-  }, [level]);
+  // useEffect(() => {
+  //   setFilledBars(Math.round((level / 150) * maxLevel));
+  // }, [level]);
 
   useEffect(() => {
     setVolume(value);
   }, [value]);
 
+  const persetOptions = useMemo(
+    () =>
+      perset?.map((data) => ({
+        label: `${data.program} : ${data.presetName}`,
+        value: data.program.toString(),
+      })),
+    [perset]
+  );
+
+  const channelIcon = useMemo(() => {
+    if (channel === 10) return <FaDrum />;
+    if (channel === 9) return <PiMicrophoneStageFill />;
+    return getIconInstruments(instruments ?? 0)?.icon;
+  }, [channel, instruments]);
+
   return (
-    <div className="flex flex-col items-center justify-center w-full lg:w-[34px] ">
+    <>
+
       <div
+        className="absolute z-10 left-0 bottom-0 w-full bg-white/50 duration-75 transition-all"
+        style={{
+          height: isLock ? "" : `${level}%`,
+        }}
+      />
+    </>
+  );
+
+  return (
+    <div className="flex flex-col items-center justify-center w-full lg:w-[34px]">
+      {/* <div
         onClick={onLockVolume}
         className={`${
           isLock ? "bg-red-500 hover:bg-red-500/50" : "hover:bg-white/30"
-        } w-full text-center text-white font-bold text-[10px] flex items-center justify-center gap-[2px] rounded-t-md  duration-300 cursor-pointer border-t border-x border-white/20 `}
+        } w-full text-center text-white font-bold text-[10px] flex items-center justify-center gap-[2px] rounded-t-md duration-300 cursor-pointer border-t border-x border-white/20`}
       >
         <span className="pt-0.5">
-          {isLock ? (
-            <BiSolidVolumeMute></BiSolidVolumeMute>
-          ) : (
-            <BiSolidVolumeFull></BiSolidVolumeFull>
-          )}
+          {isLock ? <BiSolidVolumeMute /> : <BiSolidVolumeFull />}
         </span>
         <span>{channel}</span>
-      </div>
+      </div> */}
       <div className="relative w-full lg:max-w-20">
         <div
           style={{ height }}
           className="relative flex gap-1 p-1 w-full justify-center"
         >
-          <div
+          {/* <div
             style={{ height }}
-            className="absolute z-20 left-0 bottom-0 w-full grid opacity-30  overflow-hidden"
+            className="absolute z-20 left-0 bottom-0 w-full grid opacity-30 overflow-hidden"
           >
             <div className="bg-white/90 w-full"></div>
             <div className="bg-white/60 w-full"></div>
             <div className="bg-white/30 w-full"></div>
-          </div>
+          </div> */}
           <div
             className="absolute z-10 left-0 bottom-0 w-full bg-white/50 duration-75 transition-all"
             style={{
-              height: isLock ? "" : `${(filledBars / maxLevel) * 100}%`,
+              height: isLock ? "" : `${level}%`,
             }}
           />
-          <div className="relative z-20 flex items-center justify-center h-full lg:w-7">
+          {/* <div className="relative z-20 flex items-center justify-center h-full lg:w-7">
             <RangeBar
               value={volume}
               max={127}
@@ -104,44 +136,31 @@ const VolumeMeter: React.FC<VolumeMeterProps> = ({
               inputProps={{
                 tabIndex: -1,
                 disabled: isLock,
-                onMouseUp: onMouseUp,
-                onTouchEnd: onTouchEnd,
+                onMouseUp,
+                onTouchEnd,
               }}
-            ></RangeBar>
-          </div>
+            />
+          </div> */}
         </div>
       </div>
-      <ButtonDropdown
+      {/* <ButtonDropdown
         value={`${instruments ?? 0}`}
         onChange={(value) => {
           onPersetChange?.(channel, parseInt(value));
         }}
-        options={perset?.map((data) => {
-          return {
-            label: data.program.toString() + " : " + data.presetName,
-            value: data.program.toString(),
-          } as IOptions;
-        })}
+        options={persetOptions}
       >
-        <div className="w-full lg:min-w-7 border-b border-x border-white/20 cursor-pointer  group-hover:bg-white/20 duration-300">
+        <div className="w-full lg:min-w-7 border-b border-x border-white/20 cursor-pointer group-hover:bg-white/20 duration-300">
           <div className="w-full blur-overlay text-center text-white font-bold text-[10px] p-1 flex gap-0.5 justify-center items-center h-5">
-            <span>
-              {channel === 10 ? (
-                <FaDrum></FaDrum>
-              ) : channel === 9 ? (
-                <PiMicrophoneStageFill></PiMicrophoneStageFill>
-              ) : (
-                <>{getIconInstruments(instruments ?? 0)?.icon}</>
-              )}
-            </span>
+            <span>{channelIcon}</span>
             <span className="text-[8px] pb-[1px] font-bold text-white/70">
               {`${instruments ?? 0}`.padStart(3, "0")}
             </span>
           </div>
         </div>
-      </ButtonDropdown>
+      </ButtonDropdown> */}
     </div>
   );
 };
 
-export default VolumeMeter;
+export default React.memo(VolumeMeter);

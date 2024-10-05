@@ -1,16 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 
-interface RangeBarCloneProps {
-  onChange?: (value: number) => void;
-  min?: number;
-  max?: number;
-  value?: number;
-  disabled?: boolean;
-  onMouseUp?: () => void;
-  onTouchEnd?: () => void;
-}
-
-const RangeBarClone: React.FC<RangeBarCloneProps> = ({
+const RangeBarClone: React.FC<RangeBarProps> = ({
   min = 0,
   max = 100,
   onChange,
@@ -18,25 +14,25 @@ const RangeBarClone: React.FC<RangeBarCloneProps> = ({
   disabled,
   onMouseUp,
   onTouchEnd,
+  ...props
 }) => {
   const [internalValue, setInternalValue] = useState(value ?? min);
   const sliderRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
 
+  // Calculate the percentage based on the value.
   const valueToPercentage = useCallback(
-    (val: number) => {
-      return ((val - min) / (max - min)) * 100;
-    },
+    (val: number) => ((val - min) / (max - min)) * 100,
     [min, max]
   );
 
+  // Calculate the value based on the percentage.
   const percentageToValue = useCallback(
-    (percentage: number) => {
-      return min + (percentage / 100) * (max - min);
-    },
+    (percentage: number) => min + (percentage / 100) * (max - min),
     [min, max]
   );
 
+  // Update the slider value based on the Y coordinate.
   const updateValue = useCallback(
     (clientY: number) => {
       if (sliderRef.current) {
@@ -51,19 +47,30 @@ const RangeBarClone: React.FC<RangeBarCloneProps> = ({
     [percentageToValue, onChange]
   );
 
-  useEffect(() => {
-    const handleMove = (clientY: number) => {
-      if (isDragging.current) {
-        updateValue(clientY);
-      }
-    };
+  // Handle mouse/touch movement events.
+  const handleMove = useCallback(
+    (clientY: number) => {
+      if (isDragging.current) updateValue(clientY);
+    },
+    [updateValue]
+  );
 
+  const handleStart = useCallback(
+    (clientY: number) => {
+      isDragging.current = true;
+      updateValue(clientY);
+    },
+    [updateValue]
+  );
+
+  const handleEnd = useCallback(() => {
+    isDragging.current = false;
+  }, []);
+
+  // Set up event listeners for mouse and touch events.
+  useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => handleMove(e.clientY);
     const handleTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientY);
-
-    const handleEnd = () => {
-      isDragging.current = false;
-    };
 
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("touchmove", handleTouchMove);
@@ -76,20 +83,19 @@ const RangeBarClone: React.FC<RangeBarCloneProps> = ({
       document.removeEventListener("mouseup", handleEnd);
       document.removeEventListener("touchend", handleEnd);
     };
-  }, [updateValue]);
+  }, [handleMove, handleEnd]);
 
   useEffect(() => {
-    if (value !== undefined && isDragging) {
+    if (value) {
       setInternalValue(value);
     }
   }, [value]);
 
-  const handleStart = (clientY: number) => {
-    isDragging.current = true;
-    updateValue(clientY);
-  };
-
-  const displayPercentage = valueToPercentage(internalValue);
+  // Display percentage for the UI.
+  const displayPercentage = useMemo(
+    () => valueToPercentage(internalValue),
+    [internalValue, valueToPercentage]
+  );
 
   return (
     <div
@@ -97,11 +103,11 @@ const RangeBarClone: React.FC<RangeBarCloneProps> = ({
         opacity: !disabled ? 1 : 0.5,
         pointerEvents: disabled ? "none" : undefined,
       }}
-      className="h-full w-0.5 flex items-center justify-center bg-white/50 touch-none rounded-full"
+      className={`h-full w-0.5 bg-white/50 touch-none rounded-full border ${props.className}`}
     >
       <div
         ref={sliderRef}
-        className="h-[85%] w-4 rounded-full relative"
+        className="h-[90%] rounded-full relative"
         onMouseDown={(e) => {
           onMouseUp?.();
           handleStart(e.clientY);
@@ -112,17 +118,15 @@ const RangeBarClone: React.FC<RangeBarCloneProps> = ({
         }}
       >
         <div
-          className="absolute bottom-0 left-0 right-0 rounded-full"
-          style={{ height: `${displayPercentage}%` }}
-        />
-        <div
-          className={`${
-            isDragging.current ? "" : "duration-1000"
-          } absolute w-4 h-4 flex items-center justify-center bg-white border-[0.01rem] border-gray-400 rounded-full shadow-md -left-[0.43rem] -translate-y-1/2 cursor-pointer`}
+          className={`
+            absolute w-4 h-4 
+            flex items-center justify-center 
+            bg-white border-[0.01rem] border-gray-400 
+            rounded-full shadow-md cursor-pointer
+            -left-[8px] ${!isDragging.current ? "duration-500" : "duration-0"}
+            `}
           style={{ top: `${100 - displayPercentage}%` }}
-        >
-          <div className="p-4"></div>
-        </div>
+        ></div>
       </div>
     </div>
   );

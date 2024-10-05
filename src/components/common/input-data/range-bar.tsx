@@ -1,31 +1,20 @@
 import React, { CSSProperties, useEffect, useState } from "react";
 import RangeBarClone from "./range-bar-clone";
 
-type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
-interface RangeBarProps {
-  layout?: "vertical" | "horizontal";
-  min?: number;
-  max?: number;
-  defaultValue?: number;
-  onRangeChange?: (value: number) => void;
-  inputProps?: InputProps;
-  value?: number;
-}
-
 const RangeBar: React.FC<RangeBarProps> = ({
   layout = "vertical",
   min,
   max,
   defaultValue,
-  onRangeChange,
-  inputProps,
+  // onChange,
+  // inputProps,
   value,
 }) => {
   const [range, setRange] = useState<number>(100);
   useEffect(() => {
-    if (defaultValue) {
-      setRange(defaultValue);
-    }
+    // if (defaultValue) {
+    //   setRange(defaultValue);
+    // }
   }, [defaultValue]);
   var setLayout: CSSProperties =
     layout == "vertical"
@@ -42,37 +31,35 @@ const RangeBar: React.FC<RangeBarProps> = ({
 
   const onChange = (value: number) => {
     setRange(value);
-    onRangeChange?.(value);
+    onChange?.(value);
   };
   const onChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     const target = event.target;
     const num = parseInt(target.value);
     if (Number(num)) {
-      onRangeChange?.(num);
+      onChange?.(num);
     }
   };
-
-  useEffect(() => {}, [value]);
 
   if (layout === "vertical") {
     return (
       <RangeBarClone
-        onChange={onRangeChange}
-        min={min}
-        max={max}
-        value={value}
-        disabled={inputProps?.disabled}
+      // onChange={onChange}
+      // min={min}
+      // max={max}
+      // value={value}
+      // disabled={inputProps?.disabled}
       ></RangeBarClone>
     );
   } else {
     return (
       <input
-        {...inputProps}
-        style={{
-          ...setLayout,
-          ...inputProps?.style,
-          transition: "all 0.3s ease",
-        }}
+        // {...inputProps}
+        // style={{
+        //   ...setLayout,
+        //   ...inputProps?.style,
+        //   transition: "all 0.3s ease",
+        // }}
         onChange={onChangeHandler}
         type="range"
         defaultValue={defaultValue}

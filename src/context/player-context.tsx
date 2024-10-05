@@ -27,17 +27,11 @@ export const PlayerContext = createContext<PlayerContextType>({
 });
 
 export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
-  const { cursorTicks, lyrics, cursorIndices, midiPlaying } = useAppControl();
+  const { lyrics, midiPlaying } = useAppControl();
   const { player } = useSynth();
 
   const [tick, setTick] = useState<number>(0);
   const [tempo, setTempo] = useState<number>(0);
-
-  const rafRef = useRef<number | null>(null);
-  const lastTimeRef = useRef<number>(0);
-  const curIdIndex = useRef<number>(0);
-  const lyricsIndex = useRef<number>(0);
-  const interval = 50;
 
   const tempoChanges = useRef<ITempoChange[]>([]);
   const timeList = useRef<ITempoTimeChange[]>([]);
