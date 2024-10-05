@@ -1,5 +1,5 @@
 import React from "react";
-import LyricsAnimation from "../common/lyrics/cut-animation";
+import LyricsAnimation from "../common/lyrics/cut-lyrics/cut-animation";
 
 interface CutLyricsProps {
   position: boolean;

@@ -59,17 +59,22 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             shape={false}
             icon={<TbPlayerSkipForwardFilled className="text-white" />}
           ></Button>
-          <div className="w-full lg:w-[300px] px-2 flex items-center pt-0.5">
-            <RangeBar
+          <div className="w-full lg:w-[300px]  px-2 flex items-center pt-0.5">
+            <input
+              style={{
+                width: "100%",
+              }}
+              onChange={(e) => {
+                const value = +e.target.value;
+                const newCurrentTime = (value / 100) * player.duration;
+                player.currentTime = newCurrentTime;
+              }}
+              type="range"
+              className="transition duration-300"
               min={0}
               max={100}
               value={timer}
-              layout="horizontal"
-              disabled={true}
-              // inputProps={{
-              //   disabled: true,
-              // }}
-            ></RangeBar>
+            ></input>
           </div>
           <div className="hidden lg:block lg:w-full h-full p-1.5">
             <div className="rounded-md bg-black/15 h-full flex items-center py-1 text-white overflow-">

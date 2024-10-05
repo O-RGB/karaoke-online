@@ -19,6 +19,7 @@ import RangeBarClone from "../../common/input-data/range-bar-clone";
 import VolumeMeterV from "../../common/volume/volume-meter-v";
 import InstrumentsButton from "./instruments-button";
 import VolumeAction from "./volume-action";
+import VolumeHorizontal from "./volume-horizontal";
 
 interface VolumePanelProps {
   instrument: number[];
@@ -104,14 +105,12 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
         );
         return value;
       });
-
       if (hideVolume) {
-        const totalGain = newVolumeLevels.reduce(
-          (sum, value) => sum + value,
-          0
-        );
-        const mainVolume = (totalGain / (newVolumeLevels.length * 100)) * 500;
-        gainMain.current = mainVolume;
+        const totalGain =
+          newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
+        const mainGain = (totalGain / (newVolumeLevels.length * 16)) * 100;
+
+        gainMain.current = Math.round(mainGain); // กำหนดค่า mainGain
       } else {
         gain.current = newVolumeLevels;
       }
@@ -122,15 +121,17 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           type: "GIND_NODE",
           user: "SUPER",
         });
-        // sendSuperUserMessage(newVolumeLevels, "GIND_NODE");
       }
     }
-  }, [analysers, hideVolume, superUserConnections]);
+
+    if (!player?.paused) {
+      requestAnimationFrame(render);
+    }
+  }, [analysers, hideVolume, superUserConnections, player?.paused]);
 
   useEffect(() => {
     if (analysers && !player?.paused) {
-      const intervalId = setInterval(() => render(), 100);
-      return () => clearInterval(intervalId);
+      requestAnimationFrame(render);
     }
   }, [analysers, render, player?.paused]);
 
@@ -167,21 +168,19 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
               } lg:h-[150px]`
         }`}
       >
-        <div
-          className="absolute top-0 left-0 h-full bg-white/40 duration-100 transition-all"
-          style={{
-            width: `${gainMain.current}%`,
-            opacity: !hideVolume ? 0 : 1,
-          }}
-        ></div>
+        <VolumeHorizontal
+          hide={hideVolume}
+          value={gainMain.current}
+        ></VolumeHorizontal>
 
         {gain.current.map((data, ch) => {
           return (
             <div
+              key={`ch-vol-${ch}`}
               style={{
                 opacity: hideVolume ? 0 : 1,
               }}
-              className="flex flex-col"
+              className="flex flex-col duration-300"
             >
               <VolumeAction
                 channel={ch + 1}
@@ -189,11 +188,11 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                 isLock={lock[ch]}
               ></VolumeAction>
               <div
-                className="relative flex items-center justify-center duration-500 w-full lg:w-[34px] h-full"
+                className="relative flex items-center justify-center w-full lg:w-[34px] h-full"
                 key={`gin-${ch}`}
               >
                 <RangeBarClone
-                  value={volumeController[ch]}
+                  value={hideVolume ? 0 : volumeController[ch]}
                   className="z-20"
                   max={127}
                   onMouseUp={() => updateVolumeHeld(true)}
@@ -202,6 +201,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                 ></RangeBarClone>
 
                 <VolumeMeterV
+                  max={127}
                   height={`${orientation === "landscape" ? "4rem" : "6rem"}`}
                   className="z-10 w-full absolute bottom-0 left-0 h-full"
                   level={data}

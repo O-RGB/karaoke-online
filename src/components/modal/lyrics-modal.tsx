@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLyrics } from "@/hooks/lyrics-hook";
-import LyricsAnimation from "../common/lyrics/cut-animation";
+import LyricsAnimation from "../common/lyrics/cut-lyrics/cut-animation";
 import Label from "../common/label";
 import SwitchRadio from "../common/input-data/switch/switch-radio";
 import RandomLyrics from "../lyrics/random-lyrics";

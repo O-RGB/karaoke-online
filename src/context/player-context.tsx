@@ -1,13 +1,15 @@
 "use client";
 import { useAppControl } from "@/hooks/app-control-hook";
 import { useSynth } from "@/hooks/spessasynth-hook";
-import {
-  calculateTicks,
-  convertTicksToTime,
-  sortTempoChanges,
-} from "@/lib/app-control";
-import React from "react";
-import { createContext, FC, useEffect, useRef, useState } from "react";
+import { convertTicksToTime, sortTempoChanges } from "@/lib/app-control";
+import React, {
+  createContext,
+  FC,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { Sequencer } from "spessasynth_lib";
 
 type PlayerContextType = {
@@ -19,6 +21,39 @@ type PlayerContextType = {
 type PlayerProviderProps = {
   children: React.ReactNode;
 };
+
+function getTicks(
+  timeDivision: number,
+  currentTime: number,
+  tempo: number
+): number {
+  const secondsPerBeat = 60.0 / tempo;
+  const ticksPerSecond = timeDivision / secondsPerBeat;
+  return currentTime * ticksPerSecond;
+}
+
+function calculateTicks(
+  timeDivision: number,
+  currentTime: number,
+  tempoChanges: ITempoTimeChange[]
+) {
+  let ticks = 0;
+  let lastTime = 0;
+  let lastTempo = tempoChanges[0].tempo;
+
+  for (const change of tempoChanges) {
+    if (currentTime > change.time) {
+      ticks += getTicks(timeDivision, change.time - lastTime, lastTempo);
+      lastTime = change.time;
+      lastTempo = change.tempo;
+    } else {
+      break;
+    }
+  }
+
+  ticks += getTicks(timeDivision, currentTime - lastTime, lastTempo);
+  return { tick: Math.round(ticks), tempo: lastTempo };
+}
 
 export const PlayerContext = createContext<PlayerContextType>({
   displayLyrics: undefined,
@@ -36,41 +71,49 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
   const tempoChanges = useRef<ITempoChange[]>([]);
   const timeList = useRef<ITempoTimeChange[]>([]);
   const timeDivision = useRef<number>(0);
+  const animationFrameRef = useRef<number>();
 
-  const updateTick = (player: Sequencer) => {
-    if (tempoChanges.current.length > 0) {
-      const currentTime = player.currentTime;
+  const updateTick = useCallback(
+    (player: Sequencer) => {
+      if (tempoChanges.current.length > 0) {
+        const currentTime = player.currentTime;
+        const { tick, tempo } = calculateTicks(
+          timeDivision.current,
+          currentTime,
+          timeList.current
+        );
+        setTick(tick);
+        setTempo(tempo);
+      }
+    },
+    [player?.currentTime]
+  );
 
-      const { tick, tempo } = calculateTicks(
-        timeDivision.current,
-        currentTime,
-        timeList.current
-      );
-      setTick(tick);
-      setTempo(tempo);
-    }
-  };
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
+  const animationLoop = useCallback(() => {
     if (player) {
-      const updateTickWithDelay = () => {
-        updateTick(player);
-        interval = setTimeout(updateTickWithDelay, 50);
-      };
-
-      updateTickWithDelay();
+      updateTick(player);
     }
-  }, [player]);
+    animationFrameRef.current = requestAnimationFrame(animationLoop);
+  }, [player, updateTick]);
 
-  useEffect(() => {
+  useMemo(() => {
     timeDivision.current = midiPlaying?.timeDivision ?? 0;
     let tempos = midiPlaying?.tempoChanges ?? [];
     tempos = tempos.slice(0, -1).reverse();
     tempos = sortTempoChanges(tempos);
     tempoChanges.current = tempos;
     timeList.current = convertTicksToTime(timeDivision.current, tempos);
-  }, [lyrics, midiPlaying]);
+
+    // Start the animation loop
+    animationFrameRef.current = requestAnimationFrame(animationLoop);
+
+    // Cleanup function
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [lyrics, midiPlaying, animationLoop]);
 
   return (
     <PlayerContext.Provider
@@ -79,7 +122,7 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
         tick,
       }}
     >
-      <>{children}</>
+      {children}
     </PlayerContext.Provider>
   );
 };

@@ -1,21 +1,12 @@
 import React, { useMemo, useCallback } from "react";
 import { useLyrics } from "@/hooks/lyrics-hook";
+import CharLyrics from "./char-lyrics";
 
 interface LyricsAnimationProps {
   display: string[][];
   charIndex: number;
   fontSize?: string;
 }
-
-const LyrTextRender: React.FC<{ lyrList: string[] }> = React.memo(
-  ({ lyrList }) => {
-    const text = useMemo(
-      () => lyrList.map((char) => (char === " " ? "\u00A0" : char)).join(""),
-      [lyrList]
-    );
-    return <div>{text}</div>;
-  }
-);
 
 const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
   display,
@@ -25,18 +16,24 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
   const { Color, ColorBorder, ActiveColor, ActiveBorderColor, Font } =
     useLyrics();
 
-  const getCharIndexForGroup = useCallback(
-    (index: number) => {
-      return display.slice(0, index).reduce((a, b) => a + b.length, 0) + 1;
-    },
-    [display]
-  );
+  // Precompute the character indices only when display changes
+  const charIndices = useMemo(() => {
+    const indices: number[] = [];
+    let cumulativeIndex = 0;
+
+    display.forEach((group) => {
+      cumulativeIndex += group.length;
+      indices.push(cumulativeIndex);
+    });
+
+    return indices;
+  }, [display]);
 
   return (
     <div style={{ ...Font?.style }} className={`flex ${fontSize}`}>
       {display.map((data, index) => {
-        const lyrInx = getCharIndexForGroup(index);
-        const isActive = lyrInx <= charIndex;
+        const lyrInx = charIndices[index] || 0; // Use the precomputed index
+        const isActive = charIndex >= lyrInx;
 
         return (
           <div className="relative" key={`char-${index}`}>
@@ -46,7 +43,7 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
                 color: isActive ? ActiveBorderColor : ActiveColor,
               }}
             >
-              <LyrTextRender lyrList={data} />
+              <CharLyrics str={data} />
             </div>
             <div
               className="relative flex flex-col text-center transition-all"
@@ -54,7 +51,7 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
                 color: isActive ? ColorBorder : Color,
               }}
             >
-              <LyrTextRender lyrList={data} />
+              <CharLyrics str={data} />
             </div>
           </div>
         );

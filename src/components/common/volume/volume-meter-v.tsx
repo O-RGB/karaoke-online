@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface VolumeMeterVProps {
   level: number;
+  max: number;
   height: string;
   className: string;
 }
@@ -9,8 +10,17 @@ interface VolumeMeterVProps {
 const VolumeMeterV: React.FC<VolumeMeterVProps> = ({
   level,
   className,
+  max = 100,
   height,
 }) => {
+  const [filledBars, setFilledBars] = useState<number>(0);
+
+  const [volume, setVolume] = useState<number>(0);
+
+  useEffect(() => {
+    setFilledBars(Math.round((level / 150) * max));
+  }, [level]);
+
   return (
     <div className={className}>
       <div className="flex flex-col w-full h-full opacity-30">
@@ -22,7 +32,7 @@ const VolumeMeterV: React.FC<VolumeMeterVProps> = ({
       <div
         className={`bg-white/30 absolute bottom-0 w-full`}
         style={{
-          height: level,
+          height: `${(filledBars / max) * 100}%`,
         }}
       ></div>
     </div>
