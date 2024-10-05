@@ -61,6 +61,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           ></Button>
           <div className="w-full lg:w-[300px]  px-2 flex items-center pt-0.5">
             <input
+              disabled
               style={{
                 width: "100%",
               }}

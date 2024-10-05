@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useCallback } from "react";
+"use client";
+
+import React, { useEffect, useRef } from "react";
 import { groupThaiCharacters } from "@/lib/app-control";
 import { useLyrics } from "@/hooks/lyrics-hook";
 import { useAppControl } from "@/hooks/app-control-hook";
@@ -13,7 +15,7 @@ interface LyricsPanelProps {
   cursorIndices?: Map<number, number[]>;
 }
 
-const LyricsPanel: React.FC<LyricsPanelProps> = React.memo(({
+const LyricsPanel: React.FC<LyricsPanelProps> = ({
   lyrics,
   tick,
   cursorTicks,
@@ -23,90 +25,122 @@ const LyricsPanel: React.FC<LyricsPanelProps> = React.memo(({
   const { lyricsDisplay } = useLyrics();
   const { hideVolume } = useAppControl();
 
-  const lyricLines = useMemo(() => lyrics.slice(3), [lyrics]);
+  const charIndex = useRef<number>(0);
+  const display = useRef<string[][]>([]);
+  const displayBottom = useRef<string[][]>([]);
+  const position = useRef<boolean>(true);
 
-  const findCurrentIndex = useCallback((currentTick: number) => {
-    return cursorTicks.findIndex(t => t > currentTick) - 1;
-  }, [cursorTicks]);
+  const curIdIndex = useRef<number>(0);
+  const lyricsIndex = useRef<number>(0);
 
-  const getLyricsState = useCallback((index: number) => {
-    const targetTick = cursorTicks[index];
-    const charIndices = cursorIndices?.get(targetTick);
-
-    if (!charIndices) return null;
-
-    let newLyricsIndex = 0;
-    let newCharIndex = 0;
-
-    for (const charIndex of charIndices) {
-      let lineIndex = 0;
-      let adjustedCharIndex = charIndex;
-
-      while (adjustedCharIndex >= lyricLines[lineIndex].length) {
-        adjustedCharIndex -= lyricLines[lineIndex].length + 1;
-        lineIndex++;
-      }
-
-      newLyricsIndex = Math.max(newLyricsIndex, lineIndex);
-      newCharIndex = Math.max(newCharIndex, adjustedCharIndex + 1);
+  const reset = () => {
+    if (lyrics.length > 0) {
+      display.current = [[lyrics[0]]];
     }
+    curIdIndex.current = 0;
+    position.current = false;
+    lyricsIndex.current = 0;
+    charIndex.current = 0;
+  };
 
-    const newPosition = newLyricsIndex % 2 === 0;
+  const renderLyricsDisplay = () => {
+    const targetTick = cursorTicks[curIdIndex.current];
+    let tickUpdated = lyricsDisplay === "random" ? tick + 200 : tick;
+    if (targetTick <= tickUpdated) {
+      curIdIndex.current = curIdIndex.current + 1;
 
-    return {
-      lyricsIndex: newLyricsIndex,
-      charIndex: newCharIndex,
-      position: newPosition,
-      display: groupThaiCharacters(lyricLines[newLyricsIndex]),
-      displayBottom: groupThaiCharacters(lyricLines[newLyricsIndex + 1] || ""),
-    };
-  }, [lyricLines, cursorIndices, cursorTicks]);
+      const charIndices = cursorIndices?.get(targetTick);
 
-  const currentState = useMemo(() => {
-    const index = findCurrentIndex(tick);
-    return getLyricsState(Math.max(0, index));
-  }, [tick, findCurrentIndex, getLyricsState]);
+      try {
+        if (charIndices) {
+          charIndices.forEach((__charIndex) => {
+            let lineIndex = 0;
+            let adjustedCharIndex = __charIndex;
+            const lyricLines = lyrics.slice(3);
 
-  const height = useMemo(() => {
-    if (hideVolume) {
-      return orientation === "landscape" ? "h-[55dvh]" : "h-[75dvh]";
+            while (adjustedCharIndex >= lyricLines[lineIndex].length) {
+              adjustedCharIndex -= lyricLines[lineIndex].length + 1;
+              lineIndex++;
+            }
+            if (lineIndex > lyricsIndex.current) {
+              if (position.current === true) {
+                display.current = groupThaiCharacters(
+                  lyricLines[lineIndex + 1]
+                );
+                displayBottom.current = groupThaiCharacters(
+                  lyricLines[lineIndex]
+                );
+              } else {
+                display.current = groupThaiCharacters(lyricLines[lineIndex]);
+                displayBottom.current = groupThaiCharacters(
+                  lyricLines[lineIndex + 1]
+                );
+              }
+              lyricsIndex.current = lineIndex;
+              position.current = !position.current;
+            }
+            charIndex.current = adjustedCharIndex + 1;
+          });
+        }
+      } catch (error) {}
     }
-    return orientation === "landscape" ? "h-[55dvh]" : "h-[30dvh]";
-  }, [hideVolume, orientation]);
+  };
+
+  useEffect(() => {
+    renderLyricsDisplay();
+  }, [tick, cursorTicks, cursorIndices, lyrics]);
+
+  useEffect(() => {
+    if (lyrics) {
+      reset();
+    }
+  }, [lyrics]);
+
+  useEffect(() => {}, [lyricsDisplay]);
+
+  const height = hideVolume
+    ? orientation === "landscape"
+      ? "h-[55dvh]"
+      : "h-[75dvh]"
+    : orientation === "landscape"
+    ? "h-[55dvh]"
+    : "h-[30dvh]";
 
   const className = `${height} lg:h-[400px] flex items-center justify-center relative w-full rounded-lg text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`;
-
-  if (!currentState) return null;
 
   return (
     <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 -z-40">
       <div className={className}>
+        <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
+
         <div className="flex flex-col py-7 lg:gap-3 items-center justify-center text-white drop-shadow-lg">
           {lyricsDisplay === "default" ? (
             <>
               <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
                 <LyricsAnimation
-                  charIndex={currentState.position ? currentState.charIndex : -1}
-                  display={currentState.display}
-                />
+                  charIndex={position.current === true ? charIndex.current : -1}
+                  display={display.current}
+                ></LyricsAnimation>
               </span>
               <br />
               <LyricsAnimation
-                charIndex={!currentState.position ? currentState.charIndex : -1}
-                display={currentState.displayBottom}
-              />
+                charIndex={position.current === false ? charIndex.current : -1}
+                display={displayBottom.current}
+              ></LyricsAnimation>
             </>
           ) : (
-            <RandomLyrics
-              display={currentState.display}
-              displayBottom={currentState.displayBottom}
-              position={currentState.position}
-            />
+            <>
+              <RandomLyrics
+                display={display.current}
+                displayBottom={displayBottom.current}
+                position={position.current}
+              ></RandomLyrics>
+            </>
           )}
         </div>
       </div>
     </div>
   );
-});
+};
 
 export default LyricsPanel;
