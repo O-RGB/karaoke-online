@@ -81,7 +81,6 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
       if (type === "GIND_NODE") {
         setAudioGain(data);
       } else if (type === "SEND_SONG_LIST") {
-        console.log("set song list");
         setSongList(data);
       }
     }

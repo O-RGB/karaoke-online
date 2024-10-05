@@ -67,8 +67,6 @@ export const getSong = async (
       } else {
         superFile = await getSongByKey(`${superId}.zip`, false);
       }
-
-      console.log(superFile?.name);
     } else {
       superFile = songStore.get(superId);
     }
@@ -203,10 +201,8 @@ export const addUserSong = async (userSong: File, id: string) => {
     }
 
     await store?.put(userSong);
-    console.log("เพิ่มไฟล์เพลง");
     return await tx?.done;
   } catch (error) {
-    console.log("addUserSong error", error);
     return false;
   }
 };

@@ -215,7 +215,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 
   const setSongPlaying = async (files: SongFilesDecode) => {
     if (!player) {
-      console.log("page");
       return;
     }
     resetVolume();
@@ -278,7 +277,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 
       case "SEARCH_SONG":
         if (tracklist !== undefined) {
-          console.log(data);
           const search = data as string;
           const res = await onSearchStrList(search);
           sendMessage({

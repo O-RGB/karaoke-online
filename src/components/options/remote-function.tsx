@@ -24,7 +24,6 @@ const RemoteFunction: React.FC<RemoteFunctionProps> = ({ buttonClass }) => {
 
   useEffect(() => {
     const paused = player?.paused;
-    console.log(paused);
     if (onRemoteOpen) {
       let end: number = player?.midiData.duration ?? 0;
       let currentTime: number = player?.currentTime ?? 0;
@@ -32,17 +31,13 @@ const RemoteFunction: React.FC<RemoteFunctionProps> = ({ buttonClass }) => {
       end = Math.floor(end);
       currentTime = Math.floor(currentTime);
 
-      console.log(end, currentTime);
       if (paused === true && end === currentTime) {
         hanndleOnChange();
       }
     }
-
     if (paused === false) {
       setOpen(false);
     }
-
-    console.log("use effect");
   }, [player?.paused]);
 
   return (

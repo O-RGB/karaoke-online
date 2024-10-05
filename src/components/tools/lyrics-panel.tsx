@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { groupThaiCharacters } from "@/lib/app-control";
 import { useLyrics } from "@/hooks/lyrics-hook";
 import { useAppControl } from "@/hooks/app-control-hook";
@@ -42,53 +42,50 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
     lyricsIndex.current = 0;
     charIndex.current = 0;
   };
+  const lyricLines = useMemo(() => lyrics.slice(3), [lyrics]);
 
   const renderLyricsDisplay = () => {
     const targetTick = cursorTicks[curIdIndex.current];
-    let tickUpdated = lyricsDisplay === "random" ? tick + 200 : tick;
-    if (targetTick <= tickUpdated) {
-      curIdIndex.current = curIdIndex.current + 1;
+    if (targetTick <= tick) {
+      curIdIndex.current++;
 
       const charIndices = cursorIndices?.get(targetTick);
 
-      try {
-        if (charIndices) {
-          charIndices.forEach((__charIndex) => {
-            let lineIndex = 0;
-            let adjustedCharIndex = __charIndex;
-            const lyricLines = lyrics.slice(3);
+      if (charIndices) {
+        charIndices.forEach((index) => {
+          let lineIndex = 0;
+          let adjustedCharIndex = index;
 
-            while (adjustedCharIndex >= lyricLines[lineIndex].length) {
-              adjustedCharIndex -= lyricLines[lineIndex].length + 1;
-              lineIndex++;
+          while (adjustedCharIndex >= lyricLines[lineIndex].length) {
+            adjustedCharIndex -= lyricLines[lineIndex].length + 1;
+            lineIndex++;
+          }
+
+          if (lineIndex > lyricsIndex.current) {
+            if (position.current) {
+              display.current = groupThaiCharacters(lyricLines[lineIndex + 1]);
+              displayBottom.current = groupThaiCharacters(
+                lyricLines[lineIndex]
+              );
+            } else {
+              display.current = groupThaiCharacters(lyricLines[lineIndex]);
+              displayBottom.current = groupThaiCharacters(
+                lyricLines[lineIndex + 1]
+              );
             }
-            if (lineIndex > lyricsIndex.current) {
-              if (position.current === true) {
-                display.current = groupThaiCharacters(
-                  lyricLines[lineIndex + 1]
-                );
-                displayBottom.current = groupThaiCharacters(
-                  lyricLines[lineIndex]
-                );
-              } else {
-                display.current = groupThaiCharacters(lyricLines[lineIndex]);
-                displayBottom.current = groupThaiCharacters(
-                  lyricLines[lineIndex + 1]
-                );
-              }
-              lyricsIndex.current = lineIndex;
-              position.current = !position.current;
-            }
-            charIndex.current = adjustedCharIndex + 1;
-          });
-        }
-      } catch (error) {}
+            lyricsIndex.current = lineIndex;
+            position.current = !position.current;
+          }
+          charIndex.current = adjustedCharIndex + 1;
+        });
+      }
     }
   };
 
   useEffect(() => {
-    renderLyricsDisplay();
-  }, [tick, cursorTicks, cursorIndices, lyrics]);
+    const animationFrame = requestAnimationFrame(renderLyricsDisplay);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [tick, cursorTicks, cursorIndices]);
 
   useEffect(() => {
     if (lyrics) {
