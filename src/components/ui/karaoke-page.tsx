@@ -42,17 +42,16 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     lyrics,
     cursorIndices,
     cursorTicks,
-    setTracklistFile,
     addTracklist,
-    setMusicLibraryFile,
-    musicLibrary,
   } = useAppControl();
 
   const { tempo, tick } = usePlayer();
   const { notification } = useNotification();
 
   const startup = async () => {
+    console.log("setupSpessasynth")
     await setupSpessasynth();
+    console.log("LoadDatabase")
     await LoadDatabase();
     const tl = await getTracklistToJson();
     addTracklist(tl);
