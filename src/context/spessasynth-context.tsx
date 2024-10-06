@@ -78,8 +78,8 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     );
 
     // Default Setting
-    synthInstance.setMainVolume(0.5);
-    synthInstance.highPerformanceMode = false;
+    synthInstance.setMainVolume(0.7);
+    synthInstance.highPerformanceMode = true;
 
     const blob = new Blob([ab], { type: "application/octet-stream" });
 
@@ -166,8 +166,6 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     //   await myAudio.resume();
     // }
   };
-
-
 
   return (
     <SpessasynthContext.Provider

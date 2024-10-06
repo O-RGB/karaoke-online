@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 interface VolumeMeterVProps {
   level: number;
   max: number;
-  height: string;
   className: string;
 }
 
@@ -11,11 +10,8 @@ const VolumeMeterV: React.FC<VolumeMeterVProps> = ({
   level,
   className,
   max = 100,
-  height,
 }) => {
   const [filledBars, setFilledBars] = useState<number>(0);
-
-  const [volume, setVolume] = useState<number>(0);
 
   useEffect(() => {
     setFilledBars(Math.round((level / 150) * max));

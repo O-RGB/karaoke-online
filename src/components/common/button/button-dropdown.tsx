@@ -5,13 +5,14 @@ interface ButtonDropdownProps {
   onChange?: (value: string) => void;
   options?: IOptions[];
   value?: string;
+  className?: string;
 }
 
 const ButtonDropdown: React.FC<ButtonDropdownProps> = ({
   children,
   onChange,
   options,
-  value,
+  value,className
 }) => {
   const hanndleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
@@ -20,7 +21,7 @@ const ButtonDropdown: React.FC<ButtonDropdownProps> = ({
 
   useEffect(() => {}, [value]);
   return (
-    <div className="relative cursor-pointer w-full group">
+    <div className={`relative cursor-pointer group ${className}`}>
       <div className="w-full">{children}</div>
       <select
         onChange={hanndleOnChange}

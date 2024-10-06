@@ -103,11 +103,11 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
         opacity: !disabled ? 1 : 0.5,
         pointerEvents: disabled ? "none" : undefined,
       }}
-      className={`h-full w-0.5 bg-white/50 touch-none rounded-full border ${props.className}`}
+      className={`relative h-full w-0.5 bg-white/50 touch-none rounded-full border ${props.className}`}
     >
       <div
         ref={sliderRef}
-        className="h-[90%] rounded-full relative"
+        className="h-[90%] rounded-full relative -mt-0.5"
         onMouseDown={(e) => {
           onMouseUp?.();
           handleStart(e.clientY);

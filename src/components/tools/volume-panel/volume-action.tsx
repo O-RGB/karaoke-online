@@ -7,6 +7,7 @@ interface VolumeActionProps {
   isLock: boolean;
   onLock?: (channel: number) => void;
   onUnLock?: (channel: number) => void;
+  className?: string;
 }
 
 const VolumeAction: React.FC<VolumeActionProps> = ({
@@ -14,6 +15,7 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
   isLock,
   onLock,
   onUnLock,
+  className,
 }) => {
   const onLockVolume = useCallback(() => {
     onLock?.(channel);
@@ -24,11 +26,11 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
       onClick={onLockVolume}
       className={`
         ${isLock ? "bg-red-500 hover:bg-red-500/50" : "hover:bg-white/30"} 
-        w-full text-center text-white font-bold text-[10px] 
+      ${className} text-center text-white font-bold text-[10px]  
         flex items-center justify-center gap-[2px] rounded-t-md
         duration-300 cursor-pointer border-t border-x border-white/20`}
     >
-      <span className="pt-0.5">
+      <span className="pt-0.5 ">
         {isLock ? <BiSolidVolumeMute /> : <BiSolidVolumeFull />}
       </span>
       <span>{channel}</span>

@@ -10,6 +10,7 @@ interface InstrumentsButtonProps {
   channel: number;
   perset?: IPersetSoundfont[];
   onPersetChange?: (channel: number, value: number) => void;
+  className?: string;
 }
 
 const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
@@ -17,6 +18,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   onPersetChange,
   channel,
   perset,
+  className,
 }) => {
   const persetOptions = useMemo(
     () =>
@@ -36,15 +38,16 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   return (
     <>
       <ButtonDropdown
+        className={className}
         value={`${instruments ?? 0}`}
         onChange={(value) => {
           onPersetChange?.(channel, parseInt(value));
         }}
         options={persetOptions}
       >
-        <div className="w-full lg:min-w-7 border-b border-x border-white/20 cursor-pointer group-hover:bg-white/20 duration-300">
+        <div className="w-full border-b border-x border-white/20 cursor-pointer group-hover:bg-white/20 duration-300">
           <div className="w-full blur-overlay text-center text-white font-bold text-[10px] p-1 flex gap-0.5 justify-center items-center h-5">
-            <span>{channelIcon}</span>
+            <span className="w-2.5">{channelIcon}</span>
             <span className="text-[8px] pb-[1px] font-bold text-white/70">
               {`${instruments ?? 0}`.padStart(3, "0")}
             </span>

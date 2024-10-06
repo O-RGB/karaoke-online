@@ -56,7 +56,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const { superUserConnections, sendSuperUserMessage } = useRemote();
 
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
-
+  const volLayout: number[] = Array(16).fill(0);
   const gain = useRef<number[]>(Array(16).fill(0));
   const gainMain = useRef<number>(0);
 
@@ -96,36 +96,51 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     updateHideVolume(hide);
   };
   const render = useCallback(() => {
-    if (analysers) {
-      const newVolumeLevels = analysers?.map((analyser) => {
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(dataArray);
-        const value = Math.round(
-          dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
-        );
-        return value;
-      });
-      if (hideVolume) {
-        const totalGain =
-          newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
-        const mainGain = (totalGain / (newVolumeLevels.length * 16)) * 100;
+    const fps = 20;
+    const frameInterval = 1000 / fps; // 50ms ต่อ frame
+    let lastFrameTime = 0;
 
-        gainMain.current = Math.round(mainGain); // กำหนดค่า mainGain
-      } else {
-        gain.current = newVolumeLevels;
+    const renderFrame = (time: number) => {
+      if (time - lastFrameTime >= frameInterval) {
+        lastFrameTime = time;
+
+        if (analysers) {
+          const newVolumeLevels = analysers?.map((analyser) => {
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
+            const value = Math.round(
+              dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
+            );
+            return value;
+          });
+
+          if (hideVolume) {
+            const totalGain =
+              newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
+            const mainGain = (totalGain / (newVolumeLevels.length * 30)) * 100;
+
+            gainMain.current = Math.round(mainGain); // กำหนดค่า mainGain
+          } else {
+            gain.current = newVolumeLevels;
+          }
+
+          if (superUserConnections.length > 0) {
+            sendSuperUserMessage({
+              message: newVolumeLevels,
+              type: "GIND_NODE",
+              user: "SUPER",
+            });
+          }
+        }
       }
 
-      if (superUserConnections.length > 0) {
-        sendSuperUserMessage({
-          message: newVolumeLevels,
-          type: "GIND_NODE",
-          user: "SUPER",
-        });
+      if (!player?.paused) {
+        requestAnimationFrame(renderFrame);
       }
-    }
+    };
 
     if (!player?.paused) {
-      requestAnimationFrame(render);
+      requestAnimationFrame(renderFrame);
     }
   }, [analysers, hideVolume, superUserConnections, player?.paused]);
 
@@ -147,12 +162,17 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     }
   }, [audioGain]);
 
+  const grid =
+    "grid grid-cols-8 lg:grid-cols-none grid-flow-row lg:grid-flow-col";
+  const hideElement = `${hideVolume ? "opacity-0" : "opacity-100"}`;
+  const animation = `duration-300 transition-all`;
+
   return (
     <div
       className={
         className
           ? className
-          : `fixed left-0 px-5 flex flex-col gap-1.5 overflow-hidden ${
+          : `fixed left-0 px-5 flex flex-col gap-1.5 overflow-hidden  ${
               orientation === "landscape"
                 ? " top-[18px] w-70"
                 : " top-14 lg:top-6 w-full"
@@ -160,77 +180,65 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
       }
     >
       <div
-        className={`relative grid grid-cols-8 flex-none lg:flex lg:flex-row w-full lg:w-fit gap-y-2 lg:gap-y-0 gap-0.5 blur-overlay border blur-border rounded-md p-2 duration-300 overflow-hidden ${
+        className={`relative w-full lg:w-fit blur-overlay border blur-border rounded-md p-2 duration-300 overflow-hidden ${
           hideVolume
             ? "h-[30px] lg:h-[30px] pointer-events-none !cursor-none"
             : `${
                 orientation === "landscape" ? "h-[230px]" : "h-[292px]"
               } lg:h-[150px]`
-        }`}
+        } `}
       >
         <VolumeHorizontal
           hide={hideVolume}
           value={gainMain.current}
         ></VolumeHorizontal>
-
-        {gain.current.map((data, ch) => {
-          return (
-            <div
-              key={`ch-vol-${ch}`}
-              style={{
-                opacity: hideVolume ? 0 : 1,
-              }}
-              className="flex flex-col duration-300"
-            >
-              <VolumeAction
-                channel={ch + 1}
-                onLock={onLockVolume}
-                isLock={lock[ch]}
-              ></VolumeAction>
-              <div
-                className="relative flex items-center justify-center w-full lg:w-[34px] h-full"
-                key={`gin-${ch}`}
-              >
-                <RangeBarClone
-                  value={hideVolume ? 0 : volumeController[ch]}
-                  className="z-20"
-                  max={127}
-                  onMouseUp={() => updateVolumeHeld(true)}
-                  onTouchEnd={() => updateVolumeHeld(false)}
-                  onChange={(v) => onVolumeMeterChange(ch, v)}
-                ></RangeBarClone>
-
+        <div
+          className={`${grid}  ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-0.5 left-0 p-2 py-[26px]`}
+        >
+          {gain.current.map((data, ch) => {
+            return (
+              <div className="relative w-full">
                 <VolumeMeterV
                   max={127}
-                  height={`${orientation === "landscape" ? "4rem" : "6rem"}`}
                   className="z-10 w-full absolute bottom-0 left-0 h-full"
                   level={data}
                 ></VolumeMeterV>
               </div>
-              <InstrumentsButton
-                channel={ch + 1}
-                instruments={instrument[ch]}
-                onPersetChange={onPersetChange}
-                perset={perset}
-              ></InstrumentsButton>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        <div
+          className={`${grid} ${hideElement} ${animation} w-full gap-0.5 h-full`}
+        >
+          {volLayout.map((data, ch) => {
+            return (
+              <div className="flex flex-col relative h-full w-full ">
+                <VolumeAction
+                  channel={ch + 1}
+                  onLock={onLockVolume}
+                  isLock={lock[ch]}
+                ></VolumeAction>
+                <div className="flex items-center justify-center h-full w-full  border-x border-white/20">
+                  <RangeBarClone
+                    value={hideVolume ? 0 : volumeController[ch]}
+                    className="z-20"
+                    max={127}
+                    onMouseUp={() => updateVolumeHeld(true)}
+                    onTouchEnd={() => updateVolumeHeld(false)}
+                    onChange={(v) => onVolumeMeterChange(ch, v)}
+                  ></RangeBarClone>
+                </div>
+                <InstrumentsButton
+                  channel={ch + 1}
+                  instruments={instrument[ch]}
+                  onPersetChange={onPersetChange}
+                  perset={perset}
+                ></InstrumentsButton>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      {/* <VolumeMeter
-          height={`${orientation === "landscape" ? "4rem" : "6rem"}`}
-          perset={perset}
-          onLock={onLockVolume}
-          isLock={lock[ch]}
-          instruments={instrument[ch]}
-          value={volumeController[ch]}
-          level={data}
-          channel={ch + 1}
-          onPersetChange={onPersetChange}
-          onChange={onVolumeMeterChange}
-          onMouseUp={() => updateVolumeHeld(true)}
-          onTouchEnd={() => updateVolumeHeld(false)}
-        ></VolumeMeter> */}
 
       <div>
         <div className="flex gap-1.5">
