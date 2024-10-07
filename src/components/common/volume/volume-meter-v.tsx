@@ -44,43 +44,32 @@ const VolumeMeterV: React.FC<VolumeMeterVProps> = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
-    let animationFrameId: number;
-
-    if (ctx && canvas) {
-      const render = () => {
-        // ลบการวาดก่อนหน้า
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // คำนวณความสูงของแถบความคืบหน้า
-        const height = (level / 150) * canvas.height;
-
-        // วาดแถบความคืบหน้า
-        ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-        ctx.fillRect(0, canvas.height - height, canvas.width, height);
-
-        // // วาดพื้นหลัง (คุณสามารถเพิ่มหลายๆ เลเยอร์ได้ที่นี่)
-        // ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-        // ctx.fillRect(0, 0, canvas.width, canvas.height * 0.66);
-        // ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-        // ctx.fillRect(
-        //   0,
-        //   canvas.height * 0.66,
-        //   canvas.width,
-        //   canvas.height * 0.33
-        // );
-
-        // เรียกการ render ใหม่ในเฟรมถัดไป
-        animationFrameId = requestAnimationFrame(render);
-      };
-
-      // เริ่มการ render
-      render();
+    if (!ctx || !canvas) {
+      return;
     }
 
-    // ล้างการ animation เมื่อ component ถูกทำลาย
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
+    // ลบการวาดก่อนหน้า
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // คำนวณความสูงของแถบความคืบหน้า
+    const height = (level / 150) * canvas.height;
+
+    // วาดแถบความคืบหน้า
+    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.fillRect(0, canvas.height - height, canvas.width, height);
+
+    // // วาดพื้นหลัง (คุณสามารถเพิ่มหลายๆ เลเยอร์ได้ที่นี่)
+    // ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    // ctx.fillRect(0, 0, canvas.width, canvas.height * 0.66);
+    // ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+    // ctx.fillRect(
+    //   0,
+    //   canvas.height * 0.66,
+    //   canvas.width,
+    //   canvas.height * 0.33
+    // );
+
+    // เรียกการ render ใหม่ในเฟรมถัดไป
   }, [level, max]);
 
   return (

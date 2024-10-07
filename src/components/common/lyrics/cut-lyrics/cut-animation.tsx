@@ -32,24 +32,26 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
   return (
     <div style={{ ...Font?.style }} className={`flex ${fontSize}`}>
       {display.map((data, index) => {
-        const lyrInx = charIndices[index] || 0; // Use the precomputed index
-        const isActive = charIndex >= lyrInx;
+        // const lyrInx = charIndices[index] || 0; // Use the precomputed index
+        // const isActive = charIndex >= lyrInx;
 
         return (
           <div className="relative" key={`char-${index}`}>
-            <div
+            {/* <div
               className="absolute top-0 left-0 font-outline-2 sm:font-outline-4 transition-all"
               style={{
-                color: isActive ? ActiveBorderColor : ActiveColor,
+                 color: isActive ? ActiveBorderColor : ActiveColor,
               }}
             >
               <CharLyrics str={data} />
-            </div>
+            </div> */}
             <div
               className="relative flex flex-col text-center transition-all"
-              style={{
-                color: isActive ? ColorBorder : Color,
-              }}
+              style={
+                {
+                  // color: isActive ? ColorBorder : Color,
+                }
+              }
             >
               <CharLyrics str={data} />
             </div>
