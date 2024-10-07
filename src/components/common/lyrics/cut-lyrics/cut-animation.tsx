@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo } from "react";
 import { useLyrics } from "@/hooks/lyrics-hook";
 import CharLyrics from "./char-lyrics";
 

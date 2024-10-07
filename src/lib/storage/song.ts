@@ -15,9 +15,54 @@ import { extractFile, zipFiles } from "../zip";
 import { getDB } from "@/utils/database/db";
 import { parseEMKFile } from "../karaoke/emk";
 import { readCursorFile, readLyricsFile } from "../karaoke/ncn";
-import { getLocalSongCount, setLocalSongCount } from "../local-storage";
+import {
+  getLocalDriveUrl,
+  getLocalSongCount,
+  setLocalSongCount,
+} from "../local-storage";
 import { createTrackList } from "./tracklist";
 import { SongUserModel } from "@/utils/database/model";
+import { base64ToImage } from "../image";
+import { base64ByteToFile } from "@/utils/file/file";
+import { getSongDrive } from "./drive";
+function QueryPost(params: any): FormData {
+  const formData = new FormData();
+  Object.keys(params).map((key) => {
+    if (params[key] !== undefined) {
+      if (Array.isArray(params[key])) {
+        formData.append(key, JSON.stringify(params[key]));
+      } else {
+        formData.append(key, params[key]);
+      }
+    }
+  });
+
+  return formData;
+}
+export const getSongByKeyDrive = async (
+  key: string | number,
+  formUser: boolean = false
+) => {
+  const form = QueryPost({
+    fun: "LOAD",
+    index: key,
+  });
+  const url = getLocalDriveUrl();
+  if (!url) {
+    return;
+  }
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      body: form,
+    });
+
+    const result = await response.json();
+    return base64ByteToFile(result.base64Content, result.fileName);
+  } catch (error) {
+    console.error("Error uploading file:", error);
+  }
+};
 
 export const getSongByKey = async (
   key: string | number,
@@ -51,13 +96,21 @@ export const genSongPath = (selected?: SearchResult) => {
 };
 
 export const getSong = async (
-  songStore: Map<string, File>,
-  selected?: SearchResult
+  selected?: SearchResult,
+  driveMode: boolean = false
 ) => {
+  console.log("start get song ");
+
   const { superId, fileId } = genSongPath(selected);
   if (superId && fileId) {
+    console.log("check id");
     var superFile: File | undefined = undefined;
-    if (songStore.size === 0) {
+
+    // on drive
+    if (driveMode) {
+      superFile = await getSongDrive(`${superId}`, false);
+    } else {
+      // // on local
       const checkUserSong: boolean = superId.startsWith(CUSTOM_SONG_ZIP);
       if (checkUserSong) {
         superFile = await getSongByKey(
@@ -67,9 +120,8 @@ export const getSong = async (
       } else {
         superFile = await getSongByKey(`${superId}.zip`, false);
       }
-    } else {
-      superFile = songStore.get(superId);
     }
+
     if (superFile) {
       const superUnzip = await extractFile(superFile);
       const index = parseInt(fileId);

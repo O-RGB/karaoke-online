@@ -94,7 +94,10 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     return synthInstance;
   };
 
-  const loadAudioContext = async (): Promise<AudioContext | undefined> => {
+  const loadAudioContext = async (): Promise<{
+    audioContext: AudioContext | undefined;
+    channels: AudioNode[];
+  }> => {
     if (typeof window !== "undefined") {
       try {
         const audioContext = new (window.AudioContext ||
@@ -108,19 +111,32 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
           new URL(WORKLET_URL_ABSOLUTE, window.location.origin).toString()
         );
 
-        return audioContext;
+        // Create a channel splitter node with 16 channels
+        const splitter = audioContext.createChannelSplitter(16);
+
+        // Create an array to hold our 16 separated channels
+        const channels: AudioNode[] = [];
+
+        // Connect each channel from the splitter to a separate AudioNode
+        for (let i = 0; i < 16; i++) {
+          const channelGain = audioContext.createGain();
+          splitter.connect(channelGain, i);
+          channels.push(channelGain);
+        }
+
+        return { audioContext, channels };
       } catch (error) {
         console.error(
           "Error loading AudioContext or adding audio worklet:",
           error
         );
-        return undefined;
+        return { audioContext: undefined, channels: [] };
       }
     } else {
       console.warn(
         "AudioContext cannot be loaded in this environment (not in browser)."
       );
-      return undefined;
+      return { audioContext: undefined, channels: [] };
     }
   };
 
@@ -148,16 +164,18 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
 
   const setup = async () => {
     const myAudio = await loadAudioContext();
-    if (!myAudio) {
+    if (!myAudio.audioContext) {
       return;
     }
-    const spessasynth = await loadSoundFontPlayer(myAudio);
+
+    console.log(myAudio.channels);
+    const spessasynth = await loadSoundFontPlayer(myAudio.audioContext);
     if (!spessasynth) {
       return;
     }
     const player = await loadPlayer(spessasynth);
-    loadSoundMeter(spessasynth, myAudio);
-    setAudio(myAudio);
+    loadSoundMeter(spessasynth, myAudio.audioContext);
+    setAudio(myAudio.audioContext);
     setSynth(spessasynth);
     setPlayer(player);
     synthProgramChange(spessasynth);

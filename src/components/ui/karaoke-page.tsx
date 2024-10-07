@@ -28,6 +28,7 @@ import { useDragDrop } from "@/hooks/drag-drop-hook";
 import { onSelectTestMusic } from "@/lib/karaoke/read";
 import { LoadDatabase } from "@/utils/database/model";
 import { getTracklistToJson } from "@/lib/storage/tracklist";
+import DriveSetting from "../modal/drive-setting-modal";
 
 interface KaraokePageProps {}
 
@@ -49,10 +50,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { notification } = useNotification();
 
   const startup = async () => {
-    console.log("setupSpessasynth")
-    await setupSpessasynth();
-    console.log("LoadDatabase")
-    await LoadDatabase();
+    setupSpessasynth();
+    LoadDatabase();
     const tl = await getTracklistToJson();
     addTracklist(tl);
   };
@@ -88,6 +87,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     LYRICS: <LyricsModal></LyricsModal>,
     MIDI_SETTING: <MidiSettingModal></MidiSettingModal>,
     SONG_LIST: <SongListModal></SongListModal>,
+    DRIVE_SETTING: <DriveSetting></DriveSetting>,
   };
 
   return (

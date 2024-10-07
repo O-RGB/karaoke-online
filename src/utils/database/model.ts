@@ -1,9 +1,21 @@
 import {
+  STORAGE_DRIVE,
   STORAGE_TRACKLIST,
   STORAGE_USER_SONG,
   STORAGE_WALLPAPER,
 } from "@/config/value";
 import { getDB } from "./db";
+
+export const SongDriveModel = async () => {
+  try {
+    const db = await getDB(STORAGE_DRIVE, true);
+    const tx = db.transaction(STORAGE_DRIVE, "readwrite");
+    const store = tx.objectStore(STORAGE_DRIVE);
+    return { store, tx, db, loaded: true };
+  } catch (error) {
+    return { store: null, tx: null, db: null, loaded: false };
+  }
+};
 
 export const SongUserModel = async () => {
   try {
@@ -23,7 +35,7 @@ export const TracklistModel = async () => {
     const store = tx.objectStore(STORAGE_TRACKLIST);
     return { store, tx, db, loaded: true };
   } catch (error) {
-    console.log("tracklist error" ,error)
+    console.log("tracklist error", error);
     return { store: null, tx: null, db: null, loaded: false };
   }
 };
@@ -39,8 +51,9 @@ export const WallpaperModel = async () => {
   }
 };
 
-export const LoadDatabase = async () => {
-  await SongUserModel();
-  await TracklistModel();
-  await WallpaperModel();
+export const LoadDatabase = () => {
+  SongUserModel();
+  TracklistModel();
+  WallpaperModel();
+  SongDriveModel();
 };

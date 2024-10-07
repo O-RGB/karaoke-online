@@ -28,6 +28,8 @@ type AppControlContextType = {
   updatePerset: (channel: number, value: number) => void;
   updateHideVolume: (hide: boolean) => void;
   addTracklist: (item: SearchResult[]) => void;
+  getSystemDriveMode: () => boolean;
+  setSystemDriveMode: (is: boolean) => void;
   hideVolume: boolean;
   musicLibrary: Map<string, File>;
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -58,6 +60,8 @@ export const AppControlContext = createContext<AppControlContextType>({
   updatePerset: () => {},
   updateHideVolume: () => {},
   addTracklist: () => {},
+  getSystemDriveMode: () => false,
+  setSystemDriveMode: () => {},
   hideVolume: false,
   lyrics: [],
   cursorTicks: [],
@@ -74,6 +78,9 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 }) => {
   const { synth, player } = useSynth();
   const { received: messages, sendMessage } = useRemote();
+
+  // Fetch Option
+  const [driveMode, setDriveMode] = useState<boolean>(false);
 
   // Volume Control
   const VolChannel = Array(16).fill(100);
@@ -103,6 +110,14 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   const [cursorTicks, setCursor] = useState<number[]>([]);
   const [cursorIndices, setCursorIndices] = useState<Map<number, number[]>>();
   // const [lyricsDisplay, setLyricsDisplay] = useState<LyricsOptions>("default");
+
+  const setSystemDriveMode = (is: boolean) => {
+    setDriveMode(is);
+  };
+
+  const getSystemDriveMode = () => {
+    return driveMode;
+  };
 
   const updateHideVolume = (hide: boolean) => {
     setHideVolume(hide);
@@ -249,7 +264,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   };
 
   const loadAndPlaySong = async (value: SearchResult) => {
-    const song = await getSong(musicLibrary, value);
+    const song = await getSong(value, driveMode);
     if (song) {
       setSongPlaying(song);
     }
@@ -330,6 +345,8 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         updatePerset,
         updateHideVolume,
         addTracklist,
+        getSystemDriveMode,
+        setSystemDriveMode,
         hideVolume,
         volumeController,
         lyrics,

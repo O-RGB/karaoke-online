@@ -23,7 +23,8 @@ type ModalType =
   | "WALLPAPER"
   | "LYRICS"
   | "MIDI_SETTING"
-  | "SONG_LIST";
+  | "SONG_LIST"
+  | "DRIVE_SETTING";
 
 type InputBarLayout = "vertical" | "horizontal";
 

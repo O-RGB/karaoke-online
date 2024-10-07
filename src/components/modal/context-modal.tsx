@@ -4,7 +4,7 @@ import { MdOutlinePiano, MdOutlineTextFields } from "react-icons/md";
 import Modal from "../common/modal";
 import { TbDeviceMobileShare, TbMusicPlus } from "react-icons/tb";
 import { VscSettings } from "react-icons/vsc";
-import { FaImage, FaRegImage } from "react-icons/fa";
+import { FaGoogleDrive, FaImage, FaRegImage } from "react-icons/fa";
 import { ImDatabase } from "react-icons/im";
 import { SiMidi } from "react-icons/si";
 import { LuDatabase, LuListMusic } from "react-icons/lu";
@@ -97,6 +97,12 @@ const ContextModal: React.FC<ContextModalProps> = ({
           text: "ฐานข้อมูลเพลง",
           onClick: handleSelectContext,
           type: "MUSIC_STORE",
+        },
+        {
+          icon: <FaGoogleDrive />,
+          text: "เชื่อมต่อ Google Drive",
+          onClick: handleSelectContext,
+          type: "DRIVE_SETTING",
         },
       ],
       name: "ที่เก็บข้อมูล",
