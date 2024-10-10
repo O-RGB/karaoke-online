@@ -7,7 +7,7 @@ body {
   user-select: none;
   overscroll-behavior: none;
   -webkit-text-size-adjust: none;
-  @apply min-h-dvh;
+  @apply min-h-dvh  
 }
 
 .blur-overlay {

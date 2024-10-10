@@ -11,9 +11,15 @@ interface SwitchRadioProps<T> {
   value?: T;
   onChange?: (value: T) => void;
   options: SwitchRadioOption<T>[];
+  disabled?: boolean;
 }
 
-const SwitchRadio = <T,>({ value, onChange, options }: SwitchRadioProps<T>) => {
+const SwitchRadio = <T,>({
+  value,
+  onChange,
+  options,
+  disabled,
+}: SwitchRadioProps<T>) => {
   const [selectedValue, setSelectedValue] = useState<T>(
     value || options[0]?.value
   );
@@ -32,18 +38,26 @@ const SwitchRadio = <T,>({ value, onChange, options }: SwitchRadioProps<T>) => {
   };
 
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className={`flex gap-2 flex-wrap`}>
       {options.map((option, index) => {
         const isChecked = option.value === selectedValue;
         return (
           <div
-            className="flex items-center gap-2"
+            className={`${
+              disabled
+                ? "opacity-50 cursor-not-allowed"
+                : "opacity-100 hover:opacity-75"
+            } flex items-center gap-2 duration-300`}
             key={index}
-            onClick={() => handleChange(option.value)}
+            onClick={() =>
+              disabled == false ? handleChange(option.value) : {}
+            }
             style={{
               cursor: "pointer",
-              padding: "10px",
-              border: isChecked ? "2px solid #22c55e" : "2px solid gray",
+              padding: "5px",
+              paddingLeft: "8px",
+              paddingRight: "8px",
+              border: isChecked ? "1px solid #22c55e" : "1px solid gray",
               borderRadius: "5px",
               backgroundColor: "white",
             }}
@@ -60,7 +74,9 @@ const SwitchRadio = <T,>({ value, onChange, options }: SwitchRadioProps<T>) => {
               <FaCheck className="text-xs text-white"></FaCheck>
             </div>
 
-            {option.label ? option.label : option.children}
+            <span className="text-sm">
+              {option.label ? option.label : option.children}
+            </span>
           </div>
         );
       })}

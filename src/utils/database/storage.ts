@@ -7,21 +7,20 @@ export async function storageGet<T = any>(
   key: string | number,
   storage_name: string,
   mode: "readonly" = "readonly"
-) {
+): Promise<IndexedDbReslut<T | undefined>> {
   try {
-    const db = await getDB(storage_name);
+    const db = await getDB(storage_name, true);
     const tx = db.transaction(storage_name, mode);
     const store = tx.objectStore(storage_name);
     const data = await store.get(key);
-
     await tx.done;
     if (data) {
-      return data as T;
+      return data as IndexedDbReslut<T>;
     } else {
-      return undefined;
+      return { value: undefined } as IndexedDbReslut<T>;
     }
   } catch (error) {
-    return undefined;
+    return { value: undefined } as IndexedDbReslut<T>;
   }
 }
 
@@ -110,23 +109,36 @@ export async function storageAddAll(
   onProgress?: (progress?: IProgressBar) => void,
   mode: "readwrite" = "readwrite"
 ) {
-  const db = await getDB(storage_name);
+  const db = await getDB(storage_name, true);
   const tx = db.transaction(storage_name, mode);
   const store = tx.objectStore(storage_name);
   let error = undefined;
+
   for (let i = 0; i < list.length; i++) {
     try {
-      await store.add(list[i].value, list[i].key);
+      await store.put({ value: list[i].value, id: list[i].key });
     } catch (e) {
       error = JSON.stringify(e);
       if (error === "{}") {
         error = undefined;
       }
+    } finally {
+      onProgress?.({
+        title: "กำลังทำงาน...",
+        progress: Math.round(((i + 1) / list.length) * 100),
+        processing: list[i]?.key,
+        error: error,
+        show: true,
+      });
     }
+  }
+  if (!error) {
     onProgress?.({
-      progress: Math.round(((i + 1) / list.length) * 100),
-      processing: list[i]?.key,
-      error: error,
+      title: "เสร็จสิ้น",
+      progress: 100,
+      processing: undefined,
+      error: undefined,
+      show: true,
     });
   }
 

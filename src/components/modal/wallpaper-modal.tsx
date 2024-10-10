@@ -56,6 +56,7 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 pt-4">
         {wallpaperList.map((data, i) => {
+          data = (data as any).value;
           const src = URL.createObjectURL(data);
           const isSet = data.name === wallpaperName;
           let classBox =

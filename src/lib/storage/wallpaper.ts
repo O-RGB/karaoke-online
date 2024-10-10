@@ -14,7 +14,7 @@ export const saveWallpaperStorage = async (file: File) => {
       return false;
     }
 
-    store?.add(file, file.name);
+    store?.put({ value: file, id: file.name });
 
     await tx?.done;
     return true;

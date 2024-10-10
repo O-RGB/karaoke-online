@@ -97,7 +97,7 @@ const DriveSetting: React.FC<DriveSettingProps> = ({}) => {
     if (isSaved) {
       setValue(isSaved);
     }
-    if (isTested === "true") {
+    if (isTested === true) {
       setChecked(true);
       setSystemDriveMode(true);
     } else {

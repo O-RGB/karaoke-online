@@ -140,8 +140,8 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
                           const loadSf = await getSoundFontStorage(
                             sf.toString()
                           );
-                          if (loadSf) {
-                            updateSoundFont(loadSf);
+                          if (loadSf.value) {
+                            updateSoundFont(loadSf.value);
                           }
                         }
                       }}

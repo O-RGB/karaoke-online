@@ -1,15 +1,5 @@
-import {
-  STORAGE_KARAOKE_EXTREME,
-  // STORAGE_NAME_DIC,
-  STORAGE_TRACKLIST,
-  TRACKLIST_FILENAME,
-} from "@/config/value";
-import { getDB } from "@/utils/database/db";
-import {
-  storageAddAll,
-  storageAdd,
-  storageGet,
-} from "../../utils/database/storage";
+import { STORAGE_KARAOKE_EXTREME, STORAGE_TRACKLIST } from "@/config/value";
+import { storageAddAll, storageGetAllKeys } from "../../utils/database/storage";
 import { TracklistModel } from "@/utils/database/model";
 
 export const createTrackList = (
@@ -31,7 +21,8 @@ export const createTrackList = (
 };
 
 export const jsonTracklistToDatabase = async (
-  file: File
+  file: File,
+  onProgress?: (progress?: IProgressBar) => void
 ): Promise<SearchResult[] | undefined> => {
   return new Promise(async (resolve) => {
     const reader = new FileReader();
@@ -42,8 +33,7 @@ export const jsonTracklistToDatabase = async (
       if (typeof jsonData === "string") {
         try {
           const data: SearchResult[] = JSON.parse(jsonData);
-          console.log(data);
-          await addTracklistsToDatabase(data);
+          await addTracklistsToDatabase(data, onProgress);
 
           console.log("Data saved successfully");
           resolve(data);
@@ -85,25 +75,42 @@ export const addTracklistToDatabase = async (obj: SearchResult) => {
   }
 };
 
-export const addTracklistsToDatabase = async (objs: SearchResult[]) => {
+export const addTracklistsToDatabase = async (
+  objs: SearchResult[],
+  onProgress?: (progress?: IProgressBar) => void
+) => {
   try {
     const { store, tx, loaded } = await TracklistModel();
     if (!loaded) {
       return false;
     }
 
-    for (const obj of objs) {
-      console.log("obj", obj);
+    for (let i = 0; i < objs.length; i++) {
+      let obj = objs[i];
       if (obj.id) {
         obj.id = obj.id.toUpperCase();
       }
-      await store?.put(obj);
+      try {
+        await store?.put(obj);
+      } catch (error) {
+        onProgress?.({
+          progress: Math.round(((i + 1) / objs.length) * 100),
+          title: "เกิดข้อผิดพลาด...",
+          show: true,
+          error: JSON.stringify(error),
+        });
+        break;
+      } finally {
+        onProgress?.({
+          progress: Math.round(((i + 1) / objs.length) * 100),
+          title: "กำลังประมวลผล...",
+          show: true,
+        });
+      }
     }
 
     await tx?.done;
-    console.log("เพิ่มข้อมูลเพลง");
     return true;
-    console.log("addTracklistsToDatabase Objects saved successfully");
   } catch (error) {
     console.error(
       "addTracklistsToDatabase Error saving objects to database:",
@@ -152,3 +159,7 @@ export const saveTracklistToStorage = async (
 // export const getTrackList = async () => {
 //   return await storageGet<File>(TRACKLIST_FILENAME, STORAGE_NAME_DIC);
 // };
+
+export const getAllKeyTracklist = async () => {
+  return await storageGetAllKeys(STORAGE_TRACKLIST);
+};

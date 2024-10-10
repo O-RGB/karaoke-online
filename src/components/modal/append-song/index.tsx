@@ -2,69 +2,106 @@ import React, { useEffect, useState } from "react";
 import { useAppControl } from "@/hooks/app-control-hook";
 import Tabs from "../../common/tabs";
 import AddSong from "./taps/add-song";
-import AddTracklist from "./taps/add-tracklist";
 import AddFormKaraokeExtreme from "./taps/add-form-karaoke-extreme";
 import { readSong } from "@/lib/karaoke/read";
 import {
   addTracklistsToDatabase,
+  getAllKeyTracklist,
   jsonTracklistToDatabase,
   saveTracklistToStorage,
 } from "@/lib/storage/tracklist";
 import {
-  addSongKaraokeExtremeToStorage,
+  extractMusicZip,
   createSongZip,
+  getAllKeysSong,
 } from "@/lib/storage/song";
+import { PiMusicNotesPlusBold } from "react-icons/pi";
+import { SiGoogledrive } from "react-icons/si";
+import { TbMicrophone2 } from "react-icons/tb";
+import ProcessingModal from "../processing-modal.tsx/processing";
+import { testUrl } from "@/lib/fetch/test-api";
+import AddFromDrive from "./taps/add-from-drive";
+import {
+  setLocalDriveTested,
+  setLocalDriveUrl,
+  setLocalSystemMode,
+  setLocalTracklistDriveTested,
+} from "@/lib/local-storage";
 
 interface AppendSongModalProps {}
 
 const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
-  const { setTracklistFile, setRemoveTracklistFile, addTracklist } =
-    useAppControl();
+  const {
+    setTracklistFile,
+    setRemoveTracklistFile,
+    addTracklist,
+    setSystemDriveMode,
+  } = useAppControl();
   const [progress, setProgress] = useState<IProgressBar>();
-  const [onLoadZip, setLoadZip] = useState<boolean>(false);
-  const [onCommitToDB, setCommitToDB] = useState<boolean>(false);
   const [filename, setFilename] = useState<string>();
   const [musicFilename, setMusicFilename] = useState<string>();
   const [listCreateSong, setListCreateSong] = useState<
     SongFiltsEncodeAndDecode[]
   >([]);
 
+  const [tracklistCount, setTracklistCount] = useState<number>(0);
+  const [musicLibraryCount, setMusicLibraryCount] = useState<number>(0);
+
+  // Count Item
+  const getTracklistCount = async () => {
+    const tracklist = await getAllKeyTracklist();
+    setTracklistCount(tracklist.length);
+    return tracklist;
+  };
+  const getMusicLibraryCount = async () => {
+    const musicLibrary = await getAllKeysSong();
+    setMusicLibraryCount(musicLibrary.length);
+    return musicLibrary;
+  };
+
+  // Zip Loader
   const onPrepareStorage = async (musicLibrary: Map<string, File>) => {
-    setCommitToDB(true);
+    setProgress({ progress: 0, title: "กำลังโหลดเข้า Database", show: true });
     await saveTracklistToStorage(musicLibrary, setProgress);
-    setCommitToDB(false);
-    setProgress(undefined);
-    setLoadZip(false);
   };
 
   const onLoadFileZip = async (_: File, fileList: FileList) => {
     if (fileList.length === 0) {
       return;
     }
-
-    setLoadZip(true);
     setFilename(fileList.item(0)?.name);
-    const loaded = await addSongKaraokeExtremeToStorage(fileList, setProgress);
+    setProgress({ progress: 0, title: "กำลัง Extract zip...", show: true });
+    const loaded = await extractMusicZip(fileList, setProgress);
     if (loaded) {
-      setLoadZip(false);
       await onPrepareStorage(loaded);
+      getMusicLibraryCount();
     }
   };
 
- 
-  const onLoadFileJson = async (_: File, fileList: FileList) => {
-    if (fileList.length === 0) {
+  // Tracklist Json
+  const onLoadFileJson = async (file: File) => {
+    if (!file) {
       return;
     }
-    const file = fileList.item(0);
 
     if (file?.type === "application/json") {
-      const saved = await jsonTracklistToDatabase(file);
+      setProgress({ progress: 0, title: "กำลังอ่านไฟล์...", show: true });
+      const saved = await jsonTracklistToDatabase(file, setProgress);
+
       if (saved) {
         setTracklistFile(file);
         setMusicFilename(file?.name);
       }
+      getTracklistCount();
+      return true;
     }
+    setProgress({
+      progress: 0,
+      title: "ดาวน์โหลดไม่สำเร็จ",
+      show: true,
+      error: "File Type ไม่ถูกต้อง",
+    });
+    return false;
   };
 
   const onRemoveFileJson = async () => {
@@ -72,6 +109,117 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     setMusicFilename(undefined);
   };
 
+  const bufferFileToDisplay = async (_: File, filelist: FileList) => {
+    const readed = await readSong(filelist);
+    setListCreateSong(readed);
+  };
+
+  // Drive Modal
+  const onAddUrlDrvie = async (value: string) => {
+    try {
+      if (!value) {
+        setProgress({
+          progress: 0,
+          title: "เกิดข้อผิดพลาด",
+          show: true,
+          error: "ไม่มี Google Url",
+        });
+        setLocalDriveUrl("");
+        setLocalDriveTested(false);
+        return false;
+      }
+      setProgress({
+        progress: 0,
+        title: "กำลังเชื่อมต่อ",
+        show: true,
+        loading: true,
+      });
+      const res = await testUrl(value);
+      if (res) {
+        setProgress({
+          progress: 100,
+          title: "เชื่อมต่อสำเร็จ",
+          show: true,
+        });
+        setLocalDriveTested(true);
+        setLocalDriveUrl(value);
+        return true;
+      } else {
+        setProgress({
+          progress: 0,
+          title: "เชื่อมต่อไม่สำเร็จ",
+          show: true,
+          error: "ไม่สามารถระบุ Google Apps script",
+        });
+        setLocalDriveUrl("");
+        setLocalDriveTested(false);
+        return false;
+      }
+    } catch (error) {
+      setProgress({
+        progress: 0,
+        title: "เกิดข้อผิดพลาด",
+        show: true,
+        error: "Error uploading file: " + JSON.stringify(error),
+      });
+      setLocalDriveUrl("");
+      setLocalDriveTested(false);
+      return false;
+    }
+  };
+
+  const onAddTrackListDrive = async (value: string) => {
+    setProgress({
+      progress: 0,
+      title: "กำลังดาวน์โหลด...",
+      show: true,
+      loading: true,
+    });
+    return fetch(value)
+      .then(async (response) => {
+        let file: File | undefined = undefined;
+        if (response.ok == true) {
+          const fileBlob = await response.blob();
+          file = new File([fileBlob], "song.json", {
+            type: fileBlob.type,
+          });
+        }
+
+        if (file) {
+          await onLoadFileJson(file);
+          setLocalTracklistDriveTested(value);
+          return true;
+        }
+        setProgress({
+          progress: 0,
+          title: "ดาวน์โหลดไม่สำเร็จ",
+          show: true,
+          error: "ไม่สามารถติดต่อกับ Server",
+        });
+        return false;
+      })
+      .catch((error) => {
+        setProgress({
+          progress: 0,
+          title: "ดาวน์โหลดไม่สำเร็จ",
+          show: true,
+          error: JSON.stringify(error),
+        });
+        return false;
+      });
+  };
+
+  const onSystemChange = (value: string) => {
+    if (value === "on") {
+      setSystemDriveMode(true);
+      setLocalSystemMode("DRIVE");
+    } else {
+      setSystemDriveMode(false);
+      setLocalSystemMode("SYSTEM");
+    }
+  };
+
+  // Custom Add Song
   const onAddSong = async () => {
     try {
       if (listCreateSong) {
@@ -92,95 +240,113 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     }
   };
 
-  const bufferFileToDisplay = async (_: File, filelist: FileList) => {
-    const readed = await readSong(filelist);
-    setListCreateSong(readed);
-  };
-
   useEffect(() => {
-    // loadTrackListFile();
+    getTracklistCount();
+    getMusicLibraryCount();
   }, []);
 
   return (
-    <Tabs
-      tabs={[
-        {
-          label: "เพิ่มเพลง",
-          content: (
-            <AddSong
-              onCreate={onAddSong}
-              onAddFile={bufferFileToDisplay}
-              bufferFile={listCreateSong}
-            />
-          ),
-        },
-        {
-          label: "ฐานข้อมูลเพลง",
-          content: (
-            <AddTracklist
-              onAddFile={onLoadFileJson}
-              onRemoveFile={onRemoveFileJson}
-              filename={musicFilename}
-            />
-          ),
-        },
-        {
-          label: "ติดตั้งเพลงจาก Karaoke extreme",
-          content: (
-            <AddFormKaraokeExtreme
-              filename={filename}
-              onAddFile={onLoadFileZip}
-              process={{
-                db_result: onCommitToDB,
-                progress: progress,
-                unzip: onLoadZip,
-              }}
-            />
-          ),
-        },
-        // {
-        //   label: "วิธีใช้โปรแกรม",
-        //   content: (
-        //     <div className="flex flex-col gap-1 p-2 w-full">
-        //       <Label className="flex gap-1 items-center ">
-        //         <FaDownload></FaDownload> โปรแกรมนำเข้าเพลง
-        //       </Label>
+    <>
+      <ProcessingModal
+        process={progress}
+        onClose={() => {
+          setProgress({ show: false });
+        }}
+      ></ProcessingModal>
+      <Tabs
+        tabs={[
+          {
+            icon: <PiMusicNotesPlusBold></PiMusicNotesPlusBold>,
+            label: "เพิ่มเพลง",
+            content: (
+              <AddSong
+                onCreate={onAddSong}
+                onAddFile={bufferFileToDisplay}
+                bufferFile={listCreateSong}
+              />
+            ),
+          },
+          // {
+          //   icon: <MdQueueMusic></MdQueueMusic>,
+          //   label: "รายชื่อเพลง",
+          //   content: (
+          //     <AddTracklist
+          //       onAddFile={onLoadFileJson}
+          //       onRemoveFile={onRemoveFileJson}
+          //       filename={musicFilename}
+          //     />
+          //   ),
+          // },
+          {
+            icon: <SiGoogledrive></SiGoogledrive>,
+            label: "เพิ่มจาก Drive",
+            content: (
+              <AddFromDrive
+                onSystemChange={onSystemChange}
+                onAddTrackListDrive={onAddTrackListDrive}
+                onAddUrlDrvie={onAddUrlDrvie}
+              />
+            ),
+          },
+          {
+            icon: <TbMicrophone2></TbMicrophone2>,
+            label: "เพิ่มจาก Extreme",
+            content: (
+              <AddFormKaraokeExtreme
+                musicLibraryCount={musicLibraryCount}
+                tracklistCount={tracklistCount}
+                onAddFileTracklist={onLoadFileJson}
+                onRemoveFileTracklist={onRemoveFileJson}
+                filenameTracklist={musicFilename}
+                filename={filename}
+                onAddFile={onLoadFileZip}
+              />
+            ),
+          },
+          // {
+          //   label: "วิธีใช้โปรแกรม",
+          //   content: (
+          //     <div className="flex flex-col gap-1 p-2 w-full">
+          //       <Label className="flex gap-1 items-center ">
+          //         <FaDownload></FaDownload> โปรแกรมนำเข้าเพลง
+          //       </Label>
 
-        //       <span className="flex gap-2">
-        //         <Button
-        //           color="blue"
-        //           className="text-white"
-        //           shadow=""
-        //           border=""
-        //           blur=""
-        //         >
-        //           <FaWindows></FaWindows>
-        //         </Button>
-        //         <Button
-        //           color="blue"
-        //           padding=""
-        //           className="text-white w-20 h-10"
-        //           shadow=""
-        //           border=""
-        //           blur=""
-        //         >
-        //           <span className="">
-        //             <SiMacos className="text-5xl"></SiMacos>
-        //           </span>
-        //         </Button>
-        //       </span>
-        //       <div className="pt-2">
-        //         <hr />
-        //       </div>
-        //       <span className="text-sm">
-        //         วิธีใช้ นำโปรแกรมไปวางไว้ที่ตำแหน่ง Karaoke Extreme
-        //         และเปิดโปรแกรมนำเข้าเพลง <br />
-        //       </span>
-        //     </div>
-        //   ),
-        // },
-      ]}
-    ></Tabs>
+          //       <span className="flex gap-2">
+          //         <Button
+          //           color="blue"
+          //           className="text-white"
+          //           shadow=""
+          //           border=""
+          //           blur=""
+          //         >
+          //           <FaWindows></FaWindows>
+          //         </Button>
+          //         <Button
+          //           color="blue"
+          //           padding=""
+          //           className="text-white w-20 h-10"
+          //           shadow=""
+          //           border=""
+          //           blur=""
+          //         >
+          //           <span className="">
+          //             <SiMacos className="text-5xl"></SiMacos>
+          //           </span>
+          //         </Button>
+          //       </span>
+          //       <div className="pt-2">
+          //         <hr />
+          //       </div>
+          //       <span className="text-sm">
+          //         วิธีใช้ นำโปรแกรมไปวางไว้ที่ตำแหน่ง Karaoke Extreme
+          //         และเปิดโปรแกรมนำเข้าเพลง <br />
+          //       </span>
+          //     </div>
+          //   ),
+          // },
+        ]}
+      ></Tabs>
+    </>
   );
 };
 

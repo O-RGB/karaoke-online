@@ -98,12 +98,12 @@ const ContextModal: React.FC<ContextModalProps> = ({
           onClick: handleSelectContext,
           type: "MUSIC_STORE",
         },
-        {
-          icon: <FaGoogleDrive />,
-          text: "เชื่อมต่อ Google Drive",
-          onClick: handleSelectContext,
-          type: "DRIVE_SETTING",
-        },
+        // {
+        //   icon: <FaGoogleDrive />,
+        //   text: "เชื่อมต่อ Google Drive",
+        //   onClick: handleSelectContext,
+        //   type: "DRIVE_SETTING",
+        // },
       ],
       name: "ที่เก็บข้อมูล",
       icon: <></>,

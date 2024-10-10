@@ -14,6 +14,7 @@ export default function Modal({
   okButtonProps,
   cancelProps,
   width = "800px",
+  height = "500px",
   footer,
   cancelText = "ยกเลิก",
   okText = "ตกลง",
@@ -37,7 +38,7 @@ export default function Modal({
   const handleClose = () => {
     setShowModal(false);
     setTimeout(() => {
-      onClose();
+      onClose?.();
       handleOpen(false);
     }, delay);
   };
@@ -56,7 +57,7 @@ export default function Modal({
         >
           <div
             className="fixed inset-0 bg-black bg-opacity-50"
-            onClick={handleClose}
+            onClick={closable ? handleClose : undefined}
           ></div>
           <div
             style={{ width }}
@@ -74,7 +75,12 @@ export default function Modal({
                 </div>
               )}
             </div>
-            <div className={`p-3 md:p-4 h-[500px] relative z-0`}>
+            <div
+              style={{
+                height: typeof height === "boolean" ? "fit-content" : height,
+              }}
+              className={`p-3 md:p-4 relative z-0`}
+            >
               {children}
               <div className="sticky bottom-0 z-50 pb-4 bg-white"></div>
             </div>

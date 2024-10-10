@@ -18,17 +18,15 @@ const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     <AppControlProvider>
       <OrientationProvider>
         <WallpaperProvider>
-          <NotificationProvider>
-            <MixerProvider>
-              <KeyUpProvider>
-                <DragDropProvider>
-                  <PlayerProvider>
-                    <LyricsDisplayProvider>{children}</LyricsDisplayProvider>
-                  </PlayerProvider>
-                </DragDropProvider>
-              </KeyUpProvider>
-            </MixerProvider>
-          </NotificationProvider>
+          <MixerProvider>
+            <KeyUpProvider>
+              <DragDropProvider>
+                <PlayerProvider>
+                  <LyricsDisplayProvider>{children}</LyricsDisplayProvider>
+                </PlayerProvider>
+              </DragDropProvider>
+            </KeyUpProvider>
+          </MixerProvider>
         </WallpaperProvider>
       </OrientationProvider>
     </AppControlProvider>

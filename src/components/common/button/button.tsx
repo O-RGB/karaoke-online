@@ -16,7 +16,7 @@ const Button: React.FC<ButtonCommonProps> = ({
 
   ...props
 }) => {
-  var butStyle = `${padding} ${shadow} ${border} flex items-center justify-center gap-2`;
+  var butStyle = `${padding} ${shadow} ${border} flex items-center justify-center gap-2 text-sm`;
   var colorStyle = ""; //bg-blue-500 hover:bg-blue-500/90 active:bg-blue-500/80
   var animation = "duration-300 transition-all";
   var shapeStyle = "";

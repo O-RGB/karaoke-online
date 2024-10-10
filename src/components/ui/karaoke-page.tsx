@@ -16,7 +16,7 @@ import ContextModal from "../modal/context-modal";
 import AppendSongModal from "../modal/append-song";
 import { usePlayer } from "@/hooks/player-hook";
 import TempoPanel from "../tools/tempo-panel";
-import StatusPanel from "../tools/status-panel";
+import StatusPanel from "../tools/status/status-panel";
 import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper-modal";
 import LyricsModal from "../modal/lyrics-modal";
@@ -29,6 +29,8 @@ import { onSelectTestMusic } from "@/lib/karaoke/read";
 import { LoadDatabase } from "@/utils/database/model";
 import { getTracklistToJson } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
+import { initDatabase } from "@/utils/database/db";
+import { getLocalSystemMode } from "@/lib/local-storage";
 
 interface KaraokePageProps {}
 
@@ -44,14 +46,22 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     cursorIndices,
     cursorTicks,
     addTracklist,
+    setSystemDriveMode,
   } = useAppControl();
 
   const { tempo, tick } = usePlayer();
   const { notification } = useNotification();
 
   const startup = async () => {
+    // Config
+    const systemConfig = getLocalSystemMode();
+    setSystemDriveMode(systemConfig === "DRIVE");
+
+    // Setup
     setupSpessasynth();
-    LoadDatabase();
+    initDatabase();
+
+    // Database
     const tl = await getTracklistToJson();
     addTracklist(tl);
   };
@@ -102,7 +112,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           musicLibrary={musicLibrary}
         ></WallcomeModal> */}
         <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel>
-        <StatusPanel text={notification}></StatusPanel>
+        <StatusPanel notification={notification}></StatusPanel>
         <VolumePanel
           perset={perset}
           analysers={analysers}

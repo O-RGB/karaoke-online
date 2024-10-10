@@ -27,6 +27,7 @@ type ModalType =
   | "DRIVE_SETTING";
 
 type InputBarLayout = "vertical" | "horizontal";
+type SystemMode = "SYSTEM" | "DRIVE";
 
 type ModalComponents = {
   [key in ModalType]?: React.ReactNode;
@@ -34,13 +35,14 @@ type ModalComponents = {
 
 type ModalProps = {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   onOk?: () => void;
   okButtonProps?: ButtonProps;
   cancelProps?: ButtonProps;
   children: React.ReactNode;
   title?: string | React.ReactNode;
   width?: string;
+  height?: string | boolean;
   footer?: React.ReactNode;
   cancelText?: string;
   okText?: string;
@@ -69,9 +71,12 @@ interface IOptions<T = any> {
 }
 
 interface IProgressBar {
+  title?: string;
   progress?: number;
   processing?: string;
   error?: string;
+  show?: boolean;
+  loading?: boolean;
 }
 
 interface MapContextMenu {
@@ -115,4 +120,18 @@ interface RangeBarProps extends InputProps {
 
   onMouseUp?: () => void;
   onTouchEnd?: () => void;
+}
+
+interface IndexedDbInput {
+  id: string;
+  value: any;
+}
+interface IndexedDbReslut<T> {
+  value: T;
+}
+
+interface INotificationValue {
+  text: string;
+  icon: React.ReactNode;
+  delay?: number;
 }

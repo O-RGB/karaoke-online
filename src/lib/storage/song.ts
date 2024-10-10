@@ -67,11 +67,12 @@ export const getSongByKeyDrive = async (
 export const getSongByKey = async (
   key: string | number,
   formUser: boolean = false
-): Promise<File | undefined> => {
-  return await storageGet(
+) => {
+  const res = await storageGet<File>(
     key,
     formUser ? STORAGE_USER_SONG : STORAGE_KARAOKE_EXTREME
   );
+  return res.value;
 };
 
 export const songIsEmpty = async () => {
@@ -99,11 +100,8 @@ export const getSong = async (
   selected?: SearchResult,
   driveMode: boolean = false
 ) => {
-  console.log("start get song ");
-
   const { superId, fileId } = genSongPath(selected);
   if (superId && fileId) {
-    console.log("check id");
     var superFile: File | undefined = undefined;
 
     // on drive
@@ -112,14 +110,7 @@ export const getSong = async (
     } else {
       // // on local
       const checkUserSong: boolean = superId.startsWith(CUSTOM_SONG_ZIP);
-      if (checkUserSong) {
-        superFile = await getSongByKey(
-          +superId.replace(CUSTOM_SONG_ZIP + "-", ""),
-          true
-        );
-      } else {
-        superFile = await getSongByKey(`${superId}.zip`, false);
-      }
+      superFile = await getSongByKey(`${superId}.zip`, checkUserSong);
     }
 
     if (superFile) {
@@ -197,7 +188,7 @@ export const createSongZip = async (bufferFile: SongFiltsEncodeAndDecode[]) => {
     }
   }
 };
-export const addSongKaraokeExtremeToStorage = async (
+export const extractMusicZip = async (
   fileList: FileList,
   onProgress?: (progress?: IProgressBar) => void
 ) => {
@@ -252,7 +243,7 @@ export const addUserSong = async (userSong: File, id: string) => {
       return false;
     }
 
-    await store?.put(userSong);
+    await store?.put({ value: userSong, id });
     return await tx?.done;
   } catch (error) {
     return false;

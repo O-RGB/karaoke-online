@@ -1,12 +1,18 @@
 import { STORAGE_SOUNDFONT_DIC, STORAGE_SOUNDFONT } from "@/config/value";
 import { getDB } from "@/utils/database/db";
-import { storageGet, storageGetAll, storageGetAllKeys } from "../../utils/database/storage";
+import {
+  storageGet,
+  storageGetAll,
+  storageGetAllKeys,
+} from "../../utils/database/storage";
 
 // Soundfont
 export const createSoundFontDic = async (filename: string, size: number) => {
   const db = await getDB(STORAGE_SOUNDFONT_DIC);
   const tx = db.transaction(STORAGE_SOUNDFONT_DIC, "readwrite");
-  await tx.objectStore(STORAGE_SOUNDFONT_DIC).add({ filename, size }, filename);
+  await tx
+    .objectStore(STORAGE_SOUNDFONT_DIC)
+    .put({ value: { filename, size }, id: filename });
   await tx.done;
 };
 
@@ -14,7 +20,7 @@ export const saveSoundFontStorage = async (file: File) => {
   try {
     const db = await getDB(STORAGE_SOUNDFONT);
     const tx = db.transaction(STORAGE_SOUNDFONT, "readwrite");
-    await tx.objectStore(STORAGE_SOUNDFONT).add(file, file.name);
+    await tx.objectStore(STORAGE_SOUNDFONT).put({ value: file, id: file.name });
     await tx.done;
   } catch (error) {}
 };

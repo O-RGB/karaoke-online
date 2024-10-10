@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 type Tab = {
+  icon?: React.ReactNode;
   label: string;
   content: React.ReactNode;
 };
@@ -19,12 +20,13 @@ const Tabs: React.FC<TabsProps> = ({ tabs }) => {
           <button
             key={index}
             onClick={() => setActiveTab(index)}
-            className={`py-2 px-4 focus:outline-none transition text-nowrap text-sm ${
+            className={`py-2 px-4 focus:outline-none transition text-nowrap text-sm flex gap-2 items-center justify-center ${
               activeTab === index
                 ? "border-b-2 border-blue-500 text-blue-500"
                 : "text-gray-500 hover:text-blue-500"
             }`}
           >
+            {tab.icon}
             {tab.label}
           </button>
         ))}

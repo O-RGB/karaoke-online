@@ -12,6 +12,8 @@ import TrieSearch from "trie-search";
 import React from "react";
 import { jsonTracklistToDatabase } from "@/lib/storage/tracklist";
 import { getSong } from "@/lib/storage/song";
+import { useNotification } from "@/hooks/notification-hook";
+import { AiOutlineLoading } from "react-icons/ai";
 
 type AppControlContextType = {
   updateVolumeSysth: (index: number, value: number) => void;
@@ -78,6 +80,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 }) => {
   const { synth, player } = useSynth();
   const { received: messages, sendMessage } = useRemote();
+  const { addNotification } = useNotification();
 
   // Fetch Option
   const [driveMode, setDriveMode] = useState<boolean>(false);
@@ -264,9 +267,23 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   };
 
   const loadAndPlaySong = async (value: SearchResult) => {
+    let mode: string = "";
+    if (driveMode) {
+      mode = " Drive";
+    } else {
+      mode = "ระบบ";
+    }
+    addNotification(
+      "กำลังโหลดจาก" + mode,
+      <AiOutlineLoading className="animate-spin"></AiOutlineLoading>,
+      40000
+    );
     const song = await getSong(value, driveMode);
     if (song) {
       setSongPlaying(song);
+      addNotification("เสร็จสิ้น");
+    } else {
+      addNotification("ไม่พบเพลงใน" + mode);
     }
   };
 
@@ -316,7 +333,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 
   useEffect(() => {
     eventRemote(messages?.from, messages?.content);
-    console.log(messages);
   }, [messages?.content]);
 
   useEffect(() => {

@@ -75,11 +75,11 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
   const changeWallpaper = async (filename: string) => {
     setLocalWallpaper(filename);
     const localfile = await getWallpaperStorage(filename);
-    if (localfile) {
-      setIsVideo(localfile.type.startsWith("video/"));
-      const mediaUrl = URL.createObjectURL(localfile);
+    if (localfile.value) {
+      setIsVideo(localfile.value.type.startsWith("video/"));
+      const mediaUrl = URL.createObjectURL(localfile.value);
       setWallpaper(mediaUrl);
-      setWallpaperName(localfile.name);
+      setWallpaperName(localfile.value.name);
     }
   };
 
@@ -95,11 +95,11 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
     const key = getLocalWallpaper();
     if (key) {
       const wallpaper = await getWallpaperStorage(key);
-      if (wallpaper) {
-        const mediaUrl = URL.createObjectURL(wallpaper);
+      if (wallpaper.value) {
+        const mediaUrl = URL.createObjectURL(wallpaper.value);
         setWallpaper(mediaUrl);
-        setIsVideo(wallpaper.type.startsWith("video/"));
-        setWallpaperName(wallpaper.name);
+        setIsVideo(wallpaper.value.type.startsWith("video/"));
+        setWallpaperName(wallpaper.value.name);
       }
     }
   };

@@ -1,5 +1,6 @@
 import {
   STORAGE_DRIVE,
+  STORAGE_KARAOKE_EXTREME,
   STORAGE_TRACKLIST,
   STORAGE_USER_SONG,
   STORAGE_WALLPAPER,
@@ -40,6 +41,18 @@ export const TracklistModel = async () => {
   }
 };
 
+export const karaokeExtremeModel = async () => {
+  try {
+    const db = await getDB(STORAGE_KARAOKE_EXTREME, true);
+    const tx = db.transaction(STORAGE_KARAOKE_EXTREME, "readwrite");
+    const store = tx.objectStore(STORAGE_KARAOKE_EXTREME);
+    return { store, tx, db, loaded: true };
+  } catch (error) {
+    console.log("tracklist error", error);
+    return { store: null, tx: null, db: null, loaded: false };
+  }
+};
+
 export const WallpaperModel = async () => {
   try {
     const db = await getDB(STORAGE_WALLPAPER);
@@ -56,4 +69,5 @@ export const LoadDatabase = () => {
   TracklistModel();
   WallpaperModel();
   SongDriveModel();
+  karaokeExtremeModel();
 };

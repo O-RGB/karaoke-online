@@ -78,7 +78,7 @@ const FileUpload: React.FC = () => {
     });
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbzQPGcw6Sk49bOpmUzo4wcvONZdsQEk75FyAFDuhrltF6VQkyKcIr_-J6_B5IucUtk2/exec",
+        "https://script.google.com/macros/s/AKfycbysqusweMz1-fSqpGfyTgWkVtBbpSHfDqUvKZXQoWkg6tJF0OgEvtHkjNo8NFm1vPNu/exec",
         {
           method: "POST",
           body: form,

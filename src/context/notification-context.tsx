@@ -1,8 +1,13 @@
 "use client";
-import { createContext, FC, useState } from "react";
+import React, { createContext, FC, useState } from "react";
+
 type NotificationContextType = {
-  notification: string | undefined;
-  addNotification: (text: string) => void;
+  notification: INotificationValue | undefined;
+  addNotification: (
+    text: string,
+    icon?: React.ReactNode,
+    delay?: number
+  ) => void;
 };
 
 type NotificationProviderProps = {
@@ -17,10 +22,14 @@ export const NotificationContext = createContext<NotificationContextType>({
 export const NotificationProvider: FC<NotificationProviderProps> = ({
   children,
 }) => {
-  const [notification, setNotification] = useState<string>();
+  const [notification, setNotification] = useState<INotificationValue>();
 
-  const addNotification = (text: string) => {
-    setNotification(text);
+  const addNotification = (
+    text: string,
+    icon?: React.ReactNode,
+    delay?: number
+  ) => {
+    setNotification({ text, icon, delay });
   };
 
   return (

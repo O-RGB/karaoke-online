@@ -1,6 +1,5 @@
 // const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-function QueryPost(params: any): FormData {
+export function QueryPost(params: any): FormData {
   const formData = new FormData();
   Object.keys(params).map((key) => {
     if (params[key] !== undefined) {

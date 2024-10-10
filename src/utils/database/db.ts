@@ -1,33 +1,63 @@
+import {
+  STORAGE_DRIVE,
+  STORAGE_USER_SONG,
+  STORAGE_TRACKLIST,
+  STORAGE_KARAOKE_EXTREME,
+  STORAGE_WALLPAPER,
+  STORAGE_SOUNDFONT,
+  STORAGE_SOUNDFONT_DIC,
+  STORAGE_USER_DRIVE,
+} from "@/config/value";
 import { deleteDB, IDBPDatabase, openDB } from "idb";
 
 const DB_NAME = "Karaoke-online";
 const DB_VERSION = 1;
 
+const stores = [
+  STORAGE_KARAOKE_EXTREME,
+  STORAGE_USER_SONG,
+  STORAGE_TRACKLIST,
+  STORAGE_SOUNDFONT,
+  STORAGE_SOUNDFONT_DIC,
+  STORAGE_WALLPAPER,
+  STORAGE_DRIVE,
+  STORAGE_USER_DRIVE,
+];
+
 export async function getDB(
   store_name: string,
   autoIncrement: boolean = false
 ) {
-  return upgradeDB(store_name, autoIncrement);
+  // เปิดฐานข้อมูล
+  const db = await openDB(DB_NAME, DB_VERSION, {
+    upgrade(db) {
+      // ตรวจสอบว่ามีการสร้าง Object Store ใหม่หรือไม่
+      if (!db.objectStoreNames.contains(store_name)) {
+        db.createObjectStore(store_name, {
+          keyPath: autoIncrement ? "id" : undefined,
+          autoIncrement: autoIncrement,
+        });
+      }
+    },
+  });
+
+  // สร้างการทำธุรกรรมกับ Object Store ที่ต้องการ
+  return db;
 }
 
-async function upgradeDB(store_name: string, autoIncrement: boolean) {
-  const db = await openDB(DB_NAME);
-
-  if (!db.objectStoreNames.contains(store_name)) {
-    const newVersion = db.version + 1;
-    db.close();
-
-    return openDB(DB_NAME, newVersion, {
-      upgrade(db) {
+export async function initDatabase(autoIncrement: boolean = true) {
+  const db = await openDB(DB_NAME, DB_VERSION, {
+    upgrade(db) {
+      stores.forEach((store_name) => {
         if (!db.objectStoreNames.contains(store_name)) {
           db.createObjectStore(store_name, {
             keyPath: autoIncrement ? "id" : undefined,
             autoIncrement: autoIncrement,
           });
         }
-      },
-    });
-  }
+      });
+    },
+  });
   return db;
 }
 

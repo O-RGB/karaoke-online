@@ -4,6 +4,8 @@ const crendentialKeys: { [key: string]: string } = {
   song_count: "song_count",
   drive_url: "drive_url",
   drive_tested: "drive_tested",
+  drive_tracklist_url: "drive_tracklist_url",
+  system_drive_mode: "system_drive_mode",
 };
 
 // SET
@@ -28,6 +30,14 @@ export const setLocalDriveTested = (tested: boolean) => {
   localStorage.setItem(crendentialKeys.drive_tested, `${tested}`);
   return true;
 };
+export const setLocalTracklistDriveTested = (url: string) => {
+  localStorage.setItem(crendentialKeys.getLocalTracklistDriveUrl, `${url}`);
+  return true;
+};
+export const setLocalSystemMode = (mode: SystemMode) => {
+  localStorage.setItem(crendentialKeys.system_drive_mode, `${mode}`);
+  return true;
+};
 
 // GET
 export const getLocalWallpaper = () => {
@@ -40,8 +50,22 @@ export const getLocalSongCount = () => {
 export const getLocalDriveUrl = () => {
   return localStorage.getItem(crendentialKeys.drive_url) || null;
 };
-export const getLocalDriveTested = () => {
-  return localStorage.getItem(crendentialKeys.drive_tested) || null;
+export const getLocalDriveTested = (): boolean => {
+  const bool = localStorage.getItem(crendentialKeys.drive_tested) || null;
+  if (bool === "true") {
+    return true;
+  } else {
+    return false;
+  }
+};
+export const getLocalTracklistDriveUrl = () => {
+  return localStorage.getItem(crendentialKeys.drive_tracklist_url) || null;
+};
+export const getLocalSystemMode = (): SystemMode => {
+  return (
+    (localStorage.getItem(crendentialKeys.system_drive_mode) as SystemMode) ||
+    null
+  );
 };
 
 // DELETE
