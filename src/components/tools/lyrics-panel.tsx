@@ -1,97 +1,28 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
-import { groupThaiCharacters } from "@/lib/app-control";
+import React, { useEffect } from "react";
 import { useLyrics } from "@/hooks/lyrics-hook";
 import { useAppControl } from "@/hooks/app-control-hook";
 import { useOrientation } from "@/hooks/orientation-hook";
 import LyricsAnimation from "../common/lyrics/cut-lyrics/cut-animation";
 import RandomLyrics from "../lyrics/random-lyrics";
+import useLyricsStore from "../stores/lyrics-store";
 
 interface LyricsPanelProps {
   lyrics: string[];
-  tick: number;
   cursorTicks: number[];
   cursorIndices?: Map<number, number[]>;
 }
 
-const LyricsPanel: React.FC<LyricsPanelProps> = ({
-  lyrics,
-  tick,
-  cursorTicks,
-  cursorIndices,
-}) => {
+const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {
+  const display = useLyricsStore((state) => state.display);
+  const displayBottom = useLyricsStore((state) => state.displayBottom);
+  const position = useLyricsStore((state) => state.position);
+  const charIndex = useLyricsStore((state) => state.charIndex);
+
   const { orientation } = useOrientation();
   const { lyricsDisplay } = useLyrics();
   const { hideVolume } = useAppControl();
-
-  const charIndex = useRef<number>(0);
-  const display = useRef<string[][]>([]);
-  const displayBottom = useRef<string[][]>([]);
-  const position = useRef<boolean>(true);
-
-  const curIdIndex = useRef<number>(0);
-  const lyricsIndex = useRef<number>(0);
-
-  const reset = () => {
-    if (lyrics.length > 0) {
-      display.current = [[lyrics[0]]];
-    }
-    curIdIndex.current = 0;
-    position.current = false;
-    lyricsIndex.current = 0;
-    charIndex.current = 0;
-  };
-  const lyricLines = useMemo(() => lyrics.slice(3), [lyrics]);
-
-  const renderLyricsDisplay = () => {
-    const targetTick = cursorTicks[curIdIndex.current];
-    if (targetTick <= tick) {
-      curIdIndex.current++;
-
-      const charIndices = cursorIndices?.get(targetTick);
-
-      if (charIndices) {
-        charIndices.forEach((index) => {
-          let lineIndex = 0;
-          let adjustedCharIndex = index;
-
-          while (adjustedCharIndex >= lyricLines[lineIndex].length) {
-            adjustedCharIndex -= lyricLines[lineIndex].length + 1;
-            lineIndex++;
-          }
-
-          if (lineIndex > lyricsIndex.current) {
-            if (position.current) {
-              display.current = groupThaiCharacters(lyricLines[lineIndex + 1]);
-              displayBottom.current = groupThaiCharacters(
-                lyricLines[lineIndex]
-              );
-            } else {
-              display.current = groupThaiCharacters(lyricLines[lineIndex]);
-              displayBottom.current = groupThaiCharacters(
-                lyricLines[lineIndex + 1]
-              );
-            }
-            lyricsIndex.current = lineIndex;
-            position.current = !position.current;
-          }
-          charIndex.current = adjustedCharIndex + 1;
-        });
-      }
-    }
-  };
-
-  useEffect(() => {
-    const animationFrame = requestAnimationFrame(renderLyricsDisplay);
-    return () => cancelAnimationFrame(animationFrame);
-  }, [tick, cursorTicks, cursorIndices]);
-
-  useEffect(() => {
-    if (lyrics) {
-      reset();
-    }
-  }, [lyrics]);
 
   useEffect(() => {}, [lyricsDisplay]);
 
@@ -115,22 +46,22 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({
             <>
               <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
                 <LyricsAnimation
-                  charIndex={position.current === true ? charIndex.current : -1}
-                  display={display.current}
+                  charIndex={position === true ? charIndex : -1}
+                  display={display}
                 ></LyricsAnimation>
               </span>
               <br />
               <LyricsAnimation
-                charIndex={position.current === false ? charIndex.current : -1}
-                display={displayBottom.current}
+                charIndex={position === false ? charIndex : -1}
+                display={displayBottom}
               ></LyricsAnimation>
             </>
           ) : (
             <>
               <RandomLyrics
-                display={display.current}
-                displayBottom={displayBottom.current}
-                position={position.current}
+                display={display}
+                displayBottom={displayBottom}
+                position={position}
               ></RandomLyrics>
             </>
           )}

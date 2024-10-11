@@ -1,9 +1,11 @@
 // import React, { useEffect, useState } from "react";
 
+import useGainStore from "@/components/stores/gain.store";
 import { useEffect, useRef } from "react";
 
 interface VolumeMeterVProps {
   level: number;
+  channel: number;
   max: number;
   className: string;
 }
@@ -11,8 +13,11 @@ interface VolumeMeterVProps {
 const VolumeMeterV: React.FC<VolumeMeterVProps> = ({
   level,
   className,
+  channel,
   max = 100,
 }) => {
+  const gain = useGainStore((state) => state.gain);
+  level = gain[channel];
   //   const [filledBars, setFilledBars] = useState<number>(0);
 
   //   useEffect(() => {

@@ -18,7 +18,7 @@ const SwitchRadio = <T,>({
   value,
   onChange,
   options,
-  disabled,
+  disabled = false,
 }: SwitchRadioProps<T>) => {
   const [selectedValue, setSelectedValue] = useState<T>(
     value || options[0]?.value

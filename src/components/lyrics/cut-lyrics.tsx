@@ -1,5 +1,4 @@
 import React from "react";
-import LyricsAnimation from "../common/lyrics/cut-lyrics/cut-animation";
 import LyricsUpdate from "../common/lyrics/cut-lyrics/cut-update";
 
 interface CutLyricsProps {

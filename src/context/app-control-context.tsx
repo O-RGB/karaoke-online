@@ -41,6 +41,7 @@ type AppControlContextType = {
   lyrics: string[];
   cursorTicks: number[];
   midiPlaying: MIDI | undefined;
+  isVolumeHeld: boolean;
 };
 
 type AppControlProviderProps = {
@@ -73,6 +74,7 @@ export const AppControlContext = createContext<AppControlContextType>({
   playingTrack: undefined,
   volumeController: [],
   midiPlaying: undefined,
+  isVolumeHeld: false,
 });
 
 export const AppControlProvider: FC<AppControlProviderProps> = ({
@@ -131,6 +133,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   };
 
   const updateVolumeHeld = (held: boolean) => {
+    console.log("updateVolumeHeld", held);
     setIsVolumeHeld(held);
   };
 
@@ -164,20 +167,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 
   const updateVolumeSysth = (channel: number, vol: number) => {
     synth?.controllerChange(channel, midiControllers.mainVolume, vol);
-    setVolumeController((ch) => {
-      ch[channel] = vol;
-      return ch;
-    });
   };
-
-  const synthEventController = useCallback(
-    (controllerNumber: number, controllerValue: number, channel: number) => {
-      if (controllerNumber === 7 && isVolumeHeld === false) {
-        updateVolumeSysth(channel, controllerValue);
-      }
-    },
-    [isVolumeHeld]
-  );
 
   const handleSetLyrics = (lyr: string[]) => {
     setLyrics(lyr);
@@ -335,14 +325,14 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     eventRemote(messages?.from, messages?.content);
   }, [messages?.content]);
 
-  useEffect(() => {
-    synth?.eventHandler.addEvent("controllerchange", "", (e) => {
-      const controllerNumber = e.controllerNumber;
-      const controllerValue = e.controllerValue;
-      const channel = e.channel;
-      synthEventController(controllerNumber, controllerValue, channel);
-    });
-  }, [synth]);
+  // useEffect(() => {
+  //   synth?.eventHandler.addEvent("controllerchange", "", (e) => {
+  //     const controllerNumber = e.controllerNumber;
+  //     const controllerValue = e.controllerValue;
+  //     const channel = e.channel;
+  //     synthEventController(controllerNumber, controllerValue, channel);
+  //   });
+  // }, [synth]);
 
   return (
     <AppControlContext.Provider
@@ -372,6 +362,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         playingTrack,
         cursorIndices,
         midiPlaying,
+        isVolumeHeld,
       }}
     >
       <>{children}</>

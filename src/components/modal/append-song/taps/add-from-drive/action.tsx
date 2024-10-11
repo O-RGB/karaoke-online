@@ -10,6 +10,7 @@ import { LuSend } from "react-icons/lu";
 interface DriveActionProps {
   title?: string;
   onSaveButton?: string;
+  onSavedButton?: string;
   buttonProps?: ButtonProps;
   inputProps?: InputProps;
   onSave?: (value: string) => Promise<boolean>;
@@ -20,11 +21,12 @@ const DriveAction: React.FC<DriveActionProps> = ({
   title,
   onSave,
   onSaveButton = "บันทึก",
+  onSavedButton = "บันทึกแล้ว",
   buttonProps,
   inputProps,
   ok = false,
 }) => {
-  const [value, setValue] = useState<string>();
+  const [value, setValue] = useState<string>("");
   const [isOk, setIsOk] = useState<boolean>(false);
 
   const handleOnSave = async () => {
@@ -75,10 +77,10 @@ const DriveAction: React.FC<DriveActionProps> = ({
           color={isOk ? "green" : "blue"}
           padding={"p-1 px-3"}
           iconPosition="left"
-          className="text-white text-nowrap w-32 h-fit"
+          className="text-white text-nowrap w-40"
           onClick={handleOnSave}
         >
-          {onSaveButton}
+          {onSavedButton ? (isOk ? onSavedButton : onSaveButton) : onSaveButton}
         </Button>
       </div>
     </div>

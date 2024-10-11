@@ -164,7 +164,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
             border="blur-border border"
             onBlur={handleSearchBlur}
             onFocus={handleSearchFocus}
-            className={"!placeholder-white appearance-none !bg-transparent"}
+            className={"!placeholder-white appearance-none !bg-transparent w-full"}
             onSelectItem={(value: IOptions<SearchResult>) => {
               if (value.option) {
                 onClickSong?.(value.option);

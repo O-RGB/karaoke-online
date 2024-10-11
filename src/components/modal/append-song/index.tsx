@@ -89,8 +89,20 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
       const saved = await jsonTracklistToDatabase(file, setProgress);
 
       if (saved) {
+        setProgress({
+          progress: 100,
+          title: "บันทึกรายชื่อเพลงสำเร็จ",
+          show: true,
+        });
         setTracklistFile(file);
         setMusicFilename(file?.name);
+      } else {
+        setProgress({
+          progress: 0,
+          title: "เกิดข้อผิดพลาด",
+          show: true,
+          error: "การบันทึกลงฐานข้อมูลรายชื่อเพลงไม่สำเร็จ",
+        });
       }
       getTracklistCount();
       return true;
@@ -221,19 +233,56 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
 
   // Custom Add Song
   const onAddSong = async () => {
+    setProgress({
+      progress: 0,
+      title: "กำลังเตรียมไฟล์...",
+      show: true,
+      loading: true,
+    });
     try {
       if (listCreateSong) {
+        setProgress({
+          progress: 0,
+          title: "Compressing files...",
+          show: true,
+          loading: true,
+        });
         const tracklist = await createSongZip(listCreateSong);
+        setProgress({
+          progress: 50,
+          title: "กำลังเพิ่มลงฐานข้อมูล",
+          show: true,
+          loading: true,
+        });
         if (tracklist) {
           const added = await addTracklistsToDatabase(tracklist);
           if (added) {
+            setProgress({ progress: 100, title: "สำเร็จ", show: true });
             addTracklist(tracklist);
             return true;
           }
+          setProgress({
+            progress: 0,
+            title: "เกิดข้อผิดพลาด",
+            show: true,
+            error: "ไม่สามารถเพิ่มลงฐานข้อมูล",
+          });
           return false;
         }
+        setProgress({
+          progress: 0,
+          title: "เกิดข้อผิดพลาด",
+          show: true,
+          error: "ไม่ะบ",
+        });
         return false;
       }
+      setProgress({
+        progress: 0,
+        title: "เกิดข้อผิดพลาด",
+        show: true,
+        error: "ไม่สามารถอ่านไฟล์บีบอัด",
+      });
       return false;
     } catch (error) {
       return false;

@@ -26,3 +26,6 @@ export const NCN_TYPE = "NCN";
 export const SONG_TYPE = { 0: EMK_TYPE, 1: NCN_TYPE };
 
 export const CUSTOM_SONG_ZIP = "u";
+
+export const CHANNEL_DEFAULT: number[] = Array(16).fill(0);
+export const VOLUME_DEFAULT: number[] = Array(16).fill(100);

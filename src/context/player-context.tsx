@@ -64,12 +64,12 @@ export const PlayerProvider: FC<PlayerProviderProps> = ({ children }) => {
     timeList.current = convertTicksToTime(timeDivision.current, tempos);
   }, [midiPlaying]);
 
-  useEffect(() => {
-    const intervalId = setInterval(updateTick, 16);
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [updateTick]);
+  // useEffect(() => {
+  //   const intervalId = setInterval(updateTick, 16);
+  //   return () => {
+  //     clearInterval(intervalId);
+  //   };
+  // }, [updateTick]);
 
   return (
     <PlayerContext.Provider

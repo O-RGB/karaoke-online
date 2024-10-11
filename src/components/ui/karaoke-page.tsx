@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useSynth } from "@/hooks/spessasynth-hook";
-import VolumePanel from "../tools/volume-panel/volume-panel";
+import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song/search-song";
 import { useAppControl } from "@/hooks/app-control-hook";
@@ -14,7 +14,6 @@ import SoundfontManager from "../modal/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
 import AppendSongModal from "../modal/append-song";
-import { usePlayer } from "@/hooks/player-hook";
 import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status/status-panel";
 import OptionsPanel from "../tools/options-panel";
@@ -26,11 +25,15 @@ import MidiSettingModal from "../modal/midi-setting-modal";
 import SongListModal from "../modal/song-list.modal";
 import { useDragDrop } from "@/hooks/drag-drop-hook";
 import { onSelectTestMusic } from "@/lib/karaoke/read";
-import { LoadDatabase } from "@/utils/database/model";
 import { getTracklistToJson } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
 import { initDatabase } from "@/utils/database/db";
 import { getLocalSystemMode } from "@/lib/local-storage";
+import TicksRender from "./ticks-render/ticks-render";
+import LyricsRender from "./lyrics-render/lyrics-render";
+import GainRender from "./gain-render/gain-render";
+import VolumeEvnet from "./event-render/volume-event";
+import InstrumentsEvent from "./event-render/instruments-event";
 
 interface KaraokePageProps {}
 
@@ -45,11 +48,14 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     lyrics,
     cursorIndices,
     cursorTicks,
+    isVolumeHeld,
     addTracklist,
     setSystemDriveMode,
+    midiPlaying,
+    hideVolume,
   } = useAppControl();
 
-  const { tempo, tick } = usePlayer();
+  // const { tempo, tick } = usePlayer();
   const { notification } = useNotification();
 
   const startup = async () => {
@@ -102,27 +108,36 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
   return (
     <>
+      {/* Process */}
+      <TicksRender
+        synth={synth}
+        player={player}
+        midiPlaying={midiPlaying}
+      ></TicksRender>
+      <LyricsRender
+        cursorIndices={cursorIndices}
+        cursorTicks={cursorTicks}
+        lyrics={lyrics}
+      ></LyricsRender>
+
+      <GainRender
+        hideVolume={hideVolume}
+        player={player}
+        analysers={analysers}
+      ></GainRender>
+      <VolumeEvnet isVolumeHeld={isVolumeHeld} synth={synth}></VolumeEvnet>
+      <InstrumentsEvent synth={synth}></InstrumentsEvent>
+      {/* Contact */}
       <ContextModal modal={modalMap}>
-        {/* <div className="fixed top-44">
-          <LargeJsonEditor></LargeJsonEditor>
-        </div> */}
-        {/* <WallcomeModal
-          setTracklistFile={setTracklistFile}
-          setMusicLibraryFile={setMusicLibraryFile}
-          musicLibrary={musicLibrary}
-        ></WallcomeModal> */}
         <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel>
         <StatusPanel notification={notification}></StatusPanel>
         <VolumePanel
+          synth={synth}
           perset={perset}
           analysers={analysers}
           instrument={instrument}
         ></VolumePanel>
-        <TempoPanel
-          tempo={tempo}
-          tick={tick}
-          timeDivision={player.midiData.timeDivision}
-        ></TempoPanel>
+        <TempoPanel timeDivision={midiPlaying?.timeDivision}></TempoPanel>
         <ClockPanel></ClockPanel>
         <SearchSong
           tracklist={tracklist}
@@ -132,7 +147,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           cursorIndices={cursorIndices}
           cursorTicks={cursorTicks}
           lyrics={lyrics}
-          tick={tick}
         ></LyricsPanel>
         <PlayerPanel
           lyrics={lyrics}

@@ -1,5 +1,5 @@
 "use client";
-import { DEFAULT_SOUND_FONT } from "@/config/value";
+import { CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
 import { createContext, FC, useEffect, useRef, useState } from "react";
 import { Sequencer, Synthetizer, WORKLET_URL_ABSOLUTE } from "spessasynth_lib";
 import { useRemote } from "../hooks/peer-hook";
@@ -47,7 +47,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
   const [perset, setPerset] = useState<IPersetSoundfont[]>([]);
   // Display
   const audioGain = useRef<number[]>([]);
-  const [instrument, setInstrument] = useState<number[]>([]);
+  const [instrument, setInstrument] = useState<number[]>(CHANNEL_DEFAULT);
   const [analysers, setAnalysers] = useState<AnalyserNode[]>([]);
   const [defaultSoundFont, setDefaultSoundFont] = useState<File>();
   const [SFname, setSFName] = useState<string>();
@@ -145,6 +145,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
       const channel: number = e.channel;
       const program: number = e.program;
       setInstrument((value) => {
+        console.log("value[channel]", value[channel], "program = ", program);
         value[channel] = program;
         return value;
       });
@@ -168,7 +169,6 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
       return;
     }
 
-    console.log(myAudio.channels);
     const spessasynth = await loadSoundFontPlayer(myAudio.audioContext);
     if (!spessasynth) {
       return;
@@ -178,11 +178,7 @@ export const SpessasynthProvider: FC<SpessasynthProviderProps> = ({
     setAudio(myAudio.audioContext);
     setSynth(spessasynth);
     setPlayer(player);
-    synthProgramChange(spessasynth);
-
-    // if (myAudio.state === "suspended") {
-    //   await myAudio.resume();
-    // }
+    // synthProgramChange(spessasynth);
   };
 
   return (

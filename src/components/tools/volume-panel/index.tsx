@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import VolumeMeter from "../../common/volume/volume-meter";
 import { Synthetizer } from "spessasynth_lib";
 import { useAppControl } from "@/hooks/app-control-hook";
 import {
@@ -12,7 +11,6 @@ import SwitchButton from "../../common/input-data/switch/switch-button";
 import { useNotification } from "@/hooks/notification-hook";
 import Button from "../../common/button/button";
 import { MdArrowDropUp } from "react-icons/md";
-import { useSynth } from "@/hooks/spessasynth-hook";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { useRemote } from "@/hooks/peer-hook";
 import RangeBarClone from "../../common/input-data/range-bar-clone";
@@ -20,6 +18,8 @@ import VolumeMeterV from "../../common/volume/volume-meter-v";
 import InstrumentsButton from "./instruments-button";
 import VolumeAction from "./volume-action";
 import VolumeHorizontal from "./volume-horizontal";
+import useEventStore from "@/components/stores/event.store";
+import useVolumeStore from "@/components/stores/volume-store";
 
 interface VolumePanelProps {
   instrument: number[];
@@ -29,17 +29,30 @@ interface VolumePanelProps {
   perset?: IPersetSoundfont[];
   options?: React.ReactNode;
   className?: string;
+  synth?: Synthetizer;
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
-  instrument,
+  synth,
+  // instrument,
   onVolumeChange,
-  analysers,
   audioGain,
   perset,
   options,
   className,
 }) => {
+  // const [instrument, setInstrument] = useState<number[]>(CHANNEL_DEFAULT);
+  // const instrument = useRef<number[]>(CHANNEL_DEFAULT);
+
+  // synth?.eventHandler.addEvent("programchange", "", (e) => {
+  //   const channel: number = e.channel;
+  //   const program: number = e.program;
+  //   console.log("programchange", channel, program);
+  //   instrument.current[channel] = program;
+  // });
+  const instrument = useEventStore((state) => state.instrument);
+  const volume = useVolumeStore((state) => state.volume);
+
   const { orientation } = useOrientation();
   const { addNotification } = useNotification();
   const VOCAL_CHANNEL = 8;
@@ -52,7 +65,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     volumeController,
     hideVolume,
   } = useAppControl();
-  const { synth, player } = useSynth();
   const { superUserConnections, sendSuperUserMessage } = useRemote();
 
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
@@ -95,60 +107,98 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const onHideVolume = (hide: boolean) => {
     updateHideVolume(hide);
   };
-  const render = useCallback(() => {
-    const fps = 20;
-    const frameInterval = 1000 / fps; // 50ms ต่อ frame
-    let lastFrameTime = 0;
+  // const render = useCallback(() => {
+  //   console.log("render gind");
+  //   const fps = 20;
+  //   const frameInterval = 1000 / fps; // 50ms ต่อ frame
+  //   let lastFrameTime = 0;
 
-    const renderFrame = (time: number) => {
-      if (time - lastFrameTime >= frameInterval) {
-        lastFrameTime = time;
+  //   const renderFrame = (time: number) => {
+  //     if (time - lastFrameTime >= frameInterval) {
+  //       lastFrameTime = time;
 
-        if (analysers) {
-          const newVolumeLevels = analysers?.map((analyser) => {
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(dataArray);
-            const value = Math.round(
-              dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
-            );
-            return value;
-          });
+  //       if (analysers) {
+  //         const newVolumeLevels = analysers?.map((analyser) => {
+  //           const dataArray = new Uint8Array(analyser.frequencyBinCount);
+  //           analyser.getByteFrequencyData(dataArray);
+  //           const value = Math.round(
+  //             dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
+  //           );
+  //           return value;
+  //         });
 
-          if (hideVolume) {
-            const totalGain =
-              newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
-            const mainGain = (totalGain / (newVolumeLevels.length * 30)) * 100;
+  //         if (hideVolume) {
+  //           const totalGain =
+  //             newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
+  //           const mainGain = (totalGain / (newVolumeLevels.length * 30)) * 100;
 
-            gainMain.current = Math.round(mainGain); // กำหนดค่า mainGain
-          } else {
-            gain.current = newVolumeLevels;
-          }
+  //           gainMain.current = Math.round(mainGain); // กำหนดค่า mainGain
+  //         } else {
+  //           gain.current = newVolumeLevels;
+  //         }
 
-          if (superUserConnections.length > 0) {
-            sendSuperUserMessage({
-              message: newVolumeLevels,
-              type: "GIND_NODE",
-              user: "SUPER",
-            });
-          }
-        }
-      }
+  //         if (superUserConnections.length > 0) {
+  //           sendSuperUserMessage({
+  //             message: newVolumeLevels,
+  //             type: "GIND_NODE",
+  //             user: "SUPER",
+  //           });
+  //         }
+  //       }
+  //     }
 
-      if (!player?.paused) {
-        requestAnimationFrame(renderFrame);
-      }
-    };
+  //     if (!player?.paused) {
+  //       requestAnimationFrame(renderFrame);
+  //     }
+  //   };
 
-    if (!player?.paused) {
-      requestAnimationFrame(renderFrame);
-    }
-  }, [analysers, hideVolume, superUserConnections, player?.paused]);
+  //   if (!player?.paused) {
+  //     requestAnimationFrame(renderFrame);
+  //   }
+  // }, [analysers, hideVolume, superUserConnections, player?.paused]);
 
-  useEffect(() => {
-    if (analysers && !player?.paused) {
-      requestAnimationFrame(render);
-    }
-  }, [analysers, render, player?.paused]);
+  // useEffect(() => {
+  //   if (analysers && !player?.paused) {
+  //     requestAnimationFrame(render);
+  //   }
+  // }, [analysers, render, player?.paused]);
+
+  // const gindRender = () => {
+  //   if (analysers) {
+  //     const newVolumeLevels = analysers?.map((analyser) => {
+  //       const dataArray = new Uint8Array(analyser.frequencyBinCount);
+  //       analyser.getByteFrequencyData(dataArray);
+  //       const value = Math.round(
+  //         dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
+  //       );
+  //       return value;
+  //     });
+
+  //     if (hideVolume) {
+  //       const totalGain =
+  //         newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
+  //       const mainGain = (totalGain / (newVolumeLevels.length * 30)) * 100;
+
+  //       gainMain.current = Math.round(mainGain); // กำหนดค่า mainGain
+  //     } else {
+  //       gain.current = newVolumeLevels;
+  //     }
+
+  //     if (superUserConnections.length > 0) {
+  //       sendSuperUserMessage({
+  //         message: newVolumeLevels,
+  //         type: "GIND_NODE",
+  //         user: "SUPER",
+  //       });
+  //     }
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (analysers && !player?.paused) {
+  //     gindRender();
+  //   }
+  // }, [tick, player?.paused, analysers]);
 
   useEffect(() => {
     if (!hideVolume) {
@@ -188,17 +238,15 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
               } lg:h-[150px]`
         } `}
       >
-        <VolumeHorizontal
-          hide={hideVolume}
-          value={gainMain.current}
-        ></VolumeHorizontal>
+        <VolumeHorizontal hide={hideVolume}></VolumeHorizontal>
         <div
-          className={`${grid}  ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-0.5 left-0 p-2 py-[26px]`}
+          className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-0.5 left-0 p-2 py-[26px]`}
         >
-          {gain.current.map((data, ch) => {
+          {volLayout.map((data, ch) => {
             return (
-              <div className="relative w-full">
+              <div key={`gain-render-${ch}`} className="relative w-full">
                 <VolumeMeterV
+                  channel={ch}
                   max={127}
                   className="z-10 w-full absolute bottom-0 left-0 h-full"
                   level={data}
@@ -212,7 +260,10 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
         >
           {volLayout.map((data, ch) => {
             return (
-              <div className="flex flex-col relative h-full w-full ">
+              <div
+                key={`vol-panel-${ch}`}
+                className="flex flex-col relative h-full w-full "
+              >
                 <VolumeAction
                   channel={ch + 1}
                   onLock={onLockVolume}
@@ -220,7 +271,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                 ></VolumeAction>
                 <div className="flex items-center justify-center h-full w-full  border-x border-white/20">
                   <RangeBarClone
-                    value={hideVolume ? 0 : volumeController[ch]}
+                    value={hideVolume ? 0 : volume[ch]}
                     className="z-20"
                     max={127}
                     onMouseUp={() => updateVolumeHeld(true)}
@@ -230,7 +281,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                 </div>
                 <InstrumentsButton
                   channel={ch + 1}
-                  instruments={instrument[ch]}
+                  instrument={instrument[ch]}
                   onPersetChange={onPersetChange}
                   perset={perset}
                 ></InstrumentsButton>

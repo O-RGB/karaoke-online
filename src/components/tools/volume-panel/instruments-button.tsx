@@ -1,12 +1,12 @@
 import ButtonDropdown from "@/components/common/button/button-dropdown";
 import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
 import { channel } from "diagnostics_channel";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { FaDrum } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 
 interface InstrumentsButtonProps {
-  instruments: number;
+  instrument: number;
   channel: number;
   perset?: IPersetSoundfont[];
   onPersetChange?: (channel: number, value: number) => void;
@@ -14,7 +14,7 @@ interface InstrumentsButtonProps {
 }
 
 const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
-  instruments,
+  instrument,
   onPersetChange,
   channel,
   perset,
@@ -32,14 +32,14 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   const channelIcon = useMemo(() => {
     if (channel === 10) return <FaDrum />;
     if (channel === 9) return <PiMicrophoneStageFill />;
-    return getIconInstruments(instruments ?? 0)?.icon;
-  }, [channel, instruments]);
+    return getIconInstruments(instrument ?? 0)?.icon;
+  }, [channel, instrument]);
 
   return (
     <>
       <ButtonDropdown
         className={className}
-        value={`${instruments ?? 0}`}
+        value={`${instrument ?? 0}`}
         onChange={(value) => {
           onPersetChange?.(channel, parseInt(value));
         }}
@@ -49,7 +49,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           <div className="w-full blur-overlay text-center text-white font-bold text-[10px] p-1 flex gap-0.5 justify-center items-center h-5">
             <span className="w-2.5">{channelIcon}</span>
             <span className="text-[8px] pb-[1px] font-bold text-white/70">
-              {`${instruments ?? 0}`.padStart(3, "0")}
+              {`${instrument ?? 0}`.padStart(3, "0")}
             </span>
           </div>
         </div>

@@ -8,6 +8,8 @@ import {
   getLocalDriveUrl,
   getLocalSystemMode,
   getLocalTracklistDriveUrl,
+  setLocalDriveTested,
+  setLocalDriveUrl,
 } from "@/lib/local-storage";
 
 interface AddFromDriveProps {
@@ -55,13 +57,29 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
       setSystem("off");
     }
   }, []);
+
+  const handleAddUrlDrive = async (value: string) => {
+    const res = await onAddUrlDrvie?.(value);
+    if (res) {
+      setDriveUrl(value);
+    } else {
+      setSystem("off");
+      setDriveUrl(undefined);
+      onSystemChange("off");
+      setLocalDriveTested(false);
+      setLocalDriveUrl("");
+    }
+    return res ?? false;
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <DriveAction
         ok={onDriveTested}
         title="Google Apps Script URL"
-        onSave={onAddUrlDrvie}
-        onSaveButton="เชื่อมต่อ"
+        onSave={handleAddUrlDrive}
+        onSaveButton={"เชื่อมต่อ"}
+        onSavedButton="เชื่อมต่อแล้ว"
         buttonProps={{
           icon: <IoSend></IoSend>,
         }}
@@ -73,7 +91,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
         ok={tracklistUrl ? true : false}
         title="Tracklist URL"
         onSave={onAddTrackListDrive}
-        onSaveButton="โหลด"
+        onSaveButton="ดาวน์โหลด"
         buttonProps={{
           icon: <IoDownload></IoDownload>,
         }}
