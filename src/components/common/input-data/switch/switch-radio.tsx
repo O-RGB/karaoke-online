@@ -57,7 +57,7 @@ const SwitchRadio = <T,>({
               padding: "5px",
               paddingLeft: "8px",
               paddingRight: "8px",
-              border: isChecked ? "1px solid #22c55e" : "1px solid gray",
+              border: isChecked ? "1px solid #3b82f6" : "1px solid gray",
               borderRadius: "5px",
               backgroundColor: "white",
             }}
@@ -69,7 +69,7 @@ const SwitchRadio = <T,>({
                 overflow: "hidden",
                 opacity: isChecked ? 1 : 0,
               }}
-              className="flex items-center justify-center bg-green-500 rounded-full duration-300"
+              className="flex items-center justify-center bg-blue-500 rounded-full duration-300"
             >
               <FaCheck className="text-xs text-white"></FaCheck>
             </div>

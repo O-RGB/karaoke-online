@@ -82,7 +82,7 @@ const ContextModal: React.FC<ContextModalProps> = ({
       contextMenus: [
         {
           icon: <TbMusicPlus />,
-          text: "เพิ่มเพลง",
+          text: "จัดการเพลง",
           onClick: handleSelectContext,
           type: "ADD_MUSIC",
         },
@@ -125,59 +125,6 @@ const ContextModal: React.FC<ContextModalProps> = ({
       ],
       name: "ปรับแต่ง",
       icon: <></>,
-    },
-  ];
-
-  const Items: IContextMenuItem<ModalType>[] = [
-    {
-      icon: <MdOutlinePiano />,
-      text: "ซาวด์ฟ้อนท์",
-      onClick: handleSelectContext,
-      type: "SOUNDFONT_MODEL",
-    },
-
-    {
-      icon: <VscSettings />,
-      text: "ควบคุม",
-      onClick: handleSelectContext,
-      type: "SUPER_JOIN",
-    },
-
-    {
-      icon: <MdOutlineTextFields />,
-      text: "เนื้อเพลง",
-      onClick: handleSelectContext,
-      type: "LYRICS",
-    },
-    {
-      icon: <TbMusicPlus />,
-      text: "เพิ่มเพลง",
-      onClick: handleSelectContext,
-      type: "ADD_MUSIC",
-    },
-    {
-      icon: <LuListMusic />,
-      text: "รายชื่อเพลง",
-      onClick: handleSelectContext,
-      type: "SONG_LIST",
-    },
-    {
-      icon: <SiMidi />,
-      text: "Midi Output",
-      onClick: handleSelectContext,
-      type: "MIDI_SETTING",
-    },
-    {
-      icon: <ImDatabase />,
-      text: "ฐานข้อมูลเพลง",
-      onClick: handleSelectContext,
-      type: "MUSIC_STORE",
-    },
-    {
-      icon: <FaImage />,
-      text: "ภาพพื้นหลัง",
-      onClick: handleSelectContext,
-      type: "WALLPAPER",
     },
   ];
 

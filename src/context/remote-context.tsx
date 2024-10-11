@@ -1,6 +1,8 @@
 "use client";
 import React, { createContext, useLayoutEffect, useState } from "react";
 import Peer, { DataConnection } from "peerjs";
+import { useNotification } from "@/hooks/notification-hook";
+import { RiRemoteControlFill } from "react-icons/ri";
 
 interface PeerContextType {
   normalPeer: Peer;
@@ -27,6 +29,9 @@ export const PeerContext = createContext<PeerContextType>({
 export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  // Notification
+  const { addNotification } = useNotification();
+
   // NORMAL
   const [normalPeer, setNormalPeer] = useState<Peer>(new Peer());
   const [connections, setConnections] = useState<DataConnection[]>([]);
@@ -54,6 +59,10 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log("normalPeer received new connection from:", conn.peer);
         setConnections((prev) => {
           console.log("Updating normalPeer connections list.");
+          addNotification(
+            "มีการเชื่อมต่อ",
+            <RiRemoteControlFill></RiRemoteControlFill>
+          );
           return [...prev, conn];
         });
 
@@ -96,6 +105,10 @@ export const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log("superUserPeer received new connection from:", conn.peer);
         setSuperUserConnections((prev) => {
           console.log("Updating superUserPeer connections list.");
+          addNotification(
+            "มีการเชื่อมต่อ Admin",
+            <RiRemoteControlFill></RiRemoteControlFill>
+          );
           return [...prev, conn];
         });
 

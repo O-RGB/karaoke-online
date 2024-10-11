@@ -54,13 +54,13 @@ export default function RootLayout({
 
       <body className={`relative ${inter.className} p-2.5 bg-slate-500 `}>
         <AllowSound>
-          <PeerProvider>
-            <SpessasynthProvider>
-              <NotificationProvider>
+          <NotificationProvider>
+            <PeerProvider>
+              <SpessasynthProvider>
                 <ToolsProvider>{children}</ToolsProvider>
-              </NotificationProvider>
-            </SpessasynthProvider>
-          </PeerProvider>
+              </SpessasynthProvider>
+            </PeerProvider>
+          </NotificationProvider>
         </AllowSound>
       </body>
     </html>
