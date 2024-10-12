@@ -1,5 +1,7 @@
+import useConfigStore from "@/components/stores/config-store";
 import useTempoStore from "@/components/stores/tempo-store";
 import useTickStore from "@/components/stores/tick-store";
+import { REFRESH_RATE } from "@/config/value";
 import {
   calculateTicks,
   convertTicksToTime,
@@ -19,6 +21,8 @@ const TicksRender: React.FC<TicksRenderProps> = ({
   midiPlaying,
   synth,
 }) => {
+  const config = useConfigStore((state) => state.config);
+  const refreshRate = config?.refreshRate?.render ?? REFRESH_RATE["MIDDLE"];
   const setCurrntTime = useTickStore((state) => state.setCurrntTick);
   const setCurrntTempo = useTempoStore((state) => state.setCurrntTempo);
   const tempoChanges = useRef<ITempoChange[]>([]);
@@ -49,11 +53,11 @@ const TicksRender: React.FC<TicksRenderProps> = ({
   }, [midiPlaying]);
 
   useEffect(() => {
-    const intervalId = setInterval(updateTick, 16);
+    const intervalId = setInterval(updateTick, refreshRate);
     return () => {
       clearInterval(intervalId);
     };
-  }, [updateTick]);
+  }, [updateTick, refreshRate]);
 
   return null;
 };

@@ -1,11 +1,12 @@
 "use client";
-const crendentialKeys: { [key: string]: string } = {
+export const crendentialKeys: { [key: string]: string } = {
   wallpaper: "wallpaper",
   song_count: "song_count",
   drive_url: "drive_url",
   drive_tested: "drive_tested",
   drive_tracklist_url: "drive_tracklist_url",
   system_drive_mode: "system_drive_mode",
+  config: "config",
 };
 
 // SET

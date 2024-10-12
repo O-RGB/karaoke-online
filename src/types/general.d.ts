@@ -24,7 +24,8 @@ type ModalType =
   | "LYRICS"
   | "MIDI_SETTING"
   | "SONG_LIST"
-  | "DRIVE_SETTING";
+  | "DRIVE_SETTING"
+  | "DISPLAY";
 
 type InputBarLayout = "vertical" | "horizontal";
 type SystemMode = "SYSTEM" | "DRIVE";

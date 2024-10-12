@@ -8,7 +8,7 @@ export const onSelectTestMusic = async (
 ) => {
   if (FileList.length === 1) {
     const file = FileList.item(0);
-    if (!file?.name.endsWith(EMK_FILE_TYPE)) {
+    if (!file?.name.toLowerCase().endsWith(EMK_FILE_TYPE)) {
       return;
     }
     const decode = await parseEMKFile(file);

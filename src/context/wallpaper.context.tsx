@@ -1,6 +1,6 @@
 "use client";
 import { WALLPAPER } from "@/config/value";
-import { getLocalWallpaper, setLocalWallpaper } from "@/lib/local-storage";
+import { getLocalWallpaper, setLocalWallpaper } from "@/lib/local-storege/local-storage";
 import { saveWallpaperStorage, getWallpaperStorage, deleteWallpaperStorage, getAllWallpaperStorage } from "@/lib/storage/wallpaper";
  
 import React from "react";

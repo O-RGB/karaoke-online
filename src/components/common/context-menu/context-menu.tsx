@@ -37,7 +37,7 @@ const ContextMenuCommon: React.FC<ContextMenuProps> = ({ items }) => {
       <React.Fragment key={`menu-item-${i}`}>
         {data.contextMenus.length > 1 ? (
           <>
-            <MenuDivider />
+            {i > 0 && <MenuDivider />}
             {data.name && (
               <MenuHeader
                 style={{

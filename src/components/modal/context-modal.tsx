@@ -1,16 +1,16 @@
 "use client";
 import React, { ReactNode, useState } from "react";
-import { MdOutlinePiano, MdOutlineTextFields } from "react-icons/md";
+import { MdOutlinePiano } from "react-icons/md";
 import Modal from "../common/modal";
 import { TbDeviceMobileShare, TbMusicPlus } from "react-icons/tb";
 import { VscSettings } from "react-icons/vsc";
-import { FaGoogleDrive, FaImage, FaRegImage } from "react-icons/fa";
-import { ImDatabase } from "react-icons/im";
+import { FaRegImage } from "react-icons/fa";
 import { SiMidi } from "react-icons/si";
-import { LuDatabase, LuListMusic } from "react-icons/lu";
+import { LuDatabase } from "react-icons/lu";
 import { ControlledMenu, Menu, MenuButton } from "@szhsin/react-menu";
 import ContextMenuCommon from "../common/context-menu/context-menu";
 import "@szhsin/react-menu/dist/index.css";
+import { CgScreen } from "react-icons/cg";
 
 interface ContextModalProps {
   children?: ReactNode;
@@ -48,10 +48,6 @@ const ContextModal: React.FC<ContextModalProps> = ({
           onClick: handleSelectContext,
           type: "SOUNDFONT_MODEL",
         },
-      ],
-    },
-    {
-      contextMenus: [
         {
           icon: <SiMidi />,
           text: "Midi Output",
@@ -59,7 +55,10 @@ const ContextModal: React.FC<ContextModalProps> = ({
           type: "MIDI_SETTING",
         },
       ],
+      name: "เสียง",
+      icon: <></>,
     },
+
     {
       contextMenus: [
         {
@@ -110,11 +109,17 @@ const ContextModal: React.FC<ContextModalProps> = ({
     },
     {
       contextMenus: [
+        // {
+        //   icon: <MdOutlineTextFields />,
+        //   text: "เนื้อเพลง",
+        //   onClick: handleSelectContext,
+        //   type: "LYRICS",
+        // },
         {
-          icon: <MdOutlineTextFields />,
-          text: "เนื้อเพลง",
+          icon: <CgScreen />,
+          text: "หน้าจอ",
           onClick: handleSelectContext,
-          type: "LYRICS",
+          type: "DISPLAY",
         },
         {
           icon: <FaRegImage />,

@@ -53,7 +53,7 @@ const AddSong: React.FC<AddSongProps> = ({
         <div>
           <Label>เลือกไฟล์เพลง (.emk หรือ .mid, .cur, .lyr) </Label>
           <Upload
-            accept=".emk,.EMK,.mid,.MID,.cur,.CUR,.lyr,.LYR"
+            accept=".emk,application/octet-stream,.cur,application/octet-stream,.lyr,text/plain,.mid,audio/midi"
             className="border p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
             onSelectFile={onAddFile}
             inputProps={{

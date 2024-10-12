@@ -26,7 +26,7 @@ import {
   setLocalDriveUrl,
   setLocalSystemMode,
   setLocalTracklistDriveTested,
-} from "@/lib/local-storage";
+} from "@/lib/local-storege/local-storage";
 
 interface AppendSongModalProps {}
 

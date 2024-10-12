@@ -6,7 +6,7 @@ import {
   getLocalDriveUrl,
   setLocalDriveTested,
   setLocalDriveUrl,
-} from "@/lib/local-storage";
+} from "@/lib/local-storege/local-storage";
 import Button from "../common/button/button";
 import { FaCheck } from "react-icons/fa";
 import { AiOutlineLoading } from "react-icons/ai";

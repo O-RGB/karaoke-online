@@ -51,7 +51,7 @@ export const validateSongFileTypes = (
     const filelist = [anyType1, anyType2, anyType3];
     const song: Partial<SongFiles> = {};
     filelist.map((data) => {
-      const name = data.name;
+      const name = data.name.toLowerCase();
       if (name.endsWith(MID_FILE_TYPE)) {
         song.mid = data;
       } else if (name.endsWith(CUR_FILE_TYPE)) {

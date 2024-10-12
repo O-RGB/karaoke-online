@@ -28,12 +28,15 @@ import { onSelectTestMusic } from "@/lib/karaoke/read";
 import { getTracklistToJson } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
 import { initDatabase } from "@/utils/database/db";
-import { getLocalSystemMode } from "@/lib/local-storage";
+import { getLocalSystemMode } from "@/lib/local-storege/local-storage";
 import TicksRender from "./ticks-render/ticks-render";
 import LyricsRender from "./lyrics-render/lyrics-render";
 import GainRender from "./gain-render/gain-render";
 import VolumeEvnet from "./event-render/volume-event";
 import InstrumentsEvent from "./event-render/instruments-event";
+import DisplaySettingModal from "../modal/display";
+import { setupLocalConfig } from "@/lib/local-storege/config";
+import LoadConfig from "./load-conifg/load-config";
 
 interface KaraokePageProps {}
 
@@ -100,7 +103,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     MUSIC_STORE: <MusicStoreModal></MusicStoreModal>,
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
-    LYRICS: <LyricsModal></LyricsModal>,
+    DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
     MIDI_SETTING: <MidiSettingModal></MidiSettingModal>,
     SONG_LIST: <SongListModal></SongListModal>,
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
@@ -119,7 +122,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         cursorTicks={cursorTicks}
         lyrics={lyrics}
       ></LyricsRender>
-
       <GainRender
         hideVolume={hideVolume}
         player={player}
@@ -127,6 +129,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       ></GainRender>
       <VolumeEvnet isVolumeHeld={isVolumeHeld} synth={synth}></VolumeEvnet>
       <InstrumentsEvent synth={synth}></InstrumentsEvent>
+      <LoadConfig></LoadConfig>
+
       {/* Contact */}
       <ContextModal modal={modalMap}>
         <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel>

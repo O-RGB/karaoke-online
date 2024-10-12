@@ -2,7 +2,7 @@ import React, { ReactNode, useState, useEffect } from "react";
 import { FaCheck } from "react-icons/fa";
 
 interface SwitchRadioOption<T> {
-  label?: string;
+  label?: string | React.ReactNode;
   value: T;
   children: ReactNode;
 }

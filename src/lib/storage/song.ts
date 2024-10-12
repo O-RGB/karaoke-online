@@ -19,7 +19,7 @@ import {
   getLocalDriveUrl,
   getLocalSongCount,
   setLocalSongCount,
-} from "../local-storage";
+} from "../local-storege/local-storage";
 import { createTrackList } from "./tracklist";
 import { SongUserModel } from "@/utils/database/model";
 import { base64ToImage } from "../image";
@@ -131,11 +131,11 @@ export const getSong = async (
 
       var song: Partial<SongFilesDecode> = {};
       songUnzip.map(async (file) => {
-        if (file.name.endsWith(MID_FILE_TYPE)) {
+        if (file.name.toLowerCase().endsWith(MID_FILE_TYPE)) {
           song.mid = file;
-        } else if (file.name.endsWith(CUR_FILE_TYPE)) {
+        } else if (file.name.toLowerCase().endsWith(CUR_FILE_TYPE)) {
           song.cur = await readCursorFile(file);
-        } else if (file.name.endsWith(LYR_FILE_TYPE)) {
+        } else if (file.name.toLowerCase().endsWith(LYR_FILE_TYPE)) {
           song.lyr = await readLyricsFile(file);
         }
       });

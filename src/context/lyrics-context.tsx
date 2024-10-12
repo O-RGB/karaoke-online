@@ -1,5 +1,7 @@
 "use client";
 
+import { DEFAULT_CONFIG } from "@/config/value";
+import { appendLocalConfig, setLocalConfig } from "@/lib/local-storege/config";
 import { NextFont } from "next/dist/compiled/@next/font";
 import {
   Inter,
@@ -52,6 +54,8 @@ type LyricsDisplayContextType = {
   setLyricsActiveColor: (color: string) => void;
   setLyricsActiveBorderColor: (color: string) => void;
   setFontChange: (set: SystemFont) => void;
+  setConfigLyrics: (config: Partial<LyricsConfig>) => void;
+  reset: () => void;
 };
 
 type LyricsDisplayProviderProps = {
@@ -74,6 +78,8 @@ export const LyricsDisplayContext = createContext<LyricsDisplayContextType>({
   setLyricsActiveColor: () => undefined,
   setLyricsActiveBorderColor: () => undefined,
   setFontChange: () => undefined,
+  setConfigLyrics: () => undefined,
+  reset: () => undefined,
 });
 
 export const LyricsDisplayProvider: FC<LyricsDisplayProviderProps> = ({
@@ -85,29 +91,66 @@ export const LyricsDisplayProvider: FC<LyricsDisplayProviderProps> = ({
   const [ColorBorder, setColorBorder] = useState<string>("#0000FF");
 
   // Active
-  const [ActiveColor, setActiveColor] = useState<string>("#000");
+  const [ActiveColor, setActiveColor] = useState<string>("#000000");
   const [ActiveBorderColor, setActiveBorderColor] = useState<string>("#ffffff");
 
   const [Font, setFont] = useState<NextFont>(notoSansThaiLooped);
-  const [FontName, setFontName] = useState<SystemFont>("notoSansThaiLooped");
+  const [FontName, setFontName] = useState<LyricsFont>("notoSansThaiLooped");
+
+  const reset = () => {
+    setConfigLyrics(DEFAULT_CONFIG.lyrics);
+    appendLocalConfig({ lyrics: DEFAULT_CONFIG.lyrics });
+  };
+
+  const setConfigLyrics = (config: Partial<LyricsConfig>) => {
+    if (config?.color?.color) {
+      setColor(config.color.color);
+    }
+
+    if (config?.color?.colorBorder) {
+      setColorBorder(config.color.colorBorder);
+    }
+
+    if (config?.active?.color) {
+      setActiveColor(config.active.color);
+    }
+    if (config?.active?.colorBorder) {
+      setActiveBorderColor(config.active.colorBorder);
+    }
+
+    if (config.font) {
+      setFontChange(config.font);
+    }
+    if (config.font) {
+      setFontName(config.font);
+    }
+    if (config.lyricsMode) {
+      setDisplayLyrics(config.lyricsMode);
+    }
+  };
 
   const setLyricsOptions = (mode: LyricsOptions) => {
     setDisplayLyrics(mode);
+    appendLocalConfig({ lyrics: { lyricsMode: mode } });
   };
 
   const setLyricsColor = (color: string) => {
     setColor(color);
+    appendLocalConfig({ lyrics: { color: { color } } });
   };
 
   const setLyricsColorBorder = (color: string) => {
     setColorBorder(color);
+    appendLocalConfig({ lyrics: { color: { colorBorder: color } } });
   };
 
   const setLyricsActiveColor = (color: string) => {
     setActiveColor(color);
+    appendLocalConfig({ lyrics: { active: { color: color } } });
   };
   const setLyricsActiveBorderColor = (color: string) => {
     setActiveBorderColor(color);
+    appendLocalConfig({ lyrics: { active: { colorBorder: color } } });
   };
 
   const setFontChange = (set: SystemFont) => {
@@ -160,6 +203,8 @@ export const LyricsDisplayProvider: FC<LyricsDisplayProviderProps> = ({
         setLyricsColorBorder,
         setLyricsActiveBorderColor,
         setFontChange,
+        setConfigLyrics,
+        reset,
       }}
     >
       <>{children}</>

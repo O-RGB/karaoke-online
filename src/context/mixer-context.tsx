@@ -1,9 +1,6 @@
 "use client";
-import Button from "@/components/common/button/button";
-import { useMixer } from "@/hooks/mixer-hook";
 import { useSynth } from "@/hooks/spessasynth-hook";
 import { createContext, FC, useCallback, useEffect, useState } from "react";
-import { AiOutlineFile } from "react-icons/ai";
 import { midiControllers } from "spessasynth_lib";
 
 type MixerContextType = {

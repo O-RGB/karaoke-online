@@ -10,7 +10,7 @@ import {
   getLocalTracklistDriveUrl,
   setLocalDriveTested,
   setLocalDriveUrl,
-} from "@/lib/local-storage";
+} from "@/lib/local-storege/local-storage";
 
 interface AddFromDriveProps {
   onAddUrlDrvie?: (value: string) => Promise<boolean>;
