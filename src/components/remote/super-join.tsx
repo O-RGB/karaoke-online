@@ -6,6 +6,11 @@ import { toOptions } from "@/lib/general";
 import { onSearchList } from "@/lib/trie-search";
 import SearchDropdown from "../tools/search-song/search-dropdown";
 import SearchSelect from "../common/input-data/select/search-select";
+import Upload from "../common/input-data/upload";
+import Label from "../common/label";
+import { FaRegFileAudio } from "react-icons/fa";
+import { EMK_FILE_TYPE } from "@/config/value";
+import { readSong } from "@/lib/karaoke/read";
 
 interface SuperJoinConnectProps {
   hostId: string;
@@ -57,6 +62,21 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
     }
   };
 
+  const handleUploadFileSong = async (file: File, filelist: FileList) => {
+    if (sendSuperUserMessage) {
+      const song = await readSong(filelist);
+      console.log("song", song)
+      if (song.length === 1) {
+        sendSuperUserMessage({
+          message: song[0],
+          type: "UPLOAD_SONG",
+          user: "SUPER",
+          clientId: superUserPeer.id,
+        });
+      }
+    }
+  };
+
   async function onSearch(value: string) {
     handleSendMessage(value);
     if (songList) {
@@ -95,7 +115,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   }
 
   return (
-    <div className="p-4 bg-slate-800 min-h-screen flex flex-col gap-2">
+    <div className="p-4 bg-slate-800 min-h-screen flex flex-col gap-4">
       <SearchSelect
         className={"!placeholder-white"}
         onSelectItem={(value: IOptions<SearchResult>) => {
@@ -107,11 +127,28 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
         onSearch={onSearch}
       ></SearchSelect>
       <VolumePanel
-        className=" "
+        className=" flex flex-col gap-1.5"
         audioGain={audioGain}
         instrument={instrument}
         onVolumeChange={(c, v) => changeVol({ channel: c, value: v })}
       ></VolumePanel>
+
+      <div className="text-white">
+        <Label>ส่งไฟล์เพื่อเล่น (.emk หรือ .mid, .cur, .lyr) </Label>
+        <Upload
+          accept=".emk,application/octet-stream,.cur,application/octet-stream,.lyr,text/plain,.mid,audio/midi"
+          className="border p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
+          onSelectFile={handleUploadFileSong}
+          inputProps={{
+            multiple: true,
+          }}
+        >
+          <span className="w-full text-sm flex items-center gap-2">
+            <FaRegFileAudio></FaRegFileAudio>
+            <span>อัปโหลดไฟล์</span>
+          </span>
+        </Upload>
+      </div>
     </div>
   );
 };

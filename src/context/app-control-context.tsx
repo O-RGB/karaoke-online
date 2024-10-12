@@ -229,7 +229,22 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     player.pause();
     handleSetLyrics([]);
     handleSetCursor(0, []);
-    const midiFileArrayBuffer = await files.mid.arrayBuffer();
+
+    let midiFileArrayBuffer: ArrayBuffer | undefined;
+
+    try {
+      // ตรวจสอบว่า files.mid เป็น ArrayBuffer หรือไม่
+      if (files.mid instanceof ArrayBuffer) {
+        midiFileArrayBuffer = files.mid;
+      } else {
+        midiFileArrayBuffer = await files.mid.arrayBuffer();
+      }
+    } catch (error) {
+      console.error("Error processing MIDI file:", error);
+      midiFileArrayBuffer = undefined;
+      return;
+    }
+
     let parsedMidi = null;
     try {
       parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
@@ -293,14 +308,14 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         if (!synth) {
           return;
         }
-        const vol = data as ISetChannelGain;
+        let vol = data as ISetChannelGain;
         updateVolumeSysth(vol.channel, vol.value);
         return data as ISetChannelGain;
 
       case "SEARCH_SONG":
         if (tracklist !== undefined) {
-          const search = data as string;
-          const res = await onSearchStrList(search);
+          let search = data as string;
+          let res = await onSearchStrList(search);
           sendMessage({
             message: res,
             type: "SEND_SONG_LIST",
@@ -308,12 +323,26 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
             clientId: from,
           });
         }
+        break;
 
       case "SET_SONG":
-        const song = data as SearchResult;
+        let song = data as SearchResult;
         if (song) {
           loadAndPlaySong(song);
           setPlayingTrackFile(song);
+        }
+        break;
+
+      case "UPLOAD_SONG":
+        let uploaded = data as SongFiltsEncodeAndDecode;
+        if (uploaded) {
+          let getDecode: SongFilesDecode = {
+            cur: uploaded.cur,
+            lyr: uploaded.lyr,
+            mid: uploaded.mid,
+          };
+          console.log("getDecode", getDecode);
+          setSongPlaying(getDecode);
         }
 
       default:

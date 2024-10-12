@@ -1,4 +1,8 @@
-type TypeFormHost = "GIND_NODE" | "VALIDATE_PIN" | "SEND_SONG_LIST";
+type TypeFormHost =
+  | "GIND_NODE"
+  | "VALIDATE_PIN"
+  | "SEND_SONG_LIST"
+  | "UPLOAD_SONG";
 type TypeFormJoiner =
   | "SET_CHANNEL"
   | "PIN_VALIDATION"
