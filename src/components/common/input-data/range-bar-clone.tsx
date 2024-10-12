@@ -1,3 +1,4 @@
+import useConfigStore from "@/components/stores/config-store";
 import React, {
   useState,
   useEffect,
@@ -27,6 +28,8 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
   onTouchEnd,
   ...props
 }) => {
+  const config = useConfigStore((state) => state.config);
+  const performance = config.refreshRate?.type ?? "MIDDLE";
   const [internalValue, setInternalValue] = useState(value ?? min);
   const [isDragging, setIsDragging] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -51,7 +54,7 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
         setInternalValue(newValue);
 
         // if (isDragging === false) {
-          onChange?.(newValue);
+        onChange?.(newValue);
         // }
       }
     },
@@ -134,7 +137,13 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
             flex items-center justify-center 
             bg-white border-[0.01rem] border-gray-400 
             rounded-full shadow-md cursor-pointer
-            -left-[8px] ${!isDragging ? "duration-1000" : "duration-0"}
+            -left-[8px] ${
+              !isDragging
+                ? performance === "LOW"
+                  ? ""
+                  : "duration-1000"
+                : "duration-0"
+            }
             `}
           style={{ top: `${100 - displayPercentage}%` }}
         ></div>

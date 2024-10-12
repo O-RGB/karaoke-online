@@ -108,7 +108,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     SONG_LIST: <SongListModal></SongListModal>,
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
   };
-
+  console.log("main updated...");
   return (
     <>
       {/* Process */}

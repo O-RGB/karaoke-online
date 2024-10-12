@@ -35,7 +35,7 @@ const GainRender: React.FC<GainRenderProps> = ({
       if (hideVolume) {
         const totalGain =
           newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
-        const mainGain = (totalGain / (newVolumeLevels.length * 30)) * 100;
+        const mainGain = (totalGain / (newVolumeLevels.length * 20)) * 100;
         gainMain.current = Math.round(mainGain); // กำหนดค่า mainGain
         setGainMain(gainMain.current);
       } else {

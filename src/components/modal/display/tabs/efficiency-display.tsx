@@ -12,8 +12,33 @@ const EfficiencyDisplay: React.FC<EfficiencyDisplayProps> = ({}) => {
   const config = useConfigStore((state) => state.config);
   const [refreshRate, setRefreshReate] = useState<RefreshRate>("MIDDLE");
 
+  function updateBlurStyles(
+    blurAmount: number,
+    borderOpacity: number,
+    color: string = "transparent"
+  ) {
+    document.documentElement.style.setProperty(
+      "--blur-amount",
+      `${blurAmount}px`
+    );
+    document.documentElement.style.setProperty(
+      "--border-opacity",
+      `${borderOpacity}`
+    );
+    document.documentElement.style.setProperty(
+      "--background-color",
+      `${color}`
+    );
+  }
+
   const onRefreshChange = (value: RefreshRate) => {
     const refreshRate = { render: REFRESH_RATE[value], type: value };
+
+    if (refreshRate.type === "LOW") {
+      updateBlurStyles(0, 0.5, "rgba(255, 255, 255, 0.10)");
+    } else {
+      updateBlurStyles(8, 0.5);
+    }
     appendLocalConfig({ refreshRate: refreshRate });
     setRefreshReate(value);
     setConfig((cf) => {

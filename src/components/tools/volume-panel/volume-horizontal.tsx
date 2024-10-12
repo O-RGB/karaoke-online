@@ -1,25 +1,38 @@
+import React, { useEffect, useRef } from "react";
 import useGainStore from "@/components/stores/gain.store";
-import React, { useEffect } from "react";
 
 interface VolumeHorizontalProps {
-  // value: number;
   hide: boolean;
 }
 
 const VolumeHorizontal: React.FC<VolumeHorizontalProps> = ({ hide }) => {
   const gain = useGainStore((state) => state.gainMain);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  useEffect(() => {}, [hide, gain]);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const context = canvas.getContext("2d");
+      if (context) {
+        // Clear the canvas
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Set styles
+        context.fillStyle = `rgba(255, 255, 255, ${hide ? 0.4 : 0})`;
+
+        // Draw the gain bar
+        context.fillRect(0, 0, (gain / 100) * canvas.width, canvas.height);
+      }
+    }
+  }, [gain, hide]);
+
   return (
-    <>
-      <div
-        className="absolute top-0 left-0 h-full bg-white/40  transition-all"
-        style={{
-          width: `${gain}%`,
-          opacity: !hide ? 0 : 1,
-        }}
-      ></div>
-    </>
+    <canvas
+      ref={canvasRef}
+      width={300} // Set your canvas width
+      height={50} // Set your canvas height
+      className="absolute top-0 left-0 w-full"
+    ></canvas>
   );
 };
 

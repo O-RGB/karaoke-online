@@ -1,4 +1,5 @@
 import ButtonDropdown from "@/components/common/button/button-dropdown";
+import useEventStore from "@/components/stores/event.store";
 import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
 import { channel } from "diagnostics_channel";
 import React, { useEffect, useMemo } from "react";
@@ -6,7 +7,7 @@ import { FaDrum } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 
 interface InstrumentsButtonProps {
-  instrument: number;
+  // instrument: number;
   channel: number;
   perset?: IPersetSoundfont[];
   onPersetChange?: (channel: number, value: number) => void;
@@ -14,12 +15,15 @@ interface InstrumentsButtonProps {
 }
 
 const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
-  instrument,
+  // instrument,
   onPersetChange,
   channel,
   perset,
   className,
 }) => {
+  const instruments = useEventStore((state) => state.instrument);
+  const instrument = instruments[channel];
+
   const persetOptions = useMemo(
     () =>
       perset?.map((data) => ({
@@ -35,13 +39,15 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
     return getIconInstruments(instrument ?? 0)?.icon;
   }, [channel, instrument]);
 
+  useEffect(() => {}, [instrument]);
+
   return (
     <>
       <ButtonDropdown
         className={className}
         value={`${instrument ?? 0}`}
         onChange={(value) => {
-          onPersetChange?.(channel, parseInt(value));
+          onPersetChange?.(channel + 1, parseInt(value));
         }}
         options={persetOptions}
       >

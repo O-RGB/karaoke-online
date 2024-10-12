@@ -53,7 +53,10 @@ const TicksRender: React.FC<TicksRenderProps> = ({
   }, [midiPlaying]);
 
   useEffect(() => {
-    const intervalId = setInterval(updateTick, refreshRate);
+    const intervalId = setInterval(
+      updateTick,
+      refreshRate ?? REFRESH_RATE["MIDDLE"]
+    );
     return () => {
       clearInterval(intervalId);
     };

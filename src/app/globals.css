@@ -7,15 +7,21 @@ body {
   user-select: none;
   overscroll-behavior: none;
   -webkit-text-size-adjust: none;
-  @apply min-h-dvh  
+  @apply min-h-dvh;
+}
+
+:root {
+  --blur-amount: 8px;
+  --border-opacity: 0.5;
+  --background-color: transparent;
 }
 
 .blur-overlay {
-  @apply backdrop-blur-md;
+  @apply backdrop-blur-[var(--blur-amount)] bg-[var(--background-color)];
 }
 
 .blur-border {
-  @apply border-white/50;
+  @apply border-white/[var(--border-opacity)];
 }
 
 @layer base {

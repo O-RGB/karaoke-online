@@ -20,6 +20,7 @@ import VolumeAction from "./volume-action";
 import VolumeHorizontal from "./volume-horizontal";
 import useEventStore from "@/components/stores/event.store";
 import useVolumeStore from "@/components/stores/volume-store";
+import VolumeAnimtaion from "./volume-animation";
 
 interface VolumePanelProps {
   instrument: number[];
@@ -50,8 +51,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   //   console.log("programchange", channel, program);
   //   instrument.current[channel] = program;
   // });
-  const instrument = useEventStore((state) => state.instrument);
-  const volume = useVolumeStore((state) => state.volume);
+  // const instrument = useEventStore((state) => state.instrument);
 
   const { orientation } = useOrientation();
   const { addNotification } = useNotification();
@@ -270,18 +270,17 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                   isLock={lock[ch]}
                 ></VolumeAction>
                 <div className="flex items-center justify-center h-full w-full  border-x border-white/20">
-                  <RangeBarClone
-                    value={hideVolume ? 0 : volume[ch]}
-                    className="z-20"
-                    max={127}
+                  <VolumeAnimtaion
+                    channel={ch}
+                    hideVolume={hideVolume}
+                    onChange={(v) => onVolumeMeterChange(ch, v)}
                     onMouseUp={() => updateVolumeHeld(true)}
                     onTouchEnd={() => updateVolumeHeld(false)}
-                    onChange={(v) => onVolumeMeterChange(ch, v)}
-                  ></RangeBarClone>
+                  ></VolumeAnimtaion>
                 </div>
                 <InstrumentsButton
-                  channel={ch + 1}
-                  instrument={instrument[ch]}
+                  channel={ch}
+                  // instrument={instrument[ch]}
                   onPersetChange={onPersetChange}
                   perset={perset}
                 ></InstrumentsButton>
