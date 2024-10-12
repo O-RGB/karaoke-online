@@ -230,21 +230,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     handleSetLyrics([]);
     handleSetCursor(0, []);
 
-    let midiFileArrayBuffer: ArrayBuffer | undefined;
-
-    try {
-      // ตรวจสอบว่า files.mid เป็น ArrayBuffer หรือไม่
-      if (files.mid instanceof ArrayBuffer) {
-        midiFileArrayBuffer = files.mid;
-      } else {
-        midiFileArrayBuffer = await files.mid.arrayBuffer();
-      }
-    } catch (error) {
-      console.error("Error processing MIDI file:", error);
-      midiFileArrayBuffer = undefined;
-      return;
-    }
-
+    let midiFileArrayBuffer = await files.mid.arrayBuffer();
     let parsedMidi = null;
     try {
       parsedMidi = new MIDI(midiFileArrayBuffer, files.mid.name);
@@ -336,12 +322,17 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
       case "UPLOAD_SONG":
         let uploaded = data as SongFiltsEncodeAndDecode;
         if (uploaded) {
+          const blob = new Blob([uploaded.mid]);
+
+          const receivedFile = new File([blob], "midi", {
+            lastModified: Date.now(),
+          });
+
           let getDecode: SongFilesDecode = {
             cur: uploaded.cur,
             lyr: uploaded.lyr,
-            mid: uploaded.mid,
+            mid: receivedFile,
           };
-          console.log("getDecode", getDecode);
           setSongPlaying(getDecode);
         }
 
