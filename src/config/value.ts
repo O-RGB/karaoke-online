@@ -49,4 +49,22 @@ export const DEFAULT_CONFIG: ConfigDisplay = {
     font: "notoSansThaiLooped",
     lyricsMode: "default",
   },
+  widgets: {
+    clock: {
+      show: true,
+    },
+    mix: {
+      show: true,
+    },
+    tempo: {
+      show: true,
+    },
+  },
+  themes: {
+    backgroundBlur: true,
+    backgroundColor: {
+      active: false,
+      color: "rgba(255, 255, 255, 0.10)",
+    },
+  },
 };

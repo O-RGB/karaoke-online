@@ -35,7 +35,7 @@ const EfficiencyDisplay: React.FC<EfficiencyDisplayProps> = ({}) => {
     const refreshRate = { render: REFRESH_RATE[value], type: value };
 
     if (refreshRate.type === "LOW") {
-      updateBlurStyles(0, 0.5, "rgba(255, 255, 255, 0.10)");
+      updateBlurStyles(0, 0.5, config.themes?.backgroundColor?.color);
     } else {
       updateBlurStyles(8, 0.5);
     }
@@ -53,40 +53,43 @@ const EfficiencyDisplay: React.FC<EfficiencyDisplayProps> = ({}) => {
     setRefreshReate(config.refreshRate?.type ?? "MIDDLE");
   }, [config]);
 
-  console.log("efficiency render...");
   return (
     <div className="flex flex-col gap-3 divide-y">
-      <div className="flex justify-between">
-        <div>
-          <Label>Refresh rate</Label>
-          <SwitchRadio<RefreshRate>
-            onChange={onRefreshChange}
-            value={refreshRate}
-            options={[
-              {
-                value: "HIGH",
-                children: "สูง",
-              },
-              {
-                value: "MIDDLE",
-                children: "กลาง",
-              },
-              {
-                value: "LOW",
-                children: "ต่ำ",
-              },
-            ]}
-          ></SwitchRadio>
-        </div>
-        <div className="bg-black p-2 text-xl text-yellow-300 flex justify-center items-center">
-          FPS:{" "}
-          {refreshRate === "HIGH"
-            ? "60"
-            : refreshRate === "MIDDLE"
-            ? "30"
-            : refreshRate === "LOW"
-            ? "20"
-            : ""}
+      <div>
+        <Label>Refresh rate</Label>
+        <div className="flex justify-between gap-3 items-center">
+          <div>
+            <SwitchRadio<RefreshRate>
+              onChange={onRefreshChange}
+              value={refreshRate}
+              options={[
+                {
+                  value: "HIGH",
+                  children: "สูง",
+                },
+                {
+                  value: "MIDDLE",
+                  children: "กลาง",
+                },
+                {
+                  value: "LOW",
+                  children: "ต่ำ",
+                },
+              ]}
+            ></SwitchRadio>
+          </div>
+          <div>
+            <div className="bg-black p-2 text-base lg:text-xl text-yellow-300 flex justify-center items-center">
+              FPS:{" "}
+              {refreshRate === "HIGH"
+                ? "60"
+                : refreshRate === "MIDDLE"
+                ? "30"
+                : refreshRate === "LOW"
+                ? "20"
+                : ""}
+            </div>
+          </div>
         </div>
       </div>
     </div>

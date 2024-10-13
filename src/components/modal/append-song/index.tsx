@@ -18,7 +18,7 @@ import {
 import { PiMusicNotesPlusBold } from "react-icons/pi";
 import { SiGoogledrive } from "react-icons/si";
 import { TbMicrophone2 } from "react-icons/tb";
-import ProcessingModal from "../processing-modal.tsx/processing";
+import ProcessingModal from "../../common/processing/processing";
 import { testUrl } from "@/lib/fetch/test-api";
 import AddFromDrive from "./taps/add-from-drive";
 import {

@@ -1,4 +1,4 @@
-import { CHANNEL_DEFAULT, VOLUME_DEFAULT } from "@/config/value";
+import { VOLUME_DEFAULT } from "@/config/value";
 import { create } from "zustand";
 
 interface VolumeStore {

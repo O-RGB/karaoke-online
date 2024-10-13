@@ -34,8 +34,8 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   );
 
   const channelIcon = useMemo(() => {
-    if (channel === 10) return <FaDrum />;
-    if (channel === 9) return <PiMicrophoneStageFill />;
+    if (channel === 9) return <FaDrum />;
+    if (channel === 8) return <PiMicrophoneStageFill />;
     return getIconInstruments(instrument ?? 0)?.icon;
   }, [channel, instrument]);
 

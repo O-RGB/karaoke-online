@@ -1,12 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import useTickStore from "../stores/tick-store";
 import useTempoStore from "../stores/tempo-store";
+import useConfigStore from "../stores/config-store";
 
 interface TempoPanelProps {
   timeDivision?: number;
 }
 
 const TempoPanel: React.FC<TempoPanelProps> = ({ timeDivision = 1 }) => {
+  const { config } = useConfigStore();
+  const widgetConfig = config.widgets;
+  const isShow = widgetConfig?.tempo?.show;
+
   const tick = useTickStore((state) => state.tick);
   const tempo = useTempoStore((state) => state.tempo);
 
@@ -18,8 +23,11 @@ const TempoPanel: React.FC<TempoPanelProps> = ({ timeDivision = 1 }) => {
       const beatInBar = Math.floor(currentTickInBar / timeDivision) + 1;
       setCurrentBeatInBar(beatInBar);
     }
-  }, [timeDivision, tick]);
+  }, [timeDivision, isShow ? tick : undefined]);
 
+  if (isShow === false) {
+    return <></>;
+  }
   return (
     <div className="fixed z-30 right-5 lg:top-6 blur-overlay blur-border border rounded-md p-2 w-44 hidden lg:block text-white">
       <div className="flex justify-between items-center mb-1">

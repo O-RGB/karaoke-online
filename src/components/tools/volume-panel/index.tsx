@@ -18,6 +18,7 @@ import InstrumentsButton from "./instruments-button";
 import VolumeAction from "./volume-action";
 import VolumeHorizontal from "./volume-horizontal";
 import VolumeAnimtaion from "./volume-animation";
+import useConfigStore from "@/components/stores/config-store";
 
 interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
@@ -37,6 +38,10 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   options,
   className,
 }) => {
+  const { config } = useConfigStore();
+  const widgetConfig = config.widgets;
+  const isShow = widgetConfig?.mix?.show;
+
   const { orientation } = useOrientation();
   const { addNotification } = useNotification();
   const VOCAL_CHANNEL = 8;
@@ -108,7 +113,9 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     "grid grid-cols-8 lg:grid-cols-none grid-flow-row lg:grid-flow-col";
   const hideElement = `${hideVolume ? "opacity-0" : "opacity-100"}`;
   const animation = `duration-300 transition-all`;
-
+  if (isShow === false) {
+    return <></>;
+  }
   return (
     <div
       className={
@@ -132,7 +139,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
       >
         <VolumeHorizontal hide={hideVolume}></VolumeHorizontal>
         <div
-          className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-0.5 left-0 p-2 py-[26px]`}
+          className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px]  left-0 p-2 py-[26px]`}
         >
           {volLayout.map((data, ch) => {
             return (
