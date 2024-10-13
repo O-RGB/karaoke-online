@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Synthetizer } from "spessasynth_lib";
 import { useAppControl } from "@/hooks/app-control-hook";
 import {
@@ -13,17 +13,13 @@ import Button from "../../common/button/button";
 import { MdArrowDropUp } from "react-icons/md";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { useRemote } from "@/hooks/peer-hook";
-import RangeBarClone from "../../common/input-data/range-bar-clone";
 import VolumeMeterV from "../../common/volume/volume-meter-v";
 import InstrumentsButton from "./instruments-button";
 import VolumeAction from "./volume-action";
 import VolumeHorizontal from "./volume-horizontal";
-import useEventStore from "@/components/stores/event.store";
-import useVolumeStore from "@/components/stores/volume-store";
 import VolumeAnimtaion from "./volume-animation";
 
 interface VolumePanelProps {
-  instrument: number[];
   onVolumeChange?: (channel: number, value: number) => void;
   analysers?: AnalyserNode[];
   audioGain?: number[];
@@ -35,24 +31,12 @@ interface VolumePanelProps {
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
   synth,
-  // instrument,
   onVolumeChange,
   audioGain,
   perset,
   options,
   className,
 }) => {
-  // const [instrument, setInstrument] = useState<number[]>(CHANNEL_DEFAULT);
-  // const instrument = useRef<number[]>(CHANNEL_DEFAULT);
-
-  // synth?.eventHandler.addEvent("programchange", "", (e) => {
-  //   const channel: number = e.channel;
-  //   const program: number = e.program;
-  //   console.log("programchange", channel, program);
-  //   instrument.current[channel] = program;
-  // });
-  // const instrument = useEventStore((state) => state.instrument);
-
   const { orientation } = useOrientation();
   const { addNotification } = useNotification();
   const VOCAL_CHANNEL = 8;
@@ -107,98 +91,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const onHideVolume = (hide: boolean) => {
     updateHideVolume(hide);
   };
-  // const render = useCallback(() => {
-  //   console.log("render gind");
-  //   const fps = 20;
-  //   const frameInterval = 1000 / fps; // 50ms ต่อ frame
-  //   let lastFrameTime = 0;
-
-  //   const renderFrame = (time: number) => {
-  //     if (time - lastFrameTime >= frameInterval) {
-  //       lastFrameTime = time;
-
-  //       if (analysers) {
-  //         const newVolumeLevels = analysers?.map((analyser) => {
-  //           const dataArray = new Uint8Array(analyser.frequencyBinCount);
-  //           analyser.getByteFrequencyData(dataArray);
-  //           const value = Math.round(
-  //             dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
-  //           );
-  //           return value;
-  //         });
-
-  //         if (hideVolume) {
-  //           const totalGain =
-  //             newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
-  //           const mainGain = (totalGain / (newVolumeLevels.length * 30)) * 100;
-
-  //           gainMain.current = Math.round(mainGain); // กำหนดค่า mainGain
-  //         } else {
-  //           gain.current = newVolumeLevels;
-  //         }
-
-  //         if (superUserConnections.length > 0) {
-  //           sendSuperUserMessage({
-  //             message: newVolumeLevels,
-  //             type: "GIND_NODE",
-  //             user: "SUPER",
-  //           });
-  //         }
-  //       }
-  //     }
-
-  //     if (!player?.paused) {
-  //       requestAnimationFrame(renderFrame);
-  //     }
-  //   };
-
-  //   if (!player?.paused) {
-  //     requestAnimationFrame(renderFrame);
-  //   }
-  // }, [analysers, hideVolume, superUserConnections, player?.paused]);
-
-  // useEffect(() => {
-  //   if (analysers && !player?.paused) {
-  //     requestAnimationFrame(render);
-  //   }
-  // }, [analysers, render, player?.paused]);
-
-  // const gindRender = () => {
-  //   if (analysers) {
-  //     const newVolumeLevels = analysers?.map((analyser) => {
-  //       const dataArray = new Uint8Array(analyser.frequencyBinCount);
-  //       analyser.getByteFrequencyData(dataArray);
-  //       const value = Math.round(
-  //         dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
-  //       );
-  //       return value;
-  //     });
-
-  //     if (hideVolume) {
-  //       const totalGain =
-  //         newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
-  //       const mainGain = (totalGain / (newVolumeLevels.length * 30)) * 100;
-
-  //       gainMain.current = Math.round(mainGain); // กำหนดค่า mainGain
-  //     } else {
-  //       gain.current = newVolumeLevels;
-  //     }
-
-  //     if (superUserConnections.length > 0) {
-  //       sendSuperUserMessage({
-  //         message: newVolumeLevels,
-  //         type: "GIND_NODE",
-  //         user: "SUPER",
-  //       });
-  //     }
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (analysers && !player?.paused) {
-  //     gindRender();
-  //   }
-  // }, [tick, player?.paused, analysers]);
 
   useEffect(() => {
     if (!hideVolume) {
@@ -280,7 +172,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                 </div>
                 <InstrumentsButton
                   channel={ch}
-                  // instrument={instrument[ch]}
                   onPersetChange={onPersetChange}
                   perset={perset}
                 ></InstrumentsButton>

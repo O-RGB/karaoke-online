@@ -1,4 +1,13 @@
-import { DragDropContext } from "@/context/drag-drop-context";
-import { useContext } from "react";
+import useDragDropStore from "@/components/stores/drag-drop-store";
+import { useEffect } from "react";
 
-export const useDragDrop = () => useContext(DragDropContext);
+export const useDragDrop = () => {
+  const { isDragging, filesDragging, initializeDragDropListeners } =
+    useDragDropStore();
+
+  useEffect(() => {
+    initializeDragDropListeners();
+  }, [initializeDragDropListeners]);
+
+  return { isDragging, filesDragging };
+};

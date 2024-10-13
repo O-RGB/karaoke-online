@@ -1,4 +1,4 @@
-import { MIDI, midiControllers, Sequencer, Synthetizer } from "spessasynth_lib";
+import { Sequencer } from "spessasynth_lib";
 
 export const getMidiInfo = (player: Sequencer) => {
   const ticksPerBeat = player.midiData.timeDivision;

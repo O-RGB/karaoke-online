@@ -3,24 +3,28 @@ import React, { useEffect, useState } from "react";
 import { setSoundFont } from "@/lib/spssasynth/sound-font";
 import UpdateFile from "../common/input-data/upload";
 import { TbMusicPlus } from "react-icons/tb";
-import { useSynth } from "@/hooks/spessasynth-hook";
- 
+
 import { FaRegFileAudio } from "react-icons/fa";
 import Button from "../common/button/button";
 import { IoMdAddCircle } from "react-icons/io";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { FaCircleCheck } from "react-icons/fa6";
-import { DEFAULT_SOUND_FONT } from "@/config/value";
 import { ImFilePlay } from "react-icons/im";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import Label from "../common/label";
-import { deleteSoundFontStorage, getAllKeySoundfont, getSoundFontStorage, saveSoundFontStorage } from "@/lib/storage/soundfont";
+import {
+  deleteSoundFontStorage,
+  getAllKeySoundfont,
+  getSoundFontStorage,
+  saveSoundFontStorage,
+} from "@/lib/storage/soundfont";
+import { useSpessasynthStore } from "../stores/spessasynth-store";
 
 interface SoundfontManagerProps {}
 
 const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
   const { synth, player, defaultSoundFont, SFname, setSoundFontName } =
-    useSynth();
+    useSpessasynthStore();
   const [soundFontStorage, setSoundFontStorage] = useState<IDBValidKey[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 

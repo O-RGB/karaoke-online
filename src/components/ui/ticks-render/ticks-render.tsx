@@ -2,12 +2,7 @@ import useConfigStore from "@/components/stores/config-store";
 import useTempoStore from "@/components/stores/tempo-store";
 import useTickStore from "@/components/stores/tick-store";
 import { REFRESH_RATE } from "@/config/value";
-import {
-  calculateTicks,
-  convertTicksToTime,
-  sortTempoChanges,
-} from "@/lib/app-control";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { MIDI, Sequencer, Synthetizer } from "spessasynth_lib";
 
 interface TicksRenderProps {
@@ -16,53 +11,83 @@ interface TicksRenderProps {
   midiPlaying: MIDI | undefined;
 }
 
-const TicksRender: React.FC<TicksRenderProps> = ({
-  player,
-  midiPlaying,
-  synth,
-}) => {
+const TicksRender: React.FC<TicksRenderProps> = ({ player, midiPlaying }) => {
   const config = useConfigStore((state) => state.config);
   const refreshRate = config?.refreshRate?.render ?? REFRESH_RATE["MIDDLE"];
-  const setCurrntTime = useTickStore((state) => state.setCurrntTick);
-  const setCurrntTempo = useTempoStore((state) => state.setCurrntTempo);
-  const tempoChanges = useRef<ITempoChange[]>([]);
-  const timeList = useRef<ITempoTimeChange[]>([]);
-  const timeDivision = useRef<number>(0);
-
-  const updateTick = useCallback(() => {
-    if (player && tempoChanges.current.length > 0) {
-      const currentTime = player.currentTime;
-      const { tick, tempo } = calculateTicks(
-        timeDivision.current,
-        currentTime,
-        timeList.current
-      );
-
-      setCurrntTime(tick);
-      setCurrntTempo(tempo);
-    }
-  }, [player]);
+  const setCurrentTick = useTickStore((state) => state.setCurrntTick);
+  const setCurrentTempo = useTempoStore((state) => state.setCurrntTempo);
+  const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    timeDivision.current = midiPlaying?.timeDivision ?? 0;
-    let tempos = midiPlaying?.tempoChanges ?? [];
-    tempos = tempos.slice(0, -1).reverse();
-    tempos = sortTempoChanges(tempos);
-    tempoChanges.current = tempos;
-    timeList.current = convertTicksToTime(timeDivision.current, tempos);
+    workerRef.current = new Worker(
+      new URL("/tick-worker.js", window.location.origin)
+    );
+
+    workerRef.current.onmessage = (e) => {
+      const { type, data } = e.data;
+      if (type === "tick") {
+        setCurrentTick(data.tick);
+        setCurrentTempo(data.tempo);
+      }
+    };
+
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (midiPlaying && workerRef.current) {
+      const timeDivision = midiPlaying.timeDivision ?? 0;
+      let tempos = midiPlaying.tempoChanges ?? [];
+      tempos = tempos.slice(0, -1).reverse();
+      tempos = sortTempoChanges(tempos);
+
+      workerRef.current.postMessage({
+        type: "init",
+        data: { timeDivision, tempoChanges: tempos },
+      });
+    }
   }, [midiPlaying]);
 
   useEffect(() => {
-    const intervalId = setInterval(
-      updateTick,
-      refreshRate ?? REFRESH_RATE["MIDDLE"]
-    );
+    if (workerRef.current && player) {
+      const updateInterval = setInterval(() => {
+        workerRef.current?.postMessage({
+          type: "updateTime",
+          data: { currentTime: player.currentTime },
+        });
+      }, refreshRate);
+
+      return () => clearInterval(updateInterval);
+    }
+  }, [player, refreshRate]);
+
+  useEffect(() => {
+    if (workerRef.current) {
+      workerRef.current.postMessage({
+        type: "start",
+        data: { refreshRate },
+      });
+    }
+
     return () => {
-      clearInterval(intervalId);
+      workerRef.current?.postMessage({ type: "stop" });
     };
-  }, [updateTick, refreshRate]);
+  }, [refreshRate]);
 
   return null;
 };
 
 export default TicksRender;
+
+// Helper function (you might want to move this to a separate utility file)
+function sortTempoChanges(tempoChanges: ITempoChange[]): ITempoChange[] {
+  return [...tempoChanges].sort((a, b) => a.ticks - b.ticks);
+}
+
+// Type definitions (you might want to move these to a separate types file)
+interface ITempoChange {
+  ticks: number;
+  tempo: number;
+}

@@ -65,7 +65,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   const handleUploadFileSong = async (file: File, filelist: FileList) => {
     if (sendSuperUserMessage) {
       const song = await readSong(filelist);
-      console.log("song", song)
+      console.log("song", song);
       if (song.length === 1) {
         sendSuperUserMessage({
           message: song[0],
@@ -129,7 +129,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
       <VolumePanel
         className=" flex flex-col gap-1.5"
         audioGain={audioGain}
-        instrument={instrument}
+        // instrument={instrument}
         onVolumeChange={(c, v) => changeVol({ channel: c, value: v })}
       ></VolumePanel>
 

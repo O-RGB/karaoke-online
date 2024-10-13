@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Label from "../common/label";
 import Select from "../common/input-data/select/select";
-import { useSynth } from "@/hooks/spessasynth-hook";
+import { useSpessasynthStore } from "../stores/spessasynth-store";
 
 interface MidiSettingModalProps {}
 
 const MidiSettingModal: React.FC<MidiSettingModalProps> = () => {
   const defaultOutput = { label: "Next Karaoke", value: "Next Karaoke" };
-  const { synth, player } = useSynth();
+  const { player } = useSpessasynthStore();
   const [midiAccess, setMidiAccess] = useState<MIDIAccess | null>(null);
   const [inputs, setInputs] = useState<MIDIInput[]>([]);
   const [outputs, setOutputs] = useState<MIDIOutput[]>([]);

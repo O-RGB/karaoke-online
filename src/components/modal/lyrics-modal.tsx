@@ -54,7 +54,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
   }, [lyricsDisplay]);
 
   return (
-    <div className="flex flex-col-reverse md:flex-row gap-4 w-full md:h-[400px]">
+    <div className="flex flex-col-reverse md:flex-row gap-4 w-full md:h-[390px]">
       <div className="w-full h-full flex flex-col">
         <div className="h-full">
           <Label>รูปแบบเนื้อเพลง</Label>

@@ -85,36 +85,19 @@ const ContextModal: React.FC<ContextModalProps> = ({
           onClick: handleSelectContext,
           type: "ADD_MUSIC",
         },
-        // {
-        //   icon: <LuListMusic />,
-        //   text: "รายชื่อเพลง",
-        //   onClick: handleSelectContext,
-        //   type: "SONG_LIST",
-        // },
+
         {
           icon: <LuDatabase />,
           text: "ฐานข้อมูลเพลง",
           onClick: handleSelectContext,
           type: "MUSIC_STORE",
         },
-        // {
-        //   icon: <FaGoogleDrive />,
-        //   text: "เชื่อมต่อ Google Drive",
-        //   onClick: handleSelectContext,
-        //   type: "DRIVE_SETTING",
-        // },
       ],
       name: "ที่เก็บข้อมูล",
       icon: <></>,
     },
     {
       contextMenus: [
-        // {
-        //   icon: <MdOutlineTextFields />,
-        //   text: "เนื้อเพลง",
-        //   onClick: handleSelectContext,
-        //   type: "LYRICS",
-        // },
         {
           icon: <CgScreen />,
           text: "หน้าจอ",

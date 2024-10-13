@@ -1,7 +1,6 @@
 "use client";
 
-import { createContext, FC, useCallback, useEffect, useState } from "react";
-import { useSynth } from "../hooks/spessasynth-hook";
+import { createContext, FC, useEffect, useState } from "react";
 import { useRemote } from "../hooks/peer-hook";
 import { convertCursorToTicks, mapCursorToIndices } from "@/lib/app-control";
 import { addAllTrie, onSearchList } from "@/lib/trie-search";
@@ -14,6 +13,7 @@ import { jsonTracklistToDatabase } from "@/lib/storage/tracklist";
 import { getSong } from "@/lib/storage/song";
 import { useNotification } from "@/hooks/notification-hook";
 import { AiOutlineLoading } from "react-icons/ai";
+import { useSpessasynthStore } from "@/components/stores/spessasynth-store";
 
 type AppControlContextType = {
   updateVolumeSysth: (index: number, value: number) => void;
@@ -80,7 +80,7 @@ export const AppControlContext = createContext<AppControlContextType>({
 export const AppControlProvider: FC<AppControlProviderProps> = ({
   children,
 }) => {
-  const { synth, player } = useSynth();
+  const { synth, player } = useSpessasynthStore();
   const { received: messages, sendMessage } = useRemote();
   const { addNotification } = useNotification();
 

@@ -2,6 +2,11 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import Button from "../common/button/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import LoadConfig from "../ui/load-conifg/load-config";
+import { getLocalSystemMode } from "@/lib/local-storege/local-storage";
+import { getTracklistToJson } from "@/lib/storage/tracklist";
+import { initDatabase } from "@/utils/database/db";
+import addTracklist from "../modal/append-song/taps/add-tracklist";
 
 interface AllowSoundProps {
   children?: React.ReactNode;
@@ -46,10 +51,12 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
 
   useLayoutEffect(() => {
     requestMIDIAccess();
+    initDatabase();
   }, []);
 
   return (
     <>
+      <LoadConfig></LoadConfig>
       {ended ? (
         children
       ) : (

@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Thai_Looped } from "next/font/google";
 import "../globals.css";
-import { SpessasynthProvider } from "../../context/spessasynth-context";
 
 import { PeerProvider } from "../../context/remote-context";
 import ToolsProvider from "../provider";
@@ -56,9 +55,7 @@ export default function RootLayout({
         <AllowSound>
           <NotificationProvider>
             <PeerProvider>
-              <SpessasynthProvider>
-                <ToolsProvider>{children}</ToolsProvider>
-              </SpessasynthProvider>
+              <ToolsProvider>{children}</ToolsProvider>
             </PeerProvider>
           </NotificationProvider>
         </AllowSound>

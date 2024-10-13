@@ -3,12 +3,11 @@ import React, { useEffect, useState } from "react";
 import TrieSearch from "trie-search";
 import SearchSelect from "../../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
-import { SONG_TYPE } from "@/config/value";
-import { useKeyUp } from "@/hooks/keyup-hook";
 import { useAppControl } from "@/hooks/app-control-hook";
 import { FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
+import { useKeyboardEvents } from "@/hooks/keyboard-hook";
 
 interface SearchSongProps {
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -17,8 +16,8 @@ interface SearchSongProps {
 
 const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
   const { orientation } = useOrientation();
-  const { searching, onEnter, arrowRight, arrowLeft } = useKeyUp();
   const { hideVolume } = useAppControl();
+  const { searching, onEnter, arrowRight, arrowLeft } = useKeyboardEvents();
 
   const [fullUi, setFullUi] = useState<boolean>(false);
   const [searchResult, setSearchResult] = useState<IOptions<SearchResult>[]>(
@@ -164,7 +163,9 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
             border="blur-border border"
             onBlur={handleSearchBlur}
             onFocus={handleSearchFocus}
-            className={"!placeholder-white appearance-none !bg-transparent w-full"}
+            className={
+              "!placeholder-white appearance-none !bg-transparent w-full"
+            }
             onSelectItem={(value: IOptions<SearchResult>) => {
               if (value.option) {
                 onClickSong?.(value.option);

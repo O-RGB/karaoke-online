@@ -134,14 +134,9 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           ></Button>
           <ContextModal
             buttonMenu={
-              <Button
-                blur={false}
-                border=""
-                shadow=""
-                padding="p-4"
-                shape={false}
-                icon={<FiSettings className="text-white" />}
-              ></Button>
+              <div className="p-4 flex items-center justify-center">
+                <FiSettings className="text-white" />
+              </div>
             }
             modal={modalMap}
             className=""

@@ -3,7 +3,7 @@ import { RiRemoteControlFill } from "react-icons/ri";
 import Button from "../common/button/button";
 import Modal from "../common/modal";
 import HostRemote from "../remote/host";
-import { useSynth } from "@/hooks/spessasynth-hook";
+import { useSpessasynthStore } from "../stores/spessasynth-store";
 
 interface RemoteFunctionProps {
   buttonClass?: string;
@@ -12,7 +12,7 @@ interface RemoteFunctionProps {
 const RemoteFunction: React.FC<RemoteFunctionProps> = ({ buttonClass }) => {
   const [onRemoteOpen, setRemoteOpen] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
-  const { player } = useSynth();
+  const { player } = useSpessasynthStore();
 
   const setRemote = () => {
     setRemoteOpen((v) => !v);
