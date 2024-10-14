@@ -173,7 +173,8 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
             <LyricsAnimation
               fontSize="text-4xl"
               display={Example}
-              charIndex={3}
+              // charIndex={3}
+              fixedCharIndex={3}
             ></LyricsAnimation>
           ) : (
             <div className="pt-12">

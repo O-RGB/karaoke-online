@@ -102,9 +102,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     new Map()
   );
 
-  // Notification
-  // const [notification, setNotification] = useState<string>();
-
   // Playing Song
   // --- Song
   const [playingTrack, setPlayingTrack] = useState<SearchResult>();
@@ -114,7 +111,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   const [lyrics, setLyrics] = useState<string[]>([]);
   const [cursorTicks, setCursor] = useState<number[]>([]);
   const [cursorIndices, setCursorIndices] = useState<Map<number, number[]>>();
-  // const [lyricsDisplay, setLyricsDisplay] = useState<LyricsOptions>("default");
 
   const setSystemDriveMode = (is: boolean) => {
     setDriveMode(is);
@@ -133,7 +129,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   };
 
   const updateVolumeHeld = (held: boolean) => {
-    console.log("updateVolumeHeld", held);
     setIsVolumeHeld(held);
   };
 
@@ -344,15 +339,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   useEffect(() => {
     eventRemote(messages?.from, messages?.content);
   }, [messages?.content]);
-
-  // useEffect(() => {
-  //   synth?.eventHandler.addEvent("controllerchange", "", (e) => {
-  //     const controllerNumber = e.controllerNumber;
-  //     const controllerValue = e.controllerValue;
-  //     const channel = e.channel;
-  //     synthEventController(controllerNumber, controllerValue, channel);
-  //   });
-  // }, [synth]);
 
   return (
     <AppControlContext.Provider

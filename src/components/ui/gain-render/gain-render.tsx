@@ -1,3 +1,4 @@
+import useConfigStore from "@/components/stores/config-store";
 import useGainStore from "@/components/stores/gain.store";
 import useTickStore from "@/components/stores/tick-store";
 import { CHANNEL_DEFAULT } from "@/config/value";
@@ -17,9 +18,10 @@ const GainRender: React.FC<GainRenderProps> = ({
 }) => {
   const gainMain = useRef<number>(0);
   const gain = useRef<number[]>(CHANNEL_DEFAULT);
-  const tick = useTickStore((state) => state.tick);
-  const setGain = useGainStore((state) => state.setCurrntGain);
-  const setGainMain = useGainStore((state) => state.setCurrntGainMain);
+  const { tick } = useTickStore();
+  const { setCurrntGain, setCurrntGainMain } = useGainStore();
+  const { config } = useConfigStore();
+  const mixIsShot = config.widgets?.mix?.show;
 
   const gindRender = () => {
     if (analysers) {
@@ -37,10 +39,10 @@ const GainRender: React.FC<GainRenderProps> = ({
           newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
         const mainGain = (totalGain / (newVolumeLevels.length * 20)) * 100;
         gainMain.current = Math.round(mainGain); // กำหนดค่า mainGain
-        setGainMain(gainMain.current);
+        setCurrntGainMain(gainMain.current);
       } else {
         gain.current = newVolumeLevels;
-        setGain(gain.current);
+        setCurrntGain(gain.current);
       }
 
       //   if (superUserConnections.length > 0) {
@@ -57,7 +59,7 @@ const GainRender: React.FC<GainRenderProps> = ({
     if (analysers && !player?.paused) {
       gindRender();
     }
-  }, [tick, player?.paused, analysers, hideVolume]);
+  }, [mixIsShot ? tick : undefined, player?.paused, analysers, hideVolume]);
 
   return null;
 };

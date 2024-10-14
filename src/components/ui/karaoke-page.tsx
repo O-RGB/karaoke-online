@@ -38,7 +38,6 @@ interface KaraokePageProps {}
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { perset, synth, player, analysers, setupSpessasynth } =
     useSpessasynthStore();
-  // const { filesDragging } = useDragDrop();
   const {
     loadAndPlaySong,
     setSongPlaying,
@@ -88,7 +87,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     SONG_LIST: <SongListModal></SongListModal>,
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
   };
-  console.log("main updated...");
   return (
     <>
       <DragDrop setSongPlaying={setSongPlaying}></DragDrop>

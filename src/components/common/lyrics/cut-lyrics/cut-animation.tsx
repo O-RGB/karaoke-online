@@ -2,24 +2,25 @@ import React, { useMemo } from "react";
 import { useLyrics } from "@/hooks/lyrics-hook";
 import CharLyrics from "./char-lyrics";
 import useConfigStore from "@/components/stores/config-store";
+import useLyricsStore from "@/components/stores/lyrics-store";
 
 interface LyricsAnimationProps {
   display: string[][];
-  charIndex: number;
+  fixedCharIndex?: number;
   fontSize?: string;
 }
 
 const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
   display,
-  charIndex,
+  fixedCharIndex,
   fontSize = "text-2xl md:text-3xl lg:text-6xl",
 }) => {
-  const config = useConfigStore((state) => state.config);
-  const performance = config.refreshRate?.type ?? "MIDDLE";
+  const { config } = useConfigStore();
   const { Color, ColorBorder, ActiveColor, ActiveBorderColor, Font } =
     useLyrics();
 
-  // Precompute the character indices only when display changes
+  const performance = config.refreshRate?.type ?? "MIDDLE";
+
   const charIndices = useMemo(() => {
     const indices: number[] = [];
     let cumulativeIndex = 0;
@@ -32,32 +33,40 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
     return indices;
   }, [display]);
 
+  const groupText = (str: string[]) =>
+    str.map((char) => (char === " " ? "\u00A0" : char)).join("");
+
   return (
     <div style={{ ...Font?.style }} className={`flex ${fontSize}`}>
       {display.map((data, index) => {
-        const lyrInx = charIndices[index] || 0; // Use the precomputed index
-        const isActive = charIndex >= lyrInx;
+        const lyrInx = charIndices[index] || 0;
+        const text = groupText(data);
 
         return (
           <div className="relative" key={`char-${index}`}>
             {performance !== "LOW" && (
-              <div
-                className="absolute top-0 left-0 font-outline-2 sm:font-outline-4 transition-all"
-                style={{
-                  color: isActive ? ActiveBorderColor : ActiveColor,
+              <CharLyrics
+                textColor={{
+                  color: ActiveColor,
+                  colorBorder: ActiveBorderColor,
                 }}
-              >
-                <CharLyrics str={data} />
-              </div>
+                lyrInx={lyrInx}
+                fixedCharIndex={fixedCharIndex}
+                className="absolute top-0 left-0 font-outline-2 sm:font-outline-4 transition-all"
+                text={text}
+              />
             )}
-            <div
-              className="relative flex flex-col text-center transition-all"
-              style={{
-                color: isActive ? ColorBorder : Color,
+
+             <CharLyrics
+              textColor={{
+                color: Color,
+                colorBorder: ColorBorder,
               }}
-            >
-              <CharLyrics str={data} />
-            </div>
+              lyrInx={lyrInx}
+              fixedCharIndex={fixedCharIndex}
+              className="relative flex flex-col text-center transition-all"
+              text={text}
+            />  
           </div>
         );
       })}
