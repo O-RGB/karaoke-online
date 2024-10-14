@@ -7,6 +7,7 @@ import { toOptions } from "@/lib/general";
 import { SONG_TYPE } from "@/config/value";
 import { onSearchList } from "@/lib/trie-search";
 import SearchDropdown from "../tools/search-song/search-dropdown";
+import { usePeerStore } from "@/stores/peer-store";
 
 interface JoinConnectProps {
   hostId: string;
@@ -14,12 +15,13 @@ interface JoinConnectProps {
 
 const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
   const {
+    initializePeers,
     normalPeer,
     connectToPeer,
     sendMessage,
     received: messages,
     connections,
-  } = useRemote();
+  } = usePeerStore();
   const [songList, setSongList] = useState<SearchResult[]>([]);
 
   const handleConnect = () => {
@@ -34,7 +36,7 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
         message: str,
         type: "SEARCH_SONG",
         user: "NORMAL",
-        clientId: normalPeer.id,
+        clientId: normalPeer?.id,
       });
       // sendMessage(str, "SEARCH_SONG", "NORMAL");
     }
@@ -46,7 +48,7 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
         message: value,
         type: "SET_SONG",
         user: "NORMAL",
-        clientId: normalPeer.id,
+        clientId: normalPeer?.id,
       });
     }
   };
@@ -64,6 +66,10 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
   }
 
   useEffect(() => {
+    initializePeers(false);
+  }, []);
+
+  useEffect(() => {
     handleConnect();
   }, [normalPeer]);
 
@@ -75,7 +81,7 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
     }
   }, [messages?.content]);
 
-  if (!normalPeer.id) {
+  if (!normalPeer?.id) {
     return (
       <div className="bg-slate-700 min-h-dvh flex items-center justify-center text-lg text-white">
         <div className="flex items-center gap-2 font-bold">

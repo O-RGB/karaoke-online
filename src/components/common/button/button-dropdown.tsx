@@ -25,7 +25,7 @@ const ButtonDropdown: React.FC<ButtonDropdownProps> = ({
       <div className="w-full">{children}</div>
       <select
         onChange={hanndleOnChange}
-        className="absolute top-0 w-full h-5 bg-transparent cursor-pointer opacity-0"
+        className="absolute top-0 w-full h-6 bg-transparent cursor-pointer opacity-0"
         name=""
         id="test"
         value={value}

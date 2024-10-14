@@ -1,4 +1,4 @@
-import useConfigStore from "@/components/stores/config-store";
+import useConfigStore from "@/stores/config-store";
 import React, {
   useState,
   useEffect,
@@ -16,6 +16,7 @@ interface RangeBarProps {
   onMouseUp?: () => void;
   onTouchEnd?: () => void;
   className?: string;
+  orientation?: "vertical" | "horizontal";
 }
 
 const RangeBarClone: React.FC<RangeBarProps> = ({
@@ -26,6 +27,7 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
   disabled,
   onMouseUp,
   onTouchEnd,
+  orientation = "vertical",
   ...props
 }) => {
   const config = useConfigStore((state) => state.config);
@@ -45,47 +47,49 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
   );
 
   const updateValue = useCallback(
-    (clientY: number) => {
+    (clientX: number, clientY: number) => {
       if (sliderRef.current) {
         const rect = sliderRef.current.getBoundingClientRect();
-        const newPercentage = 100 - ((clientY - rect.top) / rect.height) * 100;
+        let newPercentage;
+        if (orientation === "vertical") {
+          newPercentage = 100 - ((clientY - rect.top) / rect.height) * 100;
+        } else {
+          newPercentage = ((clientX - rect.left) / rect.width) * 100;
+        }
         const clampedPercentage = Math.max(0, Math.min(100, newPercentage));
         const newValue = percentageToValue(clampedPercentage);
         setInternalValue(newValue);
-
-        // if (isDragging === false) {
         onChange?.(newValue);
-        // }
       }
     },
-    [percentageToValue, onChange, isDragging]
+    [percentageToValue, onChange, orientation]
   );
 
   const handleMove = useCallback(
-    (clientY: number) => {
-      if (isDragging) updateValue(clientY);
+    (clientX: number, clientY: number) => {
+      if (isDragging) updateValue(clientX, clientY);
     },
     [isDragging, updateValue]
   );
 
   const handleStart = useCallback(
-    (clientY: number) => {
+    (clientX: number, clientY: number) => {
       setIsDragging(true);
-      onMouseUp?.();
-      updateValue(clientY);
+      updateValue(clientX, clientY);
     },
     [updateValue]
   );
 
   const handleEnd = useCallback(() => {
     setIsDragging(false);
-
+    onMouseUp?.();
     onTouchEnd?.();
   }, [onMouseUp, onTouchEnd]);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => handleMove(e.clientY);
-    const handleTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientY);
+    const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
+    const handleTouchMove = (e: TouchEvent) =>
+      handleMove(e.touches[0].clientX, e.touches[0].clientY);
 
     if (isDragging) {
       document.addEventListener("mousemove", handleMouseMove);
@@ -113,22 +117,37 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
     [internalValue, valueToPercentage]
   );
 
+  const orientationStyles = {
+    vertical: {
+      container: "h-full w-0.5",
+      slider: "h-[85%] -mt-[1px]",
+      thumb: "-left-[8px]",
+      thumbPosition: { top: `${100 - displayPercentage}%` },
+    },
+    horizontal: {
+      container: "w-full h-0.5",
+      slider: "w-[90%] -ml-[1px]",
+      thumb: "-top-[8px]",
+      thumbPosition: { left: `${displayPercentage}%` },
+    },
+  }[orientation];
+
   return (
     <div
       style={{
         opacity: !disabled ? 1 : 0.5,
         pointerEvents: disabled ? "none" : undefined,
       }}
-      className={`relative h-full w-0.5 bg-white/50 touch-none rounded-full border ${props.className}`}
+      className={`relative bg-white/50 touch-none rounded-full border ${orientationStyles.container} ${props.className}`}
     >
       <div
         ref={sliderRef}
-        className="h-[90%] rounded-full relative -mt-0.5"
+        className={`rounded-full relative ${orientationStyles.slider}`}
         onMouseDown={(e) => {
-          handleStart(e.clientY);
+          handleStart(e.clientX, e.clientY);
         }}
         onTouchStart={(e) => {
-          handleStart(e.touches[0].clientY);
+          handleStart(e.touches[0].clientX, e.touches[0].clientY);
         }}
       >
         <div
@@ -136,16 +155,16 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
             absolute w-4 h-4 
             flex items-center justify-center 
             bg-white border-[0.01rem] border-gray-400 
-            rounded-full shadow-md cursor-pointer
-            -left-[8px] ${
-              !isDragging
-                ? performance === "LOW"
-                  ? ""
-                  : "duration-1000"
-                : "duration-0"
-            }
+            rounded-full shadow-md cursor-pointer disabled:cursor-auto
+            ${orientationStyles.thumb} ${
+            !isDragging
+              ? performance === "LOW"
+                ? ""
+                : "duration-1000"
+              : "duration-0"
+          }
             `}
-          style={{ top: `${100 - displayPercentage}%` }}
+          style={orientationStyles.thumbPosition}
         ></div>
       </div>
     </div>

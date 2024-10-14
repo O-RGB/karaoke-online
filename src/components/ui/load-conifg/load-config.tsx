@@ -1,4 +1,4 @@
-import useConfigStore from "@/components/stores/config-store";
+import useConfigStore from "@/stores/config-store";
 import { useLyrics } from "@/hooks/lyrics-hook";
 import { setupLocalConfig } from "@/lib/local-storege/config";
 import React, { useEffect } from "react";

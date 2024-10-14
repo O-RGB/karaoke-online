@@ -11,7 +11,7 @@ import ContextModal from "../modal/context-modal";
 import { FiSettings } from "react-icons/fi";
 import Marquee from "react-fast-marquee";
 import { FaSearch } from "react-icons/fa";
-import useTickStore from "../stores/tick-store";
+import useTickStore from "../../stores/tick-store";
 interface PlayerPanelProps {
   player: Sequencer;
   lyrics: string[];

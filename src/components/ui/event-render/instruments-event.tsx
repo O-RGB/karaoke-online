@@ -1,4 +1,4 @@
-import useEventStore from "@/components/stores/event.store";
+import useEventStore from "@/stores/event.store";
 import { CHANNEL_DEFAULT } from "@/config/value";
 import React, { useEffect, useRef, useState } from "react";
 import { Synthetizer } from "spessasynth_lib";

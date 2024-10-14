@@ -18,7 +18,7 @@ import {
   getSoundFontStorage,
   saveSoundFontStorage,
 } from "@/lib/storage/soundfont";
-import { useSpessasynthStore } from "../stores/spessasynth-store";
+import { useSpessasynthStore } from "../../stores/spessasynth-store";
 
 interface SoundfontManagerProps {}
 

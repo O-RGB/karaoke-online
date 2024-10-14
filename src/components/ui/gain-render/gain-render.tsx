@@ -1,9 +1,10 @@
-import useConfigStore from "@/components/stores/config-store";
-import useGainStore from "@/components/stores/gain.store";
-import useTickStore from "@/components/stores/tick-store";
+import useConfigStore from "@/stores/config-store";
+import useGainStore from "@/stores/gain.store";
+import useTickStore from "@/stores/tick-store";
 import { CHANNEL_DEFAULT } from "@/config/value";
 import React, { useEffect, useRef } from "react";
 import { Sequencer } from "spessasynth_lib";
+import { usePeerStore } from "@/stores/peer-store";
 
 interface GainRenderProps {
   analysers?: AnalyserNode[];
@@ -20,6 +21,7 @@ const GainRender: React.FC<GainRenderProps> = ({
   const gain = useRef<number[]>(CHANNEL_DEFAULT);
   const { tick } = useTickStore();
   const { setCurrntGain, setCurrntGainMain } = useGainStore();
+  const { sendSuperUserMessage, superUserConnections } = usePeerStore();
   const { config } = useConfigStore();
   const mixIsShot = config.widgets?.mix?.show;
 
@@ -45,13 +47,13 @@ const GainRender: React.FC<GainRenderProps> = ({
         setCurrntGain(gain.current);
       }
 
-      //   if (superUserConnections.length > 0) {
-      //     sendSuperUserMessage({
-      //       message: newVolumeLevels,
-      //       type: "GIND_NODE",
-      //       user: "SUPER",
-      //     });
-      //   }
+      if (superUserConnections.length > 0) {
+        sendSuperUserMessage({
+          message: newVolumeLevels,
+          type: "GIND_NODE",
+          user: "SUPER",
+        });
+      }
     }
   };
 

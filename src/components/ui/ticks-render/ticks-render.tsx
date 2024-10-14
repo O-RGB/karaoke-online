@@ -1,6 +1,6 @@
-import useConfigStore from "@/components/stores/config-store";
-import useTempoStore from "@/components/stores/tempo-store";
-import useTickStore from "@/components/stores/tick-store";
+import useConfigStore from "@/stores/config-store";
+import useTempoStore from "@/stores/tempo-store";
+import useTickStore from "@/stores/tick-store";
 import { REFRESH_RATE } from "@/config/value";
 import React, { useEffect, useRef } from "react";
 import { MIDI, Sequencer, Synthetizer } from "spessasynth_lib";

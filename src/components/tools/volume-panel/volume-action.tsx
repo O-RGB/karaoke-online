@@ -1,37 +1,53 @@
 import { channel } from "diagnostics_channel";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { BiSolidVolumeMute, BiSolidVolumeFull } from "react-icons/bi";
 
 interface VolumeActionProps {
   channel: number;
   isLock: boolean;
-  onLock?: (channel: number) => void;
+  onLock?: (channel: number, muted: boolean) => void;
+  onMuted?: (channel: number, muted: boolean) => void;
   onUnLock?: (channel: number) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 const VolumeAction: React.FC<VolumeActionProps> = ({
   channel,
   isLock,
   onLock,
+  onMuted,
   onUnLock,
   className,
+  disabled,
 }) => {
-  const onLockVolume = useCallback(() => {
-    onLock?.(channel);
-  }, [onLock, channel]);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const onLockVolume = () => {
+    // onLock?.(channel, !isMuted);
+    // setIsMuted((v) => !v);
+  };
+  const onMutedVolume = () => {
+    onMuted?.(channel, !isMuted);
+    setIsMuted((v) => !v);
+  };
+
+  const buttonStyle = `text-center text-white font-bold text-[10px]  
+        flex items-center justify-center gap-[2px] rounded-t-md
+        duration-300  border-t border-x border-white/20`;
 
   return (
     <div
-      onClick={onLockVolume}
-      className={`
-        ${isLock ? "bg-red-500 hover:bg-red-500/50" : "hover:bg-white/30"} 
-      ${className} text-center text-white font-bold text-[10px]  
-        flex items-center justify-center gap-[2px] rounded-t-md
-        duration-300 cursor-pointer border-t border-x border-white/20`}
+      onClick={disabled ? undefined : onMutedVolume}
+      className={`${className} ${buttonStyle} ${
+        disabled
+          ? "cursor-auto"
+          : `${
+              isMuted ? "bg-red-500 hover:bg-red-500/50" : "hover:bg-white/30"
+            } cursor-pointer`
+      } `}
     >
       <span className="pt-0.5 ">
-        {isLock ? <BiSolidVolumeMute /> : <BiSolidVolumeFull />}
+        {isMuted ? <BiSolidVolumeMute /> : <BiSolidVolumeFull />}
       </span>
       <span>{channel}</span>
     </div>

@@ -1,4 +1,4 @@
-import useLyricsStore from "@/components/stores/lyrics-store";
+import useLyricsStore from "@/stores/lyrics-store";
 import React, { useMemo } from "react";
 
 interface CharLyricsProps {

@@ -13,7 +13,8 @@ import { jsonTracklistToDatabase } from "@/lib/storage/tracklist";
 import { getSong } from "@/lib/storage/song";
 import { useNotification } from "@/hooks/notification-hook";
 import { AiOutlineLoading } from "react-icons/ai";
-import { useSpessasynthStore } from "@/components/stores/spessasynth-store";
+import { useSpessasynthStore } from "@/stores/spessasynth-store";
+import { usePeerStore } from "@/stores/peer-store";
 
 type AppControlContextType = {
   updateVolumeSysth: (index: number, value: number) => void;
@@ -81,7 +82,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   children,
 }) => {
   const { synth, player } = useSpessasynthStore();
-  const { received: messages, sendMessage } = useRemote();
+  const { received: messages, sendMessage } = usePeerStore();
   const { addNotification } = useNotification();
 
   // Fetch Option
@@ -315,6 +316,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         break;
 
       case "UPLOAD_SONG":
+        console.log("remote...")
         let uploaded = data as SongFiltsEncodeAndDecode;
         if (uploaded) {
           const blob = new Blob([uploaded.mid]);

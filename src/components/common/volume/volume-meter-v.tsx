@@ -1,6 +1,6 @@
 // import React, { useEffect, useState } from "react";
 
-import useGainStore from "@/components/stores/gain.store";
+import useGainStore from "@/stores/gain.store";
 import { useEffect, useRef } from "react";
 
 interface VolumeMeterVProps {

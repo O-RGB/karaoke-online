@@ -98,6 +98,10 @@ async function loadSoundFontPlayer(audio: AudioContext) {
   synthInstance.setMainVolume(0.7);
   synthInstance.highPerformanceMode = true;
 
+  for (let i = 0; i < 16; i++) {
+    synthInstance.setPitchBendRange(i, 12); // ตั้งค่า range เป็น 12 semitones
+  }
+
   const blob = new Blob([ab], { type: "application/octet-stream" });
   const sf = new File([blob], "soundfont.sf2", {
     type: "application/octet-stream",

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useQRCode } from "next-qrcode";
-import { useRemote } from "@/hooks/peer-hook"; // Updated hook for super user
 import Input from "../common/input-data/input";
+import { usePeerStore } from "@/stores/peer-store";
 
 interface SuperHostRemoteProps {}
 
 const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
-  const { superUserPeer, superUserConnections } = useRemote();
+  const { superUserPeer, superUserConnections } = usePeerStore();
 
   const [hostUrl, setHostUrl] = useState<string>();
   const [hostId, setHostId] = useState<string>();

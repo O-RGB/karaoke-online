@@ -1,5 +1,5 @@
 import RangeBarClone from "@/components/common/input-data/range-bar-clone";
-import useVolumeStore from "@/components/stores/volume-store";
+import useVolumeStore from "@/stores/volume-store";
 import React from "react";
 
 interface VolumeAnimtaionProps {
@@ -20,16 +20,15 @@ const VolumeAnimtaion: React.FC<VolumeAnimtaionProps> = ({
   const volume = useVolumeStore((state) => state.volume);
 
   return (
-    <>
-      <RangeBarClone
-        value={hideVolume ? 0 : volume[channel]}
-        className="z-20"
-        max={127}
-        onMouseUp={onMouseUp}
-        onTouchEnd={onTouchEnd}
-        onChange={onChange}
-      ></RangeBarClone>
-    </>
+    <RangeBarClone
+      value={hideVolume ? 0 : volume[channel]}
+      className="z-20"
+      disabled={hideVolume}
+      max={127}
+      onMouseUp={onMouseUp}
+      onTouchEnd={onTouchEnd}
+      onChange={onChange}
+    ></RangeBarClone>
   );
 };
 

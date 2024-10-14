@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import useGainStore from "@/components/stores/gain.store";
+import useGainStore from "@/stores/gain.store";
 
 interface VolumeHorizontalProps {
   hide: boolean;

@@ -54,9 +54,9 @@ export default function RootLayout({
       <body className={`relative ${inter.className} p-2.5 bg-slate-500 `}>
         <AllowSound>
           <NotificationProvider>
-            <PeerProvider>
+            {/* <PeerProvider> */}
               <ToolsProvider>{children}</ToolsProvider>
-            </PeerProvider>
+            {/* </PeerProvider> */}
           </NotificationProvider>
         </AllowSound>
       </body>

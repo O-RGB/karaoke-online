@@ -11,14 +11,20 @@ import Label from "../common/label";
 import { FaRegFileAudio } from "react-icons/fa";
 import { EMK_FILE_TYPE } from "@/config/value";
 import { readSong } from "@/lib/karaoke/read";
+import { usePeerStore } from "@/stores/peer-store";
 
 interface SuperJoinConnectProps {
   hostId: string;
 }
 
 const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
-  const { superUserPeer, connectToPeer, sendSuperUserMessage, received } =
-    useRemote();
+  const {
+    superUserPeer,
+    connectToPeer,
+    sendSuperUserMessage,
+    received,
+    initializePeers,
+  } = usePeerStore();
   const [audioGain, setAudioGain] = useState<number[]>(Array(16).fill(0));
   const [instrument, setInstrument] = useState<number[]>([]);
   const [songList, setSongList] = useState<SearchResult[]>([]);
@@ -35,7 +41,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
         message: value,
         type: "SET_CHANNEL",
         user: "SUPER",
-        clientId: superUserPeer.id,
+        clientId: superUserPeer?.id,
       });
     }
   };
@@ -46,7 +52,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
         message: str,
         type: "SEARCH_SONG",
         user: "SUPER",
-        clientId: superUserPeer.id,
+        clientId: superUserPeer?.id,
       });
     }
   };
@@ -57,7 +63,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
         message: value,
         type: "SET_SONG",
         user: "SUPER",
-        clientId: superUserPeer.id,
+        clientId: superUserPeer?.id,
       });
     }
   };
@@ -71,7 +77,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
           message: song[0],
           type: "UPLOAD_SONG",
           user: "SUPER",
-          clientId: superUserPeer.id,
+          clientId: superUserPeer?.id,
         });
       }
     }
@@ -90,6 +96,10 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   }
 
   useEffect(() => {
+    initializePeers(true);
+  }, []);
+
+  useEffect(() => {
     handleConnect();
   }, [superUserPeer]);
 
@@ -106,7 +116,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
     }
   }, [received?.content]);
 
-  if (!superUserPeer.id) {
+  if (!superUserPeer?.id) {
     return (
       <div className="min-h-dvh flex items-center justify-center text-lg">
         กำลังเชื่อมต่อ...

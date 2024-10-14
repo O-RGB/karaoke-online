@@ -30,14 +30,16 @@ import GainRender from "./gain-render/gain-render";
 import VolumeEvnet from "./event-render/volume-event";
 import InstrumentsEvent from "./event-render/instruments-event";
 import DisplaySettingModal from "../modal/display";
-import { useSpessasynthStore } from "../stores/spessasynth-store";
+import { useSpessasynthStore } from "../../stores/spessasynth-store";
 import { DragDrop } from "../tools/drag-drop/drag-drop";
+import { usePeerStore } from "@/stores/peer-store";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { perset, synth, player, analysers, setupSpessasynth } =
     useSpessasynthStore();
+  const { initializePeers } = usePeerStore();
   const {
     loadAndPlaySong,
     setSongPlaying,
@@ -61,6 +63,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
     // Setup
     setupSpessasynth();
+    initializePeers();
 
     // Database
     const tl = await getTracklistToJson();

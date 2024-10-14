@@ -18,7 +18,13 @@ import InstrumentsButton from "./instruments-button";
 import VolumeAction from "./volume-action";
 import VolumeHorizontal from "./volume-horizontal";
 import VolumeAnimtaion from "./volume-animation";
-import useConfigStore from "@/components/stores/config-store";
+import useConfigStore from "@/stores/config-store";
+import volumeSynth from "@/features/volume/volume-features";
+import { FiSettings } from "react-icons/fi";
+import { Menu, MenuButton } from "@szhsin/react-menu";
+import "@szhsin/react-menu/dist/index.css";
+import "@szhsin/react-menu/dist/transitions/zoom.css";
+import RangeBarClone from "@/components/common/input-data/range-bar-clone";
 
 interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
@@ -69,23 +75,50 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     }
   };
 
-  const onLockVolume = (channel: number) => {
-    const ch_index = channel - 1;
-    let clone: boolean[] = { ...lock };
-    let vByIndex = !clone[ch_index];
-    clone[ch_index] = vByIndex;
-    if (vByIndex) {
-      onVolumeMeterChange(ch_index, 0);
-    } else {
-      onVolumeMeterChange(ch_index, 100);
+  const onPenChange = (channel: number, value: number) => {
+    if (synth) {
+      const volumeLib = volumeSynth(synth);
+      if (volumeLib) {
+        volumeLib.uploadPanVolume(channel - 1, value);
+      }
     }
-    setLock(clone);
+  };
+
+  const onPitchChange = (value: number) => {
+    if (synth) {
+      const volumeLib = volumeSynth(synth);
+      if (volumeLib) {
+        volumeLib.updatePitch(null, value);
+      }
+    }
+  };
+
+  const onMutedVolume = (channel: number, isMuted: boolean) => {
+    if (synth) {
+      const volumeLib = volumeSynth(synth);
+      if (volumeLib) {
+        volumeLib.updateMuteVolume(channel - 1, isMuted);
+        setLock((v) => {
+          v[channel - 1] = isMuted;
+          return v;
+        });
+      }
+    }
+  };
+
+  const onLockedVolume = (channel: number, isLocked: boolean) => {
+    if (synth) {
+      const volumeLib = volumeSynth(synth);
+      if (volumeLib) {
+        volumeLib.uploadLockedVolume(channel - 1, isLocked);
+      }
+    }
   };
 
   const onLockVocal = (mute: boolean = false) => {
     const vocal = lock[VOCAL_CHANNEL];
     if (mute === vocal) {
-      onLockVolume(VOCAL_CHANNEL + 1);
+      onMutedVolume(VOCAL_CHANNEL + 1, mute);
     }
   };
 
@@ -121,7 +154,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
       className={
         className
           ? className
-          : `fixed left-0 px-5 flex flex-col gap-1.5 overflow-hidden  ${
+          : `fixed left-0 px-5 flex flex-col gap-1.5 ${
               orientation === "landscape"
                 ? " top-[18px] w-70"
                 : " top-14 lg:top-6 w-full"
@@ -129,9 +162,9 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
       }
     >
       <div
-        className={`relative w-full lg:w-fit blur-overlay border blur-border rounded-md p-2 duration-300 overflow-hidden ${
+        className={`select-none relative z-50 w-full lg:w-fit blur-overlay border blur-border rounded-md p-2 duration-300 ${
           hideVolume
-            ? "h-[30px] lg:h-[30px] pointer-events-none !cursor-none"
+            ? "h-[30px] lg:h-[30px]"
             : `${
                 orientation === "landscape" ? "h-[230px]" : "h-[292px]"
               } lg:h-[150px]`
@@ -155,17 +188,30 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           })}
         </div>
         <div
-          className={`${grid} ${hideElement} ${animation} w-full gap-0.5 h-full`}
+          className={`${grid} ${hideElement} ${animation} ${
+            hideVolume ?? "pointer-events-none !cursor-none"
+          } w-full gap-0.5 h-full`}
         >
           {volLayout.map((data, ch) => {
             return (
               <div
                 key={`vol-panel-${ch}`}
-                className="flex flex-col relative h-full w-full "
+                className="flex flex-col relative h-full w-full"
               >
+                {/* <div className="absolute z-10">
+                  <VolumeMeterV
+                    channel={ch}
+                    max={127}
+                    className="z-10 w-full absolute bottom-5 left-0 h-full"
+                    level={data}
+                  ></VolumeMeterV>
+                </div> */}
+
                 <VolumeAction
+                  disabled={hideVolume}
                   channel={ch + 1}
-                  onLock={onLockVolume}
+                  onMuted={onMutedVolume}
+                  onLock={onLockedVolume}
                   isLock={lock[ch]}
                 ></VolumeAction>
                 <div className="flex items-center justify-center h-full w-full  border-x border-white/20">
@@ -177,8 +223,11 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                     onTouchEnd={() => updateVolumeHeld(false)}
                   ></VolumeAnimtaion>
                 </div>
+
                 <InstrumentsButton
+                  disabled={hideVolume}
                   channel={ch}
+                  onPenChange={onPenChange}
                   onPersetChange={onPersetChange}
                   perset={perset}
                 ></InstrumentsButton>
@@ -186,13 +235,35 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
             );
           })}
         </div>
+
+        <div className="absolute -bottom-1.5 right-4 z-50 ">
+          <Button
+            tabIndex={-1}
+            shadow={""}
+            onClick={() => onHideVolume(!hideVolume)}
+            onKeyDown={(event) =>
+              event.key === "Enter" && event.preventDefault()
+            }
+            blur={""}
+            border="border blur-border focus:outline-none "
+            padding=""
+            className="px-3 h-3"
+            icon={
+              <MdArrowDropUp
+                className={`${
+                  hideVolume ? "rotate-180" : "rotate-0 "
+                } text-white duration-300`}
+              ></MdArrowDropUp>
+            }
+          ></Button>
+        </div>
       </div>
 
       <div>
         <div className="flex gap-1.5">
           <NumberButton
             onChange={(value) => {
-              updatePitch(value);
+              onPitchChange(value);
               addNotification(`Pitch ${value}`);
             }}
             value={0}
@@ -212,8 +283,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
         <div>{options}</div>
       </div>
 
-      <div className="relative flex w-full lg:w-[592px] justify-center items-center h-0">
-        <div className="absolute bottom-[38px] right-4">
+      {/* <div className="relative flex w-full lg:w-[592px] justify-center items-center h-0 z-10">
+        <div className="absolute bottom-[38px] right-4 z-10">
           <Button
             tabIndex={-1}
             shadow={""}
@@ -233,7 +304,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
             }
           ></Button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

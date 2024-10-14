@@ -2,6 +2,7 @@
 import Button from "@/components/common/button/button";
 import { useDragDrop } from "@/hooks/drag-drop-hook";
 import { onSelectTestMusic } from "@/lib/karaoke/read";
+import useDragDropStore from "@/stores/drag-drop-store";
 
 import { FC, useEffect } from "react";
 import { AiOutlineFile } from "react-icons/ai";
@@ -28,9 +29,9 @@ export const DragDrop: FC<DragDropProps> = ({ setSongPlaying }) => {
 
   return (
     <div
-      className={`fixed w-screen h-screen ${
+      className={`fixed top-0 left-0 w-screen h-screen ${
         isDragging ? "opacity-100" : "opacity-0"
-      } duration-300 bg-red-600`}
+      } duration-300`}
     >
       <div className="flex items-center justify-center h-full">
         <Button

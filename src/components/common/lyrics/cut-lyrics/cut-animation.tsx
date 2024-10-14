@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
 import { useLyrics } from "@/hooks/lyrics-hook";
 import CharLyrics from "./char-lyrics";
-import useConfigStore from "@/components/stores/config-store";
-import useLyricsStore from "@/components/stores/lyrics-store";
+import useConfigStore from "@/stores/config-store";
+import useLyricsStore from "@/stores/lyrics-store";
 
 interface LyricsAnimationProps {
   display: string[][];

@@ -1,5 +1,5 @@
-import useLyricsStore from "@/components/stores/lyrics-store";
-import useTickStore from "@/components/stores/tick-store";
+import useLyricsStore from "@/stores/lyrics-store";
+import useTickStore from "@/stores/tick-store";
 import { groupThaiCharacters } from "@/lib/app-control";
 import React, { useEffect, useMemo, useRef } from "react";
 

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 
 import { useQRCode } from "next-qrcode";
-import { useRemote } from "@/hooks/peer-hook";
 import Input from "../common/input-data/input";
+import { usePeerStore } from "@/stores/peer-store";
 
 interface HostRemoteProps {}
 
 const HostRemote: React.FC<HostRemoteProps> = ({}) => {
-  const { normalPeer, connections } = useRemote();
+  const { normalPeer, connections } = usePeerStore();
 
   const [hostUrl, setHostUrl] = useState<string>();
   const [hostId, setHostId] = useState<string>();

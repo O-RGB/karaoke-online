@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import useTickStore from "../stores/tick-store";
-import useTempoStore from "../stores/tempo-store";
-import useConfigStore from "../stores/config-store";
+import useTickStore from "../../stores/tick-store";
+import useTempoStore from "../../stores/tempo-store";
+import useConfigStore from "../../stores/config-store";
 
 interface TempoPanelProps {
   timeDivision?: number;

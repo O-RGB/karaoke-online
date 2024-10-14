@@ -6,7 +6,7 @@ import { useAppControl } from "@/hooks/app-control-hook";
 import { useOrientation } from "@/hooks/orientation-hook";
 import LyricsAnimation from "../common/lyrics/cut-lyrics/cut-animation";
 import RandomLyrics from "../lyrics/random-lyrics";
-import useLyricsStore from "../stores/lyrics-store";
+import useLyricsStore from "../../stores/lyrics-store";
 
 interface LyricsPanelProps {
   lyrics: string[];
