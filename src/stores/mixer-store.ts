@@ -6,8 +6,8 @@ import {
 import { create } from "zustand";
 
 interface MixerStore {
-  volume: number[];
-  setVolume: (instrument: number[] | ((prev: number[]) => number[])) => void;
+  volumes: number[];
+  setVolumes: (volume: number[] | ((prev: number[]) => number[])) => void;
   pan: number[];
   setPan: (pan: number[] | ((prev: number[]) => number[])) => void;
   reverb: number[];
@@ -27,10 +27,10 @@ interface MixerStore {
 }
 
 const useMixerStore = create<MixerStore>((set) => ({
-  volume: VOLUME_DEFAULT,
-  setVolume: (volume) =>
+  volumes: VOLUME_DEFAULT,
+  setVolumes: (volume) =>
     set((state) => ({
-      volume: typeof volume === "function" ? volume(state.volume) : volume,
+      volumes: typeof volume === "function" ? volume(state.volumes) : volume,
     })),
   pan: VOLUME_MIDDLE_DEFAULT_128,
   setPan: (pan) =>

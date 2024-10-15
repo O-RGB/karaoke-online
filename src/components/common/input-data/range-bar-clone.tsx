@@ -50,23 +50,28 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
         const thumbSize = 16; // ขนาดของ thumb
         const halfThumbSize = thumbSize / 2;
         let newPercentage;
+
         if (orientation === "vertical") {
+          const yPos = clientY - rect.top - halfThumbSize; // หักลบ halfThumbSize เพื่อให้ thumb อยู่ในขอบ
+          const clampedYPos = Math.max(
+            0,
+            Math.min(rect.height - thumbSize, yPos)
+          ); // ป้องกันไม่ให้เกินขอบ
           newPercentage =
             rect.height === 0
               ? 0
               : 100 -
-                Math.round(
-                  ((clientY - rect.top - halfThumbSize) * 100) /
-                    (rect.height - thumbSize)
-                );
+                Math.round((clampedYPos * 100) / (rect.height - thumbSize));
         } else {
+          const xPos = clientX - rect.left - halfThumbSize; // หักลบ halfThumbSize เพื่อให้ thumb อยู่ในขอบ
+          const clampedXPos = Math.max(
+            0,
+            Math.min(rect.width - thumbSize, xPos)
+          ); // ป้องกันไม่ให้เกินขอบ
           newPercentage =
             rect.width === 0
               ? 0
-              : Math.round(
-                  ((clientX - rect.left - halfThumbSize) * 100) /
-                    (rect.width - thumbSize)
-                );
+              : Math.round((clampedXPos * 100) / (rect.width - thumbSize));
         }
 
         const clampedPercentage = Math.max(0, Math.min(100, newPercentage));
@@ -106,6 +111,8 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
     const handleTouchMove = (e: TouchEvent) =>
       handleMove(e.touches[0].clientX, e.touches[0].clientY);
 
+    console.log("isDragging", isDragging);
+
     if (isDragging) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("touchmove", handleTouchMove);
@@ -134,16 +141,16 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
 
   const orientationStyles = {
     vertical: {
-      container: "h-full w-0.5",
-      slider: "h-[85%] translate-y-[7px]",
+      container: "h-full w-0.5 pb-3.5",
+      slider: "h-full",
       thumb: "left-1/2 -translate-x-1/2",
-      thumbPosition: { top: `calc(${100 - displayPercentage}% - 8px)` },
+      thumbPosition: { top: `${100 - displayPercentage}%` },
     },
     horizontal: {
-      container: "w-full h-0.5",
-      slider: "w-[90%] translate-x-[7px]",
+      container: "w-full h-0.5 pr-3.5",
+      slider: "w-full",
       thumb: "top-1/2 -translate-y-1/2",
-      thumbPosition: { left: `calc(${displayPercentage}% - 8px)` },
+      thumbPosition: { left: `${displayPercentage}%` },
     },
   }[orientation];
 
@@ -153,7 +160,7 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
         opacity: !disabled ? 1 : 0.5,
         pointerEvents: disabled ? "none" : undefined,
       }}
-      className={`relative bg-white/50 touch-none rounded-full border ${orientationStyles.container} ${className}`}
+      className={`relative bg-white/50 touch-none rounded-full border  ${orientationStyles.container} ${className}`}
     >
       <div
         ref={sliderRef}
@@ -169,8 +176,8 @@ const RangeBarClone: React.FC<RangeBarProps> = ({
             flex items-center justify-center
             bg-white border-[0.01rem] border-gray-400
             rounded-full shadow-md cursor-pointer disabled:cursor-auto
-            ${isDragging ? "duration-0" : "duration-1000"}
             ${orientationStyles.thumb}
+            ${isDragging ? "duration-0" : "duration-1000"}
           `}
           style={orientationStyles.thumbPosition}
         ></div>

@@ -13,6 +13,18 @@ import {
   useLayoutEffect,
 } from "react";
 
+
+// ฟังก์ชันสำหรับสุ่มสีในรูปแบบ HEX
+const getRandomColor = () => {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+};
+
+
 type WallpaperContextType = {
   wallpaper: string | undefined;
   wallpaperName: string | undefined;
@@ -72,6 +84,8 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
     }
   };
 
+ 
+
   const changeWallpaper = async (filename: string) => {
     setLocalWallpaper(filename);
     const localfile = await getWallpaperStorage(filename);
@@ -80,6 +94,11 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
       const mediaUrl = URL.createObjectURL(localfile.value);
       setWallpaper(mediaUrl);
       setWallpaperName(localfile.value.name);
+
+      const metaThemeColor = document.querySelector("meta[name='theme-color']");
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute("content", getRandomColor());
+      }
     }
   };
 

@@ -1,17 +1,16 @@
 import useMixerStore from "@/stores/mixer-store";
-import { useAppControl } from "@/hooks/app-control-hook";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect } from "react";
 import { midiControllers, Synthetizer } from "spessasynth_lib";
-import volumeSynth from "@/features/volume/volume-features";
 
 interface VolumeEventProps {
   synth: Synthetizer;
-  // isVolumeHeld: boolean;
 }
 
 const VolumeEvent: React.FC<VolumeEventProps> = ({ synth }) => {
-  const volumeLib = volumeSynth(synth);
-  const { setVolume, setPan, setReverb, setChorusDepth } = useMixerStore();
+  const setVolumes = useMixerStore((state) => state.setVolumes);
+  const setPan = useMixerStore((state) => state.setPan);
+  const setReverb = useMixerStore((state) => state.setReverb);
+  const setChorusDepth = useMixerStore((state) => state.setChorusDepth);
   const heid = useMixerStore((state) => state.held);
 
   const synthEventController = useCallback(
@@ -19,7 +18,10 @@ const VolumeEvent: React.FC<VolumeEventProps> = ({ synth }) => {
       if (heid === false) {
         switch (controllerNumber) {
           case midiControllers.mainVolume:
-            setVolume((prevVoluem) => {
+            if(channel === 3){
+              console.log("on event", controllerValue)
+            }
+            setVolumes((prevVoluem) => {
               const newVolume = [...prevVoluem];
               newVolume[channel] = controllerValue;
               return newVolume;
@@ -27,7 +29,6 @@ const VolumeEvent: React.FC<VolumeEventProps> = ({ synth }) => {
             break;
 
           case midiControllers.pan:
-            console.log("set pan in event");
             setPan((prevPan) => {
               const newPan = [...prevPan];
               newPan[channel] = controllerValue;
@@ -54,28 +55,23 @@ const VolumeEvent: React.FC<VolumeEventProps> = ({ synth }) => {
         }
       }
     },
-    [heid, setVolume]
+    [heid, setVolumes]
   );
 
   const eventProgramChange = () => {
     synth?.eventHandler.addEvent("controllerchange", "", (e) => {
       const { controllerNumber, controllerValue, channel } = e;
 
-      console.log({ controllerNumber, controllerValue, channel });
+      // console.log({ controllerNumber, controllerValue, channel });
       synthEventController(controllerNumber, controllerValue, channel);
     });
   };
 
   useEffect(() => {
-    if (volumeLib) {
-      volumeLib.updateMainVolume(0, 100);
-    }
     setTimeout(() => {
       eventProgramChange();
     }, 10);
   }, [synth]);
-
-  // useEffect(() => {volumeLib()}, [isMute]);
 
   return null;
 };

@@ -23,7 +23,6 @@ import MidiSettingModal from "../modal/midi-setting-modal";
 import SongListModal from "../modal/song-list.modal";
 import { getTracklistToJson } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
-import { getLocalSystemMode } from "@/lib/local-storege/local-storage";
 import TicksRender from "./ticks-render/ticks-render";
 import LyricsRender from "./lyrics-render/lyrics-render";
 import GainRender from "./gain-render/gain-render";
@@ -33,7 +32,6 @@ import DisplaySettingModal from "../modal/display";
 import { useSpessasynthStore } from "../../stores/spessasynth-store";
 import { DragDrop } from "../tools/drag-drop/drag-drop";
 import { usePeerStore } from "@/stores/peer-store";
-import useMixerStore from "@/stores/mixer-store";
 
 interface KaraokePageProps {}
 
@@ -86,6 +84,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     SONG_LIST: <SongListModal></SongListModal>,
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
   };
+
   return (
     <>
       <DragDrop setSongPlaying={setSongPlaying}></DragDrop>

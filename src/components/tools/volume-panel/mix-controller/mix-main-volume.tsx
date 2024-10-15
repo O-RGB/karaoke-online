@@ -17,10 +17,14 @@ const MixMainVolume: React.FC<MixMainVolume> = ({
   onMouseUp,
   onTouchEnd,
 }) => {
-  const volume = useMixerStore((state) => state.volume[channel]);
+  const volume = useMixerStore((state) => state.volumes[channel]);
+
+  if (channel === 3) {
+    console.log(volume);
+  }
   return (
     <RangeBarClone
-      value={disabled ? 0 : volume}
+      value={volume}
       className="z-20"
       disabled={disabled}
       max={127}

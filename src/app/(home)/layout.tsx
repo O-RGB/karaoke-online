@@ -48,14 +48,17 @@ export default function RootLayout({
         />
         <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
       </head>
 
       <body className={`relative  p-2.5 bg-slate-500 `}>
         <AllowSound>
           <NotificationProvider>
             {/* <PeerProvider> */}
-              <ToolsProvider>{children}</ToolsProvider>
+            <ToolsProvider>{children}</ToolsProvider>
             {/* </PeerProvider> */}
           </NotificationProvider>
         </AllowSound>
