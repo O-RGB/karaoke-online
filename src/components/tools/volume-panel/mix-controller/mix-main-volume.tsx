@@ -2,7 +2,7 @@ import RangeBarClone from "@/components/common/input-data/range-bar-clone";
 import useVolumeStore from "@/stores/volume-store";
 import React from "react";
 
-interface VolumeAnimtaionProps {
+interface MixMainVolume {
   onMouseUp?: () => void;
   onTouchEnd?: () => void;
   onChange?: (value: number) => void;
@@ -10,18 +10,17 @@ interface VolumeAnimtaionProps {
   channel: number;
 }
 
-const VolumeAnimtaion: React.FC<VolumeAnimtaionProps> = ({
+const MixMainVolume: React.FC<MixMainVolume> = ({
   channel,
   hideVolume,
   onChange,
   onMouseUp,
   onTouchEnd,
 }) => {
-  const volume = useVolumeStore((state) => state.volume);
-
+  const volume = useVolumeStore((state) => state.volume[channel]);
   return (
     <RangeBarClone
-      value={hideVolume ? 0 : volume[channel]}
+      value={hideVolume ? 0 : volume}
       className="z-20"
       disabled={hideVolume}
       max={127}
@@ -32,4 +31,4 @@ const VolumeAnimtaion: React.FC<VolumeAnimtaionProps> = ({
   );
 };
 
-export default VolumeAnimtaion;
+export default MixMainVolume;

@@ -34,7 +34,6 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {
     : "h-[30dvh]";
 
   const className = `${height} lg:h-[400px] flex items-center justify-center relative w-full rounded-lg text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`;
-  console.log("lyrics-panel-render...");
   return (
     <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 -z-40">
       <div className={className}>

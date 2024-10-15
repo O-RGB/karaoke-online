@@ -7,10 +7,10 @@ import ToolsProvider from "../provider";
 import AllowSound from "@/components/tools/allow-sound";
 import { NotificationProvider } from "@/context/notification-context";
 
-const inter = Noto_Sans_Thai_Looped({
-  weight: "400",
-  subsets: ["latin", "thai", "latin-ext"],
-});
+// const inter = Noto_Sans_Thai_Looped({
+//   weight: "400",
+//   subsets: ["latin", "thai", "latin-ext"],
+// });
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -51,7 +51,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       </head>
 
-      <body className={`relative ${inter.className} p-2.5 bg-slate-500 `}>
+      <body className={`relative  p-2.5 bg-slate-500 `}>
         <AllowSound>
           <NotificationProvider>
             {/* <PeerProvider> */}

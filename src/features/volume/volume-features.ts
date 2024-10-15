@@ -6,11 +6,23 @@ import {
 } from "spessasynth_lib";
 
 const volumeSynth = (synth: Synthetizer): FeatureSynth | null => {
-  const uploadPanVolume = (channel: number, value: number) => {
+  const updateChorusDepth = (channel: number, value: number) => {
+    synth?.controllerChange(channel, 93, value);
+  };
+
+  const updateReverb = (channel: number, value: number) => {
+    synth?.controllerChange(channel, 91, value);
+  };
+
+  const updatePreset = (channel: number, value: number) => {
+    synth?.programChange(channel, value);
+  };
+
+  const updatePanVolume = (channel: number, value: number) => {
     synth.controllerChange(channel, midiControllers.pan, value);
   };
 
-  const uploadLockedVolume = (channel: number, isLocked: boolean) => {
+  const updateLockedVolume = (channel: number, isLocked: boolean) => {
     synth.lockController(channel, midiControllers.mainVolume, isLocked);
   };
   const uploadLockedPitchWheel = (channel: number, isLocked: boolean) => {
@@ -25,22 +37,28 @@ const volumeSynth = (synth: Synthetizer): FeatureSynth | null => {
     synth.muteChannel(channel, isMuted);
   };
 
-  const updatePerset = (channel: number, value: number) => {
-    synth.programChange(channel, value);
-  };
-
   const updatePitch = (channel: number | null, semitones: number = 0) => {
     const PITCH_CENTER = 8192;
     const PITCH_RANGE = 16384;
     const SEMITONE_STEP = PITCH_RANGE / 24;
 
-    const pitchValue = Math.round(PITCH_CENTER + semitones * SEMITONE_STEP);
+    const pitchValue = Math.max(
+      0,
+      Math.min(
+        PITCH_RANGE - 1,
+        Math.round(PITCH_CENTER + semitones * SEMITONE_STEP)
+      )
+    );
     const MSB = (pitchValue >> 7) & 0x7f;
     const LSB = pitchValue & 0x7f;
 
     const sendPitch = (channel: number) => {
       uploadLockedPitchWheel(channel, false);
+      synth.setPitchBendRange(channel, Math.abs(semitones));
       synth.pitchWheel(channel, MSB, LSB);
+      if (semitones !== 0) {
+        uploadLockedPitchWheel(channel, true);
+      }
     };
 
     if (channel !== null) {
@@ -58,11 +76,13 @@ const volumeSynth = (synth: Synthetizer): FeatureSynth | null => {
 
   return {
     updateMainVolume,
-    updatePerset,
+    updatePreset,
     updatePitch,
     updateMuteVolume,
-    uploadLockedVolume,
-    uploadPanVolume,
+    updateLockedVolume,
+    updatePanVolume,
+    updateReverb,
+    updateChorusDepth,
   };
 };
 

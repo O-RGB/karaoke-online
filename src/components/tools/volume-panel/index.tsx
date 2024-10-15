@@ -17,14 +17,11 @@ import VolumeMeterV from "../../common/volume/volume-meter-v";
 import InstrumentsButton from "./instruments-button";
 import VolumeAction from "./volume-action";
 import VolumeHorizontal from "./volume-horizontal";
-import VolumeAnimtaion from "./volume-animation";
+import MixMainVolume from "./mix-controller/mix-main-volume";
 import useConfigStore from "@/stores/config-store";
 import volumeSynth from "@/features/volume/volume-features";
-import { FiSettings } from "react-icons/fi";
-import { Menu, MenuButton } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
-import RangeBarClone from "@/components/common/input-data/range-bar-clone";
 
 interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
@@ -44,22 +41,14 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   options,
   className,
 }) => {
+  const VOCAL_CHANNEL = 9;
   const { config } = useConfigStore();
   const widgetConfig = config.widgets;
   const isShow = widgetConfig?.mix?.show;
 
   const { orientation } = useOrientation();
   const { addNotification } = useNotification();
-  const VOCAL_CHANNEL = 8;
-  const {
-    updateVolumeSysth,
-    updateVolumeHeld,
-    updatePitch,
-    updatePerset,
-    updateHideVolume,
-    volumeController,
-    hideVolume,
-  } = useAppControl();
+  const { updateVolumeHeld, updateHideVolume, hideVolume } = useAppControl();
   const { superUserConnections, sendSuperUserMessage } = useRemote();
 
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
@@ -69,7 +58,10 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
 
   const onVolumeMeterChange = (channel: number, value: number) => {
     if (synth) {
-      updateVolumeSysth(channel, value);
+      const volumeLib = volumeSynth(synth);
+      if (volumeLib) {
+        volumeLib.updateMainVolume(channel - 1, value);
+      }
     } else {
       onVolumeChange?.(channel, value);
     }
@@ -79,7 +71,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     if (synth) {
       const volumeLib = volumeSynth(synth);
       if (volumeLib) {
-        volumeLib.uploadPanVolume(channel - 1, value);
+        volumeLib.updatePanVolume(channel - 1, value);
       }
     }
   };
@@ -110,20 +102,34 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     if (synth) {
       const volumeLib = volumeSynth(synth);
       if (volumeLib) {
-        volumeLib.uploadLockedVolume(channel - 1, isLocked);
+        volumeLib.updateLockedVolume(channel - 1, isLocked);
       }
     }
   };
 
-  const onLockVocal = (mute: boolean = false) => {
-    const vocal = lock[VOCAL_CHANNEL];
-    if (mute === vocal) {
-      onMutedVolume(VOCAL_CHANNEL + 1, mute);
+  const onPersetChange = (channel: number, value: number) => {
+    if (synth) {
+      const volumeLib = volumeSynth(synth);
+      if (volumeLib) {
+        volumeLib.updatePreset(channel - 1, value);
+      }
     }
   };
-
-  const onPersetChange = (channel: number, value: number) => {
-    updatePerset(channel - 1, value);
+  const onReverbChange = (channel: number, value: number) => {
+    if (synth) {
+      const volumeLib = volumeSynth(synth);
+      if (volumeLib) {
+        volumeLib.updateReverb(channel - 1, value);
+      }
+    }
+  };
+  const onChorusDepthChange = (channel: number, value: number) => {
+    if (synth) {
+      const volumeLib = volumeSynth(synth);
+      if (volumeLib) {
+        volumeLib.updateChorusDepth(channel - 1, value);
+      }
+    }
   };
 
   const onHideVolume = (hide: boolean) => {
@@ -149,6 +155,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   if (isShow === false) {
     return <></>;
   }
+
+  console.log("#### volume panel render")
   return (
     <div
       className={
@@ -162,15 +170,16 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
       }
     >
       <div
-        className={`select-none relative z-50 w-full lg:w-fit blur-overlay border blur-border rounded-md p-2 duration-300 ${
+        className={` select-none relative z-50 w-full lg:w-fit blur-overlay border blur-border rounded-md p-2 duration-300 ${
           hideVolume
-            ? "h-[30px] lg:h-[30px]"
+            ? "h-[30px] overflow-hidden"
             : `${
                 orientation === "landscape" ? "h-[230px]" : "h-[292px]"
               } lg:h-[150px]`
         } `}
       >
         <VolumeHorizontal hide={hideVolume}></VolumeHorizontal>
+
         <div
           className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px]  left-0 p-2 py-[26px]`}
         >
@@ -198,30 +207,19 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                 key={`vol-panel-${ch}`}
                 className="flex flex-col relative h-full w-full"
               >
-                {/* <div className="absolute z-10">
-                  <VolumeMeterV
-                    channel={ch}
-                    max={127}
-                    className="z-10 w-full absolute bottom-5 left-0 h-full"
-                    level={data}
-                  ></VolumeMeterV>
-                </div> */}
-
                 <VolumeAction
                   disabled={hideVolume}
                   channel={ch + 1}
                   onMuted={onMutedVolume}
-                  onLock={onLockedVolume}
-                  isLock={lock[ch]}
                 ></VolumeAction>
-                <div className="flex items-center justify-center h-full w-full  border-x border-white/20">
-                  <VolumeAnimtaion
+                <div className="flex items-center justify-center h-full w-full border-x border-white/20 py-1">
+                  <MixMainVolume
                     channel={ch}
                     hideVolume={hideVolume}
-                    onChange={(v) => onVolumeMeterChange(ch, v)}
+                    onChange={(v) => onVolumeMeterChange(ch + 1, v)}
                     onMouseUp={() => updateVolumeHeld(true)}
                     onTouchEnd={() => updateVolumeHeld(false)}
-                  ></VolumeAnimtaion>
+                  ></MixMainVolume>
                 </div>
 
                 <InstrumentsButton
@@ -229,33 +227,15 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                   channel={ch}
                   onPenChange={onPenChange}
                   onPersetChange={onPersetChange}
+                  onReverbChange={onReverbChange}
+                  onChorusDepthChange={onChorusDepthChange}
                   perset={perset}
+                  onMouseUp={() => updateVolumeHeld(true)}
+                  onTouchEnd={() => updateVolumeHeld(false)}
                 ></InstrumentsButton>
               </div>
             );
           })}
-        </div>
-
-        <div className="absolute -bottom-1.5 right-4 z-50 ">
-          <Button
-            tabIndex={-1}
-            shadow={""}
-            onClick={() => onHideVolume(!hideVolume)}
-            onKeyDown={(event) =>
-              event.key === "Enter" && event.preventDefault()
-            }
-            blur={""}
-            border="border blur-border focus:outline-none "
-            padding=""
-            className="px-3 h-3"
-            icon={
-              <MdArrowDropUp
-                className={`${
-                  hideVolume ? "rotate-180" : "rotate-0 "
-                } text-white duration-300`}
-              ></MdArrowDropUp>
-            }
-          ></Button>
         </div>
       </div>
 
@@ -273,7 +253,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           ></NumberButton>
 
           <SwitchButton
-            onChange={onLockVocal}
+            onChange={(muted) => onMutedVolume(VOCAL_CHANNEL, !muted)}
             iconOpen={<PiUserSoundFill></PiUserSoundFill>}
             iconClose={<PiUserMinusFill></PiUserMinusFill>}
             labelOpen="Vocal"
@@ -283,8 +263,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
         <div>{options}</div>
       </div>
 
-      {/* <div className="relative flex w-full lg:w-[592px] justify-center items-center h-0 z-10">
-        <div className="absolute bottom-[38px] right-4 z-10">
+      <div className="relative flex w-full lg:w-[690px] justify-center items-center h-0 z-10">
+        <div className="absolute bottom-[34px] right-4 z-10">
           <Button
             tabIndex={-1}
             shadow={""}
@@ -294,17 +274,17 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
             }
             border="border blur-border focus:outline-none"
             padding=""
-            className="px-3 h-3"
+            className="px-3 h-4"
             icon={
               <MdArrowDropUp
                 className={`${
                   hideVolume ? "rotate-180" : "rotate-0"
-                } text-white duration-300`}
+                } text-white duration-300 mt-1`}
               ></MdArrowDropUp>
             }
           ></Button>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 };

@@ -4,28 +4,19 @@ import { BiSolidVolumeMute, BiSolidVolumeFull } from "react-icons/bi";
 
 interface VolumeActionProps {
   channel: number;
-  isLock: boolean;
-  onLock?: (channel: number, muted: boolean) => void;
   onMuted?: (channel: number, muted: boolean) => void;
-  onUnLock?: (channel: number) => void;
   className?: string;
   disabled?: boolean;
 }
 
 const VolumeAction: React.FC<VolumeActionProps> = ({
   channel,
-  isLock,
-  onLock,
   onMuted,
-  onUnLock,
   className,
   disabled,
 }) => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
-  const onLockVolume = () => {
-    // onLock?.(channel, !isMuted);
-    // setIsMuted((v) => !v);
-  };
+
   const onMutedVolume = () => {
     onMuted?.(channel, !isMuted);
     setIsMuted((v) => !v);
@@ -46,7 +37,7 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
             } cursor-pointer`
       } `}
     >
-      <span className="pt-0.5 ">
+      <span className=" ">
         {isMuted ? <BiSolidVolumeMute /> : <BiSolidVolumeFull />}
       </span>
       <span>{channel}</span>

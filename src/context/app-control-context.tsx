@@ -17,7 +17,7 @@ import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import { usePeerStore } from "@/stores/peer-store";
 
 type AppControlContextType = {
-  updateVolumeSysth: (index: number, value: number) => void;
+  // updateVolumeSysth: (index: number, value: number) => void;
   onSearchStrList: (str: string) => Promise<SearchResult[]> | undefined;
   setTracklistFile: (file: File) => Promise<void>;
   setRemoveTracklistFile: () => Promise<void>;
@@ -27,8 +27,8 @@ type AppControlContextType = {
   setSongPlaying: (files: SongFilesDecode) => Promise<void>;
   loadAndPlaySong: (value: SearchResult) => Promise<void>;
   updateVolumeHeld: (held: boolean) => void;
-  updatePitch: (semitones: number, channel?: number) => void;
-  updatePerset: (channel: number, value: number) => void;
+  // updatePitch: (semitones: number, channel?: number) => void;
+  // updatePerset: (channel: number, value: number) => void;
   updateHideVolume: (hide: boolean) => void;
   addTracklist: (item: SearchResult[]) => void;
   getSystemDriveMode: () => boolean;
@@ -37,7 +37,7 @@ type AppControlContextType = {
   musicLibrary: Map<string, File>;
   tracklist: TrieSearch<SearchResult> | undefined;
   playingTrack: SearchResult | undefined;
-  volumeController: number[];
+  // volumeController: number[];
   cursorIndices: Map<number, number[]> | undefined;
   lyrics: string[];
   cursorTicks: number[];
@@ -49,8 +49,13 @@ type AppControlProviderProps = {
   children: React.ReactNode;
 };
 
+// updateVolumeSysth,
+// updatePitch,
+// updatePerset,
+// volumeController,
+
 export const AppControlContext = createContext<AppControlContextType>({
-  updateVolumeSysth: () => {},
+  // updateVolumeSysth: () => {},
   onSearchStrList: async () => [],
   setTracklistFile: async () => {},
   setRemoveTracklistFile: async () => {},
@@ -60,8 +65,8 @@ export const AppControlContext = createContext<AppControlContextType>({
   setSongPlaying: async () => {},
   loadAndPlaySong: async () => {},
   updateVolumeHeld: () => {},
-  updatePitch: () => {},
-  updatePerset: () => {},
+  // updatePitch: () => {},
+  // updatePerset: () => {},
   updateHideVolume: () => {},
   addTracklist: () => {},
   getSystemDriveMode: () => false,
@@ -73,7 +78,7 @@ export const AppControlContext = createContext<AppControlContextType>({
   cursorIndices: new Map(),
   tracklist: undefined,
   playingTrack: undefined,
-  volumeController: [],
+  // volumeController: [],
   midiPlaying: undefined,
   isVolumeHeld: false,
 });
@@ -88,10 +93,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   // Fetch Option
   const [driveMode, setDriveMode] = useState<boolean>(false);
 
-  // Volume Control
-  const VolChannel = Array(16).fill(100);
-  const [volumeController, setVolumeController] =
-    useState<number[]>(VolChannel);
   const [isVolumeHeld, setIsVolumeHeld] = useState<boolean>(false);
   const [hideVolume, setHideVolume] = useState<boolean>(false);
 
@@ -125,36 +126,10 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     setHideVolume(hide);
   };
 
-  const updatePerset = (channel: number, value: number) => {
-    synth?.programChange(channel, value);
-  };
-
   const updateVolumeHeld = (held: boolean) => {
     setIsVolumeHeld(held);
   };
 
-  const updatePitch = (semitones: number = 1, channel?: number) => {
-    const PITCH_CENTER = 8192;
-    const SEMITONE_STEP = PITCH_CENTER / 12; // แก้ไขเป็น 12 แทน 2
-
-    const pitchValue = PITCH_CENTER + semitones * SEMITONE_STEP;
-    const MSB = (pitchValue >> 7) & 0x7f;
-    const LSB = pitchValue & 0x7f;
-
-    const sendPitch = (channel: number) => {
-      synth?.setPitchBendRange(channel, 12); // ตั้งค่า pitch bend range เป็น 12 semitones
-      synth?.pitchWheel(channel, MSB, LSB);
-      // synth?.lockController(channel, midiControllers.effects3Depth, true);
-    };
-
-    if (channel !== undefined) {
-      sendPitch(channel);
-    } else {
-      for (let i = 0; i < 16; i++) {
-        sendPitch(i);
-      }
-    }
-  };
   const resetVolume = () => {
     Array.from({ length: 16 }, (_, i) => {
       updateVolumeSysth(i, 100);
@@ -223,6 +198,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
     }
     resetVolume();
     player.pause();
+    player.stop();
     handleSetLyrics([]);
     handleSetCursor(0, []);
 
@@ -249,7 +225,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         handleSetCursor(timeDivision, files.cur);
         player.loadNewSongList([parsedMidi]);
         player.play();
-      }, 500);
+      }, 1000);
     }
   };
 
@@ -316,7 +292,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         break;
 
       case "UPLOAD_SONG":
-        console.log("remote...")
+        console.log("remote...");
         let uploaded = data as SongFiltsEncodeAndDecode;
         if (uploaded) {
           const blob = new Blob([uploaded.mid]);
@@ -345,7 +321,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   return (
     <AppControlContext.Provider
       value={{
-        updateVolumeSysth,
+        // updateVolumeSysth,
         setTracklistFile,
         onSearchStrList,
         setPlayingTrackFile,
@@ -355,14 +331,14 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         setSongPlaying,
         loadAndPlaySong,
         updateVolumeHeld,
-        updatePitch,
-        updatePerset,
+        // updatePitch,
+        // updatePerset,
         updateHideVolume,
         addTracklist,
         getSystemDriveMode,
         setSystemDriveMode,
         hideVolume,
-        volumeController,
+        // volumeController,
         lyrics,
         cursorTicks,
         musicLibrary,
