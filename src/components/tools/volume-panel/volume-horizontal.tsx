@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import useGainStore from "@/stores/gain.store";
+import useMixerStore from "@/stores/mixer-store";
 
 interface VolumeHorizontalProps {
   hide: boolean;
 }
 
 const VolumeHorizontal: React.FC<VolumeHorizontalProps> = ({ hide }) => {
-  const gain = useGainStore((state) => state.gainMain);
+  const gain = useMixerStore((state) => state.gainMain);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {

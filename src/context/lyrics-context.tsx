@@ -99,58 +99,58 @@ export const LyricsDisplayProvider: FC<LyricsDisplayProviderProps> = ({
 
   const reset = () => {
     setConfigLyrics(DEFAULT_CONFIG.lyrics);
-    appendLocalConfig({ lyrics: DEFAULT_CONFIG.lyrics });
+    // appendLocalConfig({ lyrics: DEFAULT_CONFIG.lyrics });
   };
 
   const setConfigLyrics = (config: Partial<LyricsConfig>) => {
-    if (config?.color?.color) {
-      setColor(config.color.color);
-    }
+    // if (config?.color?.color) {
+    //   setColor(config.color.color);
+    // }
 
-    if (config?.color?.colorBorder) {
-      setColorBorder(config.color.colorBorder);
-    }
+    // if (config?.color?.colorBorder) {
+    //   setColorBorder(config.color.colorBorder);
+    // }
 
-    if (config?.active?.color) {
-      setActiveColor(config.active.color);
-    }
-    if (config?.active?.colorBorder) {
-      setActiveBorderColor(config.active.colorBorder);
-    }
+    // if (config?.active?.color) {
+    //   setActiveColor(config.active.color);
+    // }
+    // if (config?.active?.colorBorder) {
+    //   setActiveBorderColor(config.active.colorBorder);
+    // }
 
-    if (config.font) {
-      setFontChange(config.font);
-    }
-    if (config.font) {
-      setFontName(config.font);
-    }
-    if (config.lyricsMode) {
-      setDisplayLyrics(config.lyricsMode);
-    }
+    // if (config.font) {
+    //   setFontChange(config.font);
+    // }
+    // if (config.font) {
+    //   setFontName(config.font);
+    // }
+    // if (config.lyricsMode) {
+    //   setDisplayLyrics(config.lyricsMode);
+    // }
   };
 
   const setLyricsOptions = (mode: LyricsOptions) => {
     setDisplayLyrics(mode);
-    appendLocalConfig({ lyrics: { lyricsMode: mode } });
+    // appendLocalConfig({ lyrics: { lyricsMode: mode } });
   };
 
   const setLyricsColor = (color: string) => {
     setColor(color);
-    appendLocalConfig({ lyrics: { color: { color } } });
+    // appendLocalConfig({ lyrics: { color: { color } } });
   };
 
   const setLyricsColorBorder = (color: string) => {
     setColorBorder(color);
-    appendLocalConfig({ lyrics: { color: { colorBorder: color } } });
+    // appendLocalConfig({ lyrics: { color: { colorBorder: color } } });
   };
 
   const setLyricsActiveColor = (color: string) => {
     setActiveColor(color);
-    appendLocalConfig({ lyrics: { active: { color: color } } });
+    // appendLocalConfig({ lyrics: { active: { color: color } } });
   };
   const setLyricsActiveBorderColor = (color: string) => {
     setActiveBorderColor(color);
-    appendLocalConfig({ lyrics: { active: { colorBorder: color } } });
+    // appendLocalConfig({ lyrics: { active: { colorBorder: color } } });
   };
 
   const setFontChange = (set: SystemFont) => {

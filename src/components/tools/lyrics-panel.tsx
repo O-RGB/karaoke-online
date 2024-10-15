@@ -1,12 +1,16 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLyrics } from "@/hooks/lyrics-hook";
 import { useAppControl } from "@/hooks/app-control-hook";
 import { useOrientation } from "@/hooks/orientation-hook";
 import LyricsAnimation from "../common/lyrics/cut-lyrics/cut-animation";
 import RandomLyrics from "../lyrics/random-lyrics";
 import useLyricsStore from "../../stores/lyrics-store";
+import useConfigStore from "@/stores/config-store";
+import { NextFont } from "next/dist/compiled/@next/font";
+import { lyricsGetFont } from "@/features/lyrics/lyrics.features";
+import useMixerStore from "@/stores/mixer-store";
 
 interface LyricsPanelProps {
   lyrics: string[];
@@ -18,14 +22,25 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {
   const display = useLyricsStore((state) => state.display);
   const displayBottom = useLyricsStore((state) => state.displayBottom);
   const position = useLyricsStore((state) => state.position);
+  const colorActive = useConfigStore((state) => state.config.lyrics?.active);
+  const color = useConfigStore((state) => state.config.lyrics?.color);
+  const lyricsMode = useConfigStore((state) => state.config.lyrics?.lyricsMode);
+  const fontName = useConfigStore((state) => state.config.lyrics?.fontName);
+
+  const [FontState, setFontState] = useState<NextFont>();
 
   const { orientation } = useOrientation();
-  const { lyricsDisplay } = useLyrics();
-  const { hideVolume } = useAppControl();
+  const hideMixer = useMixerStore((state) => state.hideMixer);
 
-  useEffect(() => {}, [lyricsDisplay]);
+  useEffect(() => {}, [lyricsMode]);
+  useEffect(() => {
+    if (fontName) {
+      const fontStyle = lyricsGetFont(fontName);
+      setFontState(fontStyle);
+    }
+  }, [fontName]);
 
-  const height = hideVolume
+  const height = hideMixer
     ? orientation === "landscape"
       ? "h-[55dvh]"
       : "h-[75dvh]"
@@ -40,18 +55,22 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
 
         <div className="flex flex-col py-7 lg:gap-3 items-center justify-center text-white drop-shadow-lg">
-          {lyricsDisplay === "default" ? (
+          {lyricsMode === "default" ? (
             <>
               <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
                 <LyricsAnimation
-                  // charIndex={position === true ? charIndex : -1}
+                  font={FontState}
+                  activeColor={colorActive!}
+                  color={color!}
                   fixedCharIndex={position === false ? -1 : undefined}
                   display={display}
                 ></LyricsAnimation>
               </span>
               <br />
               <LyricsAnimation
-                // charIndex={position === false ? charIndex : -1}
+                font={FontState}
+                activeColor={colorActive!}
+                color={color!}
                 fixedCharIndex={position === true ? -1 : undefined}
                 display={displayBottom}
               ></LyricsAnimation>

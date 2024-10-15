@@ -41,7 +41,6 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
 }) => {
   const instruments = useEventStore((state) => state.instrument);
   const instrument = instruments[channel];
-  const [onMenuOpen, setMenuOpen] = useState<boolean>(false);
 
   const persetOptions = useMemo(
     () =>
@@ -80,9 +79,6 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
     <Menu
       transition
       boundingBoxPadding="10 10 10 10"
-      onMenuChange={(e) => {
-        setMenuOpen(e.open);
-      }}
       menuButton={(open) => {
         return (
           <MenuButton disabled={disabled}>
@@ -102,60 +98,58 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
         );
       }}
     >
-      {onMenuOpen && (
-        <div className=" px-2 relative z-50 flex flex-col gap-1 min-w-56">
-          <div className="flex gap-1">
-            <LabelTag name="เสียง"></LabelTag>
-            <ButtonDropdown
-              className={"w-full"}
-              value={`${instrument ?? 0}`}
-              onChange={(value) => {
-                onPersetChange?.(channel + 1, parseInt(value));
-              }}
-              options={persetOptions}
-            >
-              <div className="w-full rounded-md overflow-hidden border border-black/10 cursor-pointer group-hover:bg-gray-200 duration-300">
-                <div className="w-full font-bold text-[10px] p-2 flex gap-0.5 justify-between items-center h-6">
-                  <span className="w-2.5">{channelIcon}</span>
-                  <span>{fullname}</span>
-                </div>
+      <div className=" px-2 relative z-50 flex flex-col gap-1 min-w-56">
+        <div className="flex gap-1">
+          <LabelTag name="เสียง"></LabelTag>
+          <ButtonDropdown
+            className={"w-full"}
+            value={`${instrument ?? 0}`}
+            onChange={(value) => {
+              onPersetChange?.(channel + 1, parseInt(value));
+            }}
+            options={persetOptions}
+          >
+            <div className="w-full rounded-md overflow-hidden border border-black/10 cursor-pointer group-hover:bg-gray-200 duration-300">
+              <div className="w-full font-bold text-[10px] p-2 flex gap-0.5 justify-between items-center h-6">
+                <span className="w-2.5">{channelIcon}</span>
+                <span>{fullname}</span>
               </div>
-            </ButtonDropdown>
-          </div>
-          <div className="flex gap-1 justify-center items-center">
-            <LabelTag name="ซ้ายขวา"></LabelTag>
-            <MixPanVolume
-              onPenChange={(value) => onPenChange(channel + 1, value)}
-              channel={channel}
-              disabled={disabled}
-              onMouseUp={onMouseUp}
-              onTouchEnd={onTouchEnd}
-            ></MixPanVolume>
-          </div>
-          <div className="flex gap-1 justify-center items-center">
-            <LabelTag name="เสียงก้อง"></LabelTag>
-            <MixReverbVolume
-              onReverbChange={(value) => onReverbChange(channel + 1, value)}
-              channel={channel}
-              disabled={disabled}
-              onMouseUp={onMouseUp}
-              onTouchEnd={onTouchEnd}
-            ></MixReverbVolume>
-          </div>
-          <div className="flex gap-1 justify-center items-center">
-            <LabelTag name="ประสาน"></LabelTag>
-            <MixChorusDepthVolume
-              onChorusDepthChange={(value) =>
-                onChorusDepthChange(channel + 1, value)
-              }
-              channel={channel}
-              disabled={disabled}
-              onMouseUp={onMouseUp}
-              onTouchEnd={onTouchEnd}
-            ></MixChorusDepthVolume>
-          </div>
+            </div>
+          </ButtonDropdown>
         </div>
-      )}
+        <div className="flex gap-1 justify-center items-center">
+          <LabelTag name="ซ้ายขวา"></LabelTag>
+          <MixPanVolume
+            onPenChange={(value) => onPenChange(channel + 1, value)}
+            channel={channel}
+            disabled={disabled}
+            onMouseUp={onMouseUp}
+            onTouchEnd={onTouchEnd}
+          ></MixPanVolume>
+        </div>
+        <div className="flex gap-1 justify-center items-center">
+          <LabelTag name="เสียงก้อง"></LabelTag>
+          <MixReverbVolume
+            onReverbChange={(value) => onReverbChange(channel + 1, value)}
+            channel={channel}
+            disabled={disabled}
+            onMouseUp={onMouseUp}
+            onTouchEnd={onTouchEnd}
+          ></MixReverbVolume>
+        </div>
+        <div className="flex gap-1 justify-center items-center">
+          <LabelTag name="ประสาน"></LabelTag>
+          <MixChorusDepthVolume
+            onChorusDepthChange={(value) =>
+              onChorusDepthChange(channel + 1, value)
+            }
+            channel={channel}
+            disabled={disabled}
+            onMouseUp={onMouseUp}
+            onTouchEnd={onTouchEnd}
+          ></MixChorusDepthVolume>
+        </div>
+      </div>
     </Menu>
   );
 };

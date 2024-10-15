@@ -12,11 +12,12 @@ import { FaCheck } from "react-icons/fa";
 import { AiOutlineLoading } from "react-icons/ai";
 import { RiErrorWarningLine } from "react-icons/ri";
 import { useAppControl } from "@/hooks/app-control-hook";
+import useConfigStore from "@/stores/config-store";
 
 interface DriveSettingProps {}
 
 const DriveSetting: React.FC<DriveSettingProps> = ({}) => {
-  const { setSystemDriveMode } = useAppControl();
+  const { setConfig } = useConfigStore();
   const [value, setValue] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
   const [checked, setChecked] = useState<boolean>(false);
@@ -84,10 +85,10 @@ const DriveSetting: React.FC<DriveSettingProps> = ({}) => {
       setChecked(true);
       setError(undefined);
       setLocalDriveTested(true);
-      setSystemDriveMode(true);
+      setConfig({ system: { drive: true } });
     } else {
       setLocalDriveTested(false);
-      setSystemDriveMode(false);
+      setConfig({ system: { drive: false } });
     }
   };
 
@@ -99,10 +100,10 @@ const DriveSetting: React.FC<DriveSettingProps> = ({}) => {
     }
     if (isTested === true) {
       setChecked(true);
-      setSystemDriveMode(true);
+      setConfig({ system: { drive: true } });
     } else {
       setChecked(false);
-      setSystemDriveMode(false);
+      setConfig({ system: { drive: false } });
     }
   }, []);
   return (

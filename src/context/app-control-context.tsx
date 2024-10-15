@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, FC, useEffect, useState } from "react";
-import { useRemote } from "../hooks/peer-hook";
 import { convertCursorToTicks, mapCursorToIndices } from "@/lib/app-control";
 import { addAllTrie, onSearchList } from "@/lib/trie-search";
 import { MIDI, midiControllers } from "spessasynth_lib";
@@ -15,9 +14,9 @@ import { useNotification } from "@/hooks/notification-hook";
 import { AiOutlineLoading } from "react-icons/ai";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import { usePeerStore } from "@/stores/peer-store";
+import useConfigStore from "@/stores/config-store";
 
 type AppControlContextType = {
-  // updateVolumeSysth: (index: number, value: number) => void;
   onSearchStrList: (str: string) => Promise<SearchResult[]> | undefined;
   setTracklistFile: (file: File) => Promise<void>;
   setRemoveTracklistFile: () => Promise<void>;
@@ -26,33 +25,19 @@ type AppControlContextType = {
   handleSetLyrics: (lyr: string[]) => void;
   setSongPlaying: (files: SongFilesDecode) => Promise<void>;
   loadAndPlaySong: (value: SearchResult) => Promise<void>;
-  updateVolumeHeld: (held: boolean) => void;
-  // updatePitch: (semitones: number, channel?: number) => void;
-  // updatePerset: (channel: number, value: number) => void;
-  updateHideVolume: (hide: boolean) => void;
   addTracklist: (item: SearchResult[]) => void;
-  getSystemDriveMode: () => boolean;
-  setSystemDriveMode: (is: boolean) => void;
-  hideVolume: boolean;
   musicLibrary: Map<string, File>;
   tracklist: TrieSearch<SearchResult> | undefined;
   playingTrack: SearchResult | undefined;
-  // volumeController: number[];
   cursorIndices: Map<number, number[]> | undefined;
   lyrics: string[];
   cursorTicks: number[];
   midiPlaying: MIDI | undefined;
-  isVolumeHeld: boolean;
 };
 
 type AppControlProviderProps = {
   children: React.ReactNode;
 };
-
-// updateVolumeSysth,
-// updatePitch,
-// updatePerset,
-// volumeController,
 
 export const AppControlContext = createContext<AppControlContextType>({
   // updateVolumeSysth: () => {},
@@ -64,23 +49,14 @@ export const AppControlContext = createContext<AppControlContextType>({
   handleSetLyrics: () => {},
   setSongPlaying: async () => {},
   loadAndPlaySong: async () => {},
-  updateVolumeHeld: () => {},
-  // updatePitch: () => {},
-  // updatePerset: () => {},
-  updateHideVolume: () => {},
   addTracklist: () => {},
-  getSystemDriveMode: () => false,
-  setSystemDriveMode: () => {},
-  hideVolume: false,
   lyrics: [],
   cursorTicks: [],
   musicLibrary: new Map(),
   cursorIndices: new Map(),
   tracklist: undefined,
   playingTrack: undefined,
-  // volumeController: [],
   midiPlaying: undefined,
-  isVolumeHeld: false,
 });
 
 export const AppControlProvider: FC<AppControlProviderProps> = ({
@@ -88,13 +64,9 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 }) => {
   const { synth, player } = useSpessasynthStore();
   const { received: messages, sendMessage } = usePeerStore();
+  const System = useConfigStore((state) => state.config.system?.drive);
+
   const { addNotification } = useNotification();
-
-  // Fetch Option
-  const [driveMode, setDriveMode] = useState<boolean>(false);
-
-  const [isVolumeHeld, setIsVolumeHeld] = useState<boolean>(false);
-  const [hideVolume, setHideVolume] = useState<boolean>(false);
 
   // Trie Search
   const [tracklist, setTracklist] = useState<TrieSearch<SearchResult>>();
@@ -113,22 +85,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   const [lyrics, setLyrics] = useState<string[]>([]);
   const [cursorTicks, setCursor] = useState<number[]>([]);
   const [cursorIndices, setCursorIndices] = useState<Map<number, number[]>>();
-
-  const setSystemDriveMode = (is: boolean) => {
-    setDriveMode(is);
-  };
-
-  const getSystemDriveMode = () => {
-    return driveMode;
-  };
-
-  const updateHideVolume = (hide: boolean) => {
-    setHideVolume(hide);
-  };
-
-  const updateVolumeHeld = (held: boolean) => {
-    setIsVolumeHeld(held);
-  };
 
   const resetVolume = () => {
     Array.from({ length: 16 }, (_, i) => {
@@ -231,7 +187,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
 
   const loadAndPlaySong = async (value: SearchResult) => {
     let mode: string = "";
-    if (driveMode) {
+    if (System) {
       mode = " Drive";
     } else {
       mode = "ระบบ";
@@ -241,7 +197,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
       <AiOutlineLoading className="animate-spin"></AiOutlineLoading>,
       40000
     );
-    const song = await getSong(value, driveMode);
+    const song = await getSong(value, System);
     if (song) {
       setSongPlaying(song);
       addNotification("เสร็จสิ้น");
@@ -321,7 +277,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
   return (
     <AppControlContext.Provider
       value={{
-        // updateVolumeSysth,
         setTracklistFile,
         onSearchStrList,
         setPlayingTrackFile,
@@ -330,15 +285,7 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         handleSetLyrics,
         setSongPlaying,
         loadAndPlaySong,
-        updateVolumeHeld,
-        // updatePitch,
-        // updatePerset,
-        updateHideVolume,
         addTracklist,
-        getSystemDriveMode,
-        setSystemDriveMode,
-        hideVolume,
-        // volumeController,
         lyrics,
         cursorTicks,
         musicLibrary,
@@ -346,7 +293,6 @@ export const AppControlProvider: FC<AppControlProviderProps> = ({
         playingTrack,
         cursorIndices,
         midiPlaying,
-        isVolumeHeld,
       }}
     >
       <>{children}</>

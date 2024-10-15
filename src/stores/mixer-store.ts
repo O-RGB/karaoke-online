@@ -1,7 +1,11 @@
-import { VOLUME_DEFAULT, VOLUME_MIDDLE_DEFAULT_128 } from "@/config/value";
+import {
+  CHANNEL_DEFAULT,
+  VOLUME_DEFAULT,
+  VOLUME_MIDDLE_DEFAULT_128,
+} from "@/config/value";
 import { create } from "zustand";
 
-interface VolumeStore {
+interface MixerStore {
   volume: number[];
   setVolume: (instrument: number[] | ((prev: number[]) => number[])) => void;
   pan: number[];
@@ -12,9 +16,17 @@ interface VolumeStore {
   setChorusDepth: (pan: number[] | ((prev: number[]) => number[])) => void;
   isMute: boolean[];
   setMute: (isMute: boolean[] | ((prev: boolean[]) => boolean[])) => void;
+  gain: number[];
+  setCurrntGain: (gain: number[]) => void;
+  gainMain: number;
+  setCurrntGainMain: (gain: number) => void;
+  hideMixer: boolean;
+  setHideMixer: (isHide: boolean) => void;
+  held: boolean;
+  setHeld: (isHeld: boolean) => void;
 }
 
-const useVolumeStore = create<VolumeStore>((set) => ({
+const useMixerStore = create<MixerStore>((set) => ({
   volume: VOLUME_DEFAULT,
   setVolume: (volume) =>
     set((state) => ({
@@ -43,6 +55,26 @@ const useVolumeStore = create<VolumeStore>((set) => ({
     set((state) => ({
       isMute: typeof isMute === "function" ? isMute(state.isMute) : isMute,
     })),
+  gain: CHANNEL_DEFAULT,
+  setCurrntGain: (gain) =>
+    set((state) => ({
+      gain,
+    })),
+  gainMain: 0,
+  setCurrntGainMain: (gainMain) =>
+    set((state) => ({
+      gainMain,
+    })),
+  hideMixer: false,
+  setHideMixer: (hideMixer) =>
+    set((state) => ({
+      hideMixer,
+    })),
+  held: false,
+  setHeld: (held) =>
+    set((state) => ({
+      held,
+    })),
 }));
 
-export default useVolumeStore;
+export default useMixerStore;

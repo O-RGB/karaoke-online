@@ -1,5 +1,6 @@
 "use client";
 import { useAppControl } from "@/hooks/app-control-hook";
+import useMixerStore from "@/stores/mixer-store";
 import { createContext, FC, useEffect, useState } from "react";
 type Orientation = "landscape" | "portrait" | null;
 
@@ -18,12 +19,12 @@ export const OrientationContext = createContext<OrientationContextType>({
 export const OrientationProvider: FC<OrientationProviderProps> = ({
   children,
 }) => {
-  const { hideVolume, updateHideVolume } = useAppControl();
+  const setHideMixer = useMixerStore((state) => state.setHideMixer);
   const [orientation, setOrientation] = useState<Orientation>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   const onLandScape = () => {
-    updateHideVolume(true);
+    setHideMixer(true);
   };
   const onPortrait = () => {};
 

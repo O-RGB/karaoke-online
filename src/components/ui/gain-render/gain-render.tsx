@@ -1,29 +1,27 @@
 import useConfigStore from "@/stores/config-store";
-import useGainStore from "@/stores/gain.store";
 import useTickStore from "@/stores/tick-store";
 import { CHANNEL_DEFAULT } from "@/config/value";
 import React, { useEffect, useRef } from "react";
 import { Sequencer } from "spessasynth_lib";
 import { usePeerStore } from "@/stores/peer-store";
+import useMixerStore from "@/stores/mixer-store";
 
 interface GainRenderProps {
   analysers?: AnalyserNode[];
   player: Sequencer | undefined;
-  hideVolume: boolean;
 }
 
-const GainRender: React.FC<GainRenderProps> = ({
-  analysers,
-  player,
-  hideVolume,
-}) => {
+const GainRender: React.FC<GainRenderProps> = ({ analysers, player }) => {
+  const setCurrntGain = useMixerStore((state) => state.setCurrntGain);
+  const setCurrntGainMain = useMixerStore((state) => state.setCurrntGainMain);
+  const { sendSuperUserMessage, superUserConnections } = usePeerStore();
+  const mixIsShot = useConfigStore((state) => state.config.widgets?.mix?.show);
+  const hideMixer = useMixerStore((state) => state.hideMixer);
+
+  const tick = useTickStore((state) => state.tick);
+
   const gainMain = useRef<number>(0);
   const gain = useRef<number[]>(CHANNEL_DEFAULT);
-  const { tick } = useTickStore();
-  const { setCurrntGain, setCurrntGainMain } = useGainStore();
-  const { sendSuperUserMessage, superUserConnections } = usePeerStore();
-  const { config } = useConfigStore();
-  const mixIsShot = config.widgets?.mix?.show;
 
   const gindRender = () => {
     if (analysers) {
@@ -36,7 +34,7 @@ const GainRender: React.FC<GainRenderProps> = ({
         return value;
       });
 
-      if (hideVolume) {
+      if (hideMixer) {
         const totalGain =
           newVolumeLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
         const mainGain = (totalGain / (newVolumeLevels.length * 20)) * 100;
@@ -61,7 +59,7 @@ const GainRender: React.FC<GainRenderProps> = ({
     if (analysers && !player?.paused) {
       gindRender();
     }
-  }, [mixIsShot ? tick : undefined, player?.paused, analysers, hideVolume]);
+  }, [mixIsShot ? tick : undefined, player?.paused, analysers, hideMixer]);
 
   return null;
 };

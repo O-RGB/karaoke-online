@@ -1,28 +1,28 @@
 import RangeBarClone from "@/components/common/input-data/range-bar-clone";
-import useVolumeStore from "@/stores/volume-store";
+import useMixerStore from "@/stores/mixer-store";
 import React from "react";
 
 interface MixMainVolume {
   onMouseUp?: () => void;
   onTouchEnd?: () => void;
   onChange?: (value: number) => void;
-  hideVolume: boolean;
+  disabled: boolean;
   channel: number;
 }
 
 const MixMainVolume: React.FC<MixMainVolume> = ({
   channel,
-  hideVolume,
+  disabled,
   onChange,
   onMouseUp,
   onTouchEnd,
 }) => {
-  const volume = useVolumeStore((state) => state.volume[channel]);
+  const volume = useMixerStore((state) => state.volume[channel]);
   return (
     <RangeBarClone
-      value={hideVolume ? 0 : volume}
+      value={disabled ? 0 : volume}
       className="z-20"
-      disabled={hideVolume}
+      disabled={disabled}
       max={127}
       onMouseUp={onMouseUp}
       onTouchEnd={onTouchEnd}

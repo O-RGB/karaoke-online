@@ -27,16 +27,14 @@ import {
   setLocalSystemMode,
   setLocalTracklistDriveTested,
 } from "@/lib/local-storege/local-storage";
+import useConfigStore from "@/stores/config-store";
 
 interface AppendSongModalProps {}
 
 const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
-  const {
-    setTracklistFile,
-    setRemoveTracklistFile,
-    addTracklist,
-    setSystemDriveMode,
-  } = useAppControl();
+  const { setConfig } = useConfigStore();
+  const { setTracklistFile, setRemoveTracklistFile, addTracklist } =
+    useAppControl();
   const [progress, setProgress] = useState<IProgressBar>();
   const [filename, setFilename] = useState<string>();
   const [musicFilename, setMusicFilename] = useState<string>();
@@ -223,11 +221,9 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
 
   const onSystemChange = (value: string) => {
     if (value === "on") {
-      setSystemDriveMode(true);
-      setLocalSystemMode("DRIVE");
+      setConfig({ system: { drive: true } });
     } else {
-      setSystemDriveMode(false);
-      setLocalSystemMode("SYSTEM");
+      setConfig({ system: { drive: true } });
     }
   };
 

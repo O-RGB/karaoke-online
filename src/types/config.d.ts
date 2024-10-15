@@ -1,3 +1,4 @@
+type SystemFont = "notoSansThaiLooped" | "inter" | "roboto" | "lora" | "krub";
 type RefreshRate = "HIGH" | "MIDDLE" | "LOW";
 
 interface ConfigDisplay {
@@ -5,6 +6,11 @@ interface ConfigDisplay {
   lyrics: Partial<LyricsConfig>;
   widgets: Partial<WidgetsConfig>;
   themes: Partial<ThemesConfig>;
+  system: Partial<SystemConfig>;
+}
+
+interface SystemConfig {
+  drive: boolean;
 }
 
 interface ThemesConfig {
@@ -34,7 +40,8 @@ interface RefreshRateConfig {
 interface LyricsConfig {
   color?: LyricsColorConfig;
   active?: LyricsColorConfig;
-  font?: LyricsFont;
+  font?: string;
+  fontName?: SystemFont;
   lyricsMode?: LyricsOptions;
 }
 

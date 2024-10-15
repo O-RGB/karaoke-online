@@ -40,6 +40,7 @@ export const appendLocalConfig = (config: Partial<ConfigDisplay>) => {
     lyrics: { ...system_config.lyrics, ...config.lyrics },
     widgets: { ...system_config.widgets, ...config.widgets },
     themes: { ...system_config.themes, ...config.themes },
+    system: { ...system_config.system, ...config.system },
   };
   setLocalConfig(system_config);
 };

@@ -69,4 +69,7 @@ export const DEFAULT_CONFIG: ConfigDisplay = {
       color: "rgba(255, 255, 255, 0.10)",
     },
   },
+  system: {
+    drive: false,
+  },
 };

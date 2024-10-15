@@ -1,5 +1,5 @@
 import RangeBarClone from "@/components/common/input-data/range-bar-clone";
-import useVolumeStore from "@/stores/volume-store";
+import useMixerStore from "@/stores/mixer-store";
 import React from "react";
 
 interface MixChorusDepthVolumeProps {
@@ -17,7 +17,7 @@ const MixChorusDepthVolume: React.FC<MixChorusDepthVolumeProps> = ({
   onMouseUp,
   onTouchEnd,
 }) => {
-  const chorusDepth = useVolumeStore((state) => state.chorusDepth[channel]);
+  const chorusDepth = useMixerStore((state) => state.chorusDepth[channel]);
   return (
     <>
       <RangeBarClone

@@ -19,38 +19,27 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
 
   const onSetWidgets = (widget: 0 | 1 | 2, show: boolean) => {
     if (widget === 0) {
-      setConfig(
-        (e) =>
-          ({
-            ...e,
-            widgets: {
-              ...e.widgets,
-              mix: { show },
-            },
-          } as ConfigDisplay)
-      );
+      setConfig({
+        widgets: {
+          mix: { show },
+        },
+      });
       setWidgets((e) => ({ ...e, mix: { show } }));
-      appendLocalConfig({ widgets: { mix: { show } } });
     } else if (widget === 1) {
-      setConfig(
-        (e) =>
-          ({
-            ...e,
-            widgets: { ...e.widgets, tempo: { show } },
-          } as ConfigDisplay)
-      );
+      setConfig({
+        widgets: {
+          tempo: { show },
+        },
+      });
       setWidgets((e) => ({ ...e, tempo: { show } }));
-      appendLocalConfig({ widgets: { tempo: { show } } });
     } else if (widget === 2) {
-      setConfig(
-        (e) =>
-          ({
-            ...e,
-            widgets: { ...e.widgets, clock: { show } },
-          } as ConfigDisplay)
-      );
+      setConfig({
+        widgets: {
+          clock: { show },
+        },
+      });
+
       setWidgets((e) => ({ ...e, clock: { show } }));
-      appendLocalConfig({ widgets: { clock: { show } } });
     }
   };
 

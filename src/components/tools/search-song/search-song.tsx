@@ -3,12 +3,11 @@ import React, { useEffect, useState } from "react";
 import TrieSearch from "trie-search";
 import SearchSelect from "../../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
-import { useAppControl } from "@/hooks/app-control-hook";
 import { FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
 import { useKeyboardEvents } from "@/hooks/keyboard-hook";
-
+import useMixerStore from "@/stores/mixer-store";
 
 interface SearchSongProps {
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -17,7 +16,8 @@ interface SearchSongProps {
 
 const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
   const { orientation } = useOrientation();
-  const { hideVolume } = useAppControl();
+  const hideMixer = useMixerStore((state) => state.hideMixer);
+
   const { searching, onEnter, arrowRight, arrowLeft } = useKeyboardEvents();
 
   const [fullUi, setFullUi] = useState<boolean>(false);
@@ -113,7 +113,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
       {searching.length > 0 && (
         <div
           className={`${
-            hideVolume ? "top-[100px]" : "top-56"
+            hideMixer ? "top-[100px]" : "top-56"
           } fixed hidden lg:block text-white w-full px-5 duration-300`}
         >
           <div className="w-full h-full blur-overlay flex gap-2 blur-border border rounded-md p-2">

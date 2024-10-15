@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useLyrics } from "@/hooks/lyrics-hook";
 import LyricsAnimation from "../common/lyrics/cut-lyrics/cut-animation";
 import Label from "../common/label";
 import SwitchRadio from "../common/input-data/switch/switch-radio";
@@ -8,27 +7,22 @@ import Select from "../common/input-data/select/select";
 import ColorPicker from "../common/input-data/color-picker";
 import Button from "../common/button/button";
 import { TbRestore } from "react-icons/tb";
+import { lyricsConfig, lyricsGetFont } from "@/features/lyrics/lyrics.features";
+import useConfigStore from "@/stores/config-store";
+import { DEFAULT_CONFIG } from "@/config/value";
+import { NextFont } from "next/dist/compiled/@next/font";
 
 interface LyricsModalProps {}
 
 const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
+  const { setConfig } = useConfigStore();
+  const lyrics =
+    useConfigStore((state) => state.config.lyrics) ?? DEFAULT_CONFIG.lyrics;
+  const lyricsConfigf = lyricsConfig(setConfig);
+
   const EX = [["ตั"], ["ว"], ["อ"], ["ย่"], ["า"], ["ง"]];
   const [Example, setExample] = useState<string[][]>(EX);
-  const {
-    setLyricsOptions,
-    lyricsDisplay,
-    setFontChange,
-    FontName,
-    Color,
-    ColorBorder,
-    ActiveColor,
-    ActiveBorderColor,
-    setLyricsColor,
-    setLyricsActiveBorderColor,
-    setLyricsActiveColor,
-    setLyricsColorBorder,
-    reset,
-  } = useLyrics();
+  const [FontState, setFontState] = useState<NextFont>();
 
   const updateAnimtaion = () => {
     setExample([]);
@@ -40,7 +34,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
 
-    if (lyricsDisplay === "random") {
+    if (lyrics.lyricsMode === "random") {
       interval = setInterval(() => {
         updateAnimtaion();
       }, 3000);
@@ -51,7 +45,12 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
         clearInterval(interval);
       }
     };
-  }, [lyricsDisplay]);
+  }, [lyrics.lyricsMode]);
+
+  const onFontChanage = (get: SystemFont) => {
+    const nextFont = lyricsGetFont(get);
+    setFontState(nextFont);
+  };
 
   return (
     <div className="flex flex-col-reverse md:flex-row gap-4 w-full md:h-[390px]">
@@ -59,8 +58,8 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
         <div className="h-full">
           <Label>รูปแบบเนื้อเพลง</Label>
           <SwitchRadio<LyricsOptions>
-            onChange={setLyricsOptions}
-            value={lyricsDisplay}
+            onChange={lyricsConfigf.setLyricsOptions}
+            value={lyrics.lyricsMode}
             options={[
               {
                 children: "เริ่มต้น",
@@ -75,15 +74,20 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
 
           <div
             className={`${
-              lyricsDisplay === "random" ? "pointer-events-none opacity-0" : ""
+              lyrics.lyricsMode === "random"
+                ? "pointer-events-none opacity-0"
+                : ""
             } duration-300`}
           >
             <Label>ฟอนต์</Label>
             <br />
 
             <Select
-              defaultValue={FontName}
-              onChange={setFontChange}
+              defaultValue={lyrics.fontName}
+              onChange={(value) => {
+                lyricsConfigf.setFontChange(value);
+                onFontChanage(value);
+              }}
               options={[
                 {
                   value: "notoSansThaiLooped",
@@ -110,7 +114,9 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
           </div>
           <div
             className={`${
-              lyricsDisplay === "random" ? "pointer-events-none opacity-0" : ""
+              lyrics.lyricsMode === "random"
+                ? "pointer-events-none opacity-0"
+                : ""
             } duration-300`}
           >
             <Label>สีเนื้อเพลง</Label>
@@ -119,15 +125,15 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
               <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
                 <Label className="pb-1">สีตัวอักษร</Label>
                 <ColorPicker
-                  onChange={setLyricsColor}
-                  value={Color}
+                  onChange={lyricsConfigf.setLyricsColor}
+                  value={lyrics.color?.color}
                 ></ColorPicker>
               </span>
               <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
                 <Label className="pb-1">สีขอบ</Label>
                 <ColorPicker
-                  onChange={setLyricsActiveColor}
-                  value={ActiveColor}
+                  onChange={lyricsConfigf.setLyricsActiveColor}
+                  value={lyrics.active?.color}
                 ></ColorPicker>
               </span>
             </span>
@@ -137,15 +143,15 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
               <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
                 <Label className="pb-1">สีตัวอักษร</Label>
                 <ColorPicker
-                  onChange={setLyricsColorBorder}
-                  value={ColorBorder}
+                  onChange={lyricsConfigf.setLyricsColorBorder}
+                  value={lyrics.color?.colorBorder}
                 ></ColorPicker>
               </span>
               <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
                 <Label className="pb-1">สีขอบ</Label>
                 <ColorPicker
-                  onChange={setLyricsActiveBorderColor}
-                  value={ActiveBorderColor}
+                  onChange={lyricsConfigf.setLyricsActiveBorderColor}
+                  value={lyrics.active?.colorBorder}
                 ></ColorPicker>
               </span>
             </span>
@@ -153,7 +159,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
         </div>
         <div className="">
           <Button
-            onClick={reset}
+            onClick={lyricsConfigf.reset}
             blur={false}
             shadow={""}
             color="default"
@@ -169,11 +175,13 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
 
       <div className="w-full relative p-2 border rounded-md bg-blue-400">
         <div className="flex w-full h-20 md:h-full items-center justify-center">
-          {lyricsDisplay === "default" ? (
+          {lyrics.lyricsMode === "default" ? (
             <LyricsAnimation
+              activeColor={lyrics.active!}
+              color={lyrics.color!}
               fontSize="text-4xl"
               display={Example}
-              // charIndex={3}
+              font={FontState}
               fixedCharIndex={3}
             ></LyricsAnimation>
           ) : (

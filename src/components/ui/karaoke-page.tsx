@@ -33,6 +33,7 @@ import DisplaySettingModal from "../modal/display";
 import { useSpessasynthStore } from "../../stores/spessasynth-store";
 import { DragDrop } from "../tools/drag-drop/drag-drop";
 import { usePeerStore } from "@/stores/peer-store";
+import useMixerStore from "@/stores/mixer-store";
 
 interface KaraokePageProps {}
 
@@ -47,19 +48,14 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     lyrics,
     cursorIndices,
     cursorTicks,
-    isVolumeHeld,
     addTracklist,
-    setSystemDriveMode,
     midiPlaying,
-    hideVolume,
   } = useAppControl();
-
   const { notification } = useNotification();
 
   const startup = async () => {
     // Config
-    const systemConfig = getLocalSystemMode();
-    setSystemDriveMode(systemConfig === "DRIVE");
+    // const systemConfig = getLocalSystemMode();
 
     // Setup
     setupSpessasynth();
@@ -104,12 +100,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         cursorTicks={cursorTicks}
         lyrics={lyrics}
       ></LyricsRender>
-      <GainRender
-        hideVolume={hideVolume}
-        player={player}
-        analysers={analysers}
-      ></GainRender>
-      <VolumeEvnet isVolumeHeld={isVolumeHeld} synth={synth}></VolumeEvnet>
+      <GainRender player={player} analysers={analysers}></GainRender>
+      <VolumeEvnet synth={synth}></VolumeEvnet>
       <InstrumentsEvent synth={synth}></InstrumentsEvent>
 
       {/* Contact */}

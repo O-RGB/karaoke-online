@@ -1,25 +1,27 @@
 import React, { useMemo } from "react";
-import { useLyrics } from "@/hooks/lyrics-hook";
 import CharLyrics from "./char-lyrics";
 import useConfigStore from "@/stores/config-store";
-import useLyricsStore from "@/stores/lyrics-store";
+import { NextFont } from "next/dist/compiled/@next/font";
 
 interface LyricsAnimationProps {
   display: string[][];
   fixedCharIndex?: number;
   fontSize?: string;
+  color: LyricsColorConfig;
+  activeColor: LyricsColorConfig;
+  font?: NextFont;
 }
 
 const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
   display,
   fixedCharIndex,
   fontSize = "text-2xl md:text-3xl lg:text-6xl",
+  color,
+  activeColor,
+  font,
 }) => {
-  const { config } = useConfigStore();
-  const { Color, ColorBorder, ActiveColor, ActiveBorderColor, Font } =
-    useLyrics();
-
-  const performance = config.refreshRate?.type ?? "MIDDLE";
+  const refreshRate = useConfigStore((state) => state.config.refreshRate);
+  const performance = refreshRate?.type ?? "MIDDLE";
 
   const charIndices = useMemo(() => {
     const indices: number[] = [];
@@ -37,7 +39,7 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
     str.map((char) => (char === " " ? "\u00A0" : char)).join("");
 
   return (
-    <div style={{ ...Font?.style }} className={`flex ${fontSize}`}>
+    <div style={{ ...font?.style }} className={`flex ${fontSize}`}>
       {display.map((data, index) => {
         const lyrInx = charIndices[index] || 0;
         const text = groupText(data);
@@ -46,10 +48,7 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
           <div className="relative" key={`char-${index}`}>
             {performance !== "LOW" && (
               <CharLyrics
-                textColor={{
-                  color: ActiveColor,
-                  colorBorder: ActiveBorderColor,
-                }}
+                textColor={activeColor}
                 lyrInx={lyrInx}
                 fixedCharIndex={fixedCharIndex}
                 className="absolute top-0 left-0 font-outline-2 sm:font-outline-4 transition-all"
@@ -57,16 +56,13 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
               />
             )}
 
-             <CharLyrics
-              textColor={{
-                color: Color,
-                colorBorder: ColorBorder,
-              }}
+            <CharLyrics
+              textColor={color}
               lyrInx={lyrInx}
               fixedCharIndex={fixedCharIndex}
               className="relative flex flex-col text-center transition-all"
               text={text}
-            />  
+            />
           </div>
         );
       })}
