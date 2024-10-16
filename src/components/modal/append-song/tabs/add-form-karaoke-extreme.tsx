@@ -82,16 +82,23 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
           </Label>
 
           <span className="flex gap-2">
-            <Button
-              color="blue"
-              className="text-white"
-              shadow=""
-              border=""
-              blur=""
+            <Link
+              href={"https://drive.google.com/file/d/1TM9liOAZayz7VJ35jIbLN0z11BlD9mNT/view?usp=sharing"}
+              target="_blank"
+              className="w-fit"
             >
-              <FaWindows></FaWindows>
-            </Button>
+              <Button
+                color="blue"
+                className="text-white"
+                shadow=""
+                border=""
+                blur=""
+              >
+                <FaWindows></FaWindows>
+              </Button>
+            </Link>
             <Button
+              disabled
               color="blue"
               padding=""
               className="text-white w-20 h-10"
