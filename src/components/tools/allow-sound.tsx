@@ -6,7 +6,7 @@ import LoadConfig from "../ui/load-conifg/load-config";
 import { getLocalSystemMode } from "@/lib/local-storege/local-storage";
 import { getTracklistToJson } from "@/lib/storage/tracklist";
 import { initDatabase } from "@/utils/database/db";
-import addTracklist from "../modal/append-song/taps/add-tracklist";
+import addTracklist from "../modal/append-song/tabs/add-tracklist";
 
 interface AllowSoundProps {
   children?: React.ReactNode;

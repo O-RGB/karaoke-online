@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useAppControl } from "@/hooks/app-control-hook";
 import Tabs from "../../common/tabs";
-import AddSong from "./taps/add-song";
-import AddFormKaraokeExtreme from "./taps/add-form-karaoke-extreme";
+import AddSong from "./tabs/add-song";
+import AddFormKaraokeExtreme from "./tabs/add-form-karaoke-extreme";
 import { readSong } from "@/lib/karaoke/read";
 import {
   addTracklistsToDatabase,
@@ -20,7 +20,7 @@ import { SiGoogledrive } from "react-icons/si";
 import { TbMicrophone2 } from "react-icons/tb";
 import ProcessingModal from "../../common/processing/processing";
 import { testUrl } from "@/lib/fetch/test-api";
-import AddFromDrive from "./taps/add-from-drive";
+import AddFromDrive from "./tabs/add-from-drive";
 import {
   setLocalDriveTested,
   setLocalDriveUrl,

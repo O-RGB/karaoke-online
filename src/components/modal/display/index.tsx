@@ -9,7 +9,6 @@ import WidgetsDisplay from "./tabs/widgets-display";
 interface DisplaySettingModalProps {}
 
 const DisplaySettingModal: React.FC<DisplaySettingModalProps> = ({}) => {
-  console.log("DisplaySettingModal render...");
   return (
     <>
       <Tabs

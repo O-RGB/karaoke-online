@@ -157,7 +157,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
             </span>
           </div>
         </div>
-        <div className="">
+        <div className="pt-2">
           <Button
             onClick={lyricsConfigf.reset}
             blur={false}

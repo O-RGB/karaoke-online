@@ -1,23 +1,11 @@
 import Button from "@/components/common/button/button";
 import Upload from "@/components/common/input-data/upload";
 import Label from "@/components/common/label";
-import Modal from "@/components/common/modal";
-import ProgressBar from "@/components/common/progress-bar";
-import {
-  getAllKeyTracklist,
-  getTracklistToJson,
-} from "@/lib/storage/tracklist";
-import React, { useEffect, useState } from "react";
-import { BsFileZip } from "react-icons/bs";
-import {
-  FaCheck,
-  FaFile,
-  FaDownload,
-  FaWindows,
-  FaTimesCircle,
-} from "react-icons/fa";
+import Link from "next/link";
+import React from "react";
+import { BsYoutube } from "react-icons/bs";
+import { FaDownload, FaWindows } from "react-icons/fa";
 import { GrDocumentZip } from "react-icons/gr";
-import { MdDelete } from "react-icons/md";
 import { SiMacos } from "react-icons/si";
 import { TbJson } from "react-icons/tb";
 
@@ -30,12 +18,6 @@ interface AddFormKaraokeExtremeProps {
   filenameTracklist?: string;
   tracklistCount: number;
   musicLibraryCount: number;
-  // process?: {
-  //   unzip?: boolean;
-  //   db_result?: boolean;
-  //   progress?: IProgressBar;
-  //   isWait?: boolean;
-  // };
 }
 
 const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
@@ -48,16 +30,6 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
   onAddFileTracklist,
   onRemoveFileTracklist,
 }) => {
-  // const [open, setOpen] = useState<boolean>(false);
-
-  // useEffect(() => {
-  //   if (process?.isWait) {
-  //     setOpen(true);
-  //   } else {
-  //     setOpen(false);
-  //   }
-  // }, [process?.isWait]);
-
   return (
     <>
       <div className="flex flex-col h-full">
@@ -101,25 +73,6 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
               <Label>
                 บันทึกแล้ว {tracklistCount.toLocaleString()} รายชื่อ
               </Label>
-              {/* {filenameTracklist ? (
-                <>
-                  <span className="border rounded-md  p-0.5 px-2 text-gray-400 flex gap-1 items-center">
-                    <FaCheck className="text-green-500"></FaCheck>
-                    {filenameTracklist}
-                  </span>
-                  <span
-                    onClick={onRemoveFileTracklist}
-                    className="border rounded-md p-0.5 px-2 text-gray-400 flex gap-1 items-center cursor-pointer"
-                  >
-                    <MdDelete className="text-red-500"></MdDelete>
-                  </span>
-                </>
-              ) : (
-                <span className="border rounded-md  p-0.5 px-2 text-gray-400 flex gap-1 items-center">
-                  <FaTimesCircle className="text-red-500"></FaTimesCircle>
-                  ยังไม่มีฐานข้อมูลเพลง
-                </span>
-              )} */}
             </div>
           </div>
         </div>
@@ -157,6 +110,21 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
           <span className="text-sm">
             วิธีใช้ นำโปรแกรมไปวางไว้ที่ตำแหน่ง Karaoke Extreme
             และเปิดโปรแกรมนำเข้าเพลง <br />
+            <Link
+              href={"https://www.youtube.com/watch?v=dVPB-dVmG1I"}
+              target="_blank"
+              className="w-fit"
+            >
+              <Button
+                blur={false}
+                color="red"
+                iconPosition="left"
+                className="text-white w-fit"
+                icon={<BsYoutube className="text-white" />}
+              >
+                วิธีเพิ่มเพลง
+              </Button>
+            </Link>
           </span>
         </div>
       </div>

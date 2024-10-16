@@ -1,8 +1,16 @@
 "use client";
 import { WALLPAPER } from "@/config/value";
-import { getLocalWallpaper, setLocalWallpaper } from "@/lib/local-storege/local-storage";
-import { saveWallpaperStorage, getWallpaperStorage, deleteWallpaperStorage, getAllWallpaperStorage } from "@/lib/storage/wallpaper";
- 
+import {
+  getLocalWallpaper,
+  setLocalWallpaper,
+} from "@/lib/local-storege/local-storage";
+import {
+  saveWallpaperStorage,
+  getWallpaperStorage,
+  deleteWallpaperStorage,
+  getAllWallpaperStorage,
+} from "@/lib/storage/wallpaper";
+
 import React from "react";
 import {
   createContext,
@@ -13,7 +21,6 @@ import {
   useLayoutEffect,
 } from "react";
 
-
 // ฟังก์ชันสำหรับสุ่มสีในรูปแบบ HEX
 const getRandomColor = () => {
   const letters = "0123456789ABCDEF";
@@ -23,7 +30,6 @@ const getRandomColor = () => {
   }
   return color;
 };
-
 
 type WallpaperContextType = {
   wallpaper: string | undefined;
@@ -84,8 +90,6 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
     }
   };
 
- 
-
   const changeWallpaper = async (filename: string) => {
     setLocalWallpaper(filename);
     const localfile = await getWallpaperStorage(filename);
@@ -94,11 +98,6 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
       const mediaUrl = URL.createObjectURL(localfile.value);
       setWallpaper(mediaUrl);
       setWallpaperName(localfile.value.name);
-
-      const metaThemeColor = document.querySelector("meta[name='theme-color']");
-      if (metaThemeColor) {
-        metaThemeColor.setAttribute("content", getRandomColor());
-      }
     }
   };
 
@@ -130,6 +129,11 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
   useEffect(() => {
     renderLogo();
     loadWallpaper();
+    const metaThemeColor = document.querySelector("meta[name='theme-color']");
+
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute("content", getRandomColor());
+    }
   }, []);
 
   useLayoutEffect(() => {
@@ -163,7 +167,7 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
         }}
         className="hidden lg:block w-fit h-fit text-white font-bold text-2xl drop-shadow-md"
       >
-        {/* NEXT KARAOKE */}
+        NEXT KARAOKE
       </div>
       <div
         style={{
@@ -175,7 +179,7 @@ export const WallpaperProvider: FC<WallpaperProviderProps> = ({ children }) => {
         }}
         className="block lg:hidden w-fit h-fit text-white font-bold text-lg drop-shadow-md"
       >
-        {/* NEXT KARAOKE */}
+        NEXT KARAOKE
       </div>
       {isVideo ? (
         <>

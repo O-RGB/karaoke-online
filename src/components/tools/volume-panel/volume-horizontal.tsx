@@ -30,7 +30,7 @@ const VolumeHorizontal: React.FC<VolumeHorizontalProps> = ({ hide }) => {
     <canvas
       ref={canvasRef}
       width={300} // Set your canvas width
-      height={15} // Set your canvas height
+      height={25} // Set your canvas height
       className="absolute top-0 left-0 w-full"
     ></canvas>
   );

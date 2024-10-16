@@ -32,6 +32,7 @@ import DisplaySettingModal from "../modal/display";
 import { useSpessasynthStore } from "../../stores/spessasynth-store";
 import { DragDrop } from "../tools/drag-drop/drag-drop";
 import { usePeerStore } from "@/stores/peer-store";
+import DataStoresModal from "../modal/datastores";
 
 interface KaraokePageProps {}
 
@@ -76,7 +77,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     SOUNDFONT_MODEL: <SoundfontManager></SoundfontManager>,
     JOIN: <HostRemote></HostRemote>,
     SUPER_JOIN: <SuperHostRemote></SuperHostRemote>,
-    MUSIC_STORE: <MusicStoreModal></MusicStoreModal>,
+    MUSIC_STORE: <DataStoresModal></DataStoresModal>,
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
