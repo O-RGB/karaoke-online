@@ -117,6 +117,8 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
           ]}
         ></SwitchRadio>
       </div>
+
+      <div>หากใครสนใจทดสอบโหลดเพลงจาก Google drive ต้องติดต่อ Admin</div>
     </div>
   );
 };

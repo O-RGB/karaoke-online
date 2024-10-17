@@ -1,6 +1,6 @@
 import Button from "@/components/common/button/button";
 import { destryoAllCredential } from "@/lib/local-storege/local-storage";
-import { deleteAllStores } from "@/utils/database/db";
+import { deleteAllStores, deleteDatabase, initDatabase } from "@/utils/database/db";
 import React from "react";
 import { CiSettings } from "react-icons/ci";
 
@@ -15,12 +15,13 @@ const ResetDatastore: React.FC<ResetDatastoreProps> = ({}) => {
       </span>
       <Button
         onClick={async () => {
-          const check = await deleteAllStores();
+          const check = await deleteDatabase();
           if (check) {
+            await initDatabase()
             destryoAllCredential();
             setTimeout(() => {
               window.location.reload();
-            }, 500);
+            }, 1000);
           }
         }}
         blur=""

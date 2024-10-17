@@ -83,7 +83,9 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
 
           <span className="flex gap-2">
             <Link
-              href={"https://drive.google.com/file/d/1TM9liOAZayz7VJ35jIbLN0z11BlD9mNT/view?usp=sharing"}
+              href={
+                "https://drive.google.com/file/d/1TM9liOAZayz7VJ35jIbLN0z11BlD9mNT/view?usp=sharing"
+              }
               target="_blank"
               className="w-fit"
             >
@@ -115,8 +117,6 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
             <hr />
           </div>
           <span className="text-sm">
-            วิธีใช้ นำโปรแกรมไปวางไว้ที่ตำแหน่ง Karaoke Extreme
-            และเปิดโปรแกรมนำเข้าเพลง <br />
             <Link
               href={"https://www.youtube.com/watch?v=dVPB-dVmG1I"}
               target="_blank"
