@@ -1,8 +1,6 @@
 import { Viewport, Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
-import { AppControlProvider } from "@/context/app-control-context";
-import { PeerProvider } from "@/context/remote-context";
 const inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
@@ -24,11 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <PeerProvider>
-        <AppControlProvider>
-          <body>{children}</body>
-        </AppControlProvider>
-      </PeerProvider>
+      <body>{children}</body>
     </html>
   );
 }

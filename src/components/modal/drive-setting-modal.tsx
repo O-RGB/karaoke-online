@@ -11,7 +11,6 @@ import Button from "../common/button/button";
 import { FaCheck } from "react-icons/fa";
 import { AiOutlineLoading } from "react-icons/ai";
 import { RiErrorWarningLine } from "react-icons/ri";
-import { useAppControl } from "@/hooks/app-control-hook";
 import useConfigStore from "@/stores/config-store";
 
 interface DriveSettingProps {}

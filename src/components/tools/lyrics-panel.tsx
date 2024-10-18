@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useLyrics } from "@/hooks/lyrics-hook";
-import { useAppControl } from "@/hooks/app-control-hook";
-import { useOrientation } from "@/hooks/orientation-hook";
+
 import LyricsAnimation from "../common/lyrics/cut-lyrics/cut-animation";
 import RandomLyrics from "../lyrics/random-lyrics";
 import useLyricsStore from "../../stores/lyrics-store";
@@ -11,6 +9,7 @@ import useConfigStore from "@/stores/config-store";
 import { NextFont } from "next/dist/compiled/@next/font";
 import { lyricsGetFont } from "@/features/lyrics/lyrics.features";
 import useMixerStore from "@/stores/mixer-store";
+import { useOrientation } from "@/hooks/orientation-hook";
 
 interface LyricsPanelProps {
   lyrics: string[];

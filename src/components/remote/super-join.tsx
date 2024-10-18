@@ -1,15 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useRemote } from "@/hooks/peer-hook"; // Updated hook
 import VolumePanel from "../tools/volume-panel";
 import { toOptions } from "@/lib/general";
-import { onSearchList } from "@/lib/trie-search";
 import SearchDropdown from "../tools/search-song/search-dropdown";
 import SearchSelect from "../common/input-data/select/search-select";
 import Upload from "../common/input-data/upload";
 import Label from "../common/label";
 import { FaRegFileAudio } from "react-icons/fa";
-import { EMK_FILE_TYPE } from "@/config/value";
 import { readSong } from "@/lib/karaoke/read";
 import { usePeerStore } from "@/stores/peer-store";
 

@@ -1,4 +1,20 @@
-import { OrientationContext } from "@/context/orientation-context";
-import { useContext } from "react";
+import { useEffect } from 'react';
+import useOrientationStore from '@/stores/orientation-store';
 
-export const useOrientation = () => useContext(OrientationContext);
+export const useOrientation = () => {
+  const {
+    orientation,
+    isMobile,
+    initializeOrientationListeners,
+  } = useOrientationStore();
+
+  useEffect(() => {
+    const cleanup = initializeOrientationListeners();
+    return cleanup;
+  }, [initializeOrientationListeners]);
+
+  return {
+    orientation,
+    isMobile,
+  };
+};

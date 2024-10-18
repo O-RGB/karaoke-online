@@ -35,8 +35,3 @@ const useLyricsStore = create<LyricsStore>((set) => ({
 }));
 
 export default useLyricsStore;
-
-// const charIndex = useRef<number>(0);
-// const display = useRef<string[][]>([]);
-// const displayBottom = useRef<string[][]>([]);
-// const position = useRef<boolean>(true);

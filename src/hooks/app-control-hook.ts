@@ -1,5 +1,5 @@
-import { AppControlContext } from "@/context/app-control-context";
-import { useContext } from "react";
+// import { AppControlContext } from "@/context/app-control-context";
+// import { useContext } from "react";
 
 
-export const useAppControl = () => useContext(AppControlContext);
+// export const useAppControl = () => useContext(AppControlContext);

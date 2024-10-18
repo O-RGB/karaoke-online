@@ -5,23 +5,21 @@ import {
   STORAGE_KARAOKE_EXTREME,
   STORAGE_WALLPAPER,
   STORAGE_SOUNDFONT,
-  STORAGE_SOUNDFONT_DIC,
-  STORAGE_USER_DRIVE,
+  // STORAGE_USER_DRIVE,
 } from "@/config/value";
-import { deleteDB, IDBPDatabase, openDB } from "idb";
+import { IDBPDatabase, openDB } from "idb";
 
 const DB_NAME = "Karaoke-online";
 const DB_VERSION = 1;
 
 const stores = [
   STORAGE_KARAOKE_EXTREME,
+  STORAGE_WALLPAPER,
+  STORAGE_SOUNDFONT,
   STORAGE_USER_SONG,
   STORAGE_TRACKLIST,
-  STORAGE_SOUNDFONT,
-  STORAGE_SOUNDFONT_DIC,
-  STORAGE_WALLPAPER,
   STORAGE_DRIVE,
-  STORAGE_USER_DRIVE,
+  // STORAGE_USER_DRIVE,
 ];
 
 export async function getDB(
@@ -82,7 +80,9 @@ export async function deleteAllStores(): Promise<IDBPDatabase> {
   return db;
 }
 
-export async function deleteDatabase(dbName: string = DB_NAME): Promise<boolean> {
+export async function deleteDatabase(
+  dbName: string = DB_NAME
+): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.deleteDatabase(dbName);
 

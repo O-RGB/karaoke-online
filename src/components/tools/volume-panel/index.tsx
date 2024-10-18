@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Synthetizer } from "spessasynth_lib";
-import { useAppControl } from "@/hooks/app-control-hook";
 import {
   PiMicrophoneStageFill,
   PiUserMinusFill,
@@ -8,11 +7,9 @@ import {
 } from "react-icons/pi";
 import NumberButton from "../../common/input-data/number-button";
 import SwitchButton from "../../common/input-data/switch/switch-button";
-import { useNotification } from "@/hooks/notification-hook";
 import Button from "../../common/button/button";
 import { MdArrowDropUp } from "react-icons/md";
 import { useOrientation } from "@/hooks/orientation-hook";
-import { useRemote } from "@/hooks/peer-hook";
 import VolumeMeterV from "../../common/volume/volume-meter-v";
 import InstrumentsButton from "./instruments-button";
 import VolumeAction from "./volume-action";
@@ -23,6 +20,7 @@ import volumeSynth from "@/features/volume/volume-features";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
 import useMixerStore from "@/stores/mixer-store";
+import useNotificationStore from "@/stores/notification-store";
 
 interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
@@ -46,91 +44,57 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
 
   const { orientation } = useOrientation();
-  const { addNotification } = useNotification();
+  const setNotification = useNotificationStore(
+    (state) => state.setNotification
+  );
   const hideMixer = useMixerStore((state) => state.hideMixer);
   const setHideMixer = useMixerStore((state) => state.setHideMixer);
   const setHeld = useMixerStore((state) => state.setHeld);
-  const { superUserConnections, sendSuperUserMessage } = useRemote();
+  // const { superUserConnections, sendSuperUserMessage } = useRemote();
 
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
   const volLayout: number[] = Array(16).fill(0);
   const gain = useRef<number[]>(Array(16).fill(0));
-  const gainMain = useRef<number>(0);
+
+  const volumeLib = synth ? volumeSynth(synth) : undefined;
 
   const onVolumeMeterChange = (channel: number, value: number) => {
     if (synth) {
-      const volumeLib = volumeSynth(synth);
-      if (volumeLib) {
-        volumeLib.updateMainVolume(channel - 1, value);
-      }
+      volumeLib?.updateMainVolume(channel - 1, value);
     } else {
       onVolumeChange?.(channel, value);
     }
   };
 
   const onPenChange = (channel: number, value: number) => {
-    if (synth) {
-      const volumeLib = volumeSynth(synth);
-      if (volumeLib) {
-        volumeLib.updatePanVolume(channel - 1, value);
-      }
-    }
+    volumeLib?.updatePanVolume(channel - 1, value);
   };
 
   const onPitchChange = (value: number) => {
-    if (synth) {
-      const volumeLib = volumeSynth(synth);
-      if (volumeLib) {
-        volumeLib.updatePitch(null, value);
-      }
-    }
+    volumeLib?.updatePitch(null, value);
   };
 
   const onMutedVolume = (channel: number, isMuted: boolean) => {
-    if (synth) {
-      const volumeLib = volumeSynth(synth);
-      if (volumeLib) {
-        volumeLib.updateMuteVolume(channel - 1, isMuted);
-        setLock((v) => {
-          v[channel - 1] = isMuted;
-          return v;
-        });
-      }
+    if (volumeLib) {
+      volumeLib.updateMuteVolume(channel - 1, isMuted);
+      setLock((v) => {
+        v[channel - 1] = isMuted;
+        return v;
+      });
     }
   };
 
   const onLockedVolume = (channel: number, isLocked: boolean) => {
-    if (synth) {
-      const volumeLib = volumeSynth(synth);
-      if (volumeLib) {
-        volumeLib.updateLockedVolume(channel - 1, isLocked);
-      }
-    }
+    volumeLib?.updateLockedVolume(channel - 1, isLocked);
   };
-
   const onPersetChange = (channel: number, value: number) => {
-    if (synth) {
-      const volumeLib = volumeSynth(synth);
-      if (volumeLib) {
-        volumeLib.updatePreset(channel - 1, value);
-      }
-    }
+    volumeLib?.updatePreset(channel - 1, value);
   };
   const onReverbChange = (channel: number, value: number) => {
-    if (synth) {
-      const volumeLib = volumeSynth(synth);
-      if (volumeLib) {
-        volumeLib.updateReverb(channel - 1, value);
-      }
-    }
+    volumeLib?.updateReverb(channel - 1, value);
   };
   const onChorusDepthChange = (channel: number, value: number) => {
-    if (synth) {
-      const volumeLib = volumeSynth(synth);
-      if (volumeLib) {
-        volumeLib.updateChorusDepth(channel - 1, value);
-      }
-    }
+    volumeLib?.updateChorusDepth(channel - 1, value);
   };
 
   useEffect(() => {
@@ -236,7 +200,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           <NumberButton
             onChange={(value) => {
               onPitchChange(value);
-              addNotification(`Pitch ${value}`);
+              setNotification({ text: `Pitch ${value}` });
             }}
             value={0}
             icon={

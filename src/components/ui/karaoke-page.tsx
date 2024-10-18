@@ -4,7 +4,6 @@ import React, { useEffect } from "react";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song/search-song";
-import { useAppControl } from "@/hooks/app-control-hook";
 import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super-host";
@@ -17,11 +16,9 @@ import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status/status-panel";
 import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper-modal";
-import { useNotification } from "@/hooks/notification-hook";
-import MusicStoreModal from "../modal/music-store-modal";
 import MidiSettingModal from "../modal/midi-setting-modal";
 import SongListModal from "../modal/song-list.modal";
-import { getTracklistToJson } from "@/lib/storage/tracklist";
+import { getTracklist } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
 import TicksRender from "./ticks-render/ticks-render";
 import LyricsRender from "./lyrics-render/lyrics-render";
@@ -33,24 +30,29 @@ import { useSpessasynthStore } from "../../stores/spessasynth-store";
 import { DragDrop } from "../tools/drag-drop/drag-drop";
 import { usePeerStore } from "@/stores/peer-store";
 import DataStoresModal from "../modal/datastores";
+import useTracklistStore from "@/stores/tracklist-store";
+import RemoteRender from "./remote-render/remote-render";
+import useNotificationStore from "@/stores/notification-store";
+import { useAppControlStore } from "@/stores/player-store";
+import WallpaperRender from "./wallpaper-render/wallpaper-render";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { perset, synth, player, analysers, setupSpessasynth } =
     useSpessasynthStore();
-  const { initializePeers } = usePeerStore();
+  const initializePeers = usePeerStore((state) => state.initializePeers);
+  const addTracklist = useTracklistStore((state) => state.addTracklist);
   const {
     loadAndPlaySong,
     setSongPlaying,
-    tracklist,
     lyrics,
     cursorIndices,
     cursorTicks,
-    addTracklist,
     midiPlaying,
-  } = useAppControl();
-  const { notification } = useNotification();
+  } = useAppControlStore();
+
+  const notification = useNotificationStore((state) => state.notification);
 
   const startup = async () => {
     // Config
@@ -58,10 +60,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
     // Setup
     setupSpessasynth();
-    initializePeers();
+    // initializePeers();
 
     // Database
-    const tl = await getTracklistToJson();
+    const tl = await getTracklist();
     addTracklist(tl);
   };
 
@@ -90,6 +92,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     <>
       <DragDrop setSongPlaying={setSongPlaying}></DragDrop>
       {/* Process */}
+      <WallpaperRender></WallpaperRender>
+      <RemoteRender></RemoteRender>
+
       <TicksRender
         synth={synth}
         player={player}
@@ -115,10 +120,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         ></VolumePanel>
         <TempoPanel timeDivision={midiPlaying?.timeDivision}></TempoPanel>
         <ClockPanel></ClockPanel>
-        <SearchSong
-          tracklist={tracklist}
-          onClickSong={loadAndPlaySong}
-        ></SearchSong>
+        <SearchSong onClickSong={loadAndPlaySong}></SearchSong>
         <LyricsPanel
           cursorIndices={cursorIndices}
           cursorTicks={cursorTicks}

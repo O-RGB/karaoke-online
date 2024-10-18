@@ -9,7 +9,4 @@ interface FeatureSynth {
   updateChorusDepth: (channel: number, value: number) => void
 }
 
-interface TrackListStore {
-  tracklist: TrieSearch<SearchResult> | undefined;
-  setTracklist: (tracklist: TrieSearch<SearchResult> | undefined) => void;
-}
+

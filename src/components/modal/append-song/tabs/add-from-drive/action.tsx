@@ -2,10 +2,8 @@ import Button from "@/components/common/button/button";
 import Input from "@/components/common/input-data/input";
 import Label from "@/components/common/label";
 
-import React, { ChangeEventHandler, useEffect, useState } from "react";
-import { AiFillProfile } from "react-icons/ai";
+import React, { useEffect, useState } from "react";
 import { FaCheck } from "react-icons/fa";
-import { LuSend } from "react-icons/lu";
 
 interface DriveActionProps {
   title?: string;

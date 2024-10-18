@@ -133,6 +133,6 @@ interface IndexedDbReslut<T> {
 
 interface INotificationValue {
   text: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   delay?: number;
 }

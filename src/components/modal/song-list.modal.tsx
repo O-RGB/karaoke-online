@@ -1,6 +1,6 @@
 
 // import { getTrackList } from "@/lib/storage/tracklist";
-import { getTracklistToJson } from "@/lib/storage/tracklist";
+import { getTracklist } from "@/lib/storage/tracklist";
 import React, { useEffect, useState } from "react";
 
 interface SongListModalProps {}

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useAppControl } from "@/hooks/app-control-hook";
 import Tabs from "../../common/tabs";
 import AddSong from "./tabs/add-song";
 import AddFormKaraokeExtreme from "./tabs/add-form-karaoke-extreme";
@@ -24,17 +23,19 @@ import AddFromDrive from "./tabs/add-from-drive";
 import {
   setLocalDriveTested,
   setLocalDriveUrl,
-  setLocalSystemMode,
   setLocalTracklistDriveTested,
 } from "@/lib/local-storege/local-storage";
 import useConfigStore from "@/stores/config-store";
+import useTracklistStore from "@/stores/tracklist-store";
 
 interface AppendSongModalProps {}
 
 const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
-  const { setConfig } = useConfigStore();
-  const { setTracklistFile, setRemoveTracklistFile, addTracklist } =
-    useAppControl();
+  const setConfig = useConfigStore((state) => state.setConfig);
+  const setTracklist = useTracklistStore((state) => state.setTracklist);
+  const addTracklist = useTracklistStore((state) => state.addTracklist);
+  const removeTracklist = useTracklistStore((state) => state.removeTracklist);
+
   const [progress, setProgress] = useState<IProgressBar>();
   const [filename, setFilename] = useState<string>();
   const [musicFilename, setMusicFilename] = useState<string>();
@@ -77,14 +78,21 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
   };
 
   // Tracklist Json
-  const onLoadFileJson = async (file: File) => {
+  const onLoadFileJson = async (
+    file: File,
+    tracklistDrive: boolean = false
+  ) => {
     if (!file) {
       return;
     }
 
     if (file?.type === "application/json") {
       setProgress({ progress: 0, title: "กำลังอ่านไฟล์...", show: true });
-      const saved = await jsonTracklistToDatabase(file, setProgress);
+      const saved = await jsonTracklistToDatabase(
+        file,
+        tracklistDrive,
+        setProgress
+      );
 
       if (saved) {
         setProgress({
@@ -92,7 +100,8 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           title: "บันทึกรายชื่อเพลงสำเร็จ",
           show: true,
         });
-        setTracklistFile(file);
+        // setTracklistFile(file);
+        setTracklist(saved)
         setMusicFilename(file?.name);
       } else {
         setProgress({
@@ -115,7 +124,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
   };
 
   const onRemoveFileJson = async () => {
-    setRemoveTracklistFile();
+    removeTracklist();
     setMusicFilename(undefined);
   };
 
@@ -178,7 +187,10 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     }
   };
 
-  const onAddTrackListDrive = async (value: string) => {
+  const onAddTrackListDrive = async (
+    value: string,
+    tracklistDrive: boolean = false
+  ) => {
     setProgress({
       progress: 0,
       title: "กำลังดาวน์โหลด...",
@@ -196,7 +208,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
         }
 
         if (file) {
-          await onLoadFileJson(file);
+          await onLoadFileJson(file, tracklistDrive);
           setLocalTracklistDriveTested(value);
           return true;
         }
@@ -311,24 +323,15 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
               />
             ),
           },
-          // {
-          //   icon: <MdQueueMusic></MdQueueMusic>,
-          //   label: "รายชื่อเพลง",
-          //   content: (
-          //     <AddTracklist
-          //       onAddFile={onLoadFileJson}
-          //       onRemoveFile={onRemoveFileJson}
-          //       filename={musicFilename}
-          //     />
-          //   ),
-          // },
           {
             icon: <SiGoogledrive></SiGoogledrive>,
             label: "เพิ่มจาก Drive",
             content: (
               <AddFromDrive
                 onSystemChange={onSystemChange}
-                onAddTrackListDrive={onAddTrackListDrive}
+                onAddTrackListDrive={(value) =>
+                  onAddTrackListDrive(value, true)
+                }
                 onAddUrlDrvie={onAddUrlDrvie}
               />
             ),

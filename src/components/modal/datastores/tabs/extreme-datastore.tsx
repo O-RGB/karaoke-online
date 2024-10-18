@@ -3,21 +3,20 @@ import SearchSelect from "@/components/common/input-data/select/search-select";
 import Label from "@/components/common/label";
 import TableList from "@/components/common/table/table-list";
 import SearchDropdown from "@/components/tools/search-song/search-dropdown";
-import { useAppControl } from "@/hooks/app-control-hook";
 import { toOptions } from "@/lib/general";
 import {
   getAllKeysSong,
   getSongByKey,
   deleteAllSong,
 } from "@/lib/storage/drive";
-import { onSearchList } from "@/lib/trie-search";
 import { extractFile } from "@/lib/zip";
+import useTracklistStore from "@/stores/tracklist-store";
 import React, { useEffect, useState } from "react";
 
 interface ExtremeDataStoreProps {}
 
 const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
-  const { tracklist } = useAppControl();
+  const searchTracklist = useTracklistStore((state) => state.searchTracklist);
 
   const [zipFilename, setZipFilename] = useState<IDBValidKey[]>([]);
   const [songs, setSongs] = useState<File[]>([]);
@@ -51,15 +50,12 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
     }
   };
   async function onSearch<T = any>(value: string) {
-    if (tracklist) {
-      const se = await onSearchList<SearchResult>(value, tracklist);
-      const op = toOptions<SearchResult>({
-        render: (value) => <SearchDropdown value={value}></SearchDropdown>,
-        list: se,
-      });
-      return op as T;
-    }
-    return [] as T;
+    const se = (await searchTracklist(value)) ?? [];
+    const op = toOptions<SearchResult>({
+      render: (value) => <SearchDropdown value={value}></SearchDropdown>,
+      list: se,
+    });
+    return op as T;
   }
 
   const deleteAll = async () => {

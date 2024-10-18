@@ -1,6 +1,6 @@
 import { STORAGE_KARAOKE_EXTREME, STORAGE_TRACKLIST } from "@/config/value";
 import { storageAddAll, storageGetAllKeys } from "../../utils/database/storage";
-import { TracklistModel } from "@/utils/database/model";
+import { TracklistDriveModel, TracklistModel } from "@/utils/database/model";
 
 export const createTrackList = (
   song: SongFiltsEncodeAndDecode,
@@ -22,6 +22,7 @@ export const createTrackList = (
 
 export const jsonTracklistToDatabase = async (
   file: File,
+  tracklistDrive: boolean = false,
   onProgress?: (progress?: IProgressBar) => void
 ): Promise<SearchResult[] | undefined> => {
   return new Promise(async (resolve) => {
@@ -33,7 +34,8 @@ export const jsonTracklistToDatabase = async (
       if (typeof jsonData === "string") {
         try {
           const data: SearchResult[] = JSON.parse(jsonData);
-          await addTracklistsToDatabase(data, onProgress);
+
+          await addTracklistsToDatabase(data, tracklistDrive, onProgress);
 
           console.log("Data saved successfully");
           resolve(data);
@@ -77,10 +79,14 @@ export const addTracklistToDatabase = async (obj: SearchResult) => {
 
 export const addTracklistsToDatabase = async (
   objs: SearchResult[],
+  tracklistDrive: boolean = false,
   onProgress?: (progress?: IProgressBar) => void
 ) => {
   try {
-    const { store, tx, loaded } = await TracklistModel();
+    let { store, tx, loaded } = tracklistDrive
+      ? await TracklistDriveModel()
+      : await TracklistModel();
+
     if (!loaded) {
       return false;
     }
@@ -120,7 +126,7 @@ export const addTracklistsToDatabase = async (
   }
 };
 
-export const getTracklistToJson = async (): Promise<SearchResult[]> => {
+export const getTracklist = async (): Promise<SearchResult[]> => {
   try {
     const { store, tx, loaded } = await TracklistModel();
 

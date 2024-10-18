@@ -79,7 +79,7 @@ export default function Modal({
               style={{
                 height: typeof height === "boolean" ? "fit-content" : height,
               }}
-              className={`p-3 md:p-4 relative z-0`}
+              className={`p-2 md:p-4 relative z-0`}
             >
               {children}
               <div className="sticky bottom-0 z-50 pb-4 bg-white"></div>

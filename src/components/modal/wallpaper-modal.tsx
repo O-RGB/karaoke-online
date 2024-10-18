@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Upload from "../common/input-data/upload";
-import { useWallpaper } from "@/hooks/wallpaper.hook";
 import { FaCheck, FaImage } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import { useWallpaperStore } from "@/stores/wallpaper-store";
 
 interface WallpaperModalProps {}
 
@@ -11,10 +11,11 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
     addWallpaper,
     getAllWallpaper,
     changeWallpaper,
-    deleteWallaper,
+    // deleteWallaper,
+    deleteWallpaper,
     wallpaper,
     wallpaperName,
-  } = useWallpaper();
+  } = useWallpaperStore();
   const [wallpaperList, setWallpaperList] = useState<File[]>([]);
 
   const setAllWallaper = async () => {
@@ -27,7 +28,7 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
   };
 
   const onDeleteWallaper = (filename: string) => {
-    deleteWallaper(filename);
+    deleteWallpaper(filename);
     setAllWallaper();
   };
 

@@ -8,13 +8,14 @@ import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
 import { useKeyboardEvents } from "@/hooks/keyboard-hook";
 import useMixerStore from "@/stores/mixer-store";
+import useTracklistStore from "@/stores/tracklist-store";
 
 interface SearchSongProps {
-  tracklist: TrieSearch<SearchResult> | undefined;
   onClickSong?: (value: SearchResult) => void;
 }
 
-const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
+const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
+  const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const { orientation } = useOrientation();
   const hideMixer = useMixerStore((state) => state.hideMixer);
 
@@ -27,15 +28,12 @@ const SearchSong: React.FC<SearchSongProps> = ({ tracklist, onClickSong }) => {
   const [indexSelect, setIndexSelect] = useState<number>(0);
 
   async function onSearch<T = any>(value: string) {
-    if (tracklist) {
-      const se = await onSearchList<SearchResult>(value, tracklist);
-      const op = toOptions<SearchResult>({
-        render: (value) => <SearchDropdown value={value}></SearchDropdown>,
-        list: se,
-      });
-      return op as T;
-    }
-    return [] as T;
+    const se = (await searchTracklist(value)) ?? [];
+    const op = toOptions<SearchResult>({
+      render: (value) => <SearchDropdown value={value}></SearchDropdown>,
+      list: se,
+    });
+    return op as T;
   }
 
   const onKeyUpSearch = async (value: string) => {

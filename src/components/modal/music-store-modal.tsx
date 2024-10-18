@@ -4,21 +4,19 @@ import { extractFile } from "@/lib/zip";
 import SearchSelect from "../common/input-data/select/search-select";
 import TableList from "../common/table/table-list";
 import { toOptions } from "@/lib/general";
-import { onSearchList } from "@/lib/trie-search";
-import { useAppControl } from "@/hooks/app-control-hook";
 import Button from "../common/button/button";
-import { FaUser } from "react-icons/fa";
 import {
   getAllKeysSong,
   deleteAllSong,
   getSongByKey,
 } from "@/lib/storage/song";
 import SearchDropdown from "../tools/search-song/search-dropdown";
+import useTracklistStore from "@/stores/tracklist-store";
 
 interface MusicStoreModalProps {}
 
 const MusicStoreModal: React.FC<MusicStoreModalProps> = ({}) => {
-  const { tracklist } = useAppControl();
+  const searchTracklist = useTracklistStore((state) => state.searchTracklist);
 
   const [zipFilename, setZipFilename] = useState<IDBValidKey[]>([]);
   const [songs, setSongs] = useState<File[]>([]);
@@ -52,15 +50,12 @@ const MusicStoreModal: React.FC<MusicStoreModalProps> = ({}) => {
     }
   };
   async function onSearch<T = any>(value: string) {
-    if (tracklist) {
-      const se = await onSearchList<SearchResult>(value, tracklist);
-      const op = toOptions<SearchResult>({
-        render: (value) => <SearchDropdown value={value}></SearchDropdown>,
-        list: se,
-      });
-      return op as T;
-    }
-    return [] as T;
+    const se = (await searchTracklist(value)) ?? [];
+    const op = toOptions<SearchResult>({
+      render: (value) => <SearchDropdown value={value}></SearchDropdown>,
+      list: se,
+    });
+    return op as T;
   }
 
   const deleteAll = async () => {

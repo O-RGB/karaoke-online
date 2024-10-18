@@ -23,7 +23,6 @@ const useDragDropStore = create<DragDropState>((set) => {
   };
 
   const handleDrop = (e: DragEvent) => {
-    console.log("on drop")
     e.preventDefault();
     e.stopPropagation();
     set({ isDragging: false });

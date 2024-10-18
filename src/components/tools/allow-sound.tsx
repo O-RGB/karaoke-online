@@ -4,7 +4,7 @@ import Button from "../common/button/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import LoadConfig from "../ui/load-conifg/load-config";
 import { getLocalSystemMode } from "@/lib/local-storege/local-storage";
-import { getTracklistToJson } from "@/lib/storage/tracklist";
+import { getTracklist } from "@/lib/storage/tracklist";
 import { initDatabase } from "@/utils/database/db";
 import addTracklist from "../modal/append-song/tabs/add-tracklist";
 
@@ -35,7 +35,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
 
   const handleClick = () => {
     if (audioRef.current && audioLoopRef.current) {
-      const audio = audioRef.current;
+      const audio = audioRef.current; 
       const audioLoop = audioLoopRef.current;
 
       setPressed(true);

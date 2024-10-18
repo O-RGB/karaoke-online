@@ -1,11 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useRemote } from "@/hooks/peer-hook";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import SearchSelect from "../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
-import { SONG_TYPE } from "@/config/value";
-import { onSearchList } from "@/lib/trie-search";
 import SearchDropdown from "../tools/search-song/search-dropdown";
 import { usePeerStore } from "@/stores/peer-store";
 
@@ -20,7 +17,6 @@ const JoinConnect: React.FC<JoinConnectProps> = ({ hostId }) => {
     connectToPeer,
     sendMessage,
     received: messages,
-    connections,
   } = usePeerStore();
   const [songList, setSongList] = useState<SearchResult[]>([]);
 
