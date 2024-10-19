@@ -18,7 +18,7 @@ const AddTracklist: React.FC<AddTracklistProps> = ({
 }) => {
   return (
     <>
-      <div className="w-full">
+      <div className="flex flex-col h-full w-full">
         <Label>เลือกไฟล์ฐานข้อมูลเพลง (.json) </Label>
         <Upload
           accept=".json"

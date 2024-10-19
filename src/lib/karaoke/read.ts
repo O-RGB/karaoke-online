@@ -43,15 +43,26 @@ export const readSong = async (
   await Promise.all(
     Object.values(groups).map(async (group) => {
       if (group.emk) {
-        const decode = await parseEMKFile(group.emk);
-        if (decode.cur && decode.lyr && decode.mid) {
-          const read: SongFiltsEncodeAndDecode = {
-            mid: decode.mid,
-            cur: (await readCursorFile(decode.cur)) ?? [],
-            lyr: await readLyricsFile(decode.lyr),
-            emk: group.emk,
-          };
-          song.push(read);
+        let lyr: string[] = [];
+        try {
+          const decode = await parseEMKFile(group.emk);
+          lyr = decode.lyr ? await readLyricsFile(decode.lyr) : [];
+          if (decode.cur && decode.lyr && decode.mid) {
+            const read: SongFiltsEncodeAndDecode = {
+              mid: decode.mid,
+              cur: (await readCursorFile(decode.cur)) ?? [],
+              lyr: lyr,
+              emk: group.emk,
+            };
+            song.push(read);
+          }
+        } catch (error) {
+          song.push({
+            cur: [],
+            lyr: lyr,
+            mid: new File([], group.emk.name),
+            error: true,
+          });
         }
       } else if (group.mid && group.cur && group.lyr) {
         const read: SongFiltsEncodeAndDecode = {

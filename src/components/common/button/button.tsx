@@ -40,23 +40,27 @@ const Button: React.FC<ButtonCommonProps> = ({
       break;
     case "blue":
       colorStyle =
-        "bg-blue-500 hover:bg-blue-500/80 active:bg-blue-500 disabled:bg-gray-200";
+        "bg-blue-500 hover:bg-blue-500/80 active:bg-blue-500 disabled:bg-gray-300";
       break;
     case "green":
       colorStyle =
-        "bg-green-500 hover:bg-green-500/80 active:bg-green-500 disabled:bg-gray-200";
+        "bg-green-500 hover:bg-green-500/80 active:bg-green-500 disabled:bg-gray-300";
       break;
     case "yellow":
       colorStyle =
-        "bg-yellow-500 hover:bg-yellow-500/80 active:bg-yellow-500 disabled:bg-gray-200";
+        "bg-yellow-500 hover:bg-yellow-500/80 active:bg-yellow-500 disabled:bg-gray-300";
       break;
     case "amber":
       colorStyle =
-        "bg-amber-500 hover:bg-amber-500/80 active:bg-amber-500 disabled:bg-gray-200";
+        "bg-amber-500 hover:bg-amber-500/80 active:bg-amber-500 disabled:bg-gray-300";
       break;
     case "red":
       colorStyle =
-        "bg-red-500 hover:bg-red-500/80 active:bg-red-500 disabled:bg-gray-200";
+        "bg-red-500 hover:bg-red-500/80 active:bg-red-500 disabled:bg-gray-300";
+      break;
+    case "gray":
+      colorStyle =
+        "bg-gray-500 hover:bg-gray-500/80 active:bg-gray-500 disabled:bg-gray-300";
       break;
 
     default:

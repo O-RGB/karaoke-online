@@ -11,7 +11,6 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
     addWallpaper,
     getAllWallpaper,
     changeWallpaper,
-    // deleteWallaper,
     deleteWallpaper,
     wallpaper,
     wallpaperName,

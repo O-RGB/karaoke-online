@@ -154,6 +154,7 @@ export const createSongZip = async (bufferFile: SongFiltsEncodeAndDecode[]) => {
     try {
       for (let i = 0; i < bufferFile.length; i++) {
         const file = bufferFile[i];
+        if (file.error) continue;
         if (file.encode) {
           const groupNcn = await zipFiles(
             [file.encode.cur, file.encode.lyr, file.encode.mid],

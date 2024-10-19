@@ -164,11 +164,8 @@ const ContextModal: React.FC<ContextModalProps> = ({
               direction="right"
               onClose={() => setContextMenuOpen(false)}
               boundingBoxPadding="10 10 10 10"
-              // menuClassName={"!p-0 !bg-transparent"}
             >
-              {/* <div className=" py-2 blur-overlay border blur-border rounded-md text-white"> */}
               <ContextMenuCommon items={ItemsGroup}></ContextMenuCommon>
-              {/* </div> */}
             </ControlledMenu>
           </div>
         </>

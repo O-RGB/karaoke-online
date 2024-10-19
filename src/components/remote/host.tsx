@@ -3,25 +3,63 @@ import React, { useEffect, useState } from "react";
 import { useQRCode } from "next-qrcode";
 import Input from "../common/input-data/input";
 import { usePeerStore } from "@/stores/peer-store";
+import Button from "../common/button/button";
+import Label from "../common/label";
+import { RiRemoteControlFill } from "react-icons/ri";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 interface HostRemoteProps {}
 
 const HostRemote: React.FC<HostRemoteProps> = ({}) => {
-  const { normalPeer, connections } = usePeerStore();
+  const { initializePeers, normalPeer, connections } = usePeerStore();
 
   const [hostUrl, setHostUrl] = useState<string>();
   const [hostId, setHostId] = useState<string>();
+  const [loading, setLoading] = useState<boolean>(false);
   const { Canvas } = useQRCode();
+
+  const initHost = () => {
+    setLoading(true);
+    initializePeers(false);
+  };
 
   useEffect(() => {
     setHostId(normalPeer?.id);
     if (typeof window !== "undefined") {
       setHostUrl(window.location.origin);
+      setLoading(false);
     }
   }, [normalPeer]);
 
   if (!hostUrl && !hostId) {
     return;
+  }
+
+  if (!normalPeer) {
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <div className="flex flex-col items-center justify-center gap-2">
+          <Button
+            disabled={loading}
+            iconPosition="left"
+            icon={
+              loading ? (
+                <AiOutlineLoading3Quarters className="animate-spin"></AiOutlineLoading3Quarters>
+              ) : (
+                <RiRemoteControlFill></RiRemoteControlFill>
+              )
+            }
+            onClick={initHost}
+            blur={false}
+            color="blue"
+            className="text-white"
+          >
+            {loading ? "กำลังโหลด" : "เปิดใช้งาน"}
+          </Button>
+          <Label className="">มีการใช้งาน CPU เพิ่มขึ้น</Label>
+        </div>
+      </div>
+    );
   }
 
   return (

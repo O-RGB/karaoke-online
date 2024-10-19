@@ -20,6 +20,7 @@ export default function Modal({
   okText = "ตกลง",
   closable = true,
   removeFooter = true,
+  overFlow = "overflow-hidden",
 }: ModalProps) {
   const [showModal, setShowModal] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(isOpen);
@@ -61,12 +62,12 @@ export default function Modal({
           ></div>
           <div
             style={{ width }}
-            className={`relative bg-white rounded-lg shadow-lg z-10 transform  overflow-auto ${
+            className={`relative bg-white rounded-lg shadow-lg z-10 transform  overflow-hidden ${
               showModal ? "scale-100" : "scale-95"
             } transition-transform duration-300`}
           >
             <div
-              className={`sticky z-10 top-0 left-0 flex justify-between items-center bg-white shadow-sm ${padding}`}
+              className={`z-10 top-0 left-0 flex justify-between items-center bg-white shadow-sm ${padding}`}
             >
               <div className="text-lg">{title}</div>
               {closable && (
@@ -79,46 +80,10 @@ export default function Modal({
               style={{
                 height: typeof height === "boolean" ? "fit-content" : height,
               }}
-              className={`p-2 md:p-4 relative z-0`}
+              className={`px-3 md:px-4 py-3 flex flex-col relative z-0 ${overFlow}`}
             >
               {children}
-              <div className="sticky bottom-0 z-50 pb-4 bg-white"></div>
             </div>
-            {!removeFooter ? (
-              <div className=" "></div>
-            ) : (
-              <div
-                className={`sticky bottom-0 flex gap-2 justify-end bg-white p-6 border-t border-t-gray-100`}
-              >
-                {footer ? (
-                  footer
-                ) : (
-                  <>
-                    {!cancelProps?.hidden && (
-                      <Button
-                        {...cancelProps}
-                        onClick={handleClose}
-                        shadow=""
-                        padding={"p-2 px-4"}
-                      >
-                        {cancelText}
-                      </Button>
-                    )}
-                    {!okButtonProps?.hidden && (
-                      <Button
-                        {...okButtonProps}
-                        onClick={onOk}
-                        shadow=""
-                        color="blue"
-                        className="text-white px-6"
-                      >
-                        {okText}
-                      </Button>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
           </div>
         </div>
       )}

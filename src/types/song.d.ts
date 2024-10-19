@@ -1,9 +1,12 @@
-interface SearchResult {
-  artist: string;
-  fileId: string;
-  name: string;
+interface SearchResult extends SongDetail {
   type: number;
+  fileId: string;
+}
+
+interface SongDetail {
+  artist: string;
   id: string;
+  name: string;
 }
 
 interface FileGroup extends Partial<SongFiles> {
@@ -13,6 +16,7 @@ interface FileGroup extends Partial<SongFiles> {
 interface SongFiltsEncodeAndDecode extends SongFilesDecode {
   encode?: SongFiles;
   emk?: File;
+  error?: boolean;
 }
 
 interface SongFiles {
@@ -41,4 +45,12 @@ interface DisplayLyrics {
   displayBottom: string[][];
   position: boolean;
   charIndex: number;
+}
+
+interface ValidSong {
+  item: SearchResult;
+  error: boolean;
+  isSame: SearchResult[];
+  render: ReactNode;
+  originValue: SongFiltsEncodeAndDecode;
 }

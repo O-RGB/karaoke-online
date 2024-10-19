@@ -101,7 +101,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           show: true,
         });
         // setTracklistFile(file);
-        setTracklist(saved)
+        setTracklist(saved);
         setMusicFilename(file?.name);
       } else {
         setProgress({
@@ -240,7 +240,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
   };
 
   // Custom Add Song
-  const onAddSong = async () => {
+  const onAddSong = async (files: SongFiltsEncodeAndDecode[]) => {
     setProgress({
       progress: 0,
       title: "กำลังเตรียมไฟล์...",
@@ -248,14 +248,14 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
       loading: true,
     });
     try {
-      if (listCreateSong) {
+      if (files.length > 0) {
         setProgress({
           progress: 0,
           title: "Compressing files...",
           show: true,
           loading: true,
         });
-        const tracklist = await createSongZip(listCreateSong);
+        const tracklist = await createSongZip(files);
         setProgress({
           progress: 50,
           title: "กำลังเพิ่มลงฐานข้อมูล",
@@ -311,6 +311,9 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
         }}
       ></ProcessingModal>
       <Tabs
+        onTabChange={() => {
+          setListCreateSong([]);
+        }}
         tabs={[
           {
             icon: <PiMusicNotesPlusBold></PiMusicNotesPlusBold>,

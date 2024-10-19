@@ -73,7 +73,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 h-full">
       <DriveAction
         ok={onDriveTested}
         title="Google Apps Script URL"

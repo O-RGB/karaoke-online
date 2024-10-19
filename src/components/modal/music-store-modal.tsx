@@ -18,8 +18,8 @@ interface MusicStoreModalProps {}
 const MusicStoreModal: React.FC<MusicStoreModalProps> = ({}) => {
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
 
-  const [zipFilename, setZipFilename] = useState<IDBValidKey[]>([]);
-  const [songs, setSongs] = useState<File[]>([]);
+  const [zipFilename, setZipFilename] = useState<ListItem<IDBValidKey>[]>([]);
+  const [songs, setSongs] = useState<ListItem<File>[]>([]);
   const [songFucos, setSongFucos] = useState<string>();
 
   const [folderFocus, setFolderFocus] = useState<string>();
@@ -29,7 +29,7 @@ const MusicStoreModal: React.FC<MusicStoreModalProps> = ({}) => {
 
   const load = async () => {
     const res = await getAllKeysSong();
-    setZipFilename(res);
+    setZipFilename(res.map((data) => ({ row: data.toString(), value: data })));
   };
 
   const onClickFolder = async (filename: string, notFocus: boolean = false) => {
@@ -39,7 +39,7 @@ const MusicStoreModal: React.FC<MusicStoreModalProps> = ({}) => {
         setSongs([]);
         setUnzipLoading(true);
         const unzip = await extractFile(res);
-        setSongs(unzip);
+        setSongs(unzip.map((data) => ({ row: data.name, value: data })));
         setUnzipLoading(false);
         setSongFucos(undefined);
         if (notFocus === false) {

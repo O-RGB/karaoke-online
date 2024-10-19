@@ -2,25 +2,64 @@ import React, { useEffect, useState } from "react";
 import { useQRCode } from "next-qrcode";
 import Input from "../common/input-data/input";
 import { usePeerStore } from "@/stores/peer-store";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { RiRemoteControlFill } from "react-icons/ri";
+import Button from "../common/button/button";
+import Label from "../common/label";
 
 interface SuperHostRemoteProps {}
 
 const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
-  const { superUserPeer, superUserConnections } = usePeerStore();
+  const { initializePeers, superUserPeer, superUserConnections } =
+    usePeerStore();
 
   const [hostUrl, setHostUrl] = useState<string>();
   const [hostId, setHostId] = useState<string>();
+  const [loading, setLoading] = useState<boolean>(false);
   const { Canvas } = useQRCode();
+
+  const initHost = () => {
+    setLoading(true);
+    initializePeers(true);
+  };
 
   useEffect(() => {
     setHostId(superUserPeer?.id);
     if (typeof window !== "undefined") {
       setHostUrl(window.location.origin);
+      setLoading(false);
     }
   }, [superUserPeer]);
 
   if (!hostUrl && !hostId) {
     return;
+  }
+
+  if (!superUserPeer) {
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <div className="flex flex-col items-center justify-center gap-2">
+          <Button
+            disabled={loading}
+            iconPosition="left"
+            icon={
+              loading ? (
+                <AiOutlineLoading3Quarters className="animate-spin"></AiOutlineLoading3Quarters>
+              ) : (
+                <RiRemoteControlFill></RiRemoteControlFill>
+              )
+            }
+            onClick={initHost}
+            blur={false}
+            color="blue"
+            className="text-white"
+          >
+            {loading ? "กำลังโหลด" : "เปิดใช้งาน"}
+          </Button>
+          <Label className="">มีการใช้งาน CPU เพิ่มขึ้น</Label>
+        </div>
+      </div>
+    );
   }
 
   return (

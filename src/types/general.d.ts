@@ -11,7 +11,8 @@ type ColorType =
   | "green"
   | "yellow"
   | "amber"
-  | "red";
+  | "red"
+  | "gray";
 type IconPosition = "default" | "top" | "right" | "left" | "bottom";
 
 type ModalType =
@@ -49,6 +50,7 @@ type ModalProps = {
   okText?: string;
   closable?: boolean;
   removeFooter?: boolean;
+  overFlow?: "overflow-hidden" | "overflow-auto";
 };
 
 interface CommonStyle {
@@ -57,6 +59,12 @@ interface CommonStyle {
   padding?: boolean | string;
   shadow?: boolean | string;
   border?: boolean | string;
+}
+
+interface ListItem<T = any> {
+  row: any;
+  className?: string;
+  value: T;
 }
 
 interface IconsProps {
