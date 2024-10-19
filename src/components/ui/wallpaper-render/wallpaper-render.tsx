@@ -53,26 +53,26 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({}) => {
       <div
         style={{
           position: "fixed",
-          bottom: 60,
-          right: 17,
+          bottom: 50,
+          right: 10,
           zIndex: -10,
           opacity: 0.7,
         }}
         className="hidden lg:block w-fit h-fit text-white font-bold text-2xl drop-shadow-md"
       >
-        NEXT KARAOKE
+        NEXT KARAOKE v1.0.2
       </div>
       <div
         style={{
           position: "fixed",
-          bottom: 75,
-          right: 17,
+          bottom: 65,
+          right: 10,
           zIndex: -10,
           opacity: 0.7,
         }}
         className="block lg:hidden w-fit h-fit text-white font-bold text-lg drop-shadow-md"
       >
-        NEXT KARAOKE
+        NEXT KARAOKE v1.0.2
       </div>
       {isVideo ? (
         <>

@@ -3,10 +3,7 @@ import React, { useLayoutEffect, useRef, useState } from "react";
 import Button from "../common/button/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import LoadConfig from "../ui/load-conifg/load-config";
-import { getLocalSystemMode } from "@/lib/local-storege/local-storage";
-import { getTracklist } from "@/lib/storage/tracklist";
 import { initDatabase } from "@/utils/database/db";
-import addTracklist from "../modal/append-song/tabs/add-tracklist";
 
 interface AllowSoundProps {
   children?: React.ReactNode;
@@ -35,7 +32,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
 
   const handleClick = () => {
     if (audioRef.current && audioLoopRef.current) {
-      const audio = audioRef.current; 
+      const audio = audioRef.current;
       const audioLoop = audioLoopRef.current;
 
       setPressed(true);
@@ -68,7 +65,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                 Karaoke Startup
               </div>
             ) : (
-              <>
+              <div className="flex flex-col items-center gap-2">
                 <div className="absolute -right-0.5 -top-0.5 ">
                   <span className="relative flex h-3 w-3 ">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
@@ -78,7 +75,8 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                 <Button blur={false} color="white" onClick={handleClick}>
                   <div className="px-2">Allow Sound</div>
                 </Button>
-              </>
+                <span className="text-white text-center">Updated v.1.0.2</span>
+              </div>
             )}
           </div>
         </div>
