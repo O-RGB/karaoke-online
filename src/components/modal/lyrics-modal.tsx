@@ -11,11 +11,13 @@ import { lyricsConfig, lyricsGetFont } from "@/features/lyrics/lyrics.features";
 import useConfigStore from "@/stores/config-store";
 import { DEFAULT_CONFIG } from "@/config/value";
 import { NextFont } from "next/dist/compiled/@next/font";
+import InputNumber from "../common/input-data/input-number";
+import ToggleCheckBox from "../common/input-data/checkbox";
 
 interface LyricsModalProps {}
 
 const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
-  const { setConfig } = useConfigStore();
+  const setConfig = useConfigStore((state) => state.setConfig);
   const lyrics =
     useConfigStore((state) => state.config.lyrics) ?? DEFAULT_CONFIG.lyrics;
   const lyricsConfigf = lyricsConfig(setConfig);
@@ -56,105 +58,104 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
     <div className="flex flex-col-reverse md:flex-row gap-4 w-full md:h-[390px]">
       <div className="w-full h-full flex flex-col">
         <div className="h-full">
-          <Label>รูปแบบเนื้อเพลง</Label>
-          <SwitchRadio<LyricsOptions>
-            onChange={lyricsConfigf.setLyricsOptions}
-            value={lyrics.lyricsMode}
-            options={[
-              {
-                children: "เริ่มต้น",
-                value: "default",
-              },
-              {
-                children: "เคลื่อนไหว",
-                value: "random",
-              },
-            ]}
-          ></SwitchRadio>
-
-          <div
-            className={`${
-              lyrics.lyricsMode === "random"
-                ? "pointer-events-none opacity-0"
-                : ""
-            } duration-300`}
-          >
-            <Label>ฟอนต์</Label>
-            <br />
-
-            <Select
-              defaultValue={lyrics.fontName}
-              onChange={(value) => {
-                lyricsConfigf.setFontChange(value);
-                onFontChanage(value);
-              }}
+          <div>
+            <Label className="pb-1">รูปแบบเนื้อเพลง</Label>
+            <SwitchRadio<LyricsOptions>
+              onChange={lyricsConfigf.setLyricsOptions}
+              value={lyrics.lyricsMode}
               options={[
                 {
-                  value: "notoSansThaiLooped",
-                  label: "Noto_Sans_Thai_Looped",
+                  children: "เริ่มต้น",
+                  value: "default",
                 },
                 {
-                  value: "inter",
-                  label: "Inter",
-                },
-                {
-                  value: "krub",
-                  label: "Krub",
-                },
-                {
-                  value: "roboto",
-                  label: "Roboto",
-                },
-                {
-                  value: "lora",
-                  label: "Lora",
+                  children: "เคลื่อนไหว",
+                  value: "random",
                 },
               ]}
-            ></Select>
+            ></SwitchRadio>
           </div>
+
           <div
             className={`${
               lyrics.lyricsMode === "random"
                 ? "pointer-events-none opacity-0"
                 : ""
-            } duration-300`}
+            } duration-300 flex flex-col gap-2 pt-2`}
           >
-            <Label>สีเนื้อเพลง</Label>
-            <br />
-            <span className="flex gap-2">
-              <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
-                <Label className="pb-1">สีตัวอักษร</Label>
-                <ColorPicker
-                  onChange={lyricsConfigf.setLyricsColor}
-                  value={lyrics.color?.color}
-                ></ColorPicker>
+            <div className="flex gap-2 w-full">
+              <div className="w-full">
+                <Label className="pb-1">ฟอนต์</Label>
+                <Select
+                  defaultValue={lyrics.fontName}
+                  onChange={(value) => {
+                    lyricsConfigf.setFontChange(value);
+                    onFontChanage(value);
+                  }}
+                  options={fontList}
+                ></Select>
+              </div>
+
+              <div className="w-20">
+                <Label className="pb-1">ขนาด (px)</Label>
+                <InputNumber
+                  disabled={lyrics.fontAuto}
+                  onChange={(x) => {
+                    const value = x.target.value;
+                    lyricsConfigf.setFontSize(value);
+                  }}
+                  value={lyrics.fontSize ?? 30}
+                ></InputNumber>
+              </div>
+              <div className="w-10 h-full">
+                <Label className="pb-1">ออโต้</Label>
+                <div className="flex justify-center items-center pl-2 h-8 rounded-md">
+                  <ToggleCheckBox
+                    defaultChecked={lyrics.fontAuto}
+                    onChange={lyricsConfigf.setFontAuto}
+                  ></ToggleCheckBox>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label className="pb-1">สีเนื้อเพลง</Label>
+              <span className="flex gap-2">
+                <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
+                  <Label className="pb-1">สีตัวอักษร</Label>
+                  <ColorPicker
+                    onChange={lyricsConfigf.setLyricsColor}
+                    value={lyrics.color?.color}
+                  ></ColorPicker>
+                </span>
+                <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
+                  <Label className="pb-1">สีขอบ</Label>
+                  <ColorPicker
+                    onChange={lyricsConfigf.setLyricsActiveColor}
+                    value={lyrics.active?.color}
+                  ></ColorPicker>
+                </span>
               </span>
-              <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
-                <Label className="pb-1">สีขอบ</Label>
-                <ColorPicker
-                  onChange={lyricsConfigf.setLyricsActiveColor}
-                  value={lyrics.active?.color}
-                ></ColorPicker>
+            </div>
+            <div>
+              <Label className="pb-1">สีปาดเนื้อร้อง</Label>
+              <span className="flex gap-2">
+                <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
+                  <Label className="pb-1">สีตัวอักษร</Label>
+                  <ColorPicker
+                    onChange={lyricsConfigf.setLyricsColorBorder}
+                    value={lyrics.color?.colorBorder}
+                  ></ColorPicker>
+                </span>
+                <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
+                  <Label className="pb-1">สีขอบ</Label>
+                  <ColorPicker
+                    onChange={lyricsConfigf.setLyricsActiveBorderColor}
+                    value={lyrics.active?.colorBorder}
+                  ></ColorPicker>
+                </span>
               </span>
-            </span>
-            <Label>สีปาดเนื้อร้อง</Label>
-            <br />
-            <span className="flex gap-2">
-              <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
-                <Label className="pb-1">สีตัวอักษร</Label>
-                <ColorPicker
-                  onChange={lyricsConfigf.setLyricsColorBorder}
-                  value={lyrics.color?.colorBorder}
-                ></ColorPicker>
-              </span>
-              <span className="flex gap-1 justify-center items-center border p-2 rounded-md">
-                <Label className="pb-1">สีขอบ</Label>
-                <ColorPicker
-                  onChange={lyricsConfigf.setLyricsActiveBorderColor}
-                  value={lyrics.active?.colorBorder}
-                ></ColorPicker>
-              </span>
-            </span>
+            </div>
           </div>
         </div>
         <div className="pt-2">
@@ -179,7 +180,11 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
             <LyricsAnimation
               activeColor={lyrics.active!}
               color={lyrics.color!}
-              fontSize="text-4xl"
+              fontSize={
+                lyrics.fontAuto
+                  ? "text-2xl md:text-3xl lg:text-6xl"
+                  : Number(lyrics.fontSize)
+              }
               display={Example}
               font={FontState}
               fixedCharIndex={3}
@@ -200,3 +205,118 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
 };
 
 export default LyricsModal;
+
+export const fontList = [
+  {
+    label: "Noto Sans Thai",
+    value: "notoSansThai",
+  },
+  {
+    label: "Noto Serif Thai",
+    value: "notoSerifThai",
+  },
+  {
+    label: "Kanit",
+    value: "kanit",
+  },
+  {
+    label: "Sarabun",
+    value: "sarabun",
+  },
+  {
+    label: "Prompt",
+    value: "prompt",
+  },
+  {
+    label: "Mitr",
+    value: "mitr",
+  },
+  {
+    label: "Pattaya",
+    value: "pattaya",
+  },
+  {
+    label: "Taviraj",
+    value: "taviraj",
+  },
+  {
+    label: "Charm",
+    value: "charm",
+  },
+  {
+    label: "Itim",
+    value: "itim",
+  },
+  {
+    label: "Pridi",
+    value: "pridi",
+  },
+  {
+    label: "Mali",
+    value: "mali",
+  },
+  {
+    label: "Sriracha",
+    value: "sriracha",
+  },
+  {
+    label: "Athiti",
+    value: "athiti",
+  },
+  {
+    label: "Trirong",
+    value: "trirong",
+  },
+  {
+    label: "KoHo",
+    value: "koHo",
+  },
+  {
+    label: "Niramit",
+    value: "niramit",
+  },
+  {
+    label: "Srisakdi",
+    value: "srisakdi",
+  },
+  {
+    label: "Chonburi",
+    value: "chonburi",
+  },
+  {
+    label: "Fahkwang",
+    value: "fahkwang",
+  },
+  {
+    label: "Kodchasan",
+    value: "kodchasan",
+  },
+  {
+    label: "Krub",
+    value: "krub",
+  },
+  {
+    label: "Charmonman",
+    value: "charmonman",
+  },
+  {
+    label: "Bai Jamjuree",
+    value: "baiJamjuree",
+  },
+  {
+    label: "Chakra Petch",
+    value: "chakraPetch",
+  },
+  {
+    label: "Thasadith",
+    value: "thasadith",
+  },
+  {
+    label: "K2D",
+    value: "k2d",
+  },
+  {
+    label: "Libre Baskerville",
+    value: "libreBaskerville",
+  },
+];

@@ -25,6 +25,8 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {
   const color = useConfigStore((state) => state.config.lyrics?.color);
   const lyricsMode = useConfigStore((state) => state.config.lyrics?.lyricsMode);
   const fontName = useConfigStore((state) => state.config.lyrics?.fontName);
+  const fontSize = useConfigStore((state) => state.config.lyrics?.fontSize);
+  const fontAuto = useConfigStore((state) => state.config.lyrics?.fontAuto);
 
   const [FontState, setFontState] = useState<NextFont>();
 
@@ -60,6 +62,11 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {
                 <LyricsAnimation
                   font={FontState}
                   activeColor={colorActive!}
+                  fontSize={
+                    fontAuto
+                      ? "text-2xl md:text-3xl lg:text-6xl"
+                      : Number(fontSize)
+                  }
                   color={color!}
                   fixedCharIndex={position === false ? -1 : undefined}
                   display={display}
@@ -69,6 +76,11 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {
               <LyricsAnimation
                 font={FontState}
                 activeColor={colorActive!}
+                fontSize={
+                  fontAuto
+                    ? "text-2xl md:text-3xl lg:text-6xl"
+                    : Number(fontSize)
+                }
                 color={color!}
                 fixedCharIndex={position === true ? -1 : undefined}
                 display={displayBottom}

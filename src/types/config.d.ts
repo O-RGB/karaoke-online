@@ -1,5 +1,33 @@
-type SystemFont = "notoSansThaiLooped" | "inter" | "roboto" | "lora" | "krub";
 type RefreshRate = "HIGH" | "MIDDLE" | "LOW";
+type SystemFont =
+  | "notoSansThai"
+  | "notoSerifThai"
+  | "kanit"
+  | "sarabun"
+  | "prompt"
+  | "mitr"
+  | "pattaya"
+  | "taviraj"
+  | "charm"
+  | "itim"
+  | "pridi"
+  | "mali"
+  | "sriracha"
+  | "athiti"
+  | "trirong"
+  | "koHo"
+  | "niramit"
+  | "srisakdi"
+  | "chonburi"
+  | "fahkwang"
+  | "kodchasan"
+  | "krub"
+  | "charmonman"
+  | "baiJamjuree"
+  | "chakraPetch"
+  | "thasadith"
+  | "k2d"
+  | "libreBaskerville";
 
 interface ConfigDisplay {
   refreshRate: Partial<RefreshRateConfig>;
@@ -41,6 +69,8 @@ interface LyricsConfig {
   color?: LyricsColorConfig;
   active?: LyricsColorConfig;
   font?: string;
+  fontSize?: number;
+  fontAuto?: boolean;
   fontName?: SystemFont;
   lyricsMode?: LyricsOptions;
 }

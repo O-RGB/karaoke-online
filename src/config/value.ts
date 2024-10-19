@@ -48,6 +48,8 @@ export const DEFAULT_CONFIG: ConfigDisplay = {
       colorBorder: "#ffffff",
     },
     font: "notoSansThaiLooped",
+    fontSize: 30,
+    fontAuto: true,
     lyricsMode: "default",
   },
   widgets: {

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import CharLyrics from "./char-lyrics";
 import useConfigStore from "@/stores/config-store";
 import { NextFont } from "next/dist/compiled/@next/font";
@@ -6,7 +6,7 @@ import { NextFont } from "next/dist/compiled/@next/font";
 interface LyricsAnimationProps {
   display: string[][];
   fixedCharIndex?: number;
-  fontSize?: string;
+  fontSize?: string | number;
   color: LyricsColorConfig;
   activeColor: LyricsColorConfig;
   font?: NextFont;
@@ -15,7 +15,7 @@ interface LyricsAnimationProps {
 const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
   display,
   fixedCharIndex,
-  fontSize = "text-2xl md:text-3xl lg:text-6xl",
+  fontSize = 40,
   color,
   activeColor,
   font,
@@ -35,11 +35,19 @@ const LyricsAnimation: React.FC<LyricsAnimationProps> = ({
     return indices;
   }, [display]);
 
+  useEffect(() => {}, [fontSize]);
+
   const groupText = (str: string[]) =>
     str.map((char) => (char === " " ? "\u00A0" : char)).join("");
 
   return (
-    <div style={{ ...font?.style }} className={`flex ${fontSize}`}>
+    <div
+      style={{
+        ...font?.style,
+        fontSize: typeof fontSize === "number" ? fontSize : "",
+      }}
+      className={`flex ${typeof fontSize === "string" ? fontSize : ""}`}
+    >
       {display.map((data, index) => {
         const lyrInx = charIndices[index] || 0;
         const text = groupText(data);
