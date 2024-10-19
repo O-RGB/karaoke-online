@@ -158,14 +158,6 @@ export const saveTracklistToStorage = async (
   return { result: true };
 };
 
-// export const saveTrackList = async (file: File) => {
-//   return await storageAdd(TRACKLIST_FILENAME, file, STORAGE_NAME_DIC);
-// };
-
-// export const getTrackList = async () => {
-//   return await storageGet<File>(TRACKLIST_FILENAME, STORAGE_NAME_DIC);
-// };
-
 export const getAllKeyTracklist = async () => {
   return await storageGetAllKeys(STORAGE_TRACKLIST);
 };

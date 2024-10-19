@@ -46,18 +46,93 @@ export async function storageGetAll<T = any[]>(
   }
 }
 
-export async function storageGetAllKeys(storage_name: string) {
+// export async function storageGetAllKeys(storage_name: string) {
+//   try {
+//     const db = await getDB(storage_name);
+//     const tx = db.transaction(storage_name, "readonly");
+//     const store = tx.objectStore(storage_name);
+//     const keys = await store.getAllKeys();
+
+//     await tx.done;
+//     return keys;
+//   } catch (error) {
+//     console.error("Error retrieving keys:", error);
+//     return [];
+//   }
+// }
+
+export async function storageGetAllKeys(
+  storage_name: string,
+  limit?: number,
+  offset?: number
+) {
   try {
     const db = await getDB(storage_name);
     const tx = db.transaction(storage_name, "readonly");
     const store = tx.objectStore(storage_name);
-    const keys = await store.getAllKeys();
+
+    let keys: IDBValidKey[];
+
+    if (limit !== undefined || offset !== undefined) {
+      // If limit or offset is provided, use cursor to get specific range
+      const allKeys: IDBValidKey[] = [];
+      let cursor = await store.openKeyCursor();
+      let count = 0;
+
+      while (cursor) {
+        if (offset === undefined || count >= offset) {
+          allKeys.push(cursor.key);
+          if (limit !== undefined && allKeys.length >= limit) {
+            break;
+          }
+        }
+        count++;
+        cursor = await cursor.continue();
+      }
+      keys = allKeys;
+    } else {
+      // If no limit or offset, get all keys
+      keys = await store.getAllKeys();
+    }
 
     await tx.done;
     return keys;
   } catch (error) {
     console.error("Error retrieving keys:", error);
     return [];
+  }
+}
+
+export async function findKeyOffset(
+  storage_name: string,
+  targetKey: IDBValidKey,
+  limit: number
+): Promise<number> {
+  try {
+    const db = await getDB(storage_name);
+    const tx = db.transaction(storage_name, "readonly");
+    const store = tx.objectStore(storage_name);
+
+    let totalCount = 0;
+    let currentOffset = 0;
+    let cursor = await store.openKeyCursor();
+
+    while (cursor) {
+      if (cursor.key === targetKey) {
+        const offsetWithinCurrentPage = totalCount % limit;
+        const pageOffset = Math.floor(totalCount / limit) * limit;
+        await tx.done;
+        return pageOffset + offsetWithinCurrentPage;
+      }
+      totalCount++;
+      cursor = await cursor.continue();
+    }
+
+    await tx.done;
+    return -1; // Key not found
+  } catch (error) {
+    console.error("Error finding key offset:", error);
+    return -1;
   }
 }
 
@@ -122,16 +197,25 @@ export async function storageAddAll(
       if (error === "{}") {
         error = undefined;
       }
-    } finally {
       onProgress?.({
-        title: "กำลังทำงาน...",
+        title: "เกิดข้อผิดพลาด",
         progress: Math.round(((i + 1) / list.length) * 100),
         processing: list[i]?.key,
         error: error,
         show: true,
       });
+      // หยุดการทำงานทันทีเมื่อเกิด error
+      throw new Error(`Failed to write to IndexedDB: ${error}`);
     }
+    onProgress?.({
+      title: "กำลังทำงาน...",
+      progress: Math.round(((i + 1) / list.length) * 100),
+      processing: list[i]?.key,
+      error: error,
+      show: true,
+    });
   }
+
   if (!error) {
     onProgress?.({
       title: "เสร็จสิ้น",

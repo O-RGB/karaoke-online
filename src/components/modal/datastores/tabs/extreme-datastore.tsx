@@ -1,21 +1,20 @@
 import Button from "@/components/common/button/button";
-import SearchSelect from "@/components/common/input-data/select/search-select";
 import Label from "@/components/common/label";
 import TableList from "@/components/common/table/table-list";
 import SearchDropdown from "@/components/tools/search-song/search-dropdown";
 import { toOptions } from "@/lib/general";
-import {
-  getAllKeysSong,
-  getSongByKey,
-  deleteAllSong,
-} from "@/lib/storage/drive";
+import { getAllKeysSong, deleteAllSong } from "@/lib/storage/drive";
+import { getSongByKey } from "@/lib/storage/song";
 import { extractFile } from "@/lib/zip";
 import useTracklistStore from "@/stores/tracklist-store";
 import React, { useEffect, useState } from "react";
+import { FaDownload } from "react-icons/fa";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 interface ExtremeDataStoreProps {}
 
 const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
+  const limit = 20;
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
 
   const [zipFilename, setZipFilename] = useState<ListItem<IDBValidKey>[]>([]);
@@ -27,9 +26,11 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
 
   const [optionSearch, setOptionSearch] = useState<SearchResult>();
 
-  const load = async () => {
-    const res = await getAllKeysSong();
-    setZipFilename(res.map((data) => ({ row: data, value: "" })));
+  const [page, setPage] = useState<number>(0);
+
+  const load = async (offset: number = 0) => {
+    const res = await getAllKeysSong(limit, offset);
+    setZipFilename(res.map((data) => ({ row: data, value: data })));
   };
 
   const onClickFolder = async (filename: string, notFocus: boolean = false) => {
@@ -74,8 +75,8 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
   }, []);
 
   return (
-    <div className="">
-      <div className="relative pb-12 pt-2 text-black w-full">
+    <>
+      {/* <div className="relative pb-12 pt-2 text-black w-full">
         <div className="absolute w-full z-50">
           <SearchSelect
             optionsStyle={{
@@ -89,6 +90,7 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
                 setOptionSearch(value.option);
                 setFolderFocus(undefined);
                 setSongFucos(undefined);
+
                 const name = value.option.fileId;
                 const type = value.option.type;
                 const folder = name.split("/");
@@ -97,6 +99,7 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
                   const songItem: string = folder[1];
                   let folderType = `${folderItem}.zip`;
                   let songType = `${songItem}.${type === 0 ? "emk" : "zip"}`;
+                  console.log(await findLimitOffsetByKey(folderType, 10));
                   await onClickFolder(folderType, true);
                   setFolderFocus(folderType);
                   setTimeout(() => {
@@ -108,10 +111,10 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
             onSearch={onSearch}
           ></SearchSelect>
         </div>
-      </div>
+      </div> */}
 
-      <div className="grid grid-cols-2 gap-4 h-full">
-        {optionSearch && (
+      <div className="w-full h-full flex flex-col md:flex-row  gap-2 ">
+        {/* {optionSearch && (
           <div className="col-span-2 md:col-span-1">
             <div className="w-full">
               <Label>ค้นหา</Label>
@@ -130,43 +133,88 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
               </div>
             </div>
           </div>
-        )}
-        <div
-          className={`col-span-2 ${
-            optionSearch ? "md:col-span-1" : "md:col-span-2"
-          } flex gap-4 w-full overflow-hidden`}
-        >
+        )} */}
+
+        <div className="w-full h-full flex flex-col items-end border rounded-md border-blue-500">
+          <div className="flex items-center w-full bg-gray-200 p-2 rounded-t-md justify-between">
+            <Label className="text-gray-700 font-bold">กลุ่มเพลง</Label>
+            <div className="flex items-center justify-center gap-2 text-xs">
+              <IoIosArrowBack
+                className="cursor-pointer"
+                onClick={() => {
+                  setPage((value) => {
+                    if (value - 1 <= 0) {
+                      return 0;
+                    } else {
+                      return value - 1;
+                    }
+                  });
+                  load((page - 1) * limit);
+                }}
+              ></IoIosArrowBack>
+              <span className="min-w-5 text-center"> {page + 1}</span>
+              <IoIosArrowForward
+                className="cursor-pointer"
+                onClick={() => {
+                  setPage((value) => value + 1);
+                  load((page + 1) * limit);
+                }}
+              ></IoIosArrowForward>
+            </div>
+          </div>
           <TableList
+            className="!rounded-b-md !border-none h-[170px] md:h-[385px]"
+            height={""}
+            deleteItem={false}
             scrollToItem={folderFocus}
             listKey="folder-list"
             label="รายชื่อโฟลเดอร์"
             onClickItem={(v) => onClickFolder(v)}
             list={zipFilename}
           ></TableList>
+        </div>
+        <div className="w-full h-full flex flex-col items-end border rounded-md border-blue-500">
+          <div className="flex items-center w-full bg-gray-200 p-2 rounded-t-md justify-between">
+            <Label className="text-gray-700 font-bold">ไฟล์เพลง</Label>
+          </div>
           <TableList
+            className="!rounded-b-md !border-none h-[170px] md:h-[385px]"
+            height={""}
+            deleteItem={false}
+            itemAction={(file: File, index: number) => {
+              return (
+                <Button
+                  shadow={false}
+                  border={""}
+                  onClick={() => {
+                    const url = URL.createObjectURL(file);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = file.name;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                  }}
+                  padding=""
+                  className="w-7 h-7"
+                  color="blue"
+                  blur={false}
+                  icon={<FaDownload className="text-white"></FaDownload>}
+                ></Button>
+              );
+            }}
             scrollToItem={songFucos}
             listKey="songs-list"
-            renderKey="name" // File.name
+            renderKey="name"
             label={`ไฟล์เพลง ${folderFocus ?? ""}`}
             onClickItem={(v) => onClickFolder(v)}
             list={songs}
             loading={unzipLoading}
           ></TableList>
         </div>
-        <div className="col-span-2 ">
-          {/* <Popconfirm title={"test"} description={"tewt"} onConfirm={() => {}}> */}
-          <Button
-            color="red"
-            blur={false}
-            onClick={deleteAll}
-            padding={"p-1 px-3 text-white text-sm"}
-          >
-            ลบเพลงทั้งหมด
-          </Button>
-          {/* </Popconfirm> */}
-        </div>
       </div>
-    </div>
+    </>
   );
 };
 

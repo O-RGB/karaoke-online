@@ -69,7 +69,12 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
       return;
     }
     setFilename(fileList.item(0)?.name);
-    setProgress({ progress: 0, title: "กำลัง Extract zip...", show: true });
+    setProgress({
+      progress: 0,
+      title: "กำลัง Extract zip...",
+      show: true,
+      loading: true,
+    });
     const loaded = await extractMusicZip(fileList, setProgress);
     if (loaded) {
       await onPrepareStorage(loaded);
@@ -87,7 +92,13 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     }
 
     if (file?.type === "application/json") {
-      setProgress({ progress: 0, title: "กำลังอ่านไฟล์...", show: true });
+      setProgress({
+        progress: 0,
+        title: "กำลังอ่านไฟล์...",
+        show: true,
+        loading: true,
+      });
+
       const saved = await jsonTracklistToDatabase(
         file,
         tracklistDrive,
@@ -346,7 +357,9 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
               <AddFormKaraokeExtreme
                 musicLibraryCount={musicLibraryCount}
                 tracklistCount={tracklistCount}
-                onAddFileTracklist={onLoadFileJson}
+                onAddFileTracklist={(file) => {
+                  onLoadFileJson(file, false);
+                }}
                 onRemoveFileTracklist={onRemoveFileJson}
                 filenameTracklist={musicFilename}
                 filename={filename}

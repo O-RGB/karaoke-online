@@ -12,9 +12,10 @@ interface TableListProps {
   loading?: boolean;
   listKey: string;
   renderKey?: string;
-  scrollToItem?: string; // ชื่อของรายการที่ต้องการเลื่อนไป
+  scrollToItem?: string;
   deleteItem?: boolean;
   itemAction?: (value: any, index: number) => ReactNode;
+  className?: string;
 }
 
 const TableList: React.FC<TableListProps> = ({
@@ -28,6 +29,8 @@ const TableList: React.FC<TableListProps> = ({
   renderKey,
   scrollToItem,
   itemAction,
+  deleteItem = true,
+  className
 }) => {
   const [onFocus, setFocus] = useState<number>(-1);
   const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -43,11 +46,7 @@ const TableList: React.FC<TableListProps> = ({
 
   useEffect(() => {
     if (scrollToItem && list) {
-      const index = list.findIndex((data) =>
-        renderKey
-          ? data.row[renderKey] === scrollToItem
-          : data.value === scrollToItem
-      );
+      const index = list.findIndex((data) => data.value === scrollToItem);
       if (index !== -1 && itemRefs.current[index]) {
         itemRefs.current[index]?.scrollIntoView({
           behavior: "smooth",
@@ -56,13 +55,13 @@ const TableList: React.FC<TableListProps> = ({
         setFocus(index);
       }
     }
-  }, [scrollToItem, list, renderKey]);
+  }, [scrollToItem, list]);
 
   return (
     <>
       <div
         style={{ height: height }}
-        className={`flex flex-col divide-y w-full border p-2 overflow-auto rounded-md`}
+        className={`${className} flex flex-col divide-y w-full border p-2 overflow-auto rounded-md`}
       >
         {loading ? (
           <div className="flex items-center justify-center w-full h-full">
@@ -72,29 +71,31 @@ const TableList: React.FC<TableListProps> = ({
           list?.map((data, i) => (
             <div
               ref={(el: any) => (itemRefs.current[i] = el)}
-              onClick={() => handleClick?.(data, i)}
+              onClick={() => handleClick?.(data.value, i)}
               className={`${
                 onFocus === i ? "bg-gray-300" : ""
-              } p-1 hover:bg-gray-200 duration-300 cursor-pointer w-full text-sm flex justify-between ${
+              } p-1 hover:bg-gray-200 duration-300 cursor-pointer w-full text-sm flex items-center justify-between ${
                 data.className
               }`}
               key={`${listKey}-${i}`}
             >
-              {renderKey ? data.row[renderKey] : data.row}
+              {data.row}
               <div className="flex gap-2">
                 {itemAction?.(data.value, i)}
-                <Button
-                  shadow={false}
-                  border={""}
-                  onClick={() => onDeleteItem?.(data.value, i)}
-                  padding=""
-                  className="w-7 h-7"
-                  color="red"
-                  blur={false}
-                  icon={
-                    <RiDeleteBin5Line className="text-white"></RiDeleteBin5Line>
-                  }
-                ></Button>
+                {deleteItem && (
+                  <Button
+                    shadow={false}
+                    border={""}
+                    onClick={() => onDeleteItem?.(data.value, i)}
+                    padding=""
+                    className="w-7 h-7"
+                    color="red"
+                    blur={false}
+                    icon={
+                      <RiDeleteBin5Line className="text-white"></RiDeleteBin5Line>
+                    }
+                  ></Button>
+                )}
               </div>
             </div>
           ))

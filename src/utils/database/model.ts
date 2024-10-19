@@ -31,6 +31,7 @@ export const SongUserModel = async () => {
 };
 
 export const TracklistModel = async () => {
+  console.log("get tracklist model")
   try {
     const db = await getDB(STORAGE_TRACKLIST, true);
     const tx = db.transaction(STORAGE_TRACKLIST, "readwrite");
@@ -43,6 +44,7 @@ export const TracklistModel = async () => {
 };
 
 export const TracklistDriveModel = async () => {
+  console.log("get tracklist drive model")
   try {
     const db = await getDB(STORAGE_DRIVE_TRACKLIST, true);
     const tx = db.transaction(STORAGE_DRIVE_TRACKLIST, "readwrite");
@@ -75,12 +77,4 @@ export const WallpaperModel = async () => {
   } catch (error) {
     return { store: null, tx: null, db: null, loaded: false };
   }
-};
-
-export const LoadDatabase = () => {
-  SongUserModel();
-  TracklistModel();
-  WallpaperModel();
-  SongDriveModel();
-  karaokeExtremeModel();
 };

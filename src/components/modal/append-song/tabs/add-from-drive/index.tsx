@@ -76,7 +76,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
     <div className="flex flex-col gap-2 h-full">
       <DriveAction
         ok={onDriveTested}
-        title="Google Apps Script URL"
+        title="ลิงก์ Google Apps Script"
         onSave={handleAddUrlDrive}
         onSaveButton={"เชื่อมต่อ"}
         onSavedButton="เชื่อมต่อแล้ว"
@@ -85,11 +85,12 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
         }}
         inputProps={{
           value: driveUrl,
+          placeholder: "https:...",
         }}
       ></DriveAction>
       <DriveAction
         ok={tracklistUrl ? true : false}
-        title="Tracklist URL"
+        title="ไฟล์รายชื่อเพลง"
         onSave={onAddTrackListDrive}
         onSaveButton="ดาวน์โหลด"
         buttonProps={{
@@ -97,9 +98,10 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
         }}
         inputProps={{
           value: tracklistUrl,
+          placeholder: "https:...",
         }}
       ></DriveAction>
-      <div>
+      <div className="flex flex-col gap-1">
         <Label>เปิดการใช้งานโหลดเพลงจาก Drive (ไม่โหลดเพลงจากเครื่อง)</Label>
         <SwitchRadio
           disabled={driveUrl ? false : true}
@@ -118,7 +120,9 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
         ></SwitchRadio>
       </div>
 
-      <div>หากใครสนใจทดสอบโหลดเพลงจาก Google drive ต้องติดต่อ Admin</div>
+      <div className="text-blue-500">
+        หากใครสนใจทดสอบโหลดเพลงจาก Google drive ต้องติดต่อ Admin
+      </div>
     </div>
   );
 };

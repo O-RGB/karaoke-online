@@ -7,7 +7,13 @@ import { createTrackList } from "@/lib/storage/tracklist";
 import useTracklistStore from "@/stores/tracklist-store";
 import React, { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { FaCheck, FaPlus, FaRegFileAudio, FaSearch } from "react-icons/fa";
+import {
+  FaCheck,
+  FaFileAudio,
+  FaPlus,
+  FaRegFileAudio,
+  FaSearch,
+} from "react-icons/fa";
 import DuplicateSongModal from "./duplicate-song";
 import IgnoreDupFile from "./ignore-dupfile";
 
@@ -226,19 +232,19 @@ const AddSong: React.FC<AddSongProps> = ({
       ></IgnoreDupFile>
 
       <div className="w-full h-full flex flex-col gap-2 ">
-        <div className="">
+        <div className="flex flex-col gap-1">
           <Label>เลือกไฟล์เพลง (.emk หรือ .mid, .cur, .lyr) </Label>
           <Upload
             accept=".emk,application/octet-stream,.cur,application/octet-stream,.lyr,text/plain,.mid,audio/midi"
-            className="border p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
+            className="border border-blue-500 p-3 rounded-md   hover:bg-gray-50 duration-300 flex justify-between"
             onSelectFile={onAddFile}
             inputProps={{
               multiple: true,
             }}
           >
             <span className="w-full text-sm flex items-center gap-2">
-              <FaRegFileAudio></FaRegFileAudio>
-              <span>อัปโหลดไฟล์</span>
+              <FaRegFileAudio className="text-blue-500"></FaRegFileAudio>
+              <span>อัปโหลดไฟล์เพลง</span>
             </span>
           </Upload>
         </div>

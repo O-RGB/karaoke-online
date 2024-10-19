@@ -1048,10 +1048,10 @@ source-map-js@^1.0.2, source-map-js@^1.2.0:
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.0.tgz#16b809c162517b5b8c3e7dcd315a2a5c2612b2af"
   integrity sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==
 
-spessasynth_lib@^3.20.31:
-  version "3.20.31"
-  resolved "https://registry.yarnpkg.com/spessasynth_lib/-/spessasynth_lib-3.20.31.tgz#594a6c877124e945c6d9597fa1f3eebdf6607b6d"
-  integrity sha512-zqOuAIZDuRmokuqZxGdWbmaEGLsO/GFbmsQxLl4oilLcMzpGzkEhvaP7RfmEZaRq1ZIa8e1uHWcnis/KoE+a0w==
+spessasynth_lib@^3.21.12:
+  version "3.21.12"
+  resolved "https://registry.yarnpkg.com/spessasynth_lib/-/spessasynth_lib-3.21.12.tgz#38f89c181266b5447f67cfdc8ea759eacaa2e0a8"
+  integrity sha512-ktSucXQIE8B1sF5ETpO1pHRz/kUYZFmUpexb8NlvS/S8x9C8NgCUNg3MI5TI8mr9TeSUwPTkSIurpYYqEt4owQ==
 
 streamsearch@^1.1.0:
   version "1.1.0"

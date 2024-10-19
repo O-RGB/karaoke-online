@@ -66,7 +66,11 @@ const DuplicateSongModal: React.FC<DuplicateSongModalProps> = ({
           </div>
           <div className="flex flex-col border-b border-x border-gray-200 rounded-b-md gap-2 h-full p-2">
             {valid &&
-              valid.isSame.map((data) => <SongDetail song={data}></SongDetail>)}
+              valid.isSame.map((data, index) => (
+                <React.Fragment key={`song-detail-${index}`}>
+                  <SongDetail song={data}></SongDetail>
+                </React.Fragment>
+              ))}
           </div>
         </div>
       </div>

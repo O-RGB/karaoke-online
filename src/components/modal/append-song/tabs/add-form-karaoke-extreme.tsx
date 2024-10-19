@@ -34,38 +34,38 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
     <>
       <div className="flex flex-col h-full">
         <div className="flex flex-col gap-2">
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-1">
             <Label>เลือกไฟล์รวมเพลง (.zip)</Label>
             <Upload
               accept=".zip"
-              className="border p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
+              className="border border-blue-500 p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
               onSelectFile={onAddFile}
               inputProps={{}}
             >
               <span className="w-full text-sm flex items-center gap-2">
-                <GrDocumentZip></GrDocumentZip>
-                <span>อัปโหลดไฟล์</span>
+                <GrDocumentZip className="text-blue-500"></GrDocumentZip>
+                <span>อัปโหลดไฟล์ .zip</span>
               </span>
               <Label>{filename}</Label>
             </Upload>
             <div className="flex gap-1 w-full justify-end pt-1 text-[10px]">
               <Label>
                 {" "}
-                บันทึกแล้ว {musicLibraryCount.toLocaleString()} รายชื่อ
+                บันทึกแล้ว {musicLibraryCount.toLocaleString()} ไฟล์
               </Label>
             </div>
           </div>
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-1">
             <Label>เลือกไฟล์ฐานข้อมูลเพลง (.json) </Label>
             <Upload
               accept=".json"
-              className="border p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
+              className="border border-blue-500 p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
               onSelectFile={onAddFileTracklist}
               inputProps={{}}
             >
               <span className="w-full text-sm flex items-center gap-2">
-                <TbJson></TbJson>
-                <span>อัปโหลดไฟล์</span>
+                <TbJson className="text-blue-500"></TbJson>
+                <span>อัปโหลดไฟล์ .json</span>
               </span>
               {/* <Label>{filenameTracklist}</Label> */}
             </Upload>
@@ -95,11 +95,13 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
                 shadow=""
                 border=""
                 blur=""
+                icon={<FaWindows></FaWindows>}
+                iconPosition="left"
               >
-                <FaWindows></FaWindows>
+                Windows
               </Button>
             </Link>
-            <Button
+            {/* <Button
               disabled
               color="blue"
               padding=""
@@ -111,27 +113,24 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
               <span className="">
                 <SiMacos className="text-5xl"></SiMacos>
               </span>
-            </Button>
-          </span>
-          <div className="pt-2">
-            <hr />
-          </div>
-          <span className="text-sm">
-            <Link
-              href={"https://www.youtube.com/watch?v=dVPB-dVmG1I"}
-              target="_blank"
-              className="w-fit"
-            >
-              <Button
-                blur={false}
-                color="red"
-                iconPosition="left"
-                className="text-white w-fit"
-                icon={<BsYoutube className="text-white" />}
+            </Button> */}
+            <span className="text-sm">
+              <Link
+                href={"https://www.youtube.com/watch?v=dVPB-dVmG1I"}
+                target="_blank"
+                className="w-fit"
               >
-                วิธีเพิ่มเพลง
-              </Button>
-            </Link>
+                <Button
+                  blur={false}
+                  color="red"
+                  iconPosition="left"
+                  className="text-white w-fit"
+                  icon={<BsYoutube className="text-white" />}
+                >
+                  วิธีใช้งาน
+                </Button>
+              </Link>
+            </span>
           </span>
         </div>
       </div>

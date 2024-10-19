@@ -106,7 +106,7 @@ export const getSong = async (
 
     // on drive
     if (driveMode) {
-      superFile = await getSongDrive(`${superId}`, false);
+      superFile = await getSongDrive(`${superId}`);
     } else {
       // // on local
       const checkUserSong: boolean = superId.startsWith(CUSTOM_SONG_ZIP);

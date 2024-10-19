@@ -40,11 +40,11 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
         <div>
           <div className="flex flex-col w-full pb-2">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1">
+              <span className="flex items-center justify-between gap-1">
                 {process?.progress === 100 ? (
                   <>
                     <Label>
-                      <FaCheck></FaCheck>
+                      <FaCheck className="pb-0.5"></FaCheck>
                     </Label>
                     <Label className="pb-0.5">
                       {process.title ? process.title : "เรียบร้อย"}

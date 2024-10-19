@@ -10,7 +10,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ value }) => {
     <>
       <div className="flex justify-between w-full gap-4">
         <span className="flex flex-col md:flex-row gap-2 md:items-center justify-between ">
-          <span className="text-lg">{value.name}</span>
+          <span className="">{value.name}</span>
           <span className="flex gap-1 items-center text-sm p-1 px-1.5 bg-white/20 rounded-md w-fit">
             <span>
               <FaUser className="text-xs"></FaUser>

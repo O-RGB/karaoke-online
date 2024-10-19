@@ -52,12 +52,11 @@ const DriveAction: React.FC<DriveActionProps> = ({
   return (
     <div>
       <Label>{title}</Label>
-      <div className="flex justify-end gap-2 w-full pb-1">
+      <div className="flex justify-end gap-2 w-full py-1">
         <Input
           {...inputProps}
           value={value}
-          placeholder="https://..."
-          className="w-full !text-black"
+          className="w-full !text-black border border-blue-500 text-sm p-2"
           onChange={handleChange}
         ></Input>
 
