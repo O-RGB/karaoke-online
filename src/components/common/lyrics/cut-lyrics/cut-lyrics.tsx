@@ -65,7 +65,7 @@ const CutLyrics: React.FC<CutLyricsProps> = ({
 
   const highlightStyle = {
     width: `${highlightedWidth}px`,
-    transition: `width ${isTransitioning ? "0.1s" : "0.0s"} ease-out`,
+    transition: `width ${isTransitioning ? "0.3s" : "0.0s"} ease-out`,
   };
 
   const fontType = typeof fontSize;
@@ -81,7 +81,7 @@ const CutLyrics: React.FC<CutLyricsProps> = ({
     lineHeight: "1.5",
   };
 
-  useEffect(() => {},[font])
+  useEffect(() => {}, [font]);
 
   return (
     <div
@@ -94,7 +94,7 @@ const CutLyrics: React.FC<CutLyricsProps> = ({
     >
       <span ref={measureRef} className="absolute opacity-0 whitespace-nowrap" />
       <div
-        className="font-outline-2 sm:font-outline-4 absolute top-0 left-0"
+        className="font-outline-3 lg:font-outline-4 absolute top-0 left-0"
         style={{ color: activeColor.color, ...commonStyles }}
       >
         {renderCharLyrics()}
@@ -103,7 +103,7 @@ const CutLyrics: React.FC<CutLyricsProps> = ({
         {renderCharLyrics()}
       </div>
       <div
-        className="absolute top-0 left-0 font-outline-2 sm:font-outline-4"
+        className="absolute top-0 left-0 font-outline-3 lg:font-outline-4"
         style={{
           ...highlightStyle,
           color: activeColor.colorBorder,

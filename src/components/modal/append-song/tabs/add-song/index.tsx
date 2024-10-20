@@ -106,7 +106,7 @@ const AddSong: React.FC<AddSongProps> = ({
         isError = true;
         errorCount = errorCount + 1;
       }
-      let tl = createTrackList(data, "", "");
+      let tl = createTrackList(data, "", "", "CUSTOM");
 
       let same: SearchResult[] = [];
       if (!isError) {
@@ -235,7 +235,7 @@ const AddSong: React.FC<AddSongProps> = ({
         <div className="flex flex-col gap-1">
           <Label>เลือกไฟล์เพลง (.emk หรือ .mid, .cur, .lyr) </Label>
           <Upload
-            accept=".emk,application/octet-stream,.cur,application/octet-stream,.lyr,text/plain,.mid,audio/midi"
+            // accept=".emk,application/octet-stream,.cur,application/octet-stream,.lyr,text/plain,.mid,audio/midi"
             className="border border-blue-500 p-3 rounded-md   hover:bg-gray-50 duration-300 flex justify-between"
             onSelectFile={onAddFile}
             inputProps={{

@@ -60,7 +60,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({}) => {
         }}
         className="hidden lg:block w-fit h-fit text-white font-bold text-2xl drop-shadow-md"
       >
-        NEXT KARAOKE v1.0.21
+        NEXT KARAOKE v1.0.22
       </div>
       <div
         style={{
@@ -72,7 +72,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({}) => {
         }}
         className="block lg:hidden w-fit h-fit text-white font-bold text-lg drop-shadow-md"
       >
-        NEXT KARAOKE v1.0.21
+        NEXT KARAOKE v1.0.22
       </div>
       {isVideo ? (
         <>

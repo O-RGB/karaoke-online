@@ -28,38 +28,6 @@ import {
   prompt,
 } from "@/config/fonts";
 import { DEFAULT_CONFIG } from "@/config/value";
-// import {
-//   Noto_Sans_Thai_Looped,
-//   Inter,
-//   Krub,
-//   Roboto,
-//   Lora,
-// } from "next/font/google";
-
-// const notoSansThaiLooped = Noto_Sans_Thai_Looped({
-//   weight: "400",
-//   subsets: ["latin", "thai", "latin-ext"],
-// });
-
-// const inter = Inter({
-//   weight: "400",
-//   subsets: ["latin"],
-// });
-
-// const krub = Krub({
-//   weight: "400",
-//   subsets: ["latin"],
-// });
-
-// const roboto = Roboto({
-//   weight: "400",
-//   subsets: ["latin"],
-// });
-
-// const lora = Lora({
-//   weight: "400",
-//   subsets: ["latin"],
-// });
 
 export const lyricsGetFont = (get: SystemFont) => {
   let font = undefined;

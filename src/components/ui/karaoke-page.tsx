@@ -17,7 +17,6 @@ import StatusPanel from "../tools/status/status-panel";
 import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper-modal";
 import MidiSettingModal from "../modal/midi-setting-modal";
-import SongListModal from "../modal/song-list.modal";
 import { getTracklist } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
 import TicksRender from "./ticks-render/ticks-render";
@@ -41,7 +40,6 @@ interface KaraokePageProps {}
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { perset, synth, player, analysers, setupSpessasynth } =
     useSpessasynthStore();
-  const initializePeers = usePeerStore((state) => state.initializePeers);
   const addTracklist = useTracklistStore((state) => state.addTracklist);
   const {
     loadAndPlaySong,
@@ -55,15 +53,12 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const notification = useNotificationStore((state) => state.notification);
 
   const startup = async () => {
-    // Config
-    // const systemConfig = getLocalSystemMode();
-
     // Setup
     setupSpessasynth();
     // initializePeers();
 
     // Database
-    const tl = await getTracklist();
+    const tl = await getTracklist(["CUSTOM", "EXTHEME"]);
     addTracklist(tl);
   };
 
@@ -84,7 +79,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
     MIDI_SETTING: <MidiSettingModal></MidiSettingModal>,
-    SONG_LIST: <SongListModal></SongListModal>,
+    // SONG_LIST: <SongListModal></SongListModal>,
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
   };
 

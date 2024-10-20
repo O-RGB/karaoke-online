@@ -11,6 +11,7 @@ import {
   setLocalDriveTested,
   setLocalDriveUrl,
 } from "@/lib/local-storege/local-storage";
+import useConfigStore from "@/stores/config-store";
 
 interface AddFromDriveProps {
   onAddUrlDrvie?: (value: string) => Promise<boolean>;
@@ -25,14 +26,16 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
   onSystemChange,
   getSystem,
 }) => {
+  const config = useConfigStore((state) => state.config);
+  const setConfig = useConfigStore((state) => state.setConfig);
   const [system, setSystem] = useState<string>("off");
   const [driveUrl, setDriveUrl] = useState<string>();
   const [tracklistUrl, setTrackListUrl] = useState<string>();
   const [onDriveTested, setDriveTested] = useState<boolean>(false);
   useEffect(() => {
-    const isSaved = getLocalDriveUrl();
-    const isTested = getLocalDriveTested();
-    const systemMode = getLocalSystemMode();
+    const isSaved = config.system?.url;
+    const isTested = config.system?.urlTested;
+    const systemMode = config.system?.drive;
 
     const url = getLocalTracklistDriveUrl();
     if (url) {
@@ -51,7 +54,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
       setDriveTested(false);
     }
 
-    if (systemMode === "DRIVE") {
+    if (systemMode === true) {
       setSystem("on");
     } else {
       setSystem("off");
@@ -66,8 +69,8 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
       setSystem("off");
       setDriveUrl(undefined);
       onSystemChange("off");
-      setLocalDriveTested(false);
-      setLocalDriveUrl("");
+      // setLocalDriveTested(false);
+      // setLocalDriveUrl("");
     }
     return res ?? false;
   };

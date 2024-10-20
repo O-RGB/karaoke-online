@@ -19,19 +19,40 @@ import {
   saveSoundFontStorage,
 } from "@/lib/storage/soundfont";
 import { useSpessasynthStore } from "../../stores/spessasynth-store";
+import TableList from "../common/table/table-list";
 
 interface SoundfontManagerProps {}
 
 const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
-  const { synth, player, defaultSoundFont, SFname, setSoundFontName } =
-    useSpessasynthStore();
-  const [soundFontStorage, setSoundFontStorage] = useState<IDBValidKey[]>([]);
+  const synth = useSpessasynthStore((state) => state.synth);
+  const player = useSpessasynthStore((state) => state.player);
+  const defaultSoundFont = useSpessasynthStore(
+    (state) => state.defaultSoundFont
+  );
+  const SFname = useSpessasynthStore((state) => state.SFname);
+  const setSoundFontName = useSpessasynthStore(
+    (state) => state.setSoundFontName
+  );
+  const [soundFontStorage, setSoundFontStorage] = useState<
+    ListItem<IDBValidKey>[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const getSF2LocalList = async () => {
+  const getSoundFontList = async () => {
     let sf = await getAllKeySoundfont();
-    console.log("getSD", sf);
+    const lists = sf.map(
+      (data) =>
+        ({
+          row: data.toString(),
+          value: data,
+        } as ListItem<IDBValidKey>)
+    );
+    setSoundFontStorage(lists);
+    return lists;
+  };
 
+  const getSoundfontLocal = async () => {
+    const sf = await getSoundFontList();
     if (sf.length === 0) {
       let file: File | undefined = defaultSoundFont;
       if (file && synth) {
@@ -39,13 +60,11 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
         setSoundFontName(file.name);
       }
     }
-
-    setSoundFontStorage(sf);
   };
 
   const removeSF2Local = async (filename: string) => {
     await deleteSoundFontStorage(filename);
-    await getSF2LocalList();
+    await getSoundfontLocal();
   };
 
   const updateSoundFont = async (file: File) => {
@@ -59,123 +78,96 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
     setTimeout(() => {
       if (player) player.play();
       setLoading(false);
-    }, 500);
+    }, 2000);
   };
 
   useEffect(() => {
-    getSF2LocalList();
-  }, [synth?.soundfontManager, SFname]);
+    getSoundFontList();
+  }, []);
 
   return (
     <div>
       <div className=" border border-white w-full grid grid-cols-5 gap-4 overflow-hidden">
-        <div className="w-full col-span-5 lg:col-span-2">
-          <Label>เพิ่ม Soundfont</Label>
-          <div className=" ">
+        <div className="w-full col-span-5 lg:col-span-2 flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
+            <Label>เพิ่ม Soundfont</Label>
             <UpdateFile
               accept=".sf2"
-              className="border p-3 rounded-md hover:bg-gray-50 duration-300"
+              className="border border-blue-500 p-3 rounded-md hover:bg-gray-50 duration-300"
               onSelectFile={async (file) => {
                 if (synth) {
                   setLoading(true);
                   await saveSoundFontStorage(file);
-                  await getSF2LocalList();
+                  await getSoundFontList();
                   setLoading(false);
                 }
               }}
             >
-              <span className="w-full text-sm flex items-center gap-2">
+              <span className="w-full  text-sm flex items-center gap-2">
                 <span>
-                  <TbMusicPlus></TbMusicPlus>
+                  <TbMusicPlus className="text-blue-500"></TbMusicPlus>
                 </span>
                 <span>อัปโหลดไฟล์</span>
                 <Label>ไม่เกิน 2 Gb.</Label>
               </span>
             </UpdateFile>
           </div>
-          <Label>Soundfont ที่กำลังเล่น</Label>
-          <div className="relative w-fit">
-            <div className="absolute -right-1 -top-1">
-              <FaCircleCheck className="text-lg text-green-500"></FaCircleCheck>
-            </div>
-            <div className=" border flex gap-2 flex-col items-center p-2 px-4 rounded-md">
-              <div>
-                {loading ? (
-                  <AiOutlineLoading3Quarters className="animate-spin text-4xl"></AiOutlineLoading3Quarters>
-                ) : (
-                  <ImFilePlay className="text-4xl"></ImFilePlay>
-                )}
+          <div className="flex flex-col gap-1 ">
+            <Label>Soundfont ที่กำลังเล่น</Label>
+            <div className="relative w-fit">
+              <div className="absolute -right-1 -top-1">
+                <FaCircleCheck className="text-lg text-green-500"></FaCircleCheck>
               </div>
-              <div className="text-sm">{SFname}</div>
+              <div className=" border flex gap-2 flex-col items-center p-2 px-4 rounded-md ">
+                <div>
+                  {loading ? (
+                    <AiOutlineLoading3Quarters className="animate-spin text-4xl"></AiOutlineLoading3Quarters>
+                  ) : (
+                    <ImFilePlay className="text-4xl"></ImFilePlay>
+                  )}
+                </div>
+                <div className="text-sm">{SFname}</div>
+              </div>
             </div>
           </div>
         </div>
-        <div className="w-full col-span-5 lg:col-span-3 h-full">
-          <span className="text-xs text-gray-400">โฟลเดอร์</span>
-          <div className=" flex flex-col  border divide-y rounded-md h-auto md:h-[440px] overflow-x-auto">
-            {soundFontStorage.length === 0 && (
-              <div className="flex items-center justify-center w-full h-full">
-                <Label>ไม่มีไฟล์</Label>
-              </div>
+
+        <div className="col-span-5 lg:col-span-3 flex flex-col gap-1 w-full">
+          <Label>โฟลเดอร์ Soundfont</Label>
+          <TableList
+            hoverFocus={false}
+            className="w-full h-[255px] lg:h-[450px]"
+            height={""}
+            listKey={"soundfont-key"}
+            list={soundFontStorage}
+            itemAction={(value) => (
+              <Button
+                padding=""
+                className="w-7 h-7"
+                disabled={loading}
+                onClick={async () => {
+                  if (SFname !== value) {
+                    const loadSf = await getSoundFontStorage(value);
+                    if (loadSf.value) {
+                      updateSoundFont(loadSf.value);
+                    }
+                  }
+                }}
+                color="default"
+                blur={false}
+                icon={
+                  loading ? (
+                    <AiOutlineLoading3Quarters className="animate-spin"></AiOutlineLoading3Quarters>
+                  ) : SFname === value ? (
+                    <FaCircleCheck className="text-green-500"></FaCircleCheck>
+                  ) : (
+                    <IoMdAddCircle></IoMdAddCircle>
+                  )
+                }
+              ></Button>
             )}
-
-            {soundFontStorage.map((sf, k) => {
-              return (
-                <div
-                  key={`sf-storage-${k}`}
-                  className="flex gap-2 items-center justify-between p-2"
-                >
-                  <div className="flex gap-2 items-center">
-                    <div>
-                      <FaRegFileAudio className="text-xl"></FaRegFileAudio>
-                    </div>
-                    <div className="text-sm break-all w-full line-clamp-1">
-                      {sf.toString()}
-                    </div>
-                  </div>
-                  <div className="flex gap-2 items-center justify-center text-nowrap">
-                    {/* <Label> {Math.round(sf.size / 1000000)} Mb.</Label> */}
-
-                    <Button
-                      padding=""
-                      className="w-7 h-7"
-                      onClick={async () => {
-                        if (SFname !== sf.toString()) {
-                          const loadSf = await getSoundFontStorage(
-                            sf.toString()
-                          );
-                          if (loadSf.value) {
-                            updateSoundFont(loadSf.value);
-                          }
-                        }
-                      }}
-                      color="default"
-                      blur={false}
-                      icon={
-                        loading ? (
-                          <AiOutlineLoading3Quarters className="animate-spin"></AiOutlineLoading3Quarters>
-                        ) : SFname === sf.toString() ? (
-                          <FaCircleCheck className="text-green-500"></FaCircleCheck>
-                        ) : (
-                          <IoMdAddCircle></IoMdAddCircle>
-                        )
-                      }
-                    ></Button>
-                    <Button
-                      onClick={() => removeSF2Local(sf.toString())}
-                      padding=""
-                      className="w-7 h-7"
-                      color="red"
-                      blur={false}
-                      icon={
-                        <RiDeleteBin5Line className="text-white"></RiDeleteBin5Line>
-                      }
-                    ></Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+            onDeleteItem={(value) => removeSF2Local(value)}
+          ></TableList>
         </div>
       </div>
     </div>

@@ -20,6 +20,11 @@ const DataStoresModal: React.FC<DataStoresModalProps> = ({}) => {
             icon: <FaUser></FaUser>,
           },
           {
+            content: <UserSongDataStore></UserSongDataStore>,
+            label: "ฐานข้อมูล Drive",
+            icon: <FaUser></FaUser>,
+          },
+          {
             content: <ExtremeDataStore></ExtremeDataStore>,
             label: "ฐานข้อมูล Extreme",
             icon: <TbMicrophone2></TbMicrophone2>,

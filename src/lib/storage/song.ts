@@ -145,7 +145,10 @@ export const getSong = async (
   }
 };
 
-export const createSongZip = async (bufferFile: SongFiltsEncodeAndDecode[]) => {
+export const createSongZip = async (
+  bufferFile: SongFiltsEncodeAndDecode[],
+  from: TracklistFrom
+) => {
   if (bufferFile) {
     let tracklist: SearchResult[] = [];
     const userSongCount: number = (await getLastIndexSongUser()) + 1;
@@ -170,7 +173,7 @@ export const createSongZip = async (bufferFile: SongFiltsEncodeAndDecode[]) => {
           });
           zip.push(newFile);
         }
-        const tl = createTrackList(file, `${i}`, superName);
+        const tl = createTrackList(file, `${i}`, superName, from);
         tracklist.push(tl);
       }
 

@@ -1,11 +1,16 @@
 import { STORAGE_KARAOKE_EXTREME, STORAGE_TRACKLIST } from "@/config/value";
 import { storageAddAll, storageGetAllKeys } from "../../utils/database/storage";
-import { TracklistDriveModel, TracklistModel } from "@/utils/database/model";
+import {
+  TracklistDriveModel,
+  TracklistModel,
+  TracklistUserModel,
+} from "@/utils/database/model";
 
 export const createTrackList = (
   song: SongFiltsEncodeAndDecode,
   fileIndex: string,
-  superFile: string
+  superFile: string,
+  from: TracklistFrom
 ) => {
   let songId: string[] | string = song.mid.name.split(".");
   if (songId.length >= 2) {
@@ -17,12 +22,13 @@ export const createTrackList = (
     artist: song.lyr[1],
     type: song.emk ? 0 : 1,
     fileId: `${superFile}/${fileIndex}`,
+    from: from,
   } as SearchResult;
 };
 
 export const jsonTracklistToDatabase = async (
   file: File,
-  tracklistDrive: boolean = false,
+  tracklistStore: TracklistFrom,
   onProgress?: (progress?: IProgressBar) => void
 ): Promise<SearchResult[] | undefined> => {
   return new Promise(async (resolve) => {
@@ -35,7 +41,7 @@ export const jsonTracklistToDatabase = async (
         try {
           const data: SearchResult[] = JSON.parse(jsonData);
 
-          await addTracklistsToDatabase(data, tracklistDrive, onProgress);
+          await addTracklistsToDatabase(data, tracklistStore, onProgress);
 
           console.log("Data saved successfully");
           resolve(data);
@@ -79,13 +85,21 @@ export const addTracklistToDatabase = async (obj: SearchResult) => {
 
 export const addTracklistsToDatabase = async (
   objs: SearchResult[],
-  tracklistDrive: boolean = false,
+  tracklistStore: TracklistFrom,
   onProgress?: (progress?: IProgressBar) => void
 ) => {
   try {
-    let { store, tx, loaded } = tracklistDrive
-      ? await TracklistDriveModel()
-      : await TracklistModel();
+    let store: any = undefined;
+    let tx: any = undefined;
+    let loaded: any = undefined;
+
+    if (tracklistStore === "DRIVE") {
+      ({ store, tx, loaded } = await TracklistDriveModel());
+    } else if (tracklistStore === "EXTHEME") {
+      ({ store, tx, loaded } = await TracklistModel());
+    } else if (tracklistStore === "CUSTOM") {
+      ({ store, tx, loaded } = await TracklistUserModel());
+    }
 
     if (!loaded) {
       return false;
@@ -95,6 +109,7 @@ export const addTracklistsToDatabase = async (
       let obj = objs[i];
       if (obj.id) {
         obj.id = obj.id.toUpperCase();
+        obj.from = tracklistStore;
       }
       try {
         await store?.put(obj);
@@ -126,18 +141,36 @@ export const addTracklistsToDatabase = async (
   }
 };
 
-export const getTracklist = async (): Promise<SearchResult[]> => {
+export const getTracklist = async (
+  tracklistStores: TracklistFrom[] = [],
+  limit?: number,
+  offset?: number
+): Promise<SearchResult[]> => {
   try {
-    const { store, tx, loaded } = await TracklistModel();
+    let allData: SearchResult[] = [];
 
-    if (!loaded) {
-      return [];
+    for (const storeName of tracklistStores) {
+      let store: any;
+      let tx: any;
+      let loaded: any;
+
+      if (storeName === "DRIVE") {
+        ({ store, tx, loaded } = await TracklistDriveModel());
+      } else if (storeName === "EXTHEME") {
+        ({ store, tx, loaded } = await TracklistModel());
+      } else if (storeName === "CUSTOM") {
+        ({ store, tx, loaded } = await TracklistUserModel());
+      }
+
+      if (!loaded) {
+        continue;
+      }
+      const lists = await store?.getAll();
+
+      allData = allData.concat(lists ?? []);
+
+      await tx?.done;
     }
-
-    const lists = await store?.getAll();
-
-    const allData: SearchResult[] = lists ?? [];
-    await tx?.done;
 
     return allData;
   } catch (error) {
@@ -146,6 +179,58 @@ export const getTracklist = async (): Promise<SearchResult[]> => {
   }
 };
 
+export const getTracklistTest = async (
+  tracklistStores: TracklistFrom[] = [],
+  limit?: number,
+  offset?: number
+): Promise<{
+  results: SearchResult[];
+  totalCount: number;
+  hasMore: boolean;
+}> => {
+  try {
+    let allData: SearchResult[] = [];
+
+    for (const storeName of tracklistStores) {
+      let store: any;
+      let tx: any;
+      let loaded: any;
+
+      if (storeName === "DRIVE") {
+        ({ store, tx, loaded } = await TracklistDriveModel());
+      } else if (storeName === "EXTHEME") {
+        ({ store, tx, loaded } = await TracklistModel());
+      } else if (storeName === "CUSTOM") {
+        ({ store, tx, loaded } = await TracklistUserModel());
+      }
+
+      if (!loaded) {
+        continue;
+      }
+
+      // Always get all data from each store
+      const lists = await store?.getAll();
+      allData = allData.concat(lists ?? []);
+
+      await tx?.done;
+    }
+
+    const totalCount = allData.length;
+    let results = allData;
+    let hasMore = false;
+
+    // Apply pagination if both limit and offset are provided
+    if (limit !== undefined && offset !== undefined) {
+      results = allData.slice(offset, offset + limit);
+      hasMore = offset + limit < totalCount;
+    }
+
+    return { results, totalCount, hasMore };
+  } catch (error) {
+    console.error("Error retrieving data from database:", error);
+    return { results: [], totalCount: 0, hasMore: false };
+  }
+};
 export const saveTracklistToStorage = async (
   files: Map<string, File>,
   onProgress?: (progress?: IProgressBar) => void

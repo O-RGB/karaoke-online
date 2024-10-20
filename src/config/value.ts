@@ -11,6 +11,7 @@ export const STORAGE_WALLPAPER = "wallpaper";
 export const STORAGE_KARAOKE_EXTREME = "karaoke_extreme";
 export const STORAGE_USER_SONG = "user_song";
 export const STORAGE_TRACKLIST = "tracklist";
+export const STORAGE_USER_TRACKLIST = "user_tracklist";
 
 export const STORAGE_DRIVE = "drive";
 export const STORAGE_DRIVE_TRACKLIST = "drive_tracklist";
@@ -72,5 +73,9 @@ export const DEFAULT_CONFIG: ConfigDisplay = {
   },
   system: {
     drive: false,
+    tracklistUrl: "",
+    url: "",
+    urlTested: false,
+    tracklistUrlTested: false,
   },
 };

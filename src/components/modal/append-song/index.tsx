@@ -6,6 +6,8 @@ import { readSong } from "@/lib/karaoke/read";
 import {
   addTracklistsToDatabase,
   getAllKeyTracklist,
+  getTracklist,
+  getTracklistTest,
   jsonTracklistToDatabase,
   saveTracklistToStorage,
 } from "@/lib/storage/tracklist";
@@ -85,7 +87,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
   // Tracklist Json
   const onLoadFileJson = async (
     file: File,
-    tracklistDrive: boolean = false
+    tracklistStore: "DRIVE" | "EXTHEME" | "CUSTOM"
   ) => {
     if (!file) {
       return;
@@ -101,7 +103,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
 
       const saved = await jsonTracklistToDatabase(
         file,
-        tracklistDrive,
+        tracklistStore,
         setProgress
       );
 
@@ -154,8 +156,9 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           show: true,
           error: "ไม่มี Google Url",
         });
-        setLocalDriveUrl("");
-        setLocalDriveTested(false);
+        // setLocalDriveUrl("");
+        // setLocalDriveTested(false);
+        setConfig({ system: { url: "", urlTested: false } });
         return false;
       }
       setProgress({
@@ -171,8 +174,9 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           title: "เชื่อมต่อสำเร็จ",
           show: true,
         });
-        setLocalDriveTested(true);
-        setLocalDriveUrl(value);
+        setConfig({ system: { url: value, urlTested: true } });
+        // setLocalDriveTested(true);
+        // setLocalDriveUrl(value);
         return true;
       } else {
         setProgress({
@@ -181,8 +185,9 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           show: true,
           error: "ไม่สามารถระบุ Google Apps script",
         });
-        setLocalDriveUrl("");
-        setLocalDriveTested(false);
+        setConfig({ system: { url: "", urlTested: false } });
+        // setLocalDriveUrl("");
+        // setLocalDriveTested(false);
         return false;
       }
     } catch (error) {
@@ -192,15 +197,16 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
         show: true,
         error: "Error uploading file: " + JSON.stringify(error),
       });
-      setLocalDriveUrl("");
-      setLocalDriveTested(false);
+      setConfig({ system: { url: "", urlTested: false } });
+      // setLocalDriveUrl("");
+      // setLocalDriveTested(false);
       return false;
     }
   };
 
   const onAddTrackListDrive = async (
     value: string,
-    tracklistDrive: boolean = false
+    tracklistStore: "DRIVE" | "EXTHEME" | "CUSTOM"
   ) => {
     setProgress({
       progress: 0,
@@ -219,7 +225,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
         }
 
         if (file) {
-          await onLoadFileJson(file, tracklistDrive);
+          await onLoadFileJson(file, tracklistStore);
           setLocalTracklistDriveTested(value);
           return true;
         }
@@ -242,11 +248,52 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
       });
   };
 
-  const onSystemChange = (value: string) => {
+  const onSystemChange = async (value: string) => {
+    setProgress({
+      progress: 0,
+      title: "กำลังเปลี่ยนฐานข้อมูล...",
+      show: true,
+      loading: true,
+    });
     if (value === "on") {
-      setConfig({ system: { drive: true } });
+      try {
+        setTracklist([]);
+        const tl = await getTracklistTest(["DRIVE"]);
+        setTracklist(tl.results);
+        setConfig({ system: { drive: true } });
+        setProgress({
+          progress: 100,
+          title: "เปลี่ยนฐานข้อมูลเป็น Drive",
+          show: true,
+        });
+      } catch (error) {
+        setProgress({
+          progress: 0,
+          title: "เกิดข้อผิดพลาด",
+          show: true,
+          error: JSON.stringify(error),
+        });
+        setConfig({ system: { drive: false } });
+      }
     } else {
-      setConfig({ system: { drive: true } });
+      try {
+        const tl = await getTracklistTest(["CUSTOM", "EXTHEME"]);
+        setTracklist(tl.results);
+        setConfig({ system: { drive: false } });
+        setProgress({
+          progress: 100,
+          title: "เปลี่ยนฐานข้อมูลเป็น System",
+          show: true,
+        });
+      } catch (error) {
+        setProgress({
+          progress: 0,
+          title: "เกิดข้อผิดพลาด",
+          show: true,
+          error: JSON.stringify(error),
+        });
+        setConfig({ system: { drive: false } });
+      }
     }
   };
 
@@ -266,7 +313,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           show: true,
           loading: true,
         });
-        const tracklist = await createSongZip(files);
+        const tracklist = await createSongZip(files, "CUSTOM");
         setProgress({
           progress: 50,
           title: "กำลังเพิ่มลงฐานข้อมูล",
@@ -274,7 +321,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           loading: true,
         });
         if (tracklist) {
-          const added = await addTracklistsToDatabase(tracklist);
+          const added = await addTracklistsToDatabase(tracklist, "CUSTOM");
           if (added) {
             setProgress({ progress: 100, title: "สำเร็จ", show: true });
             addTracklist(tracklist);
@@ -344,7 +391,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
               <AddFromDrive
                 onSystemChange={onSystemChange}
                 onAddTrackListDrive={(value) =>
-                  onAddTrackListDrive(value, true)
+                  onAddTrackListDrive(value, "DRIVE")
                 }
                 onAddUrlDrvie={onAddUrlDrvie}
               />
@@ -358,7 +405,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
                 musicLibraryCount={musicLibraryCount}
                 tracklistCount={tracklistCount}
                 onAddFileTracklist={(file) => {
-                  onLoadFileJson(file, false);
+                  onLoadFileJson(file, "EXTHEME");
                 }}
                 onRemoveFileTracklist={onRemoveFileJson}
                 filenameTracklist={musicFilename}

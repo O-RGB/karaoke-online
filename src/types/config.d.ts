@@ -40,6 +40,10 @@ interface ConfigDisplay {
 
 interface SystemConfig {
   drive: boolean;
+  url: string;
+  urlTested: boolean;
+  tracklistUrl: string;
+  tracklistUrlTested: boolean;
 }
 
 interface ThemesConfig {

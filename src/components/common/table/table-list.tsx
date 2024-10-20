@@ -16,6 +16,7 @@ interface TableListProps {
   deleteItem?: boolean;
   itemAction?: (value: any, index: number) => ReactNode;
   className?: string;
+  hoverFocus?: boolean;
 }
 
 const TableList: React.FC<TableListProps> = ({
@@ -30,7 +31,8 @@ const TableList: React.FC<TableListProps> = ({
   scrollToItem,
   itemAction,
   deleteItem = true,
-  className
+  className,
+  hoverFocus = true,
 }) => {
   const [onFocus, setFocus] = useState<number>(-1);
   const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -73,8 +75,12 @@ const TableList: React.FC<TableListProps> = ({
               ref={(el: any) => (itemRefs.current[i] = el)}
               onClick={() => handleClick?.(data.value, i)}
               className={`${
-                onFocus === i ? "bg-gray-300" : ""
-              } p-1 hover:bg-gray-200 duration-300 cursor-pointer w-full text-sm flex items-center justify-between ${
+                hoverFocus
+                  ? `${
+                      onFocus === i ? "bg-gray-300" : ""
+                    } hover:bg-gray-200 duration-300 cursor-pointer`
+                  : ""
+              } p-1  w-full text-sm flex items-center justify-between ${
                 data.className
               }`}
               key={`${listKey}-${i}`}

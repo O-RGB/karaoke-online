@@ -6,7 +6,7 @@ import {
   STORAGE_WALLPAPER,
   STORAGE_SOUNDFONT,
   STORAGE_DRIVE_TRACKLIST,
-  // STORAGE_USER_DRIVE,
+  STORAGE_USER_TRACKLIST,
 } from "@/config/value";
 import { IDBPDatabase, openDB } from "idb";
 
@@ -21,7 +21,7 @@ const stores = [
   STORAGE_TRACKLIST,
   STORAGE_DRIVE_TRACKLIST,
   STORAGE_DRIVE,
-  // STORAGE_USER_DRIVE,
+  STORAGE_USER_TRACKLIST,
 ];
 
 export async function getDB(

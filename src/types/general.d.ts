@@ -30,6 +30,7 @@ type ModalType =
 
 type InputBarLayout = "vertical" | "horizontal";
 type SystemMode = "SYSTEM" | "DRIVE";
+type TracklistFrom = "DRIVE" | "EXTHEME" | "CUSTOM";
 
 type ModalComponents = {
   [key in ModalType]?: React.ReactNode;

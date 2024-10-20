@@ -58,24 +58,39 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
         children
       ) : (
         <div className="flex h-screen w-screen -m-2.5 items-center justify-center">
-          <div className="relative">
+          <div className="">
+            {!pressed && (
+              <span className="flex items-center flex-col text-white pb-2 text-sm">
+                <span>ทุกครั้งที่มีอัปเดต</span>
+                <span>ถ้าใช้งานไม่ได้ควรรีเซ็ตฐานข้อมูล</span>
+              </span>
+            )}
             {pressed ? (
               <div className="flex items-center gap-2 text-white font-bold">
                 <AiOutlineLoading3Quarters className="text-lg animate-spin"></AiOutlineLoading3Quarters>
                 Karaoke Startup
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2">
-                <div className="absolute -right-0.5 -top-0.5 ">
-                  <span className="relative flex h-3 w-3 ">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
-                  </span>
+              <div className="flex flex-col items-center justify-center">
+                <div className="relative w-fit">
+                  <div className="absolute -right-0.5 -top-0.5 w-fit">
+                    <span className="relative flex h-3 w-3 ">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                    </span>
+                  </div>
+                  <Button
+                    blur={false}
+                    color="white"
+                    className="w-fit"
+                    onClick={handleClick}
+                  >
+                    <div className="px-2">Allow Sound</div>
+                  </Button>
                 </div>
-                <Button blur={false} color="white" onClick={handleClick}>
-                  <div className="px-2">Allow Sound</div>
-                </Button>
-                <span className="text-white text-center">Updated v.1.0.21</span>
+                <span className="pt-1 text-xs text-white">
+                  ✨😉 Updated v.1.0.22 🔥✨
+                </span>
               </div>
             )}
           </div>

@@ -1,6 +1,10 @@
 import Button from "@/components/common/button/button";
 import { destryoAllCredential } from "@/lib/local-storege/local-storage";
-import { deleteAllStores, deleteDatabase, initDatabase } from "@/utils/database/db";
+import {
+  deleteAllStores,
+  deleteDatabase,
+  initDatabase,
+} from "@/utils/database/db";
 import React from "react";
 import { CiSettings } from "react-icons/ci";
 
@@ -15,13 +19,28 @@ const ResetDatastore: React.FC<ResetDatastoreProps> = ({}) => {
       </span>
       <Button
         onClick={async () => {
-          const check = await deleteDatabase();
-          if (check) {
-            await initDatabase()
-            destryoAllCredential();
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
+          try {
+            // Close any open connections (you need to implement this in your code if not already done)
+            // closeDatabaseConnections();
+
+            const check = await deleteDatabase(); // Try to delete the database
+            if (check) {
+              console.log("Database deleted successfully.");
+
+              // If the deletion succeeds, initialize the database and destroy credentials
+              await initDatabase();
+              destryoAllCredential();
+
+              // Reload the page after a delay
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            }
+          } catch (error) {
+            console.error("Error deleting database:", error);
+
+            // Handle database deletion being blocked
+            alert("เกิดข้อผิดพลาด คุณอาจต้องกลับมา Reset ฐานข้อมูลอีกครั้ง!");
           }
         }}
         blur=""

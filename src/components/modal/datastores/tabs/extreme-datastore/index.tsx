@@ -1,4 +1,6 @@
 import Button from "@/components/common/button/button";
+import SwitchButton from "@/components/common/input-data/switch/switch-button";
+import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
 import Label from "@/components/common/label";
 import TableList from "@/components/common/table/table-list";
 import SearchDropdown from "@/components/tools/search-song/search-dropdown";
@@ -10,72 +12,102 @@ import useTracklistStore from "@/stores/tracklist-store";
 import React, { useEffect, useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import ExtremeMusic from "./extreme-music";
+import ExtremeTracklist from "./extreme-tracklist";
 
 interface ExtremeDataStoreProps {}
 
 const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
-  const limit = 20;
-  const searchTracklist = useTracklistStore((state) => state.searchTracklist);
+  // const limit = 20;
+  // const searchTracklist = useTracklistStore((state) => state.searchTracklist);
 
-  const [zipFilename, setZipFilename] = useState<ListItem<IDBValidKey>[]>([]);
-  const [songs, setSongs] = useState<ListItem<File>[]>([]);
-  const [songFucos, setSongFucos] = useState<string>();
+  // const [zipFilename, setZipFilename] = useState<ListItem<IDBValidKey>[]>([]);
+  // const [songs, setSongs] = useState<ListItem<File>[]>([]);
+  // const [songFucos, setSongFucos] = useState<string>();
 
-  const [folderFocus, setFolderFocus] = useState<string>();
-  const [unzipLoading, setUnzipLoading] = useState<boolean>(false);
+  // const [folderFocus, setFolderFocus] = useState<string>();
+  // const [unzipLoading, setUnzipLoading] = useState<boolean>(false);
 
-  const [optionSearch, setOptionSearch] = useState<SearchResult>();
+  // const [optionSearch, setOptionSearch] = useState<SearchResult>();
 
-  const [page, setPage] = useState<number>(0);
+  // const [page, setPage] = useState<number>(0);
 
-  const load = async (offset: number = 0) => {
-    const res = await getAllKeysSong(limit, offset);
-    setZipFilename(res.map((data) => ({ row: data, value: data })));
-  };
+  // const load = async (offset: number = 0) => {
+  //   const res = await getAllKeysSong(limit, offset);
+  //   setZipFilename(res.map((data) => ({ row: data, value: data })));
+  // };
 
-  const onClickFolder = async (filename: string, notFocus: boolean = false) => {
-    const res = await getSongByKey(filename);
-    if (res) {
-      if (res.name.endsWith(".zip")) {
-        setSongs([]);
-        setUnzipLoading(true);
-        const unzip = await extractFile(res);
-        setSongs(unzip.map((data) => ({ row: data.name, value: data })));
-        setUnzipLoading(false);
-        setSongFucos(undefined);
-        if (notFocus === false) {
-          setOptionSearch(undefined);
-          setFolderFocus(filename);
-        }
-      }
-    }
-  };
-  async function onSearch<T = any>(value: string) {
-    const se = (await searchTracklist(value)) ?? [];
-    const op = toOptions<SearchResult>({
-      render: (value) => <SearchDropdown value={value}></SearchDropdown>,
-      list: se,
-    });
-    return op as T;
-  }
+  // const onClickFolder = async (filename: string, notFocus: boolean = false) => {
+  //   const res = await getSongByKey(filename);
+  //   if (res) {
+  //     if (res.name.endsWith(".zip")) {
+  //       setSongs([]);
+  //       setUnzipLoading(true);
+  //       const unzip = await extractFile(res);
+  //       setSongs(unzip.map((data) => ({ row: data.name, value: data })));
+  //       setUnzipLoading(false);
+  //       setSongFucos(undefined);
+  //       if (notFocus === false) {
+  //         setOptionSearch(undefined);
+  //         setFolderFocus(filename);
+  //       }
+  //     }
+  //   }
+  // };
+  // async function onSearch<T = any>(value: string) {
+  //   const se = (await searchTracklist(value)) ?? [];
+  //   const op = toOptions<SearchResult>({
+  //     render: (value) => <SearchDropdown value={value}></SearchDropdown>,
+  //     list: se,
+  //   });
+  //   return op as T;
+  // }
 
-  const deleteAll = async () => {
-    const res = await deleteAllSong();
-    if (res) {
-      load();
-      setUnzipLoading(false);
-      setSongFucos(undefined);
-      setOptionSearch(undefined);
-      setFolderFocus(undefined);
-      setSongs([]);
-    }
-  };
-  useEffect(() => {
-    load();
-  }, []);
+  // const deleteAll = async () => {
+  //   const res = await deleteAllSong();
+  //   if (res) {
+  //     load();
+  //     setUnzipLoading(false);
+  //     setSongFucos(undefined);
+  //     setOptionSearch(undefined);
+  //     setFolderFocus(undefined);
+  //     setSongs([]);
+  //   }
+  // };
+  // useEffect(() => {
+  //   load();
+  // }, []);
+
+  const [redioChange, setRadioChange] = useState<string>("FILE");
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-between">
+        <SwitchRadio
+          onChange={setRadioChange}
+          options={[
+            {
+              value: "FILE",
+              children: "ไฟล์เพลง",
+            },
+            {
+              value: "TRACKLIST",
+              children: "รายชื่อเพลง",
+            },
+          ]}
+        ></SwitchRadio>
+
+        {/* <Button className="h-8 text-white" blur={false} color="red">
+          รีเช็ตฐานข้อมูล
+        </Button> */}
+      </div>
+
+      {redioChange === "FILE" ? (
+        <ExtremeMusic></ExtremeMusic>
+      ) : (
+        <ExtremeTracklist></ExtremeTracklist>
+      )}
+
       {/* <div className="relative pb-12 pt-2 text-black w-full">
         <div className="absolute w-full z-50">
           <SearchSelect
@@ -113,8 +145,7 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
         </div>
       </div> */}
 
-      <div className="w-full h-full flex flex-col md:flex-row  gap-2 ">
-        {/* {optionSearch && (
+      {/* {optionSearch && (
           <div className="col-span-2 md:col-span-1">
             <div className="w-full">
               <Label>ค้นหา</Label>
@@ -134,6 +165,7 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
             </div>
           </div>
         )} */}
+      {/* <div className="w-full h-full flex flex-col md:flex-row  gap-2 ">
 
         <div className="w-full h-full flex flex-col items-end border rounded-md border-blue-500">
           <div className="flex items-center w-full bg-gray-200 p-2 rounded-t-md justify-between">
@@ -163,7 +195,7 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
             </div>
           </div>
           <TableList
-            className="!rounded-b-md !border-none h-[170px] md:h-[385px]"
+            className="!rounded-b-md !border-none h-[155px] md:h-[350px]"
             height={""}
             deleteItem={false}
             scrollToItem={folderFocus}
@@ -178,7 +210,7 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
             <Label className="text-gray-700 font-bold">ไฟล์เพลง</Label>
           </div>
           <TableList
-            className="!rounded-b-md !border-none h-[170px] md:h-[385px]"
+            className="!rounded-b-md !border-none h-[155px] md:h-[350px]"
             height={""}
             deleteItem={false}
             itemAction={(file: File, index: number) => {
@@ -213,8 +245,8 @@ const ExtremeDataStore: React.FC<ExtremeDataStoreProps> = ({}) => {
             loading={unzipLoading}
           ></TableList>
         </div>
-      </div>
-    </>
+      </div> */}
+    </div>
   );
 };
 
