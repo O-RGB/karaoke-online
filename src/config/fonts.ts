@@ -29,12 +29,6 @@ import {
   Libre_Baskerville,
 } from "next/font/google";
 
-// Example: Import 40 Thai fonts with multiple weights
-const notoSansThai = Noto_Sans_Thai({
-  weight: ["400", "700"],
-  subsets: ["thai", "latin"],
-});
-
 const notoSerifThai = Noto_Serif_Thai({
   weight: ["400", "700"],
   subsets: ["thai", "latin"],
@@ -171,7 +165,6 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export {
-  notoSansThai,
   notoSerifThai,
   kanit,
   sarabun,

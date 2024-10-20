@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import LyricsAnimation from "../common/lyrics/cut-lyrics/cut-animation";
 import Label from "../common/label";
 import SwitchRadio from "../common/input-data/switch/switch-radio";
 import RandomLyrics from "../lyrics/random-lyrics";
@@ -13,6 +12,7 @@ import { DEFAULT_CONFIG } from "@/config/value";
 import { NextFont } from "next/dist/compiled/@next/font";
 import InputNumber from "../common/input-data/input-number";
 import ToggleCheckBox from "../common/input-data/checkbox";
+import CutLyrics from "../common/lyrics/cut-lyrics/cut-lyrics";
 
 interface LyricsModalProps {}
 
@@ -177,7 +177,20 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
       <div className="w-full relative p-2 border rounded-md bg-blue-400">
         <div className="flex w-full h-20 md:h-full items-center justify-center">
           {lyrics.lyricsMode === "default" ? (
-            <LyricsAnimation
+            // <LyricsAnimation
+            //   activeColor={lyrics.active!}
+            //   color={lyrics.color!}
+            //   fontSize={
+            //     lyrics.fontAuto
+            //       ? "text-2xl md:text-3xl lg:text-6xl"
+            //       : Number(lyrics.fontSize)
+            //   }
+            //   display={Example}
+            //   font={FontState}
+            //   fixedCharIndex={3}
+            // ></LyricsAnimation>
+            <CutLyrics
+              preview
               activeColor={lyrics.active!}
               color={lyrics.color!}
               fontSize={
@@ -188,7 +201,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
               display={Example}
               font={FontState}
               fixedCharIndex={3}
-            ></LyricsAnimation>
+            ></CutLyrics>
           ) : (
             <div className="pt-12">
               <RandomLyrics
@@ -208,8 +221,8 @@ export default LyricsModal;
 
 export const fontList = [
   {
-    label: "Noto Sans Thai",
-    value: "notoSansThai",
+    label: "เริ่มต้น",
+    value: "null",
   },
   {
     label: "Noto Serif Thai",

@@ -47,7 +47,7 @@ export const DEFAULT_CONFIG: ConfigDisplay = {
       color: "#000000",
       colorBorder: "#ffffff",
     },
-    font: "notoSansThaiLooped",
+    font: "เริ่มต้น",
     fontSize: 30,
     fontAuto: true,
     lyricsMode: "default",

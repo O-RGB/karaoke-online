@@ -1,5 +1,6 @@
 type RefreshRate = "HIGH" | "MIDDLE" | "LOW";
 type SystemFont =
+  | "เริ่มต้น"
   | "notoSansThai"
   | "notoSerifThai"
   | "kanit"

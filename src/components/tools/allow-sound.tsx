@@ -75,7 +75,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                 <Button blur={false} color="white" onClick={handleClick}>
                   <div className="px-2">Allow Sound</div>
                 </Button>
-                <span className="text-white text-center">Updated v.1.0.2</span>
+                <span className="text-white text-center">Updated v.1.0.21</span>
               </div>
             )}
           </div>

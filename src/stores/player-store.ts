@@ -81,6 +81,7 @@ export const useAppControlStore = create<AppControlState>((set, get) => ({
     //   delay: 40000,
     //   icon: <AiOutlineLoading className="animate-spin" />,
     // });
+    setNotification({ text: "กำลังโหลดจาก" + mode, delay: 40000 });
 
     const song = await getSong(value, System);
     if (song) {

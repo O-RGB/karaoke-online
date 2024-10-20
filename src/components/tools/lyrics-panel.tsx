@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
-import LyricsAnimation from "../common/lyrics/cut-lyrics/cut-animation";
 import RandomLyrics from "../lyrics/random-lyrics";
 import useLyricsStore from "../../stores/lyrics-store";
 import useConfigStore from "@/stores/config-store";
@@ -10,6 +8,7 @@ import { NextFont } from "next/dist/compiled/@next/font";
 import { lyricsGetFont } from "@/features/lyrics/lyrics.features";
 import useMixerStore from "@/stores/mixer-store";
 import { useOrientation } from "@/hooks/orientation-hook";
+import CutLyrics from "../common/lyrics/cut-lyrics/cut-lyrics";
 
 interface LyricsPanelProps {
   lyrics: string[];
@@ -59,32 +58,33 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {
           {lyricsMode === "default" ? (
             <>
               <span className="min-h-10 md:min-h-16 lg:min-h-20 flex items-center">
-                <LyricsAnimation
+                ​
+                <CutLyrics
                   font={FontState}
+                  color={color!}
                   activeColor={colorActive!}
+                  fixedCharIndex={position === false ? -1 : undefined}
+                  display={display}
                   fontSize={
                     fontAuto
                       ? "text-2xl md:text-3xl lg:text-6xl"
                       : Number(fontSize)
                   }
-                  color={color!}
-                  fixedCharIndex={position === false ? -1 : undefined}
-                  display={display}
-                ></LyricsAnimation>
+                ></CutLyrics>
               </span>
               <br />
-              <LyricsAnimation
+              <CutLyrics
                 font={FontState}
+                color={color!}
                 activeColor={colorActive!}
+                fixedCharIndex={position === true ? -1 : undefined}
+                display={displayBottom}
                 fontSize={
                   fontAuto
                     ? "text-2xl md:text-3xl lg:text-6xl"
                     : Number(fontSize)
                 }
-                color={color!}
-                fixedCharIndex={position === true ? -1 : undefined}
-                display={displayBottom}
-              ></LyricsAnimation>
+              ></CutLyrics>
             </>
           ) : (
             <>

@@ -16,7 +16,6 @@ import {
   mali,
   mitr,
   niramit,
-  notoSansThai,
   notoSerifThai,
   pattaya,
   pridi,
@@ -63,7 +62,7 @@ import { DEFAULT_CONFIG } from "@/config/value";
 // });
 
 export const lyricsGetFont = (get: SystemFont) => {
-  let font = notoSansThai;
+  let font = undefined;
   switch (get) {
     case "notoSerifThai":
       font = notoSerifThai;
@@ -184,17 +183,9 @@ export const lyricsConfig = (
   };
 
   const setFontChange = (set: SystemFont) => {
-    let font = notoSansThai;
-    let fontName: SystemFont = "notoSansThai";
+    let font = undefined;
+    let fontName: SystemFont = "เริ่มต้น";
     switch (set) {
-      // case "inter":
-      //   font = inter;
-      //   fontName = "inter";
-      //   break;
-      case "notoSansThai":
-        font = notoSansThai;
-        fontName = "notoSansThai";
-        break;
       case "notoSerifThai":
         font = notoSerifThai;
         fontName = "notoSerifThai";
