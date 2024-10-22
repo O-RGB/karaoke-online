@@ -89,7 +89,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                   </Button>
                 </div>
                 <span className="pt-1 text-xs text-white">
-                  ✨😉 Updated v.1.0.22 🔥✨
+                  🎃👻 Updated v.1.0.23 👻🎃
                 </span>
               </div>
             )}
