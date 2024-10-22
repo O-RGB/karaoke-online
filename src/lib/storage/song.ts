@@ -263,6 +263,10 @@ export const getAllKeysSong = async () => {
   return await storageGetAllKeys(STORAGE_KARAOKE_EXTREME);
 };
 
+export const getAllKeysUserSong = async () => {
+  return await storageGetAllKeys(STORAGE_USER_SONG);
+};
+
 export const deleteAllSong = async () => {
   return await sortageDeleteAll(STORAGE_KARAOKE_EXTREME);
 };

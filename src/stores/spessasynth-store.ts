@@ -95,6 +95,7 @@ async function loadSoundFontPlayer(audio: AudioContext) {
     }
   );
 
+  
   synthInstance.setMainVolume(0.7);
   synthInstance.highPerformanceMode = false;
 

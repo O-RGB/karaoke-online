@@ -51,8 +51,8 @@ export const findLimitOffsetByKey = async (key: string, limit: number) => {
   return await findKeyOffset(STORAGE_KARAOKE_EXTREME, key, limit);
 };
 
-export const getAllKeysSong = async (limit: number, offset: number) => {
-  return await storageGetAllKeys(STORAGE_KARAOKE_EXTREME, limit, offset);
+export const getAllKeysDrive = async (limit: number, offset: number) => {
+  return await storageGetAllKeys(STORAGE_DRIVE, limit, offset);
 };
 
 export const deleteAllSong = async () => {

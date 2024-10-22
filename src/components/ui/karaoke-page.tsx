@@ -34,6 +34,7 @@ import RemoteRender from "./remote-render/remote-render";
 import useNotificationStore from "@/stores/notification-store";
 import { useAppControlStore } from "@/stores/player-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
+import useConfigStore from "@/stores/config-store";
 
 interface KaraokePageProps {}
 
@@ -51,14 +52,17 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   } = useAppControlStore();
 
   const notification = useNotificationStore((state) => state.notification);
+  const config = useConfigStore((state) => state.config);
 
   const startup = async () => {
-    // Setup
     setupSpessasynth();
-    // initializePeers();
+    let tl: SearchResult[] = [];
 
-    // Database
-    const tl = await getTracklist(["CUSTOM", "EXTHEME"]);
+    if (config.system?.drive) {
+      tl = await getTracklist(["DRIVE"]);
+    } else {
+      tl = await getTracklist(["CUSTOM", "EXTHEME"]);
+    }
     addTracklist(tl);
   };
 

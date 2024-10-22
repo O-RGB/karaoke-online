@@ -1,25 +1,18 @@
 import Label from "@/components/common/label";
 import TableList from "@/components/common/table/table-list";
 import SearchDropdown from "@/components/tools/search-song/search-dropdown";
+import { getTracklistTest } from "@/lib/storage/tracklist";
 import React, { useEffect, useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
-interface ExtremeTracklistProps {
+interface TracklistDatabaseListProps {
   limit?: number;
-  getTracklistTest(
-    tracklistStores?: TracklistFrom[],
-    limit?: number,
-    offset?: number
-  ): Promise<{
-    results: SearchResult[];
-    totalCount: number;
-    hasMore: boolean;
-  }>;
+  tracklistStores?: TracklistFrom[];
 }
 
-const ExtremeTracklist: React.FC<ExtremeTracklistProps> = ({
+const TracklistDatabaseList: React.FC<TracklistDatabaseListProps> = ({
   limit = 20,
-  getTracklistTest,
+  tracklistStores,
 }) => {
   const [zipFilename, setZipFilename] = useState<ListItem<SearchResult>[]>([]);
 
@@ -27,7 +20,7 @@ const ExtremeTracklist: React.FC<ExtremeTracklistProps> = ({
   const [page, setPage] = useState<number>(0);
 
   const load = async (offset: number = 0) => {
-    const res = await getTracklistTest(["EXTHEME"], limit, offset);
+    const res = await getTracklistTest(tracklistStores, limit, offset);
     setZipFilename(
       res.results.map(
         (data) =>
@@ -42,7 +35,6 @@ const ExtremeTracklist: React.FC<ExtremeTracklistProps> = ({
   useEffect(() => {
     load();
   }, []);
-
   return (
     <>
       <div className="w-full h-full flex flex-col items-end border rounded-md border-blue-500">
@@ -86,4 +78,4 @@ const ExtremeTracklist: React.FC<ExtremeTracklistProps> = ({
   );
 };
 
-export default ExtremeTracklist;
+export default TracklistDatabaseList;

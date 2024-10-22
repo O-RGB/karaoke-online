@@ -3,12 +3,13 @@ import React, { useEffect, useState } from "react";
 import TrieSearch from "trie-search";
 import SearchSelect from "../../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
-import { FaUser } from "react-icons/fa";
+import { FaGoogleDrive, FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
 import { useKeyboardEvents } from "@/hooks/keyboard-hook";
 import useMixerStore from "@/stores/mixer-store";
 import useTracklistStore from "@/stores/tracklist-store";
+import Tags from "@/components/common/tags";
 
 interface SearchSongProps {
   onClickSong?: (value: SearchResult) => void;
@@ -105,6 +106,37 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
     );
   }
 
+  function GetFromType({ from }: { from?: TracklistFrom }) {
+    if (from) {
+      if (from === "EXTHEME")
+        return (
+          <Tags color="white" className="!border-none w-[37px] h-[37px]">
+            <img src="/icon/ke.ico" alt="" className="w-full h-full" />
+          </Tags>
+        );
+      else if (from === "DRIVE") {
+        return (
+          <Tags
+            color="white"
+            className="!border-none w-[37px] h-[37px] flex items-center justify-center"
+          >
+            <img src="/icon/gd.ico" alt="" className="w-full h-full" />
+          </Tags>
+        );
+      } else if (from === "CUSTOM") {
+        return (
+          <Tags
+            color="white"
+            className="!border-none w-[37px] h-[37px] flex items-center justify-center"
+          >
+            <FaUser className="text-green-500 text-2xl"></FaUser>
+          </Tags>
+        );
+      }
+    }
+    return <></>;
+  }
+
   return (
     <div>
       {/* // Default UI */}
@@ -124,15 +156,20 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
             {searchResult.length > 0 && (
               <div className="flex flex-wrap gap-3 items-center text-2xl duration-300 transition-all ">
                 {searchResult[indexSelect].option?.type === 0 && (
-                  <span className="text-lg font-bold p-1  rounded-md bg-red-500/80">
+                  <Tags color="red" className="!text-lg">
                     EMK
-                  </span>
+                  </Tags>
                 )}
                 {searchResult[indexSelect].option?.type === 1 && (
-                  <span className="text-lg font-bold p-1  rounded-md bg-green-500/80">
+                  <Tags color="green" className="!text-lg">
                     NCN
-                  </span>
+                  </Tags>
                 )}
+
+                <GetFromType
+                  from={searchResult[indexSelect].option?.from}
+                ></GetFromType>
+
                 <span className="uppercase">
                   {searchResult[indexSelect].option?.id}{" "}
                 </span>

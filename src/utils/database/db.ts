@@ -61,6 +61,23 @@ export async function initDatabase(autoIncrement: boolean = true) {
   return db;
 }
 
+export const closeDatabaseConnections = () => {
+  return new Promise((resolve) => {
+    const request = indexedDB.open(DB_NAME);
+
+    request.onsuccess = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      db.close(); // ปิดการเชื่อมต่อ
+      console.log("Database connection closed");
+      resolve(true);
+    };
+
+    request.onerror = (event) => {
+      resolve(false);
+    };
+  });
+};
+
 export async function deleteAllStores(): Promise<IDBPDatabase> {
   const db = await openDB(DB_NAME);
 
@@ -82,25 +99,24 @@ export async function deleteAllStores(): Promise<IDBPDatabase> {
   return db;
 }
 
-export async function deleteDatabase(
-  dbName: string = DB_NAME
-): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.deleteDatabase(dbName);
+export function deleteDatabase(dbName: string = DB_NAME) {
+  return indexedDB.deleteDatabase(dbName);
+  // return new Promise((resolve, reject) => {
+  //   const request = indexedDB.deleteDatabase(dbName);
 
-    request.onsuccess = () => {
-      console.log(`Database ${dbName} deleted successfully.`);
-      resolve(true);
-    };
+  //   request.onsuccess = () => {
+  //     console.log(`Database ${dbName} deleted successfully.`);
+  //     resolve(true);
+  //   };
 
-    request.onerror = (event) => {
-      console.error(`Error deleting database ${dbName}:`, event);
-      reject(false);
-    };
+  //   request.onerror = (event) => {
+  //     console.error(`Error deleting database ${dbName}:`, event);
+  //     resolve(false);
+  //   };
 
-    request.onblocked = () => {
-      console.warn(`Database deletion blocked: ${dbName}`);
-      // Handle case where the deletion is blocked by open connections
-    };
-  });
+  //   request.onblocked = () => {
+  //     console.warn(`Database deletion blocked: ${dbName}`);
+  //     resolve(null);
+  //   };
+  // });
 }

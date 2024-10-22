@@ -3,14 +3,7 @@ import DriveAction from "./action";
 import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
 import Label from "@/components/common/label";
 import { IoDownload, IoSend } from "react-icons/io5";
-import {
-  getLocalDriveTested,
-  getLocalDriveUrl,
-  getLocalSystemMode,
-  getLocalTracklistDriveUrl,
-  setLocalDriveTested,
-  setLocalDriveUrl,
-} from "@/lib/local-storege/local-storage";
+import { getLocalTracklistDriveUrl } from "@/lib/local-storege/local-storage";
 import useConfigStore from "@/stores/config-store";
 
 interface AddFromDriveProps {
@@ -27,7 +20,6 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
   getSystem,
 }) => {
   const config = useConfigStore((state) => state.config);
-  const setConfig = useConfigStore((state) => state.setConfig);
   const [system, setSystem] = useState<string>("off");
   const [driveUrl, setDriveUrl] = useState<string>();
   const [tracklistUrl, setTrackListUrl] = useState<string>();

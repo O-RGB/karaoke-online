@@ -114,7 +114,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           show: true,
         });
         // setTracklistFile(file);
-        setTracklist(saved);
+        addTracklist(saved);
         setMusicFilename(file?.name);
       } else {
         setProgress({
