@@ -116,3 +116,5 @@ export const groupFileTrackList = (fileList: FileList): FileGroup[] => {
 
   return groups;
 };
+
+export const getTracklistFile = (file: File) => {};

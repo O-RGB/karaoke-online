@@ -10,14 +10,17 @@ export const useKeyboardEvents = () => {
     arrowUp,
     arrowLeft,
     arrowRight,
+    queueing,
+    setQueueOpen,
     initializeKeyboardListeners,
     clearSearchingTimeout,
+    resetQueueingTimeout,
+    resetSearchingTimeout,
   } = useKeyboardStore();
 
   useEffect(() => {
     initializeKeyboardListeners();
     return () => {
-      // ไม่ต้อง removeEventListener ที่นี่เพราะเราต้องการให้ listener ทำงานตลอดอายุของแอปพลิเคชัน
       clearSearchingTimeout();
     };
   }, [initializeKeyboardListeners, clearSearchingTimeout]);
@@ -30,5 +33,9 @@ export const useKeyboardEvents = () => {
     arrowUp,
     arrowLeft,
     arrowRight,
+    queueing,
+    resetQueueingTimeout,
+    resetSearchingTimeout,
+    setQueueOpen
   };
 };

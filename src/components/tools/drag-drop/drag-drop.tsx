@@ -8,7 +8,7 @@ import { FC, useEffect } from "react";
 import { AiOutlineFile } from "react-icons/ai";
 
 type DragDropProps = {
-  setSongPlaying: (song: SongFilesDecode) => void;
+  setSongPlaying: (song: SongFilesDecode, info?: SearchResult) => void;
 };
 
 export const DragDrop: FC<DragDropProps> = ({ setSongPlaying }) => {

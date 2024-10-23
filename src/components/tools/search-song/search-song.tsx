@@ -1,9 +1,7 @@
-import { onSearchList } from "@/lib/trie-search";
 import React, { useEffect, useState } from "react";
-import TrieSearch from "trie-search";
 import SearchSelect from "../../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
-import { FaGoogleDrive, FaUser } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
 import { useKeyboardEvents } from "@/hooks/keyboard-hook";
@@ -20,7 +18,14 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   const { orientation } = useOrientation();
   const hideMixer = useMixerStore((state) => state.hideMixer);
 
-  const { searching, onEnter, arrowRight, arrowLeft } = useKeyboardEvents();
+  const {
+    searching,
+    onEnter,
+    arrowRight,
+    arrowLeft,
+    queueing,
+    resetQueueingTimeout,
+  } = useKeyboardEvents();
 
   const [fullUi, setFullUi] = useState<boolean>(false);
   const [searchResult, setSearchResult] = useState<IOptions<SearchResult>[]>(
@@ -51,6 +56,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   };
 
   useEffect(() => {
+    resetQueueingTimeout(0);
     if (searching !== "") {
       onKeyUpSearch(searching);
     }
@@ -58,7 +64,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   }, [searching]);
 
   useEffect(() => {
-    if (searchResult.length > 0) {
+    if (searchResult.length > 0 && queueing === false) {
       let option = searchResult[indexSelect].option;
       if (option) {
         onClickSong?.(option);
@@ -66,7 +72,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
         setSearchResult([]);
       }
     }
-  }, [onEnter]);
+  }, [queueing ? undefined : onEnter]);
 
   useEffect(() => {
     setIndexSelect((value) => {
@@ -134,6 +140,9 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
         );
       }
     }
+    return <></>;
+  }
+  if (queueing) {
     return <></>;
   }
 

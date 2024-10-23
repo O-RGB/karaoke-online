@@ -21,6 +21,8 @@ import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
 import useMixerStore from "@/stores/mixer-store";
 import useNotificationStore from "@/stores/notification-store";
+import { useKeyboardEvents } from "@/hooks/keyboard-hook";
+import { FaList } from "react-icons/fa";
 
 interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
@@ -42,6 +44,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
 }) => {
   const VOCAL_CHANNEL = 9;
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
+  const { setQueueOpen } = useKeyboardEvents();
 
   const { orientation } = useOrientation();
   const setNotification = useNotificationStore(
@@ -209,11 +212,22 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           ></NumberButton>
 
           <SwitchButton
-            onChange={(muted) => onMutedVolume(VOCAL_CHANNEL, !muted)}
+            onChange={(muted) => {
+              onMutedVolume(VOCAL_CHANNEL, !muted);
+            }}
             iconOpen={<PiUserSoundFill></PiUserSoundFill>}
             iconClose={<PiUserMinusFill></PiUserMinusFill>}
             labelOpen="Vocal"
             labelClose="Vocal"
+          ></SwitchButton>
+          <SwitchButton
+            onChange={(muted) => {
+              setQueueOpen?.();
+            }}
+            iconOpen={<FaList className="pb-0.5"></FaList>}
+            iconClose={<FaList className="pb-0.5"></FaList>}
+            labelOpen="คิวเพลง"
+            labelClose="คิวเพลง"
           ></SwitchButton>
         </div>
         <div>{options}</div>

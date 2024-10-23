@@ -8,9 +8,12 @@ interface TempoPanelProps {
 }
 
 const TempoPanel: React.FC<TempoPanelProps> = ({ timeDivision = 1 }) => {
-  const { config } = useConfigStore();
+  const config = useConfigStore((state) => state.config);
+  // const setConfig = useConfigStore((state) => state.setConfig);
   const widgetConfig = config.widgets;
-  const isShow = widgetConfig?.tempo?.show;
+  let isShow = widgetConfig?.tempo?.show;
+  const windowMatches = window.matchMedia("(min-width: 1024px)").matches;
+  isShow = isShow ? windowMatches : false;
 
   const tick = useTickStore((state) => state.tick);
   const tempo = useTempoStore((state) => state.tempo);
@@ -18,10 +21,12 @@ const TempoPanel: React.FC<TempoPanelProps> = ({ timeDivision = 1 }) => {
   const [currentBeatInBar, setCurrentBeatInBar] = useState(1);
 
   useEffect(() => {
-    if (tick > 0 && timeDivision > 0) {
-      const currentTickInBar = tick % (timeDivision * 4);
-      const beatInBar = Math.floor(currentTickInBar / timeDivision) + 1;
-      setCurrentBeatInBar(beatInBar);
+    if (isShow) {
+      if (tick > 0 && timeDivision > 0) {
+        const currentTickInBar = tick % (timeDivision * 4);
+        const beatInBar = Math.floor(currentTickInBar / timeDivision) + 1;
+        setCurrentBeatInBar(beatInBar);
+      }
     }
   }, [timeDivision, isShow ? tick : undefined]);
 

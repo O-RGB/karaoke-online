@@ -7,18 +7,40 @@ import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import useConfigStore from "@/stores/config-store";
 import useNotificationStore from "@/stores/notification-store";
 
+interface IPlayingQueues {
+  songInfo: SearchResult;
+  midi: MIDI;
+}
+interface IPlayingDecodedQueues {
+  songInfo: SearchResult;
+  file: SongFilesDecode;
+}
 interface AppControlState {
   musicLibrary: Map<string, File>;
-  playingTrack: SearchResult | undefined;
+  playingTrack: IPlayingQueues | undefined;
   midiPlaying: MIDI | undefined;
   lyrics: string[];
   cursorTicks: number[];
   cursorIndices: Map<number, number[]> | undefined;
-  setPlayingTrackFile: (value: SearchResult) => void;
+  playingQueue: IPlayingDecodedQueues[];
+  setPlayingQueue: (value: IPlayingDecodedQueues[]) => void;
+  setPlayingTrackFile: (value: IPlayingQueues) => void;
   setMusicLibraryFile: (files: Map<string, File>) => void;
   handleSetLyrics: (lyr: string[]) => void;
-  setSongPlaying: (files: SongFilesDecode) => Promise<void>;
-  loadAndPlaySong: (value: SearchResult) => Promise<void>;
+  setSongPlaying: (
+    files: SongFilesDecode,
+    info?: SearchResult
+  ) => Promise<void>;
+  loadAndPlaySong: (
+    value: SearchResult
+  ) => Promise<IPlayingDecodedQueues[] | undefined>;
+  setMidiPlayer: (midi: MIDI) => Promise<void>;
+
+  setPaused: (value: boolean) => void;
+  paused: boolean;
+
+  setIsFinished: (value: boolean) => void;
+  isFinished: boolean;
 }
 
 export const useAppControlStore = create<AppControlState>((set, get) => ({
@@ -27,7 +49,13 @@ export const useAppControlStore = create<AppControlState>((set, get) => ({
   midiPlaying: undefined,
   lyrics: [],
   cursorTicks: [],
+  paused: false,
+  setPaused: (value: boolean) => set({ paused: value }),
+  isFinished: false,
+  setIsFinished: (value: boolean) => set({ isFinished: value }),
   cursorIndices: undefined,
+  playingQueue: [],
+  setPlayingQueue: (value) => set({ playingQueue: value }),
 
   setPlayingTrackFile: (value) => set({ playingTrack: value }),
 
@@ -35,14 +63,15 @@ export const useAppControlStore = create<AppControlState>((set, get) => ({
 
   handleSetLyrics: (lyr) => set({ lyrics: lyr }),
 
-  setSongPlaying: async (files) => {
+  setSongPlaying: async (files, info) => {
     const player = useSpessasynthStore.getState().player;
     if (!player) return;
 
-    player.pause();
-    player.stop();
-    set({ lyrics: [], cursorTicks: [], cursorIndices: undefined });
-
+    if (player.paused) {
+      player.pause();
+      player.stop();
+      set({ lyrics: [], cursorTicks: [], cursorIndices: undefined });
+    }
     let midiFileArrayBuffer = await files.mid.arrayBuffer();
     let parsedMidi = null;
     try {
@@ -55,38 +84,61 @@ export const useAppControlStore = create<AppControlState>((set, get) => ({
     }
 
     if (parsedMidi) {
-      setTimeout(() => {
+      setTimeout(async () => {
         set({ midiPlaying: parsedMidi });
         const timeDivision = parsedMidi.timeDivision;
         const cur = convertCursorToTicks(timeDivision, files.cur);
         const curMapping = mapCursorToIndices(cur);
+
         set({
           lyrics: files.lyr,
           cursorTicks: cur,
           cursorIndices: curMapping,
         });
-        player.loadNewSongList([parsedMidi]);
-        player.play();
+        get().setMidiPlayer(parsedMidi);
       }, 1000);
     }
+  },
+
+  setMidiPlayer: async (midi: MIDI) => {
+    const player = useSpessasynthStore.getState().player;
+    if (!player) return;
+    player.loadNewSongList([midi]);
+    player.play();
+    get().setIsFinished(false);
+    get().setPaused(false);
   },
 
   loadAndPlaySong: async (value) => {
     const setNotification = useNotificationStore.getState().setNotification;
     const System = useConfigStore.getState().config.system?.drive;
+    const {} = get();
     const mode = System ? " Drive" : "ระบบ";
-
     // setNotification({
     //   text: "กำลังโหลดจาก" + mode,
     //   delay: 40000,
     //   icon: <AiOutlineLoading className="animate-spin" />,
     // });
+
     setNotification({ text: "กำลังโหลดจาก" + mode, delay: 40000 });
 
-    const song = await getSong(value, System);
+    const song = await getSong(value);
     if (song) {
-      await get().setSongPlaying(song);
+      const data: IPlayingDecodedQueues[] = [
+        ...get().playingQueue,
+        {
+          file: song,
+          songInfo: value,
+        },
+      ];
+      set({
+        playingQueue: [...data],
+      });
+      // if (autoPlay) {
+      //   await get().setSongPlaying(song, value);
+      // }
       setNotification({ text: "เสร็จสิ้น" });
+      return data;
     } else {
       setNotification({ text: "ไม่พบเพลงใน" + mode });
     }

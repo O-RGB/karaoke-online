@@ -35,21 +35,21 @@ import useNotificationStore from "@/stores/notification-store";
 import { useAppControlStore } from "@/stores/player-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/stores/config-store";
+import QueueSong from "../tools/queue-song/queue-song";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
-  const { perset, synth, player, analysers, setupSpessasynth } =
-    useSpessasynthStore();
+  const { perset, analysers, setupSpessasynth } = useSpessasynthStore();
+  const player = useSpessasynthStore((state) => state.player);
   const addTracklist = useTracklistStore((state) => state.addTracklist);
-  const {
-    loadAndPlaySong,
-    setSongPlaying,
-    lyrics,
-    cursorIndices,
-    cursorTicks,
-    midiPlaying,
-  } = useAppControlStore();
+
+  const midiPlaying = useAppControlStore((state) => state.midiPlaying);
+  const cursorTicks = useAppControlStore((state) => state.cursorTicks);
+  const cursorIndices = useAppControlStore((state) => state.cursorIndices);
+  const lyrics = useAppControlStore((state) => state.lyrics);
+  const setSongPlaying = useAppControlStore((state) => state.setSongPlaying);
+  const loadAndPlaySong = useAppControlStore((state) => state.loadAndPlaySong);
 
   const notification = useNotificationStore((state) => state.notification);
   const config = useConfigStore((state) => state.config);
@@ -70,10 +70,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     startup();
   }, []);
 
-  if (!synth || !player) {
-    return <></>;
-  }
-
   const modalMap: ModalComponents = {
     SOUNDFONT_MODEL: <SoundfontManager></SoundfontManager>,
     JOIN: <HostRemote></HostRemote>,
@@ -87,6 +83,12 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
   };
 
+  if (!player) {
+    return <></>;
+  }
+
+  console.log("main rerender");
+
   return (
     <>
       <DragDrop setSongPlaying={setSongPlaying}></DragDrop>
@@ -94,42 +96,41 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <WallpaperRender></WallpaperRender>
       <RemoteRender></RemoteRender>
 
-      <TicksRender
-        synth={synth}
-        player={player}
-        midiPlaying={midiPlaying}
-      ></TicksRender>
+      <TicksRender midiPlaying={midiPlaying}></TicksRender>
       <LyricsRender
         cursorIndices={cursorIndices}
         cursorTicks={cursorTicks}
         lyrics={lyrics}
       ></LyricsRender>
-      <GainRender player={player} analysers={analysers}></GainRender>
-      <VolumeEvnet synth={synth}></VolumeEvnet>
-      <InstrumentsEvent synth={synth}></InstrumentsEvent>
+      <GainRender analysers={analysers}></GainRender>
+      <VolumeEvnet></VolumeEvnet>
+      <InstrumentsEvent></InstrumentsEvent>
 
       {/* Contact */}
       <ContextModal modal={modalMap}>
         <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel>
         <StatusPanel notification={notification}></StatusPanel>
-        <VolumePanel
-          synth={synth}
-          perset={perset}
-          analysers={analysers}
-        ></VolumePanel>
+        <VolumePanel perset={perset} analysers={analysers}></VolumePanel>
         <TempoPanel timeDivision={midiPlaying?.timeDivision}></TempoPanel>
         <ClockPanel></ClockPanel>
-        <SearchSong onClickSong={loadAndPlaySong}></SearchSong>
+        <QueueSong></QueueSong>
+        <SearchSong
+          onClickSong={async (value) => {
+            const data = await loadAndPlaySong(value);
+            if (data) {
+              if (data.length <= 1) {
+                const { file, songInfo } = data[0];
+                setSongPlaying(file, songInfo);
+              }
+            }
+          }}
+        ></SearchSong>
         <LyricsPanel
           cursorIndices={cursorIndices}
           cursorTicks={cursorTicks}
           lyrics={lyrics}
         ></LyricsPanel>
-        <PlayerPanel
-          lyrics={lyrics}
-          modalMap={modalMap}
-          player={player}
-        ></PlayerPanel>
+        <PlayerPanel lyrics={lyrics} modalMap={modalMap}></PlayerPanel>
       </ContextModal>
     </>
   );

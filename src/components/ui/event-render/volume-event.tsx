@@ -1,17 +1,18 @@
 import useMixerStore from "@/stores/mixer-store";
+import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import React, { useCallback, useEffect } from "react";
 import { midiControllers, Synthetizer } from "spessasynth_lib";
 
-interface VolumeEventProps {
-  synth: Synthetizer;
+interface VolumeEventProps { 
 }
 
-const VolumeEvent: React.FC<VolumeEventProps> = ({ synth }) => {
+const VolumeEvent: React.FC<VolumeEventProps> = ({   }) => {
   const setVolumes = useMixerStore((state) => state.setVolumes);
   const setPan = useMixerStore((state) => state.setPan);
   const setReverb = useMixerStore((state) => state.setReverb);
   const setChorusDepth = useMixerStore((state) => state.setChorusDepth);
   const heid = useMixerStore((state) => state.held);
+  const synth = useSpessasynthStore.getState().synth;
 
   const synthEventController = useCallback(
     (controllerNumber: number, controllerValue: number, channel: number) => {

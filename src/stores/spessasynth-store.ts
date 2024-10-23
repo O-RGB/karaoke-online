@@ -10,6 +10,7 @@ interface SpessasynthState {
   perset: IPersetSoundfont[];
   defaultSoundFont: File | undefined;
   SFname: string | undefined;
+
   setupSpessasynth: () => Promise<void>;
   setSoundFontName: (name: string) => void;
 }
@@ -20,8 +21,10 @@ export const useSpessasynthStore = create<SpessasynthState>((set, get) => ({
   audio: undefined,
   analysers: [],
   perset: [],
+  paused: false,
   defaultSoundFont: undefined,
   SFname: undefined,
+
   setSoundFontName: (name: string) => set({ SFname: name }),
   setupSpessasynth: async () => {
     const { audio, synth, player } = await setupSpessasynth();
@@ -95,7 +98,6 @@ async function loadSoundFontPlayer(audio: AudioContext) {
     }
   );
 
-  
   synthInstance.setMainVolume(0.7);
   synthInstance.highPerformanceMode = false;
 

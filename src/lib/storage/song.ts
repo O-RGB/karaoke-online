@@ -97,17 +97,17 @@ export const genSongPath = (selected?: SearchResult) => {
 };
 
 export const getSong = async (
-  selected?: SearchResult,
-  driveMode: boolean = false
+  selected?: SearchResult
+  // driveMode: boolean = false
 ) => {
   const { superId, fileId } = genSongPath(selected);
   if (superId && fileId) {
     var superFile: File | undefined = undefined;
-
+console.log(selected)
     // on drive
-    if (driveMode) {
+    if (selected?.from === "DRIVE") {
       superFile = await getSongDrive(`${superId}`);
-    } else {
+    } else if (selected?.from === "EXTHEME") {
       // // on local
       const checkUserSong: boolean = superId.startsWith(CUSTOM_SONG_ZIP);
       superFile = await getSongByKey(`${superId}.zip`, checkUserSong);

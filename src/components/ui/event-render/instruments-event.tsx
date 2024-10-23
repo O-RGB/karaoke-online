@@ -2,14 +2,13 @@ import useEventStore from "@/stores/event.store";
 import { CHANNEL_DEFAULT } from "@/config/value";
 import React, { useEffect, useRef, useState } from "react";
 import { Synthetizer } from "spessasynth_lib";
+import { useSpessasynthStore } from "@/stores/spessasynth-store";
 
-interface InstrumentsEventProps {
-  synth: Synthetizer;
-}
+interface InstrumentsEventProps {}
 
-const InstrumentsEvent: React.FC<InstrumentsEventProps> = ({ synth }) => {
+const InstrumentsEvent: React.FC<InstrumentsEventProps> = ({}) => {
   const storeSetInstrument = useEventStore((state) => state.setInstrument);
-
+  const synth = useSpessasynthStore.getState().synth;
   const eventProgramChange = () => {
     synth?.eventHandler.addEvent("programchange", "", (e) => {
       const channel: number = e.channel;

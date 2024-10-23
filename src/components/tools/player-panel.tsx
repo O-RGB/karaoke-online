@@ -12,33 +12,52 @@ import { FiSettings } from "react-icons/fi";
 import Marquee from "react-fast-marquee";
 import { FaSearch } from "react-icons/fa";
 import useTickStore from "../../stores/tick-store";
+import { useSpessasynthStore } from "@/stores/spessasynth-store";
+import { useAppControlStore } from "@/stores/player-store";
 interface PlayerPanelProps {
-  player: Sequencer;
   lyrics: string[];
   modalMap: ModalComponents;
 }
 
-const PlayerPanel: React.FC<PlayerPanelProps> = ({
-  player,
-  lyrics,
-  modalMap,
-}) => {
+const PlayerPanel: React.FC<PlayerPanelProps> = ({ lyrics, modalMap }) => {
   // re-render
-  useTickStore((state) => state.tick);
-  const timer = Math.round((player.currentTime / player.duration) * 100);
+  const tick = useTickStore((state) => state.tick);
+
+  const player = useSpessasynthStore((state) => state.player);
+  const currentTime = useSpessasynthStore((state) => state.player?.currentTime);
+  const duration = useSpessasynthStore((state) => state.player?.duration);
+
+  const isFinished = useAppControlStore((state) => state.isFinished);
+  const paused = useAppControlStore((state) => state.paused);
+  const setPaused = useAppControlStore((state) => state.setPaused);
+
+  const [timer, setTimer] = useState<number>(0);
   const inputRef = useRef<any>(null);
 
+  useEffect(() => {
+    if (currentTime && duration) {
+      const timer = Math.round((currentTime / duration) * 100);
+      setTimer(timer);
+    }
+  }, [tick, currentTime]);
+
+  if (!player) {
+    return <></>;
+  }
   return (
     <>
       <div className="fixed bottom-0 w-full left-0 blur-overlay bg-black/10 border-t blur-border flex justify-between p-2 lg:p-0">
         <div className="flex items-center w-full">
-          {!player.paused ? (
+          {!isFinished || !paused ? (
             <Button
               blur={false}
               border=""
               shadow=""
               padding="p-4"
-              onClick={() => player.pause()}
+              onClick={() => {
+                player.pause();
+                setPaused(true);
+              }}
               shape={false}
               icon={<TbPlayerPauseFilled className="text-white" />}
             ></Button>
@@ -48,7 +67,10 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               border=""
               shadow=""
               padding="p-4"
-              onClick={() => player.play()}
+              onClick={() => {
+                player.play();
+                setPaused(false);
+              }}
               shape={false}
               icon={<TbPlayerPlayFilled className="text-white" />}
             ></Button>
@@ -68,10 +90,13 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               style={{
                 width: "100%",
               }}
+              tabIndex={-1}
               onChange={(e) => {
-                const value = +e.target.value;
-                const newCurrentTime = (value / 100) * player.duration;
-                player.currentTime = newCurrentTime;
+                if (duration) {
+                  const value = +e.target.value;
+                  const newCurrentTime = (value / 100) * duration;
+                  player.currentTime = newCurrentTime;
+                }
               }}
               type="range"
               className="transition duration-300"
