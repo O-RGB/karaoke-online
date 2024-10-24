@@ -60,8 +60,9 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   }, [searching]);
 
   useEffect(() => {
-    if (searchResult.length > 0 && queueing === false && searching.length > 0) {
+    if (searchResult.length > 0 && queueing === false) {
       let option = searchResult[indexSelect].option;
+      console.log("option", option)
       if (option) {
         onClickSong?.(option);
         setIndexSelect(0);

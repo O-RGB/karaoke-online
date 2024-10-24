@@ -125,7 +125,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
     //   delay: 40000,
     //   icon: <AiOutlineLoading className="animate-spin" />,
     // });
-
+    console.log("value", value)
     setNotification({ text: "กำลังโหลดจาก" + mode, delay: 40000 });
 
     const song = await getSong(value);

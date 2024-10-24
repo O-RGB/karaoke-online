@@ -107,7 +107,7 @@ console.log(selected)
     // on drive
     if (selected?.from === "DRIVE") {
       superFile = await getSongDrive(`${superId}`);
-    } else if (selected?.from === "EXTHEME") {
+    } else if (selected?.from === "EXTHEME" || selected?.from === "CUSTOM") {
       // // on local
       const checkUserSong: boolean = superId.startsWith(CUSTOM_SONG_ZIP);
       superFile = await getSongByKey(`${superId}.zip`, checkUserSong);
