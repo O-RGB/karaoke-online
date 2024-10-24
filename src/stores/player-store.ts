@@ -15,7 +15,7 @@ interface IPlayingDecodedQueues {
   songInfo: SearchResult;
   file: SongFilesDecode;
 }
-interface AppControlState {
+interface PlayerState {
   musicLibrary: Map<string, File>;
   playingTrack: IPlayingQueues | undefined;
   midiPlaying: MIDI | undefined;
@@ -41,9 +41,12 @@ interface AppControlState {
 
   setIsFinished: (value: boolean) => void;
   isFinished: boolean;
+
+  setCountDown: (value: number) => void;
+  countDown: number;
 }
 
-export const useAppControlStore = create<AppControlState>((set, get) => ({
+export const usePlayer = create<PlayerState>((set, get) => ({
   musicLibrary: new Map(),
   playingTrack: undefined,
   midiPlaying: undefined,
@@ -55,6 +58,9 @@ export const useAppControlStore = create<AppControlState>((set, get) => ({
   setIsFinished: (value: boolean) => set({ isFinished: value }),
   cursorIndices: undefined,
   playingQueue: [],
+
+  setCountDown: (value) => set({ countDown: value }),
+  countDown: 10,
   setPlayingQueue: (value) => set({ playingQueue: value }),
 
   setPlayingTrackFile: (value) => set({ playingTrack: value }),
@@ -134,10 +140,12 @@ export const useAppControlStore = create<AppControlState>((set, get) => ({
       set({
         playingQueue: [...data],
       });
-      // if (autoPlay) {
-      //   await get().setSongPlaying(song, value);
-      // }
-      setNotification({ text: "เสร็จสิ้น" });
+
+      if (data.length > 1) {
+        setNotification({ text: "เพิ่มในคิวแล้ว" });
+      } else {
+        setNotification({ text: "เสร็จสิ้น" });
+      }
       return data;
     } else {
       setNotification({ text: "ไม่พบเพลงใน" + mode });

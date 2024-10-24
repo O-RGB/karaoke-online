@@ -13,17 +13,11 @@ export const useKeyboardEvents = () => {
     queueing,
     setQueueOpen,
     initializeKeyboardListeners,
-    clearSearchingTimeout,
-    resetQueueingTimeout,
-    resetSearchingTimeout,
   } = useKeyboardStore();
 
   useEffect(() => {
     initializeKeyboardListeners();
-    return () => {
-      clearSearchingTimeout();
-    };
-  }, [initializeKeyboardListeners, clearSearchingTimeout]);
+  }, [initializeKeyboardListeners]);
 
   return {
     lastKey,
@@ -34,8 +28,6 @@ export const useKeyboardEvents = () => {
     arrowLeft,
     arrowRight,
     queueing,
-    resetQueueingTimeout,
-    resetSearchingTimeout,
-    setQueueOpen
+    setQueueOpen,
   };
 };

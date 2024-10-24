@@ -17,11 +17,14 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { HiMiniBars2 } from "react-icons/hi2";
-import { useKeyboardEvents } from "@/hooks/keyboard-hook";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import useTickStore from "@/stores/tick-store";
 import { MdLockOutline } from "react-icons/md";
-import { useAppControlStore } from "@/stores/player-store";
+import { usePlayer } from "@/stores/player-store";
+import useKeyboardStore from "@/stores/keyboard-state";
+import Button from "@/components/common/button/button";
+import { RiDeleteBin5Line } from "react-icons/ri";
+import Tags from "@/components/common/tags";
 
 interface SongItem {
   id: string;
@@ -38,6 +41,7 @@ const SortableTableRow = ({
   lockFirst,
   countDown,
   onKeySelected,
+  onDelete,
 }: {
   item: SongItem;
   index: number;
@@ -46,6 +50,7 @@ const SortableTableRow = ({
   lockFirst: boolean;
   countDown: number;
   onKeySelected: boolean;
+  onDelete: (index: number) => void;
 }) => {
   const {
     attributes,
@@ -81,7 +86,7 @@ const SortableTableRow = ({
           : "border-gray-300"
       }  transition-colors ${isDragging ? "shadow-lg" : ""}`}
     >
-      <td className="p-2">
+      <td valign="top" className="p-2">
         <div className="flex items-center gap-2">
           <div
             {...attributes}
@@ -101,9 +106,32 @@ const SortableTableRow = ({
           </div>
         </div>
       </td>
-      <td className="p-2">{item.number}</td>
-      <td className="p-2">{item.details}</td>
-      <td className="p-2">{item.type}</td>
+      <td valign="top" className="p-2 ">
+        {item.number}
+      </td>
+      <td valign="top" className="p-2">
+        {item.details}
+      </td>
+      <td valign="top" className="p-2">
+        {item.type === "0" ? (
+          <Tags color="red">EMK</Tags>
+        ) : (
+          <Tags color="green">NCN</Tags>
+        )}
+      </td>
+      <td valign="top" className="p-2">
+        <Button
+          shadow={false}
+          border={false}
+          onClick={() => onDelete?.(index)}
+          padding=""
+          className="w-7 h-7"
+          blur=""
+          color="red"
+          iconPosition="left"
+          icon={<RiDeleteBin5Line className="text-white"></RiDeleteBin5Line>}
+        ></Button>
+      </td>
     </tr>
   );
 };
@@ -115,36 +143,36 @@ interface QueueSongProps {
 const QueueSong: React.FC<QueueSongProps> = ({
   stopTouchMusicPlaying = 10,
 }) => {
-  const {
-    queueing,
-    searching,
-    resetQueueingTimeout,
-    resetSearchingTimeout,
-    arrowDown,
-    arrowUp,
-    onEnter,
-  } = useKeyboardEvents();
+  const queueing = useKeyboardStore((state) => state.queueing);
+  const searching = useKeyboardStore((state) => state.searching);
+  const arrowDown = useKeyboardStore((state) => state.arrowDown);
+  const arrowUp = useKeyboardStore((state) => state.arrowUp);
+  const onEnter = useKeyboardStore((state) => state.onEnter);
+  const resetQueueingTimeout = useKeyboardStore(
+    (state) => state.resetQueueingTimeout
+  );
+
   const player = useSpessasynthStore((state) => state.player);
   const [lockFirstIndex, setLockFirstIndex] = useState<boolean>(false);
-  const playingQueue = useAppControlStore((state) => state.playingQueue);
-  const setPlayingQueue = useAppControlStore((state) => state.setPlayingQueue);
-  const setSongPlaying = useAppControlStore((state) => state.setSongPlaying);
+  const playingQueue = usePlayer((state) => state.playingQueue);
+  const countDown = usePlayer((state) => state.countDown);
+  const setPlayingQueue = usePlayer((state) => state.setPlayingQueue);
+  const setSongPlaying = usePlayer((state) => state.setSongPlaying);
 
-  const [countdown, setCountDown] = useState<number>(stopTouchMusicPlaying);
+  // const [countdown, setCountDown] = useState<number>(stopTouchMusicPlaying);
   const tick = useTickStore((state) => state.tick);
   const [selected, setSelected] = useState<number>(0);
 
   const sensors = useSensors(
-    // ปรับแต่ง TouchSensor ให้เหมาะกับมือถือ
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 250, // หน่วงเวลานิดหน่อยเพื่อไม่ให้ทำงานเมื่อ scroll
-        tolerance: 5, // ระยะที่ยอมให้นิ้วเคลื่อนที่ได้ก่อนเริ่ม drag
+        delay: 250,
+        tolerance: 5,
       },
     }),
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // ระยะที่ต้องลากก่อนเริ่มทำงาน
+        distance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -153,7 +181,6 @@ const QueueSong: React.FC<QueueSongProps> = ({
   );
 
   const handleDragStart = (event: any) => {
-    // เพิ่ม haptic feedback ถ้าเบราว์เซอร์รองรับ
     if (window.navigator.vibrate) {
       window.navigator.vibrate(50);
       resetQueueingTimeout(100000);
@@ -164,7 +191,6 @@ const QueueSong: React.FC<QueueSongProps> = ({
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      //   playingQueue((items) => {
       const oldIndex = playingQueue.findIndex(
         (item) => item.songInfo.id === active.id
       );
@@ -172,47 +198,48 @@ const QueueSong: React.FC<QueueSongProps> = ({
         (item) => item.songInfo.id === over.id
       );
 
-      // ถ้า lockFirstIndex เปิดอยู่ และพยายามจะย้ายไปที่ตำแหน่งแรก
       if (lockFirstIndex && newIndex === 0) {
         return;
       }
 
-      // ถ้า lockFirstIndex เปิดอยู่ และพยายามจะย้ายตำแหน่งแรก
       if (lockFirstIndex && oldIndex === 0) {
         return;
       }
 
       const newItems = arrayMove(playingQueue, oldIndex, newIndex);
+      // setSelected(newIndex)
       const updated = newItems.map((item, index) => ({
         ...item,
         number: index + 1,
       }));
 
       setPlayingQueue(updated);
-      //   });
 
-      // vibrate เมื่อวางเสร็จ
       if (window.navigator.vibrate) {
         window.navigator.vibrate(30);
-        resetQueueingTimeout();
+        resetQueueingTimeout(5000);
       }
     }
   };
 
+  const onDelete = (index: number) => {
+    let clone = [...playingQueue];
+    clone = clone.filter((_, i) => i !== index);
+    setPlayingQueue(clone);
+  };
+
   useEffect(() => {
-    const lastTime = Math.floor(player?.duration ?? 0);
-    const count = lastTime - Math.floor(player?.currentTime ?? 0);
-    if (count < stopTouchMusicPlaying) {
-      //lock
+    // const lastTime = Math.floor(player?.duration ?? 0);
+    // const count = lastTime - Math.floor(player?.currentTime ?? 0);
+    if (countDown < stopTouchMusicPlaying) {
       setLockFirstIndex(true);
-      setCountDown(count + 1);
+      // setCountDown(count + 1);
     } else {
       setLockFirstIndex(false);
-      setCountDown(stopTouchMusicPlaying);
+      // setCountDown(stopTouchMusicPlaying);
     }
   }, [queueing ? tick : undefined]);
   useEffect(() => {
-    resetSearchingTimeout(0);
     setSelected((value) => {
       let coming = value + 1;
       if (coming >= playingQueue.length - 1) {
@@ -224,7 +251,6 @@ const QueueSong: React.FC<QueueSongProps> = ({
   }, [arrowDown]);
 
   useEffect(() => {
-    resetSearchingTimeout(0);
     setSelected((value) => {
       let coming = value - 1;
       if (coming <= 1) {
@@ -236,6 +262,7 @@ const QueueSong: React.FC<QueueSongProps> = ({
   }, [arrowUp]);
 
   useEffect(() => {
+    console.log("searching", searching);
     if (queueing && searching === "") {
       let clone = [...playingQueue];
       if (clone.length > 0) {
@@ -244,7 +271,6 @@ const QueueSong: React.FC<QueueSongProps> = ({
           let removed = clone.filter((_, i) => i !== selected);
           setPlayingQueue(removed);
           setSongPlaying(songPlaying.file, songPlaying.songInfo);
-          resetQueueingTimeout(0);
         }
       }
     }
@@ -263,27 +289,27 @@ const QueueSong: React.FC<QueueSongProps> = ({
   return (
     <div
       onClick={() => {
-        resetQueueingTimeout();
+        resetQueueingTimeout(5000);
       }}
       className={`z-[99] pt-[58px] h-screen bg-black/30 fixed text-white w-full px-5 duration-300`}
     >
       <div className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2 overflow-x-auto">
-        <table className="w-full min-w-[300px]">
-          <thead>
-            <tr>
-              <th className="text-start w-[10%] p-2"></th>
-              <th className="text-start w-[1%] p-2">ที่</th>
-              <th className="text-start w-full p-2">รายละเอียด</th>
-              <th className="text-start w-[10%] p-2">ประเภท</th>
-            </tr>
-          </thead>
-          <tbody className="relative">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-            >
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <table className="w-full min-w-[300px]">
+            <thead>
+              <tr>
+                <th className="text-start w-[10%] p-2"></th>
+                <th className="text-start w-[1%] p-2">ที่</th>
+                <th className="text-start w-full p-2">รายละเอียด</th>
+                <th className="text-start w-[10%] p-2">ประเภท</th>
+              </tr>
+            </thead>
+            <tbody className="relative">
               <SortableContext
                 items={playingQueue.map((item) => item.songInfo.id)}
                 strategy={verticalListSortingStrategy}
@@ -292,9 +318,9 @@ const QueueSong: React.FC<QueueSongProps> = ({
                   (item, index) =>
                     index > 0 && (
                       <SortableTableRow
-                        key={`queue-${index}`}
+                        key={`queue-${item.songInfo.id}-${index}`}
                         item={{
-                          details: item.songInfo.name,
+                          details: `${item.songInfo.id} ${item.songInfo.name} - ${item.songInfo.artist}`,
                           id: item.songInfo.id,
                           number: index,
                           type: item.songInfo.type.toString(),
@@ -302,16 +328,17 @@ const QueueSong: React.FC<QueueSongProps> = ({
                         index={index}
                         isFirst={index == 1}
                         isLast={index === playingQueue.length - 1}
-                        lockFirst={countdown < stopTouchMusicPlaying}
-                        countDown={countdown}
+                        lockFirst={countDown < stopTouchMusicPlaying}
+                        countDown={countDown}
                         onKeySelected={selected === index}
+                        onDelete={onDelete}
                       />
                     )
                 )}
               </SortableContext>
-            </DndContext>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </DndContext>
       </div>
     </div>
   );

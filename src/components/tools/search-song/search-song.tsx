@@ -4,10 +4,10 @@ import { toOptions } from "@/lib/general";
 import { FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
-import { useKeyboardEvents } from "@/hooks/keyboard-hook";
 import useMixerStore from "@/stores/mixer-store";
 import useTracklistStore from "@/stores/tracklist-store";
 import Tags from "@/components/common/tags";
+import useKeyboardStore from "@/stores/keyboard-state";
 
 interface SearchSongProps {
   onClickSong?: (value: SearchResult) => void;
@@ -18,14 +18,11 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   const { orientation } = useOrientation();
   const hideMixer = useMixerStore((state) => state.hideMixer);
 
-  const {
-    searching,
-    onEnter,
-    arrowRight,
-    arrowLeft,
-    queueing,
-    resetQueueingTimeout,
-  } = useKeyboardEvents();
+  const queueing = useKeyboardStore((state) => state.queueing);
+  const searching = useKeyboardStore((state) => state.searching);
+  const arrowRight = useKeyboardStore((state) => state.arrowRight);
+  const arrowLeft = useKeyboardStore((state) => state.arrowLeft);
+  const onEnter = useKeyboardStore((state) => state.onEnter);
 
   const [fullUi, setFullUi] = useState<boolean>(false);
   const [searchResult, setSearchResult] = useState<IOptions<SearchResult>[]>(
@@ -56,7 +53,6 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   };
 
   useEffect(() => {
-    resetQueueingTimeout(0);
     if (searching !== "") {
       onKeyUpSearch(searching);
     }
@@ -64,7 +60,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   }, [searching]);
 
   useEffect(() => {
-    if (searchResult.length > 0 && queueing === false) {
+    if (searchResult.length > 0 && queueing === false && searching.length > 0) {
       let option = searchResult[indexSelect].option;
       if (option) {
         onClickSong?.(option);
@@ -83,6 +79,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
       return value;
     });
   }, [arrowRight]);
+
   useEffect(() => {
     setIndexSelect((value) => {
       let sum = value - 1;

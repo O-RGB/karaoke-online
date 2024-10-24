@@ -21,8 +21,9 @@ import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
 import useMixerStore from "@/stores/mixer-store";
 import useNotificationStore from "@/stores/notification-store";
-import { useKeyboardEvents } from "@/hooks/keyboard-hook";
 import { FaList } from "react-icons/fa";
+import useKeyboardStore from "@/stores/keyboard-state";
+import { useSpessasynthStore } from "@/stores/spessasynth-store";
 
 interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
@@ -31,11 +32,9 @@ interface VolumePanelProps {
   perset?: IPersetSoundfont[];
   options?: React.ReactNode;
   className?: string;
-  synth?: Synthetizer;
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
-  synth,
   onVolumeChange,
   audioGain,
   perset,
@@ -44,7 +43,10 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
 }) => {
   const VOCAL_CHANNEL = 9;
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
-  const { setQueueOpen } = useKeyboardEvents();
+  const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
+  const resetQueueingTimeout = useKeyboardStore(
+    (state) => state.resetQueueingTimeout
+  );
 
   const { orientation } = useOrientation();
   const setNotification = useNotificationStore(
@@ -53,6 +55,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const hideMixer = useMixerStore((state) => state.hideMixer);
   const setHideMixer = useMixerStore((state) => state.setHideMixer);
   const setHeld = useMixerStore((state) => state.setHeld);
+  const synth = useSpessasynthStore((state) => state.synth);
   // const { superUserConnections, sendSuperUserMessage } = useRemote();
 
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
@@ -223,6 +226,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           <SwitchButton
             onChange={(muted) => {
               setQueueOpen?.();
+              resetQueueingTimeout(5000);
             }}
             iconOpen={<FaList className="pb-0.5"></FaList>}
             iconClose={<FaList className="pb-0.5"></FaList>}

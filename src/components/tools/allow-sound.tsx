@@ -89,7 +89,15 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                   </Button>
                 </div>
                 <span className="pt-1 text-xs text-white">
-                  🎃👻 Updated v.1.0.23 👻🎃
+                  🔥🩷 Updated v.1.0.24 🩷🔥
+                </span>
+
+                <span className="pt-2 text-xs text-white flex flex-col items-center justify-center">
+                  <hr className="w-full" />
+                  <span>Version นี้มีระบบคิวเพลงแล้ว</span>
+                  <span>
+                    <img src="/update.png" alt="" className="w-20 h-12" />
+                  </span>
                 </span>
               </div>
             )}

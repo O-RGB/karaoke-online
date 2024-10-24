@@ -32,10 +32,12 @@ import DataStoresModal from "../modal/datastores";
 import useTracklistStore from "@/stores/tracklist-store";
 import RemoteRender from "./remote-render/remote-render";
 import useNotificationStore from "@/stores/notification-store";
-import { useAppControlStore } from "@/stores/player-store";
+import { usePlayer } from "@/stores/player-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/stores/config-store";
 import QueueSong from "../tools/queue-song/queue-song";
+import useKeyboardStore from "@/stores/keyboard-state";
+import NextSongPanel from "../tools/next-song-panel";
 
 interface KaraokePageProps {}
 
@@ -43,19 +45,23 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const { perset, analysers, setupSpessasynth } = useSpessasynthStore();
   const player = useSpessasynthStore((state) => state.player);
   const addTracklist = useTracklistStore((state) => state.addTracklist);
+  const initializeKeyboardListeners = useKeyboardStore(
+    (state) => state.initializeKeyboardListeners
+  );
 
-  const midiPlaying = useAppControlStore((state) => state.midiPlaying);
-  const cursorTicks = useAppControlStore((state) => state.cursorTicks);
-  const cursorIndices = useAppControlStore((state) => state.cursorIndices);
-  const lyrics = useAppControlStore((state) => state.lyrics);
-  const setSongPlaying = useAppControlStore((state) => state.setSongPlaying);
-  const loadAndPlaySong = useAppControlStore((state) => state.loadAndPlaySong);
+  const midiPlaying = usePlayer((state) => state.midiPlaying);
+  const cursorTicks = usePlayer((state) => state.cursorTicks);
+  const cursorIndices = usePlayer((state) => state.cursorIndices);
+  const lyrics = usePlayer((state) => state.lyrics);
+  const setSongPlaying = usePlayer((state) => state.setSongPlaying);
+  const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
 
   const notification = useNotificationStore((state) => state.notification);
   const config = useConfigStore((state) => state.config);
 
   const startup = async () => {
     setupSpessasynth();
+    initializeKeyboardListeners();
     let tl: SearchResult[] = [];
 
     if (config.system?.drive) {
@@ -114,6 +120,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         <TempoPanel timeDivision={midiPlaying?.timeDivision}></TempoPanel>
         <ClockPanel></ClockPanel>
         <QueueSong></QueueSong>
+        <NextSongPanel></NextSongPanel>
         <SearchSong
           onClickSong={async (value) => {
             const data = await loadAndPlaySong(value);

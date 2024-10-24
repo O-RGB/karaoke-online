@@ -58,45 +58,49 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
   };
 
   const setQueueOpen = () => {
-    set({ queueing: true });
+    set({ queueing: true, searching: "" }); // เคลียร์ searching เมื่อเปิด queue
   };
 
   const handleKeyUp = (event: KeyboardEvent) => {
-    console.log("keyup zustated");
     const { key } = event;
+
     set((state) => {
       let newState = { ...state };
 
+      // ถ้ากำลัง searching อยู่จะไม่ให้ queueing ทำงาน
       if (/^[a-zA-Zก-๙0-9\s]$/.test(key)) {
-        newState.lastKey = key;
+        newState.queueing = false; // ปิด queueing เมื่อมีการ search
+        resetSearchingTimeout();
         newState.searching += key;
-        newState.queueing = false;
-        resetSearchingTimeout();
       } else if (key === "Backspace") {
+        clearQueueingTimeout();
+        queueingTimeout = null;
         newState.searching = state.searching.slice(0, -1);
-        newState.queueing = false;
-        resetSearchingTimeout();
+        newState.queueing = false; // ปิด queueing เมื่อมีการ search
       } else if (key === "Enter") {
+        clearSearchingTimeout();
+        clearQueueingTimeout();
+        queueingTimeout = null;
         newState.onEnter = !state.onEnter;
         newState.searching = "";
-        newState.queueing = false;
+      }
+      // ถ้ากด arrow up/down จะเคลียร์ searching และเปิด queueing
+      else if (key === "ArrowDown" || key === "ArrowUp") {
+        if (key === "ArrowDown") newState.arrowDown = !state.arrowDown;
+        if (key === "ArrowUp") newState.arrowUp = !state.arrowUp;
         clearSearchingTimeout();
-      } else if (key === "ArrowDown") {
-        newState.arrowDown = !state.arrowDown;
-        newState.queueing = true;
-        resetQueueingTimeout();
-      } else if (key === "ArrowUp") {
-        newState.arrowUp = !state.arrowUp;
+        newState.searching = "";
+        searchingTimeout = null;
         newState.queueing = true;
         resetQueueingTimeout();
       } else if (key === "ArrowLeft") {
+        queueingTimeout = null;
         newState.arrowLeft = !state.arrowLeft;
-        newState.queueing = false;
         resetSearchingTimeout();
       } else if (key === "ArrowRight") {
-        newState.arrowRight = !state.arrowRight;
-        newState.queueing = false;
         resetSearchingTimeout();
+        queueingTimeout = null;
+        newState.arrowRight = !state.arrowRight;
       } else {
         newState.lastKey = null;
       }
@@ -123,7 +127,7 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
     arrowRight: false,
     setLastKey: (key) => set({ lastKey: key }),
     setSearching: (value) => {
-      set({ searching: value });
+      set({ searching: value, queueing: false }); // ปิด queueing เมื่อมีการ set searching
       resetSearchingTimeout();
     },
     setEnter: (value) => set({ onEnter: value }),

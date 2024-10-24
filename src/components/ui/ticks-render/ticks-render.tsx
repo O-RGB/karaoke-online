@@ -5,7 +5,7 @@ import { REFRESH_RATE } from "@/config/value";
 import React, { useEffect, useRef } from "react";
 import { MIDI } from "spessasynth_lib";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
-import { useAppControlStore } from "@/stores/player-store";
+import { usePlayer } from "@/stores/player-store";
 
 interface TicksRenderProps {
   midiPlaying: MIDI | undefined;
@@ -20,13 +20,14 @@ const TicksRender: React.FC<TicksRenderProps> = ({ midiPlaying }) => {
   // console.log("paused", player?.paused);
   const player = useSpessasynthStore((state) => state.player);
 
-  const setIsFinished = useAppControlStore((state) => state.setIsFinished);
-  const setPaused = useAppControlStore((state) => state.setPaused);
-  const isFinished = useAppControlStore((state) => state.isFinished);
-  const paused = useAppControlStore((state) => state.paused);
-  const playingQueue = useAppControlStore((state) => state.playingQueue);
-  const setPlayingQueue = useAppControlStore((state) => state.setPlayingQueue);
-  const setSongPlaying = useAppControlStore((state) => state.setSongPlaying);
+  const setIsFinished = usePlayer((state) => state.setIsFinished);
+  const setPaused = usePlayer((state) => state.setPaused);
+  const isFinished = usePlayer((state) => state.isFinished);
+  const paused = usePlayer((state) => state.paused);
+  const playingQueue = usePlayer((state) => state.playingQueue);
+  const setPlayingQueue = usePlayer((state) => state.setPlayingQueue);
+  const setSongPlaying = usePlayer((state) => state.setSongPlaying);
+  const setCountDown = usePlayer((state) => state.setCountDown);
   const workerRef = useRef<Worker | null>(null);
   let updateInterval: NodeJS.Timeout | null = null;
 
@@ -70,9 +71,18 @@ const TicksRender: React.FC<TicksRenderProps> = ({ midiPlaying }) => {
             type: "updateTime",
             data: { currentTime: player?.currentTime },
           });
+          const lastTime = Math.floor(player?.duration ?? 0);
+          const countDown = lastTime - Math.floor(player?.currentTime ?? 0);
+          if (countDown < 10) {
+            setCountDown(countDown);
+          }
+          if (countDown === 0) {
+            setTimeout(() => {
+              setCountDown(10);
+            }, 500);
+          }
           setIsFinished(player.isFinished);
           setPaused(player.paused);
-          // console.log("check running");
         },
         isFinished || paused ? 1000 : refreshRate
       );
