@@ -6,6 +6,7 @@ import { Sequencer } from "spessasynth_lib";
 import { usePeerStore } from "@/stores/peer-store";
 import useMixerStore from "@/stores/mixer-store";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
+import { usePlayer } from "@/stores/player-store";
 
 interface GainRenderProps {
   analysers?: AnalyserNode[];
@@ -17,7 +18,7 @@ const GainRender: React.FC<GainRenderProps> = ({ analysers }) => {
   const { sendSuperUserMessage, superUserConnections } = usePeerStore();
   const mixIsShot = useConfigStore((state) => state.config.widgets?.mix?.show);
   const hideMixer = useMixerStore((state) => state.hideMixer);
-  const player = useSpessasynthStore.getState().player;
+  const paused = usePlayer((state) => state.paused);
 
   const tick = useTickStore((state) => state.tick);
 
@@ -57,10 +58,10 @@ const GainRender: React.FC<GainRenderProps> = ({ analysers }) => {
   };
 
   useEffect(() => {
-    if (analysers && !player?.paused) {
+    if (analysers && !paused) {
       gindRender();
     }
-  }, [mixIsShot ? tick : undefined, player?.paused, analysers, hideMixer]);
+  }, [mixIsShot ? tick : undefined, paused, analysers, hideMixer]);
 
   return null;
 };

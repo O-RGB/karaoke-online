@@ -5,8 +5,6 @@ import {
   TbPlayerSkipForwardFilled,
 } from "react-icons/tb";
 import Button from "../common/button/button";
-import RangeBar from "../common/input-data/range-bar";
-import { Sequencer } from "spessasynth_lib";
 import ContextModal from "../modal/context-modal";
 import { FiSettings } from "react-icons/fi";
 import Marquee from "react-fast-marquee";
@@ -15,31 +13,29 @@ import useTickStore from "../../stores/tick-store";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import { usePlayer } from "@/stores/player-store";
 interface PlayerPanelProps {
-  lyrics: string[];
+  // lyrics: string[];
   modalMap: ModalComponents;
 }
 
-const PlayerPanel: React.FC<PlayerPanelProps> = ({ lyrics, modalMap }) => {
+const PlayerPanel: React.FC<PlayerPanelProps> = ({ modalMap }) => {
   // re-render
   const tick = useTickStore((state) => state.tick);
 
   const player = useSpessasynthStore((state) => state.player);
-  const currentTime = useSpessasynthStore((state) => state.player?.currentTime);
-  const duration = useSpessasynthStore((state) => state.player?.duration);
 
-  const isFinished = usePlayer((state) => state.isFinished);
   const paused = usePlayer((state) => state.paused);
   const setPaused = usePlayer((state) => state.setPaused);
 
   const [timer, setTimer] = useState<number>(0);
   const inputRef = useRef<any>(null);
+  const lyrics = usePlayer((state) => state.lyrics);
 
   useEffect(() => {
-    if (currentTime && duration) {
-      const timer = Math.round((currentTime / duration) * 100);
+    if (player) {
+      const timer = Math.round((player.currentTime / player.duration) * 100);
       setTimer(timer);
     }
-  }, [tick, currentTime]);
+  }, [tick, player]);
 
   if (!player) {
     return <></>;
@@ -92,11 +88,9 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ lyrics, modalMap }) => {
               }}
               tabIndex={-1}
               onChange={(e) => {
-                if (duration) {
-                  const value = +e.target.value;
-                  const newCurrentTime = (value / 100) * duration;
-                  player.currentTime = newCurrentTime;
-                }
+                const value = +e.target.value;
+                const newCurrentTime = (value / 100) * player.duration;
+                player.currentTime = newCurrentTime;
               }}
               type="range"
               className="transition duration-300"

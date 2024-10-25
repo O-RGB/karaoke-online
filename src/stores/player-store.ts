@@ -7,14 +7,6 @@ import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import useConfigStore from "@/stores/config-store";
 import useNotificationStore from "@/stores/notification-store";
 
-interface IPlayingQueues {
-  songInfo: SearchResult;
-  midi: MIDI;
-}
-interface IPlayingDecodedQueues {
-  songInfo: SearchResult;
-  file: SongFilesDecode;
-}
 interface PlayerState {
   musicLibrary: Map<string, File>;
   playingTrack: IPlayingQueues | undefined;
@@ -125,7 +117,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
     //   delay: 40000,
     //   icon: <AiOutlineLoading className="animate-spin" />,
     // });
-    console.log("value", value)
+    console.log("value", value);
     setNotification({ text: "กำลังโหลดจาก" + mode, delay: 40000 });
 
     const song = await getSong(value);

@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import useTickStore from "../../stores/tick-store";
 import useTempoStore from "../../stores/tempo-store";
 import useConfigStore from "../../stores/config-store";
+import { usePlayer } from "@/stores/player-store";
 
-interface TempoPanelProps {
-  timeDivision?: number;
-}
+interface TempoPanelProps {}
 
-const TempoPanel: React.FC<TempoPanelProps> = ({ timeDivision = 1 }) => {
+const TempoPanel: React.FC<TempoPanelProps> = ({}) => {
+  const midiPlaying = usePlayer((state) => state.midiPlaying);
+
   const config = useConfigStore((state) => state.config);
   // const setConfig = useConfigStore((state) => state.setConfig);
   const widgetConfig = config.widgets;
@@ -21,14 +22,15 @@ const TempoPanel: React.FC<TempoPanelProps> = ({ timeDivision = 1 }) => {
   const [currentBeatInBar, setCurrentBeatInBar] = useState(1);
 
   useEffect(() => {
-    if (isShow) {
-      if (tick > 0 && timeDivision > 0) {
-        const currentTickInBar = tick % (timeDivision * 4);
-        const beatInBar = Math.floor(currentTickInBar / timeDivision) + 1;
+    if (isShow && midiPlaying) {
+      if (tick > 0 && midiPlaying.timeDivision > 0) {
+        const currentTickInBar = tick % (midiPlaying.timeDivision * 4);
+        const beatInBar =
+          Math.floor(currentTickInBar / midiPlaying.timeDivision) + 1;
         setCurrentBeatInBar(beatInBar);
       }
     }
-  }, [timeDivision, isShow ? tick : undefined]);
+  }, [midiPlaying?.timeDivision, isShow ? tick : undefined]);
 
   if (isShow === false) {
     return <></>;

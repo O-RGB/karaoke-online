@@ -27,17 +27,17 @@ import { useSpessasynthStore } from "@/stores/spessasynth-store";
 
 interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
+  onOpenQueue?: () => void;
   analysers?: AnalyserNode[];
   audioGain?: number[];
-  perset?: IPersetSoundfont[];
   options?: React.ReactNode;
   className?: string;
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
   onVolumeChange,
+  onOpenQueue,
   audioGain,
-  perset,
   options,
   className,
 }) => {
@@ -47,6 +47,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const resetQueueingTimeout = useKeyboardStore(
     (state) => state.resetQueueingTimeout
   );
+  const perset = useSpessasynthStore((state) => state.perset);
 
   const { orientation } = useOrientation();
   const setNotification = useNotificationStore(
@@ -56,11 +57,9 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const setHideMixer = useMixerStore((state) => state.setHideMixer);
   const setHeld = useMixerStore((state) => state.setHeld);
   const synth = useSpessasynthStore((state) => state.synth);
-  // const { superUserConnections, sendSuperUserMessage } = useRemote();
 
   const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
   const volLayout: number[] = Array(16).fill(0);
-  const gain = useRef<number[]>(Array(16).fill(0));
 
   const volumeLib = synth ? volumeSynth(synth) : undefined;
 
@@ -68,7 +67,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     if (synth) {
       volumeLib?.updateMainVolume(channel - 1, value);
     } else {
-      onVolumeChange?.(channel, value);
+      onVolumeChange?.(channel - 1, value);
     }
   };
 
@@ -102,12 +101,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const onChorusDepthChange = (channel: number, value: number) => {
     volumeLib?.updateChorusDepth(channel - 1, value);
   };
-
-  useEffect(() => {
-    if (audioGain) {
-      gain.current = audioGain;
-    }
-  }, [audioGain]);
 
   const grid =
     "grid grid-cols-8 lg:grid-cols-none grid-flow-row lg:grid-flow-col";
@@ -152,7 +145,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                   channel={ch}
                   max={127}
                   className="z-10 w-full absolute bottom-0 left-0 h-full"
-                  level={data}
+                  level={audioGain ? audioGain[ch] : data}
                 ></VolumeMeterV>
               </div>
             );
@@ -164,6 +157,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           } w-full gap-0.5 h-full`}
         >
           {volLayout.map((data, ch) => {
+            console.log("map re loop...");
             return (
               <div
                 key={`vol-panel-${ch}`}
@@ -225,6 +219,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           ></SwitchButton>
           <SwitchButton
             onChange={(muted) => {
+              onOpenQueue?.();
               setQueueOpen?.();
               resetQueueingTimeout(5000);
             }}

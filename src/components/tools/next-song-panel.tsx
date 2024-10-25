@@ -14,18 +14,14 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
 
   const [saveInfo, setInfo] = useState<SearchResult>();
   useEffect(() => {
-    if (playingQueue.length > 1 && countDown > 1) {
+    if (playingQueue.length > 1 && countDown == 3) {
       setInfo(playingQueue[1].songInfo);
     } else if (playingQueue.length === 1) {
       setInfo(undefined);
     }
   }, [countDown]);
 
-  if (
-    (isFinished === false && countDown > 3) ||
-    playingQueue.length < 1 ||
-    !saveInfo
-  ) {
+  if (countDown > 3 || playingQueue.length < 1 || !saveInfo) {
     return <></>;
   }
 
@@ -34,37 +30,39 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
       <div
         className={`fixed ${
           orientation === "landscape"
-            ? "top-[90px]"
+            ? "top-[60px] lg:top-[90px]"
             : hideMixer
             ? "top-[140px] lg:top-[100px]"
             : "top-[400px] lg:top-[250px]"
-        } w-full h-20 px-20 flex flex-col justify-center items-center gap-2`}
+        } w-full h-20 px-6 lg:px-20 flex flex-col lg:justify-center items-end lg:items-center gap-2`}
       >
-        <div className=" flex justify-center gap-10">
+        <div className=" flex justify-center gap-3 lg:gap-10">
           <div
             className={`${
               countDown <= 3 ? "bg-white/70" : "bg-white/20"
-            } w-10 h-10 rounded-full border flex items-center justify-center text-xl font-bold text-white`}
+            } w-5 lg:w-10 h-5 lg:h-10 rounded-full border flex items-center justify-center text-xs lg:text-xl font-bold text-white`}
           >
             3
           </div>
           <div
             className={`${
               countDown <= 2 ? "bg-white/70" : "bg-white/20"
-            } w-10 h-10 rounded-full border flex items-center justify-center text-xl font-bold text-white`}
+            } w-5 lg:w-10 h-5 lg:h-10 rounded-full border flex items-center justify-center text-xs lg:text-xl font-bold text-white`}
           >
             2
           </div>
           <div
             className={`${
               countDown <= 1 ? "bg-white/70" : "bg-white/20"
-            } w-10 h-10 rounded-full border flex items-center justify-center text-xl font-bold text-white`}
+            } w-5 lg:w-10 h-5 lg:h-10 rounded-full border flex items-center justify-center text-xs lg:text-xl font-bold text-white`}
           >
             1
           </div>
         </div>
-        <div className="text-xl text-white">
-          {saveInfo?.name} - {saveInfo?.artist}
+        <div className="lg:text-xl text-white text-end leading-none lg:leading-normal">
+          <span>{saveInfo?.name}</span>
+          <br />
+          <span className="text-xs lg:text-base">{saveInfo?.artist}</span>
         </div>
       </div>
     </>

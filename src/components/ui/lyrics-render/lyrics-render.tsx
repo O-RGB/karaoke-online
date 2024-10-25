@@ -2,23 +2,24 @@ import useLyricsStore from "@/stores/lyrics-store";
 import useTickStore from "@/stores/tick-store";
 import { groupThaiCharacters } from "@/lib/app-control";
 import React, { useEffect, useMemo, useRef } from "react";
+import { usePlayer } from "@/stores/player-store";
 
 interface LyricsRenderProps {
-  lyrics: string[];
-  cursorTicks: number[];
-  cursorIndices?: Map<number, number[]>;
+  
 }
 
 const LyricsRender: React.FC<LyricsRenderProps> = ({
-  cursorTicks,
-  lyrics,
-  cursorIndices,
+ 
 }) => {
   const tick = useTickStore((state) => state.tick);
   const setCharIndex = useLyricsStore((state) => state.setCharIndex);
   const setDisplay = useLyricsStore((state) => state.setDisplay);
   const setDisplayBottom = useLyricsStore((state) => state.setDisplayBottom);
   const setPosition = useLyricsStore((state) => state.setPosition);
+
+  const cursorTicks = usePlayer((state) => state.cursorTicks);
+  const cursorIndices = usePlayer((state) => state.cursorIndices);
+  const lyrics = usePlayer((state) => state.lyrics);
 
   const charIndex = useRef<number>(0);
   const display = useRef<string[][]>([]);

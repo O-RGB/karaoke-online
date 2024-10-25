@@ -7,15 +7,15 @@ import { MIDI } from "spessasynth_lib";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import { usePlayer } from "@/stores/player-store";
 
-interface TicksRenderProps {
-  midiPlaying: MIDI | undefined;
-}
+interface TicksRenderProps {}
 
-const TicksRender: React.FC<TicksRenderProps> = ({ midiPlaying }) => {
+const TicksRender: React.FC<TicksRenderProps> = ({}) => {
   const config = useConfigStore((state) => state.config);
   const refreshRate = config?.refreshRate?.render ?? REFRESH_RATE["MIDDLE"];
   const setCurrentTick = useTickStore((state) => state.setCurrntTick);
   const setCurrentTempo = useTempoStore((state) => state.setCurrntTempo);
+
+  const midiPlaying = usePlayer((state) => state.midiPlaying);
 
   // console.log("paused", player?.paused);
   const player = useSpessasynthStore((state) => state.player);
@@ -79,7 +79,7 @@ const TicksRender: React.FC<TicksRenderProps> = ({ midiPlaying }) => {
           if (countDown === 0) {
             setTimeout(() => {
               setCountDown(10);
-            }, 500);
+            }, 1000);
           }
           setIsFinished(player.isFinished);
           setPaused(player.paused);

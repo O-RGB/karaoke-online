@@ -262,7 +262,6 @@ const QueueSong: React.FC<QueueSongProps> = ({
   }, [arrowUp]);
 
   useEffect(() => {
-    console.log("searching", searching);
     if (queueing && searching === "") {
       let clone = [...playingQueue];
       if (clone.length > 0) {
@@ -271,6 +270,7 @@ const QueueSong: React.FC<QueueSongProps> = ({
           let removed = clone.filter((_, i) => i !== selected);
           setPlayingQueue(removed);
           setSongPlaying(songPlaying.file, songPlaying.songInfo);
+          resetQueueingTimeout(0);
         }
       }
     }
@@ -284,16 +284,22 @@ const QueueSong: React.FC<QueueSongProps> = ({
     return <></>;
   }
 
-  if (!player) return <></>;
+  // if (!player) return <></>;
 
   return (
     <div
       onClick={() => {
-        resetQueueingTimeout(5000);
+        resetQueueingTimeout(0);
       }}
       className={`z-[99] pt-[58px] h-screen bg-black/30 fixed text-white w-full px-5 duration-300`}
     >
-      <div className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2 overflow-x-auto">
+      <div
+        onClick={(e) => {
+          e.stopPropagation(); // หยุดการส่งต่อ event
+          resetQueueingTimeout(5000);
+        }}
+        className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2 overflow-x-auto"
+      >
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}

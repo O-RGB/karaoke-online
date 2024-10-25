@@ -1,8 +1,14 @@
 type TypeFormHost =
   | "GIND_NODE"
+  | "VOLUMES"
+  | "PAN"
+  | "REVERB"
+  | "CHORUSDEPTH"
+  | ""
   | "VALIDATE_PIN"
   | "SEND_SONG_LIST"
-  | "UPLOAD_SONG";
+  | "UPLOAD_SONG"
+  | "REQUEST_QUEUE_LIST";
 type TypeFormJoiner =
   | "SET_CHANNEL"
   | "PIN_VALIDATION"

@@ -11,9 +11,9 @@ import { useOrientation } from "@/hooks/orientation-hook";
 import CutLyrics from "../common/lyrics/cut-lyrics/cut-lyrics";
 
 interface LyricsPanelProps {
-  lyrics: string[];
-  cursorTicks: number[];
-  cursorIndices?: Map<number, number[]>;
+  // lyrics: string[];
+  // cursorTicks: number[];
+  // cursorIndices?: Map<number, number[]>;
 }
 
 const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {

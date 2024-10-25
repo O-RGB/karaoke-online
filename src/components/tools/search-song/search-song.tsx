@@ -55,6 +55,8 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   useEffect(() => {
     if (searching !== "") {
       onKeyUpSearch(searching);
+    } else {
+      onKeyUpSearch("");
     }
     setIndexSelect(0);
   }, [searching]);
@@ -62,14 +64,13 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   useEffect(() => {
     if (searchResult.length > 0 && queueing === false) {
       let option = searchResult[indexSelect].option;
-      console.log("option", option)
       if (option) {
         onClickSong?.(option);
         setIndexSelect(0);
         setSearchResult([]);
       }
     }
-  }, [queueing ? undefined : onEnter]);
+  }, [onEnter]);
 
   useEffect(() => {
     setIndexSelect((value) => {

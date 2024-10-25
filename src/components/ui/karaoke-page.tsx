@@ -6,7 +6,7 @@ import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song/search-song";
 import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
-import SuperHostRemote from "../remote/super-host";
+import SuperHostRemote from "../remote/super/super-host";
 
 import SoundfontManager from "../modal/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
@@ -27,7 +27,6 @@ import InstrumentsEvent from "./event-render/instruments-event";
 import DisplaySettingModal from "../modal/display";
 import { useSpessasynthStore } from "../../stores/spessasynth-store";
 import { DragDrop } from "../tools/drag-drop/drag-drop";
-import { usePeerStore } from "@/stores/peer-store";
 import DataStoresModal from "../modal/datastores";
 import useTracklistStore from "@/stores/tracklist-store";
 import RemoteRender from "./remote-render/remote-render";
@@ -42,17 +41,16 @@ import NextSongPanel from "../tools/next-song-panel";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
-  const { perset, analysers, setupSpessasynth } = useSpessasynthStore();
+  const setupSpessasynth = useSpessasynthStore(
+    (state) => state.setupSpessasynth
+  );
+  const analysers = useSpessasynthStore((state) => state.analysers);
+
   const player = useSpessasynthStore((state) => state.player);
   const addTracklist = useTracklistStore((state) => state.addTracklist);
   const initializeKeyboardListeners = useKeyboardStore(
     (state) => state.initializeKeyboardListeners
   );
-
-  const midiPlaying = usePlayer((state) => state.midiPlaying);
-  const cursorTicks = usePlayer((state) => state.cursorTicks);
-  const cursorIndices = usePlayer((state) => state.cursorIndices);
-  const lyrics = usePlayer((state) => state.lyrics);
   const setSongPlaying = usePlayer((state) => state.setSongPlaying);
   const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
 
@@ -85,7 +83,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
     MIDI_SETTING: <MidiSettingModal></MidiSettingModal>,
-    // SONG_LIST: <SongListModal></SongListModal>,
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
   };
 
@@ -102,12 +99,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <WallpaperRender></WallpaperRender>
       <RemoteRender></RemoteRender>
 
-      <TicksRender midiPlaying={midiPlaying}></TicksRender>
-      <LyricsRender
-        cursorIndices={cursorIndices}
-        cursorTicks={cursorTicks}
-        lyrics={lyrics}
-      ></LyricsRender>
+      <TicksRender></TicksRender>
+      <LyricsRender></LyricsRender>
       <GainRender analysers={analysers}></GainRender>
       <VolumeEvnet></VolumeEvnet>
       <InstrumentsEvent></InstrumentsEvent>
@@ -116,8 +109,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <ContextModal modal={modalMap}>
         <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel>
         <StatusPanel notification={notification}></StatusPanel>
-        <VolumePanel perset={perset} analysers={analysers}></VolumePanel>
-        <TempoPanel timeDivision={midiPlaying?.timeDivision}></TempoPanel>
+        <VolumePanel analysers={analysers}></VolumePanel>
+        <TempoPanel></TempoPanel>
         <ClockPanel></ClockPanel>
         <QueueSong></QueueSong>
         <NextSongPanel></NextSongPanel>
@@ -132,12 +125,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
             }
           }}
         ></SearchSong>
-        <LyricsPanel
-          cursorIndices={cursorIndices}
-          cursorTicks={cursorTicks}
-          lyrics={lyrics}
-        ></LyricsPanel>
-        <PlayerPanel lyrics={lyrics} modalMap={modalMap}></PlayerPanel>
+        <LyricsPanel></LyricsPanel>
+        <PlayerPanel modalMap={modalMap}></PlayerPanel>
       </ContextModal>
     </>
   );

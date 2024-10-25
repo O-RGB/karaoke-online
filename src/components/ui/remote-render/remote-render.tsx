@@ -1,5 +1,6 @@
 import volumeSynth from "@/features/volume/volume-features";
 import { usePeerStore } from "@/stores/peer-store";
+import { usePlayer } from "@/stores/player-store";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import useTracklistStore from "@/stores/tracklist-store";
 import React, { useEffect } from "react";
@@ -12,6 +13,11 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
   const synth = useSpessasynthStore((state) => state.synth);
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const volumeLib = synth ? volumeSynth(synth) : undefined;
+  const { sendSuperUserMessage, superUserConnections } = usePeerStore();
+  const playingQueue = usePlayer((state) => state.playingQueue);
+  const setSongPlaying = usePlayer((state) => state.setSongPlaying);
+  const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
+
   const eventRemote = async (from?: string, content?: RemoteSendMessage) => {
     const type = content?.type;
     const data = content?.message;
@@ -23,6 +29,14 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
     switch (type) {
       case "GIND_NODE":
         return data as number[];
+
+      case "REQUEST_QUEUE_LIST":
+        sendSuperUserMessage({
+          message: playingQueue,
+          type: "REQUEST_QUEUE_LIST",
+          user: "SUPER",
+          clientId: from,
+        });
 
       case "SET_CHANNEL":
         let vol = data as ISetChannelGain;
@@ -45,11 +59,16 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
         break;
 
       case "SET_SONG":
-        // let song = data as SearchResult;
-        // if (song) {
-        //   loadAndPlaySong(song);
-        //   setPlayingTrackFile(song);
-        // }
+        let song = data as SearchResult;
+        if (song) {
+          const data = await loadAndPlaySong(song);
+          if (data) {
+            if (data.length <= 1) {
+              const { file, songInfo } = data[0];
+              setSongPlaying(file, songInfo);
+            }
+          }
+        }
         break;
 
       case "UPLOAD_SONG":
@@ -67,7 +86,7 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
             lyr: uploaded.lyr,
             mid: receivedFile,
           };
-          //   setSongPlaying(getDecode);
+          setSongPlaying(getDecode);
         }
 
       default:

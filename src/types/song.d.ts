@@ -55,3 +55,12 @@ interface ValidSong {
   render: ReactNode;
   originValue: SongFiltsEncodeAndDecode;
 }
+
+interface IPlayingQueues {
+  songInfo: SearchResult;
+  midi: MIDI;
+}
+interface IPlayingDecodedQueues {
+  songInfo: SearchResult;
+  file: SongFilesDecode;
+}
