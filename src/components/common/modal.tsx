@@ -3,6 +3,27 @@ import { createPortal } from "react-dom";
 import { IoMdClose } from "react-icons/io";
 import Button from "./button/button";
 
+// Component to create and manage modal container
+const ModalContainer = ({ containerId = "modal-container" }) => {
+  useEffect(() => {
+    let container = document.getElementById(containerId);
+    if (!container) {
+      container = document.createElement("div");
+      container.id = containerId;
+      container.style.position = "relative";
+      container.style.zIndex = "99999";
+      document
+        .getElementById("your-fullscreen-wrapper-id")
+        ?.appendChild(container);
+    }
+    return () => {
+      container?.parentElement?.removeChild(container);
+    };
+  }, [containerId]);
+
+  return null;
+};
+
 const delay = 100;
 
 export default function Modal({
@@ -21,7 +42,8 @@ export default function Modal({
   closable = true,
   removeFooter = true,
   overFlow = "overflow-hidden",
-}: ModalProps) {
+  containerId = "modal-container",
+}: ModalProps & { containerId?: string }) {
   const [showModal, setShowModal] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(isOpen);
   var padding = "p-3";
@@ -48,7 +70,11 @@ export default function Modal({
     handleOpen(isOpen);
   }, [isOpen]);
 
-  return createPortal(
+  // Get modal container element
+  const modalRoot = document.getElementById(containerId);
+  if (!modalRoot) return null;
+
+  const modal = (
     <>
       {isVisible && (
         <div
@@ -62,7 +88,7 @@ export default function Modal({
           ></div>
           <div
             style={{ width }}
-            className={`relative bg-white rounded-lg shadow-lg z-10 transform  overflow-hidden ${
+            className={`relative bg-white rounded-lg shadow-lg z-10 transform overflow-hidden ${
               showModal ? "scale-100" : "scale-95"
             } transition-transform duration-300`}
           >
@@ -71,8 +97,8 @@ export default function Modal({
             >
               <div className="text-lg">{title}</div>
               {closable && (
-                <div onClick={handleClose} className="p-2 cursor-pointer ">
-                  <IoMdClose></IoMdClose>
+                <div onClick={handleClose} className="p-2 cursor-pointer">
+                  <IoMdClose />
                 </div>
               )}
             </div>
@@ -87,7 +113,8 @@ export default function Modal({
           </div>
         </div>
       )}
-    </>,
-    document.body
+    </>
   );
+
+  return createPortal(modal, modalRoot);
 }

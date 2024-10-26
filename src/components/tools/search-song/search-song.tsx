@@ -8,6 +8,9 @@ import useMixerStore from "@/stores/mixer-store";
 import useTracklistStore from "@/stores/tracklist-store";
 import Tags from "@/components/common/tags";
 import useKeyboardStore from "@/stores/keyboard-state";
+import Button from "@/components/common/button/button";
+import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
+import { MdPlayCircleFilled } from "react-icons/md";
 
 interface SearchSongProps {
   onClickSong?: (value: SearchResult) => void;
@@ -23,6 +26,9 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   const arrowRight = useKeyboardStore((state) => state.arrowRight);
   const arrowLeft = useKeyboardStore((state) => state.arrowLeft);
   const onEnter = useKeyboardStore((state) => state.onEnter);
+  const resetSearchingTimeout = useKeyboardStore(
+    (state) => state.resetSearchingTimeout
+  );
 
   const [fullUi, setFullUi] = useState<boolean>(false);
   const [searchResult, setSearchResult] = useState<IOptions<SearchResult>[]>(
@@ -55,24 +61,27 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   useEffect(() => {
     if (searching !== "") {
       onKeyUpSearch(searching);
+      resetSearchingTimeout(5000);
     } else {
-      onKeyUpSearch("");
+      setSearchResult([]);
+      resetSearchingTimeout(0);
     }
     setIndexSelect(0);
   }, [searching]);
 
-  useEffect(() => {
+  const onEnterSong = () => {
     if (searchResult.length > 0 && queueing === false) {
       let option = searchResult[indexSelect].option;
       if (option) {
         onClickSong?.(option);
         setIndexSelect(0);
         setSearchResult([]);
+        resetSearchingTimeout(0);
       }
     }
-  }, [onEnter]);
+  };
 
-  useEffect(() => {
+  const onArrowRight = () => {
     setIndexSelect((value) => {
       let sum = value + 1;
       if (sum <= searchResult.length - 1) {
@@ -80,9 +89,11 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
       }
       return value;
     });
-  }, [arrowRight]);
+    resetSearchingTimeout(5000);
+  };
 
-  useEffect(() => {
+  const onArrowLeft = () => {
+    console.log("value");
     setIndexSelect((value) => {
       let sum = value - 1;
       if (sum >= 0) {
@@ -90,6 +101,19 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
       }
       return value;
     });
+    resetSearchingTimeout(5000);
+  };
+
+  useEffect(() => {
+    onEnterSong();
+  }, [onEnter]);
+
+  useEffect(() => {
+    onArrowRight();
+  }, [arrowRight]);
+
+  useEffect(() => {
+    onArrowLeft();
   }, [arrowLeft]);
 
   function ArtistRender({
@@ -151,16 +175,50 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
       {searching.length > 0 && (
         <div
           className={`${
-            hideMixer ? "top-[100px]" : "top-56"
+            hideMixer ? "top-[130px]" : "top-[254px]"
           } fixed hidden lg:block text-white w-full px-5 duration-300`}
         >
+          <div className="pb-2 flex gap-2">
+            <Button
+              disabled={indexSelect === 0}
+              onClick={onArrowLeft}
+              icon={<IoMdArrowDropleft className="text-lg"></IoMdArrowDropleft>}
+              iconPosition="left"
+              className="h-7"
+              padding="px-2"
+            >
+              ย้อนกลับ
+            </Button>
+            <Button
+              // disabled={indexSelect > searching.length - 1}
+              onClick={onArrowRight}
+              icon={
+                <IoMdArrowDropright className="text-lg"></IoMdArrowDropright>
+              }
+              iconPosition="right"
+              className="h-7"
+              padding="px-2"
+            >
+              ต่อไป
+            </Button>
+            <Button
+              onClick={onEnterSong}
+              icon={
+                <MdPlayCircleFilled className="text-lg"></MdPlayCircleFilled>
+              }
+              iconPosition="right"
+              className="h-7"
+              padding="px-2"
+            >
+              เล่น
+            </Button>
+          </div>
           <div className="w-full h-full blur-overlay flex gap-2 blur-border border rounded-md p-2">
             <div className="p-2 bg-white/20 w-[256px] overflow-hidden rounded-md flex-none">
               <span className="text-2xl flex items-center h-full">
                 {searching}
               </span>
             </div>
-
             {searchResult.length > 0 && (
               <div className="flex flex-wrap gap-3 items-center text-2xl duration-300 transition-all ">
                 {searchResult[indexSelect].option?.type === 0 && (

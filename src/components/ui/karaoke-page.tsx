@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song/search-song";
@@ -37,7 +37,7 @@ import useConfigStore from "@/stores/config-store";
 import QueueSong from "../tools/queue-song/queue-song";
 import useKeyboardStore from "@/stores/keyboard-state";
 import NextSongPanel from "../tools/next-song-panel";
-
+import { FullScreen, useFullScreenHandle } from "react-full-screen";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
@@ -53,7 +53,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   );
   const setSongPlaying = usePlayer((state) => state.setSongPlaying);
   const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
-
+  const handle = useFullScreenHandle();
+  const fullscreenRef = useRef(null);
   const notification = useNotificationStore((state) => state.notification);
   const config = useConfigStore((state) => state.config);
 
@@ -93,7 +94,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   console.log("main rerender");
 
   return (
-    <>
+    <FullScreen handle={handle}>
       <DragDrop setSongPlaying={setSongPlaying}></DragDrop>
       {/* Process */}
       <WallpaperRender></WallpaperRender>
@@ -106,29 +107,41 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <InstrumentsEvent></InstrumentsEvent>
 
       {/* Contact */}
-      <ContextModal modal={modalMap}>
-        <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel>
-        <StatusPanel notification={notification}></StatusPanel>
-        <VolumePanel analysers={analysers}></VolumePanel>
-        <TempoPanel></TempoPanel>
-        <ClockPanel></ClockPanel>
-        <QueueSong></QueueSong>
-        <NextSongPanel></NextSongPanel>
-        <SearchSong
-          onClickSong={async (value) => {
-            const data = await loadAndPlaySong(value);
-            if (data) {
-              if (data.length <= 1) {
-                const { file, songInfo } = data[0];
-                setSongPlaying(file, songInfo);
+      <div id="modal-container">
+        <ContextModal modal={modalMap}>
+          <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel>
+          <StatusPanel notification={notification}></StatusPanel>
+          <VolumePanel analysers={analysers}></VolumePanel>
+          <TempoPanel></TempoPanel>
+          <ClockPanel></ClockPanel>
+          <QueueSong></QueueSong>
+          <NextSongPanel></NextSongPanel>
+          <SearchSong
+            onClickSong={async (value) => {
+              const data = await loadAndPlaySong(value);
+              if (data) {
+                if (data.length <= 1) {
+                  const { file, songInfo } = data[0];
+                  setSongPlaying(file, songInfo);
+                }
               }
-            }
-          }}
-        ></SearchSong>
-        <LyricsPanel></LyricsPanel>
-        <PlayerPanel modalMap={modalMap}></PlayerPanel>
-      </ContextModal>
-    </>
+            }}
+          ></SearchSong>
+          <LyricsPanel></LyricsPanel>
+          <PlayerPanel
+            isFullScreen={handle.active}
+            modalMap={modalMap}
+            onFullScreen={() => {
+              if (!handle.active) {
+                handle.enter();
+              } else {
+                handle.exit();
+              }
+            }}
+          ></PlayerPanel>
+        </ContextModal>
+      </div>
+    </FullScreen>
   );
 };
 

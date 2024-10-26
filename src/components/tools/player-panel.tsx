@@ -12,12 +12,21 @@ import { FaSearch } from "react-icons/fa";
 import useTickStore from "../../stores/tick-store";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import { usePlayer } from "@/stores/player-store";
+import { useFullScreenHandle } from "react-full-screen";
+
+import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
+
 interface PlayerPanelProps {
-  // lyrics: string[];
+  isFullScreen: boolean;
   modalMap: ModalComponents;
+  onFullScreen?: () => void;
 }
 
-const PlayerPanel: React.FC<PlayerPanelProps> = ({ modalMap }) => {
+const PlayerPanel: React.FC<PlayerPanelProps> = ({
+  modalMap,
+  isFullScreen,
+  onFullScreen,
+}) => {
   // re-render
   const tick = useTickStore((state) => state.tick);
 
@@ -29,6 +38,8 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ modalMap }) => {
   const [timer, setTimer] = useState<number>(0);
   const inputRef = useRef<any>(null);
   const lyrics = usePlayer((state) => state.lyrics);
+
+  const handle = useFullScreenHandle();
 
   useEffect(() => {
     if (player) {
@@ -42,10 +53,11 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ modalMap }) => {
   }
   return (
     <>
-      <div className="fixed bottom-0 w-full left-0 blur-overlay bg-black/10 border-t blur-border flex justify-between p-2 lg:p-0">
+      <div className="fixed bottom-0 gap-2 w-full left-0 blur-overlay bg-black/10 border-t blur-border flex justify-between p-2 lg:p-0">
         <div className="flex items-center w-full">
           {!paused ? (
             <Button
+              className="hover:bg-white/20"
               blur={false}
               border=""
               shadow=""
@@ -59,6 +71,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ modalMap }) => {
             ></Button>
           ) : (
             <Button
+              className="hover:bg-white/20"
               blur={false}
               border=""
               shadow=""
@@ -72,6 +85,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ modalMap }) => {
             ></Button>
           )}
           <Button
+            className="hover:bg-white/20"
             blur={false}
             border=""
             shadow=""
@@ -100,7 +114,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ modalMap }) => {
             ></input>
           </div>
           <div className="hidden lg:block lg:w-full h-full p-1.5">
-            <div className="rounded-md bg-black/15 h-full flex items-center py-1 text-white overflow-">
+            <div className="border border-white/20 rounded-md bg-black/15 h-full flex items-center py-1 text-white overflow-hidden">
               {lyrics.length > 3 && (
                 <Marquee
                   className="flex gap-2 opacity-40 text-sm overflow-hidden"
@@ -137,8 +151,27 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ modalMap }) => {
               }}
             />
           </div>
+
+          {document.fullscreenEnabled && (
+            <Button
+              className="hover:bg-white/20"
+              onClick={onFullScreen}
+              blur={false}
+              border=""
+              shadow=""
+              padding="p-4"
+              shape={false}
+              icon={
+                isFullScreen ? (
+                  <BsFullscreenExit className="text-white" />
+                ) : (
+                  <BsFullscreen className="text-white" />
+                )
+              }
+            ></Button>
+          )}
           <Button
-            className="hidden lg:block"
+            className="hidden lg:block hover:bg-white/20"
             onClick={() => {
               if (inputRef.current) {
                 inputRef.current.focus();
@@ -153,7 +186,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ modalMap }) => {
           ></Button>
           <ContextModal
             buttonMenu={
-              <div className="p-4 flex items-center justify-center">
+              <div className="p-4 flex items-center justify-center hover:bg-white/20 duration-300">
                 <FiSettings className="text-white" />
               </div>
             }
