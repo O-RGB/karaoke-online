@@ -89,14 +89,14 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                   </Button>
                 </div>
                 <span className="pt-1 text-xs text-white">
-                  🔥🩷 Updated v.1.0.24 🩷🔥
+                  🎇🍭 Updated v.1.0.25 🍭🎇
                 </span>
 
                 <span className="pt-2 text-xs text-white flex flex-col items-center justify-center">
                   <hr className="w-full" />
-                  <span>Version นี้มีระบบคิวเพลงแล้ว</span>
+                  <span>v.1.0.24 - ระบบคิวเพลงแล้ว</span>
                   <span>
-                    <img src="/update.png" alt="" className="w-20 h-12" />
+                    v.1.0.25 - สามารถกดเต็มจอได้แล้ว (เฉพาะเครื่องที่รองรับ)
                   </span>
                 </span>
               </div>
