@@ -15,12 +15,37 @@ const LyricsRender: React.FC<LyricsRenderProps> = ({}) => {
 
   const cursorIndices = usePlayer((state) => state.cursorIndices);
   const lyrics = usePlayer((state) => state.lyrics);
-  // const lyricsCut = lyrics.slice(3);
+  const isFinished = usePlayer((state) => state.isFinished);
 
   const position = useRef<boolean>(true);
   const [lyricsIndex, setLyricsIndex] = useState<number>(0);
   const [tickMapper, setTickMapper] = useState<TickMapper>();
   const [lyricsCut, setLyricsCut] = useState<string[]>([]);
+
+  const [mappingLyrics, setMappingLyrics] = useState<
+    {
+      line: number;
+      lyr: string;
+      lineIndex: number;
+    }[]
+  >();
+
+  const mapingLyricsGroup = (lyrics: string[]) => {
+    lyrics = lyrics.slice(3);
+    const lyrs: { line: number; lyr: string; lineIndex: number }[] = [];
+    lyrics.map((data, line) => {
+      const group = data.split("");
+      let lastIndex: number = 0;
+      group.map((lyr, lineIndex) => {
+        lyrs.push({ line, lyr, lineIndex: lineIndex + 1 });
+        lastIndex = lineIndex + 1;
+      });
+      lyrs.push({ line, lyr: "", lineIndex: lastIndex });
+    });
+
+    setMappingLyrics(lyrs);
+    return lyrs;
+  };
 
   const reset = () => {
     setLyricsCut([]);
@@ -41,7 +66,7 @@ const LyricsRender: React.FC<LyricsRenderProps> = ({}) => {
       position.current = true;
 
       setLyricsIndex(0);
-    }, 100);
+    }, 50);
   };
 
   const renderLyricsDisplay = () => {
@@ -49,21 +74,18 @@ const LyricsRender: React.FC<LyricsRenderProps> = ({}) => {
       return;
     }
     try {
-      const charIndices = tickMapper?.getValue(tick);
+      const charIndices = tickMapper.getValue(tick);
 
       if (charIndices) {
         charIndices.forEach((index) => {
-          let lineIndex = 0;
+          if (mappingLyrics) {
+            const lint = mappingLyrics[index];
 
-          while (index >= lyricsCut[lineIndex].length) {
-            index -= lyricsCut[lineIndex].length + 1;
-            lineIndex++;
-          }
+            const lineIndex = lint.line;
+            const charIndex = lint.lineIndex;
 
-          if (lineIndex > lyricsIndex) {
             let displayTop = [];
             let displayBottom = [];
-
             if (lineIndex % 2 === 0) {
               displayTop = groupThaiCharacters(lyricsCut[lineIndex + 1]);
               displayBottom = groupThaiCharacters(lyricsCut[lineIndex]);
@@ -73,14 +95,11 @@ const LyricsRender: React.FC<LyricsRenderProps> = ({}) => {
               displayBottom = groupThaiCharacters(lyricsCut[lineIndex + 1]);
               setPosition(true);
             }
-
             setLyricsIndex(lineIndex);
-            position.current = !position.current;
-
             setDisplay(displayTop);
             setDisplayBottom(displayBottom);
+            setCharIndex(charIndex);
           }
-          setCharIndex(index + 1);
         });
       }
     } catch (error) {}
@@ -91,8 +110,16 @@ const LyricsRender: React.FC<LyricsRenderProps> = ({}) => {
       reset();
       const mapper = new TickMapper(cursorIndices);
       setTickMapper(mapper);
+      mapingLyricsGroup(lyrics);
     }
   }, [cursorIndices, lyrics]);
+
+  // useEffect(() => {
+  //   console.log("isFinished", isFinished);
+  //   if (isFinished) {
+  //     reset();
+  //   }
+  // }, [isFinished]);
 
   useEffect(() => {
     renderLyricsDisplay();

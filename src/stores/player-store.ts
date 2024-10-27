@@ -12,6 +12,7 @@ interface PlayerState {
   playingTrack: IPlayingQueues | undefined;
   midiPlaying: MIDI | undefined;
   lyrics: string[];
+  setLyrics: (value: string[]) => void;
   cursorTicks: number[];
   cursorIndices: Map<number, number[]> | undefined;
   playingQueue: IPlayingDecodedQueues[];
@@ -43,6 +44,8 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   playingTrack: undefined,
   midiPlaying: undefined,
   lyrics: [],
+  setLyrics: (value: string[]) => set({ lyrics: value }),
+
   cursorTicks: [],
   paused: false,
   setPaused: (value: boolean) => set({ paused: value }),
