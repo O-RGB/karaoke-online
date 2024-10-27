@@ -59,7 +59,7 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
             1
           </div>
         </div>
-        <div className="lg:text-xl text-white text-end leading-none lg:leading-normal">
+        <div className="lg:text-xl text-white text-end lg:text-center leading-none lg:leading-normal">
           <span>{saveInfo?.name}</span>
           <br />
           <span className="text-xs lg:text-base">{saveInfo?.artist}</span>

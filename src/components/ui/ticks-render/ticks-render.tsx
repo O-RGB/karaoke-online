@@ -17,7 +17,6 @@ const TicksRender: React.FC<TicksRenderProps> = ({}) => {
 
   const midiPlaying = usePlayer((state) => state.midiPlaying);
 
-  // console.log("paused", player?.paused);
   const player = useSpessasynthStore((state) => state.player);
 
   const setIsFinished = usePlayer((state) => state.setIsFinished);

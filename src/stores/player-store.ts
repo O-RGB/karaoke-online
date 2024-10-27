@@ -82,6 +82,9 @@ export const usePlayer = create<PlayerState>((set, get) => ({
     }
 
     if (parsedMidi) {
+      set({
+        lyrics: [],
+      });
       setTimeout(async () => {
         set({ midiPlaying: parsedMidi });
         const timeDivision = parsedMidi.timeDivision;

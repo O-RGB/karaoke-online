@@ -99,7 +99,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       {/* Process */}
       <WallpaperRender></WallpaperRender>
       <RemoteRender></RemoteRender>
-
       <TicksRender></TicksRender>
       <LyricsRender></LyricsRender>
       <GainRender analysers={analysers}></GainRender>
