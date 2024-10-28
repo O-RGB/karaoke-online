@@ -1,14 +1,24 @@
 type TypeFormHost =
+  //MIX
   | "GIND_NODE"
   | "VOLUMES"
   | "PAN"
   | "REVERB"
   | "CHORUSDEPTH"
-  | ""
+
+  // TIME MUSIC
+  | "TIME_CHANGE"
+  | "SET_TIME_CHANGE"
+
+  // LOGIN
   | "VALIDATE_PIN"
+
+  // SONG PLAYER
   | "SEND_SONG_LIST"
   | "UPLOAD_SONG"
-  | "REQUEST_QUEUE_LIST";
+  | "REQUEST_QUEUE_LIST"
+  | "SONG_INFO_PLAYING";
+
 type TypeFormJoiner =
   | "SET_CHANNEL"
   | "PIN_VALIDATION"

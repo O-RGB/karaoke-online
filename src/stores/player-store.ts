@@ -37,6 +37,11 @@ interface PlayerState {
 
   setCountDown: (value: number) => void;
   countDown: number;
+
+  setCurrentTime: (value: number) => void;
+  currentTime: number;
+
+  nextSong: () => void;
 }
 
 export const usePlayer = create<PlayerState>((set, get) => ({
@@ -56,6 +61,10 @@ export const usePlayer = create<PlayerState>((set, get) => ({
 
   setCountDown: (value) => set({ countDown: value }),
   countDown: 10,
+
+  setCurrentTime: (value) => set({ currentTime: value }),
+  currentTime: 0,
+
   setPlayingQueue: (value) => set({ playingQueue: value }),
 
   setPlayingTrackFile: (value) => set({ playingTrack: value }),
@@ -63,6 +72,28 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   setMusicLibraryFile: (files) => set({ musicLibrary: files }),
 
   handleSetLyrics: (lyr) => set({ lyrics: lyr }),
+
+  nextSong: async () => {
+    const playingQueue = get().playingQueue;
+    if (playingQueue.length > 1) {
+      let clone = [...playingQueue];
+      clone = clone.splice(1, clone.length);
+      set({
+        playingQueue: clone,
+      });
+
+      setTimeout(() => {
+        if (clone.length > 0) {
+          const nextSong = clone[0];
+          get().setSongPlaying(nextSong.file, nextSong.songInfo);
+        }
+      }, 1000);
+    } else {
+      set({
+        playingQueue: [],
+      });
+    }
+  },
 
   setSongPlaying: async (files, info) => {
     const player = useSpessasynthStore.getState().player;

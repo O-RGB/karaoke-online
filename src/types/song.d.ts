@@ -64,3 +64,12 @@ interface IPlayingDecodedQueues {
   songInfo: SearchResult;
   file: SongFilesDecode;
 }
+
+interface MidiPlayingInfo {
+  searchInfo: SearchResult;
+  midiInfo: PlayingInfo;
+}
+
+interface PlayingInfo {
+  duration: number;
+}

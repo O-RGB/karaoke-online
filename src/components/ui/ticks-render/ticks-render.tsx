@@ -3,13 +3,20 @@ import useTempoStore from "@/stores/tempo-store";
 import useTickStore from "@/stores/tick-store";
 import { REFRESH_RATE } from "@/config/value";
 import React, { useEffect, useRef } from "react";
-import { MIDI } from "spessasynth_lib";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import { usePlayer } from "@/stores/player-store";
+import { usePeerStore } from "@/stores/peer-store";
 
 interface TicksRenderProps {}
 
 const TicksRender: React.FC<TicksRenderProps> = ({}) => {
+  const superUserConnections = usePeerStore(
+    (state) => state.superUserConnections
+  );
+  const sendSuperUserMessage = usePeerStore(
+    (state) => state.sendSuperUserMessage
+  );
+
   const config = useConfigStore((state) => state.config);
   const refreshRate = config?.refreshRate?.render ?? REFRESH_RATE["MIDDLE"];
   const setCurrentTick = useTickStore((state) => state.setCurrntTick);
@@ -19,6 +26,7 @@ const TicksRender: React.FC<TicksRenderProps> = ({}) => {
 
   const player = useSpessasynthStore((state) => state.player);
 
+  const nextSong = usePlayer((state) => state.nextSong);
   const setIsFinished = usePlayer((state) => state.setIsFinished);
   const setPaused = usePlayer((state) => state.setPaused);
   const isFinished = usePlayer((state) => state.isFinished);
@@ -82,6 +90,15 @@ const TicksRender: React.FC<TicksRenderProps> = ({}) => {
           }
           setIsFinished(player.isFinished);
           setPaused(player.paused);
+
+          if (superUserConnections.length > 0) {
+            sendSuperUserMessage({
+              message: player.currentTime,
+              type: "TIME_CHANGE",
+              user: "SUPER",
+              clientId: superUserConnections[0].connectionId,
+            });
+          }
         },
         isFinished || paused ? 1000 : refreshRate
       );
@@ -96,20 +113,21 @@ const TicksRender: React.FC<TicksRenderProps> = ({}) => {
 
   useEffect(() => {
     if (isFinished === true) {
-      if (playingQueue.length > 1) {
-        let clone = [...playingQueue];
-        clone = clone.splice(1, clone.length);
-        setPlayingQueue(clone);
+      nextSong();
+      // if (playingQueue.length > 1) {
+      //   let clone = [...playingQueue];
+      //   clone = clone.splice(1, clone.length);
+      //   setPlayingQueue(clone);
 
-        setTimeout(() => {
-          if (clone.length > 0) {
-            const nextSong = clone[0];
-            setSongPlaying(nextSong.file, nextSong.songInfo);
-          }
-        }, 1000);
-      } else {
-        setPlayingQueue([]);
-      }
+      //   setTimeout(() => {
+      //     if (clone.length > 0) {
+      //       const nextSong = clone[0];
+      //       setSongPlaying(nextSong.file, nextSong.songInfo);
+      //     }
+      //   }, 1000);
+      // } else {
+      //   setPlayingQueue([]);
+      // }
     }
   }, [isFinished]);
 

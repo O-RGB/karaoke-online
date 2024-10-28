@@ -54,7 +54,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const setSongPlaying = usePlayer((state) => state.setSongPlaying);
   const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
   const handle = useFullScreenHandle();
-  const fullscreenRef = useRef(null);
   const notification = useNotificationStore((state) => state.notification);
   const config = useConfigStore((state) => state.config);
 
@@ -115,17 +114,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           <ClockPanel></ClockPanel>
           <QueueSong></QueueSong>
           <NextSongPanel></NextSongPanel>
-          <SearchSong
-            onClickSong={async (value) => {
-              const data = await loadAndPlaySong(value);
-              if (data) {
-                if (data.length <= 1) {
-                  const { file, songInfo } = data[0];
-                  setSongPlaying(file, songInfo);
-                }
-              }
-            }}
-          ></SearchSong>
+          <SearchSong></SearchSong>
           <LyricsPanel></LyricsPanel>
           <PlayerPanel
             isFullScreen={handle.active}

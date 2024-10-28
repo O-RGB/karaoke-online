@@ -13,6 +13,7 @@ import useMixerStore from "@/stores/mixer-store";
 import EventRenderSuper from "./event-render";
 import QueueSong from "@/components/tools/queue-song/queue-song";
 import useKeyboardStore from "@/stores/keyboard-state";
+import RangeBarClone from "@/components/common/input-data/range-bar-clone";
 
 interface SuperJoinConnectProps {
   hostId: string;
@@ -28,7 +29,9 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   const initializeKeyboardListeners = useKeyboardStore(
     (state) => state.initializeKeyboardListeners
   );
-  const [songList, setSongList] = useState<SearchResult[]>([]);
+  const [searchSongList, setSearchSongList] = useState<SearchResult[]>([]);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [songPlayingInfo, setSongPlayingInfo] = useState<MidiPlayingInfo>();
 
   const handleConnect = () => {
     if (hostId) {
@@ -80,6 +83,17 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
     }
   };
 
+  const handleSetCurrentTime = (value: number) => {
+    if (sendSuperUserMessage) {
+      sendSuperUserMessage({
+        message: value,
+        type: "SET_TIME_CHANGE",
+        user: "SUPER",
+        clientId: superUserPeer?.id,
+      });
+    }
+  };
+
   const handleUploadFileSong = async (file: File, filelist: FileList) => {
     if (sendSuperUserMessage) {
       const song = await readSong(filelist);
@@ -97,10 +111,10 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
 
   async function onSearch(value: string) {
     handleSendMessage(value);
-    if (songList) {
+    if (searchSongList) {
       const op = toOptions<SearchResult>({
         render: (value) => <SearchDropdown value={value}></SearchDropdown>,
-        list: songList,
+        list: searchSongList,
       });
       return op;
     }
@@ -127,7 +141,11 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   return (
     <>
       <QueueSong></QueueSong>
-      <EventRenderSuper setSongList={setSongList}></EventRenderSuper>
+      <EventRenderSuper
+        setSearchSongList={setSearchSongList}
+        setCurrentTime={setCurrentTime}
+        setSongInfoPlaying={setSongPlayingInfo}
+      ></EventRenderSuper>
       <div className="p-4 bg-slate-800 min-h-screen flex flex-col gap-4">
         <SearchSelect
           className={"!placeholder-white"}
@@ -160,6 +178,14 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
               <span>อัปโหลดไฟล์</span>
             </span>
           </Upload>
+        </div>
+        <div className="w-full">
+          {JSON.stringify(currentTime)}
+          <RangeBarClone
+            max={songPlayingInfo?.midiInfo.duration}
+            value={currentTime}
+            onChange={handleSetCurrentTime}
+          ></RangeBarClone>
         </div>
       </div>
     </>

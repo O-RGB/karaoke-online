@@ -11,15 +11,25 @@ import useKeyboardStore from "@/stores/keyboard-state";
 import Button from "@/components/common/button/button";
 import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
 import { MdPlayCircleFilled } from "react-icons/md";
+import { usePlayer } from "@/stores/player-store";
+import { usePeerStore } from "@/stores/peer-store";
 
-interface SearchSongProps {
-  onClickSong?: (value: SearchResult) => void;
-}
+interface SearchSongProps {}
 
-const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
+const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const { orientation } = useOrientation();
   const hideMixer = useMixerStore((state) => state.hideMixer);
+
+  const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
+  const setSongPlaying = usePlayer((state) => state.setSongPlaying);
+
+  const superUserConnections = usePeerStore(
+    (state) => state.superUserConnections
+  );
+  const sendSuperUserMessage = usePeerStore(
+    (state) => state.sendSuperUserMessage
+  );
 
   const queueing = useKeyboardStore((state) => state.queueing);
   const searching = useKeyboardStore((state) => state.searching);
@@ -58,6 +68,33 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
     setFullUi(false);
   };
 
+  
+  const setSongPlayer = async (value: SearchResult) => {
+    const data = await loadAndPlaySong(value);
+    if (data) {
+      if (data.length <= 1) {
+        const { file, songInfo } = data[0];
+        setSongPlaying(file, songInfo);
+
+        if (superUserConnections.length > 0) {
+
+          // let ingo:MidiPlayingInfo = {
+          //   midiInfo:{
+          //     duration
+          //   }
+          // }
+
+          sendSuperUserMessage({
+            message: "",
+            type: "SONG_INFO_PLAYING",
+            user: "SUPER",
+            clientId: superUserConnections[0].connectionId,
+          });
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     if (searching !== "") {
       onKeyUpSearch(searching);
@@ -73,7 +110,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
     if (searchResult.length > 0 && queueing === false) {
       let option = searchResult[indexSelect].option;
       if (option) {
-        onClickSong?.(option);
+        setSongPlayer(option);
         setIndexSelect(0);
         setSearchResult([]);
         resetSearchingTimeout(0);
@@ -93,7 +130,6 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
   };
 
   const onArrowLeft = () => {
-    console.log("value");
     setIndexSelect((value) => {
       let sum = value - 1;
       if (sum >= 0) {
@@ -270,7 +306,7 @@ const SearchSong: React.FC<SearchSongProps> = ({ onClickSong }) => {
             }
             onSelectItem={(value: IOptions<SearchResult>) => {
               if (value.option) {
-                onClickSong?.(value.option);
+                setSongPlayer(value.option);
               }
             }}
             onSearch={onSearch}
