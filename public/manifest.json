@@ -1,20 +1,41 @@
 {
-  "name": "Karaoke Online",
-  "short_name": "Karaoke",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "theme_color": "#8936FF",
+  "background_color": "#2EC6FE",
   "icons": [
     {
-      "src": "/icon.ico",
-      "sizes": "48x48",
-      "type": "image/x-icon"
+      "purpose": "maskable",
+      "sizes": "512x512",
+      "src": "icon512_maskable.png",
+      "type": "image/png"
     },
     {
-      "src": "/icon-mid.png",
-      "sizes": "192x192",
+      "purpose": "any",
+      "sizes": "512x512",
+      "src": "icon512_rounded.png",
       "type": "image/png"
+    }
+  ],
+  "orientation": "any",
+  "display": "fullscreen",
+  "dir": "auto",
+  "lang": "th-TH",
+  "name": "Next Karaoke",
+  "short_name": "NextKaraoke",
+  "start_url": "/",
+  "screenshots": [
+    {
+      "src": "https://picsum.photos/1280/720",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Homescreen of Awesome App"
+    },
+    {
+      "src": "https://picsum.photos/1280/720",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "List of Awesome Resources available in Awesome App"
     }
   ]
 }

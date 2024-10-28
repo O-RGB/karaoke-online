@@ -11,6 +11,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Karaoke Online",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({

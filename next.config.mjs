@@ -15,11 +15,11 @@
 // };
 
 // module.exports = withPWA(nextConfig);
-import withPWA from "next-pwa";
+import withPWA from "@ducanh2912/next-pwa";
 
 const pwaConfig = withPWA({
   dest: "public",
-  sw: "synthetizer/worklet_processor.min.js",
+  sw: "/test.js",
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
