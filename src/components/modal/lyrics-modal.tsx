@@ -97,7 +97,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
               </div>
 
               <div className="w-20">
-                <Label className="pb-1">ขนาด (px)</Label>
+                <Label className="pb-1">ขนาด</Label>
                 <InputNumber
                   disabled={lyrics.fontAuto}
                   onChange={(x) => {

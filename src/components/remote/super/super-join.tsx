@@ -179,14 +179,14 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
             </span>
           </Upload>
         </div>
-        <div className="w-full">
+        {/* <div className="w-full">
           {JSON.stringify(currentTime)}
           <RangeBarClone
             max={songPlayingInfo?.midiInfo.duration}
             value={currentTime}
             onChange={handleSetCurrentTime}
           ></RangeBarClone>
-        </div>
+        </div> */}
       </div>
     </>
   );

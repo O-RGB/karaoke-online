@@ -1,6 +1,6 @@
 "use client";
 import React, { ReactNode, useState } from "react";
-import { MdOutlinePiano } from "react-icons/md";
+import { MdOutlinePiano, MdOutlineSpeaker } from "react-icons/md";
 import Modal from "../common/modal";
 import { TbDeviceMobileShare, TbMusicPlus } from "react-icons/tb";
 import { VscSettings } from "react-icons/vsc";
@@ -49,10 +49,10 @@ const ContextModal: React.FC<ContextModalProps> = ({
           type: "SOUNDFONT_MODEL",
         },
         {
-          icon: <SiMidi />,
-          text: "Midi Output",
+          icon: <MdOutlineSpeaker />,
+          text: "อุปกรเสียง",
           onClick: handleSelectContext,
-          type: "MIDI_SETTING",
+          type: "SOUND_SETTING",
         },
       ],
       name: "เสียง",

@@ -20,10 +20,7 @@ interface PlayerState {
   setPlayingTrackFile: (value: IPlayingQueues) => void;
   setMusicLibraryFile: (files: Map<string, File>) => void;
   handleSetLyrics: (lyr: string[]) => void;
-  setSongPlaying: (
-    files: SongFilesDecode,
-    info?: SearchResult
-  ) => Promise<void>;
+  setSongPlaying: (files: SongFilesDecode, info: SearchResult) => Promise<void>;
   loadAndPlaySong: (
     value: SearchResult
   ) => Promise<IPlayingDecodedQueues[] | undefined>;
@@ -41,7 +38,9 @@ interface PlayerState {
   setCurrentTime: (value: number) => void;
   currentTime: number;
 
-  nextSong: () => void;
+  nextSong: () => Promise<void>;
+
+  songPlayingInfo?: SearchResult;
 }
 
 export const usePlayer = create<PlayerState>((set, get) => ({
@@ -49,6 +48,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   playingTrack: undefined,
   midiPlaying: undefined,
   lyrics: [],
+  songPlayingInfo: undefined,
   setLyrics: (value: string[]) => set({ lyrics: value }),
 
   cursorTicks: [],
@@ -86,6 +86,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
         if (clone.length > 0) {
           const nextSong = clone[0];
           get().setSongPlaying(nextSong.file, nextSong.songInfo);
+          set({ songPlayingInfo: nextSong.songInfo });
         }
       }, 1000);
     } else {
@@ -99,11 +100,11 @@ export const usePlayer = create<PlayerState>((set, get) => ({
     const player = useSpessasynthStore.getState().player;
     if (!player) return;
 
-    if (player.paused) {
+    // if (player.paused) {
       player.pause();
       player.stop();
       set({ lyrics: [], cursorTicks: [], cursorIndices: undefined });
-    }
+    // }
     let midiFileArrayBuffer = await files.mid.arrayBuffer();
     let parsedMidi = null;
     try {
@@ -129,6 +130,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
           lyrics: files.lyr,
           cursorTicks: cur,
           cursorIndices: curMapping,
+          songPlayingInfo: info,
         });
         get().setMidiPlayer(parsedMidi);
       }, 1000);

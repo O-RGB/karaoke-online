@@ -17,7 +17,14 @@ type TypeFormHost =
   | "SEND_SONG_LIST"
   | "UPLOAD_SONG"
   | "REQUEST_QUEUE_LIST"
-  | "SONG_INFO_PLAYING";
+  | "SONG_INFO_PLAYING"
+
+  // SONG ACTION
+  | "PLAY"
+  | "PAUSED"
+  | "NEXT_SONG"
+  | "SET_SONG_INDEX_QUEUE"
+  | "SORT_QUEUE";
 
 type TypeFormJoiner =
   | "SET_CHANNEL"

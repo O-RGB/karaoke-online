@@ -212,10 +212,9 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
             onChange={(muted) => {
               onMutedVolume(VOCAL_CHANNEL, !muted);
             }}
-            iconOpen={<PiUserSoundFill></PiUserSoundFill>}
-            iconClose={<PiUserMinusFill></PiUserMinusFill>}
-            labelOpen="Vocal"
-            labelClose="Vocal"
+            iconOpen={<PiUserSoundFill className="text-lg"></PiUserSoundFill>}
+            iconClose={<PiUserMinusFill className="text-lg"></PiUserMinusFill>}
+            colorClose="red"
           ></SwitchButton>
           <SwitchButton
             onChange={(muted) => {
@@ -223,17 +222,15 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
               setQueueOpen?.();
               resetQueueingTimeout(5000);
             }}
-            iconOpen={<FaList className="pb-0.5"></FaList>}
-            iconClose={<FaList className="pb-0.5"></FaList>}
-            labelOpen="คิวเพลง"
-            labelClose="คิวเพลง"
+            iconOpen={<FaList></FaList>}
+            iconClose={<FaList></FaList>}
           ></SwitchButton>
         </div>
         <div>{options}</div>
       </div>
 
       <div className="relative flex w-full lg:w-[690px] justify-center items-center h-0 z-10">
-        <div className="absolute bottom-[34px] right-4 z-10">
+        <div className="absolute bottom-[32px] right-4 z-10">
           <Button
             tabIndex={-1}
             shadow={""}

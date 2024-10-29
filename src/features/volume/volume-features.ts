@@ -1,4 +1,5 @@
 import {
+  ALL_CHANNELS_OR_DIFFERENT_ACTION,
   midiControllers,
   modulatorSources,
   NON_CC_INDEX_OFFSET,
@@ -25,6 +26,11 @@ const volumeSynth = (synth: Synthetizer): FeatureSynth | null => {
   const updateLockedVolume = (channel: number, isLocked: boolean) => {
     synth.lockController(channel, midiControllers.mainVolume, isLocked);
   };
+
+  const updateLockedPreset = (channel: number, isLocked: boolean) => {
+    synth.lockController(channel, ALL_CHANNELS_OR_DIFFERENT_ACTION, isLocked);
+  };
+
   const uploadLockedPitchWheel = (channel: number, isLocked: boolean) => {
     synth.lockController(
       channel,
@@ -80,6 +86,7 @@ const volumeSynth = (synth: Synthetizer): FeatureSynth | null => {
     updatePitch,
     updateMuteVolume,
     updateLockedVolume,
+    updateLockedPreset,
     updatePanVolume,
     updateReverb,
     updateChorusDepth,

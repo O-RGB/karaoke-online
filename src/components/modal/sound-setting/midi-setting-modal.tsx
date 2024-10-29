@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Label from "../common/label";
-import Select from "../common/input-data/select/select";
-import { useSpessasynthStore } from "../../stores/spessasynth-store";
+import Label from "../../common/label";
+import Select from "../../common/input-data/select/select";
+import { useSpessasynthStore } from "../../../stores/spessasynth-store";
 
 interface MidiSettingModalProps {}
 

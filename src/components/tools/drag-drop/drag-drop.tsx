@@ -8,7 +8,7 @@ import { FC, useEffect } from "react";
 import { AiOutlineFile } from "react-icons/ai";
 
 type DragDropProps = {
-  setSongPlaying: (song: SongFilesDecode, info?: SearchResult) => void;
+  setSongPlaying: (song: SongFilesDecode, info: SearchResult) => void;
 };
 
 export const DragDrop: FC<DragDropProps> = ({ setSongPlaying }) => {
@@ -17,7 +17,14 @@ export const DragDrop: FC<DragDropProps> = ({ setSongPlaying }) => {
   const decodeFile = async (files: FileList) => {
     const song = await onSelectTestMusic(undefined, files);
     if (song) {
-      setSongPlaying(song);
+      setSongPlaying(song, {
+        artist: "-",
+        fileId: "0000",
+        from: "CUSTOM",
+        id: "0000",
+        name: "เพลงนอกระบบ",
+        type: 0,
+      });
     }
   };
 

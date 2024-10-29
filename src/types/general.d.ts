@@ -23,7 +23,7 @@ type ModalType =
   | "ADD_MUSIC"
   | "WALLPAPER"
   | "LYRICS"
-  | "MIDI_SETTING"
+  | "SOUND_SETTING"
   | "SONG_LIST"
   | "DRIVE_SETTING"
   | "DISPLAY";

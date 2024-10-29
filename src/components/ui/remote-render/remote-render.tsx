@@ -86,7 +86,14 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
             lyr: uploaded.lyr,
             mid: receivedFile,
           };
-          setSongPlaying(getDecode);
+          setSongPlaying(getDecode, {
+            artist: "-",
+            fileId: "0000",
+            from: "CUSTOM",
+            id: "0000",
+            name: "เพลงนอกระบบ",
+            type: 0,
+          });
         }
 
       default:

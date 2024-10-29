@@ -16,7 +16,7 @@ import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status/status-panel";
 import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper-modal";
-import MidiSettingModal from "../modal/midi-setting-modal";
+import MidiSettingModal from "../modal/sound-setting/midi-setting-modal";
 import { getTracklist } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
 import TicksRender from "./ticks-render/ticks-render";
@@ -38,6 +38,8 @@ import QueueSong from "../tools/queue-song/queue-song";
 import useKeyboardStore from "@/stores/keyboard-state";
 import NextSongPanel from "../tools/next-song-panel";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
+import SongInfo from "../tools/song-info";
+import SoundSettingModal from "../modal/sound-setting";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
@@ -82,7 +84,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
-    MIDI_SETTING: <MidiSettingModal></MidiSettingModal>,
+    SOUND_SETTING: <SoundSettingModal></SoundSettingModal>,
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
   };
 
@@ -112,6 +114,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           <VolumePanel analysers={analysers}></VolumePanel>
           <TempoPanel></TempoPanel>
           <ClockPanel></ClockPanel>
+          <SongInfo></SongInfo>
           <QueueSong></QueueSong>
           <NextSongPanel></NextSongPanel>
           <SearchSong></SearchSong>

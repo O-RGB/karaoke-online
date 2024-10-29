@@ -29,11 +29,12 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
 }) => {
   // re-render
   const tick = useTickStore((state) => state.tick);
-
   const player = useSpessasynthStore((state) => state.player);
 
   const paused = usePlayer((state) => state.paused);
   const setPaused = usePlayer((state) => state.setPaused);
+  const nextSong = usePlayer((state) => state.nextSong);
+  const playingQueue = usePlayer((state) => state.playingQueue);
 
   const [timer, setTimer] = useState<number>(0);
   const inputRef = useRef<any>(null);
@@ -87,10 +88,15 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <Button
             className="hover:bg-white/20"
             blur={false}
+            disabled={playingQueue.length <= 1}
             border=""
             shadow=""
             padding="p-4"
-            onClick={() => player.nextSong()}
+            onClick={async () => {
+              nextSong()
+              // player.play()
+              
+            }}
             shape={false}
             icon={<TbPlayerSkipForwardFilled className="text-white" />}
           ></Button>

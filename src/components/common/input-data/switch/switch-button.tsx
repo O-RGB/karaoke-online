@@ -7,7 +7,7 @@ interface SwitchButtonProps {
   iconClose?: React.ReactNode;
   labelOpen?: string;
   labelClose?: string;
-  colorClose?: string;
+  colorClose?: ColorType;
   onChange?: (open: boolean) => void;
 }
 
@@ -16,7 +16,7 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({
   iconOpen,
   labelClose,
   labelOpen,
-  colorClose = "bg-red-500 hover:bg-red-500",
+  colorClose,
   onChange,
 }) => {
   const [open, setOpen] = useState<boolean>(true);
@@ -30,13 +30,10 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({
     <Button
       shadow=""
       border="border blur-border"
-      blur={
-        !open
-          ? "blur-overlay bg-red-500/80 hover:bg-red-500/50"
-          : "blur-overlay bg-white/10 hover:bg-white/20"
-      }
+      blur={!open ? false : "blur-overlay bg-white/10 hover:bg-white/20"}
       onClick={handleOnClick}
-      className={[open ? " hover:bg-white/30" : colorClose].join(" ")}
+      color={colorClose}
+      className={[open ? " hover:bg-white/30" : ""].join(" ")}
       padding="p-1 px-2"
     >
       <div
@@ -44,8 +41,12 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({
           " "
         )}
       >
-        <span>{open ? iconOpen : iconClose}</span>
-        <span className="text-sm -mt-0.5">{open ? labelOpen : labelClose}</span>
+        {iconClose && <span>{open ? iconOpen : iconClose}</span>}
+        {labelClose && (
+          <span className="text-sm -mt-0.5">
+            {open ? labelOpen : labelClose}
+          </span>
+        )}
       </div>
     </Button>
   );

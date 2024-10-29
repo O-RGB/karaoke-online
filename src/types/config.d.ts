@@ -36,6 +36,12 @@ interface ConfigDisplay {
   widgets: Partial<WidgetsConfig>;
   themes: Partial<ThemesConfig>;
   system: Partial<SystemConfig>;
+  sound: Partial<SoundSetting>;
+}
+
+interface SoundSetting {
+  soundFont: string;
+  lockBase: number;
 }
 
 interface SystemConfig {

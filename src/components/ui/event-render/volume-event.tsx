@@ -25,7 +25,6 @@ const VolumeEvent: React.FC<VolumeEventProps> = ({}) => {
       if (heid === false) {
         switch (controllerNumber) {
           case midiControllers.mainVolume:
-            console.log("on event", controllerValue);
             if (channel === 3) {
             }
             let vol: number[] = [];
