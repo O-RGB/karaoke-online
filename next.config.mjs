@@ -19,10 +19,23 @@ import withPWA from "@ducanh2912/next-pwa";
 
 const pwaConfig = withPWA({
   dest: "public",
-  sw: "/synthetizer/worklet_processor.min.js",
+  customWorkerSrc: "/synthetizer/worklet_processor.min.js",
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
+  runtimeCaching: [
+    {
+      urlPattern: /^https?.*/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "offlineCache",
+        expiration: {
+          maxEntries: 200,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+        },
+      },
+    },
+  ],
 });
 
 /** @type {import('next').NextConfig} */

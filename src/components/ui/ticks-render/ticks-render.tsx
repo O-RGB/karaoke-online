@@ -69,47 +69,69 @@ const TicksRender: React.FC<TicksRenderProps> = ({}) => {
       });
     }
   }, [midiPlaying]);
-
   useEffect(() => {
-    if (workerRef.current && player) {
-      updateInterval = setInterval(
-        () => {
-          workerRef.current?.postMessage({
-            type: "updateTime",
-            data: { currentTime: player?.currentTime },
+    let animationFrameId: number;
+    let lastTime = performance.now();
+    let accumulatedTime = 0;
+  
+    const update = (currentTime: number) => {
+      if (!player || !workerRef.current) return;
+  
+      // Calculate the time elapsed since the last frame
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+      accumulatedTime += deltaTime;
+  
+      // Only update if enough time has passed, based on refreshRate
+      if (accumulatedTime >= refreshRate) {
+        accumulatedTime = 0; // Reset the accumulated time
+  
+        // Send the updateTime message
+        workerRef.current?.postMessage({
+          type: "updateTime",
+          data: { currentTime: player.currentTime },
+        });
+  
+        const lastTime = Math.floor(player?.duration ?? 0);
+        const countDown = lastTime - Math.floor(player?.currentTime ?? 0);
+        if (countDown < 10) {
+          setCountDown(countDown);
+        }
+        if (countDown === 0) {
+          setTimeout(() => {
+            setCountDown(10);
+          }, 1000);
+        }
+        setIsFinished(player.isFinished);
+        setPaused(player.paused);
+  
+        if (superUserConnections.length > 0) {
+          sendSuperUserMessage({
+            message: player.currentTime,
+            type: "TIME_CHANGE",
+            user: "SUPER",
+            clientId: superUserConnections[0].connectionId,
           });
-          const lastTime = Math.floor(player?.duration ?? 0);
-          const countDown = lastTime - Math.floor(player?.currentTime ?? 0);
-          if (countDown < 10) {
-            setCountDown(countDown);
-          }
-          if (countDown === 0) {
-            setTimeout(() => {
-              setCountDown(10);
-            }, 1000);
-          }
-          setIsFinished(player.isFinished);
-          setPaused(player.paused);
-
-          if (superUserConnections.length > 0) {
-            sendSuperUserMessage({
-              message: player.currentTime,
-              type: "TIME_CHANGE",
-              user: "SUPER",
-              clientId: superUserConnections[0].connectionId,
-            });
-          }
-        },
-        isFinished || paused ? 1000 : refreshRate
-      );
-    }
-
-    return () => {
-      if (updateInterval) {
-        clearInterval(updateInterval);
+        }
+      }
+  
+      // Request the next frame if not paused or finished
+      if (!isFinished && !paused) {
+        animationFrameId = requestAnimationFrame(update);
       }
     };
-  }, [player, isFinished, paused]);
+  
+    // Start the animation loop
+    if (!isFinished && !paused) {
+      animationFrameId = requestAnimationFrame(update);
+    }
+  
+    // Cleanup function to cancel the animation frame
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [player, isFinished, paused, refreshRate]);
+  
 
   useEffect(() => {
     if (isFinished === true) {
