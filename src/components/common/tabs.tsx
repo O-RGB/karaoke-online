@@ -15,7 +15,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onTabChange }) => {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <>
+    <div className="h-full">
       <div className="flex border-b border-gray-300 overflow-auto w-full h-10">
         {tabs.map((tab, index) => (
           <button
@@ -36,10 +36,10 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onTabChange }) => {
         ))}
       </div>
       <div className="pt-3"></div>
-      <div key={activeTab} className="tab-content">
+      <div key={activeTab} className="tab-content ">
         {tabs[activeTab].content}
       </div>
-    </>
+    </div>
   );
 };
 

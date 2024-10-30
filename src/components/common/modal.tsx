@@ -2,6 +2,7 @@ import { CSSProperties, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { IoMdClose } from "react-icons/io";
 import Button from "./button/button";
+import { useOrientation } from "@/hooks/orientation-hook";
 
 // Component to create and manage modal container
 const ModalContainer = ({ containerId = "modal-container" }) => {
@@ -44,6 +45,8 @@ export default function Modal({
   overFlow = "overflow-hidden",
   containerId = "modal-container",
 }: ModalProps & { containerId?: string }) {
+  const { isMobile, orientation } = useOrientation();
+
   const [showModal, setShowModal] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(isOpen);
   var padding = "p-3";
@@ -103,10 +106,13 @@ export default function Modal({
               )}
             </div>
             <div
-              style={{
-                height: typeof height === "boolean" ? "fit-content" : height,
-              }}
-              className={`px-3 md:px-4 py-3 flex flex-col relative z-0 ${overFlow}`}
+              className={`px-3 md:px-4 py-3 flex flex-col relative z-0 overflow-auto  ${
+                isMobile && orientation === "landscape"
+                  ? `h-[70vh]`
+                  : typeof height === "string"
+                  ? `h-[${height}]`
+                  : `h-[${height}px]`
+              }`}
             >
               {children}
             </div>

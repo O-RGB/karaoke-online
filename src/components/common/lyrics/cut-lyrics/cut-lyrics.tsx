@@ -25,7 +25,7 @@ const CutLyrics: React.FC<CutLyricsProps> = ({
   const measureRef = useRef<HTMLSpanElement>(null);
   const [screenWidth, setScreenWidth] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const { charIndex } = useLyricsStore();
+  const charIndex = useLyricsStore((state) => state.charIndex);
   const [highlightedWidth, setHighlightedWidth] = useState<number>(0);
 
   useEffect(() => {

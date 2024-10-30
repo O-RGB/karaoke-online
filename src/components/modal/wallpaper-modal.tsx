@@ -54,7 +54,7 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
         </span>
       </Upload>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 pt-4">
+      <div className="grid grid-cols-4 lg:grid-cols-3 gap-3 pt-4 max-h-[500px] overflow-auto">
         {wallpaperList.map((data, i) => {
           data = (data as any).value;
           const src = URL.createObjectURL(data);
