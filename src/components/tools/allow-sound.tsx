@@ -95,21 +95,28 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                 <span className="pt-2 text-xs text-white flex flex-col items-center justify-center">
                   <hr className="w-full" />
                   <div className="w-56">
-                    <span className="font-bold">มีอะไรใหม่</span> <br />
-                    - แก้ไขปุ่ม เปลี่ยนเพลง <br /> - เพิ่มระบบล็อกเสียงเบส{" "}
-                    <br /> - เพิ่มประสิทธิภาพ <br />{" "}
-                    <span className="font-bold">ประกาศ</span>
+                    <div className="border p-2">
+                      - ตอนนี้แอดมินได้ทดสอบเครื่อง Android
+                      แล้วมีการกระตุกอย่างมาก
+                      ตอนนี้มีบราวเซอร์ที่พอช่วยให้กระตุกน้อยให้ไปใช้
+                      <span className="inline-block">
+                        <img
+                          src="https://upload.wikimedia.org/wikipedia/commons/a/a0/Firefox_logo%2C_2019.svg"
+                          alt=""
+                          className="w-5 h-5"
+                        />
+                      </span>{" "}
+                      Firefox แทนนะครับ
+                    </div>
                     <div className="border p-2">
                       - สำหรับ Android สามารถติดตั้งแอปลงหน้าจอจริง ๆ ได้แล้ว
                       (ทดสอบกด Add to home screen อีกครั้ง)
                       จะเป็นการติดตั้งลงหน้าจอ
                     </div>
-                    <div className="border p-2">
-                      - ตอนนี้แอดมินได้ทดสอบเครื่อง Android
-                      แล้วมีการกระตุกอย่างมาก
-                      ตอนนี้มีบราวเซอร์ที่พอช่วยให้กระตุกน้อยให้ไปใช้ Firefox
-                      แทนนะครับ
-                    </div>
+                    <span className="font-bold">มีอะไรใหม่</span> <br />
+                    - แก้ไขปุ่ม เปลี่ยนเพลง <br /> - เพิ่มระบบล็อกเสียงเบส{" "}
+                    <br /> - เพิ่มประสิทธิภาพ <br />{" "}
+                    <span className="font-bold">ประกาศ</span>
                   </div>
                 </span>
               </div>
