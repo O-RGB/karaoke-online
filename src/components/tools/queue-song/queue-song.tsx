@@ -152,15 +152,12 @@ const QueueSong: React.FC<QueueSongProps> = ({
     (state) => state.resetQueueingTimeout
   );
 
-  const player = useSpessasynthStore((state) => state.player);
   const [lockFirstIndex, setLockFirstIndex] = useState<boolean>(false);
   const playingQueue = usePlayer((state) => state.playingQueue);
   const countDown = usePlayer((state) => state.countDown);
   const setPlayingQueue = usePlayer((state) => state.setPlayingQueue);
   const setSongPlaying = usePlayer((state) => state.setSongPlaying);
 
-  // const [countdown, setCountDown] = useState<number>(stopTouchMusicPlaying);
-  const tick = useTickStore((state) => state.tick);
   const [selected, setSelected] = useState<number>(0);
 
   const sensors = useSensors(
@@ -229,16 +226,12 @@ const QueueSong: React.FC<QueueSongProps> = ({
   };
 
   useEffect(() => {
-    // const lastTime = Math.floor(player?.duration ?? 0);
-    // const count = lastTime - Math.floor(player?.currentTime ?? 0);
     if (countDown < stopTouchMusicPlaying) {
       setLockFirstIndex(true);
-      // setCountDown(count + 1);
     } else {
       setLockFirstIndex(false);
-      // setCountDown(stopTouchMusicPlaying);
     }
-  }, [queueing ? tick : undefined]);
+  }, [countDown]);
   useEffect(() => {
     setSelected((value) => {
       let coming = value + 1;

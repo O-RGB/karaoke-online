@@ -85,7 +85,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
             <div
               className={`${
                 disabled ? "cursor-auto" : "cursor-pointer"
-              } w-full lg:w-10 border-b border-x border-white/20  hover:bg-white/20 duration-300`}
+              } w-full lg:w-9 border-b border-x border-white/20  hover:bg-white/20 duration-300`}
             >
               <div className="w-full blur-overlay text-center text-white font-bold text-[10px] p-1 flex gap-0.5 justify-center items-center h-5">
                 <span className="w-2.5">{channelIcon}</span>

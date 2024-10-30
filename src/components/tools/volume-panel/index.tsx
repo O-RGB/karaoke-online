@@ -161,7 +161,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
             return (
               <div
                 key={`vol-panel-${ch}`}
-                className="flex flex-col relative h-full w-full"
+                className="flex flex-col relative h-full "
               >
                 <VolumeAction
                   disabled={hideMixer}
@@ -229,8 +229,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
         <div>{options}</div>
       </div>
 
-      <div className="relative flex w-full lg:w-[690px] justify-center items-center h-0 z-10">
-        <div className="absolute bottom-[32px] right-4 z-10">
+      <div className="relative flex w-full lg:w-[620px] justify-center items-center h-0 z-10">
+        <div className="absolute bottom-[33px] right-4 z-10">
           <Button
             tabIndex={-1}
             shadow={""}
