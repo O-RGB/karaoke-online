@@ -14,7 +14,7 @@ const LyricsRender: React.FC<LyricsRenderProps> = ({}) => {
   const setPosition = useLyricsStore((state) => state.setPosition);
 
   const cursorIndices = usePlayer((state) => state.cursorIndices);
-  const lyrics = usePlayer((state) => state.lyrics); 
+  const lyrics = usePlayer((state) => state.lyrics);
 
   const position = useRef<boolean>(true);
   const [lyricsIndex, setLyricsIndex] = useState<number>(0);

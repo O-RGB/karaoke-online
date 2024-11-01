@@ -22,7 +22,8 @@ interface PlayerState {
   handleSetLyrics: (lyr: string[]) => void;
   setSongPlaying: (files: SongFilesDecode, info: SearchResult) => Promise<void>;
   loadAndPlaySong: (
-    value: SearchResult
+    value: SearchResult,
+    systemConfig?: Partial<SystemConfig>
   ) => Promise<IPlayingDecodedQueues[] | undefined>;
   setMidiPlayer: (midi: MIDI) => Promise<void>;
 
@@ -101,9 +102,9 @@ export const usePlayer = create<PlayerState>((set, get) => ({
     if (!player) return;
 
     // if (player.paused) {
-      player.pause();
-      player.stop();
-      set({ lyrics: [], cursorTicks: [], cursorIndices: undefined });
+    player.pause();
+    player.stop();
+    set({ lyrics: [], cursorTicks: [], cursorIndices: undefined });
     // }
     let midiFileArrayBuffer = await files.mid.arrayBuffer();
     let parsedMidi = null;
@@ -146,7 +147,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
     get().setPaused(false);
   },
 
-  loadAndPlaySong: async (value) => {
+  loadAndPlaySong: async (value, systemConfig) => {
     const setNotification = useNotificationStore.getState().setNotification;
     const System = useConfigStore.getState().config.system?.drive;
     const {} = get();
@@ -159,7 +160,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
     console.log("value", value);
     setNotification({ text: "กำลังโหลดจาก" + mode, delay: 40000 });
 
-    const song = await getSong(value);
+    const song = await getSong(value, systemConfig);
     if (song) {
       const data: IPlayingDecodedQueues[] = [
         ...get().playingQueue,

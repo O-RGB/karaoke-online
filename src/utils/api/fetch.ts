@@ -17,7 +17,7 @@ export function QueryPost(params: any): FormData {
 export async function Fetcher<Input = any, Result = any>(
   url: string,
   data: any,
-  action: "TEST" | "LOAD" | "SAVE_MUSIC",
+  action: "TEST" | "LOAD" | "SAVE_MUSIC" | "SAVE" | "CHECK_UPDATE",
   init?: RequestInit
 ): Promise<any> {
   //POST

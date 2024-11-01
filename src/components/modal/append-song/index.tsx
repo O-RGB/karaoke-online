@@ -6,7 +6,6 @@ import { readSong } from "@/lib/karaoke/read";
 import {
   addTracklistsToDatabase,
   getAllKeyTracklist,
-  getTracklist,
   getTracklistTest,
   jsonTracklistToDatabase,
   saveTracklistToStorage,
@@ -23,16 +22,23 @@ import ProcessingModal from "../../common/processing/processing";
 import { testUrl } from "@/lib/fetch/test-api";
 import AddFromDrive from "./tabs/add-from-drive";
 import {
-  setLocalDriveTested,
-  setLocalDriveUrl,
+  getLocalLastUpdated,
+  setLocalLastUpdated,
   setLocalTracklistDriveTested,
 } from "@/lib/local-storege/local-storage";
 import useConfigStore from "@/stores/config-store";
 import useTracklistStore from "@/stores/tracklist-store";
+import { Fetcher } from "@/utils/api/fetch";
+import { fileToBase64 } from "@/utils/file/file";
+import Modal from "@/components/common/modal";
+import TableList from "@/components/common/table/table-list";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { FaCheck } from "react-icons/fa";
 
 interface AppendSongModalProps {}
 
 const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
+  const config = useConfigStore((state) => state.config);
   const setConfig = useConfigStore((state) => state.setConfig);
   const setTracklist = useTracklistStore((state) => state.setTracklist);
   const addTracklist = useTracklistStore((state) => state.addTracklist);
@@ -47,6 +53,11 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
 
   const [tracklistCount, setTracklistCount] = useState<number>(0);
   const [musicLibraryCount, setMusicLibraryCount] = useState<number>(0);
+
+  const [addToDrviePasswrod, setDrivePassword] = useState<string>();
+  const [updatedModal, setUpdatedModal] = useState<boolean>(false);
+  const [updateing, setUploading] = useState<boolean>(false);
+  const [updateList, setUpdateList] = useState<ListItem<SearchResult>[]>([]);
 
   // Count Item
   const getTracklistCount = async () => {
@@ -85,10 +96,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
   };
 
   // Tracklist Json
-  const onLoadFileJson = async (
-    file: File,
-    tracklistStore: "DRIVE" | "EXTHEME" | "CUSTOM"
-  ) => {
+  const onLoadFileJson = async (file: File, tracklistStore: TracklistFrom) => {
     if (!file) {
       return;
     }
@@ -206,7 +214,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
 
   const onAddTrackListDrive = async (
     value: string,
-    tracklistStore: "DRIVE" | "EXTHEME" | "CUSTOM"
+    tracklistStore: TracklistFrom
   ) => {
     setProgress({
       progress: 0,
@@ -258,9 +266,9 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     if (value === "on") {
       try {
         setTracklist([]);
-        const tl = await getTracklistTest(["DRIVE"]);
+        const tl = await getTracklistTest(["DRIVE", "DRIVE_EXTHEME"]);
         setTracklist(tl.results);
-        setConfig({ system: { drive: true } });
+        setConfig({ system: { drive: true, uploadToDrive: false } });
         setProgress({
           progress: 100,
           title: "เปลี่ยนฐานข้อมูลเป็น Drive",
@@ -279,7 +287,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
       try {
         const tl = await getTracklistTest(["CUSTOM", "EXTHEME"]);
         setTracklist(tl.results);
-        setConfig({ system: { drive: false } });
+        setConfig({ system: { drive: false, uploadToDrive: false } });
         setProgress({
           progress: 100,
           title: "เปลี่ยนฐานข้อมูลเป็น System",
@@ -295,6 +303,56 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
         setConfig({ system: { drive: false } });
       }
     }
+  };
+
+  const driveCheckForUpdate = async (showUpdatedList: boolean = false) => {
+    setUploading(true);
+    setUpdatedModal(true);
+    const url = config.system?.url;
+    if (!url) {
+      return;
+    }
+    const sheetsIndex = getLocalLastUpdated() ?? "0";
+    const checkUpdate = await Fetcher(
+      url,
+      {
+        lastIndex: sheetsIndex,
+      },
+      "CHECK_UPDATE"
+    );
+    const { update, lastRow, data } = checkUpdate;
+    if (!update) {
+      setLocalLastUpdated(lastRow);
+      const searchObj: SearchResult[] = data.map(
+        (data: any) =>
+          ({
+            id: data[0],
+            name: data[1],
+            artist: data[2],
+            type: data[3],
+            fileId: data[4],
+            from: data[5],
+          } as SearchResult)
+      );
+
+      const driveAdded = await addTracklistsToDatabase(searchObj, "DRIVE");
+      addTracklist(searchObj);
+
+      if (showUpdatedList) {
+        const tfefg: ListItem[] = searchObj.map((data: SearchResult) => ({
+          row: (
+            <span className="flex gap-2 items-center">
+              <span>{data.name}</span>
+              <span>{data.artist}</span>
+            </span>
+          ),
+          value: data.fileId,
+        }));
+        setUpdateList(tfefg);
+      }
+    }
+
+    setUploading(false);
   };
 
   // Custom Add Song
@@ -320,13 +378,79 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           show: true,
           loading: true,
         });
-        if (tracklist) {
-          const added = await addTracklistsToDatabase(tracklist, "CUSTOM");
+        if (tracklist?.tracklist) {
+          const system = config.system;
+          if (
+            system?.uploadToDrive &&
+            system.drive &&
+            system.url &&
+            tracklist.superZip
+          ) {
+            setProgress({
+              progress: 75,
+              title: "กำลังเพิ่มไปที่ Drive",
+              show: true,
+              loading: true,
+            });
+            const fileBase64 = await fileToBase64(tracklist.superZip);
+            const response = await Fetcher(
+              system.url,
+              {
+                base64: fileBase64,
+                tracklist: tracklist.tracklist,
+                password: addToDrviePasswrod,
+              },
+              "SAVE"
+            );
+
+            if (response.fileName) {
+              setProgress({
+                progress: 80,
+                title: "เพิ่มไปที่ Drive แล้ว",
+                show: true,
+                loading: true,
+              });
+
+              setProgress({
+                progress: 90,
+                title: "กำลังเพิ่มฐานข้อมูล",
+                show: true,
+                loading: true,
+              });
+
+              await driveCheckForUpdate();
+
+              setProgress({
+                progress: 95,
+                title: "เพิ่มฐานข้อมูลสำเร็จ",
+                show: true,
+                loading: true,
+              });
+            } else if (response.error) {
+              setProgress({
+                progress: 0,
+                title: "ผิดพลาด",
+                error: response.error,
+                show: true,
+              });
+              return false;
+            }
+          }
+
+          const added = await addTracklistsToDatabase(
+            tracklist.tracklist,
+            "CUSTOM"
+          );
+
           if (added) {
             setProgress({ progress: 100, title: "สำเร็จ", show: true });
-            addTracklist(tracklist);
+            if (system?.drive === false) {
+              addTracklist(tracklist.tracklist);
+            }
+
             return true;
           }
+
           setProgress({
             progress: 0,
             title: "เกิดข้อผิดพลาด",
@@ -362,6 +486,48 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
 
   return (
     <>
+      <Modal
+        width="500px"
+        height="300px"
+        title={
+          <span className="flex gap-1.5 items-center">
+            <span>
+              <img src="/icon/gd.ico" className="w-4 h-4" alt="" />
+            </span>
+            รายการอัปเดต
+          </span>
+        }
+        isOpen={updatedModal}
+        closable={!updateing}
+        onClose={() => {
+          setUpdateList([]);
+          setUpdatedModal(false);
+        }}
+      >
+        <div className="h-full">
+          {updateing ? (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+              <AiOutlineLoading3Quarters className="animate-spin text-lg text-gray-500"></AiOutlineLoading3Quarters>
+              กำลังตรวจสอบ
+            </div>
+          ) : (
+            <>
+              {updateList.length === 0 ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                  <FaCheck className="text-lg text-gray-500"></FaCheck>
+                  เพลงของคุณเป็นเวอร์ชันล่าสุดแล้ว
+                </div>
+              ) : (
+                <TableList
+                  listKey="updated-data"
+                  list={updateList}
+                  deleteItem={false}
+                ></TableList>
+              )}
+            </>
+          )}
+        </div>
+      </Modal>
       <ProcessingModal
         process={progress}
         onClose={() => {
@@ -381,6 +547,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
                 onCreate={onAddSong}
                 onAddFile={bufferFileToDisplay}
                 bufferFile={listCreateSong}
+                onOpenAddToDrive={setDrivePassword}
               />
             ),
           },
@@ -389,9 +556,10 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
             label: "เพิ่มจาก Drive",
             content: (
               <AddFromDrive
+                driveCheckForUpdate={() => driveCheckForUpdate(true)}
                 onSystemChange={onSystemChange}
                 onAddTrackListDrive={(value) =>
-                  onAddTrackListDrive(value, "DRIVE")
+                  onAddTrackListDrive(value, "DRIVE_EXTHEME")
                 }
                 onAddUrlDrvie={onAddUrlDrvie}
               />

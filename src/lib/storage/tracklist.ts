@@ -1,9 +1,13 @@
-import { STORAGE_KARAOKE_EXTREME, STORAGE_TRACKLIST } from "@/config/value";
+import {
+  STORAGE_EXTREME_SONG,
+  STORAGE_EXTREME_TRACKLIST,
+} from "@/config/value";
 import { storageAddAll, storageGetAllKeys } from "../../utils/database/storage";
 import {
-  TracklistDriveModel,
-  TracklistModel,
-  TracklistUserModel,
+  DriveExtremeTracklistModel,
+  DriveTracklistSongModel,
+  ExtremeTracklistModel,
+  UserTracklistModel,
 } from "@/utils/database/model";
 
 export const createTrackList = (
@@ -65,7 +69,7 @@ export const jsonTracklistToDatabase = async (
 
 export const addTracklistToDatabase = async (obj: SearchResult) => {
   try {
-    const { store, tx, loaded } = await TracklistModel();
+    const { store, tx, loaded } = await ExtremeTracklistModel();
     if (!loaded) {
       return false;
     }
@@ -94,11 +98,13 @@ export const addTracklistsToDatabase = async (
     let loaded: any = undefined;
 
     if (tracklistStore === "DRIVE") {
-      ({ store, tx, loaded } = await TracklistDriveModel());
+      ({ store, tx, loaded } = await DriveTracklistSongModel());
+    } else if (tracklistStore === "DRIVE_EXTHEME") {
+      ({ store, tx, loaded } = await DriveExtremeTracklistModel());
     } else if (tracklistStore === "EXTHEME") {
-      ({ store, tx, loaded } = await TracklistModel());
+      ({ store, tx, loaded } = await ExtremeTracklistModel());
     } else if (tracklistStore === "CUSTOM") {
-      ({ store, tx, loaded } = await TracklistUserModel());
+      ({ store, tx, loaded } = await UserTracklistModel());
     }
 
     if (!loaded) {
@@ -153,13 +159,14 @@ export const getTracklist = async (
       let store: any;
       let tx: any;
       let loaded: any;
-
       if (storeName === "DRIVE") {
-        ({ store, tx, loaded } = await TracklistDriveModel());
+        ({ store, tx, loaded } = await DriveTracklistSongModel());
+      } else if (storeName === "DRIVE_EXTHEME") {
+        ({ store, tx, loaded } = await DriveExtremeTracklistModel());
       } else if (storeName === "EXTHEME") {
-        ({ store, tx, loaded } = await TracklistModel());
+        ({ store, tx, loaded } = await ExtremeTracklistModel());
       } else if (storeName === "CUSTOM") {
-        ({ store, tx, loaded } = await TracklistUserModel());
+        ({ store, tx, loaded } = await UserTracklistModel());
       }
 
       if (!loaded) {
@@ -197,11 +204,13 @@ export const getTracklistTest = async (
       let loaded: any;
 
       if (storeName === "DRIVE") {
-        ({ store, tx, loaded } = await TracklistDriveModel());
+        ({ store, tx, loaded } = await DriveTracklistSongModel());
+      } else if (storeName === "DRIVE_EXTHEME") {
+        ({ store, tx, loaded } = await DriveExtremeTracklistModel());
       } else if (storeName === "EXTHEME") {
-        ({ store, tx, loaded } = await TracklistModel());
+        ({ store, tx, loaded } = await ExtremeTracklistModel());
       } else if (storeName === "CUSTOM") {
-        ({ store, tx, loaded } = await TracklistUserModel());
+        ({ store, tx, loaded } = await UserTracklistModel());
       }
 
       if (!loaded) {
@@ -239,10 +248,10 @@ export const saveTracklistToStorage = async (
     key: value.name,
     value,
   }));
-  await storageAddAll(countSuperZip, STORAGE_KARAOKE_EXTREME, onProgress);
+  await storageAddAll(countSuperZip, STORAGE_EXTREME_SONG, onProgress);
   return { result: true };
 };
 
 export const getAllKeyTracklist = async () => {
-  return await storageGetAllKeys(STORAGE_TRACKLIST);
+  return await storageGetAllKeys(STORAGE_EXTREME_TRACKLIST);
 };

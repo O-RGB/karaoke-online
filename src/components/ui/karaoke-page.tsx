@@ -54,7 +54,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     (state) => state.initializeKeyboardListeners
   );
   const setSongPlaying = usePlayer((state) => state.setSongPlaying);
-  const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
   const handle = useFullScreenHandle();
   const notification = useNotificationStore((state) => state.notification);
   const config = useConfigStore((state) => state.config);
@@ -65,7 +64,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     let tl: SearchResult[] = [];
 
     if (config.system?.drive) {
-      tl = await getTracklist(["DRIVE"]);
+      tl = await getTracklist(["DRIVE", "DRIVE_EXTHEME"]);
     } else {
       tl = await getTracklist(["CUSTOM", "EXTHEME"]);
     }

@@ -5,12 +5,14 @@ import Label from "@/components/common/label";
 import { IoDownload, IoSend } from "react-icons/io5";
 import { getLocalTracklistDriveUrl } from "@/lib/local-storege/local-storage";
 import useConfigStore from "@/stores/config-store";
+import Button from "@/components/common/button/button";
 
 interface AddFromDriveProps {
   onAddUrlDrvie?: (value: string) => Promise<boolean>;
   onAddTrackListDrive?: (value: string) => Promise<boolean>;
   onSystemChange: (value: string) => void;
   getSystem?: () => boolean;
+  driveCheckForUpdate: () => Promise<void>;
 }
 
 const AddFromDrive: React.FC<AddFromDriveProps> = ({
@@ -18,6 +20,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
   onAddTrackListDrive,
   onSystemChange,
   getSystem,
+  driveCheckForUpdate,
 }) => {
   const config = useConfigStore((state) => state.config);
   const [system, setSystem] = useState<string>("off");
@@ -61,8 +64,6 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
       setSystem("off");
       setDriveUrl(undefined);
       onSystemChange("off");
-      // setLocalDriveTested(false);
-      // setLocalDriveUrl("");
     }
     return res ?? false;
   };
@@ -115,9 +116,26 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
         ></SwitchRadio>
       </div>
 
-      <div className="text-blue-500">
+
+        <div>
+          <Button
+            disabled={!config.system?.drive}
+            color="blue"
+            padding="px-4"
+            className="h-8 text-white"
+            onClick={() => {
+              driveCheckForUpdate();
+            }}
+            blur={false}
+          >
+            อัปเดตเพลง
+          </Button>
+        </div>
+
+
+      {/* <div className="text-blue-500">
         หากใครสนใจทดสอบโหลดเพลงจาก Google drive ต้องติดต่อ Admin
-      </div>
+      </div> */}
     </div>
   );
 };

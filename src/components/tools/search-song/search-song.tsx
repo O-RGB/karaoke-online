@@ -13,10 +13,13 @@ import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
 import { MdPlayCircleFilled } from "react-icons/md";
 import { usePlayer } from "@/stores/player-store";
 import { usePeerStore } from "@/stores/peer-store";
+import useConfigStore from "@/stores/config-store";
 
 interface SearchSongProps {}
 
 const SearchSong: React.FC<SearchSongProps> = ({}) => {
+  const config = useConfigStore((state) => state.config);
+
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const { orientation } = useOrientation();
   const hideMixer = useMixerStore((state) => state.hideMixer);
@@ -68,16 +71,14 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
     setFullUi(false);
   };
 
-  
   const setSongPlayer = async (value: SearchResult) => {
-    const data = await loadAndPlaySong(value);
+    const data = await loadAndPlaySong(value, config.system);
     if (data) {
       if (data.length <= 1) {
         const { file, songInfo } = data[0];
         setSongPlaying(file, songInfo);
 
         if (superUserConnections.length > 0) {
-
           // let ingo:MidiPlayingInfo = {
           //   midiInfo:{
           //     duration
@@ -179,7 +180,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
             <img src="/icon/ke.ico" alt="" className="w-full h-full" />
           </Tags>
         );
-      else if (from === "DRIVE") {
+      else if (from === "DRIVE_EXTHEME") {
         return (
           <Tags
             color="white"

@@ -7,6 +7,7 @@ export const crendentialKeys: { [key: string]: string } = {
   drive_tracklist_url: "drive_tracklist_url",
   system_drive_mode: "system_drive_mode",
   config: "config",
+  lastUpdated: "lastUpdated",
 };
 
 // SET
@@ -39,6 +40,10 @@ export const setLocalSystemMode = (mode: SystemMode) => {
   localStorage.setItem(crendentialKeys.system_drive_mode, `${mode}`);
   return true;
 };
+export const setLocalLastUpdated = (lastIndex: string) => {
+  localStorage.setItem(crendentialKeys.lastUpdated, `${lastIndex}`);
+  return true;
+};
 
 // GET
 export const getLocalWallpaper = () => {
@@ -67,6 +72,9 @@ export const getLocalSystemMode = (): SystemMode => {
     (localStorage.getItem(crendentialKeys.system_drive_mode) as SystemMode) ||
     null
   );
+};
+export const getLocalLastUpdated = (): string | null => {
+  return (localStorage.getItem(crendentialKeys.lastUpdated) as string) || null;
 };
 
 // DELETE

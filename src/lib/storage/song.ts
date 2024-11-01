@@ -1,9 +1,10 @@
 import {
   CUR_FILE_TYPE,
+  CUSTOM_DRIVE_SONG_ZIP,
   CUSTOM_SONG_ZIP,
   LYR_FILE_TYPE,
   MID_FILE_TYPE,
-  STORAGE_KARAOKE_EXTREME,
+  STORAGE_EXTREME_SONG,
   STORAGE_USER_SONG,
 } from "@/config/value";
 import {
@@ -21,7 +22,7 @@ import {
   setLocalSongCount,
 } from "../local-storege/local-storage";
 import { createTrackList } from "./tracklist";
-import { SongUserModel } from "@/utils/database/model";
+import { UserSongModel } from "@/utils/database/model";
 import { base64ToImage } from "../image";
 import { base64ByteToFile } from "@/utils/file/file";
 import { getSongDrive } from "./drive";
@@ -70,15 +71,15 @@ export const getSongByKey = async (
 ) => {
   const res = await storageGet<File>(
     key,
-    formUser ? STORAGE_USER_SONG : STORAGE_KARAOKE_EXTREME
+    formUser ? STORAGE_USER_SONG : STORAGE_EXTREME_SONG
   );
   return res.value;
 };
 
 export const songIsEmpty = async () => {
-  const db = await getDB(STORAGE_KARAOKE_EXTREME);
-  const transaction = db.transaction(STORAGE_KARAOKE_EXTREME, "readonly");
-  const store = transaction.objectStore(STORAGE_KARAOKE_EXTREME);
+  const db = await getDB(STORAGE_EXTREME_SONG);
+  const transaction = db.transaction(STORAGE_EXTREME_SONG, "readonly");
+  const store = transaction.objectStore(STORAGE_EXTREME_SONG);
   const count = await store.count();
   return count <= 0;
 };
@@ -97,16 +98,24 @@ export const genSongPath = (selected?: SearchResult) => {
 };
 
 export const getSong = async (
-  selected?: SearchResult
+  selected: SearchResult,
+  systemConfig?: Partial<SystemConfig>
   // driveMode: boolean = false
 ) => {
+  console.log("selected", selected)
   const { superId, fileId } = genSongPath(selected);
+  console.log("DRIVE", superId, fileId)
   if (superId && fileId) {
     var superFile: File | undefined = undefined;
-console.log(selected)
+
     // on drive
-    if (selected?.from === "DRIVE") {
-      superFile = await getSongDrive(`${superId}`);
+    if (selected?.from === "DRIVE_EXTHEME" || selected?.from === "DRIVE") {
+      const checkUserSong: boolean = superId.startsWith(CUSTOM_DRIVE_SONG_ZIP);
+      superFile = await getSongDrive(
+        `${superId}`,
+        systemConfig?.url,
+        checkUserSong
+      );
     } else if (selected?.from === "EXTHEME" || selected?.from === "CUSTOM") {
       // // on local
       const checkUserSong: boolean = superId.startsWith(CUSTOM_SONG_ZIP);
@@ -186,7 +195,7 @@ export const createSongZip = async (
         }
       }
 
-      return tracklist;
+      return { tracklist, superZip };
     } catch (error) {
       console.error("Error creating zip files:", error);
     }
@@ -242,7 +251,7 @@ const getAllUserSong = () => {
 // DATABASE
 export const addUserSong = async (userSong: File, id: string) => {
   try {
-    const { tx, store, loaded } = await SongUserModel();
+    const { tx, store, loaded } = await UserSongModel();
     if (!loaded) {
       return false;
     }
@@ -260,7 +269,7 @@ export const getLastIndexSongUser = async () => {
 
 // MODEL
 export const getAllKeysSong = async () => {
-  return await storageGetAllKeys(STORAGE_KARAOKE_EXTREME);
+  return await storageGetAllKeys(STORAGE_EXTREME_SONG);
 };
 
 export const getAllKeysUserSong = async () => {
@@ -268,5 +277,5 @@ export const getAllKeysUserSong = async () => {
 };
 
 export const deleteAllSong = async () => {
-  return await sortageDeleteAll(STORAGE_KARAOKE_EXTREME);
+  return await sortageDeleteAll(STORAGE_EXTREME_SONG);
 };

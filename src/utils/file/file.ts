@@ -19,3 +19,18 @@ export const bytesToFile = (
   const blob = new Blob([byteArray], { type: contentType });
   return new File([blob], filename, { type: contentType });
 };
+
+export const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const base64String = (reader.result as string).split(",")[1]; // Type assertion to access the result as a string
+      resolve(base64String);
+    };
+
+    reader.onerror = (error) => reject(error);
+
+    reader.readAsDataURL(file);
+  });
+};

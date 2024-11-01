@@ -7,27 +7,29 @@ import { createTrackList } from "@/lib/storage/tracklist";
 import useTracklistStore from "@/stores/tracklist-store";
 import React, { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import {
-  FaCheck,
-  FaFileAudio,
-  FaPlus,
-  FaRegFileAudio,
-  FaSearch,
-} from "react-icons/fa";
+import { FaPlus, FaRegFileAudio, FaSearch } from "react-icons/fa";
 import DuplicateSongModal from "./duplicate-song";
 import IgnoreDupFile from "./ignore-dupfile";
+import useConfigStore from "@/stores/config-store";
+import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
+import Modal from "@/components/common/modal";
+import Input from "@/components/common/input-data/input";
 
 interface AddSongProps {
   bufferFile: SongFiltsEncodeAndDecode[];
   onAddFile: (_: File, fileList: FileList) => void;
   onCreate: (bufferFile: SongFiltsEncodeAndDecode[]) => Promise<boolean>;
+  onOpenAddToDrive?: (password: string) => void;
 }
 
 const AddSong: React.FC<AddSongProps> = ({
   bufferFile = [],
   onAddFile,
   onCreate,
+  onOpenAddToDrive,
 }) => {
+  const config = useConfigStore((state) => state.config);
+  const setConfig = useConfigStore((state) => state.setConfig);
   const findSimilarSongs = useTracklistStore((state) => state.findSimilarSongs);
   const [songRender, setSongRender] = useState<ListItem<ValidSong>[]>([]);
   const [result, setResult] = useState<boolean>();
@@ -41,6 +43,10 @@ const AddSong: React.FC<AddSongProps> = ({
   const [ignoreDup, setIgnoreDup] = useState<boolean>(false);
   const [wraningDupFile, setWraningDupFile] = useState<boolean>(false);
   const [searchDupFile, setSearchDupFile] = useState<boolean>(false);
+  // รหัสผ่าน google drive
+  const [passwordModal, setOpenPasswordModal] = useState<boolean>(false);
+  const [password, setInputPassword] = useState<string>("");
+  const [isAddToDive, setIsAddToDrive] = useState<boolean>(false);
 
   const reset = () => {
     setSongRender([]);
@@ -165,15 +171,6 @@ const AddSong: React.FC<AddSongProps> = ({
     const data = getOrigin.map((data) => data.value?.originValue);
     const res = await onCreate(data);
     reset();
-    // setResult(res);
-    // setResultAnimtaion(res);
-    // setTimeout(() => {
-    //   setResultAnimtaion(false);
-    // }, 1000);
-
-    // setTimeout(() => {
-    //   setResult(false);
-    // }, 1500);
   };
 
   const removeItem = (value: ValidSong) => {
@@ -196,6 +193,19 @@ const AddSong: React.FC<AddSongProps> = ({
     });
     setModalSongSame(undefined);
     setSameCount((value) => value - 1);
+  };
+
+  const onAddToDrive = async () => {
+    if (password !== undefined) {
+      setConfig({ system: { uploadToDrive: true } });
+      setIsAddToDrive(true);
+      onOpenAddToDrive?.(password)
+    } else {
+      setConfig({ system: { uploadToDrive: false } });
+      setIsAddToDrive(false);
+      setInputPassword("");
+    }
+    setOpenPasswordModal(false);
   };
 
   useEffect(() => {
@@ -231,6 +241,39 @@ const AddSong: React.FC<AddSongProps> = ({
         isOpen={wraningDupFile}
       ></IgnoreDupFile>
 
+      <Modal
+        isOpen={passwordModal}
+        closable
+        onClose={() => {
+          setIsAddToDrive(false);
+          setInputPassword("");
+          setOpenPasswordModal(false);
+        }}
+        width="300px"
+        height={true}
+        title="รหัสผ่าน"
+      >
+        <div className="flex gap-1">
+          <Input
+            className="!text-black w-full h-full"
+            value={password}
+            onChange={(e) => {
+              const value = e.target.value;
+              setInputPassword(value);
+            }}
+          ></Input>
+          <Button
+            disabled={password?.length === 0}
+            className="text-white"
+            blur={false}
+            color="blue"
+            onClick={onAddToDrive}
+          >
+            บันทึก
+          </Button>
+        </div>
+      </Modal>
+
       <div className="w-full h-full flex flex-col gap-2 ">
         <div className="flex flex-col gap-1">
           <Label>เลือกไฟล์เพลง (.emk หรือ .mid, .cur, .lyr) </Label>
@@ -247,6 +290,48 @@ const AddSong: React.FC<AddSongProps> = ({
               <span>อัปโหลดไฟล์เพลง</span>
             </span>
           </Upload>
+        </div>
+
+        <div className="flex gap-2 items-center">
+          <SwitchRadio
+            disabled={!config.system?.drive}
+            value={isAddToDive ? "true" : "false"}
+            onChange={(value) => {
+              if (value === "true") {
+                setIsAddToDrive(true);
+                setOpenPasswordModal(true);
+              } else {
+                setIsAddToDrive(false);
+                setInputPassword("");
+                setOpenPasswordModal(false);
+              }
+            }}
+            options={[
+              {
+                children: (
+                  <span className="flex gap-1 items-center">
+                    บันทึกไปที่
+                    <img
+                      src="/icon/gd.ico"
+                      alt=""
+                      className="w-4 h-4 object-contain pb-0.5"
+                    />
+                    Drive
+                  </span>
+                ),
+                value: "true",
+              },
+              {
+                children: "ไม่บันทึก",
+                value: "false",
+              },
+            ]}
+          ></SwitchRadio>
+          {!config.system?.drive && (
+            <span className="text-sm text-gray-300">
+              ยังไม่มีการเชื่อมต่อกับ Drive
+            </span>
+          )}
         </div>
 
         <div className="relative">
@@ -285,7 +370,7 @@ const AddSong: React.FC<AddSongProps> = ({
             <Label headClass="bg-yellow-500">ซ้ำ: {sameCount}</Label>
           </div>
           <TableList
-            height={"280px"}
+            height={"250px"}
             listKey="add-song-file"
             list={songRender}
             onDeleteItem={removeItem}
@@ -307,7 +392,7 @@ const AddSong: React.FC<AddSongProps> = ({
             }
           ></TableList>
         </div>
-        <div className=" w-full">
+        <div className="flex flex-col items-center gap-1 w-full">
           <Button
             iconPosition="left"
             icon={

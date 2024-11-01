@@ -1,23 +1,40 @@
-import { STORAGE_DRIVE, STORAGE_KARAOKE_EXTREME } from "@/config/value";
+import {
+  STORAGE_DRIVE_EXTREME_SONG,
+  STORAGE_DRIVE_SONG,
+  STORAGE_EXTREME_SONG,
+} from "@/config/value";
 import {
   storageGetAllKeys,
   sortageDeleteAll,
   storageGet,
   findKeyOffset,
 } from "@/utils/database/storage";
-import { getLocalDriveUrl } from "../local-storege/local-storage";
 import { Fetcher } from "@/utils/api/fetch";
 import { bytesToFile } from "@/utils/file/file";
-import { SongDriveModel } from "@/utils/database/model";
+import { DriveExtremeModel } from "@/utils/database/model";
 
-export const getSongDrive = async (key: string | number) => {
+export const getSongDrive = async (
+  key: string | number,
+  url?: string,
+  custom?: boolean
+) => {
   // check file in store
-  const file = await getSongDriveByKey(+key);
-  const url = getLocalDriveUrl();
-  if (file) {
+
+  let file = undefined;
+
+  console.log("custom", custom);
+  if (custom) {
+    file = await getSongDriveByKey(+key);
+  } else {
+    file = await getSongDriveExtremeByKey(+key);
+  }
+  console.log("file", file);
+
+  if (file !== undefined) {
     return file;
   } else if (url) {
-    const res = await Fetcher(url, { index: key }, "LOAD");
+    const res = await Fetcher(url, { index: key, custom }, "LOAD");
+    console.log("res", res);
     const file = bytesToFile(res.bytes, res.contentType, res.fileName);
     const getFileId = file.name.split(".");
     saveSongByKey(file, +getFileId[0]);
@@ -30,7 +47,7 @@ export const getSongDrive = async (key: string | number) => {
 // MODEL
 export const saveSongByKey = async (song: File, id: number) => {
   try {
-    const { tx, store, loaded } = await SongDriveModel();
+    const { tx, store, loaded } = await DriveExtremeModel();
     if (!loaded) {
       return false;
     }
@@ -41,22 +58,28 @@ export const saveSongByKey = async (song: File, id: number) => {
   }
 };
 
+export const getSongDriveExtremeByKey = async (
+  key: string | number
+): Promise<any | undefined> => {
+  return (await storageGet<File>(key, STORAGE_DRIVE_EXTREME_SONG))?.value;
+};
+
 export const getSongDriveByKey = async (
   key: string | number
 ): Promise<any | undefined> => {
-  return (await storageGet<File>(key, STORAGE_DRIVE))?.value;
+  return (await storageGet<File>(key, STORAGE_DRIVE_SONG))?.value;
 };
 
 export const findLimitOffsetByKey = async (key: string, limit: number) => {
-  return await findKeyOffset(STORAGE_KARAOKE_EXTREME, key, limit);
+  return await findKeyOffset(STORAGE_EXTREME_SONG, key, limit);
 };
 
 export const getAllKeysDrive = async (limit: number, offset: number) => {
-  return await storageGetAllKeys(STORAGE_DRIVE, limit, offset);
+  return await storageGetAllKeys(STORAGE_DRIVE_EXTREME_SONG, limit, offset);
 };
 
 export const deleteAllSong = async () => {
-  return await sortageDeleteAll(STORAGE_KARAOKE_EXTREME);
+  return await sortageDeleteAll(STORAGE_EXTREME_SONG);
 };
 
-SongDriveModel;
+DriveExtremeModel;

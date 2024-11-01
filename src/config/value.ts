@@ -8,20 +8,24 @@ export const EMK_FILE_TYPE = "emk";
 export const STORAGE_SOUNDFONT = "soundfont";
 export const STORAGE_WALLPAPER = "wallpaper";
 
-export const STORAGE_KARAOKE_EXTREME = "karaoke_extreme";
 export const STORAGE_USER_SONG = "user_song";
-export const STORAGE_TRACKLIST = "tracklist";
 export const STORAGE_USER_TRACKLIST = "user_tracklist";
 
-export const STORAGE_DRIVE = "drive";
-export const STORAGE_DRIVE_TRACKLIST = "drive_tracklist";
-// export const STORAGE_USER_DRIVE = "user_drive"; ไม่มีแผนให้ผู้ใช้อัปโหลดเพลงขึ้น Drive
+export const STORAGE_EXTREME_TRACKLIST = "extreme_tracklist";
+export const STORAGE_EXTREME_SONG = "extreme_song";
+
+export const STORAGE_DRIVE_SONG = "drive_user_song";
+export const STORAGE_DRIVE_TRACKLIST_SONG = "drive_user_tracklist";
+
+export const STORAGE_DRIVE_EXTREME_SONG = "drive_extreme_song";
+export const STORAGE_DRIVE_EXTREME_TRACKLIST = "drive_extreme_tracklist";
 
 export const EMK_TYPE = "EMK";
 export const NCN_TYPE = "NCN";
 export const SONG_TYPE = { 0: EMK_TYPE, 1: NCN_TYPE };
 
 export const CUSTOM_SONG_ZIP = "u";
+export const CUSTOM_DRIVE_SONG_ZIP = "d";
 
 export const CHANNEL_DEFAULT: number[] = Array(16).fill(0);
 export const VOLUME_DEFAULT: number[] = Array(16).fill(100);
@@ -77,6 +81,7 @@ export const DEFAULT_CONFIG: ConfigDisplay = {
     url: "",
     urlTested: false,
     tracklistUrlTested: false,
+    uploadToDrive: false,
   },
   sound: {},
 };

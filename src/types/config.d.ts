@@ -50,6 +50,7 @@ interface SystemConfig {
   urlTested: boolean;
   tracklistUrl: string;
   tracklistUrlTested: boolean;
+  uploadToDrive: boolean;
 }
 
 interface ThemesConfig {

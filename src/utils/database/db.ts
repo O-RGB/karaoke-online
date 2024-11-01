@@ -1,12 +1,14 @@
 import {
-  STORAGE_DRIVE,
+  STORAGE_DRIVE_EXTREME_SONG,
   STORAGE_USER_SONG,
-  STORAGE_TRACKLIST,
-  STORAGE_KARAOKE_EXTREME,
+  STORAGE_EXTREME_TRACKLIST,
+  STORAGE_EXTREME_SONG,
   STORAGE_WALLPAPER,
   STORAGE_SOUNDFONT,
-  STORAGE_DRIVE_TRACKLIST,
+  STORAGE_DRIVE_EXTREME_TRACKLIST,
   STORAGE_USER_TRACKLIST,
+  STORAGE_DRIVE_TRACKLIST_SONG,
+  STORAGE_DRIVE_SONG,
 } from "@/config/value";
 import { IDBPDatabase, openDB } from "idb";
 
@@ -14,14 +16,16 @@ const DB_NAME = "Karaoke-online";
 const DB_VERSION = 1;
 
 const stores = [
-  STORAGE_KARAOKE_EXTREME,
+  STORAGE_EXTREME_SONG,
   STORAGE_WALLPAPER,
   STORAGE_SOUNDFONT,
   STORAGE_USER_SONG,
-  STORAGE_TRACKLIST,
-  STORAGE_DRIVE_TRACKLIST,
-  STORAGE_DRIVE,
+  STORAGE_EXTREME_TRACKLIST,
+  STORAGE_DRIVE_EXTREME_TRACKLIST,
+  STORAGE_DRIVE_EXTREME_SONG,
   STORAGE_USER_TRACKLIST,
+  STORAGE_DRIVE_SONG,
+  STORAGE_DRIVE_TRACKLIST_SONG,
 ];
 
 export async function getDB(
@@ -101,22 +105,4 @@ export async function deleteAllStores(): Promise<IDBPDatabase> {
 
 export function deleteDatabase(dbName: string = DB_NAME) {
   return indexedDB.deleteDatabase(dbName);
-  // return new Promise((resolve, reject) => {
-  //   const request = indexedDB.deleteDatabase(dbName);
-
-  //   request.onsuccess = () => {
-  //     console.log(`Database ${dbName} deleted successfully.`);
-  //     resolve(true);
-  //   };
-
-  //   request.onerror = (event) => {
-  //     console.error(`Error deleting database ${dbName}:`, event);
-  //     resolve(false);
-  //   };
-
-  //   request.onblocked = () => {
-  //     console.warn(`Database deletion blocked: ${dbName}`);
-  //     resolve(null);
-  //   };
-  // });
 }
