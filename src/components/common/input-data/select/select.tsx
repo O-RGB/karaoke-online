@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import Label from "../../label";
+import Label from "../../display/label";
 
 type AllowValueType = string | number | readonly string[] | undefined;
 interface SelectOptionsProps {

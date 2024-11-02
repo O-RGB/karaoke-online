@@ -24,7 +24,7 @@ const TableList: React.FC<TableListProps> = ({
   list,
   onClickItem,
   onDeleteItem,
-  height = 310,
+  height,
   loading,
   listKey,
   renderKey,
@@ -59,18 +59,23 @@ const TableList: React.FC<TableListProps> = ({
     }
   }, [scrollToItem, list]);
 
+  // สร้าง style object สำหรับ container โดยใช้ height ที่ส่งมาถ้ามี
+  const containerStyle = height ? {
+    height: typeof height === 'number' ? `${height}px` : height,
+  } : undefined;
+
   return (
-    <>
-      <div
-        style={{ height: height }}
-        className={`${className} flex flex-col divide-y w-full border p-2 overflow-auto rounded-md`}
+    <div className="flex flex-col h-full">
+      <div 
+        style={containerStyle}
+        className={`${className} flex-1 flex flex-col divide-y w-full border p-2 overflow-auto rounded-md`}
       >
         {loading ? (
           <div className="flex items-center justify-center w-full h-full">
-            <AiOutlineLoading3Quarters className="animate-spin text-gray-400"></AiOutlineLoading3Quarters>
+            <AiOutlineLoading3Quarters className="animate-spin text-gray-400" />
           </div>
-        ) : (
-          list?.map((data, i) => (
+        ) : list && list.length > 0 ? (
+          list.map((data, i) => (
             <div
               ref={(el: any) => (itemRefs.current[i] = el)}
               onClick={() => handleClick?.(data.value, i)}
@@ -80,7 +85,7 @@ const TableList: React.FC<TableListProps> = ({
                       onFocus === i ? "bg-gray-300" : ""
                     } hover:bg-gray-200 duration-300 cursor-pointer`
                   : ""
-              } p-1  w-full text-sm flex items-center justify-between ${
+              } p-1 w-full text-sm flex items-center justify-between ${
                 data.className
               }`}
               key={`${listKey}-${i}`}
@@ -98,16 +103,20 @@ const TableList: React.FC<TableListProps> = ({
                     color="red"
                     blur={false}
                     icon={
-                      <RiDeleteBin5Line className="text-white"></RiDeleteBin5Line>
+                      <RiDeleteBin5Line className="text-white" />
                     }
-                  ></Button>
+                  />
                 )}
               </div>
             </div>
           ))
+        ) : (
+          <div className="flex items-center justify-center w-full min-h-full text-gray-300 text-xs">
+            ไม่มีข้อมูล
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

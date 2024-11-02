@@ -1,5 +1,5 @@
 import Button from "@/components/common/button/button";
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 import Modal from "@/components/common/modal";
 import SongDetail from "@/components/common/song/song-detail";
 import React, { useEffect } from "react";

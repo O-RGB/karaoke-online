@@ -1,31 +1,10 @@
-import { CSSProperties, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { IoMdClose } from "react-icons/io";
-import Button from "./button/button";
 import { useOrientation } from "@/hooks/orientation-hook";
+import Tabs from "./tabs";
 
-// Component to create and manage modal container
-const ModalContainer = ({ containerId = "modal-container" }) => {
-  useEffect(() => {
-    let container = document.getElementById(containerId);
-    if (!container) {
-      container = document.createElement("div");
-      container.id = containerId;
-      container.style.position = "relative";
-      container.style.zIndex = "99999";
-      document
-        .getElementById("your-fullscreen-wrapper-id")
-        ?.appendChild(container);
-    }
-    return () => {
-      container?.parentElement?.removeChild(container);
-    };
-  }, [containerId]);
-
-  return null;
-};
-
-const delay = 100;
+const ANIMATION_DURATION = 200;
 
 export default function Modal({
   isOpen,
@@ -35,29 +14,55 @@ export default function Modal({
   title,
   okButtonProps,
   cancelProps,
-  width = "800px",
-  height = "500px",
+  width,
+  height,
   footer,
   cancelText = "ยกเลิก",
   okText = "ตกลง",
   closable = true,
   removeFooter = true,
-  overFlow = "overflow-hidden",
+  overFlow = "overflow-auto",
   containerId = "modal-container",
-}: ModalProps & { containerId?: string }) {
+  modalClassName = "",
+}: ModalProps) {
   const { isMobile, orientation } = useOrientation();
-
   const [showModal, setShowModal] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(isOpen);
-  var padding = "p-3";
+
+  // Calculate dynamic dimensions based on screen size and orientation
+  const getModalDimensions = () => {
+    if (isMobile) {
+      if (orientation === "landscape") {
+        return {
+          width: "90vw",
+          height: height ? `${height}px` : "80vh",
+          maxWidth: "1200px",
+        };
+      }
+      return {
+        width: "95vw",
+        height: height ? `${height}px` : "80vh",
+        maxWidth: "600px",
+      };
+    }
+    return {
+      width: width ? `${width}px` : "90vw",
+      height: height ? `${height}px` : "80vh",
+      maxWidth: "800px",
+    };
+  };
 
   const handleOpen = (open: boolean) => {
     if (open) {
       setIsVisible(true);
-      setTimeout(() => setShowModal(true), delay);
+      // Add class to prevent body scroll
+      document.body.classList.add("overflow-hidden");
+      setTimeout(() => setShowModal(true), ANIMATION_DURATION);
     } else {
       setShowModal(false);
-      setTimeout(() => setIsVisible(false), delay);
+      // Remove class to allow body scroll
+      document.body.classList.remove("overflow-hidden");
+      setTimeout(() => setIsVisible(false), ANIMATION_DURATION);
     }
   };
 
@@ -66,56 +71,116 @@ export default function Modal({
     setTimeout(() => {
       onClose?.();
       handleOpen(false);
-    }, delay);
+    }, ANIMATION_DURATION);
   };
 
   useEffect(() => {
     handleOpen(isOpen);
+
+    // Cleanup function
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
   }, [isOpen]);
 
-  // Get modal container element
+  // Handle escape key press
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && closable) {
+        handleClose();
+      }
+    };
+
+    if (isVisible) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [isVisible, closable]);
+
   const modalRoot = document.getElementById(containerId);
   if (!modalRoot) return null;
+
+  const dimensions = getModalDimensions();
 
   const modal = (
     <>
       {isVisible && (
         <div
-          className={`fixed inset-0 z-[99999] flex items-center justify-center px-5 ${
+          className={`fixed inset-0 z-[99999] flex items-center justify-center p-4 ${
             showModal ? "opacity-100" : "opacity-0"
-          } transition-opacity duration-300`}
+          } transition-all duration-300 ease-in-out`}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
         >
+          {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="fixed inset-0 bg-black/50  "
             onClick={closable ? handleClose : undefined}
-          ></div>
+            aria-hidden="true"
+          />
+
+          {/* Modal Content */}
           <div
-            style={{ width }}
-            className={`relative bg-white rounded-lg shadow-lg z-10 transform overflow-hidden ${
-              showModal ? "scale-100" : "scale-95"
-            } transition-transform duration-300`}
+            style={{
+              width: dimensions.width,
+              height: dimensions.height,
+              maxWidth: dimensions.maxWidth,
+            }}
+            className={`relative bg-white rounded-lg shadow-xl z-10 transform 
+              ${
+                showModal ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
+              }
+              transition-all duration-300 ease-in-out ${modalClassName}
+              flex flex-col`} // Added flex container
           >
-            <div
-              className={`z-10 top-0 left-0 flex justify-between items-center bg-white shadow-sm ${padding}`}
-            >
-              <div className="text-lg">{title}</div>
+            {/* Header */}
+            <div className="flex-none flex items-center justify-between px-6 py-4 border-b">
+              <h2 className="text-xl font-semibold" id="modal-title">
+                {title}
+              </h2>
               {closable && (
-                <div onClick={handleClose} className="p-2 cursor-pointer">
-                  <IoMdClose />
-                </div>
+                <button
+                  onClick={handleClose}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Close modal"
+                >
+                  <IoMdClose className="w-6 h-6" />
+                </button>
               )}
             </div>
-            <div
-              className={`px-3 md:px-4 py-3 flex flex-col relative z-0 overflow-auto  ${
-                isMobile && orientation === "landscape"
-                  ? `h-[70vh]`
-                  : typeof height === "string"
-                  ? `h-[${height}]`
-                  : `h-[${height}px]`
-              }`}
-            >
-              {children}
-            </div>
+
+            {/* Body - with flex-grow to take remaining space */}
+            <div className={`${overFlow} p-4 h-full`}>{children}</div>
+            {/* Footer - with flex-none to maintain size */}
+            {/* {!removeFooter && (
+              <div className="flex-none flex justify-end gap-3 px-6 py-4 border-t bg-gray-50">
+                {footer || (
+                  <>
+                    <button
+                      onClick={handleClose}
+                      className="px-4 py-2 text-gray-700 bg-white border rounded-md hover:bg-gray-50 transition-colors"
+                      {...cancelProps}
+                    >
+                      {cancelText}
+                    </button>
+                    <button
+                      onClick={() => {
+                        onOk?.();
+                        handleClose();
+                      }}
+                      className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                      {...okButtonProps}
+                    >
+                      {okText}
+                    </button>
+                  </>
+                )}
+              </div>
+            )} */}
           </div>
         </div>
       )}

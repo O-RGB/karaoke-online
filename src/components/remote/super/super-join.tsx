@@ -5,7 +5,7 @@ import { toOptions } from "@/lib/general";
 import SearchDropdown from "../../tools/search-song/search-dropdown";
 import SearchSelect from "../../common/input-data/select/search-select";
 import Upload from "../../common/input-data/upload";
-import Label from "../../common/label";
+import Label from "../../common/display/label";
 import { FaRegFileAudio } from "react-icons/fa";
 import { readSong } from "@/lib/karaoke/read";
 import { usePeerStore } from "@/stores/peer-store";

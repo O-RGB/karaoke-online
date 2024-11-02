@@ -1,8 +1,8 @@
 import Button from "@/components/common/button/button";
 import Upload from "@/components/common/input-data/upload";
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 import TableList from "@/components/common/table/table-list";
-import Tags from "@/components/common/tags";
+import Tags from "@/components/common/display/tags";
 import { createTrackList } from "@/lib/storage/tracklist";
 import useTracklistStore from "@/stores/tracklist-store";
 import React, { useEffect, useState } from "react";
@@ -199,7 +199,7 @@ const AddSong: React.FC<AddSongProps> = ({
     if (password !== undefined) {
       setConfig({ system: { uploadToDrive: true } });
       setIsAddToDrive(true);
-      onOpenAddToDrive?.(password)
+      onOpenAddToDrive?.(password);
     } else {
       setConfig({ system: { uploadToDrive: false } });
       setIsAddToDrive(false);
@@ -218,7 +218,7 @@ const AddSong: React.FC<AddSongProps> = ({
         valid={modalSongSame}
         title="ตรวจสอบเพลงซ้ำ"
         isOpen={!!modalSongSame}
-        height={"500px"}
+        height={500}
         onClose={() => {
           setModalSongSame(undefined);
           setWraningDupFile(false);
@@ -228,8 +228,8 @@ const AddSong: React.FC<AddSongProps> = ({
       ></DuplicateSongModal>
 
       <IgnoreDupFile
-        width="300px"
-        height={"100px"}
+        width={300}
+        height={100}
         onClose={() => {
           setWraningDupFile(false);
           setLoading(false);
@@ -249,8 +249,9 @@ const AddSong: React.FC<AddSongProps> = ({
           setInputPassword("");
           setOpenPasswordModal(false);
         }}
-        width="300px"
-        height={true}
+        width={300}
+        // height={true}
+        height={150}
         title="รหัสผ่าน"
       >
         <div className="flex gap-1">
@@ -274,7 +275,7 @@ const AddSong: React.FC<AddSongProps> = ({
         </div>
       </Modal>
 
-      <div className="w-full h-full flex flex-col gap-2 ">
+      <div className="w-full h-full flex flex-col gap-2 pb-4">
         <div className="flex flex-col gap-1">
           <Label>เลือกไฟล์เพลง (.emk หรือ .mid, .cur, .lyr) </Label>
           <Upload
@@ -370,7 +371,6 @@ const AddSong: React.FC<AddSongProps> = ({
             <Label headClass="bg-yellow-500">ซ้ำ: {sameCount}</Label>
           </div>
           <TableList
-            height={"250px"}
             listKey="add-song-file"
             list={songRender}
             onDeleteItem={removeItem}

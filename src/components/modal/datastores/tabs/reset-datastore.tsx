@@ -18,8 +18,8 @@ const ResetDatastore: React.FC<ResetDatastoreProps> = ({}) => {
     <>
       <Modal
         isOpen={message !== undefined}
-        width="300px"
-        height={"100px"}
+        width={300}
+        height={100}
         title={
           error === undefined
             ? "กำลังรอ"

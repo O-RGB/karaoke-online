@@ -44,14 +44,16 @@ type ModalProps = {
   cancelProps?: ButtonProps;
   children: React.ReactNode;
   title?: string | React.ReactNode;
-  width?: string;
-  height?: string | boolean;
+  width?: number;
+  height?: number
   footer?: React.ReactNode;
   cancelText?: string;
   okText?: string;
   closable?: boolean;
   removeFooter?: boolean;
   overFlow?: "overflow-hidden" | "overflow-auto";
+  containerId?: string;
+  modalClassName?: string;
 };
 
 interface CommonStyle {
@@ -144,4 +146,10 @@ interface INotificationValue {
   text: string;
   icon?: React.ReactNode;
   delay?: number;
+}
+
+interface TabProps {
+  icon?: React.ReactNode;
+  label: string;
+  content: React.ReactNode;
 }

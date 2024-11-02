@@ -1,6 +1,6 @@
 import ToggleCheckBox from "@/components/common/input-data/checkbox";
 import Select from "@/components/common/input-data/select/select";
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 import volumeSynth from "@/features/volume/volume-features";
 import useConfigStore from "@/stores/config-store";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";

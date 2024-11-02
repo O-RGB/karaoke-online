@@ -1,5 +1,5 @@
 import Button from "@/components/common/button/button";
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 import TableList from "@/components/common/table/table-list";
 import React, { useEffect } from "react";
 import { FaDownload } from "react-icons/fa";

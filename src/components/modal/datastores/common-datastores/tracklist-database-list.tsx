@@ -1,4 +1,4 @@
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 import TableList from "@/components/common/table/table-list";
 import SearchDropdown from "@/components/tools/search-song/search-dropdown";
 import { getTracklistTest } from "@/lib/storage/tracklist";

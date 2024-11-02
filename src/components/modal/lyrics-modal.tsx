@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Label from "../common/label";
+import Label from "../common/display/label";
 import SwitchRadio from "../common/input-data/switch/switch-radio";
 import RandomLyrics from "../lyrics/random-lyrics";
 import Select from "../common/input-data/select/select";

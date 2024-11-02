@@ -1,4 +1,4 @@
-import Tags from "@/components/common/tags";
+import Tags from "@/components/common/display/tags";
 import React from "react";
 import { FaGoogleDrive, FaUser } from "react-icons/fa";
 
@@ -16,6 +16,20 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ value }) => {
           </Tags>
         );
       else if (from === "DRIVE") {
+        return (
+          <span className="relative">
+            <Tags
+              color="white"
+              className="!border-none w-[25px] h-[25px] flex items-center justify-center relative"
+            >
+              <span className="absolute -bottom-1 -left-1 p-0.5 bg-white rounded-full flex items-center justify-center">
+                <FaUser className="text-xs text-green-500"></FaUser>
+              </span>
+              <img src="/icon/gd.ico" alt="" className="w-full h-full" />
+            </Tags>
+          </span>
+        );
+      } else if (from === "DRIVE_EXTHEME") {
         return (
           <Tags
             color="white"

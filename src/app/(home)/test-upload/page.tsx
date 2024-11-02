@@ -13,6 +13,16 @@ const TestUploaded: React.FC<TestUploadedProps> = () => {
     }
   };
 
+  const testload = async () => {
+    const res = await Fetcher(
+      "https://script.google.com/macros/s/AKfycbwptoKkyMQ2xzcwOVAqTjujFUd8WDd6Q6QWqNzbBa0iQG1P_Wzp9WpCUhxWfbC9e8CM/exec",
+      { index: 1, custom: false },
+      "LOAD"
+    );
+
+    console.log(res);
+  };
+
   const uploadFile = async () => {
     if (!file) return;
 
@@ -41,6 +51,8 @@ const TestUploaded: React.FC<TestUploadedProps> = () => {
     <>
       <input type="file" onChange={handleFileChange} />
       <button onClick={uploadFile}>Upload File</button>
+
+      <button onClick={testload}>test load file </button>
     </>
   );
 };

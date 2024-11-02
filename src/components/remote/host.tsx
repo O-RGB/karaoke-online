@@ -4,7 +4,7 @@ import { useQRCode } from "next-qrcode";
 import Input from "../common/input-data/input";
 import { usePeerStore } from "@/stores/peer-store";
 import Button from "../common/button/button";
-import Label from "../common/label";
+import Label from "../common/display/label";
 import { RiRemoteControlFill } from "react-icons/ri";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 

@@ -10,27 +10,25 @@ interface DisplaySettingModalProps {}
 
 const DisplaySettingModal: React.FC<DisplaySettingModalProps> = ({}) => {
   return (
-    <>
-      <Tabs
-        tabs={[
-          {
-            content: <LyricsModal></LyricsModal>,
-            label: "เนื้อเพลง",
-            icon: <MdTextFields></MdTextFields>,
-          },
-          {
-            content: <WidgetsDisplay></WidgetsDisplay>,
-            label: "วิดเจ็ต",
-            icon: <MdOutlineWidgets></MdOutlineWidgets>,
-          },
-          {
-            content: <EfficiencyDisplay></EfficiencyDisplay>,
-            label: "ประสิทธิภาพ",
-            icon: <LuCpu></LuCpu>,
-          },
-        ]}
-      ></Tabs>
-    </>
+    <Tabs
+      tabs={[
+        {
+          content: <LyricsModal></LyricsModal>,
+          label: "เนื้อเพลง",
+          icon: <MdTextFields></MdTextFields>,
+        },
+        {
+          content: <WidgetsDisplay></WidgetsDisplay>,
+          label: "วิดเจ็ต",
+          icon: <MdOutlineWidgets></MdOutlineWidgets>,
+        },
+        {
+          content: <EfficiencyDisplay></EfficiencyDisplay>,
+          label: "ประสิทธิภาพ",
+          icon: <LuCpu></LuCpu>,
+        },
+      ]}
+    ></Tabs>
   );
 };
 

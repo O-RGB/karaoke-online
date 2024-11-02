@@ -6,7 +6,7 @@ import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
 import useMixerStore from "@/stores/mixer-store";
 import useTracklistStore from "@/stores/tracklist-store";
-import Tags from "@/components/common/tags";
+import Tags from "@/components/common/display/tags";
 import useKeyboardStore from "@/stores/keyboard-state";
 import Button from "@/components/common/button/button";
 import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
@@ -180,7 +180,21 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
             <img src="/icon/ke.ico" alt="" className="w-full h-full" />
           </Tags>
         );
-      else if (from === "DRIVE_EXTHEME") {
+      else if (from === "DRIVE") {
+        return (
+          <span className="relative">
+            <Tags
+              color="white"
+              className="!border-none w-[37px] h-[37px] flex items-center justify-center relative"
+            >
+              <span className="absolute -bottom-1 -left-1 p-1 bg-white rounded-full flex items-center justify-center">
+                <FaUser className=" text-green-500"></FaUser>
+              </span>
+              <img src="/icon/gd.ico" alt="" className="w-full h-full" />
+            </Tags>
+          </span>
+        );
+      } else if (from === "DRIVE_EXTHEME") {
         return (
           <Tags
             color="white"

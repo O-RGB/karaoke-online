@@ -11,7 +11,7 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import { FaCircleCheck } from "react-icons/fa6";
 import { ImFilePlay } from "react-icons/im";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import Label from "../common/label";
+import Label from "../common/display/label";
 import {
   deleteSoundFontStorage,
   getAllKeySoundfont,
@@ -132,12 +132,10 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
           </div>
         </div>
 
-        <div className="col-span-5 lg:col-span-3 flex flex-col gap-1 w-full">
+        <div className="col-span-5 lg:col-span-3 flex flex-col gap-1 w-full h-full">
           <Label>โฟลเดอร์ Soundfont</Label>
           <TableList
             hoverFocus={false}
-            className="w-full h-[255px] lg:h-[450px]"
-            height={""}
             listKey={"soundfont-key"}
             list={soundFontStorage}
             itemAction={(value) => (

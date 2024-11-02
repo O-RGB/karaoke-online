@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import Label from "../label";
-import Tags from "../tags";
+import Label from "../display/label";
+import Tags from "../display/tags";
 
 interface SongDetailProps {
   song: SearchResult;

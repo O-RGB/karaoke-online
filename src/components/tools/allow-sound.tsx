@@ -61,8 +61,8 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
           <div className="">
             {!pressed && (
               <span className="flex items-center flex-col text-white pb-2 text-sm">
-                <span>ทุกครั้งที่มีอัปเดต</span>
-                <span>ถ้าใช้งานไม่ได้ควรรีเซ็ตฐานข้อมูล</span>
+                <span>เวอร์ชันนี้</span>
+                <span>คุณต้องรีเซ็ตระบบก่อนใช้งาน</span>
               </span>
             )}
             {pressed ? (
@@ -89,35 +89,28 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                   </Button>
                 </div>
                 <span className="pt-1 text-xs text-white">
-                  💫🌏 Updated v.1.0.26 🌏💫
+                  🎇💥 Updated v.1.0.27 💥🎇
+                </span>
+                <br />
+                <span className="text-xs text-center text-white">
+                  <span className="flex gap-1 items-center">
+                    แนะนำให้ใช้งานใน{" "}
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/a/a0/Firefox_logo%2C_2019.svg"
+                      alt=""
+                      className="w-5 h-5"
+                    />
+                    <span>Firefox </span>
+                  </span>
+                  <span className="text-center">ทั้ง ios, android</span>
                 </span>
 
-                <span className="pt-2 text-xs text-white flex flex-col items-center justify-center">
-                  <hr className="w-full" />
-                  <div className="w-56">
-                    <div className="border p-2">
-                      - ตอนนี้แอดมินได้ทดสอบเครื่อง Android
-                      แล้วมีการกระตุกอย่างมาก
-                      ตอนนี้มีบราวเซอร์ที่พอช่วยให้กระตุกน้อยให้ไปใช้
-                      <span className="inline-block">
-                        <img
-                          src="https://upload.wikimedia.org/wikipedia/commons/a/a0/Firefox_logo%2C_2019.svg"
-                          alt=""
-                          className="w-5 h-5"
-                        />
-                      </span>{" "}
-                      Firefox แทนนะครับ
-                    </div>
-                    <div className="border p-2">
-                      - สำหรับ Android สามารถติดตั้งแอปลงหน้าจอจริง ๆ ได้แล้ว
-                      (ทดสอบกด Add to home screen อีกครั้ง)
-                      จะเป็นการติดตั้งลงหน้าจอ
-                    </div>
-                    <span className="font-bold">มีอะไรใหม่</span> <br />
-                    - แก้ไขปุ่ม เปลี่ยนเพลง <br /> - เพิ่มระบบล็อกเสียงเบส{" "}
-                    <br /> - เพิ่มประสิทธิภาพ <br />{" "}
-                    <span className="font-bold">ประกาศ</span>
-                  </div>
+                <span className="text-xs text-center text-white pt-1">
+                  <span className="flex gap-1 items-center">
+                    รองรับการโหลดเพลงจาก{" "}
+                    <img src="/icon/gd.ico" alt="" className="w-5 h-5" />
+                    <span>Google Drive </span>
+                  </span>
                 </span>
               </div>
             )}

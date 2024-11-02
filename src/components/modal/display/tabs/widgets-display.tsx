@@ -1,5 +1,5 @@
 import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 import useConfigStore from "@/stores/config-store";
 import React, { useEffect, useState } from "react";
 

@@ -1,6 +1,6 @@
 import Button from "@/components/common/button/button";
 import Input from "@/components/common/input-data/input";
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 
 import React, { useEffect, useState } from "react";
 import { FaCheck } from "react-icons/fa";

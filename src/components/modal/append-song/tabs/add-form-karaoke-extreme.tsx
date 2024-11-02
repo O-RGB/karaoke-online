@@ -1,6 +1,6 @@
 import Button from "@/components/common/button/button";
 import Upload from "@/components/common/input-data/upload";
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 import Link from "next/link";
 import React from "react";
 import { BsYoutube } from "react-icons/bs";
@@ -33,6 +33,16 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
   return (
     <>
       <div className="flex flex-col h-full">
+        <div className="pb-2">
+          <Label
+            textSize={15}
+            textColor="text-gray-800"
+            headClass="bg-blue-500"
+            description="เลือกไฟล์ .zip และ .json เข้าไปในระบบ"
+          >
+            Import ไฟล์ Extreme
+          </Label>
+        </div>
         <div className="flex flex-col gap-2">
           <div className="w-full flex flex-col gap-1">
             <Label>เลือกไฟล์รวมเพลง (.zip)</Label>
@@ -76,9 +86,14 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-2 pt-2">
-          <Label className="flex gap-1 items-center ">
-            <FaDownload></FaDownload> โปรแกรมนำเข้าเพลง
+        <div className="flex flex-col gap-2 py-2">
+          <hr className="pb-2" />
+          <Label
+            textSize={15}
+            textColor="text-gray-800"
+            headClass="bg-blue-500"
+          >
+            ดาวน์โหลดโปรแกรมและวิธีใช้งาน
           </Label>
 
           <span className="flex gap-2">
@@ -101,19 +116,6 @@ const AddFormKaraokeExtreme: React.FC<AddFormKaraokeExtremeProps> = ({
                 Windows
               </Button>
             </Link>
-            {/* <Button
-              disabled
-              color="blue"
-              padding=""
-              className="text-white w-20 h-10"
-              shadow=""
-              border=""
-              blur=""
-            >
-              <span className="">
-                <SiMacos className="text-5xl"></SiMacos>
-              </span>
-            </Button> */}
             <span className="text-sm">
               <Link
                 href={"https://www.youtube.com/watch?v=dVPB-dVmG1I"}

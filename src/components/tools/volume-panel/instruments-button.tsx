@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FaDrum } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { Menu, MenuButton } from "@szhsin/react-menu";
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 import RangeBarClone from "@/components/common/input-data/range-bar-clone";
 import MixPanVolume from "./mix-controller/mix-pan-volume";
 import MixReverbVolume from "./mix-controller/mix-reverb-volume";

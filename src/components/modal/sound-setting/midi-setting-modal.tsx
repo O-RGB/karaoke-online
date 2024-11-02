@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Label from "../../common/label";
+import Label from "../../common/display/label";
 import Select from "../../common/input-data/select/select";
 import { useSpessasynthStore } from "../../../stores/spessasynth-store";
 

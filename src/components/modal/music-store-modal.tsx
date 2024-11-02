@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Label from "../common/label";
+import Label from "../common/display/label";
 import { extractFile } from "@/lib/zip";
 import SearchSelect from "../common/input-data/select/search-select";
 import TableList from "../common/table/table-list";

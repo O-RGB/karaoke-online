@@ -1,13 +1,7 @@
 import { useState } from "react";
 
-type Tab = {
-  icon?: React.ReactNode;
-  label: string;
-  content: React.ReactNode;
-};
-
 type TabsProps = {
-  tabs: Tab[];
+  tabs: TabProps[];
   onTabChange?: (activeIndex: number) => void;
 };
 

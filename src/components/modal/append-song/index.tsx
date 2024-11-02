@@ -487,8 +487,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
   return (
     <>
       <Modal
-        width="500px"
-        height="300px"
+        width={500}
         title={
           <span className="flex gap-1.5 items-center">
             <span>

@@ -1,5 +1,5 @@
 import Upload from "@/components/common/input-data/upload";
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 import React from "react";
 import { FaCheck, FaTimesCircle } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";

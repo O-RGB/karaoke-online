@@ -1,5 +1,5 @@
 import Button from "@/components/common/button/button";
-import Label from "@/components/common/label";
+import Label from "@/components/common/display/label";
 import Modal from "@/components/common/modal";
 import ProgressBar from "@/components/common/progress-bar";
 import React, { useEffect, useState } from "react";
@@ -32,9 +32,8 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
         title="การประมวลผล"
         closable={false}
         removeFooter={false}
-        width="400px"
-        // height="130px"
-        height={false}
+        width={400}
+        height={180}
         isOpen={open}
       >
         <div>
