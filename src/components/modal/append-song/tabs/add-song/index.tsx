@@ -218,7 +218,7 @@ const AddSong: React.FC<AddSongProps> = ({
         valid={modalSongSame}
         title="ตรวจสอบเพลงซ้ำ"
         isOpen={!!modalSongSame}
-        height={500}
+
         onClose={() => {
           setModalSongSame(undefined);
           setWraningDupFile(false);
@@ -228,8 +228,7 @@ const AddSong: React.FC<AddSongProps> = ({
       ></DuplicateSongModal>
 
       <IgnoreDupFile
-        width={300}
-        height={100}
+        height={180}
         onClose={() => {
           setWraningDupFile(false);
           setLoading(false);
@@ -293,47 +292,44 @@ const AddSong: React.FC<AddSongProps> = ({
           </Upload>
         </div>
 
-        <div className="flex gap-2 items-center">
-          <SwitchRadio
-            disabled={!config.system?.drive}
-            value={isAddToDive ? "true" : "false"}
-            onChange={(value) => {
-              if (value === "true") {
-                setIsAddToDrive(true);
-                setOpenPasswordModal(true);
-              } else {
-                setIsAddToDrive(false);
-                setInputPassword("");
-                setOpenPasswordModal(false);
-              }
-            }}
-            options={[
-              {
-                children: (
-                  <span className="flex gap-1 items-center">
-                    บันทึกไปที่
-                    <img
-                      src="/icon/gd.ico"
-                      alt=""
-                      className="w-4 h-4 object-contain pb-0.5"
-                    />
-                    Drive
-                  </span>
-                ),
-                value: "true",
-              },
-              {
-                children: "ไม่บันทึก",
-                value: "false",
-              },
-            ]}
-          ></SwitchRadio>
-          {!config.system?.drive && (
-            <span className="text-sm text-gray-300">
-              ยังไม่มีการเชื่อมต่อกับ Drive
-            </span>
-          )}
-        </div>
+        {config.system?.drive && (
+          <div className="flex gap-2 items-center">
+            <SwitchRadio
+              disabled={!config.system?.drive}
+              value={isAddToDive ? "true" : "false"}
+              onChange={(value) => {
+                if (value === "true") {
+                  setIsAddToDrive(true);
+                  setOpenPasswordModal(true);
+                } else {
+                  setIsAddToDrive(false);
+                  setInputPassword("");
+                  setOpenPasswordModal(false);
+                }
+              }}
+              options={[
+                {
+                  children: (
+                    <span className="flex gap-1 items-center">
+                      บันทึกไปที่
+                      <img
+                        src="/icon/gd.ico"
+                        alt=""
+                        className="w-4 h-4 object-contain pb-0.5"
+                      />
+                      Drive
+                    </span>
+                  ),
+                  value: "true",
+                },
+                {
+                  children: "ไม่บันทึก",
+                  value: "false",
+                },
+              ]}
+            ></SwitchRadio>
+          </div>
+        )}
 
         <div className="relative">
           {/* {result && (

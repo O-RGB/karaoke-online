@@ -37,7 +37,7 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
 
   if (!superUserPeer) {
     return (
-      <div className="flex items-center justify-center h-full border bg-red-500">
+      <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center justify-center gap-2">
           <Button
             disabled={loading}
@@ -63,7 +63,7 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
   }
 
   return (
-    <div className="flex-1 flex h-full w-full border p-2">
+    <div className="flex-1 flex items-center justify-center h-full w-full p-2">
       <div className="flex flex-col lg:flex-row justify-center items-center gap-6 h-full">
         <a
           className="block lg:hidden"

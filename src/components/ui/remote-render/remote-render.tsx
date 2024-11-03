@@ -1,4 +1,5 @@
 import volumeSynth from "@/features/volume/volume-features";
+import useConfigStore from "@/stores/config-store";
 import { usePeerStore } from "@/stores/peer-store";
 import { usePlayer } from "@/stores/player-store";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
@@ -17,6 +18,8 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
   const playingQueue = usePlayer((state) => state.playingQueue);
   const setSongPlaying = usePlayer((state) => state.setSongPlaying);
   const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
+  const nextSong = usePlayer((state) => state.nextSong);
+  const config = useConfigStore((state) => state.config);
 
   const eventRemote = async (from?: string, content?: RemoteSendMessage) => {
     const type = content?.type;
@@ -61,7 +64,7 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
       case "SET_SONG":
         let song = data as SearchResult;
         if (song) {
-          const data = await loadAndPlaySong(song);
+          const data = await loadAndPlaySong(song, config.system);
           if (data) {
             if (data.length <= 1) {
               const { file, songInfo } = data[0];
@@ -69,6 +72,10 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
             }
           }
         }
+        break;
+
+      case "NEXT_SONG":
+        nextSong();
         break;
 
       case "UPLOAD_SONG":

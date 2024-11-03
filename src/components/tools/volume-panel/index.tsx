@@ -24,6 +24,7 @@ import useNotificationStore from "@/stores/notification-store";
 import { FaList } from "react-icons/fa";
 import useKeyboardStore from "@/stores/keyboard-state";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
+import PlayerPanel from "../player-panel";
 
 interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
@@ -32,6 +33,7 @@ interface VolumePanelProps {
   audioGain?: number[];
   options?: React.ReactNode;
   className?: string;
+  show?: boolean;
 }
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
@@ -40,6 +42,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   audioGain,
   options,
   className,
+  show,
 }) => {
   const VOCAL_CHANNEL = 9;
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
@@ -54,6 +57,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     (state) => state.setNotification
   );
   const hideMixer = useMixerStore((state) => state.hideMixer);
+
   const setHideMixer = useMixerStore((state) => state.setHideMixer);
   const setHeld = useMixerStore((state) => state.setHeld);
   const synth = useSpessasynthStore((state) => state.synth);
@@ -107,7 +111,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const hideElement = `${hideMixer ? "opacity-0" : "opacity-100"}`;
   const animation = `duration-300 transition-all`;
 
-  if (isShow?.show === false) {
+  if (isShow?.show === false && show !== true) {
     return <></>;
   }
 

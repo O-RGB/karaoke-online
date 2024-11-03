@@ -15,17 +15,24 @@ import { usePlayer } from "@/stores/player-store";
 import { useFullScreenHandle } from "react-full-screen";
 
 import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
+interface PlayerRemote {
+  onPause?: () => void;
+  onPlay?: () => void;
+  nextSong?: () => void;
+}
 
-interface PlayerPanelProps {
+interface PlayerPanelProps extends PlayerRemote {
   isFullScreen: boolean;
-  modalMap: ModalComponents;
+  modalMap?: ModalComponents;
   onFullScreen?: () => void;
+  show?: boolean;
 }
 
 const PlayerPanel: React.FC<PlayerPanelProps> = ({
   modalMap,
   isFullScreen,
   onFullScreen,
+  show,
 }) => {
   // re-render
   const tick = useTickStore((state) => state.tick);
@@ -49,7 +56,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
     }
   }, [tick, player]);
 
-  if (!player) {
+  if (!player && show !== true) {
     return <></>;
   }
   return (
@@ -64,7 +71,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               shadow=""
               padding="p-4"
               onClick={() => {
-                player.pause();
+                player?.pause();
                 setPaused(true);
               }}
               shape={false}
@@ -78,7 +85,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               shadow=""
               padding="p-4"
               onClick={() => {
-                player.play();
+                player?.play();
                 setPaused(false);
               }}
               shape={false}
@@ -92,11 +99,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             border=""
             shadow=""
             padding="p-4"
-            onClick={async () => {
-              nextSong()
-              // player.play()
-              
-            }}
+            onClick={nextSong}
             shape={false}
             icon={<TbPlayerSkipForwardFilled className="text-white" />}
           ></Button>
@@ -108,9 +111,11 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               }}
               tabIndex={-1}
               onChange={(e) => {
-                const value = +e.target.value;
-                const newCurrentTime = (value / 100) * player.duration;
-                player.currentTime = newCurrentTime;
+                if (player) {
+                  const value = +e.target.value;
+                  const newCurrentTime = (value / 100) * player?.duration;
+                  player.currentTime = newCurrentTime;
+                }
               }}
               type="range"
               className="transition duration-300"
@@ -190,15 +195,17 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             shape={false}
             icon={<FaSearch className="text-white" />}
           ></Button>
-          <ContextModal
-            buttonMenu={
-              <div className="p-4 flex items-center justify-center hover:bg-white/20 duration-300">
-                <FiSettings className="text-white" />
-              </div>
-            }
-            modal={modalMap}
-            className=""
-          ></ContextModal>
+          {modalMap && (
+            <ContextModal
+              buttonMenu={
+                <div className="p-4 flex items-center justify-center hover:bg-white/20 duration-300">
+                  <FiSettings className="text-white" />
+                </div>
+              }
+              modal={modalMap}
+              className=""
+            ></ContextModal>
+          )}
         </div>
       </div>
     </>

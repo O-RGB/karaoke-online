@@ -14,6 +14,9 @@ import EventRenderSuper from "./event-render";
 import QueueSong from "@/components/tools/queue-song/queue-song";
 import useKeyboardStore from "@/stores/keyboard-state";
 import RangeBarClone from "@/components/common/input-data/range-bar-clone";
+import PlayerPanel from "@/components/tools/player-panel";
+import Button from "@/components/common/button/button";
+import NextSongButton from "@/components/common/player/next-song-button";
 
 interface SuperJoinConnectProps {
   hostId: string;
@@ -66,6 +69,17 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
       sendSuperUserMessage({
         message: value,
         type: "SET_SONG",
+        user: "SUPER",
+        clientId: superUserPeer?.id,
+      });
+    }
+  };
+
+  const handleNextSong = () => {
+    if (sendSuperUserMessage) {
+      sendSuperUserMessage({
+        message: null,
+        type: "NEXT_SONG",
         user: "SUPER",
         clientId: superUserPeer?.id,
       });
@@ -158,7 +172,8 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
           onSearch={onSearch}
         ></SearchSelect>
         <VolumePanel
-          className=" flex flex-col gap-1.5"
+          show
+          className="flex flex-col gap-1.5"
           onOpenQueue={handleRequestQueue}
           onVolumeChange={(c, v) => changeVol({ channel: c, value: v })}
         ></VolumePanel>
@@ -166,7 +181,7 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
         <div className="text-white">
           <Label>ส่งไฟล์เพื่อเล่น (.emk หรือ .mid, .cur, .lyr) </Label>
           <Upload
-            accept=".emk,application/octet-stream,.cur,application/octet-stream,.lyr,text/plain,.mid,audio/midi"
+            // accept=".emk,application/octet-stream,.cur,application/octet-stream,.lyr,text/plain,.mid,audio/midi"
             className="border p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
             onSelectFile={handleUploadFileSong}
             inputProps={{
@@ -179,14 +194,16 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
             </span>
           </Upload>
         </div>
-        {/* <div className="w-full">
-          {JSON.stringify(currentTime)}
-          <RangeBarClone
-            max={songPlayingInfo?.midiInfo.duration}
-            value={currentTime}
-            onChange={handleSetCurrentTime}
-          ></RangeBarClone>
-        </div> */}
+
+        <Label headClass="bg-white">ควบคุม</Label>
+        <div className="flex gap-1 w-full">
+          {/* <NextSongButton border={undefined} onClick={handleNextSong}>
+            <span className="text-white w-full">หยุด</span>
+          </NextSongButton> */}
+          <NextSongButton border={"rounded-md border border-white"} onClick={handleNextSong}>
+            <span className="text-white w-full">เพลงต่อไป</span>
+          </NextSongButton>
+        </div>
       </div>
     </>
   );

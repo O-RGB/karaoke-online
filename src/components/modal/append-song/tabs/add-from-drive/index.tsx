@@ -75,7 +75,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
 
   return (
     <div className="flex flex-col gap-2 h-full">
-      <div className="flex justify-between">
+      <div className="md:flex justify-between">
         <Label
           textSize={15}
           textColor="text-gray-800"
