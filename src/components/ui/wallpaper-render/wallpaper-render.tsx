@@ -1,5 +1,6 @@
 import { useWallpaperStore } from "@/stores/wallpaper-store";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 // ฟังก์ชันสำหรับสุ่มสีในรูปแบบ HEX
 const getRandomColor = () => {
@@ -11,9 +12,13 @@ const getRandomColor = () => {
   return color;
 };
 
-interface WallpaperRenderProps {}
+interface WallpaperRenderProps {
+  wallpaperLoadingTitle?: string;
+}
 
-const WallpaperRender: React.FC<WallpaperRenderProps> = ({}) => {
+const WallpaperRender: React.FC<WallpaperRenderProps> = ({
+  wallpaperLoadingTitle,
+}) => {
   const { wallpaper, isVideo, loadWallpaper } = useWallpaperStore();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -120,6 +125,16 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({}) => {
             zIndex: -20,
           }}
         />
+      )}
+      {wallpaperLoadingTitle && (
+        <div className="fixed flex w-full h-full items-center justify-center">
+          <div className="p-3 bg-white rounded-md flex items-center justify-center gap-2">
+            <span>
+              <AiOutlineLoading3Quarters className="animate-spin"></AiOutlineLoading3Quarters>
+            </span>
+            {wallpaperLoadingTitle}
+          </div>
+        </div>
       )}
     </>
   );

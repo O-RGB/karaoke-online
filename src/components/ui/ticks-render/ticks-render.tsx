@@ -153,7 +153,7 @@ const TicksRender: React.FC<TicksRenderProps> = ({}) => {
           setIsFinished(player.isFinished);
           setPaused(player.paused);
         },
-        isFinished || paused ? 1000 : refreshRate
+        isFinished || paused ? 1000 : 150
       );
     }
 

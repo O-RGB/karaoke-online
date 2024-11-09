@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song/search-song";
@@ -57,8 +57,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const handle = useFullScreenHandle();
   const notification = useNotificationStore((state) => state.notification);
   const config = useConfigStore((state) => state.config);
+  const [onPrepare, setPrepare] = useState<boolean>(false);
 
   const startup = async () => {
+    setPrepare(true);
     setupSpessasynth();
     initializeKeyboardListeners();
     let tl: SearchResult[] = [];
@@ -69,6 +71,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       tl = await getTracklist(["CUSTOM", "EXTHEME"]);
     }
     addTracklist(tl);
+    setTimeout(() => {
+      setPrepare(false);
+    }, 1000);
   };
 
   useEffect(() => {
@@ -97,7 +102,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     <FullScreen handle={handle}>
       <DragDrop setSongPlaying={setSongPlaying}></DragDrop>
       {/* Process */}
-      <WallpaperRender></WallpaperRender>
+      <WallpaperRender
+        wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
+      ></WallpaperRender>
       <RemoteRender></RemoteRender>
       <TicksRender></TicksRender>
       <LyricsRender></LyricsRender>

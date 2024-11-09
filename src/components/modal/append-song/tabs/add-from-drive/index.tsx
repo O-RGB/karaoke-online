@@ -10,7 +10,7 @@ import { GrUpdate } from "react-icons/gr";
 import Tags from "@/components/common/display/tags";
 import { BsYoutube } from "react-icons/bs";
 import Link from "next/link";
-import { FaGoogleDrive } from "react-icons/fa";
+import { FaCat, FaGoogleDrive } from "react-icons/fa";
 
 interface AddFromDriveProps {
   onAddUrlDrvie?: (value: string) => Promise<boolean>;
@@ -86,7 +86,9 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
         </Label>
         <div className="flex gap-1">
           <Link
-            href={"https://drive.google.com/drive/folders/11z9hlAAJVgGOiuJnkxA1gdsIJjDf3BpY?usp=sharing"}
+            href={
+              "https://drive.google.com/drive/folders/11z9hlAAJVgGOiuJnkxA1gdsIJjDf3BpY?usp=sharing"
+            }
             target="_blank"
             className="w-fit"
           >
@@ -97,9 +99,10 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
               className="text-white w-fit"
               icon={<FaGoogleDrive className="text-white" />}
             >
-              ลิงก์ Drive
+              {/* ลิงก์ Drive */}
             </Button>
           </Link>
+
           <Link
             href={"https://www.youtube.com/watch?v=jgLmRHOPLO8"}
             target="_blank"
@@ -112,7 +115,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
               className="text-white w-fit"
               icon={<BsYoutube className="text-white" />}
             >
-              วิธีใช้งาน
+              {/* วิธีใช้งาน */}
             </Button>
           </Link>
         </div>
@@ -168,15 +171,65 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
         </Button>
       </div>
       <div className="py-2">
-        <hr className="pb-2" />
-        <Label
-          textSize={15}
-          textColor="text-gray-800"
-          headClass="bg-blue-500"
-          description="สำหรับเชื่อมต่อเพลง Extheme ที่อยู่บน Drive"
-        >
-          เชื่อมต่อ Extreme Drive
-        </Label>
+        <div className="md:flex justify-between">
+          <Label
+            textSize={15}
+            textColor="text-gray-800"
+            headClass="bg-blue-500"
+            description="สำหรับเชื่อมต่อเพลง Extheme ที่อยู่บน Drive"
+          >
+            เชื่อมต่อ Extreme Drive
+          </Label>
+          <div className="flex gap-1">
+            <Link
+              href={
+                "https://drive.google.com/drive/folders/1-xSPjDnDKr3JpMp4VlghxwgAe2AM342s?usp=sharing"
+              }
+              target="_blank"
+              className="w-fit"
+            >
+              <Button
+                blur={false}
+                color="blue"
+                iconPosition="left"
+                className="text-white w-fit"
+                icon={<FaGoogleDrive className="text-white" />}
+              >
+                {/* ลิงก์ Drive */}
+              </Button>
+            </Link>
+            <Link
+              href={"https://catbox.moe/#"}
+              target="_blank"
+              className="w-fit"
+            >
+              <Button
+                blur={false}
+                color="amber"
+                iconPosition="left"
+                className="text-white w-fit"
+                icon={<FaCat className="text-white" />}
+              >
+                {/* ลิงก์ Drive */}
+              </Button>
+            </Link>
+            <Link
+              href={"https://youtu.be/pHzYj_EksNI"}
+              target="_blank"
+              className="w-fit"
+            >
+              <Button
+                blur={false}
+                color="red"
+                iconPosition="left"
+                className="text-white w-fit"
+                icon={<BsYoutube className="text-white" />}
+              >
+                {/* วิธีใช้งาน */}
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
       <DriveAction
         ok={tracklistUrl ? true : false}

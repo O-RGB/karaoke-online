@@ -16,11 +16,9 @@ const GainRender: React.FC<GainRenderProps> = ({ analysers }) => {
   const setCurrntGain = useMixerStore((state) => state.setCurrntGain);
   const setCurrntGainMain = useMixerStore((state) => state.setCurrntGainMain);
   const { sendSuperUserMessage, superUserConnections } = usePeerStore();
-  const mixIsShot = useConfigStore((state) => state.config.widgets?.mix?.show);
+  const mixIsShow = useConfigStore((state) => state.config.widgets?.mix?.show);
   const hideMixer = useMixerStore((state) => state.hideMixer);
   const paused = usePlayer((state) => state.paused);
-
-  const tick = useTickStore((state) => state.tick);
 
   const gainMain = useRef<number>(0);
   const gain = useRef<number[]>(CHANNEL_DEFAULT);
@@ -58,10 +56,12 @@ const GainRender: React.FC<GainRenderProps> = ({ analysers }) => {
   };
 
   useEffect(() => {
-    if (analysers && !paused) {
-      gindRender();
-    }
-  }, [mixIsShot ? tick : undefined, paused, analysers, hideMixer]);
+    setInterval(() => {
+      if (analysers && !paused && mixIsShow) {
+        gindRender();
+      }
+    }, 100);
+  }, [paused, analysers, hideMixer]);
 
   return null;
 };

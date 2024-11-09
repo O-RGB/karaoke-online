@@ -129,7 +129,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
       }
     >
       <div
-        className={` select-none relative z-50 w-full lg:w-fit blur-overlay border blur-border rounded-md p-2 duration-300 ${
+        className={`select-none relative z-50 w-full lg:w-fit blur-overlay border blur-border rounded-md p-2 duration-300 ${
           hideMixer
             ? "h-[30px] overflow-hidden"
             : `${

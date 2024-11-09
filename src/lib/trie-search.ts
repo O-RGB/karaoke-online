@@ -1,5 +1,19 @@
 import TrieSearch from "trie-search";
 
+const options = {
+  ignoreCase: true, // ยังจำเป็นต้องใช้
+  splitOnRegEx: /\s+/, // ยังจำเป็นต้องใช้
+  min: 0, // เพิ่มจาก 1 เป็น 2 เพื่อลดการประมวลผล
+  keepAll: false, // ปิดการเก็บข้อมูลทั้งหมด
+  cache: false, // ปิด cache เพื่อลดการใช้ memory
+  expandRegexes: [
+    {
+      regex: /[่้๊๋]/g,
+      alternate: "",
+    },
+  ],
+};
+
 export async function addSongList<T = any>(file: File): Promise<TrieSearch<T>> {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -7,7 +21,7 @@ export async function addSongList<T = any>(file: File): Promise<TrieSearch<T>> {
       try {
         const contentArrayBuffer = e.target.result;
         let parsedJSON = JSON.parse(contentArrayBuffer) as T[];
-        const trie = new TrieSearch<T>(["name", "artist"]);
+        const trie = new TrieSearch<T>(["name", "artist"], options);
         trie.addAll(parsedJSON);
         resolve(trie);
       } catch (error) {}
@@ -17,7 +31,7 @@ export async function addSongList<T = any>(file: File): Promise<TrieSearch<T>> {
 }
 
 export function addAllTrie<T = any>(list: any[]) {
-  const trie = new TrieSearch<T>(["name", "artist"]);
+  const trie = new TrieSearch<T>(["name", "artist"], options);
   trie.addAll(list);
   return trie;
 }
