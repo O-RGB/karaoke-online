@@ -28,6 +28,7 @@ import {
   prompt,
 } from "@/config/fonts";
 import { DEFAULT_CONFIG } from "@/config/value";
+import { SystemFont, ConfigDisplay } from "@/stores/config/types/config.type";
 
 export const lyricsGetFont = (get: SystemFont) => {
   let font = undefined;
