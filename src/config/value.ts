@@ -1,3 +1,5 @@
+import { ConfigDisplay } from "@/stores/config/types/config.type";
+
 export const WALLPAPER = "wallpaper-3.png";
 export const DEFAULT_SOUND_FONT = "default-sound-font.sf2";
 export const MID_FILE_TYPE = "mid";
