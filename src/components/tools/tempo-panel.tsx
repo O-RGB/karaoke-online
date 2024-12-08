@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import useTickStore from "../../stores/tick-store";
-import useTempoStore from "../../stores/tempo-store";
-import useConfigStore from "../../stores/config-store";
-import { usePlayer } from "@/stores/player-store";
+import useConfigStore from "../../stores/config/config-store";
+
+import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 
 interface TempoPanelProps {}
 
 const TempoPanel: React.FC<TempoPanelProps> = ({}) => {
-  const midiPlaying = usePlayer((state) => state.midiPlaying);
-
+  // const midiPlaying = usePlayer((state) => state.midiPlaying);
+  const timeDivision = useRuntimePlayer((state) => state.timeDivision);
   const config = useConfigStore((state) => state.config);
   // const setConfig = useConfigStore((state) => state.setConfig);
   const widgetConfig = config.widgets;
@@ -16,27 +15,27 @@ const TempoPanel: React.FC<TempoPanelProps> = ({}) => {
   const windowMatches = window.matchMedia("(min-width: 1024px)").matches;
   isShow = isShow ? windowMatches : false;
 
-  const tick = useTickStore((state) => state.tick);
-  const tempo = useTempoStore((state) => state.tempo);
+  const tick = useRuntimePlayer((state) => state.currentTick);
+  const tempo = useRuntimePlayer((state) => state.currentTempo);
 
   const [currentBeatInBar, setCurrentBeatInBar] = useState(1);
 
   useEffect(() => {
-    if (isShow && midiPlaying) {
-      if (tick > 0 && midiPlaying.timeDivision > 0) {
-        const currentTickInBar = tick % (midiPlaying.timeDivision * 4);
-        const beatInBar =
-          Math.floor(currentTickInBar / midiPlaying.timeDivision) + 1;
+    if (isShow) {
+      if (tick > 0 && timeDivision > 0) {
+        const currentTickInBar = tick % (timeDivision * 4);
+        const beatInBar = Math.floor(currentTickInBar / timeDivision) + 1;
         setCurrentBeatInBar(beatInBar);
       }
     }
-  }, [midiPlaying?.timeDivision, isShow ? tick : undefined]);
+  }, [timeDivision, isShow ? tick : undefined]);
 
   if (isShow === false) {
     return <></>;
   }
   return (
     <div className="fixed z-30 right-5 lg:top-6 blur-overlay blur-border border rounded-md p-2 w-44 hidden lg:block text-white">
+      {/* {JSON.stringify(timeDivision)} */}
       <div className="flex justify-between items-center mb-1">
         <span className=" text-xl font-bold">{Math.round(tempo)}</span>
 

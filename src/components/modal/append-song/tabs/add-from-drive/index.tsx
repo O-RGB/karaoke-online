@@ -4,7 +4,7 @@ import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
 import Label from "@/components/common/display/label";
 import { IoDownload, IoSend } from "react-icons/io5";
 import { getLocalTracklistDriveUrl } from "@/lib/local-storege/local-storage";
-import useConfigStore from "@/stores/config-store";
+import useConfigStore from "@/stores/config/config-store";
 import Button from "@/components/common/button/button";
 import { GrUpdate } from "react-icons/gr";
 import Tags from "@/components/common/display/tags";

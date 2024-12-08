@@ -4,16 +4,18 @@ import { toOptions } from "@/lib/general";
 import { FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
-import useMixerStore from "@/stores/mixer-store";
+import useMixerStore from "@/stores/player/mixer-store";
 import useTracklistStore from "@/stores/tracklist-store";
 import Tags from "@/components/common/display/tags";
 import useKeyboardStore from "@/stores/keyboard-state";
 import Button from "@/components/common/button/button";
 import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
 import { MdPlayCircleFilled } from "react-icons/md";
-import { usePlayer } from "@/stores/player-store";
+// import { usePlayer } from "@/stores/player/player-store";
 import { usePeerStore } from "@/stores/peer-store";
-import useConfigStore from "@/stores/config-store";
+import useConfigStore from "@/stores/config/config-store";
+import { usePlayerNew } from "@/stores/player/update/player-new-store";
+import useQueuePlayer from "@/stores/player/update/modules/queue-player";
 
 interface SearchSongProps {}
 
@@ -24,8 +26,11 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const { orientation } = useOrientation();
   const hideMixer = useMixerStore((state) => state.hideMixer);
 
-  const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
-  const setSongPlaying = usePlayer((state) => state.setSongPlaying);
+  const queue = useQueuePlayer((state) => state.queue);
+
+  // const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
+  // const setSongPlaying = usePlayer((state) => state.setSongPlaying);
+  const test = usePlayerNew((state) => state.queue);
 
   const superUserConnections = usePeerStore(
     (state) => state.superUserConnections
@@ -33,6 +38,10 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const sendSuperUserMessage = usePeerStore(
     (state) => state.sendSuperUserMessage
   );
+
+  const play = usePlayerNew((state) => state.runtime.play);
+  const paused = usePlayerNew((state) => state.runtime.paused);
+  const nextMusic = usePlayerNew((state) => state.queue.nextMusic);
 
   const queueing = useKeyboardStore((state) => state.queueing);
   const searching = useKeyboardStore((state) => state.searching);
@@ -72,28 +81,16 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   };
 
   const setSongPlayer = async (value: SearchResult) => {
-    const data = await loadAndPlaySong(value, config.system);
-    if (data) {
-      if (data.length <= 1) {
-        const { file, songInfo } = data[0];
-        setSongPlaying(file, songInfo);
+    test.addQueue(value);
 
-        if (superUserConnections.length > 0) {
-          // let ingo:MidiPlayingInfo = {
-          //   midiInfo:{
-          //     duration
-          //   }
-          // }
-
-          sendSuperUserMessage({
-            message: "",
-            type: "SONG_INFO_PLAYING",
-            user: "SUPER",
-            clientId: superUserConnections[0].connectionId,
-          });
-        }
-      }
-    }
+    // if (superUserConnections.length > 0) {
+    //   sendSuperUserMessage({
+    //     message: "",
+    //     type: "SONG_INFO_PLAYING",
+    //     user: "SUPER",
+    //     clientId: superUserConnections[0].connectionId,
+    //   });
+    // }
   };
 
   useEffect(() => {

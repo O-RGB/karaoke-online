@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import RandomLyrics from "../lyrics/random-lyrics";
-import useLyricsStore from "../../stores/lyrics-store";
-import useConfigStore from "@/stores/config-store";
+import useLyricsStore from "../../stores/player/lyrics-store";
+import useConfigStore from "@/stores/config/config-store";
 import { NextFont } from "next/dist/compiled/@next/font";
 import { lyricsGetFont } from "@/features/lyrics/lyrics.features";
-import useMixerStore from "@/stores/mixer-store";
+import useMixerStore from "@/stores/player/mixer-store";
 import { useOrientation } from "@/hooks/orientation-hook";
 import CutLyrics from "../common/lyrics/cut-lyrics/cut-lyrics";
 

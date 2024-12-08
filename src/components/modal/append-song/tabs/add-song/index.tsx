@@ -10,7 +10,7 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FaPlus, FaRegFileAudio, FaSearch } from "react-icons/fa";
 import DuplicateSongModal from "./duplicate-song";
 import IgnoreDupFile from "./ignore-dupfile";
-import useConfigStore from "@/stores/config-store";
+import useConfigStore from "@/stores/config/config-store";
 import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
 import Modal from "@/components/common/modal";
 import Input from "@/components/common/input-data/input";

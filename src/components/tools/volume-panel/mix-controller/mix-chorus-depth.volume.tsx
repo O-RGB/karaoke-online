@@ -1,5 +1,5 @@
 import RangeBarClone from "@/components/common/input-data/range-bar-clone";
-import useMixerStore from "@/stores/mixer-store";
+import useMixerStore from "@/stores/player/mixer-store";
 import React from "react";
 
 interface MixChorusDepthVolumeProps {

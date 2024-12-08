@@ -17,14 +17,13 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { HiMiniBars2 } from "react-icons/hi2";
-import { useSpessasynthStore } from "@/stores/spessasynth-store";
-import useTickStore from "@/stores/tick-store";
 import { MdLockOutline } from "react-icons/md";
-import { usePlayer } from "@/stores/player-store";
 import useKeyboardStore from "@/stores/keyboard-state";
 import Button from "@/components/common/button/button";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import Tags from "@/components/common/display/tags";
+import useQueuePlayer from "@/stores/player/update/modules/queue-player";
+import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 
 interface SongItem {
   id: string;
@@ -153,11 +152,9 @@ const QueueSong: React.FC<QueueSongProps> = ({
   );
 
   const [lockFirstIndex, setLockFirstIndex] = useState<boolean>(false);
-  const playingQueue = usePlayer((state) => state.playingQueue);
-  const countDown = usePlayer((state) => state.countDown);
-  const setPlayingQueue = usePlayer((state) => state.setPlayingQueue);
-  const setSongPlaying = usePlayer((state) => state.setSongPlaying);
-
+  const queue = useQueuePlayer((state) => state.queue);
+  const moveQueue = useQueuePlayer((state) => state.moveQueue);
+  const countDown = useRuntimePlayer((state) => state.countDown);
   const [selected, setSelected] = useState<number>(0);
 
   const sensors = useSensors(
@@ -188,12 +185,8 @@ const QueueSong: React.FC<QueueSongProps> = ({
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      const oldIndex = playingQueue.findIndex(
-        (item) => item.songInfo.id === active.id
-      );
-      const newIndex = playingQueue.findIndex(
-        (item) => item.songInfo.id === over.id
-      );
+      const oldIndex = queue.findIndex((item) => item.id === active.id);
+      const newIndex = queue.findIndex((item) => item.id === over.id);
 
       if (lockFirstIndex && newIndex === 0) {
         return;
@@ -203,14 +196,14 @@ const QueueSong: React.FC<QueueSongProps> = ({
         return;
       }
 
-      const newItems = arrayMove(playingQueue, oldIndex, newIndex);
+      const newItems = arrayMove(queue, oldIndex, newIndex);
       // setSelected(newIndex)
       const updated = newItems.map((item, index) => ({
         ...item,
         number: index + 1,
       }));
 
-      setPlayingQueue(updated);
+      moveQueue(updated);
 
       if (window.navigator.vibrate) {
         window.navigator.vibrate(30);
@@ -220,9 +213,9 @@ const QueueSong: React.FC<QueueSongProps> = ({
   };
 
   const onDelete = (index: number) => {
-    let clone = [...playingQueue];
+    let clone = [...queue];
     clone = clone.filter((_, i) => i !== index);
-    setPlayingQueue(clone);
+    moveQueue(clone);
   };
 
   useEffect(() => {
@@ -235,8 +228,8 @@ const QueueSong: React.FC<QueueSongProps> = ({
   useEffect(() => {
     setSelected((value) => {
       let coming = value + 1;
-      if (coming >= playingQueue.length - 1) {
-        return playingQueue.length - 1;
+      if (coming >= queue.length - 1) {
+        return queue.length - 1;
       } else {
         return coming;
       }
@@ -256,13 +249,14 @@ const QueueSong: React.FC<QueueSongProps> = ({
 
   useEffect(() => {
     if (queueing && searching === "") {
-      let clone = [...playingQueue];
+      let clone = [...queue];
       if (clone.length > 0) {
         let songPlaying = clone[selected];
         if (songPlaying) {
           let removed = clone.filter((_, i) => i !== selected);
-          setPlayingQueue(removed);
-          setSongPlaying(songPlaying.file, songPlaying.songInfo);
+          moveQueue(removed);
+          // playMusic(songPlaying, )
+          // setSongPlaying(songPlaying.file, songPlaying.songInfo);
           resetQueueingTimeout(0);
         }
       }
@@ -310,23 +304,23 @@ const QueueSong: React.FC<QueueSongProps> = ({
             </thead>
             <tbody className="relative">
               <SortableContext
-                items={playingQueue.map((item) => item.songInfo.id)}
+                items={queue.map((item) => item.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {playingQueue.map(
+                {queue.map(
                   (item, index) =>
                     index > 0 && (
                       <SortableTableRow
-                        key={`queue-${item.songInfo.id}-${index}`}
+                        key={`queue-${item.id}-${index}`}
                         item={{
-                          details: `${item.songInfo.id} ${item.songInfo.name} - ${item.songInfo.artist}`,
-                          id: item.songInfo.id,
+                          details: `${item.id} ${item.name} - ${item.artist}`,
+                          id: item.id,
                           number: index,
-                          type: item.songInfo.type.toString(),
+                          type: item.type.toString(),
                         }}
                         index={index}
                         isFirst={index == 1}
-                        isLast={index === playingQueue.length - 1}
+                        isLast={index === queue.length - 1}
                         lockFirst={countDown < stopTouchMusicPlaying}
                         countDown={countDown}
                         onKeySelected={selected === index}

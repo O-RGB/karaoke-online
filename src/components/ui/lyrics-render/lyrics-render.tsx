@@ -1,20 +1,19 @@
-import useLyricsStore from "@/stores/lyrics-store";
-import useTickStore from "@/stores/tick-store";
+import useLyricsStore from "@/stores/player/lyrics-store";
 import { groupThaiCharacters } from "@/lib/app-control";
 import React, { useEffect, useRef, useState } from "react";
-import { usePlayer } from "@/stores/player-store";
+import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 
 interface LyricsRenderProps {}
 
 const LyricsRender: React.FC<LyricsRenderProps> = ({}) => {
-  const tick = useTickStore((state) => state.tick);
+  const tick = useRuntimePlayer((state) => state.currentTick);
   const setCharIndex = useLyricsStore((state) => state.setCharIndex);
   const setDisplay = useLyricsStore((state) => state.setDisplay);
   const setDisplayBottom = useLyricsStore((state) => state.setDisplayBottom);
   const setPosition = useLyricsStore((state) => state.setPosition);
 
-  const cursorIndices = usePlayer((state) => state.cursorIndices);
-  const lyrics = usePlayer((state) => state.lyrics);
+  const cursorIndices = useRuntimePlayer((state) => state.ticksIndices);
+  const lyrics = useRuntimePlayer((state) => state.lyrics);
 
   const position = useRef<boolean>(true);
   const [lyricsIndex, setLyricsIndex] = useState<number>(0);
@@ -42,7 +41,6 @@ const LyricsRender: React.FC<LyricsRenderProps> = ({}) => {
       lyrs.push({ line, lyr: "", lineIndex: lastIndex });
     });
 
-    setMappingLyrics(lyrs);
     return lyrs;
   };
 
@@ -109,16 +107,10 @@ const LyricsRender: React.FC<LyricsRenderProps> = ({}) => {
       reset();
       const mapper = new TickMapper(cursorIndices);
       setTickMapper(mapper);
-      mapingLyricsGroup(lyrics);
+      const mapping = mapingLyricsGroup(lyrics);
+      setMappingLyrics(mapping);
     }
   }, [cursorIndices, lyrics]);
-
-  // useEffect(() => {
-  //   console.log("isFinished", isFinished);
-  //   if (isFinished) {
-  //     reset();
-  //   }
-  // }, [isFinished]);
 
   useEffect(() => {
     renderLyricsDisplay();

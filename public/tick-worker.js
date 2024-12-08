@@ -4,22 +4,22 @@ let timeList = [];
 let timeDivision = 0;
 let lastCurrentTime = 0;
 
-self.onmessage = function(e) {
+self.onmessage = function (e) {
   const { type, data } = e.data;
   switch (type) {
-    case 'init':
+    case "init":
       timeDivision = data.timeDivision;
       tempoChanges = data.tempoChanges;
       timeList = convertTicksToTime(timeDivision, tempoChanges);
       break;
-    case 'updateTime':
+    case "updateTime":
       lastCurrentTime = data.currentTime;
       updateTick();
       break;
-    case 'start':
+    case "start":
       startInterval(data.refreshRate);
       break;
-    case 'stop':
+    case "stop":
       stopInterval();
       break;
   }
@@ -41,8 +41,12 @@ function stopInterval() {
 
 function updateTick() {
   if (timeList.length > 0) {
-    const { tick, tempo } = calculateTicks(timeDivision, lastCurrentTime, timeList);
-    self.postMessage({ type: 'tick', data: { tick, tempo } });
+    const { tick, tempo } = calculateTicks(
+      timeDivision,
+      lastCurrentTime,
+      timeList
+    );
+    self.postMessage({ type: "tick", data: { tick, tempo } });
   }
 }
 

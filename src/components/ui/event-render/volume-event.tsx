@@ -1,4 +1,4 @@
-import useMixerStore from "@/stores/mixer-store";
+import useMixerStore from "@/stores/player/mixer-store";
 import { usePeerStore } from "@/stores/peer-store";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import React, { useCallback, useEffect } from "react";

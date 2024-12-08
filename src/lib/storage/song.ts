@@ -99,12 +99,10 @@ export const genSongPath = (selected?: SearchResult) => {
 
 export const getSong = async (
   selected: SearchResult,
-  systemConfig?: Partial<SystemConfig>
+  driveSetting?: string
   // driveMode: boolean = false
 ) => {
-  console.log("selected", selected);
   const { superId, fileId } = genSongPath(selected);
-  console.log("DRIVE", superId, fileId);
   if (superId && fileId) {
     var superFile: File | undefined = undefined;
 
@@ -112,12 +110,11 @@ export const getSong = async (
     if (selected?.from === "DRIVE_EXTHEME" || selected?.from === "DRIVE") {
       superFile = await getSongDrive(
         `${superId}`,
-        systemConfig?.url,
+        driveSetting,
         selected?.from === "DRIVE"
       );
     } else if (selected?.from === "EXTHEME" || selected?.from === "CUSTOM") {
       // // on local
-
       superFile = await getSongByKey(
         `${superId}.zip`,
         selected?.from === "CUSTOM"

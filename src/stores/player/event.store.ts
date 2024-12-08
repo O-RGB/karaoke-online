@@ -1,5 +1,6 @@
-import { CHANNEL_DEFAULT, VOLUME_DEFAULT } from "@/config/value";
+import { CHANNEL_DEFAULT } from "@/config/value";
 import { create } from "zustand";
+
 interface EventStore {
   instrument: number[];
   setInstrument: (

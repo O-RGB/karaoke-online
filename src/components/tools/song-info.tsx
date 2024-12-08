@@ -1,6 +1,6 @@
 import { useOrientation } from "@/hooks/orientation-hook";
-import useMixerStore from "@/stores/mixer-store";
-import { usePlayer } from "@/stores/player-store";
+import useMixerStore from "@/stores/player/mixer-store";
+import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 import React, { useEffect, useState } from "react";
 
 interface SongInfoProps {}
@@ -8,7 +8,7 @@ interface SongInfoProps {}
 const SongInfo: React.FC<SongInfoProps> = ({}) => {
   const { orientation } = useOrientation();
   const hideMixer = useMixerStore((state) => state.hideMixer);
-  const songPlayingInfo = usePlayer((state) => state.songPlayingInfo);
+  const musicInfo = useRuntimePlayer((state) => state.musicInfo)
 
   const [show, setShow] = useState<boolean>(false);
 
@@ -17,7 +17,7 @@ const SongInfo: React.FC<SongInfoProps> = ({}) => {
     setTimeout(() => {
       setShow(false);
     }, 5000);
-  }, [songPlayingInfo]);
+  }, [musicInfo]);
 
   if (!show) return <></>;
   return (
@@ -32,8 +32,8 @@ const SongInfo: React.FC<SongInfoProps> = ({}) => {
         }  w-fit h-20 px-5   flex flex-col   gap-2 `}
       >
         <div className="p-3 border blur-overlay rounded-md text-white ">
-          ชื่อเพลง: {songPlayingInfo?.name} <br />
-          นักร้อง: {songPlayingInfo?.artist}
+          ชื่อเพลง: {musicInfo?.name} <br />
+          นักร้อง: {musicInfo?.artist}
         </div>
       </div>
     </>

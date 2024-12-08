@@ -3324,10 +3324,10 @@ sourcemap-codec@^1.4.8:
   resolved "https://registry.yarnpkg.com/sourcemap-codec/-/sourcemap-codec-1.4.8.tgz#ea804bd94857402e6992d05a38ef1ae35a9ab4c4"
   integrity sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==
 
-spessasynth_lib@^3.21.12:
-  version "3.21.12"
-  resolved "https://registry.yarnpkg.com/spessasynth_lib/-/spessasynth_lib-3.21.12.tgz#38f89c181266b5447f67cfdc8ea759eacaa2e0a8"
-  integrity sha512-ktSucXQIE8B1sF5ETpO1pHRz/kUYZFmUpexb8NlvS/S8x9C8NgCUNg3MI5TI8mr9TeSUwPTkSIurpYYqEt4owQ==
+spessasynth_lib@^3.23.6:
+  version "3.23.6"
+  resolved "https://registry.yarnpkg.com/spessasynth_lib/-/spessasynth_lib-3.23.6.tgz#a6de2f842ceb7c7a3f7726a2ea0671797db9f0f8"
+  integrity sha512-P/fVfS9r4QwqmXThNjnP/ETs5TQkOgx/xuSnkYln/+61fJsAPYhB63eX7rWd7SCr0OVAi3vFnsUPPkAUyvqNVg==
 
 streamsearch@^1.1.0:
   version "1.1.0"

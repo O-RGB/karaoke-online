@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import useLyricsStore from "@/stores/lyrics-store";
+import useLyricsStore from "@/stores/player/lyrics-store";
 import { NextFont } from "next/dist/compiled/@next/font";
+import { LyricsColorConfig } from "@/stores/config/types/config.type";
 
 interface CutLyricsProps {
   display: string[][];

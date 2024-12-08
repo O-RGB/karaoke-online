@@ -1,5 +1,5 @@
 import ButtonDropdown from "@/components/common/button/button-dropdown";
-import useEventStore from "@/stores/event.store";
+import useEventStore from "@/stores/player/event.store";
 import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
 import { channel } from "diagnostics_channel";
 import React, { useEffect, useMemo, useState } from "react";

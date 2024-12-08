@@ -9,12 +9,11 @@ import ContextModal from "../modal/context-modal";
 import { FiSettings } from "react-icons/fi";
 import Marquee from "react-fast-marquee";
 import { FaSearch } from "react-icons/fa";
-import useTickStore from "../../stores/tick-store";
-import { useSpessasynthStore } from "@/stores/spessasynth-store";
-import { usePlayer } from "@/stores/player-store";
 import { useFullScreenHandle } from "react-full-screen";
 
 import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
+import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
+import useQueuePlayer from "@/stores/player/update/modules/queue-player";
 interface PlayerRemote {
   onPause?: () => void;
   onPlay?: () => void;
@@ -34,36 +33,33 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   onFullScreen,
   show,
 }) => {
-  // re-render
-  const tick = useTickStore((state) => state.tick);
-  const player = useSpessasynthStore((state) => state.player);
-
-  const paused = usePlayer((state) => state.paused);
-  const setPaused = usePlayer((state) => state.setPaused);
-  const nextSong = usePlayer((state) => state.nextSong);
-  const playingQueue = usePlayer((state) => state.playingQueue);
-
   const [timer, setTimer] = useState<number>(0);
   const inputRef = useRef<any>(null);
-  const lyrics = usePlayer((state) => state.lyrics);
 
-  const handle = useFullScreenHandle();
+  const isPaused = useRuntimePlayer((state) => state.isPaused);
+  const lyrics = useRuntimePlayer((state) => state.lyrics);
+  const paused = useRuntimePlayer((state) => state.paused);
+  const play = useRuntimePlayer((state) => state.play);
+  const setCurrentTime = useRuntimePlayer((state) => state.setCurrentTime);
+  const currentTime = useRuntimePlayer((state) => state.currentTime);
+  const midi = useRuntimePlayer((state) => state.midi);
+
+  const queue = useQueuePlayer((state) => state.queue);
+  const nextMusic = useQueuePlayer((state) => state.nextMusic);
 
   useEffect(() => {
-    if (player) {
-      const timer = Math.round((player.currentTime / player.duration) * 100);
-      setTimer(timer);
-    }
-  }, [tick, player]);
+    const timer = Math.round((currentTime / (midi?.duration ?? 0)) * 100);
+    setTimer(timer);
+  }, [currentTime, midi]);
 
-  if (!player && show !== true) {
-    return <></>;
-  }
+  // if (show !== true) {
+  //   return <></>;
+  // }
   return (
     <>
       <div className="fixed bottom-0 gap-2 w-full left-0 blur-overlay bg-black/10 border-t blur-border flex justify-between p-2 lg:p-0">
         <div className="flex items-center w-full">
-          {!paused ? (
+          {!isPaused ? (
             <Button
               className="hover:bg-white/20"
               blur={false}
@@ -71,8 +67,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               shadow=""
               padding="p-4"
               onClick={() => {
-                player?.pause();
-                setPaused(true);
+                paused();
               }}
               shape={false}
               icon={<TbPlayerPauseFilled className="text-white" />}
@@ -85,8 +80,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               shadow=""
               padding="p-4"
               onClick={() => {
-                player?.play();
-                setPaused(false);
+                play();
               }}
               shape={false}
               icon={<TbPlayerPlayFilled className="text-white" />}
@@ -95,11 +89,11 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <Button
             className="hover:bg-white/20"
             blur={false}
-            disabled={playingQueue.length <= 1}
+            disabled={queue.length <= 1}
             border=""
             shadow=""
             padding="p-4"
-            onClick={nextSong}
+            onClick={nextMusic}
             shape={false}
             icon={<TbPlayerSkipForwardFilled className="text-white" />}
           ></Button>
@@ -111,11 +105,8 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               }}
               tabIndex={-1}
               onChange={(e) => {
-                if (player) {
-                  const value = +e.target.value;
-                  const newCurrentTime = (value / 100) * player?.duration;
-                  player.currentTime = newCurrentTime;
-                }
+                const value = +e.target.value;
+                setCurrentTime(value);
               }}
               type="range"
               className="transition duration-300"

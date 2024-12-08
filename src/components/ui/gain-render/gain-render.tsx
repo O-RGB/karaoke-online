@@ -1,12 +1,10 @@
-import useConfigStore from "@/stores/config-store";
-import useTickStore from "@/stores/tick-store";
+import useConfigStore from "@/stores/config/config-store";
+
 import { CHANNEL_DEFAULT } from "@/config/value";
 import React, { useEffect, useRef } from "react";
-import { Sequencer } from "spessasynth_lib";
 import { usePeerStore } from "@/stores/peer-store";
-import useMixerStore from "@/stores/mixer-store";
-import { useSpessasynthStore } from "@/stores/spessasynth-store";
-import { usePlayer } from "@/stores/player-store";
+import useMixerStore from "@/stores/player/mixer-store";
+import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 
 interface GainRenderProps {
   analysers?: AnalyserNode[];
@@ -18,7 +16,8 @@ const GainRender: React.FC<GainRenderProps> = ({ analysers }) => {
   const { sendSuperUserMessage, superUserConnections } = usePeerStore();
   const mixIsShow = useConfigStore((state) => state.config.widgets?.mix?.show);
   const hideMixer = useMixerStore((state) => state.hideMixer);
-  const paused = usePlayer((state) => state.paused);
+
+  const isPaused = useRuntimePlayer((state) => state.isPaused);
 
   const gainMain = useRef<number>(0);
   const gain = useRef<number[]>(CHANNEL_DEFAULT);
@@ -57,11 +56,11 @@ const GainRender: React.FC<GainRenderProps> = ({ analysers }) => {
 
   useEffect(() => {
     setInterval(() => {
-      if (analysers && !paused && mixIsShow) {
+      if (analysers && !isPaused && mixIsShow) {
         gindRender();
       }
     }, 100);
-  }, [paused, analysers, hideMixer]);
+  }, [isPaused, analysers, hideMixer]);
 
   return null;
 };

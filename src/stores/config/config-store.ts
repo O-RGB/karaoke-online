@@ -1,14 +1,6 @@
 import { DEFAULT_CONFIG } from "@/config/value";
 import { create } from "zustand";
-
-interface ConfigStore {
-  config: Partial<ConfigDisplay>;
-  setConfig: (
-    config:
-      | Partial<ConfigDisplay>
-      | ((config: Partial<ConfigDisplay>) => Partial<ConfigDisplay>)
-  ) => void;
-}
+import { ConfigStoreProps } from "./types/config.type";
 
 const loadConfigFromLocalStorage = () => {
   if (typeof window !== "undefined") {
@@ -37,7 +29,7 @@ const deepMerge = (target: any, source: any): any => {
   return output;
 };
 
-const useConfigStore = create<ConfigStore>((set) => ({
+const useConfigStore = create<ConfigStoreProps>((set) => ({
   config: loadConfigFromLocalStorage(),
   setConfig: (configUpdate) =>
     set((state) => {
@@ -49,7 +41,6 @@ const useConfigStore = create<ConfigStore>((set) => ({
       if (typeof window !== "undefined") {
         localStorage.setItem("config", JSON.stringify(newConfig));
       }
-
       return { config: newConfig };
     }),
 }));

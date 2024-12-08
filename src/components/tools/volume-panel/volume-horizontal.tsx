@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import useMixerStore from "@/stores/mixer-store";
+import useMixerStore from "@/stores/player/mixer-store";
 
 interface VolumeHorizontalProps {
   hide: boolean;

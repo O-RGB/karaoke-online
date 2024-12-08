@@ -7,12 +7,13 @@ import ColorPicker from "../common/input-data/color-picker";
 import Button from "../common/button/button";
 import { TbRestore } from "react-icons/tb";
 import { lyricsConfig, lyricsGetFont } from "@/features/lyrics/lyrics.features";
-import useConfigStore from "@/stores/config-store";
+import useConfigStore from "@/stores/config/config-store";
 import { DEFAULT_CONFIG } from "@/config/value";
 import { NextFont } from "next/dist/compiled/@next/font";
 import InputNumber from "../common/input-data/input-number";
 import ToggleCheckBox from "../common/input-data/checkbox";
 import CutLyrics from "../common/lyrics/cut-lyrics/cut-lyrics";
+import { SystemFont } from "@/stores/config/types/config.type";
 
 interface LyricsModalProps {}
 

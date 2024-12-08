@@ -1,6 +1,7 @@
 import { useOrientation } from "@/hooks/orientation-hook";
-import useMixerStore from "@/stores/mixer-store";
-import { usePlayer } from "@/stores/player-store";
+import useMixerStore from "@/stores/player/mixer-store";
+import useQueuePlayer from "@/stores/player/update/modules/queue-player";
+import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 import React, { useEffect, useState } from "react";
 
 interface NextSongPanelProps {}
@@ -8,20 +9,18 @@ interface NextSongPanelProps {}
 const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
   const { orientation } = useOrientation();
   const hideMixer = useMixerStore((state) => state.hideMixer);
-  const countDown = usePlayer((state) => state.countDown);
-  const playingQueue = usePlayer((state) => state.playingQueue);
-  const isFinished = usePlayer((state) => state.isFinished);
-
+  const countDown = useRuntimePlayer((state) => state.countDown);
+  const queue = useQueuePlayer((state) => state.queue);
   const [saveInfo, setInfo] = useState<SearchResult>();
   useEffect(() => {
-    if (playingQueue.length > 1 && countDown == 3) {
-      setInfo(playingQueue[1].songInfo);
-    } else if (playingQueue.length === 1) {
+    if (queue.length > 1 && countDown == 3) {
+      setInfo(queue[1]);
+    } else if (queue.length === 1) {
       setInfo(undefined);
     }
   }, [countDown]);
 
-  if (countDown > 3 || playingQueue.length < 1 || !saveInfo) {
+  if (countDown > 3 || queue.length < 1 || !saveInfo) {
     return <></>;
   }
 

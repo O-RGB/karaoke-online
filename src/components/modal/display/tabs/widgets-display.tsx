@@ -1,7 +1,11 @@
 import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
 import Label from "@/components/common/display/label";
-import useConfigStore from "@/stores/config-store";
+import useConfigStore from "@/stores/config/config-store";
 import React, { useEffect, useState } from "react";
+import {
+  WidgetsConfig,
+  WidgetsSettingConfig,
+} from "@/stores/config/types/config.type";
 
 interface WidgetsDisplayProps {}
 

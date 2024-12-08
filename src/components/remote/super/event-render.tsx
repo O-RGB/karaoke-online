@@ -1,8 +1,8 @@
 import useKeyboardStore from "@/stores/keyboard-state";
-import useMixerStore from "@/stores/mixer-store";
+import useMixerStore from "@/stores/player/mixer-store";
 import { usePeerStore } from "@/stores/peer-store";
-import { usePlayer } from "@/stores/player-store";
 import React, { useEffect } from "react";
+import useQueuePlayer from "@/stores/player/update/modules/queue-player";
 
 interface EventRenderSuperProps {
   setSearchSongList?: (value: SearchResult[]) => void;
@@ -28,8 +28,10 @@ const EventRenderSuper: React.FC<EventRenderSuperProps> = ({
   // const setCurrentTime = usePlayer((state) => state.setCurrentTime);
 
   // SONG PLAYER
-  const setPlayingQueue = usePlayer((state) => state.setPlayingQueue);
+  // const setPlayingQueue = usePlayer((state) => state.setPlayingQueue);
+
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
+  const moveQueue = useQueuePlayer((state) => state.moveQueue);
 
   useEffect(() => {
     if (received) {
@@ -66,7 +68,8 @@ const EventRenderSuper: React.FC<EventRenderSuperProps> = ({
         setSearchSongList?.(songList);
       } else if (type === "REQUEST_QUEUE_LIST") {
         let queue: IPlayingDecodedQueues[] = data;
-        setPlayingQueue(queue);
+        const songInfo = queue.map((data) => data.songInfo);
+        moveQueue(songInfo);
         setQueueOpen?.();
       } else if (type === "SONG_INFO_PLAYING") {
         let midiInfo: MidiPlayingInfo = data as MidiPlayingInfo;

@@ -8,20 +8,28 @@ import { create } from "zustand";
 interface MixerStore {
   volumes: number[];
   setVolumes: (volume: number[] | ((prev: number[]) => number[])) => void;
+
   pan: number[];
   setPan: (pan: number[] | ((prev: number[]) => number[])) => void;
+
   reverb: number[];
   setReverb: (pan: number[] | ((prev: number[]) => number[])) => void;
+
   chorusDepth: number[];
   setChorusDepth: (pan: number[] | ((prev: number[]) => number[])) => void;
+
   isMute: boolean[];
   setMute: (isMute: boolean[] | ((prev: boolean[]) => boolean[])) => void;
+
   gain: number[];
   setCurrntGain: (gain: number[]) => void;
+
   gainMain: number;
   setCurrntGainMain: (gain: number) => void;
+
   hideMixer: boolean;
   setHideMixer: (isHide: boolean) => void;
+
   held: boolean;
   setHeld: (isHeld: boolean) => void;
 }

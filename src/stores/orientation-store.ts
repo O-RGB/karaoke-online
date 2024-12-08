@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import useMixerStore from './mixer-store';
+import { create } from "zustand";
+import useMixerStore from "./player/mixer-store";
 
-type Orientation = 'landscape' | 'portrait' | null;
+type Orientation = "landscape" | "portrait" | null;
 
 interface OrientationState {
   orientation: Orientation;
@@ -20,15 +20,17 @@ const useOrientationStore = create<OrientationState>((set, get) => ({
   setIsMobile: (isMobile) => set({ isMobile }),
   checkIsMobile: () => {
     const userAgent = navigator.userAgent.toLowerCase();
-    const mobileDevices = /iphone|ipad|ipod|android|blackberry|iemobile|opera mini|mobile/;
+    const mobileDevices =
+      /iphone|ipad|ipod|android|blackberry|iemobile|opera mini|mobile/;
     set({ isMobile: mobileDevices.test(userAgent) });
   },
   handleResize: () => {
     const { isMobile } = get();
     if (isMobile) {
-      const newOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+      const newOrientation =
+        window.innerWidth > window.innerHeight ? "landscape" : "portrait";
       set({ orientation: newOrientation });
-      if (newOrientation === 'landscape') {
+      if (newOrientation === "landscape") {
         useMixerStore.getState().setHideMixer(true);
       }
     } else {
@@ -39,9 +41,9 @@ const useOrientationStore = create<OrientationState>((set, get) => ({
     const { checkIsMobile, handleResize } = get();
     checkIsMobile();
     handleResize();
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   },
 }));
