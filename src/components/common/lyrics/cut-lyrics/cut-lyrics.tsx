@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import useLyricsStore from "@/stores/player/lyrics-store";
+// import useLyricsStore from "@/stores/player/lyrics-store";
 import { NextFont } from "next/dist/compiled/@next/font";
 import { LyricsColorConfig } from "@/stores/config/types/config.type";
+import useLyricsStoreNew from "@/stores/lyrics/lyrics-store";
 
 interface CutLyricsProps {
   display: string[][];
@@ -26,7 +27,7 @@ const CutLyrics: React.FC<CutLyricsProps> = ({
   const measureRef = useRef<HTMLSpanElement>(null);
   const [screenWidth, setScreenWidth] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const charIndex = useLyricsStore((state) => state.charIndex);
+  const charIndex = useLyricsStoreNew((state) => state.charIndex);
   const [highlightedWidth, setHighlightedWidth] = useState<number>(0);
 
   useEffect(() => {

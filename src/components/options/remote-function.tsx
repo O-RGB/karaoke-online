@@ -3,7 +3,7 @@ import { RiRemoteControlFill } from "react-icons/ri";
 import Button from "../common/button/button";
 import Modal from "../common/modal";
 import HostRemote from "../remote/host";
-import { useSpessasynthStore } from "../../stores/spessasynth-store";
+import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 
 interface RemoteFunctionProps {
   buttonClass?: string;

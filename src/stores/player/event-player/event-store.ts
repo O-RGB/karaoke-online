@@ -1,8 +1,9 @@
 import { CHANNEL_DEFAULT } from "@/config/value";
-import { useSpessasynthStore } from "@/stores/spessasynth-store";
+
 import { create } from "zustand";
 import useInstrumentStore from "./modules/event-instrument-store";
 import useMixerStoreNew from "./modules/event-mixer-store";
+import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 
 interface EventStore {
   instrument: number[];

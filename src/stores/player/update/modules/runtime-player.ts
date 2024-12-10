@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { RuntimeProps } from "../types/player.type";
-import { useSpessasynthStore } from "@/stores/spessasynth-store";
+import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 import {
   calculateTicks,
   convertTicksToTime,
@@ -8,6 +8,7 @@ import {
 } from "@/lib/app-control";
 import useQueuePlayer from "./queue-player";
 import useEventStoreNew from "../../event-player/event-store";
+import useLyricsStoreNew from "@/stores/lyrics/lyrics-store";
 
 const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   isPaused: false,
@@ -89,6 +90,8 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
     midiDecoded,
     musicInfo
   ) {
+    const lyricsInit = useLyricsStoreNew.getState().lyricsInit;
+    lyricsInit(lyrics, ticksIndices);
     set({
       ticks,
       ticksIndices,
@@ -105,6 +108,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
     const setEventRun = useEventStoreNew.getState().setEventRun;
     const setGainRun = useEventStoreNew.getState().setGainRun;
     const nextMusic = useQueuePlayer.getState().nextMusic;
+    const lyricsRender = useLyricsStoreNew.getState().lyricsRender;
     const midi = get().midi;
 
     setEventRun(isPlay);
@@ -134,9 +138,12 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
           const lastTime = Math.floor(player?.duration ?? 0);
           const updateCountDown = lastTime - Math.floor(currentTime ?? 0);
 
+          lyricsRender(tick);
+
           if (get().countDown === 0) {
             get().reset();
             get().tickRun(false);
+
             setTimeout(() => {
               nextMusic();
             }, 2000);

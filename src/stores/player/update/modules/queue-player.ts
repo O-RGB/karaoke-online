@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { QueuePlayerProps } from "../types/player.type";
-import { useSpessasynthStore } from "@/stores/spessasynth-store";
+import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 import { getSong } from "@/lib/storage/song";
 import useConfigStore from "@/stores/config/config-store";
 import { MIDI } from "spessasynth_lib";

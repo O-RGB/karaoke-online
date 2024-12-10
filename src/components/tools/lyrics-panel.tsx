@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import RandomLyrics from "../lyrics/random-lyrics";
-import useLyricsStore from "../../stores/player/lyrics-store";
+// import useLyricsStore from "../../stores/player/lyrics-store";
 import useConfigStore from "@/stores/config/config-store";
 import { NextFont } from "next/dist/compiled/@next/font";
 import { lyricsGetFont } from "@/features/lyrics/lyrics.features";
 import { useOrientation } from "@/hooks/orientation-hook";
 import CutLyrics from "../common/lyrics/cut-lyrics/cut-lyrics";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import useLyricsStoreNew from "@/stores/lyrics/lyrics-store";
 
 interface LyricsPanelProps {
   // lyrics: string[];
@@ -17,9 +18,9 @@ interface LyricsPanelProps {
 }
 
 const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {
-  const display = useLyricsStore((state) => state.display);
-  const displayBottom = useLyricsStore((state) => state.displayBottom);
-  const position = useLyricsStore((state) => state.position);
+  const display = useLyricsStoreNew((state) => state.display);
+  const displayBottom = useLyricsStoreNew((state) => state.displayBottom);
+  const position = useLyricsStoreNew((state) => state.position);
   const colorActive = useConfigStore((state) => state.config.lyrics?.active);
   const color = useConfigStore((state) => state.config.lyrics?.color);
   const lyricsMode = useConfigStore((state) => state.config.lyrics?.lyricsMode);

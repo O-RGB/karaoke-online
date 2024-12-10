@@ -4,7 +4,8 @@ import {
   VOLUME_MIDDLE_DEFAULT_128,
 } from "@/config/value";
 import { usePeerStore } from "@/stores/peer-store";
-import { useSpessasynthStore } from "@/stores/spessasynth-store";
+import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
+
 import {
   midiControllers,
   modulatorSources,

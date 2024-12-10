@@ -18,9 +18,8 @@ import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper-modal";
 import { getTracklist } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
-import LyricsRender from "./lyrics-render/lyrics-render";
 import DisplaySettingModal from "../modal/display";
-import { useSpessasynthStore } from "../../stores/spessasynth-store";
+
 import { DragDrop } from "../tools/drag-drop/drag-drop";
 import DataStoresModal from "../modal/datastores";
 import useTracklistStore from "@/stores/tracklist-store";
@@ -34,6 +33,7 @@ import NextSongPanel from "../tools/next-song-panel";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import SongInfo from "../tools/song-info";
 import SoundSettingModal from "../modal/sound-setting";
+import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 
 interface KaraokePageProps {}
 
@@ -99,7 +99,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>
       <RemoteRender></RemoteRender>
-      <LyricsRender></LyricsRender>
       {/* Contact */}
       <div id="modal-container">
         <ContextModal modal={modalMap}>

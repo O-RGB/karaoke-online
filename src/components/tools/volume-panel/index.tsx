@@ -22,9 +22,10 @@ import "@szhsin/react-menu/dist/transitions/zoom.css";
 import useNotificationStore from "@/stores/notification-store";
 import { FaList } from "react-icons/fa";
 import useKeyboardStore from "@/stores/keyboard-state";
-import { useSpessasynthStore } from "@/stores/spessasynth-store";
+
 import PlayerPanel from "../player-panel";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 
 interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
@@ -67,7 +68,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const setMute = useMixerStoreNew((state) => state.setMute);
 
   const setHeld = useMixerStoreNew((state) => state.setHeld);
-  const synth = useSpessasynthStore((state) => state.synth);
 
   const volLayout: number[] = Array(16).fill(0);
   // const volumeLib = synth ? volumeSynth(synth) : undefined;

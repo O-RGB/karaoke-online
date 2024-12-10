@@ -3,7 +3,7 @@ import Select from "@/components/common/input-data/select/select";
 import Label from "@/components/common/display/label";
 import volumeSynth from "@/features/volume/volume-features";
 import useConfigStore from "@/stores/config/config-store";
-import { useSpessasynthStore } from "@/stores/spessasynth-store";
+import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 import React, { useEffect, useState } from "react";
 
 interface LockSoundModalProps {}

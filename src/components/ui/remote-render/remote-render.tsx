@@ -2,7 +2,8 @@ import volumeSynth from "@/features/volume/volume-features";
 import useConfigStore from "@/stores/config/config-store";
 import { usePeerStore } from "@/stores/peer-store";
 import useQueuePlayer from "@/stores/player/update/modules/queue-player";
-import { useSpessasynthStore } from "@/stores/spessasynth-store";
+import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
+
 import useTracklistStore from "@/stores/tracklist-store";
 import React, { useEffect } from "react";
 
