@@ -4,7 +4,6 @@ import { toOptions } from "@/lib/general";
 import { FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
-import useMixerStore from "@/stores/player/mixer-store";
 import useTracklistStore from "@/stores/tracklist-store";
 import Tags from "@/components/common/display/tags";
 import useKeyboardStore from "@/stores/keyboard-state";
@@ -16,6 +15,7 @@ import { usePeerStore } from "@/stores/peer-store";
 import useConfigStore from "@/stores/config/config-store";
 import { usePlayerNew } from "@/stores/player/update/player-new-store";
 import useQueuePlayer from "@/stores/player/update/modules/queue-player";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 
 interface SearchSongProps {}
 
@@ -24,7 +24,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
 
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const { orientation } = useOrientation();
-  const hideMixer = useMixerStore((state) => state.hideMixer);
+  const hideMixer = useMixerStoreNew((state) => state.hideMixer);
 
   const queue = useQueuePlayer((state) => state.queue);
 

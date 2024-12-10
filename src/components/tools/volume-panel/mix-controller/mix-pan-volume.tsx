@@ -1,5 +1,5 @@
 import RangeBarClone from "@/components/common/input-data/range-bar-clone";
-import useMixerStore from "@/stores/player/mixer-store";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import React from "react";
 
 interface MixPanVolumeProps {
@@ -17,7 +17,7 @@ const MixPanVolume: React.FC<MixPanVolumeProps> = ({
   onMouseUp,
   onTouchEnd,
 }) => {
-  const pan = useMixerStore((state) => state.pan[channel]);
+  const pan = useMixerStoreNew((state) => state.pan[channel]);
   return (
     <>
       <RangeBarClone

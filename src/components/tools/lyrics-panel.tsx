@@ -6,9 +6,9 @@ import useLyricsStore from "../../stores/player/lyrics-store";
 import useConfigStore from "@/stores/config/config-store";
 import { NextFont } from "next/dist/compiled/@next/font";
 import { lyricsGetFont } from "@/features/lyrics/lyrics.features";
-import useMixerStore from "@/stores/player/mixer-store";
 import { useOrientation } from "@/hooks/orientation-hook";
 import CutLyrics from "../common/lyrics/cut-lyrics/cut-lyrics";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 
 interface LyricsPanelProps {
   // lyrics: string[];
@@ -30,7 +30,7 @@ const LyricsPanel: React.FC<LyricsPanelProps> = ({}) => {
   const [FontState, setFontState] = useState<NextFont>();
 
   const { orientation } = useOrientation();
-  const hideMixer = useMixerStore((state) => state.hideMixer);
+  const hideMixer = useMixerStoreNew((state) => state.hideMixer);
 
   useEffect(() => {}, [lyricsMode]);
   useEffect(() => {

@@ -1,8 +1,8 @@
 import useKeyboardStore from "@/stores/keyboard-state";
-import useMixerStore from "@/stores/player/mixer-store";
 import { usePeerStore } from "@/stores/peer-store";
 import React, { useEffect } from "react";
 import useQueuePlayer from "@/stores/player/update/modules/queue-player";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 
 interface EventRenderSuperProps {
   setSearchSongList?: (value: SearchResult[]) => void;
@@ -18,11 +18,11 @@ const EventRenderSuper: React.FC<EventRenderSuperProps> = ({
   const received = usePeerStore((state) => state.received);
 
   // MIX
-  const setCurrntGain = useMixerStore((state) => state.setCurrntGain);
-  const setVolumes = useMixerStore((state) => state.setVolumes);
-  const setPan = useMixerStore((state) => state.setPan);
-  const setReverb = useMixerStore((state) => state.setReverb);
-  const setChorusDepth = useMixerStore((state) => state.setChorusDepth);
+  const setCurrntGain = useMixerStoreNew((state) => state.setCurrntGain);
+  const setVolumes = useMixerStoreNew((state) => state.setVolumes);
+  const setPan = useMixerStoreNew((state) => state.setPan);
+  const setReverb = useMixerStoreNew((state) => state.setReverb);
+  const setChorusDepth = useMixerStoreNew((state) => state.setChorusDepth);
 
   // TIME PLAYING
   // const setCurrentTime = usePlayer((state) => state.setCurrentTime);
@@ -38,23 +38,24 @@ const EventRenderSuper: React.FC<EventRenderSuperProps> = ({
       const type = received.content.type;
       const data = received?.content.message;
 
+      //channel: number, value: number, synthUpdate: boolean
+
       // MIX
       if (type === "GIND_NODE") {
         let gain: number[] = data;
         setCurrntGain(gain);
       } else if (type === "VOLUMES") {
-        let volumes: number[] = data;
-        console.log(volumes);
-        setVolumes(volumes);
+        let { channel, value } = data;
+        setVolumes(channel, value, true);
       } else if (type === "PAN") {
-        let pan: number[] = data;
-        setPan(pan);
+        let { channel, value } = data;
+        setPan(channel, value, true);
       } else if (type === "REVERB") {
-        let reverb: number[] = data;
-        setReverb(reverb);
+        let { channel, value } = data;
+        setReverb(channel, value, true);
       } else if (type === "CHORUSDEPTH") {
-        let chorusDepth: number[] = data;
-        setChorusDepth(chorusDepth);
+        let { channel, value } = data;
+        setChorusDepth(channel, value, true);
       }
 
       // TIME PLAYING

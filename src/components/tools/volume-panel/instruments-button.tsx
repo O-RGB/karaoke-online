@@ -1,5 +1,4 @@
 import ButtonDropdown from "@/components/common/button/button-dropdown";
-import useEventStore from "@/stores/player/event.store";
 import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
 import { channel } from "diagnostics_channel";
 import React, { useEffect, useMemo, useState } from "react";
@@ -11,6 +10,7 @@ import RangeBarClone from "@/components/common/input-data/range-bar-clone";
 import MixPanVolume from "./mix-controller/mix-pan-volume";
 import MixReverbVolume from "./mix-controller/mix-reverb-volume";
 import MixChorusDepthVolume from "./mix-controller/mix-chorus-depth.volume";
+import useInstrumentStore from "@/stores/player/event-player/modules/event-instrument-store";
 
 interface InstrumentsButtonProps {
   // instrument: number;
@@ -39,7 +39,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   onMouseUp,
   onTouchEnd,
 }) => {
-  const instruments = useEventStore((state) => state.instrument);
+  const instruments = useInstrumentStore((state) => state.instrument);
   const instrument = instruments[channel];
 
   const persetOptions = useMemo(

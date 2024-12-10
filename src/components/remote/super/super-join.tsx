@@ -9,13 +9,9 @@ import Label from "../../common/display/label";
 import { FaRegFileAudio } from "react-icons/fa";
 import { readSong } from "@/lib/karaoke/read";
 import { usePeerStore } from "@/stores/peer-store";
-import useMixerStore from "@/stores/player/mixer-store";
 import EventRenderSuper from "./event-render";
 import QueueSong from "@/components/tools/queue-song/queue-song";
-import useKeyboardStore from "@/stores/keyboard-state";
-import RangeBarClone from "@/components/common/input-data/range-bar-clone";
-import PlayerPanel from "@/components/tools/player-panel";
-import Button from "@/components/common/button/button";
+import useKeyboardStore from "@/stores/keyboard-state"; 
 import NextSongButton from "@/components/common/player/next-song-button";
 
 interface SuperJoinConnectProps {

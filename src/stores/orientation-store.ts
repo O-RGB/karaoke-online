@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import useMixerStore from "./player/mixer-store";
+import useMixerStoreNew from "./player/event-player/modules/event-mixer-store";
 
 type Orientation = "landscape" | "portrait" | null;
 
@@ -31,7 +31,7 @@ const useOrientationStore = create<OrientationState>((set, get) => ({
         window.innerWidth > window.innerHeight ? "landscape" : "portrait";
       set({ orientation: newOrientation });
       if (newOrientation === "landscape") {
-        useMixerStore.getState().setHideMixer(true);
+        useMixerStoreNew.getState().setHideMixer(true);
       }
     } else {
       set({ orientation: null });

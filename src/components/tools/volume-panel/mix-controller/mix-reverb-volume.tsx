@@ -1,5 +1,5 @@
 import RangeBarClone from "@/components/common/input-data/range-bar-clone";
-import useMixerStore from "@/stores/player/mixer-store";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import React from "react";
 
 interface MixReverbVolumeProps {
@@ -17,7 +17,7 @@ const MixReverbVolume: React.FC<MixReverbVolumeProps> = ({
   onMouseUp,
   onTouchEnd,
 }) => {
-  const reverb = useMixerStore((state) => state.reverb[channel]);
+  const reverb = useMixerStoreNew((state) => state.reverb[channel]);
   return (
     <>
       <RangeBarClone

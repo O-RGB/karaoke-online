@@ -1,6 +1,6 @@
 import RangeBarClone from "@/components/common/input-data/range-bar-clone";
-import useMixerStore from "@/stores/player/mixer-store";
-import React from "react";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import React, { useEffect } from "react";
 
 interface MixMainVolume {
   onMouseUp?: () => void;
@@ -17,11 +17,13 @@ const MixMainVolume: React.FC<MixMainVolume> = ({
   onMouseUp,
   onTouchEnd,
 }) => {
-  const volume = useMixerStore((state) => state.volumes[channel]);
+  const volume = useMixerStoreNew((state) => state.volumes[channel]);
 
   if (channel === 3) {
     console.log(volume);
   }
+
+  useEffect(() => {}, [volume]);
   return (
     <RangeBarClone
       value={volume}

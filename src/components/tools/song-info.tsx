@@ -1,5 +1,5 @@
 import { useOrientation } from "@/hooks/orientation-hook";
-import useMixerStore from "@/stores/player/mixer-store";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 import React, { useEffect, useState } from "react";
 
@@ -7,7 +7,7 @@ interface SongInfoProps {}
 
 const SongInfo: React.FC<SongInfoProps> = ({}) => {
   const { orientation } = useOrientation();
-  const hideMixer = useMixerStore((state) => state.hideMixer);
+  const hideMixer = useMixerStoreNew((state) => state.hideMixer);
   const musicInfo = useRuntimePlayer((state) => state.musicInfo)
 
   const [show, setShow] = useState<boolean>(false);

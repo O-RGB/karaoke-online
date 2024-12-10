@@ -18,11 +18,7 @@ import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper-modal";
 import { getTracklist } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
-// import TicksRender from "./ticks-render/ticks-render";
 import LyricsRender from "./lyrics-render/lyrics-render";
-import GainRender from "./gain-render/gain-render";
-import VolumeEvnet from "./event-render/volume-event";
-import InstrumentsEvent from "./event-render/instruments-event";
 import DisplaySettingModal from "../modal/display";
 import { useSpessasynthStore } from "../../stores/spessasynth-store";
 import { DragDrop } from "../tools/drag-drop/drag-drop";
@@ -30,7 +26,6 @@ import DataStoresModal from "../modal/datastores";
 import useTracklistStore from "@/stores/tracklist-store";
 import RemoteRender from "./remote-render/remote-render";
 import useNotificationStore from "@/stores/notification-store";
-// import { usePlayer } from "@/stores/player/player-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/stores/config/config-store";
 import QueueSong from "../tools/queue-song/queue-song";
@@ -39,8 +34,6 @@ import NextSongPanel from "../tools/next-song-panel";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import SongInfo from "../tools/song-info";
 import SoundSettingModal from "../modal/sound-setting";
-import { usePlayerNew } from "@/stores/player/update/player-new-store";
-import useQueuePlayer from "@/stores/player/update/modules/queue-player";
 
 interface KaraokePageProps {}
 
@@ -48,7 +41,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const setupSpessasynth = useSpessasynthStore(
     (state) => state.setupSpessasynth
   );
-  const analysers = useSpessasynthStore((state) => state.analysers);
 
   const player = useSpessasynthStore((state) => state.player);
   const addTracklist = useTracklistStore((state) => state.addTracklist);
@@ -56,7 +48,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     (state) => state.initializeKeyboardListeners
   );
 
-  // const setSongPlaying = usePlayer((state) => state.setSongPlaying);
   const handle = useFullScreenHandle();
   const notification = useNotificationStore((state) => state.notification);
   const config = useConfigStore((state) => state.config);
@@ -101,64 +92,20 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
   console.log("main rerender");
 
-  // return (
-  //   <>
-  //     <SearchSong></SearchSong>
-  //     Debug Mode
-  //     <div className="pt-20">
-  //       <div
-  //         onClick={() => {
-  //           play();
-  //         }}
-  //       >
-  //         Play
-  //       </div>
-  //       <div
-  //         onClick={() => {
-  //           paused();
-  //         }}
-  //       >
-  //         paused
-  //       </div>
-  //       <div>{JSON.stringify(queue)}</div>
-  //       <div
-  //         onClick={() => {
-  //           nextMusic();
-  //         }}
-  //       >
-  //         nextSong
-  //       </div>
-  //       <div
-  //         onClick={() => {
-  //           console.log(queue);
-  //         }}
-  //       >
-  //         Print Queue
-  //       </div>
-  //     </div>
-  //   </>
-  // );
-
   return (
     <FullScreen handle={handle}>
-      {/* <DragDrop setSongPlaying={setSongPlaying}></DragDrop> */}
       {/* Process */}
       <WallpaperRender
         wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>
       <RemoteRender></RemoteRender>
-      {/* <TicksRender></TicksRender> */}
       <LyricsRender></LyricsRender>
-      <GainRender analysers={analysers}></GainRender>
-      <VolumeEvnet></VolumeEvnet>
-      <InstrumentsEvent></InstrumentsEvent>
-
       {/* Contact */}
       <div id="modal-container">
         <ContextModal modal={modalMap}>
           <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel>
           <StatusPanel notification={notification}></StatusPanel>
-          <VolumePanel analysers={analysers}></VolumePanel>
+          <VolumePanel></VolumePanel>
           <TempoPanel></TempoPanel>
           <ClockPanel></ClockPanel>
           <SongInfo></SongInfo>

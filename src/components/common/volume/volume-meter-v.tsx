@@ -1,4 +1,4 @@
-import useMixerStore from "@/stores/player/mixer-store";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import { useEffect, useRef } from "react";
 
 interface VolumeMeterVProps {
@@ -14,7 +14,7 @@ const VolumeMeterV: React.FC<VolumeMeterVProps> = ({
   channel,
   max = 100,
 }) => {
-  level = useMixerStore((state) => state.gain[channel]);
+  level = useMixerStoreNew((state) => state.gain[channel]);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 

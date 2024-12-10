@@ -19,17 +19,16 @@ import useConfigStore from "@/stores/config/config-store";
 import volumeSynth from "@/features/volume/volume-features";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
-import useMixerStore from "@/stores/player/mixer-store";
 import useNotificationStore from "@/stores/notification-store";
 import { FaList } from "react-icons/fa";
 import useKeyboardStore from "@/stores/keyboard-state";
 import { useSpessasynthStore } from "@/stores/spessasynth-store";
 import PlayerPanel from "../player-panel";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 
 interface VolumePanelProps {
   onVolumeChange?: (channel: number, value: number) => void;
   onOpenQueue?: () => void;
-  analysers?: AnalyserNode[];
   audioGain?: number[];
   options?: React.ReactNode;
   className?: string;
@@ -56,54 +55,55 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const setNotification = useNotificationStore(
     (state) => state.setNotification
   );
-  const hideMixer = useMixerStore((state) => state.hideMixer);
+  const hideMixer = useMixerStoreNew((state) => state.hideMixer);
 
-  const setHideMixer = useMixerStore((state) => state.setHideMixer);
-  const setHeld = useMixerStore((state) => state.setHeld);
+  const setHideMixer = useMixerStoreNew((state) => state.setHideMixer);
+  const setVolumes = useMixerStoreNew((state) => state.setVolumes);
+  const setPan = useMixerStoreNew((state) => state.setPan);
+  const setReverb = useMixerStoreNew((state) => state.setReverb);
+  const setChorusDepth = useMixerStoreNew((state) => state.setChorusDepth);
+  const updatePitch = useMixerStoreNew((state) => state.updatePitch);
+  const updatePreset = useMixerStoreNew((state) => state.updatePreset);
+  const setMute = useMixerStoreNew((state) => state.setMute);
+
+  const setHeld = useMixerStoreNew((state) => state.setHeld);
   const synth = useSpessasynthStore((state) => state.synth);
 
-  const [lock, setLock] = useState<boolean[]>(Array(16).fill(false));
   const volLayout: number[] = Array(16).fill(0);
-
-  const volumeLib = synth ? volumeSynth(synth) : undefined;
+  // const volumeLib = synth ? volumeSynth(synth) : undefined;
 
   const onVolumeMeterChange = (channel: number, value: number) => {
-    if (synth) {
-      volumeLib?.updateMainVolume(channel - 1, value);
-    } else {
-      onVolumeChange?.(channel - 1, value);
-    }
+    setVolumes(channel - 1, value, true);
+    // if (synth) {
+    //   volumeLib?.updateMainVolume(channel - 1, value);
+    // } else {
+    //   onVolumeChange?.(channel - 1, value);
+    // }
   };
 
   const onPenChange = (channel: number, value: number) => {
-    volumeLib?.updatePanVolume(channel - 1, value);
+    setPan(channel - 1, value, true);
   };
 
   const onPitchChange = (value: number) => {
-    volumeLib?.updatePitch(null, value);
+    updatePitch(null, value);
   };
 
   const onMutedVolume = (channel: number, isMuted: boolean) => {
-    if (volumeLib) {
-      volumeLib.updateMuteVolume(channel - 1, isMuted);
-      setLock((v) => {
-        v[channel - 1] = isMuted;
-        return v;
-      });
-    }
+    setMute(channel - 1, isMuted);
   };
 
   const onLockedVolume = (channel: number, isLocked: boolean) => {
-    volumeLib?.updateLockedVolume(channel - 1, isLocked);
+    // volumeLib?.updateLockedVolume(channel - 1, isLocked);
   };
   const onPersetChange = (channel: number, value: number) => {
-    volumeLib?.updatePreset(channel - 1, value);
+    updatePreset(channel - 1, value);
   };
   const onReverbChange = (channel: number, value: number) => {
-    volumeLib?.updateReverb(channel - 1, value);
+    setReverb(channel - 1, value, true);
   };
   const onChorusDepthChange = (channel: number, value: number) => {
-    volumeLib?.updateChorusDepth(channel - 1, value);
+    setChorusDepth(channel - 1, value, true);
   };
 
   const grid =

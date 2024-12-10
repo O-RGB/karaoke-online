@@ -1,5 +1,5 @@
 import { useOrientation } from "@/hooks/orientation-hook";
-import useMixerStore from "@/stores/player/mixer-store";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import useQueuePlayer from "@/stores/player/update/modules/queue-player";
 import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 import React, { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ interface NextSongPanelProps {}
 
 const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
   const { orientation } = useOrientation();
-  const hideMixer = useMixerStore((state) => state.hideMixer);
+  const hideMixer = useMixerStoreNew((state) => state.hideMixer);
   const countDown = useRuntimePlayer((state) => state.countDown);
   const queue = useQueuePlayer((state) => state.queue);
   const [saveInfo, setInfo] = useState<SearchResult>();

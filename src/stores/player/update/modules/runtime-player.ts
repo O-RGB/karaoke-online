@@ -7,6 +7,7 @@ import {
   sortTempoChanges,
 } from "@/lib/app-control";
 import useQueuePlayer from "./queue-player";
+import useEventStoreNew from "../../event-player/event-store";
 
 const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   isPaused: false,
@@ -56,7 +57,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   },
 
   play: () => {
-    console.log("Play ing")
+    console.log("Play ing");
     const player = useSpessasynthStore.getState().player;
     player?.play();
 
@@ -101,11 +102,16 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   tickRun: (isPlay: boolean) => {
     const { intervalId } = get();
     const player = useSpessasynthStore.getState().player;
+    const setEventRun = useEventStoreNew.getState().setEventRun;
+    const setGainRun = useEventStoreNew.getState().setGainRun;
     const nextMusic = useQueuePlayer.getState().nextMusic;
     const midi = get().midi;
+
+    setEventRun(isPlay);
     if (isPlay) {
       if (!intervalId) {
         const newIntervalId = setInterval(() => {
+          setGainRun();
           const timeDivision = midi?.timeDivision;
           const tempoChanges: ITempoChange[] = midi?.tempoChanges ?? [];
           const currentTime = player?.currentTime;
