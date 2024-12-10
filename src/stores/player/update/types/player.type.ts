@@ -10,7 +10,7 @@ export interface QueuePlayerProps {
   addQueue: (value: SearchResult) => void;
   removeQueue: (index: number) => void;
   moveQueue: (value: SearchResult[]) => void;
-  playMusic: (value: SearchResult, index: number) => void;
+  playMusic: (index: number) => void;
   nextMusic: () => void;
 }
 
@@ -29,6 +29,8 @@ export interface RuntimePlayer {
   ) => void;
   play: () => void;
   paused: () => void;
+  stop: () => void;
+  reset: () => void;
 }
 
 export interface RuntimeTick {
@@ -39,6 +41,7 @@ export interface RuntimeTick {
 export interface RuntimeValue {
   isPaused: boolean;
   isFinished: boolean;
+  hasTransitioned: boolean;
   countDown: number;
   currentTime: number;
   currentTick: number;

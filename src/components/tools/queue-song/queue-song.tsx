@@ -154,6 +154,7 @@ const QueueSong: React.FC<QueueSongProps> = ({
   const [lockFirstIndex, setLockFirstIndex] = useState<boolean>(false);
   const queue = useQueuePlayer((state) => state.queue);
   const moveQueue = useQueuePlayer((state) => state.moveQueue);
+  const playMusic = useQueuePlayer((state) => state.playMusic);
   const countDown = useRuntimePlayer((state) => state.countDown);
   const [selected, setSelected] = useState<number>(0);
 
@@ -225,6 +226,7 @@ const QueueSong: React.FC<QueueSongProps> = ({
       setLockFirstIndex(false);
     }
   }, [countDown]);
+
   useEffect(() => {
     setSelected((value) => {
       let coming = value + 1;
@@ -239,8 +241,8 @@ const QueueSong: React.FC<QueueSongProps> = ({
   useEffect(() => {
     setSelected((value) => {
       let coming = value - 1;
-      if (coming <= 1) {
-        return 1;
+      if (coming <= 0) {
+        return 0;
       } else {
         return coming;
       }
@@ -250,18 +252,30 @@ const QueueSong: React.FC<QueueSongProps> = ({
   useEffect(() => {
     if (queueing && searching === "") {
       let clone = [...queue];
-      if (clone.length > 0) {
-        let songPlaying = clone[selected];
-        if (songPlaying) {
-          let removed = clone.filter((_, i) => i !== selected);
-          moveQueue(removed);
-          // playMusic(songPlaying, )
-          // setSongPlaying(songPlaying.file, songPlaying.songInfo);
-          resetQueueingTimeout(0);
-        }
+      let songPlaying = clone[selected];
+
+      if (songPlaying) {
+        playMusic(selected);
+        resetQueueingTimeout(0);
+        let removed = clone.filter((_, i) => i !== selected);
+        moveQueue(removed);
       }
+
+      // if (clone.length > 0) {
+      //   let songPlaying = clone[selected];
+      //   if (songPlaying) {
+      //     let removed = clone.filter((_, i) => i !== selected);
+      //     moveQueue(removed);
+      //     nextMusic();
+      //     // playMusic(songPlaying, )
+      //     // setSongPlaying(songPlaying.file, songPlaying.songInfo);
+      //     resetQueueingTimeout(0);
+      //   }
+      // }
     }
   }, [onEnter]);
+
+  useEffect(() => {}, [queue]);
 
   if (!queueing) {
     return <></>;
@@ -280,6 +294,7 @@ const QueueSong: React.FC<QueueSongProps> = ({
       }}
       className={`z-[99] pt-[58px] h-screen bg-black/30 fixed text-white w-full px-5 duration-300`}
     >
+      selected: {JSON.stringify(selected)}
       <div
         onClick={(e) => {
           e.stopPropagation(); // หยุดการส่งต่อ event
@@ -307,27 +322,24 @@ const QueueSong: React.FC<QueueSongProps> = ({
                 items={queue.map((item) => item.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {queue.map(
-                  (item, index) =>
-                    index > 0 && (
-                      <SortableTableRow
-                        key={`queue-${item.id}-${index}`}
-                        item={{
-                          details: `${item.id} ${item.name} - ${item.artist}`,
-                          id: item.id,
-                          number: index,
-                          type: item.type.toString(),
-                        }}
-                        index={index}
-                        isFirst={index == 1}
-                        isLast={index === queue.length - 1}
-                        lockFirst={countDown < stopTouchMusicPlaying}
-                        countDown={countDown}
-                        onKeySelected={selected === index}
-                        onDelete={onDelete}
-                      />
-                    )
-                )}
+                {queue.map((item, index) => (
+                  <SortableTableRow
+                    key={`queue-${item.id}-${index}`}
+                    item={{
+                      details: `${item.id} ${item.name} - ${item.artist}`,
+                      id: item.id,
+                      number: index,
+                      type: item.type.toString(),
+                    }}
+                    index={index}
+                    isFirst={index == 0}
+                    isLast={index === queue.length - 1}
+                    lockFirst={countDown < stopTouchMusicPlaying}
+                    countDown={countDown}
+                    onKeySelected={selected === index}
+                    onDelete={onDelete}
+                  />
+                ))}
               </SortableContext>
             </tbody>
           </table>

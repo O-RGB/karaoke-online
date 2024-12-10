@@ -39,9 +39,9 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
     (state) => state.sendSuperUserMessage
   );
 
-  const play = usePlayerNew((state) => state.runtime.play);
-  const paused = usePlayerNew((state) => state.runtime.paused);
-  const nextMusic = usePlayerNew((state) => state.queue.nextMusic);
+  // const play = usePlayerNew((state) => state.runtime.play);
+  // const paused = usePlayerNew((state) => state.runtime.paused);
+  // const nextMusic = usePlayerNew((state) => state.queue.nextMusic);
 
   const queueing = useKeyboardStore((state) => state.queueing);
   const searching = useKeyboardStore((state) => state.searching);

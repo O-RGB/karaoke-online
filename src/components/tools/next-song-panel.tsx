@@ -12,9 +12,10 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
   const countDown = useRuntimePlayer((state) => state.countDown);
   const queue = useQueuePlayer((state) => state.queue);
   const [saveInfo, setInfo] = useState<SearchResult>();
+
   useEffect(() => {
-    if (queue.length > 1 && countDown == 3) {
-      setInfo(queue[1]);
+    if (queue.length > 0 && countDown <= 3) {
+      setInfo(queue[0]);
     } else if (queue.length === 1) {
       setInfo(undefined);
     }

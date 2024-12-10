@@ -19,10 +19,11 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     set({ queue });
 
     if (runtime.isFinished) {
-      get().playMusic(value, 0);
+      get().playMusic(0);
       get().removeQueue(0);
     }
   },
+
   removeQueue: (index) => {
     let queue = get().queue;
     const updated = queue.filter((x, i) => i !== index);
@@ -44,16 +45,18 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
       return;
     }
 
-    get().playMusic(nextSong, 0);
+    get().playMusic(0);
     get().removeQueue(0);
   },
 
-  playMusic: async (value, index) => {
+  playMusic: async (index) => {
     const player = useSpessasynthStore.getState().player;
+    const runtime = useRuntimePlayer.getState();
 
     if (!player) {
       return;
     }
+
     const queue = get().queue;
     const music = queue[index];
 
@@ -62,14 +65,13 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     }
 
     const url = useConfigStore.getState().config.system?.url;
-    const song = await getSong(value, url);
+    const song = await getSong(music, url);
 
     if (!song) {
       return;
     }
 
-    player.pause();
-    player.stop();
+    runtime.stop();
 
     let midiFileArrayBuffer = await song.mid.arrayBuffer();
     let parsedMidi = null;
@@ -87,7 +89,6 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
       const ticks = convertCursorToTicks(timeDivision, song.cur);
       const ticksIndices = mapCursorToIndices(ticks);
 
-      const runtime = useRuntimePlayer.getState();
       runtime.setMidiInfo(
         ticks,
         ticksIndices,
@@ -95,17 +96,18 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
         song.lyr,
         parsedMidi,
         song,
-        value
+        music
       );
 
-      const isFinished = runtime.isFinished;
+      // const isFinished = runtime.isFinished;
 
-      if (isFinished) {
-        player?.loadNewSongList([parsedMidi]);
-      }
-
-      runtime.play();
-      runtime.tickRun(true);
+      // if (isFinished) {
+      player?.loadNewSongList([parsedMidi], false);
+      // }
+      setTimeout(() => {
+        runtime.play();
+        runtime.tickRun(true);
+      }, 500);
     }
   },
 }));

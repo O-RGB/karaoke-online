@@ -11,6 +11,7 @@ import useQueuePlayer from "./queue-player";
 const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   isPaused: false,
   isFinished: true,
+  hasTransitioned: true,
   countDown: 10,
   currentTime: 0,
   currentTick: 0,
@@ -24,6 +25,29 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   midi: undefined,
   musicInfo: undefined,
 
+  reset: () => {
+    set({
+      lyrics: [],
+      ticksIndices: new Map(),
+      ticks: [],
+      currentTempo: 0,
+      timeDivision: 0,
+      midi: undefined,
+      musicInfo: undefined,
+      countDown: 10,
+      isFinished: true,
+      isPaused: true,
+      // hasTransitioned: false,
+    });
+  },
+
+  stop: () => {
+    const player = useSpessasynthStore.getState().player;
+    player?.stop();
+    set({ isPaused: true, isFinished: true });
+    get().tickRun(false);
+  },
+
   paused: () => {
     const player = useSpessasynthStore.getState().player;
     player?.pause();
@@ -32,6 +56,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   },
 
   play: () => {
+    console.log("Play ing")
     const player = useSpessasynthStore.getState().player;
     player?.play();
 
@@ -54,7 +79,15 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
     }
   },
 
-  setMidiInfo(ticks, ticksIndices, timeDivision, lyrics, midi, midiDecoded) {
+  setMidiInfo(
+    ticks,
+    ticksIndices,
+    timeDivision,
+    lyrics,
+    midi,
+    midiDecoded,
+    musicInfo
+  ) {
     set({
       ticks,
       ticksIndices,
@@ -62,6 +95,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
       lyrics,
       midi,
       midiDecoded,
+      musicInfo,
     });
   },
   tickRun: (isPlay: boolean) => {
@@ -92,15 +126,16 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
           );
 
           const lastTime = Math.floor(player?.duration ?? 0);
-          const countDown = lastTime - Math.floor(currentTime ?? 0);
-          if (countDown < 10) {
-            set({ countDown });
-          }
-          if (countDown === 0) {
+          const updateCountDown = lastTime - Math.floor(currentTime ?? 0);
+
+          if (get().countDown === 0) {
+            get().reset();
+            get().tickRun(false);
             setTimeout(() => {
               nextMusic();
-              set({ countDown: 10 });
-            }, 1000);
+            }, 2000);
+          } else {
+            set({ countDown: updateCountDown });
           }
 
           set({

@@ -14,7 +14,7 @@ const InstrumentsEvent: React.FC<InstrumentsEventProps> = ({}) => {
       const channel: number = e.channel;
       const program: number = e.program;
 
-      console.log("programchange", channel, program);
+      // console.log("programchange", channel, program);
       storeSetInstrument((prevInstrument) => {
         const newInstrument = [...prevInstrument];
         newInstrument[channel] = program;
