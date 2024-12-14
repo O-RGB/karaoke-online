@@ -64,6 +64,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     } else {
       tl = await getTracklist(["CUSTOM", "EXTHEME"]);
     }
+
     addTracklist(tl);
     setTimeout(() => {
       setPrepare(false);

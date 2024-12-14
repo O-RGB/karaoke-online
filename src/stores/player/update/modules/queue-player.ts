@@ -36,15 +36,29 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
 
   nextMusic: () => {
     const queue = get().queue;
+
+    console.log(
+      "%csrc/stores/player/update/modules/queue-player.ts:40 queue",
+      "color: #007acc;",
+      queue
+    );
     let nextSong: SearchResult | undefined = undefined;
     if (queue.length > 0) {
       nextSong = queue[0];
     }
 
     if (!nextSong) {
+      console.log(
+        "%csrc/stores/player/update/modules/queue-player.ts:47 return",
+        "color: #007acc;"
+      );
       return;
     }
 
+    console.log(
+      "%csrc/stores/player/update/modules/queue-player.ts:51 playMusic",
+      "color: white; background-color: #007acc;"
+    );
     get().playMusic(0);
     get().removeQueue(0);
   },
@@ -99,11 +113,8 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
         music
       );
 
-      // const isFinished = runtime.isFinished;
-
-      // if (isFinished) {
       player?.loadNewSongList([parsedMidi], false);
-      // }
+
       setTimeout(() => {
         runtime.play();
         runtime.tickRun(true);

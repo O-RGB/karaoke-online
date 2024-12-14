@@ -89,7 +89,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <Button
             className="hover:bg-white/20"
             blur={false}
-            disabled={queue.length <= 1}
+            disabled={queue.length == 0}
             border=""
             shadow=""
             padding="p-4"

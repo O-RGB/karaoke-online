@@ -21,6 +21,7 @@ const useTracklistStore = create<TrackListStore>((set, get) => ({
   },
   addTracklist: (trackList: SearchResult[]) => {
     const { tracklist } = get();
+
     if (tracklist) {
       const updatedTrie = tracklist;
       trackList.forEach((item) => updatedTrie.add(item));

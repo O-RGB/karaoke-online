@@ -122,6 +122,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           show: true,
         });
         // setTracklistFile(file);
+        console.log("UPLOAD: Tracklist Loaded lenght", saved.length)
         addTracklist(saved);
         setMusicFilename(file?.name);
       } else {

@@ -3,9 +3,10 @@ import TrieSearch from "trie-search";
 const options = {
   ignoreCase: true, // ยังจำเป็นต้องใช้
   splitOnRegEx: /\s+/, // ยังจำเป็นต้องใช้
-  min: 0, // เพิ่มจาก 1 เป็น 2 เพื่อลดการประมวลผล
+  min: 0,
   keepAll: false, // ปิดการเก็บข้อมูลทั้งหมด
   cache: false, // ปิด cache เพื่อลดการใช้ memory
+  fuzzy: true, // เปิด fuzzy matching
   expandRegexes: [
     {
       regex: /[่้๊๋]/g,
