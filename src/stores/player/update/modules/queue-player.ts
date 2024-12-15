@@ -1,12 +1,11 @@
 import { create } from "zustand";
 import { QueuePlayerProps } from "../types/player.type";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
+
 import { getSong } from "@/lib/storage/song";
 import useConfigStore from "@/stores/config/config-store";
-import { MIDI } from "spessasynth_lib";
-import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { convertCursorToTicks, mapCursorToIndices } from "@/lib/app-control";
 import useRuntimePlayer from "./runtime-player";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   queue: [],
@@ -64,7 +63,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   },
 
   playMusic: async (index) => {
-    const player = useSpessasynthStore.getState().player;
+    const player = useSynthesizerEngine.getState().engine;
     const runtime = useRuntimePlayer.getState();
 
     if (!player) {
@@ -87,16 +86,20 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
 
     runtime.stop();
 
-    let midiFileArrayBuffer = await song.mid.arrayBuffer();
-    let parsedMidi = null;
-    try {
-      parsedMidi = new MIDI(midiFileArrayBuffer, song.mid.name);
-    } catch (e) {
-      // console.error(e);
-      const fix = await fixMidiHeader(song.mid);
-      const fixArrayBuffer = await fix.arrayBuffer();
-      parsedMidi = new MIDI(fixArrayBuffer, fix.name);
-    }
+    console.log("prepae load new song");
+
+    const parsedMidi = await player.player?.loadMidi(song.mid);
+
+    // let midiFileArrayBuffer = await song.mid.arrayBuffer();
+    // let parsedMidi = null;
+    // try {
+    //   parsedMidi = new MIDI(midiFileArrayBuffer, song.mid.name);
+    // } catch (e) {
+    //   // console.error(e);
+    //   const fix = await fixMidiHeader(song.mid);
+    //   const fixArrayBuffer = await fix.arrayBuffer();
+    //   parsedMidi = new MIDI(fixArrayBuffer, fix.name);
+    // }
 
     if (parsedMidi) {
       const timeDivision = parsedMidi.timeDivision;
@@ -113,7 +116,9 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
         music
       );
 
-      player?.loadNewSongList([parsedMidi], false);
+      // player?.loadNewSongList([parsedMidi], false);
+
+      console.log(parsedMidi);
 
       setTimeout(() => {
         runtime.play();

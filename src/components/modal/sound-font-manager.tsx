@@ -1,13 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { setSoundFont } from "@/lib/spssasynth/sound-font";
 import UpdateFile from "../common/input-data/upload";
 import { TbMusicPlus } from "react-icons/tb";
 
-import { FaRegFileAudio } from "react-icons/fa";
 import Button from "../common/button/button";
 import { IoMdAddCircle } from "react-icons/io";
-import { RiDeleteBin5Line } from "react-icons/ri";
 import { FaCircleCheck } from "react-icons/fa6";
 import { ImFilePlay } from "react-icons/im";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
@@ -18,21 +15,14 @@ import {
   getSoundFontStorage,
   saveSoundFontStorage,
 } from "@/lib/storage/soundfont";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 import TableList from "../common/table/table-list";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
 interface SoundfontManagerProps {}
 
 const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
-  const synth = useSpessasynthStore((state) => state.synth);
-  const player = useSpessasynthStore((state) => state.player);
-  const defaultSoundFont = useSpessasynthStore(
-    (state) => state.defaultSoundFont
-  );
-  const SFname = useSpessasynthStore((state) => state.SFname);
-  const setSoundFontName = useSpessasynthStore(
-    (state) => state.setSoundFontName
-  );
+  const engine = useSynthesizerEngine((state) => state.engine);
+
   const [soundFontStorage, setSoundFontStorage] = useState<
     ListItem<IDBValidKey>[]
   >([]);
@@ -54,11 +44,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
   const getSoundfontLocal = async () => {
     const sf = await getSoundFontList();
     if (sf.length === 0) {
-      let file: File | undefined = defaultSoundFont;
-      if (file && synth) {
-        setSoundFont(file, synth);
-        setSoundFontName(file.name);
-      }
+      engine?.loadDefaultSoundFont();
     }
   };
 
@@ -69,14 +55,14 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
 
   const updateSoundFont = async (file: File) => {
     setLoading(true);
-    if (player) player.pause();
-    if (file && synth) {
-      await setSoundFont(file, synth);
-      setSoundFontName(file.name);
+    if (engine) engine.player?.pause();
+    if (file && engine) {
+      engine.setSoundFont(file);
+      // setSoundFontName(file.name);
     }
 
     setTimeout(() => {
-      if (player) player.play();
+      if (engine) engine.player?.play();
       setLoading(false);
     }, 2000);
   };
@@ -95,7 +81,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
               accept=".sf2"
               className="border border-blue-500 p-3 rounded-md hover:bg-gray-50 duration-300"
               onSelectFile={async (file) => {
-                if (synth) {
+                if (engine) {
                   setLoading(true);
                   await saveSoundFontStorage(file);
                   await getSoundFontList();
@@ -126,7 +112,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
                     <ImFilePlay className="text-4xl"></ImFilePlay>
                   )}
                 </div>
-                <div className="text-sm">{SFname}</div>
+                <div className="text-sm">{engine?.soundfontName}</div>
               </div>
             </div>
           </div>
@@ -144,7 +130,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
                 className="w-7 h-7"
                 disabled={loading}
                 onClick={async () => {
-                  if (SFname !== value) {
+                  if (engine?.soundfontName !== value) {
                     const loadSf = await getSoundFontStorage(value);
                     if (loadSf.value) {
                       updateSoundFont(loadSf.value);
@@ -156,7 +142,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
                 icon={
                   loading ? (
                     <AiOutlineLoading3Quarters className="animate-spin"></AiOutlineLoading3Quarters>
-                  ) : SFname === value ? (
+                  ) : engine?.soundfontName === value ? (
                     <FaCircleCheck className="text-green-500"></FaCircleCheck>
                   ) : (
                     <IoMdAddCircle></IoMdAddCircle>

@@ -19,6 +19,7 @@ export const useSpessasynthStore = create<SpessasynthStoreProps>(
       const { audio, synth, player } = await setupSpessasynth();
       set({ audio, synth, player });
     },
+    
   })
 );
 

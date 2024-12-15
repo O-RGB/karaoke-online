@@ -1,3 +1,5 @@
+import { EngineType } from "@/stores/engine/synth-store";
+
 export type RefreshRate = "HIGH" | "MIDDLE" | "LOW";
 export type SystemFont =
   | "เริ่มต้น"
@@ -51,6 +53,7 @@ export interface SystemConfig {
   tracklistUrl: string;
   tracklistUrlTested: boolean;
   uploadToDrive: boolean;
+  engine: EngineType;
 }
 
 export interface ThemesConfig {

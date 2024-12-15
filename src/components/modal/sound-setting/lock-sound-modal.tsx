@@ -3,8 +3,8 @@ import Select from "@/components/common/input-data/select/select";
 import Label from "@/components/common/display/label";
 import volumeSynth from "@/features/volume/volume-features";
 import useConfigStore from "@/stores/config/config-store";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 import React, { useEffect, useState } from "react";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
 interface LockSoundModalProps {}
 
@@ -14,28 +14,28 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
   const lockBased = config.sound?.lockBase;
   const [onLockBase, setLockBase] = useState<boolean>(false);
 
-  const preset = useSpessasynthStore((state) => state.perset);
+  const preset = useSynthesizerEngine((state) => state.engine?.preset);
 
-  const synth = useSpessasynthStore((state) => state.synth);
-  const volumeSetting = synth ? volumeSynth(synth) : null;
+  // const synth = useSynthesizerEngine((state) => state.synth);
+  // const volumeSetting = synth ? volumeSynth(synth) : null;
 
   const updateLocked = (program: number) => {
-    volumeSetting?.updateLockedPreset(1, false);
-    volumeSetting?.updatePreset(1, program);
-    volumeSetting?.updateLockedPreset(1, true);
+    // volumeSetting?.updateLockedPreset(1, false);
+    // volumeSetting?.updatePreset(1, program);
+    // volumeSetting?.updateLockedPreset(1, true);
   };
 
   const onBaseLock = (value: boolean) => {
     setLockBase(value);
 
-    if (!value) {
-      setConfig({ sound: { lockBase: undefined } });
-      volumeSetting?.updateLockedPreset(1, false);
-    } else {
-      setConfig({ sound: { lockBase: 32 } });
-      updateLocked(32);
-      volumeSetting?.updateLockedPreset(1, true);
-    }
+    // if (!value) {
+    //   setConfig({ sound: { lockBase: undefined } });
+    //   volumeSetting?.updateLockedPreset(1, false);
+    // } else {
+    //   setConfig({ sound: { lockBase: 32 } });
+    //   updateLocked(32);
+    //   volumeSetting?.updateLockedPreset(1, true);
+    // }
   };
 
   const onBaseChange = (program: string) => {
@@ -63,10 +63,10 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
           defaultValue={`${lockBased}`}
           className="!w-full"
           onChange={onBaseChange}
-          options={preset.map((data) => ({
-            label: `${data.program} - ${data.presetName}`,
-            value: data.program,
-          }))}
+          // options={preset.map((data) => ({
+          //   label: `${data.program} - ${data.presetName}`,
+          //   value: data.program,
+          // }))}
         ></Select>
       </div>
     </>

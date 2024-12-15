@@ -3,7 +3,7 @@ import { RiRemoteControlFill } from "react-icons/ri";
 import Button from "../common/button/button";
 import Modal from "../common/modal";
 import HostRemote from "../remote/host";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
 interface RemoteFunctionProps {
   buttonClass?: string;
@@ -12,7 +12,7 @@ interface RemoteFunctionProps {
 const RemoteFunction: React.FC<RemoteFunctionProps> = ({ buttonClass }) => {
   const [onRemoteOpen, setRemoteOpen] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
-  const { player } = useSpessasynthStore();
+  const engine = useSynthesizerEngine((state) => state.engine);
 
   const setRemote = () => {
     setRemoteOpen((v) => !v);
@@ -22,11 +22,11 @@ const RemoteFunction: React.FC<RemoteFunctionProps> = ({ buttonClass }) => {
     setOpen((value) => !value);
   };
 
-  useEffect(() => {
-    const paused = player?.paused;
+  const autoStartup = async () => {
+    const paused = engine?.player?.paused;
     if (onRemoteOpen) {
-      let end: number = player?.midiData.duration ?? 0;
-      let currentTime: number = player?.currentTime ?? 0;
+      let end: number = engine?.player?.midiData?.duration ?? 0;
+      let currentTime: number = (await engine?.player?.getCurrentTime()) ?? 0;
 
       end = Math.floor(end);
       currentTime = Math.floor(currentTime);
@@ -38,7 +38,11 @@ const RemoteFunction: React.FC<RemoteFunctionProps> = ({ buttonClass }) => {
     if (paused === false) {
       setOpen(false);
     }
-  }, [player?.paused]);
+  };
+
+  useEffect(() => {
+    autoStartup();
+  }, [engine?.player?.paused]);
 
   return (
     <>

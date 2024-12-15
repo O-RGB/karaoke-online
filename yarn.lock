@@ -2378,6 +2378,11 @@ jiti@^1.21.0:
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-1.21.6.tgz#6c7f7398dd4b3142767f9a168af2f317a428d268"
   integrity sha512-2yTgeWTWzMWkHu6Jp9NKgePDaYHbntiwvYuuJLbbN9vl7DC9DvXKOB2BC3ZZ92D3cvV/aflH0osDfwpHepQ53w==
 
+js-synthesizer@^1.10.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/js-synthesizer/-/js-synthesizer-1.10.0.tgz#b13fd5589697cd4f8a3bea221586e9c5919e3bf7"
+  integrity sha512-OR8j8QcWgAPvVcJ8LOtCx3Ypdm7lfyumYGQmxLUWIpZmnpzoUlb/HDYagHMv79je1D/rS6mEkq27F48MS87LMw==
+
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"

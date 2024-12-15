@@ -3,6 +3,7 @@ import {
   VOLUME_DEFAULT,
   VOLUME_MIDDLE_DEFAULT_128,
 } from "@/config/value";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 import { usePeerStore } from "@/stores/peer-store";
 import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 
@@ -56,6 +57,14 @@ interface MixerStore {
 
   isMute: boolean[];
   setMute: (channel: number, isMuted: boolean) => void;
+
+  programList: number[];
+  setProgramList: (
+    programList: number[] | ((prev: number[]) => number[])
+  ) => void;
+
+  instrument: IPersetSoundfont[];
+  setInstrument: (instrument: IPersetSoundfont[]) => void;
 }
 
 const useMixerStoreNew = create<MixerStore>((set, get) => ({
@@ -120,10 +129,9 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
     }
 
     set({ volumes });
-
     if (synthUpdate) {
-      const synth = useSpessasynthStore.getState().synth;
-      synth?.controllerChange(channel, midiControllers.mainVolume, value);
+      const engine = useSynthesizerEngine.getState().engine;
+      engine?.setController(channel, midiControllers.mainVolume, value);
     }
   },
   pan: VOLUME_MIDDLE_DEFAULT_128,
@@ -145,8 +153,8 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
     set({ pan });
 
     if (synthUpdate) {
-      const synth = useSpessasynthStore.getState().synth;
-      synth?.controllerChange(channel, midiControllers.pan, value);
+      const engine = useSynthesizerEngine.getState().engine;
+      engine?.setController(channel, midiControllers.pan, value);
     }
   },
   reverb: VOLUME_MIDDLE_DEFAULT_128,
@@ -168,8 +176,8 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
     set({ reverb });
 
     if (synthUpdate) {
-      const synth = useSpessasynthStore.getState().synth;
-      synth?.controllerChange(channel, 91, value);
+      const engine = useSynthesizerEngine.getState().engine;
+      engine?.setController(channel, 91, value);
     }
   },
   chorusDepth: VOLUME_MIDDLE_DEFAULT_128,
@@ -191,8 +199,8 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
     set({ chorusDepth });
 
     if (synthUpdate) {
-      const synth = useSpessasynthStore.getState().synth;
-      synth?.controllerChange(channel, 93, value);
+      const engine = useSynthesizerEngine.getState().engine;
+      engine?.setController(channel, 93, value);
     }
   },
 
@@ -218,13 +226,9 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
     })),
 
   uploadLockedPitchWheel: (channel: number, isLocked: boolean) => {
-    const synth = useSpessasynthStore.getState().synth;
+    const engine = useSynthesizerEngine.getState().engine;
 
-    if (!synth) {
-      return;
-    }
-
-    synth.lockController(
+    engine?.lockController(
       channel,
       NON_CC_INDEX_OFFSET + modulatorSources.pitchWheel,
       isLocked
@@ -232,47 +236,12 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
   },
 
   updatePitch: (channel, semitones = 0) => {
-    const synth = useSpessasynthStore.getState().synth;
-
-    if (!synth) {
-      return;
-    }
-
-    const PITCH_CENTER = 8192;
-    const PITCH_RANGE = 16384;
-    const SEMITONE_STEP = PITCH_RANGE / 24;
-    const pitchValue = Math.max(
-      0,
-      Math.min(
-        PITCH_RANGE - 1,
-        Math.round(PITCH_CENTER + semitones * SEMITONE_STEP)
-      )
-    );
-    const MSB = (pitchValue >> 7) & 0x7f;
-    const LSB = pitchValue & 0x7f;
-    const sendPitch = (channel: number) => {
-      get().uploadLockedPitchWheel(channel, false);
-      synth.setPitchBendRange(channel, Math.abs(semitones));
-      synth.pitchWheel(channel, MSB, LSB);
-      if (semitones !== 0) {
-        get().uploadLockedPitchWheel(channel, true);
-      }
-    };
-    if (channel !== null) {
-      sendPitch(channel);
-    } else {
-      for (let i = 0; i < 16; i++) {
-        sendPitch(i);
-      }
-    }
+    const engine = useSynthesizerEngine.getState().engine;
+    engine?.updatePitch(channel, semitones);
   },
   updatePreset: (channel, value) => {
-    const synth = useSpessasynthStore.getState().synth;
-
-    if (!synth) {
-      return;
-    }
-    synth?.programChange(channel, value);
+    const engine = useSynthesizerEngine.getState().engine;
+    engine?.setProgram(channel, value);
   },
 
   isMute: VOLUME_DEFAULT.map((v) => false),
@@ -288,6 +257,20 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
 
     synth.muteChannel(channel, isMuted);
     set({ isMute });
+  },
+
+  programList: CHANNEL_DEFAULT,
+  setProgramList: (programList) =>
+    set((state) => ({
+      programList:
+        typeof programList === "function"
+          ? programList(state.programList)
+          : programList,
+    })),
+
+  instrument: [],
+  setInstrument: (instrument) => {
+    set({ instrument });
   },
 }));
 

@@ -22,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <script src="/js-synthesizer/libfluidsynth-2.3.0.js"></script>
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icon.ico" sizes="48x48" />
         <link rel="icon" type="image/x-icon" href="./icon.ico" />

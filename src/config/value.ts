@@ -84,6 +84,7 @@ export const DEFAULT_CONFIG: ConfigDisplay = {
     urlTested: false,
     tracklistUrlTested: false,
     uploadToDrive: false,
+    engine: "spessa",
   },
   sound: {},
 };

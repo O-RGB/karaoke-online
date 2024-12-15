@@ -33,16 +33,12 @@ import NextSongPanel from "../tools/next-song-panel";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import SongInfo from "../tools/song-info";
 import SoundSettingModal from "../modal/sound-setting";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
-  const setupSpessasynth = useSpessasynthStore(
-    (state) => state.setupSpessasynth
-  );
-
-  const player = useSpessasynthStore((state) => state.player);
+  const setup = useSynthesizerEngine((state) => state.setup);
   const addTracklist = useTracklistStore((state) => state.addTracklist);
   const initializeKeyboardListeners = useKeyboardStore(
     (state) => state.initializeKeyboardListeners
@@ -55,16 +51,14 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
   const startup = async () => {
     setPrepare(true);
-    setupSpessasynth();
+    setup(config.system?.engine);
     initializeKeyboardListeners();
     let tl: SearchResult[] = [];
-
     if (config.system?.drive) {
       tl = await getTracklist(["DRIVE", "DRIVE_EXTHEME"]);
     } else {
       tl = await getTracklist(["CUSTOM", "EXTHEME"]);
     }
-
     addTracklist(tl);
     setTimeout(() => {
       setPrepare(false);
@@ -87,9 +81,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
   };
 
-  if (!player) {
-    return <></>;
-  }
+  // if (!player) {
+  //   return <></>;
+  // }
 
   console.log("main rerender");
 

@@ -1,5 +1,6 @@
 import volumeSynth from "@/features/volume/volume-features";
 import useConfigStore from "@/stores/config/config-store";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 import { usePeerStore } from "@/stores/peer-store";
 import useQueuePlayer from "@/stores/player/update/modules/queue-player";
 import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
@@ -12,9 +13,11 @@ interface RemoteRenderProps {}
 const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
   const sendMessage = usePeerStore((state) => state.sendMessage);
   const received = usePeerStore((state) => state.received);
-  const synth = useSpessasynthStore((state) => state.synth);
+  // const synth = useSpessasynthStore((state) => state.synth);
+  const engine = useSynthesizerEngine((state) => state.engine);
+
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
-  const volumeLib = synth ? volumeSynth(synth) : undefined;
+  // const volumeLib = synth ? volumeSynth(synth) : undefined;
   const { sendSuperUserMessage, superUserConnections } = usePeerStore();
 
   const queue = useQueuePlayer((state) => state.queue);
@@ -48,7 +51,7 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
 
       case "SET_CHANNEL":
         let vol = data as ISetChannelGain;
-        volumeLib?.updateMainVolume(vol.channel, vol.value);
+        // volumeLib?.updateMainVolume(vol.channel, vol.value);
         return data as ISetChannelGain;
 
       case "SEARCH_SONG":

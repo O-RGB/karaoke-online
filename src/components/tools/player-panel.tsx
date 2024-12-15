@@ -9,7 +9,6 @@ import ContextModal from "../modal/context-modal";
 import { FiSettings } from "react-icons/fi";
 import Marquee from "react-fast-marquee";
 import { FaSearch } from "react-icons/fa";
-import { useFullScreenHandle } from "react-full-screen";
 
 import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
 import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";

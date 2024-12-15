@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Synthetizer } from "spessasynth_lib";
+import React from "react";
 import {
   PiMicrophoneStageFill,
   PiUserMinusFill,
@@ -16,14 +15,12 @@ import VolumeAction from "./volume-action";
 import VolumeHorizontal from "./volume-horizontal";
 import MixMainVolume from "./mix-controller/mix-main-volume";
 import useConfigStore from "@/stores/config/config-store";
-import volumeSynth from "@/features/volume/volume-features";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
 import useNotificationStore from "@/stores/notification-store";
 import { FaList } from "react-icons/fa";
 import useKeyboardStore from "@/stores/keyboard-state";
 
-import PlayerPanel from "../player-panel";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 
@@ -50,7 +47,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const resetQueueingTimeout = useKeyboardStore(
     (state) => state.resetQueueingTimeout
   );
-  const perset = useSpessasynthStore((state) => state.perset);
+  // const perset = useSpessasynthStore((state) => state.perset);
+  const instrument = useMixerStoreNew((state) => state.instrument)
 
   const { orientation } = useOrientation();
   const setNotification = useNotificationStore(
@@ -189,7 +187,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                   onPersetChange={onPersetChange}
                   onReverbChange={onReverbChange}
                   onChorusDepthChange={onChorusDepthChange}
-                  perset={perset}
+                  perset={instrument}
                   onMouseUp={() => setHeld(true)}
                   onTouchEnd={() => setHeld(false)}
                 ></InstrumentsButton>

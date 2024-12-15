@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { RuntimeProps } from "../types/player.type";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 import {
   calculateTicks,
   convertTicksToTime,
@@ -9,6 +8,7 @@ import {
 import useQueuePlayer from "./queue-player";
 import useEventStoreNew from "../../event-player/event-store";
 import useLyricsStoreNew from "@/stores/lyrics/lyrics-store";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
 const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   isPaused: false,
@@ -44,14 +44,14 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   },
 
   stop: () => {
-    const player = useSpessasynthStore.getState().player;
+    const player = useSynthesizerEngine.getState().engine?.player;
     player?.stop();
     set({ isPaused: true, isFinished: true });
     get().tickRun(false);
   },
 
   paused: () => {
-    const player = useSpessasynthStore.getState().player;
+    const player = useSynthesizerEngine.getState().engine?.player;
     player?.pause();
     set({ isPaused: true });
     get().tickRun(false);
@@ -59,7 +59,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
 
   play: () => {
     console.log("Play ing");
-    const player = useSpessasynthStore.getState().player;
+    const player = useSynthesizerEngine.getState().engine?.player;
     player?.play();
 
     set({ isPaused: false, isFinished: false });
@@ -73,11 +73,13 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   setCountDown: (queue) => {},
 
   setCurrentTime: (time) => {
-    const player = useSpessasynthStore.getState().player;
+    const player = useSynthesizerEngine.getState().engine?.player;
     if (player) {
       const duration = player.duration ?? 0;
       const newCurrentTime = (time / 100) * duration;
-      player.currentTime = newCurrentTime;
+      // player.currentTime = newCurrentTime;
+
+      player.setCurrentTime(newCurrentTime);
     }
   },
 
@@ -104,7 +106,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   },
   tickRun: (isPlay: boolean) => {
     const { intervalId } = get();
-    const player = useSpessasynthStore.getState().player;
+    const player = useSynthesizerEngine.getState().engine?.player;
     const setEventRun = useEventStoreNew.getState().setEventRun;
     const setGainRun = useEventStoreNew.getState().setGainRun;
     const nextMusic = useQueuePlayer.getState().nextMusic;
@@ -114,11 +116,11 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
     setEventRun(isPlay);
     if (isPlay) {
       if (!intervalId) {
-        const newIntervalId = setInterval(() => {
+        const newIntervalId = setInterval(async () => {
           setGainRun();
           const timeDivision = midi?.timeDivision;
           const tempoChanges: ITempoChange[] = midi?.tempoChanges ?? [];
-          const currentTime = player?.currentTime;
+          const currentTime = await player?.getCurrentTime();
 
           let tempos: ITempoChange[] = tempoChanges?.slice(0, -1).reverse();
           tempos = sortTempoChanges(tempos);
@@ -127,15 +129,17 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
             return;
           }
 
-          const tempoTimeChange = convertTicksToTime(timeDivision, tempos);
+          if (!player) {
+            return;
+          }
 
-          let { tick, tempo } = calculateTicks(
+          const { tick, tempo } = await player.getCurrentTickAndTempo(
             timeDivision,
             currentTime,
-            tempoTimeChange
+            tempos
           );
 
-          const lastTime = Math.floor(player?.duration ?? 0);
+          const lastTime = Math.floor(midi.duration ?? 0);
           const updateCountDown = lastTime - Math.floor(currentTime ?? 0);
 
           lyricsRender(tick);

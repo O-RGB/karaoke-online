@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Label from "../../common/display/label";
 import Select from "../../common/input-data/select/select";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
 interface MidiSettingModalProps {}
 
 const MidiSettingModal: React.FC<MidiSettingModalProps> = () => {
   const defaultOutput = { label: "Next Karaoke", value: "Next Karaoke" };
-  const { player } = useSpessasynthStore();
+  const engine = useSynthesizerEngine((state) => state.engine);
   const [midiAccess, setMidiAccess] = useState<MIDIAccess | null>(null);
   const [inputs, setInputs] = useState<MIDIInput[]>([]);
   const [outputs, setOutputs] = useState<MIDIOutput[]>([]);
@@ -34,11 +34,11 @@ const MidiSettingModal: React.FC<MidiSettingModalProps> = () => {
   const onChangeMidiOutPut = (id: string) => {
     try {
       if (id === defaultOutput.label) {
-        player?.resetMIDIOut();
+        engine?.player?.resetMidiOutput();
       } else {
         const find = outputs.find((v) => v.name === id);
         if (find) {
-          player?.connectMidiOutput(find);
+          engine?.player?.setMidiOutput(find);
         }
       }
     } catch (error) {

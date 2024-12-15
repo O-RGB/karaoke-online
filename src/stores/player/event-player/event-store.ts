@@ -1,53 +1,48 @@
 import { CHANNEL_DEFAULT } from "@/config/value";
 
 import { create } from "zustand";
-import useInstrumentStore from "./modules/event-instrument-store";
 import useMixerStoreNew from "./modules/event-mixer-store";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
 interface EventStore {
-  instrument: number[];
-  setInstrument: (
-    instrument: number[] | ((prev: number[]) => number[])
-  ) => void;
   setEventRun: (start: boolean) => void;
   setGainRun: () => void;
 }
 
 const useEventStoreNew = create<EventStore>((set) => ({
-  instrument: CHANNEL_DEFAULT,
-  setInstrument: (instrument) =>
-    set((state) => ({
-      instrument:
-        typeof instrument === "function"
-          ? instrument(state.instrument)
-          : instrument,
-    })),
   setEventRun: () => {
-    const synth = useSpessasynthStore.getState().synth;
+    const synth = useSynthesizerEngine.getState().engine;
 
-    const setInstrument = useInstrumentStore.getState().setInstrument;
     const setEventController = useMixerStoreNew.getState().setEventController;
-    synth?.eventHandler.addEvent("programchange", "", (e) => {
-      const channel: number = e.channel;
-      const program: number = e.program;
-      setInstrument((prevInstrument) => {
+    const setProgramList = useMixerStoreNew.getState().setProgramList;
+    const setInstrument = useMixerStoreNew.getState().setInstrument;
+
+    synth?.programChange((event) => {
+      const { channel, program } = event;
+      setProgramList((prevInstrument) => {
         const newInstrument = [...prevInstrument];
         newInstrument[channel] = program;
         return newInstrument;
       });
     });
 
-    synth?.eventHandler.addEvent("controllerchange", "", (e) => {
-      const { controllerNumber, controllerValue, channel } = e;
+    synth?.controllerChange((event) => {
+      const { controllerNumber, controllerValue, channel } = event;
       setEventController(controllerNumber, controllerValue, channel);
+    });
+
+    synth?.persetChange((event) => {
+      setInstrument(event);
     });
   },
 
   setGainRun: () => {
-    const analysers = useSpessasynthStore.getState().analysers;
-    const setEventGain = useMixerStoreNew.getState().setEventGain;
+    const analysers = useSynthesizerEngine.getState().engine?.analysers;
 
+    if (!analysers) {
+      return;
+    }
+    const setEventGain = useMixerStoreNew.getState().setEventGain;
     const newVolumeLevels = analysers?.map((analyser) => {
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       analyser.getByteFrequencyData(dataArray);
@@ -56,7 +51,6 @@ const useEventStoreNew = create<EventStore>((set) => ({
       );
       return value;
     });
-
     setEventGain(newVolumeLevels);
   },
 }));

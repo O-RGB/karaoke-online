@@ -6,11 +6,10 @@ import { FaDrum } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { Menu, MenuButton } from "@szhsin/react-menu";
 import Label from "@/components/common/display/label";
-import RangeBarClone from "@/components/common/input-data/range-bar-clone";
 import MixPanVolume from "./mix-controller/mix-pan-volume";
 import MixReverbVolume from "./mix-controller/mix-reverb-volume";
 import MixChorusDepthVolume from "./mix-controller/mix-chorus-depth.volume";
-import useInstrumentStore from "@/stores/player/event-player/modules/event-instrument-store";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 
 interface InstrumentsButtonProps {
   // instrument: number;
@@ -39,8 +38,8 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   onMouseUp,
   onTouchEnd,
 }) => {
-  const instruments = useInstrumentStore((state) => state.instrument);
-  const instrument = instruments[channel];
+  const programList = useMixerStoreNew((state) => state.programList);
+  const instrument = programList[channel];
 
   const persetOptions = useMemo(
     () =>

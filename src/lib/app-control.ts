@@ -167,3 +167,57 @@ export function calculateTicks(
   ticks += getTicks(timeDivision, currentTime - lastTime, lastTempo);
   return { tick: Math.round(ticks), tempo: lastTempo };
 }
+
+export function timeToTick(
+  timeDivision: number,
+  timeInSeconds: number,
+  tempoChanges: ITempoTimeChange[]
+): number {
+  let ticks = 0;
+  let lastTime = 0;
+  let lastTempo = tempoChanges[0].tempo; // ใช้ค่า tempo เริ่มต้น
+
+  for (const change of tempoChanges) {
+    if (timeInSeconds > change.time) {
+      // คำนวณ ticks ระหว่าง lastTime และ change.time
+      ticks += getTicks(timeDivision, change.time - lastTime, lastTempo);
+      lastTime = change.time;
+      lastTempo = change.tempo;
+    } else {
+      // ถ้าเวลาปัจจุบันอยู่ระหว่าง lastTime และ change.time
+      break;
+    }
+  }
+
+  // คำนวณ ticks สำหรับเวลาที่เหลือหลังจาก lastTime
+  ticks += getTicks(timeDivision, timeInSeconds - lastTime, lastTempo);
+
+  return Math.round(ticks); // คืนค่า ticks ที่คำนวณได้
+}
+
+export function currentTickToTime(
+  timeDivision: number,
+  currentTick: number,
+  tempoChanges: ITempoTimeChange[]
+): number {
+  let time = 0;
+  let lastTicks = 0;
+  let lastTempo = tempoChanges[0].tempo; // ใช้ค่า tempo เริ่มต้น
+
+  for (const change of tempoChanges) {
+    if (currentTick > change.time) {
+      // คำนวณเวลาในช่วงระหว่าง lastTicks และ change.ticks
+      time += getTime(timeDivision, change.time - lastTicks, lastTempo);
+      lastTicks = change.time;
+      lastTempo = change.tempo;
+    } else {
+      // ถ้า currentTick อยู่ระหว่าง lastTicks และ change.ticks
+      break;
+    }
+  }
+
+  // คำนวณเวลาสำหรับ ticks ที่เหลือหลังจาก lastTicks
+  time += getTime(timeDivision, currentTick - lastTicks, lastTempo);
+
+  return Math.round(time * 100) / 100; // คืนค่าเวลาในวินาทีที่คำนวณได้
+}

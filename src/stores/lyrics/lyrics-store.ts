@@ -47,7 +47,7 @@ const useLyricsStoreNew = create<LyricsStore>((set, get) => ({
       return;
     }
 
-    console.log("tick", tick, tickMapper);
+    // console.log("tick", tick, tickMapper);
 
     const charIndices = tickMapper.getValue(tick);
 
