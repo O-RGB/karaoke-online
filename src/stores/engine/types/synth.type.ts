@@ -41,6 +41,8 @@ export interface BaseSynthEngine {
     userChange?: boolean
   ): void;
 
+  setMute(channel: number, isMuted: boolean): void;
+
   setupMIDIEventHook?(): void;
 }
 

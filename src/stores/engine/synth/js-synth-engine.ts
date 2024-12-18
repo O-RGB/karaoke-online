@@ -30,11 +30,6 @@ export class JsSynthEngine implements BaseSynthEngine {
   }
 
   async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
-    console.log(
-      "%csrc/stores/engine/synth/js-synth-engine.ts:34 Setup JsSynthesizer",
-      "color: #007acc;"
-    );
-
     const audioContext = new AudioContext();
 
     const { Synthesizer } = await import("js-synthesizer");
@@ -138,4 +133,8 @@ export class JsSynthEngine implements BaseSynthEngine {
     programNumber: number,
     userChange?: boolean
   ): void {}
+
+  setMute(channel: number, mute: boolean): void {
+    
+  }
 }

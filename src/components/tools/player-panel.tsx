@@ -62,11 +62,11 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
     if (midi) {
       if (timingMode === "Tick") {
         setMaxTimer(midi.loop.end);
-      } else {
+      } else if(timingMode === "Time") {
         setMaxTimer(midi.duration);
       }
     }
-  }, [midi]);
+  }, [midi, timingMode]);
 
   useEffect(() => {
     engine?.player?.eventChange?.();

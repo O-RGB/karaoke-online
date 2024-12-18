@@ -16,13 +16,14 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
 
   const preset = useSynthesizerEngine((state) => state.engine?.preset);
 
-  // const synth = useSynthesizerEngine((state) => state.synth);
+  const engine = useSynthesizerEngine((state) => state.engine);
   // const volumeSetting = synth ? volumeSynth(synth) : null;
 
   const updateLocked = (program: number) => {
     // volumeSetting?.updateLockedPreset(1, false);
     // volumeSetting?.updatePreset(1, program);
     // volumeSetting?.updateLockedPreset(1, true);
+    // engine?.lockController()
   };
 
   const onBaseLock = (value: boolean) => {

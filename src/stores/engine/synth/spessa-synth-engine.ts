@@ -201,4 +201,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       }
     }
   }
+
+  setMute(channel: number, isMuted: boolean): void {
+    this.synth?.muteChannel(channel, isMuted);
+  }
 }

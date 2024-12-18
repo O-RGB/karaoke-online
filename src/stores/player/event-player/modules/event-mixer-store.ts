@@ -246,16 +246,16 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
 
   isMute: VOLUME_DEFAULT.map((v) => false),
   setMute: (channel, isMuted) => {
-    const synth = useSpessasynthStore.getState().synth;
+    const engine = useSynthesizerEngine.getState().engine;
 
-    if (!synth) {
+    if (!engine) {
       return;
     }
 
     let isMute = [...get().isMute];
     isMute[channel] = isMuted;
 
-    synth.muteChannel(channel, isMuted);
+    engine?.setMute(channel, isMuted);
     set({ isMute });
   },
 
