@@ -26,7 +26,7 @@ const RemoteFunction: React.FC<RemoteFunctionProps> = ({ buttonClass }) => {
     const paused = engine?.player?.paused;
     if (onRemoteOpen) {
       let end: number = engine?.player?.midiData?.duration ?? 0;
-      let currentTime: number = (await engine?.player?.getCurrentTime()) ?? 0;
+      let currentTime: number = (await engine?.player?.getCurrentTiming()) ?? 0;
 
       end = Math.floor(end);
       currentTime = Math.floor(currentTime);

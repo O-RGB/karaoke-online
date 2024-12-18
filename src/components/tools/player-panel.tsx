@@ -1,4 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
@@ -13,6 +18,9 @@ import { FaSearch } from "react-icons/fa";
 import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
 import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 import useQueuePlayer from "@/stores/player/update/modules/queue-player";
+import useConfigStore from "@/stores/config/config-store";
+import useEventStoreNew from "@/stores/player/event-player/event-store";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 interface PlayerRemote {
   onPause?: () => void;
   onPlay?: () => void;
@@ -32,24 +40,37 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   onFullScreen,
   show,
 }) => {
-  const [timer, setTimer] = useState<number>(0);
+  const timingMode =
+    useConfigStore((state) => state.config.system?.timingModeType) ?? "Time";
+  const [maxTimer, setMaxTimer] = useState<number>(0);
   const inputRef = useRef<any>(null);
 
+  const engine = useSynthesizerEngine((state) => state.engine);
   const isPaused = useRuntimePlayer((state) => state.isPaused);
   const lyrics = useRuntimePlayer((state) => state.lyrics);
   const paused = useRuntimePlayer((state) => state.paused);
   const play = useRuntimePlayer((state) => state.play);
   const setCurrentTime = useRuntimePlayer((state) => state.setCurrentTime);
   const currentTime = useRuntimePlayer((state) => state.currentTime);
+  const currentTick = useRuntimePlayer((state) => state.currentTick);
   const midi = useRuntimePlayer((state) => state.midi);
 
   const queue = useQueuePlayer((state) => state.queue);
   const nextMusic = useQueuePlayer((state) => state.nextMusic);
 
   useEffect(() => {
-    const timer = Math.round((currentTime / (midi?.duration ?? 0)) * 100);
-    setTimer(timer);
-  }, [currentTime, midi]);
+    if (midi) {
+      if (timingMode === "Tick") {
+        setMaxTimer(midi.loop.end);
+      } else {
+        setMaxTimer(midi.duration);
+      }
+    }
+  }, [midi]);
+
+  useEffect(() => {
+    engine?.player?.eventChange?.();
+  }, [isPaused]);
 
   // if (show !== true) {
   //   return <></>;
@@ -98,20 +119,20 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           ></Button>
           <div className="w-full lg:w-[300px]  px-2 flex items-center pt-0.5">
             <input
-              // disabled
               style={{
                 width: "100%",
               }}
               tabIndex={-1}
               onChange={(e) => {
                 const value = +e.target.value;
+                console.log("on click time", value);
                 setCurrentTime(value);
               }}
               type="range"
               className="transition duration-300"
               min={0}
-              max={100}
-              value={timer}
+              max={maxTimer}
+              value={timingMode === "Time" ? currentTime : currentTick}
             ></input>
           </div>
           <div className="hidden lg:block lg:w-full h-full p-1.5">

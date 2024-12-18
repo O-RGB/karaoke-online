@@ -1,4 +1,5 @@
 import { EngineType } from "@/stores/engine/synth-store";
+import { TimingModeType } from "@/stores/engine/types/synth.type";
 
 export type RefreshRate = "HIGH" | "MIDDLE" | "LOW";
 export type SystemFont =
@@ -54,6 +55,7 @@ export interface SystemConfig {
   tracklistUrlTested: boolean;
   uploadToDrive: boolean;
   engine: EngineType;
+  timingModeType: TimingModeType;
 }
 
 export interface ThemesConfig {

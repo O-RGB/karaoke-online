@@ -6,10 +6,8 @@ import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 interface TempoPanelProps {}
 
 const TempoPanel: React.FC<TempoPanelProps> = ({}) => {
-  // const midiPlaying = usePlayer((state) => state.midiPlaying);
   const timeDivision = useRuntimePlayer((state) => state.timeDivision);
   const config = useConfigStore((state) => state.config);
-  // const setConfig = useConfigStore((state) => state.setConfig);
   const widgetConfig = config.widgets;
   let isShow = widgetConfig?.tempo?.show;
   const windowMatches = window.matchMedia("(min-width: 1024px)").matches;

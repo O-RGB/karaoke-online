@@ -1,19 +1,29 @@
 import { DEFAULT_SOUND_FONT } from "@/config/value";
-import { jsSynthesizerCurrentTime, setupJsSynthesizer } from "../lib/js-synthesizer";
+import {
+  jsSynthesizerCurrentTime,
+  setupJsSynthesizer,
+} from "../lib/js-synthesizer";
 import { JsSynthPlayerEngine } from "../player/js-synth-player";
 import { SpessaPlayerEngine } from "../player/spessa-synth-player";
 
-import { BaseSynthEngine, BaseSynthPlayerEngine } from "../types/synth.type";
+import {
+  BaseSynthEngine,
+  BaseSynthPlayerEngine,
+  IControllerChange,
+  IProgramChange,
+  TimingModeType,
+} from "../types/synth.type";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 
 export class JsSynthEngine implements BaseSynthEngine {
+  public time: TimingModeType = "Tick";
   public synth: JsSynthesizer | undefined;
   public audio: AudioContext | undefined;
   public player: BaseSynthPlayerEngine | undefined;
-  preset: number[] = [];
-  analysers: AnalyserNode[] = [];
-  soundfontName: string | undefined;
-  soundfontFile: File | undefined;
+  public preset: number[] = [];
+  public analysers: AnalyserNode[] = [];
+  public soundfontName: string | undefined;
+  public soundfontFile: File | undefined;
 
   constructor(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
     this.startup();
@@ -29,16 +39,15 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     const { Synthesizer } = await import("js-synthesizer");
     const synth = new Synthesizer();
+
     synth.init(audioContext.sampleRate);
 
     const node = synth.createAudioNode(audioContext, 8192);
     node.connect(audioContext.destination);
 
-    synth.setGain(0.1);
+    synth.setGain(0.3);
 
     this.loadDefaultSoundFont();
-
-    this.programChange();
 
     this.synth = synth;
     this.audio = audioContext;
@@ -49,6 +58,7 @@ export class JsSynthEngine implements BaseSynthEngine {
     }
 
     this.player = new JsSynthPlayerEngine(synth);
+
     return { synth: this.synth, audio: this.audio };
   }
 
@@ -85,57 +95,23 @@ export class JsSynthEngine implements BaseSynthEngine {
     const bf = await file.arrayBuffer();
     try {
       this.synth?.loadSFont(bf);
+      this.soundfontName = file.name;
       return true;
     } catch (error) {
       return false;
     }
   }
 
-  controllerChange(): void {}
+  controllerChange(callback: (event: IControllerChange) => void): void {
+    if (this.player?.addEvent) {
+      this.player.addEvent({ controllerChangeCallback: callback });
+    }
+  }
   persetChange(): void {}
-  programChange(): void {
-    this.synth?.hookPlayerMIDIEvents(function (s, type, event) {
-
-      
-      // const _bpm = (await synthesizer?.retrievePlayerBpm()) || 0;
-      // const ticks = (await synthesizer?.retrievePlayerTotalTicks()) || 0;
-      // const tempo = (await synthesizer?.retrievePlayerMIDITempo()) || 0;
-
-      s.retrievePlayerTotalTicks();
-
-      // const duration = (ticks / (_bpm * 1000)) * 60;
-      // setBPM(_bpm);
-
-      // if (event.getChannel() == 12) {
-      // console.log("TYPE == " + type);
-      // console.log("getChannel", event.getChannel());
-      // console.log("getValue", event.getValue());
-      // console.log("getVelocity", event.getVelocity());
-      // console.log("getControl", event.getControl());
-      // console.log("getProgram", event.getProgram());
-      // console.log("###########");
-      // }
-
-      const conrtol = event.getControl();
-      const channel = event.getChannel();
-
-      if (type === 192) {
-        // เครื่องดนตรี
-        // updateInstrumentalControl(channel, event.getProgram());
-      } else if (type == 176) {
-        if (conrtol == 7) {
-          //ระดับเสียง
-          // let getData = sound[channel];
-          // if (getData) {
-          //   updateLevelControl(channel, event.getValue());
-          // }
-        } else if (conrtol == 10) {
-          // updateVelocityControl(channel, event.getVelocity());
-        }
-      }
-
-      return false;
-    });
+  programChange(callback: (event: IProgramChange) => void): void {
+    if (this.player?.addEvent) {
+      this.player.addEvent({ programChangeCallback: callback });
+    }
   }
 
   setMidiOutput(): void {}
@@ -145,7 +121,9 @@ export class JsSynthEngine implements BaseSynthEngine {
     controllerNumber: number,
     controllerValue: number,
     force?: boolean
-  ): void {}
+  ): void {
+    this.synth?.midiControl(channel, controllerNumber, controllerValue);
+  }
 
   lockController(
     channel: number,
@@ -161,5 +139,3 @@ export class JsSynthEngine implements BaseSynthEngine {
     userChange?: boolean
   ): void {}
 }
-
-

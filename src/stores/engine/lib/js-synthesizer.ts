@@ -10,7 +10,7 @@ export async function setupJsSynthesizer() {
   const node = synth.createAudioNode(audioContext, 8192);
   node.connect(audioContext.destination);
 
-  synth.setGain(0.1);
+  synth.setGain(1);
 
   return { audio: audioContext, synth };
 }

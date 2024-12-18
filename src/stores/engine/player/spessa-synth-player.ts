@@ -5,11 +5,12 @@ import { calculateTicks, convertTicksToTime } from "@/lib/app-control";
 
 export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   private player: Sequencer | undefined;
-  paused: boolean = false;
-  isFinished: boolean = false;
-  currentTime: number = 0;
-  midiData: MIDI | undefined = undefined;
-  duration: number = 0;
+  public paused: boolean = false;
+  public isFinished: boolean = false;
+  public currentTiming: number = 0;
+  public midiData: MIDI | undefined = undefined;
+  public duration: number = 0;
+  public durationTiming: number = 0;
 
   constructor(player: Sequencer | undefined) {
     this.player = player;
@@ -29,15 +30,17 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
     this.paused = true;
   }
 
-  async getCurrentTime() {
+  async getCurrentTiming() {
     return this.player?.currentTime ?? 0;
   }
 
-  setCurrentTime(time: number): void {
+  setCurrentTiming(timing: number): void {
     if (!this.player) {
       return;
     }
-    this.player.currentTime = time;
+    // const duration = this.duration ?? 0;
+    // const newCurrentTime = (timing / 100) * duration;
+    this.player.currentTime = timing;
   }
 
   async getCurrentTickAndTempo(
@@ -63,6 +66,8 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
     this.midiData = parsedMidi;
     this.duration = parsedMidi.duration;
     this.player?.loadNewSongList([parsedMidi], false);
+
+    this.durationTiming = parsedMidi.duration;
 
     return parsedMidi;
   }

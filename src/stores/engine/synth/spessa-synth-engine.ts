@@ -9,19 +9,21 @@ import {
   BaseSynthPlayerEngine,
   IControllerChange,
   IProgramChange,
+  TimingModeType,
 } from "../types/synth.type";
 import { SpessaPlayerEngine } from "../player/spessa-synth-player";
 import { loadAudioContext, loadPlayer } from "../lib/spessasynth";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
+  public time: TimingModeType = "Time";
   public synth: Spessasynth | undefined;
   public audio: AudioContext | undefined;
   public player: BaseSynthPlayerEngine | undefined;
-  preset: number[] = [];
-  analysers: AnalyserNode[] = [];
-  soundfontName: string | undefined;
-  soundfontFile: File | undefined;
+  public preset: number[] = [];
+  public analysers: AnalyserNode[] = [];
+  public soundfontName: string | undefined;
+  public soundfontFile: File | undefined;
 
   constructor(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
     this.startup(setInstrument);

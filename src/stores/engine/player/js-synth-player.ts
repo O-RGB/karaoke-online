@@ -1,21 +1,26 @@
-import { MIDI } from "spessasynth_lib";
-import { BaseSynthPlayerEngine } from "../types/synth.type";
+import { MIDI, midiControllers } from "spessasynth_lib";
+import {
+  BaseSynthEvent,
+  BaseSynthPlayerEngine,
+  IControllerChange,
+  IProgramChange,
+} from "../types/synth.type";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
-import {
-  convertTicksToTime,
-  currentTickToTime,
-  timeToTick,
-} from "@/lib/app-control";
-import { jsSynthesizerCurrentTime } from "../lib/js-synthesizer";
 
 export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   private player: JsSynthesizer | undefined = undefined;
-  paused: boolean = false;
-  isFinished: boolean = false;
-  currentTime: number = 0;
-  midiData: MIDI | undefined = undefined;
-  duration: number = 0;
+  public paused: boolean = false;
+  public isFinished: boolean = false;
+  public currentTiming: number = 0;
+  public midiData: MIDI | undefined = undefined;
+  public duration: number = 0;
+  public durationTiming: number = 0;
+  public eventInit?: BaseSynthEvent | undefined;
+
+  addEvent(input: Partial<BaseSynthEvent>): void {
+    this.eventInit = { ...input };
+  }
 
   constructor(synth: JsSynthesizer) {
     this.player = synth;
@@ -34,47 +39,13 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.paused = true;
   }
 
-  async getCurrentTime() {
-    // const currentTick = (await this.player?.retrievePlayerCurrentTick()) ?? 0;
-    // const timeDivision = this.midiData?.timeDivision;
-    // const tempoChanges = this.midiData?.tempoChanges;
-
-    // if (!timeDivision || !tempoChanges) {
-    //   return 0;
-    // }
-
-    // let tempoMapping: ITempoTimeChange[] = tempoChanges.map((data) => ({
-    //   tempo: data.tempo,
-    //   time: data.ticks,
-    // }));
-
-    // const time = currentTickToTime(timeDivision, currentTick, tempoMapping);
-
-    if (!this.player || !this.midiData?.timeDivision) {
-      return 0;
-    }
-
-    let time = await jsSynthesizerCurrentTime(
-      this.player,
-      this.midiData.timeDivision
-    );
-    return time ? time.currentTime : 0;
+  async getCurrentTiming() {
+    const currentTick = (await this.player?.retrievePlayerCurrentTick()) ?? 0;
+    return currentTick;
   }
 
-  setCurrentTime(time: number): void {
-    const timeDivision = this.midiData?.timeDivision;
-    const tempoChanges = this.midiData?.tempoChanges;
-
-    if (!timeDivision || !tempoChanges) {
-      return;
-    }
-
-    let tempoMapping: ITempoTimeChange[] = tempoChanges.map((data) => ({
-      tempo: data.tempo,
-      time: data.ticks,
-    }));
-
-    this.player?.seekPlayer(timeToTick(timeDivision, time, tempoMapping));
+  setCurrentTiming(tick: number): void {
+    this.player?.seekPlayer(tick);
   }
 
   async getCurrentTickAndTempo() {
@@ -104,4 +75,43 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
   setMidiOutput(): void {}
   resetMidiOutput(): void {}
+  eventChange(): void {
+    this.player?.hookPlayerMIDIEvents((s, type, event) => {
+      switch (type) {
+        case 176: // Controller Change
+          if (this.eventInit?.controllerChangeCallback) {
+            let controller = event.getControl();
+            let controllerNumber = 0;
+            switch (controller) {
+              case 7:
+                controllerNumber = midiControllers.mainVolume;
+                break;
+
+              case midiControllers.pan:
+              case 91:
+              case 93:
+              default:
+                break;
+            }
+            this.eventInit.controllerChangeCallback({
+              controllerNumber: controllerNumber,
+              controllerValue: event.getValue(),
+              channel: event.getChannel(),
+            });
+          }
+          break;
+
+        case 192: // Program Change
+          if (this.eventInit?.programChangeCallback) {
+            this.eventInit?.programChangeCallback({
+              channel: event.getChannel(),
+              program: event.getProgram(),
+            });
+          }
+          break;
+      }
+
+      return false;
+    });
+  }
 }

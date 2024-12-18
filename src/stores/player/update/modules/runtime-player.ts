@@ -1,10 +1,6 @@
 import { create } from "zustand";
 import { RuntimeProps } from "../types/player.type";
-import {
-  calculateTicks,
-  convertTicksToTime,
-  sortTempoChanges,
-} from "@/lib/app-control";
+import { sortTempoChanges } from "@/lib/app-control";
 import useQueuePlayer from "./queue-player";
 import useEventStoreNew from "../../event-player/event-store";
 import useLyricsStoreNew from "@/stores/lyrics/lyrics-store";
@@ -39,7 +35,6 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
       countDown: 10,
       isFinished: true,
       isPaused: true,
-      // hasTransitioned: false,
     });
   },
 
@@ -58,12 +53,14 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   },
 
   play: () => {
-    console.log("Play ing");
     const player = useSynthesizerEngine.getState().engine?.player;
+    const engine = useSynthesizerEngine.getState().engine;
     player?.play();
 
     set({ isPaused: false, isFinished: false });
     get().tickRun(true);
+
+    engine?.setupMIDIEventHook?.();
   },
 
   setIsFinished: (isFinished) => {
@@ -72,15 +69,9 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
 
   setCountDown: (queue) => {},
 
-  setCurrentTime: (time) => {
+  setCurrentTime: (timing) => {
     const player = useSynthesizerEngine.getState().engine?.player;
-    if (player) {
-      const duration = player.duration ?? 0;
-      const newCurrentTime = (time / 100) * duration;
-      // player.currentTime = newCurrentTime;
-
-      player.setCurrentTime(newCurrentTime);
-    }
+    player?.setCurrentTiming(timing);
   },
 
   setMidiInfo(
@@ -107,31 +98,30 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   tickRun: (isPlay: boolean) => {
     const { intervalId } = get();
     const player = useSynthesizerEngine.getState().engine?.player;
+
+    if (!player || !player.midiData) {
+      return;
+    }
+
     const setEventRun = useEventStoreNew.getState().setEventRun;
     const setGainRun = useEventStoreNew.getState().setGainRun;
     const nextMusic = useQueuePlayer.getState().nextMusic;
     const lyricsRender = useLyricsStoreNew.getState().lyricsRender;
-    const midi = get().midi;
+
+    const midi = player.midiData;
+    const timeDivision = midi.timeDivision;
+    const duration = midi.duration;
+    const tempoChanges: ITempoChange[] = midi.tempoChanges;
 
     setEventRun(isPlay);
     if (isPlay) {
       if (!intervalId) {
         const newIntervalId = setInterval(async () => {
           setGainRun();
-          const timeDivision = midi?.timeDivision;
-          const tempoChanges: ITempoChange[] = midi?.tempoChanges ?? [];
-          const currentTime = await player?.getCurrentTime();
+          const currentTime = await player.getCurrentTiming();
 
           let tempos: ITempoChange[] = tempoChanges?.slice(0, -1).reverse();
           tempos = sortTempoChanges(tempos);
-
-          if (!timeDivision || !tempoChanges || !currentTime) {
-            return;
-          }
-
-          if (!player) {
-            return;
-          }
 
           const { tick, tempo } = await player.getCurrentTickAndTempo(
             timeDivision,
@@ -139,7 +129,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
             tempos
           );
 
-          const lastTime = Math.floor(midi.duration ?? 0);
+          const lastTime = Math.floor(duration);
           const updateCountDown = lastTime - Math.floor(currentTime ?? 0);
 
           lyricsRender(tick);

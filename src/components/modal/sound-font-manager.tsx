@@ -17,11 +17,13 @@ import {
 } from "@/lib/storage/soundfont";
 import TableList from "../common/table/table-list";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
 
 interface SoundfontManagerProps {}
 
 const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
   const engine = useSynthesizerEngine((state) => state.engine);
+  const isPaused = useRuntimePlayer((state) => state.isPaused);
 
   const [soundFontStorage, setSoundFontStorage] = useState<
     ListItem<IDBValidKey>[]
@@ -58,18 +60,21 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({}) => {
     if (engine) engine.player?.pause();
     if (file && engine) {
       engine.setSoundFont(file);
-      // setSoundFontName(file.name);
     }
 
-    setTimeout(() => {
-      if (engine) engine.player?.play();
+    if (!isPaused) {
+      setTimeout(() => {
+        if (engine) engine.player?.play();
+        setLoading(false);
+      }, 2000);
+    } else {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   useEffect(() => {
     getSoundFontList();
-  }, []);
+  }, [engine]);
 
   return (
     <div>

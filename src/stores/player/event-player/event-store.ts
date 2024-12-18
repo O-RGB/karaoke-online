@@ -28,6 +28,7 @@ const useEventStoreNew = create<EventStore>((set) => ({
 
     synth?.controllerChange((event) => {
       const { controllerNumber, controllerValue, channel } = event;
+      console.log("EVENT", controllerNumber, controllerValue, channel )
       setEventController(controllerNumber, controllerValue, channel);
     });
 

@@ -55,9 +55,9 @@ const useLyricsStoreNew = create<LyricsStore>((set, get) => ({
       const line = lyricsMapper[index];
 
       const lineIndex = line?.line;
-      const charIndex = line.lineIndex;
+      const charIndex = line?.lineIndex;
 
-      if (!lineIndex) {
+      if (!lineIndex || !charIndex) {
         return;
       }
 

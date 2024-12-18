@@ -85,6 +85,7 @@ export const DEFAULT_CONFIG: ConfigDisplay = {
     tracklistUrlTested: false,
     uploadToDrive: false,
     engine: "spessa",
+    timingModeType: "Time",
   },
   sound: {},
 };

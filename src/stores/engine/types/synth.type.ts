@@ -1,9 +1,14 @@
 import { MIDI } from "spessasynth_lib/@types/midi_parser/midi_loader";
-
+import { Synthesizer as JsSynthesizer } from "js-synthesizer";
+import { Synthetizer as Spessasynth } from "spessasynth_lib";
+export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
+  time: TimingModeType;
   audio: AudioContext | undefined;
   player: BaseSynthPlayerEngine | undefined;
   analysers: AnalyserNode[];
+  synth: Spessasynth | JsSynthesizer | undefined;
+
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;
   setSoundFont(file: File): void;
@@ -35,19 +40,26 @@ export interface BaseSynthEngine {
     programNumber: number,
     userChange?: boolean
   ): void;
+
+  setupMIDIEventHook?(): void;
+}
+
+export interface BaseSynthEvent {
+  controllerChangeCallback?: (event: IControllerChange) => void;
+  programChangeCallback?: (event: IProgramChange) => void | undefined;
 }
 
 export interface BaseSynthPlayerEngine {
   paused: boolean;
   isFinished: boolean;
-  currentTime: number;
+  currentTiming: number;
   midiData: MIDI | undefined;
   duration: number;
   play(): void;
   stop(): void;
   pause(): void;
-  getCurrentTime(): Promise<number>;
-  setCurrentTime(time: number): void;
+  getCurrentTiming(): Promise<number>;
+  setCurrentTiming(timeOrTick: number): void;
   getCurrentTickAndTempo(
     timeDivision?: number,
     currentTime?: number,
@@ -56,6 +68,9 @@ export interface BaseSynthPlayerEngine {
   loadMidi(midi: File): Promise<MIDI>;
   setMidiOutput(output: MIDIOutput): void;
   resetMidiOutput(): void;
+  eventChange?(): void;
+  addEvent?(input: Partial<BaseSynthEvent>): void;
+  eventInit?: BaseSynthEvent;
 }
 
 export interface IEventChange {
