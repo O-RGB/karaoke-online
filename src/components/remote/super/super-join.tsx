@@ -11,7 +11,7 @@ import { readSong } from "@/lib/karaoke/read";
 import { usePeerStore } from "@/stores/peer-store";
 import EventRenderSuper from "./event-render";
 import QueueSong from "@/components/tools/queue-song/queue-song";
-import useKeyboardStore from "@/stores/keyboard-state"; 
+import useKeyboardStore from "@/stores/keyboard-state";
 import NextSongButton from "@/components/common/player/next-song-button";
 
 interface SuperJoinConnectProps {
@@ -43,6 +43,28 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
       sendSuperUserMessage({
         message: value,
         type: "SET_CHANNEL",
+        user: "SUPER",
+        clientId: superUserPeer?.id,
+      });
+    }
+  };
+
+  const changePitch = (value: number) => {
+    if (sendSuperUserMessage) {
+      sendSuperUserMessage({
+        message: value,
+        type: "PITCH",
+        user: "SUPER",
+        clientId: superUserPeer?.id,
+      });
+    }
+  };
+
+  const changeMute = (value: ISetMuteChannel) => {
+    if (sendSuperUserMessage) {
+      sendSuperUserMessage({
+        message: value,
+        type: "MUTE",
         user: "SUPER",
         clientId: superUserPeer?.id,
       });
@@ -171,7 +193,9 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
           show
           className="flex flex-col gap-1.5"
           onOpenQueue={handleRequestQueue}
-          onVolumeChange={(c, v) => changeVol({ channel: c, value: v })}
+          onVolumeChange={changeVol}
+          onRemotePitchChange={changePitch}
+          onRemoteMutedVolume={changeMute}
         ></VolumePanel>
 
         <div className="text-white">
@@ -196,7 +220,10 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
           {/* <NextSongButton border={undefined} onClick={handleNextSong}>
             <span className="text-white w-full">หยุด</span>
           </NextSongButton> */}
-          <NextSongButton border={"rounded-md border border-white"} onClick={handleNextSong}>
+          <NextSongButton
+            border={"rounded-md border border-white"}
+            onClick={handleNextSong}
+          >
             <span className="text-white w-full">เพลงต่อไป</span>
           </NextSongButton>
         </div>

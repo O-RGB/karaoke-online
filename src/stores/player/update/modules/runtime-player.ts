@@ -116,8 +116,10 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
     setEventRun(isPlay);
     if (isPlay) {
       if (!intervalId) {
-        const newIntervalId = setInterval(async () => {
+        setInterval(() => {
           setGainRun();
+        }, 40);
+        const newIntervalId = setInterval(async () => {
           const currentTime = await player.getCurrentTiming();
 
           let tempos: ITempoChange[] = tempoChanges?.slice(0, -1).reverse();

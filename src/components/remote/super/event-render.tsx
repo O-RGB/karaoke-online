@@ -68,9 +68,8 @@ const EventRenderSuper: React.FC<EventRenderSuperProps> = ({
         let songList: SearchResult[] = data as SearchResult[];
         setSearchSongList?.(songList);
       } else if (type === "REQUEST_QUEUE_LIST") {
-        let queue: IPlayingDecodedQueues[] = data;
-        const songInfo = queue.map((data) => data.songInfo);
-        moveQueue(songInfo);
+        let queue: SearchResult[] = data;
+        moveQueue(queue);
         setQueueOpen?.();
       } else if (type === "SONG_INFO_PLAYING") {
         let midiInfo: MidiPlayingInfo = data as MidiPlayingInfo;

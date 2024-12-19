@@ -2,6 +2,7 @@ import volumeSynth from "@/features/volume/volume-features";
 import useConfigStore from "@/stores/config/config-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 import { usePeerStore } from "@/stores/peer-store";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import useQueuePlayer from "@/stores/player/update/modules/queue-player";
 import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 
@@ -17,6 +18,9 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
   const engine = useSynthesizerEngine((state) => state.engine);
 
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
+  const setVolumes = useMixerStoreNew((state) => state.setVolumes);
+  const updatePitch = useMixerStoreNew((state) => state.updatePitch);
+  const setMute = useMixerStoreNew((state) => state.setMute);
   // const volumeLib = synth ? volumeSynth(synth) : undefined;
   const { sendSuperUserMessage, superUserConnections } = usePeerStore();
 
@@ -49,9 +53,27 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
           clientId: from,
         });
 
+      case "CONTROLLER":
+        sendSuperUserMessage({
+          message: queue,
+          type: "REQUEST_QUEUE_LIST",
+          user: "SUPER",
+          clientId: from,
+        });
+
       case "SET_CHANNEL":
         let vol = data as ISetChannelGain;
-        // volumeLib?.updateMainVolume(vol.channel, vol.value);
+        setVolumes(vol.channel, vol.value, true);
+        return data as ISetChannelGain;
+
+      case "PITCH":
+        let pitch = data as number;
+        updatePitch(null, pitch);
+        return data as ISetChannelGain;
+
+      case "MUTE":
+        let mute = data as ISetMuteChannel;
+        setMute(mute.channel, mute.mute);
         return data as ISetChannelGain;
 
       case "SEARCH_SONG":

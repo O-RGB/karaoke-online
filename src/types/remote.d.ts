@@ -1,11 +1,15 @@
-type TypeFormHost =
-  //MIX
+type TypeMixer =
+  | "MUTE"
   | "GIND_NODE"
   | "VOLUMES"
   | "PAN"
   | "REVERB"
   | "CHORUSDEPTH"
+  | "PITCH";
 
+type TypeEvent = "CONTROLLER" | "PROGRAM";
+
+type TypeFormHost =
   // TIME MUSIC
   | "TIME_CHANGE"
   | "SET_TIME_CHANGE"
@@ -31,7 +35,7 @@ type TypeFormJoiner =
   | "PIN_VALIDATION"
   | "SET_SONG"
   | "SEARCH_SONG";
-type SendType = TypeFormJoiner | TypeFormHost;
+type SendType = TypeFormJoiner | TypeFormHost | TypeMixer | TypeEvent;
 type TypeUserControl = "NORMAL" | "SUPER";
 
 // interface RemoteEncode<T = any> {

@@ -20,12 +20,16 @@ import "@szhsin/react-menu/dist/transitions/zoom.css";
 import useNotificationStore from "@/stores/notification-store";
 import { FaList } from "react-icons/fa";
 import useKeyboardStore from "@/stores/keyboard-state";
-
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 
 interface VolumePanelProps {
-  onVolumeChange?: (channel: number, value: number) => void;
+  onVolumeChange?: (value: ISetChannelGain) => void;
+  onRemotePenChange?: (value: ISetChannelGain) => void;
+  onRemotePitchChange?: (value: number) => void;
+  onRemoteMutedVolume?: (value: ISetMuteChannel) => void;
+  onRemotePersetChange?: (value: ISetChannelGain) => void;
+  onRemoteReverbChange?: (value: ISetChannelGain) => void;
+  onRemoteChorusDepthChange?: (value: ISetChannelGain) => void;
   onOpenQueue?: () => void;
   audioGain?: number[];
   options?: React.ReactNode;
@@ -35,6 +39,12 @@ interface VolumePanelProps {
 
 const VolumePanel: React.FC<VolumePanelProps> = ({
   onVolumeChange,
+  onRemotePenChange,
+  onRemotePitchChange,
+  onRemoteMutedVolume,
+  onRemotePersetChange,
+  onRemoteReverbChange,
+  onRemoteChorusDepthChange,
   onOpenQueue,
   audioGain,
   options,
@@ -47,8 +57,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const resetQueueingTimeout = useKeyboardStore(
     (state) => state.resetQueueingTimeout
   );
-  // const perset = useSpessasynthStore((state) => state.perset);
-  const instrument = useMixerStoreNew((state) => state.instrument)
+  const instrument = useMixerStoreNew((state) => state.instrument);
 
   const { orientation } = useOrientation();
   const setNotification = useNotificationStore(
@@ -68,15 +77,13 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const setHeld = useMixerStoreNew((state) => state.setHeld);
 
   const volLayout: number[] = Array(16).fill(0);
-  // const volumeLib = synth ? volumeSynth(synth) : undefined;
 
   const onVolumeMeterChange = (channel: number, value: number) => {
     setVolumes(channel - 1, value, true);
-    // if (synth) {
-    //   volumeLib?.updateMainVolume(channel - 1, value);
-    // } else {
-    //   onVolumeChange?.(channel - 1, value);
-    // }
+
+    if (onVolumeChange) {
+      onVolumeChange?.({ channel, value });
+    }
   };
 
   const onPenChange = (channel: number, value: number) => {
@@ -85,10 +92,18 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
 
   const onPitchChange = (value: number) => {
     updatePitch(null, value);
+
+    if (onRemotePitchChange) {
+      onRemotePitchChange(value);
+    }
   };
 
   const onMutedVolume = (channel: number, isMuted: boolean) => {
     setMute(channel - 1, isMuted);
+
+    if (onRemoteMutedVolume) {
+      onRemoteMutedVolume({ channel: channel - 1, mute: isMuted });
+    }
   };
 
   const onLockedVolume = (channel: number, isLocked: boolean) => {

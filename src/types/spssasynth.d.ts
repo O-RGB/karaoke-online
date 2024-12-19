@@ -7,6 +7,10 @@ interface ISetChannelGain {
   channel: number;
   value: number;
 }
+interface ISetMuteChannel {
+  channel: number;
+  mute: boolean;
+}
 
 interface IInstruments {
   name: string;
