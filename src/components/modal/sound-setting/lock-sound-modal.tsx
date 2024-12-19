@@ -5,6 +5,7 @@ import volumeSynth from "@/features/volume/volume-features";
 import useConfigStore from "@/stores/config/config-store";
 import React, { useEffect, useState } from "react";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 
 interface LockSoundModalProps {}
 
@@ -14,12 +15,14 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
   const lockBased = config.sound?.lockBase;
   const [onLockBase, setLockBase] = useState<boolean>(false);
 
-  const preset = useSynthesizerEngine((state) => state.engine?.preset);
+  // const preset = useSynthesizerEngine((state) => state.engine?.preset);
+  const instrument = useMixerStoreNew.getState().instrument;
 
   const engine = useSynthesizerEngine((state) => state.engine);
   // const volumeSetting = synth ? volumeSynth(synth) : null;
 
   const updateLocked = (program: number) => {
+    engine?.setBassLocked(program, true);
     // volumeSetting?.updateLockedPreset(1, false);
     // volumeSetting?.updatePreset(1, program);
     // volumeSetting?.updateLockedPreset(1, true);
@@ -28,6 +31,7 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
 
   const onBaseLock = (value: boolean) => {
     setLockBase(value);
+    engine?.setBassLocked(0, value);
 
     // if (!value) {
     //   setConfig({ sound: { lockBase: undefined } });
@@ -47,7 +51,7 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
     if (lockBased !== undefined) {
       setLockBase(true);
     }
-  }, [preset, lockBased]);
+  }, [instrument, lockBased]);
 
   return (
     <>
@@ -64,10 +68,10 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
           defaultValue={`${lockBased}`}
           className="!w-full"
           onChange={onBaseChange}
-          // options={preset.map((data) => ({
-          //   label: `${data.program} - ${data.presetName}`,
-          //   value: data.program,
-          // }))}
+          options={instrument?.map((data) => ({
+            label: `${data.program} - ${data.presetName}`,
+            value: data.program,
+          }))}
         ></Select>
       </div>
     </>

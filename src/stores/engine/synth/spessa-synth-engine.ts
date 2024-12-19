@@ -7,13 +7,14 @@ import {
 import {
   BaseSynthEngine,
   BaseSynthPlayerEngine,
+  IBassLock,
   IControllerChange,
   IProgramChange,
   TimingModeType,
 } from "../types/synth.type";
 import { SpessaPlayerEngine } from "../player/spessa-synth-player";
 import { loadAudioContext, loadPlayer } from "../lib/spessasynth";
-import { DEFAULT_SOUND_FONT } from "@/config/value";
+import { BASE_PROGRAM, DEFAULT_SOUND_FONT } from "@/config/value";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -24,9 +25,17 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public analysers: AnalyserNode[] = [];
   public soundfontName: string | undefined;
   public soundfontFile: File | undefined;
+  public bassLocked: number | undefined = undefined;
+  public bassDetect: IProgramChange | undefined = undefined;
 
-  constructor(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
+  constructor(
+    setInstrument?: (instrument: IPersetSoundfont[]) => void,
+    bassLocked?: number
+  ) {
     this.startup(setInstrument);
+    if (bassLocked) {
+      this.bassLocked = bassLocked;
+    }
   }
 
   async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
@@ -117,8 +126,29 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   }
 
   programChange(event: (event: IProgramChange) => void): void {
-    return this.synth?.eventHandler.addEvent("programchange", "", (e) =>
-      event(e)
+    return this.synth?.eventHandler.addEvent(
+      "programchange",
+      "",
+      (e: IProgramChange) => {
+        const { channel, program } = e;
+
+        const isBass = BASE_PROGRAM.includes(program);
+
+        if (isBass) {
+          this.bassDetect = e;
+        }
+
+        if (isBass && this.bassLocked) {
+          const lockNum: number = this.bassLocked;
+
+          if (this.bassDetect?.program !== lockNum) {
+            this.setProgram(channel, lockNum);
+            return event({ channel, program: lockNum });
+          }
+        } else {
+          event(e);
+        }
+      }
     );
   }
 
@@ -204,5 +234,22 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
   setMute(channel: number, isMuted: boolean): void {
     this.synth?.muteChannel(channel, isMuted);
+  }
+
+  setBassLocked(bassNumber: number, isLock: boolean): void {
+    const backup = this.bassDetect;
+    if (isLock) {
+      this.bassLocked = bassNumber;
+
+      if (backup) {
+        this.setProgram(backup.channel, bassNumber);
+      }
+    } else {
+      if (backup) {
+        this.setProgram(backup.channel, backup.program);
+      }
+
+      this.bassLocked = undefined;
+    }
   }
 }

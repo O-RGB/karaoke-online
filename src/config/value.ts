@@ -34,6 +34,8 @@ export const VOLUME_DEFAULT: number[] = Array(16).fill(100);
 export const VOLUME_MIDDLE_DEFAULT_128: number[] = Array(16).fill(64);
 export const VOLUME_MIDDLE_DEFAULT_100: number[] = Array(16).fill(50);
 
+export const BASE_PROGRAM: number[] = [32, 33, 34, 35, 36, 37, 38, 39];
+
 export const REFRESH_RATE: { [key: string]: number } = {
   HIGH: 16, // 60Fps
   MIDDLE: 33, // 30Fps

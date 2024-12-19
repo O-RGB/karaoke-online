@@ -3,22 +3,27 @@ import { CHANNEL_DEFAULT } from "@/config/value";
 import { create } from "zustand";
 import useMixerStoreNew from "./modules/event-mixer-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { get } from "http";
 
 interface EventStore {
   setEventRun: (start: boolean) => void;
   setGainRun: () => void;
+
+  bassLock?: number | undefined;
+  setBassLock?: (bassNumber: number) => void;
 }
 
-const useEventStoreNew = create<EventStore>((set) => ({
+const useEventStoreNew = create<EventStore>((set, get) => ({
   setEventRun: () => {
-    const synth = useSynthesizerEngine.getState().engine;
+    const engine = useSynthesizerEngine.getState().engine;
 
     const setEventController = useMixerStoreNew.getState().setEventController;
     const setProgramList = useMixerStoreNew.getState().setProgramList;
     const setInstrument = useMixerStoreNew.getState().setInstrument;
 
-    synth?.programChange((event) => {
+    engine?.programChange((event) => {
       const { channel, program } = event;
+
       setProgramList((prevInstrument) => {
         const newInstrument = [...prevInstrument];
         newInstrument[channel] = program;
@@ -26,13 +31,12 @@ const useEventStoreNew = create<EventStore>((set) => ({
       });
     });
 
-    synth?.controllerChange((event) => {
+    engine?.controllerChange((event) => {
       const { controllerNumber, controllerValue, channel } = event;
-      console.log("EVENT", controllerNumber, controllerValue, channel )
       setEventController(controllerNumber, controllerValue, channel);
     });
 
-    synth?.persetChange((event) => {
+    engine?.persetChange((event) => {
       setInstrument(event);
     });
   },
@@ -53,6 +57,10 @@ const useEventStoreNew = create<EventStore>((set) => ({
       return value;
     });
     setEventGain(newVolumeLevels);
+  },
+  bassLock: undefined,
+  setBassLock: (bassNumber) => {
+    set({ bassLock: bassNumber });
   },
 }));
 

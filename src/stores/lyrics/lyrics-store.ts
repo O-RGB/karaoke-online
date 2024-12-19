@@ -40,7 +40,7 @@ const useLyricsStoreNew = create<LyricsStore>((set, get) => ({
     });
   },
   lyricsRender: (tick) => {
-    tick = tick - 85; // Delay
+    tick = tick - 50; // Delay
     const tickMapper = get().tickMapper;
     const lyricsMapper = get().lyricsMapper;
     const lyricsCut = get().lyricsCut;

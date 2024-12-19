@@ -2,7 +2,7 @@ import ButtonDropdown from "@/components/common/button/button-dropdown";
 import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
 import { channel } from "diagnostics_channel";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaDrum } from "react-icons/fa";
+import { FaDrum, FaLock } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { Menu, MenuButton } from "@szhsin/react-menu";
 import Label from "@/components/common/display/label";
@@ -10,6 +10,7 @@ import MixPanVolume from "./mix-controller/mix-pan-volume";
 import MixReverbVolume from "./mix-controller/mix-reverb-volume";
 import MixChorusDepthVolume from "./mix-controller/mix-chorus-depth.volume";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
 interface InstrumentsButtonProps {
   // instrument: number;
@@ -40,6 +41,8 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
 }) => {
   const programList = useMixerStoreNew((state) => state.programList);
   const instrument = programList[channel];
+  const bassLocked = useSynthesizerEngine((state) => state.engine?.bassLocked);
+  const bassDetect = useSynthesizerEngine((state) => state.engine?.bassDetect);
 
   const persetOptions = useMemo(
     () =>
@@ -56,7 +59,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
     return getIconInstruments(instrument ?? 0)?.icon;
   }, [channel, instrument]);
 
-  useEffect(() => {}, [instrument]);
+  useEffect(() => {}, [instrument, bassLocked, bassDetect]);
 
   function LabelTag({ name }: { name: string }) {
     return (
@@ -73,6 +76,10 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
       ? persetOptions[instrument ?? 0].label
       : "None"
     : "None";
+
+  const bassIsLocked: boolean = bassLocked
+    ? bassDetect?.channel === channel
+    : false;
 
   return (
     <Menu
@@ -101,6 +108,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
         <div className="flex gap-1">
           <LabelTag name="เสียง"></LabelTag>
           <ButtonDropdown
+            disabled={bassIsLocked}
             className={"w-full"}
             value={`${instrument ?? 0}`}
             onChange={(value) => {
@@ -108,9 +116,16 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
             }}
             options={persetOptions}
           >
-            <div className="w-full rounded-md overflow-hidden border border-black/10 cursor-pointer group-hover:bg-gray-200 duration-300">
+            <div
+              className={`${
+                bassIsLocked ? "bg-yellow-400 text-red-600" : ""
+              } w-full rounded-md overflow-hidden border border-black/10 cursor-pointer group-hover:bg-gray-200 duration-300`}
+            >
               <div className="w-full font-bold text-[10px] p-2 flex gap-0.5 justify-between items-center h-6">
-                <span className="w-2.5">{channelIcon}</span>
+                <div className="flex gap-2 items-center">
+                  <span>{bassIsLocked ? <FaLock className=""></FaLock> : <></>}</span>
+                  <span>{channelIcon}</span>
+                </div>
                 <span>{fullname}</span>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { FaLock } from "react-icons/fa";
 
 interface ButtonDropdownProps {
   children?: React.ReactNode;
@@ -6,13 +7,16 @@ interface ButtonDropdownProps {
   options?: IOptions[];
   value?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 const ButtonDropdown: React.FC<ButtonDropdownProps> = ({
   children,
   onChange,
   options,
-  value,className
+  value,
+  className,
+  disabled,
 }) => {
   const hanndleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
@@ -21,9 +25,14 @@ const ButtonDropdown: React.FC<ButtonDropdownProps> = ({
 
   useEffect(() => {}, [value]);
   return (
-    <div className={`relative cursor-pointer group ${className}`}>
+    <div
+      className={`relative group ${className} ${
+        disabled ? "pointer-events-none" : "cursor-pointer"
+      }`}
+    >
       <div className="w-full">{children}</div>
       <select
+        disabled={disabled}
         onChange={hanndleOnChange}
         className="absolute top-0 w-full h-6 bg-transparent cursor-pointer opacity-0"
         name=""

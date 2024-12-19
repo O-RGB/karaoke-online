@@ -5,7 +5,6 @@ import {
 } from "@/config/value";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 import { usePeerStore } from "@/stores/peer-store";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
 
 import {
   midiControllers,

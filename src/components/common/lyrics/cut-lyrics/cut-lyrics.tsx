@@ -67,7 +67,7 @@ const CutLyrics: React.FC<CutLyricsProps> = ({
 
   const highlightStyle = {
     width: `${highlightedWidth}px`,
-    transition: `width ${isTransitioning ? "0.5s" : "0.0s"} ease-out`,
+    transition: `width ${isTransitioning ? "0.35s" : "0.0s"} ease-out`,
   };
 
   const fontType = typeof fontSize;

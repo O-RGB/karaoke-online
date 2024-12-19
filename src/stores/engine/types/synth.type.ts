@@ -42,8 +42,12 @@ export interface BaseSynthEngine {
   ): void;
 
   setMute(channel: number, isMuted: boolean): void;
+  setBassLocked(baseNumber: number, isLock: boolean): void;
 
   setupMIDIEventHook?(): void;
+
+  bassLocked?: number;
+  bassDetect?: IProgramChange;
 }
 
 export interface BaseSynthEvent {
@@ -93,3 +97,9 @@ export interface IPersetSoundfont {
   presetName: string;
   program: number;
 }
+
+export interface IBassLock {
+  programLock: number;
+}
+
+ 

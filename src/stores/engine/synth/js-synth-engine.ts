@@ -9,6 +9,7 @@ import { SpessaPlayerEngine } from "../player/spessa-synth-player";
 import {
   BaseSynthEngine,
   BaseSynthPlayerEngine,
+  IBassLock,
   IControllerChange,
   IProgramChange,
   TimingModeType,
@@ -24,6 +25,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   public analysers: AnalyserNode[] = [];
   public soundfontName: string | undefined;
   public soundfontFile: File | undefined;
+  public bassLocked: number | undefined = undefined;
 
   constructor(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
     this.startup();
@@ -134,7 +136,7 @@ export class JsSynthEngine implements BaseSynthEngine {
     userChange?: boolean
   ): void {}
 
-  setMute(channel: number, mute: boolean): void {
-    
-  }
+  setMute(channel: number, mute: boolean): void {}
+
+  setBassLocked(bassNumber: number): void {}
 }
