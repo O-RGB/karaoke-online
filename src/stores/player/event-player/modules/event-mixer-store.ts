@@ -4,7 +4,7 @@ import {
   VOLUME_MIDDLE_DEFAULT_128,
 } from "@/config/value";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
-import { usePeerStore } from "@/stores/peer-store";
+import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
 
 import {
   midiControllers,

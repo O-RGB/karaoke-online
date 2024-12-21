@@ -2,7 +2,6 @@ import { groupThaiCharacters } from "@/lib/app-control";
 import { TickMapper } from "@/lib/spssasynth/tick-mapper";
 import { create } from "zustand";
 import { ILyricsMapper } from "./types/lyrics.type";
-import useRuntimePlayer from "../player/update/modules/runtime-player";
 
 interface LyricsStore {
   charIndex: number;

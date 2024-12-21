@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { RuntimeProps } from "../types/player.type";
 import { sortTempoChanges } from "@/lib/app-control";
 import useQueuePlayer from "./queue-player";
-import useEventStoreNew from "../../event-player/event-store";
+import useEventStore from "../../event-player/event-store";
 import useLyricsStoreNew from "@/stores/lyrics/lyrics-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
@@ -103,8 +103,8 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
       return;
     }
 
-    const setEventRun = useEventStoreNew.getState().setEventRun;
-    const setGainRun = useEventStoreNew.getState().setGainRun;
+    const setEventRun = useEventStore.getState().setEventRun;
+    const setGainRun = useEventStore.getState().setGainRun;
     const nextMusic = useQueuePlayer.getState().nextMusic;
     const lyricsRender = useLyricsStoreNew.getState().lyricsRender;
 

@@ -7,7 +7,6 @@ import {
 import {
   BaseSynthEngine,
   BaseSynthPlayerEngine,
-  IBassLock,
   IControllerChange,
   IProgramChange,
   TimingModeType,

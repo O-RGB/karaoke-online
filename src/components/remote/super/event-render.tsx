@@ -1,8 +1,8 @@
 import useKeyboardStore from "@/stores/keyboard-state";
-import { usePeerStore } from "@/stores/peer-store";
 import React, { useEffect } from "react";
-import useQueuePlayer from "@/stores/player/update/modules/queue-player";
+import useQueuePlayer from "@/stores/player/player/modules/queue-player";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
 
 interface EventRenderSuperProps {
   setSearchSongList?: (value: SearchResult[]) => void;

@@ -1,10 +1,11 @@
 import volumeSynth from "@/features/volume/volume-features";
 import useConfigStore from "@/stores/config/config-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
-import { usePeerStore } from "@/stores/peer-store";
+
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
-import useQueuePlayer from "@/stores/player/update/modules/queue-player";
-import { useSpessasynthStore } from "@/stores/spessasynth/spessasynth-store";
+import useQueuePlayer from "@/stores/player/player/modules/queue-player";
+import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
+import { RemoteSendMessage } from "@/stores/remote/types/remote.type";
 
 import useTracklistStore from "@/stores/tracklist-store";
 import React, { useEffect } from "react";
@@ -63,6 +64,7 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
 
       case "SET_CHANNEL":
         let vol = data as ISetChannelGain;
+        console.log("set channel re")
         setVolumes(vol.channel, vol.value, true);
         return data as ISetChannelGain;
 
@@ -92,16 +94,11 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
         break;
 
       case "SET_SONG":
+        
         let song = data as SearchResult;
+        console.log(song)
         if (song) {
           addQueue(song);
-          // const data = await loadAndPlaySong(song, config.system);
-          // if (data) {
-          //   if (data.length <= 1) {
-          //     const { file, songInfo } = data[0];
-          //     setSongPlaying(file, songInfo);
-          //   }
-          // }
         }
         break;
 

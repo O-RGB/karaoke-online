@@ -22,8 +22,8 @@ import useKeyboardStore from "@/stores/keyboard-state";
 import Button from "@/components/common/button/button";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import Tags from "@/components/common/display/tags";
-import useQueuePlayer from "@/stores/player/update/modules/queue-player";
-import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
+import useQueuePlayer from "@/stores/player/player/modules/queue-player";
+import useRuntimePlayer from "@/stores/player/player/modules/runtime-player";
 
 interface SongItem {
   id: string;

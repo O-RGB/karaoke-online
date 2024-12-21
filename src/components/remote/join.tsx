@@ -4,7 +4,8 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import SearchSelect from "../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
 import SearchDropdown from "../tools/search-song/search-dropdown";
-import { usePeerStore } from "@/stores/peer-store";
+import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
+
 
 interface JoinConnectProps {
   hostId: string;

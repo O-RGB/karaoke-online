@@ -8,11 +8,12 @@ import Upload from "../../common/input-data/upload";
 import Label from "../../common/display/label";
 import { FaRegFileAudio } from "react-icons/fa";
 import { readSong } from "@/lib/karaoke/read";
-import { usePeerStore } from "@/stores/peer-store";
+
 import EventRenderSuper from "./event-render";
 import QueueSong from "@/components/tools/queue-song/queue-song";
 import useKeyboardStore from "@/stores/keyboard-state";
 import NextSongButton from "@/components/common/player/next-song-button";
+import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
 
 interface SuperJoinConnectProps {
   hostId: string;
@@ -129,7 +130,6 @@ const SuperJoinConnect: React.FC<SuperJoinConnectProps> = ({ hostId }) => {
   const handleUploadFileSong = async (file: File, filelist: FileList) => {
     if (sendSuperUserMessage) {
       const song = await readSong(filelist);
-      console.log("song", song);
       if (song.length === 1) {
         sendSuperUserMessage({
           message: song[0],

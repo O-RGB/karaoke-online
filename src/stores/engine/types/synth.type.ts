@@ -97,9 +97,3 @@ export interface IPersetSoundfont {
   presetName: string;
   program: number;
 }
-
-export interface IBassLock {
-  programLock: number;
-}
-
- 

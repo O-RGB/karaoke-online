@@ -10,12 +10,12 @@ import useKeyboardStore from "@/stores/keyboard-state";
 import Button from "@/components/common/button/button";
 import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
 import { MdPlayCircleFilled } from "react-icons/md";
-// import { usePlayer } from "@/stores/player/player-store";
-import { usePeerStore } from "@/stores/peer-store";
+
 import useConfigStore from "@/stores/config/config-store";
-import { usePlayerNew } from "@/stores/player/update/player-new-store";
-import useQueuePlayer from "@/stores/player/update/modules/queue-player";
+
+import useQueuePlayer from "@/stores/player/player/modules/queue-player";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
 
 interface SearchSongProps {}
 
@@ -26,11 +26,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const { orientation } = useOrientation();
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
 
-  const queue = useQueuePlayer((state) => state.queue);
-
-  // const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
-  // const setSongPlaying = usePlayer((state) => state.setSongPlaying);
-  const test = usePlayerNew((state) => state.queue);
+  const addQueue = useQueuePlayer((state) => state.addQueue);
 
   const superUserConnections = usePeerStore(
     (state) => state.superUserConnections
@@ -38,10 +34,6 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const sendSuperUserMessage = usePeerStore(
     (state) => state.sendSuperUserMessage
   );
-
-  // const play = usePlayerNew((state) => state.runtime.play);
-  // const paused = usePlayerNew((state) => state.runtime.paused);
-  // const nextMusic = usePlayerNew((state) => state.queue.nextMusic);
 
   const queueing = useKeyboardStore((state) => state.queueing);
   const searching = useKeyboardStore((state) => state.searching);
@@ -81,7 +73,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   };
 
   const setSongPlayer = async (value: SearchResult) => {
-    test.addQueue(value);
+    addQueue(value);
 
     // if (superUserConnections.length > 0) {
     //   sendSuperUserMessage({

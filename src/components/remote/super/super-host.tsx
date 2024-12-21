@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useQRCode } from "next-qrcode";
 import Input from "../../common/input-data/input";
-import { usePeerStore } from "@/stores/peer-store";
+
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { RiRemoteControlFill } from "react-icons/ri";
 import Button from "../../common/button/button";
 import Label from "../../common/display/label";
+import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
 
 interface SuperHostRemoteProps {}
 

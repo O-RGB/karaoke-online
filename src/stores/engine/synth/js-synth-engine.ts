@@ -1,15 +1,9 @@
 import { DEFAULT_SOUND_FONT } from "@/config/value";
-import {
-  jsSynthesizerCurrentTime,
-  setupJsSynthesizer,
-} from "../lib/js-synthesizer";
 import { JsSynthPlayerEngine } from "../player/js-synth-player";
-import { SpessaPlayerEngine } from "../player/spessa-synth-player";
 
 import {
   BaseSynthEngine,
   BaseSynthPlayerEngine,
-  IBassLock,
   IControllerChange,
   IProgramChange,
   TimingModeType,

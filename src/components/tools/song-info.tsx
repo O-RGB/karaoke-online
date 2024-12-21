@@ -1,6 +1,6 @@
 import { useOrientation } from "@/hooks/orientation-hook";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
-import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
+import useRuntimePlayer from "@/stores/player/player/modules/runtime-player";
 import React, { useEffect, useState } from "react";
 
 interface SongInfoProps {}

@@ -1,9 +1,6 @@
-import { CHANNEL_DEFAULT } from "@/config/value";
-
 import { create } from "zustand";
 import useMixerStoreNew from "./modules/event-mixer-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
-import { get } from "http";
 
 interface EventStore {
   setEventRun: (start: boolean) => void;
@@ -13,7 +10,7 @@ interface EventStore {
   setBassLock?: (bassNumber: number) => void;
 }
 
-const useEventStoreNew = create<EventStore>((set, get) => ({
+const useEventStore = create<EventStore>((set, get) => ({
   setEventRun: () => {
     const engine = useSynthesizerEngine.getState().engine;
 
@@ -64,4 +61,4 @@ const useEventStoreNew = create<EventStore>((set, get) => ({
   },
 }));
 
-export default useEventStoreNew;
+export default useEventStore;

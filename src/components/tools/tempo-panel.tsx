@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import useConfigStore from "../../stores/config/config-store";
 
-import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
+import useRuntimePlayer from "@/stores/player/player/modules/runtime-player";
 
 interface TempoPanelProps {}
 

@@ -16,10 +16,10 @@ import Marquee from "react-fast-marquee";
 import { FaSearch } from "react-icons/fa";
 
 import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
-import useRuntimePlayer from "@/stores/player/update/modules/runtime-player";
-import useQueuePlayer from "@/stores/player/update/modules/queue-player";
+import useRuntimePlayer from "@/stores/player/player/modules/runtime-player";
+import useQueuePlayer from "@/stores/player/player/modules/queue-player";
 import useConfigStore from "@/stores/config/config-store";
-import useEventStoreNew from "@/stores/player/event-player/event-store";
+import useEventStore from "@/stores/player/event-player/event-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 interface PlayerRemote {
   onPause?: () => void;
