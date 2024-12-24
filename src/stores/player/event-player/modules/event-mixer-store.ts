@@ -1,9 +1,11 @@
 import {
+  CHANNEL_BOOLEAN,
   CHANNEL_DEFAULT,
   VOLUME_DEFAULT,
   VOLUME_MIDDLE_DEFAULT_128,
 } from "@/config/value";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { IControllerChange } from "@/stores/engine/types/synth.type";
 import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
 
 import {
@@ -14,16 +16,14 @@ import {
 import { create } from "zustand";
 
 interface MixerStore {
-  setEventController: (
-    controllerNumber: number,
-    controllerValue: number,
-    channel: number
-  ) => void;
+  setEventController: (event: IControllerChange, isUser?: boolean) => void;
 
   setEventGain: (analysersLevels: number[]) => void;
 
   volumes: number[];
   setVolumes: (channel: number, value: number, synthUpdate: boolean) => void;
+  volLocked: boolean[];
+  setVolLock: (channel: number, isLock: boolean, synthUpdate: boolean) => void;
 
   pan: number[];
   setPan: (channel: number, value: number, synthUpdate: boolean) => void;
@@ -47,9 +47,6 @@ interface MixerStore {
   hideMixer: boolean;
   setHideMixer: (isHide: boolean) => void;
 
-  held: boolean;
-  setHeld: (isHeld: boolean) => void;
-
   updatePitch: (channel: number | null, semitones: number) => void;
   uploadLockedPitchWheel: (channel: number, isLocked: boolean) => void;
   updatePreset: (channel: number, value: number) => void;
@@ -67,31 +64,48 @@ interface MixerStore {
 }
 
 const useMixerStoreNew = create<MixerStore>((set, get) => ({
-  setEventController: (
-    controllerNumber: number,
-    controllerValue: number,
-    channel: number
-  ) => {
-    switch (controllerNumber) {
+  setEventController: (event: IControllerChange, isUser) => {
+    const superUserConnections = usePeerStore.getState().superUserConnections;
+    const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
+    const engine = useSynthesizerEngine.getState().engine;
+
+    if (superUserConnections.length > 0) {
+      sendSuperUserMessage({
+        message: event,
+        type: "CONTROLLER",
+        user: "SUPER",
+      });
+    }
+
+    if (isUser) {
+      engine?.lockController(event.channel, event.controllerNumber, false);
+    }
+
+    switch (event.controllerNumber) {
       case midiControllers.mainVolume:
-        get().setVolumes(channel, controllerValue, false);
+        get().setVolumes(event.channel, event.controllerValue, false);
         break;
       case midiControllers.pan:
-        get().setPan(channel, controllerValue, false);
+        get().setPan(event.channel, event.controllerValue, false);
         break;
       case 91:
-        get().setReverb(channel, controllerValue, false);
+        get().setReverb(event.channel, event.controllerValue, false);
         break;
       case 93:
-        get().setChorusDepth(channel, controllerValue, false);
+        get().setChorusDepth(event.channel, event.controllerValue, false);
         break;
       default:
         break;
+    }
+
+    if (isUser) {
+      engine?.lockController(event.channel, event.controllerNumber, true);
     }
   },
   setEventGain: (analysersLevels: number[]) => {
     const superUserConnections = usePeerStore.getState().superUserConnections;
     const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
+
     if (get().hideMixer) {
       const totalGain =
         analysersLevels?.reduce((acc, volume) => acc + volume, 0) || 0;
@@ -113,41 +127,38 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
   },
   volumes: VOLUME_DEFAULT,
   setVolumes: (channel, value, synthUpdate) => {
-    const superUserConnections = usePeerStore.getState().superUserConnections;
-    const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
-
     let volumes = [...get().volumes];
     volumes[channel] = value;
-
-    if (superUserConnections.length > 0) {
-      sendSuperUserMessage({
-        message: volumes,
-        type: "VOLUMES",
-        user: "SUPER",
-      });
-    }
 
     set({ volumes });
     if (synthUpdate) {
       const engine = useSynthesizerEngine.getState().engine;
+
+      const locked = get().volLocked[channel];
+      if (locked) {
+        engine?.lockController(channel, midiControllers.mainVolume, false);
+      }
       engine?.setController(channel, midiControllers.mainVolume, value);
+      if (locked) {
+        engine?.lockController(channel, midiControllers.mainVolume, true);
+      }
     }
   },
+  setVolLock: (channel, isLock, synthUpdate) => {
+    let volLocked = [...get().volLocked];
+    volLocked[channel] = isLock;
+
+    set({ volLocked });
+    if (synthUpdate) {
+      const engine = useSynthesizerEngine.getState().engine;
+      engine?.lockController(channel, midiControllers.mainVolume, isLock);
+    }
+  },
+  volLocked: CHANNEL_BOOLEAN,
   pan: VOLUME_MIDDLE_DEFAULT_128,
   setPan: (channel, value, synthUpdate) => {
-    const superUserConnections = usePeerStore.getState().superUserConnections;
-    const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
-
     let pan = [...get().pan];
     pan[channel] = value;
-
-    if (superUserConnections.length > 0) {
-      sendSuperUserMessage({
-        message: pan,
-        type: "PAN",
-        user: "SUPER",
-      });
-    }
 
     set({ pan });
 
@@ -158,19 +169,8 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
   },
   reverb: VOLUME_MIDDLE_DEFAULT_128,
   setReverb: (channel, value, synthUpdate) => {
-    const superUserConnections = usePeerStore.getState().superUserConnections;
-    const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
-
     let reverb = [...get().reverb];
     reverb[channel] = value;
-
-    if (superUserConnections.length > 0) {
-      sendSuperUserMessage({
-        message: reverb,
-        type: "REVERB",
-        user: "SUPER",
-      });
-    }
 
     set({ reverb });
 
@@ -181,19 +181,8 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
   },
   chorusDepth: VOLUME_MIDDLE_DEFAULT_128,
   setChorusDepth: (channel, value, synthUpdate) => {
-    const superUserConnections = usePeerStore.getState().superUserConnections;
-    const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
-
     let chorusDepth = [...get().chorusDepth];
     chorusDepth[channel] = value;
-
-    if (superUserConnections.length > 0) {
-      sendSuperUserMessage({
-        message: chorusDepth,
-        type: "CHORUSDEPTH",
-        user: "SUPER",
-      });
-    }
 
     set({ chorusDepth });
 
@@ -217,11 +206,6 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
   setHideMixer: (hideMixer) =>
     set((state) => ({
       hideMixer,
-    })),
-  held: false,
-  setHeld: (held) =>
-    set((state) => ({
-      held,
     })),
 
   uploadLockedPitchWheel: (channel: number, isLocked: boolean) => {

@@ -27,7 +27,7 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
   useEffect(() => {
     setHostId(superUserPeer?.id);
     if (typeof window !== "undefined") {
-      setHostUrl(window.location.origin);
+      setHostUrl("http://localhost:3001/");
       setLoading(false);
     }
   }, [superUserPeer]);
@@ -68,12 +68,12 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
       <div className="flex flex-col lg:flex-row justify-center items-center gap-6 h-full">
         <a
           className="block lg:hidden"
-          href={`${hostUrl}/remote/super/${hostId}`}
+          href={`${hostUrl}/super/${hostId}`}
           target="_blank"
         >
           {hostId && (
             <Canvas
-              text={`${hostUrl}/remote/super/${hostId}`}
+              text={`${hostUrl}/super/${hostId}`}
               options={{
                 errorCorrectionLevel: "M",
                 margin: 3,
@@ -89,12 +89,12 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
 
         <a
           className="hidden lg:block"
-          href={`${hostUrl}/remote/super/${hostId}`}
+          href={`${hostUrl}/super/${hostId}`}
           target="_blank"
         >
           {hostId && (
             <Canvas
-              text={`${hostUrl}/remote/super/${hostId}`}
+              text={`${hostUrl}/super/${hostId}`}
               options={{
                 errorCorrectionLevel: "M",
                 margin: 3,

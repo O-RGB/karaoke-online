@@ -92,6 +92,12 @@ export interface IControllerChange extends IEventChange {
   controllerValue: number;
 }
 
+export interface ILockController {
+  channel: number;
+  controllerNumber: number;
+  isLocked: boolean;
+}
+
 export interface IPersetSoundfont {
   bank: number;
   presetName: string;

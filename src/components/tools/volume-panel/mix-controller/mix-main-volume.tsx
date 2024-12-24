@@ -1,39 +1,33 @@
 import RangeBarClone from "@/components/common/input-data/range-bar-clone";
+import SliderCommon from "@/components/common/input-data/slider";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import React, { useEffect } from "react";
 
 interface MixMainVolume {
-  onMouseUp?: () => void;
-  onTouchEnd?: () => void;
   onChange?: (value: number) => void;
-  disabled: boolean;
+  disabled?: boolean;
   channel: number;
+  vertical?: boolean;
 }
 
 const MixMainVolume: React.FC<MixMainVolume> = ({
   channel,
-  disabled,
   onChange,
-  onMouseUp,
-  onTouchEnd,
+  disabled = false,
+  vertical = true,
 }) => {
   const volume = useMixerStoreNew((state) => state.volumes[channel]);
 
-  if (channel === 3) {
-    console.log(volume);
-  }
-
   useEffect(() => {}, [volume]);
   return (
-    <RangeBarClone
+    <SliderCommon
+      vertical={vertical}
       value={volume}
       className="z-20"
       disabled={disabled}
       max={127}
-      onMouseUp={onMouseUp}
-      onTouchEnd={onTouchEnd}
       onChange={onChange}
-    ></RangeBarClone>
+    ></SliderCommon>
   );
 };
 

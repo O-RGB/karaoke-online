@@ -1,8 +1,7 @@
 import ButtonDropdown from "@/components/common/button/button-dropdown";
 import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
-import { channel } from "diagnostics_channel";
-import React, { useEffect, useMemo, useState } from "react";
-import { FaDrum, FaLock } from "react-icons/fa";
+import React, { useEffect, useMemo } from "react";
+import { FaDrum, FaLock, FaUnlock } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { Menu, MenuButton } from "@szhsin/react-menu";
 import Label from "@/components/common/display/label";
@@ -11,38 +10,50 @@ import MixReverbVolume from "./mix-controller/mix-reverb-volume";
 import MixChorusDepthVolume from "./mix-controller/mix-chorus-depth.volume";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import Button from "@/components/common/button/button";
+import MixMainVolume from "./mix-controller/mix-main-volume";
 
 interface InstrumentsButtonProps {
-  // instrument: number;
   channel: number;
   perset?: IPersetSoundfont[];
+  // onMainChange?: (channel: number, value: number) => void;
+  onMainlock?: (channel: number, isLocked: boolean) => void;
+
+  volRender?: React.ReactNode;
   onPersetChange?: (channel: number, value: number) => void;
+  onPresetlock?: (channel: number, isLocked: boolean) => void;
   onPenChange: (channel: number, value: number) => void;
+  onPenlock?: (channel: number, isLocked: boolean) => void;
   onReverbChange: (channel: number, value: number) => void;
+  onReverblock?: (channel: number, isLocked: boolean) => void;
   onChorusDepthChange: (channel: number, value: number) => void;
+  onChorusDepthlock?: (channel: number, isLocked: boolean) => void;
   className?: string;
   disabled?: boolean;
-  onMouseUp?: () => void;
-  onTouchEnd?: () => void;
 }
 
 const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
-  // instrument,
+  // onMainChange,
+  onMainlock,
+  volRender,
   onPersetChange,
+  onPresetlock,
   onPenChange,
+  onPenlock,
   onReverbChange,
+  onReverblock,
   onChorusDepthChange,
+  onChorusDepthlock,
   channel,
   perset,
   className,
   disabled,
-  onMouseUp,
-  onTouchEnd,
 }) => {
   const programList = useMixerStoreNew((state) => state.programList);
   const instrument = programList[channel];
   const bassLocked = useSynthesizerEngine((state) => state.engine?.bassLocked);
   const bassDetect = useSynthesizerEngine((state) => state.engine?.bassDetect);
+  const volLock = useMixerStoreNew((state) => state.volLocked[channel]);
 
   const persetOptions = useMemo(
     () =>
@@ -104,9 +115,38 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
         );
       }}
     >
-      <div className=" px-2 relative z-50 flex flex-col gap-1 min-w-56">
+      <div className=" px-2 relative z-50 flex flex-col gap-1 min-w-60">
+        <div className="text-xs w-full pb-2 border-b">Channel {channel}</div>
+        <div className="flex gap-1 justify-center items-center">
+          <LabelTag name="ความดัง"></LabelTag>
+          <div className="pr-0.5">
+            <Button
+              onClick={() => onMainlock?.(channel, !volLock)}
+              icon={
+                volLock ? (
+                  <FaLock className="text-[8px] text-red-500"></FaLock>
+                ) : (
+                  <FaUnlock className="text-[8px] text-gray-500"></FaUnlock>
+                )
+              }
+              className="!p-1.5 shadow-none border-none"
+            ></Button>
+          </div>
+          {volRender}
+          {/* <MixMainVolume
+            channel={channel}
+            vertical={false}
+            onChange={(v) => onMainChange?.(channel, v)}
+          ></MixMainVolume> */}
+        </div>
         <div className="flex gap-1">
           <LabelTag name="เสียง"></LabelTag>
+          <div className="pr-0.5">
+            <Button
+              icon={<FaUnlock className="text-[8px] text-gray-500"></FaUnlock>}
+              className="!p-1.5 shadow-none border-none"
+            ></Button>
+          </div>
           <ButtonDropdown
             disabled={bassIsLocked}
             className={"w-full"}
@@ -123,7 +163,9 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
             >
               <div className="w-full font-bold text-[10px] p-2 flex gap-0.5 justify-between items-center h-6">
                 <div className="flex gap-2 items-center">
-                  <span>{bassIsLocked ? <FaLock className=""></FaLock> : <></>}</span>
+                  <span>
+                    {bassIsLocked ? <FaUnlock className=""></FaUnlock> : <></>}
+                  </span>
                   <span>{channelIcon}</span>
                 </div>
                 <span>{fullname}</span>
@@ -133,34 +175,46 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
         </div>
         <div className="flex gap-1 justify-center items-center">
           <LabelTag name="ซ้ายขวา"></LabelTag>
+          <div className="pr-0.5">
+            <Button
+              icon={<FaUnlock className="text-[8px] text-gray-500"></FaUnlock>}
+              className="!p-1.5 shadow-none border-none"
+            ></Button>
+          </div>
           <MixPanVolume
             onPenChange={(value) => onPenChange(channel + 1, value)}
             channel={channel}
             disabled={disabled}
-            onMouseUp={onMouseUp}
-            onTouchEnd={onTouchEnd}
           ></MixPanVolume>
         </div>
         <div className="flex gap-1 justify-center items-center">
           <LabelTag name="เสียงก้อง"></LabelTag>
+          <div className="pr-0.5">
+            <Button
+              icon={<FaUnlock className="text-[8px] text-gray-500"></FaUnlock>}
+              className="!p-1.5 shadow-none border-none"
+            ></Button>
+          </div>
           <MixReverbVolume
             onReverbChange={(value) => onReverbChange(channel + 1, value)}
             channel={channel}
             disabled={disabled}
-            onMouseUp={onMouseUp}
-            onTouchEnd={onTouchEnd}
           ></MixReverbVolume>
         </div>
         <div className="flex gap-1 justify-center items-center">
           <LabelTag name="ประสาน"></LabelTag>
+          <div className="pr-0.5">
+            <Button
+              icon={<FaUnlock className="text-[8px] text-gray-500"></FaUnlock>}
+              className="!p-1.5 shadow-none border-none"
+            ></Button>
+          </div>
           <MixChorusDepthVolume
             onChorusDepthChange={(value) =>
               onChorusDepthChange(channel + 1, value)
             }
             channel={channel}
             disabled={disabled}
-            onMouseUp={onMouseUp}
-            onTouchEnd={onTouchEnd}
           ></MixChorusDepthVolume>
         </div>
       </div>

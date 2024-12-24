@@ -30,6 +30,7 @@ export const CUSTOM_SONG_ZIP = "u";
 export const CUSTOM_DRIVE_SONG_ZIP = "d";
 
 export const CHANNEL_DEFAULT: number[] = Array(16).fill(0);
+export const CHANNEL_BOOLEAN: boolean[] = Array(16).fill(false);
 export const VOLUME_DEFAULT: number[] = Array(16).fill(100);
 export const VOLUME_MIDDLE_DEFAULT_128: number[] = Array(16).fill(64);
 export const VOLUME_MIDDLE_DEFAULT_100: number[] = Array(16).fill(50);

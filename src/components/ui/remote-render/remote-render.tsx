@@ -1,6 +1,10 @@
 import volumeSynth from "@/features/volume/volume-features";
 import useConfigStore from "@/stores/config/config-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import {
+  IControllerChange,
+  ILockController,
+} from "@/stores/engine/types/synth.type";
 
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import useQueuePlayer from "@/stores/player/player/modules/queue-player";
@@ -22,16 +26,15 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
   const setVolumes = useMixerStoreNew((state) => state.setVolumes);
   const updatePitch = useMixerStoreNew((state) => state.updatePitch);
   const setMute = useMixerStoreNew((state) => state.setMute);
-  // const volumeLib = synth ? volumeSynth(synth) : undefined;
   const { sendSuperUserMessage, superUserConnections } = usePeerStore();
+
+  const setEventController = useMixerStoreNew(
+    (state) => state.setEventController
+  );
 
   const queue = useQueuePlayer((state) => state.queue);
   const addQueue = useQueuePlayer((state) => state.addQueue);
   const nextMusic = useQueuePlayer((state) => state.nextMusic);
-  // const playingQueue = usePlayer((state) => state.playingQueue);
-  // const setSongPlaying = usePlayer((state) => state.setSongPlaying);
-  // const loadAndPlaySong = usePlayer((state) => state.loadAndPlaySong);
-  // const nextSong = usePlayer((state) => state.nextSong);
   const config = useConfigStore((state) => state.config);
 
   const eventRemote = async (from?: string, content?: RemoteSendMessage) => {
@@ -53,6 +56,7 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
           user: "SUPER",
           clientId: from,
         });
+        break;
 
       case "CONTROLLER":
         sendSuperUserMessage({
@@ -61,10 +65,26 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
           user: "SUPER",
           clientId: from,
         });
+        break;
+
+      case "CONTROLLER_CHANGE":
+        let controller = data as IControllerChange;
+        console.log(controller)
+        setEventController(controller, true);
+        break;
+
+      case "CONTROLLER_LOCK":
+        let lock = data as ILockController;
+        engine?.lockController(
+          lock.channel,
+          lock.controllerNumber,
+          lock.isLocked
+        );
+        break;
 
       case "SET_CHANNEL":
         let vol = data as ISetChannelGain;
-        console.log("set channel re")
+        console.log("set channel re");
         setVolumes(vol.channel, vol.value, true);
         return data as ISetChannelGain;
 
@@ -94,9 +114,8 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
         break;
 
       case "SET_SONG":
-        
         let song = data as SearchResult;
-        console.log(song)
+        console.log(song);
         if (song) {
           addQueue(song);
         }

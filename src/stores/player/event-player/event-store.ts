@@ -20,7 +20,7 @@ const useEventStore = create<EventStore>((set, get) => ({
 
     engine?.programChange((event) => {
       const { channel, program } = event;
-
+      console.log(event)
       setProgramList((prevInstrument) => {
         const newInstrument = [...prevInstrument];
         newInstrument[channel] = program;
@@ -29,11 +29,12 @@ const useEventStore = create<EventStore>((set, get) => ({
     });
 
     engine?.controllerChange((event) => {
-      const { controllerNumber, controllerValue, channel } = event;
-      setEventController(controllerNumber, controllerValue, channel);
+      console.log(event)
+      setEventController(event);
     });
 
     engine?.persetChange((event) => {
+      console.log(event)
       setInstrument(event);
     });
   },

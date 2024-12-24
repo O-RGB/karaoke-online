@@ -21,6 +21,7 @@ import useNotificationStore from "@/stores/notification-store";
 import { FaList } from "react-icons/fa";
 import useKeyboardStore from "@/stores/keyboard-state";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import { CHANNEL_DEFAULT } from "@/config/value";
 
 interface VolumePanelProps {
   onVolumeChange?: (value: ISetChannelGain) => void;
@@ -66,6 +67,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
 
   const setHideMixer = useMixerStoreNew((state) => state.setHideMixer);
+
+  const setVolLock = useMixerStoreNew((state) => state.setVolLock);
   const setVolumes = useMixerStoreNew((state) => state.setVolumes);
   const setPan = useMixerStoreNew((state) => state.setPan);
   const setReverb = useMixerStoreNew((state) => state.setReverb);
@@ -73,10 +76,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   const updatePitch = useMixerStoreNew((state) => state.updatePitch);
   const updatePreset = useMixerStoreNew((state) => state.updatePreset);
   const setMute = useMixerStoreNew((state) => state.setMute);
-
-  const setHeld = useMixerStoreNew((state) => state.setHeld);
-
-  const volLayout: number[] = Array(16).fill(0);
 
   const onVolumeMeterChange = (channel: number, value: number) => {
     setVolumes(channel - 1, value, true);
@@ -106,9 +105,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     }
   };
 
-  const onLockedVolume = (channel: number, isLocked: boolean) => {
-    // volumeLib?.updateLockedVolume(channel - 1, isLocked);
-  };
   const onPersetChange = (channel: number, value: number) => {
     updatePreset(channel - 1, value);
   };
@@ -155,7 +151,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
         <div
           className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px]  left-0 p-2 py-[26px]`}
         >
-          {volLayout.map((data, ch) => {
+          {CHANNEL_DEFAULT.map((data, ch) => {
             return (
               <div key={`gain-render-${ch}`} className="relative w-full">
                 <VolumeMeterV
@@ -173,7 +169,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
             hideMixer ?? "pointer-events-none !cursor-none"
           } w-full gap-0.5 h-full`}
         >
-          {volLayout.map((data, ch) => {
+          {CHANNEL_DEFAULT.map((data, ch) => {
             console.log("map re loop...");
             return (
               <div
@@ -185,26 +181,33 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
                   channel={ch + 1}
                   onMuted={onMutedVolume}
                 ></VolumeAction>
-                <div className="flex items-center justify-center h-full w-full border-x border-white/20 py-1">
+                <div className="flex items-center justify-center h-full py-1.5 w-full border-x border-white/20">
                   <MixMainVolume
                     channel={ch}
                     disabled={hideMixer}
                     onChange={(v) => onVolumeMeterChange(ch + 1, v)}
-                    onMouseUp={() => setHeld(true)}
-                    onTouchEnd={() => setHeld(false)}
                   ></MixMainVolume>
                 </div>
 
                 <InstrumentsButton
                   disabled={hideMixer}
                   channel={ch}
+                  volRender={
+                    <div className="w-full">
+                      <MixMainVolume
+                        vertical={false}
+                        channel={ch}
+                        disabled={hideMixer}
+                        onChange={(v) => onVolumeMeterChange(ch + 1, v)}
+                      ></MixMainVolume>
+                    </div>
+                  }
+                  onMainlock={(ch, locked) => setVolLock(ch, locked, true)}
                   onPenChange={onPenChange}
                   onPersetChange={onPersetChange}
                   onReverbChange={onReverbChange}
                   onChorusDepthChange={onChorusDepthChange}
                   perset={instrument}
-                  onMouseUp={() => setHeld(true)}
-                  onTouchEnd={() => setHeld(false)}
                 ></InstrumentsButton>
               </div>
             );

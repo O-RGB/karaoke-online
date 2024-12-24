@@ -7,7 +7,11 @@ export type TypeMixer =
   | "CHORUSDEPTH"
   | "PITCH";
 
-export type TypeEvent = "CONTROLLER" | "PROGRAM";
+export type TypeEvent =
+  | "CONTROLLER"
+  | "PROGRAM"
+  | "CONTROLLER_CHANGE"
+  | "CONTROLLER_LOCK";
 
 export type TypeFormHost =
   // TIME MUSIC

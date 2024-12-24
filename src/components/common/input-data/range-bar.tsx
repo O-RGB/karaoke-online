@@ -1,5 +1,6 @@
 import React, { CSSProperties, useEffect, useState } from "react";
 import RangeBarClone from "./range-bar-clone";
+import SliderCommon from "./slider";
 
 const RangeBar: React.FC<RangeBarProps> = ({
   layout = "vertical",
@@ -43,13 +44,14 @@ const RangeBar: React.FC<RangeBarProps> = ({
 
   if (layout === "vertical") {
     return (
-      <RangeBarClone
-      // onChange={onChange}
-      // min={min}
-      // max={max}
-      // value={value}
-      // disabled={inputProps?.disabled}
-      ></RangeBarClone>
+      // <RangeBarClone
+      // // onChange={onChange}
+      // // min={min}
+      // // max={max}
+      // // value={value}
+      // // disabled={inputProps?.disabled}
+      // ></RangeBarClone>
+      <SliderCommon></SliderCommon>
     );
   } else {
     return (
