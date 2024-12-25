@@ -23,6 +23,7 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
   const engine = useSynthesizerEngine((state) => state.engine);
 
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
+  const setVolLock = useMixerStoreNew((state) => state.setVolLock);
   const setVolumes = useMixerStoreNew((state) => state.setVolumes);
   const updatePitch = useMixerStoreNew((state) => state.updatePitch);
   const setMute = useMixerStoreNew((state) => state.setMute);
@@ -69,22 +70,16 @@ const RemoteRender: React.FC<RemoteRenderProps> = ({}) => {
 
       case "CONTROLLER_CHANGE":
         let controller = data as IControllerChange;
-        console.log(controller)
         setEventController(controller, true);
         break;
 
       case "CONTROLLER_LOCK":
         let lock = data as ILockController;
-        engine?.lockController(
-          lock.channel,
-          lock.controllerNumber,
-          lock.isLocked
-        );
+        setVolLock(lock.channel, lock.isLocked, true);
         break;
 
       case "SET_CHANNEL":
         let vol = data as ISetChannelGain;
-        console.log("set channel re");
         setVolumes(vol.channel, vol.value, true);
         return data as ISetChannelGain;
 

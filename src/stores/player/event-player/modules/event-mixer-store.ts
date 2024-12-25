@@ -77,10 +77,6 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
       });
     }
 
-    if (isUser) {
-      engine?.lockController(event.channel, event.controllerNumber, false);
-    }
-
     switch (event.controllerNumber) {
       case midiControllers.mainVolume:
         get().setVolumes(event.channel, event.controllerValue, false);
@@ -96,10 +92,6 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
         break;
       default:
         break;
-    }
-
-    if (isUser) {
-      engine?.lockController(event.channel, event.controllerNumber, true);
     }
   },
   setEventGain: (analysersLevels: number[]) => {

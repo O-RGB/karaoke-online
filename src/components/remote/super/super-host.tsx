@@ -27,7 +27,7 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
   useEffect(() => {
     setHostId(superUserPeer?.id);
     if (typeof window !== "undefined") {
-      setHostUrl("http://localhost:3001/");
+      setHostUrl("https://karaoke-online-remote.vercel.app");
       setLoading(false);
     }
   }, [superUserPeer]);
