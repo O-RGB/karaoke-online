@@ -21,11 +21,13 @@ export class JsSynthEngine implements BaseSynthEngine {
   public soundfontFile: File | undefined;
   public bassLocked: number | undefined = undefined;
 
+  private setInstrument: ((instrument: IPersetSoundfont[]) => void) | undefined;
   constructor(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
+    this.setInstrument = setInstrument;
     this.startup();
   }
 
-  async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
+  async startup() {
     const audioContext = new AudioContext();
 
     const { Synthesizer } = await import("js-synthesizer");
@@ -34,7 +36,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     synth.init(audioContext.sampleRate);
 
     const node = synth.createAudioNode(audioContext, 8192);
-    node.connect(audioContext.destination);
 
     synth.setGain(0.3);
 
@@ -48,9 +49,37 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.analysers = analysers;
     }
 
+    node.connect(audioContext.destination);
+
     this.player = new JsSynthPlayerEngine(synth);
 
     return { synth: this.synth, audio: this.audio };
+  }
+
+  private getAnalyserNode(auto: AudioContext) {
+    return Array.from({ length: 16 }, () => {
+      const analyser = auto.createAnalyser();
+      analyser.fftSize = 256;
+      return analyser;
+    });
+  }
+
+  async loadPresetSoundFont(sfId?: number) {
+    if (!sfId) {
+      return [];
+    }
+
+    const preset = this.synth?.getSFontObject(sfId)?.getPresetIterable();
+    if (preset) {
+      const presetList = Array.from(preset);
+
+      const instrument: IPersetSoundfont[] = presetList.map((data) => ({
+        bank: data.bankNum,
+        presetName: data.name,
+        program: data.num,
+      }));
+      this.setInstrument?.(instrument);
+    }
   }
 
   async loadDefaultSoundFont() {
@@ -70,23 +99,18 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.soundfontFile = fileBlob;
     }
 
-    await this.synth?.loadSFont(arraybuffer);
+    const sfId = await this.synth?.loadSFont(arraybuffer);
     this.soundfontName = "Default Soundfont sf2";
-  }
 
-  getAnalyserNode(auto: AudioContext) {
-    return Array.from({ length: 16 }, () => {
-      const analyser = auto.createAnalyser();
-      analyser.fftSize = 256;
-      return analyser;
-    });
+    this.loadPresetSoundFont(sfId);
   }
 
   async setSoundFont(file: File) {
     const bf = await file.arrayBuffer();
     try {
-      this.synth?.loadSFont(bf);
+      const sfId = await this.synth?.loadSFont(bf);
       this.soundfontName = file.name;
+      this.loadPresetSoundFont(sfId);
       return true;
     } catch (error) {
       return false;

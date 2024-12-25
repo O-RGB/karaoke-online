@@ -21,6 +21,7 @@ import useQueuePlayer from "@/stores/player/player/modules/queue-player";
 import useConfigStore from "@/stores/config/config-store";
 import useEventStore from "@/stores/player/event-player/event-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import SliderCommon from "../common/input-data/slider";
 interface PlayerRemote {
   onPause?: () => void;
   onPlay?: () => void;
@@ -43,6 +44,8 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   const timingMode =
     useConfigStore((state) => state.config.system?.timingModeType) ?? "Time";
   const [maxTimer, setMaxTimer] = useState<number>(0);
+  const [value, setValue] = useState<number>(0);
+
   const inputRef = useRef<any>(null);
 
   const engine = useSynthesizerEngine((state) => state.engine);
@@ -62,11 +65,13 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
     if (midi) {
       if (timingMode === "Tick") {
         setMaxTimer(midi.loop.end);
-      } else if(timingMode === "Time") {
+        setValue(currentTick);
+      } else if (timingMode === "Time") {
         setMaxTimer(midi.duration);
+        setValue(currentTime);
       }
     }
-  }, [midi, timingMode]);
+  }, [midi, timingMode, currentTime, currentTick]);
 
   useEffect(() => {
     engine?.player?.eventChange?.();
@@ -117,23 +122,20 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             shape={false}
             icon={<TbPlayerSkipForwardFilled className="text-white" />}
           ></Button>
-          <div className="w-full lg:w-[300px]  px-2 flex items-center pt-0.5">
-            <input
+          <div className="w-full lg:w-[300px] px-2 flex items-center pt-0.5 relative">
+            <SliderCommon
+              tabIndex={-1}
+              value={value}
+              min={0}
+              max={maxTimer}
               style={{
                 width: "100%",
               }}
-              tabIndex={-1}
-              onChange={(e) => {
-                const value = +e.target.value;
-                console.log("on click time", value);
-                setCurrentTime(value);
-              }}
-              type="range"
-              className="transition duration-300"
-              min={0}
-              max={maxTimer}
-              value={timingMode === "Time" ? currentTime : currentTick}
-            ></input>
+              onChange={setCurrentTime}
+            ></SliderCommon>
+            {/* <div className="absolute -bottom-2.5 left-0 p-0.5 text-[8px] text-white">
+              {timingMode==="Tick" ? "T" : "C"}{maxTimer}/{value}/{midi?.loop.end}
+            </div> */}
           </div>
           <div className="hidden lg:block lg:w-full h-full p-1.5">
             <div className="border border-white/20 rounded-md bg-black/15 h-full flex items-center py-1 text-white overflow-hidden">

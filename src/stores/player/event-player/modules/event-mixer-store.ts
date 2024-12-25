@@ -245,6 +245,7 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
 
   instrument: [],
   setInstrument: (instrument) => {
+    console.log("instrument in sotre", instrument)
     set({ instrument });
   },
 }));

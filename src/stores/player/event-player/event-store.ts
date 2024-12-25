@@ -17,10 +17,12 @@ const useEventStore = create<EventStore>((set, get) => ({
     const setEventController = useMixerStoreNew.getState().setEventController;
     const setProgramList = useMixerStoreNew.getState().setProgramList;
     const setInstrument = useMixerStoreNew.getState().setInstrument;
+    engine?.controllerChange((event) => {
+      setEventController(event);
+    });
 
     engine?.programChange((event) => {
       const { channel, program } = event;
-      console.log(event)
       setProgramList((prevInstrument) => {
         const newInstrument = [...prevInstrument];
         newInstrument[channel] = program;
@@ -28,20 +30,13 @@ const useEventStore = create<EventStore>((set, get) => ({
       });
     });
 
-    engine?.controllerChange((event) => {
-      console.log(event)
-      setEventController(event);
-    });
-
     engine?.persetChange((event) => {
-      console.log(event)
       setInstrument(event);
     });
   },
 
   setGainRun: () => {
     const analysers = useSynthesizerEngine.getState().engine?.analysers;
-
     if (!analysers) {
       return;
     }

@@ -25,7 +25,7 @@ export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
       const spessaSynth = new SpessaSynthEngine(setInstrument, config);
       set({ engine: spessaSynth });
     } else {
-      const jsSynth = new JsSynthEngine();
+      const jsSynth = new JsSynthEngine(setInstrument);
       set({ engine: jsSynth });
     }
   },

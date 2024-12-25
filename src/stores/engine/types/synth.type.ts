@@ -52,7 +52,7 @@ export interface BaseSynthEngine {
 
 export interface BaseSynthEvent {
   controllerChangeCallback?: (event: IControllerChange) => void;
-  programChangeCallback?: (event: IProgramChange) => void | undefined;
+  programChangeCallback?: (event: IProgramChange) => void;
 }
 
 export interface BaseSynthPlayerEngine {

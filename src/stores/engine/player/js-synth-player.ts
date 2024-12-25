@@ -1,10 +1,5 @@
 import { MIDI, midiControllers } from "spessasynth_lib";
-import {
-  BaseSynthEvent,
-  BaseSynthPlayerEngine,
-  IControllerChange,
-  IProgramChange,
-} from "../types/synth.type";
+import { BaseSynthEvent, BaseSynthPlayerEngine } from "../types/synth.type";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 
@@ -19,7 +14,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   public eventInit?: BaseSynthEvent | undefined;
 
   addEvent(input: Partial<BaseSynthEvent>): void {
-    this.eventInit = { ...input };
+    this.eventInit = { ...this.eventInit, ...input };
   }
 
   constructor(synth: JsSynthesizer) {
@@ -86,11 +81,14 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
               case 7:
                 controllerNumber = midiControllers.mainVolume;
                 break;
-
               case midiControllers.pan:
+                controllerNumber = midiControllers.pan;
               case 91:
+                controllerNumber = 91;
               case 93:
+                controllerNumber = 93;
               default:
+                controllerNumber = controller;
                 break;
             }
             this.eventInit.controllerChangeCallback({
@@ -102,10 +100,14 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
           break;
 
         case 192: // Program Change
+          console.log("program change= ", {
+            program: event.getProgram(),
+            channel: event.getChannel(),
+          });
           if (this.eventInit?.programChangeCallback) {
             this.eventInit?.programChangeCallback({
-              channel: event.getChannel(),
               program: event.getProgram(),
+              channel: event.getChannel(),
             });
           }
           break;

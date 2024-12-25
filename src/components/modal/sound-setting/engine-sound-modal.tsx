@@ -12,7 +12,12 @@ const EngineSoundModal: React.FC<EngineSoundModalProps> = ({}) => {
   const config = useConfigStore((state) => state.config);
 
   const onEngineChange = (value: EngineType) => {
-    setConfig({ system: { engine: value } });
+    setConfig({
+      system: {
+        engine: value,
+        timingModeType: value === "jsSynth" ? "Tick" : "Time",
+      },
+    });
 
     window.location.reload();
   };
