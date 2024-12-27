@@ -1,5 +1,7 @@
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { INodeCallBack } from "@/stores/player/event-player/types/node.type";
 import { channel } from "diagnostics_channel";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { BiSolidVolumeMute, BiSolidVolumeFull } from "react-icons/bi";
 
 interface VolumeActionProps {
@@ -17,10 +19,19 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
 }) => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const onMutedVolume = () => {
-    onMuted?.(channel, !isMuted);
-    setIsMuted((v) => !v);
+  const onMutedVolume = (value: INodeCallBack) => {
+    setIsMuted(value.value);
   };
+
+  const controllerItem = useSynthesizerEngine(
+    (state) => state.engine?.controllerItem
+  );
+
+  useEffect(() => {
+    if (controllerItem) {
+      controllerItem.addEventCallBack("VOLUME", "MUTE", channel, onMutedVolume);
+    }
+  }, [controllerItem]);
 
   const buttonStyle = `text-center text-white font-bold text-[10px]  
         flex items-center justify-center gap-[2px] rounded-t-md
@@ -28,7 +39,13 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
 
   return (
     <div
-      onClick={disabled ? undefined : onMutedVolume}
+      onClick={
+        disabled
+          ? undefined
+          : () => {
+              onMuted?.(channel, !isMuted);
+            }
+      }
       className={`${className} ${buttonStyle} ${
         disabled
           ? "cursor-auto"
@@ -40,7 +57,7 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
       <span className=" ">
         {isMuted ? <BiSolidVolumeMute /> : <BiSolidVolumeFull />}
       </span>
-      <span>{channel}</span>
+      <span>{channel + 1}</span>
     </div>
   );
 };

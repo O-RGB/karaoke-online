@@ -14,6 +14,7 @@ import {
 import { SpessaPlayerEngine } from "../player/spessa-synth-player";
 import { loadAudioContext, loadPlayer } from "../lib/spessasynth";
 import { BASE_PROGRAM, DEFAULT_SOUND_FONT } from "@/config/value";
+import { MainNodeController } from "@/stores/player/event-player/lib/node";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -27,6 +28,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public bassLocked: number | undefined = undefined;
   public bassDetect: IProgramChange | undefined = undefined;
 
+  public controllerItem: MainNodeController | undefined = undefined;
+
   constructor(
     setInstrument?: (instrument: IPersetSoundfont[]) => void,
     bassLocked?: number
@@ -38,11 +41,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   }
 
   async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
-    console.log(
-      "%csrc/stores/engine/synth/spessa-synth-engine.ts:38 Setup Spessasynth",
-      "color: #007acc;"
-    );
-
     const { audioContext, channels } = await loadAudioContext();
     if (!audioContext)
       return { audio: undefined, synth: undefined, player: undefined };
@@ -65,8 +63,9 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     }
 
     this.player = new SpessaPlayerEngine(player);
+    this.controllerItem = new MainNodeController();
 
-    return { synth: this.synth, audio: this.audio };
+    return { synth: synth, audio: this.audio };
   }
 
   async loadDefaultSoundFont(audio?: AudioContext): Promise<any> {
@@ -119,8 +118,13 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   }
 
   controllerChange(event: (event: IControllerChange) => void): void {
-    return this.synth?.eventHandler.addEvent("controllerchange", "", (e) =>
-      event(e)
+    return this.synth?.eventHandler.addEvent(
+      "controllerchange",
+      "",
+      (e: IControllerChange) => {
+        event(e);
+        this.controllerItem?.onControllerChange(e, false);
+      }
     );
   }
 
@@ -142,10 +146,14 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
           if (this.bassDetect?.program !== lockNum) {
             this.setProgram(channel, lockNum);
-            return event({ channel, program: lockNum });
+            let bassMapping = { channel, program: lockNum };
+
+            this.controllerItem?.onProgramChange(bassMapping, false);
+            return event(bassMapping);
           }
         } else {
           event(e);
+          this.controllerItem?.onProgramChange(e, false);
         }
       }
     );
@@ -172,12 +180,29 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     controllerValue: number,
     force?: boolean
   ): void {
+    const isLocked = this.controllerItem?.onControllerChange(
+      {
+        channel,
+        controllerNumber,
+        controllerValue,
+      },
+      true
+    );
+
+    if (isLocked === true) {
+      this.lockController(channel, controllerNumber, false);
+    }
+
     this.synth?.controllerChange(
       channel,
       controllerNumber,
       controllerValue,
       force
     );
+
+    if (isLocked === true) {
+      this.lockController(channel, controllerNumber, true);
+    }
   }
 
   lockController(
@@ -186,6 +211,10 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     isLocked: boolean
   ): void {
     this.synth?.lockController(channel, controllerNumber, isLocked);
+    this.controllerItem?.onLockChange(
+      { channel, controllerNumber, isLocked },
+      false
+    );
   }
 
   updatePreset(channel: number, value: number): void {
@@ -233,6 +262,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
   setMute(channel: number, isMuted: boolean): void {
     this.synth?.muteChannel(channel, isMuted);
+    this.controllerItem?.onMuteChange({ channel, isMute: isMuted }, false);
   }
 
   setBassLocked(bassNumber: number, isLock: boolean): void {

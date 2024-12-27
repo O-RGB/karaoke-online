@@ -13,7 +13,6 @@ import VolumeMeterV from "../../common/volume/volume-meter-v";
 import InstrumentsButton from "./instruments-button";
 import VolumeAction from "./volume-action";
 import VolumeHorizontal from "./volume-horizontal";
-import MixMainVolume from "./mix-controller/mix-main-volume";
 import useConfigStore from "@/stores/config/config-store";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
@@ -22,6 +21,19 @@ import { FaList } from "react-icons/fa";
 import useKeyboardStore from "@/stores/keyboard-state";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import { CHANNEL_DEFAULT } from "@/config/value";
+import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import {
+  CHORUSDEPTH,
+  MAIN_VOLUME,
+  PAN,
+  REVERB,
+} from "@/stores/player/event-player/types/node.type";
+import ChannelRender from "./channel";
+import {
+  IControllerChange,
+  ILockController,
+  IProgramChange,
+} from "@/stores/engine/types/synth.type";
 
 interface VolumePanelProps {
   onVolumeChange?: (value: ISetChannelGain) => void;
@@ -53,6 +65,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   show,
 }) => {
   const VOCAL_CHANNEL = 9;
+  const engine = useSynthesizerEngine((state) => state.engine);
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
   const resetQueueingTimeout = useKeyboardStore(
@@ -68,26 +81,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
 
   const setHideMixer = useMixerStoreNew((state) => state.setHideMixer);
 
-  const setVolLock = useMixerStoreNew((state) => state.setVolLock);
-  const setVolumes = useMixerStoreNew((state) => state.setVolumes);
-  const setPan = useMixerStoreNew((state) => state.setPan);
-  const setReverb = useMixerStoreNew((state) => state.setReverb);
-  const setChorusDepth = useMixerStoreNew((state) => state.setChorusDepth);
   const updatePitch = useMixerStoreNew((state) => state.updatePitch);
-  const updatePreset = useMixerStoreNew((state) => state.updatePreset);
-  const setMute = useMixerStoreNew((state) => state.setMute);
-
-  const onVolumeMeterChange = (channel: number, value: number) => {
-    setVolumes(channel - 1, value, true);
-
-    if (onVolumeChange) {
-      onVolumeChange?.({ channel, value });
-    }
-  };
-
-  const onPenChange = (channel: number, value: number) => {
-    setPan(channel - 1, value, true);
-  };
 
   const onPitchChange = (value: number) => {
     updatePitch(null, value);
@@ -97,22 +91,32 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     }
   };
 
+  const onLockChange = (value: ILockController) => {
+    engine?.lockController(
+      value.channel,
+      value.controllerNumber,
+      value.isLocked
+    );
+  };
+
   const onMutedVolume = (channel: number, isMuted: boolean) => {
-    setMute(channel - 1, isMuted);
+    engine?.setMute(channel, isMuted);
 
     if (onRemoteMutedVolume) {
       onRemoteMutedVolume({ channel: channel - 1, mute: isMuted });
     }
   };
 
-  const onPersetChange = (channel: number, value: number) => {
-    updatePreset(channel - 1, value);
+  const onPersetChange = (value: IProgramChange) => {
+    engine?.updatePreset(value.channel, value.program);
   };
-  const onReverbChange = (channel: number, value: number) => {
-    setReverb(channel - 1, value, true);
-  };
-  const onChorusDepthChange = (channel: number, value: number) => {
-    setChorusDepth(channel - 1, value, true);
+
+  const onControllerChange = (value: IControllerChange) => {
+    engine?.setController(
+      value.channel,
+      value.controllerNumber,
+      value.controllerValue
+    );
   };
 
   const grid =
@@ -169,46 +173,21 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
             hideMixer ?? "pointer-events-none !cursor-none"
           } w-full gap-0.5 h-full`}
         >
-          {CHANNEL_DEFAULT.map((data, ch) => {
-            console.log("map re loop...");
+          {CHANNEL_DEFAULT.map((_, ch) => {
             return (
               <div
                 key={`vol-panel-${ch}`}
                 className="flex flex-col relative h-full "
               >
-                <VolumeAction
-                  disabled={hideMixer}
-                  channel={ch + 1}
-                  onMuted={onMutedVolume}
-                ></VolumeAction>
-                <div className="flex items-center justify-center h-full py-1.5 w-full border-x border-white/20">
-                  <MixMainVolume
-                    channel={ch}
-                    disabled={hideMixer}
-                    onChange={(v) => onVolumeMeterChange(ch + 1, v)}
-                  ></MixMainVolume>
-                </div>
-
-                <InstrumentsButton
-                  disabled={hideMixer}
+                <ChannelRender
+                  onLockChange={onLockChange}
+                  onMutedVolume={onMutedVolume}
+                  isShow={hideMixer}
                   channel={ch}
-                  volRender={
-                    <div className="w-full">
-                      <MixMainVolume
-                        vertical={false}
-                        channel={ch}
-                        disabled={hideMixer}
-                        onChange={(v) => onVolumeMeterChange(ch + 1, v)}
-                      ></MixMainVolume>
-                    </div>
-                  }
-                  onMainlock={(ch, locked) => setVolLock(ch, locked, true)}
-                  onPenChange={onPenChange}
-                  onPersetChange={onPersetChange}
-                  onReverbChange={onReverbChange}
-                  onChorusDepthChange={onChorusDepthChange}
+                  onProgramChange={onPersetChange}
+                  onChange={onControllerChange}
                   perset={instrument}
-                ></InstrumentsButton>
+                ></ChannelRender>
               </div>
             );
           })}

@@ -4,9 +4,18 @@ import "rc-slider/assets/index.css";
 
 interface SliderCommonProps extends Omit<SliderProps, "onChange"> {
   onChange?: (value: number) => void;
+  onPressStart?: () => void;
+  onPressEnd?: () => void;
+  color?: string;
 }
 
-const SliderCommon: React.FC<SliderCommonProps> = ({ onChange, ...props }) => {
+const SliderCommon: React.FC<SliderCommonProps> = ({
+  onChange,
+  onPressStart,
+  onPressEnd,
+  color,
+  ...props
+}) => {
   const [isUserInteracting, setIsUserInteracting] = useState(false);
 
   return (
@@ -14,9 +23,11 @@ const SliderCommon: React.FC<SliderCommonProps> = ({ onChange, ...props }) => {
       {...props}
       onBeforeChange={() => {
         setIsUserInteracting(true);
+        onPressStart?.();
       }}
       onChangeComplete={() => {
         setIsUserInteracting(false);
+        onPressEnd?.();
       }}
       onChange={(value) => {
         if (typeof value === "number") {
@@ -26,6 +37,14 @@ const SliderCommon: React.FC<SliderCommonProps> = ({ onChange, ...props }) => {
       styles={{
         handle: {
           transitionDuration: isUserInteracting ? "0s" : "1s",
+          borderColor: color,
+          backgroundColor: color,
+        },
+        track: {
+          backgroundColor: color,
+        },
+        rail: {
+          backgroundColor: `${color}33`,
         },
       }}
     />
