@@ -129,8 +129,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "controllerchange",
       "",
       (e: IControllerChange) => {
-        // event(e);
-        console.log(e);
         this.controllerItem?.onControllerChange(e, false);
       }
     );
@@ -157,10 +155,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
             let bassMapping = { channel, program: lockNum };
 
             this.controllerItem?.onProgramChange(bassMapping, false);
-            // return event(bassMapping);
           }
         } else {
-          // event(e);
           this.controllerItem?.onProgramChange(e, false);
         }
       }

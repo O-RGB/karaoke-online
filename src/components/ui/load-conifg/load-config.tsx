@@ -5,15 +5,10 @@ import React, { useEffect } from "react";
 interface LoadConfigProps {}
 
 const LoadConfig: React.FC<LoadConfigProps> = ({}) => {
-  // const { setConfigLyrics } = useLyrics();
   const setConifg = useConfigStore((state) => state.setConfig);
   const load = async () => {
     const config = await setupLocalConfig();
     setConifg(config);
-
-    // if (config.lyrics) {
-    //   setConfigLyrics(config.lyrics);
-    // }
   };
   useEffect(() => {
     load();

@@ -19,7 +19,6 @@ import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
 import useRuntimePlayer from "@/stores/player/player/modules/runtime-player";
 import useQueuePlayer from "@/stores/player/player/modules/queue-player";
 import useConfigStore from "@/stores/config/config-store";
-import useEventStore from "@/stores/player/event-player/event-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 import SliderCommon from "../common/input-data/slider";
 interface PlayerRemote {
