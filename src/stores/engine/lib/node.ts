@@ -19,6 +19,7 @@ import {
 export class MainNodeController {
   public dataController: ControllerItemList[] = [];
   private userIshold: boolean = false;
+
   constructor() {
     this.dataController = [
       {
@@ -56,81 +57,61 @@ export class MainNodeController {
 
   public onControllerChange(value: IControllerChange, isUser: boolean) {
     if (this.userIshold ? isUser === false : isUser === true) {
-      return;
+      return {};
     }
+    let controller: DataController | undefined = undefined;
     switch (value.controllerNumber) {
       case MAIN_VOLUME:
-        const main_vol = this.getControllerByType("VOLUME");
-        const main_vol_ch = main_vol?.getChannel(value.channel);
-        main_vol_ch?.setValue(value.controllerValue);
-        return main_vol_ch?.isLocked;
+        controller = this.getControllerByType("VOLUME");
         break;
       case PAN:
-        const main_pan = this.getControllerByType("PAN");
-        const main_pan_ch = main_pan?.getChannel(value.channel);
-        main_pan_ch?.setValue(value.controllerValue);
-        return main_pan_ch?.isLocked;
+        controller = this.getControllerByType("PAN");
         break;
       case REVERB:
-        const main_reverb = this.getControllerByType("REVERB");
-        const main_reverb_ch = main_reverb?.getChannel(value.channel);
-        main_reverb_ch?.setValue(value.controllerValue);
-        return main_reverb_ch?.isLocked;
+        controller = this.getControllerByType("REVERB");
         break;
       case CHORUSDEPTH:
-        const main_chorus_depth = this.getControllerByType("CHORUSDEPTH");
-        const main_chorus_depth_ch = main_chorus_depth?.getChannel(
-          value.channel
-        );
-        main_chorus_depth_ch?.setValue(value.controllerValue);
-        return main_chorus_depth_ch?.isLocked;
-        break;
-
-      default:
+        controller = this.getControllerByType("CHORUSDEPTH");
         break;
     }
+    const node = controller?.getChannel(value.channel);
+    const event = node?.setValue(value.controllerValue);
+
+    return { isLock: node?.isLocked, event };
   }
 
   public onProgramChange(value: IProgramChange, isUser: boolean) {
     const main_vol = this.getControllerByType("VOLUME");
     const main_vol_ch = main_vol?.getChannel(value.channel);
-    main_vol_ch?.setProgram(value.program);
+    return main_vol_ch?.setProgram(value.program);
   }
 
   public onMuteChange(value: IMuteController, isUser: boolean) {
     const main_vol = this.getControllerByType("VOLUME");
     const main_vol_ch = main_vol?.getChannel(value.channel);
-    main_vol_ch?.setMute(value.isMute);
+    return main_vol_ch?.setMute(value.isMute);
   }
 
   public onLockChange(value: ILockController, isUser: boolean) {
+    let controller: DataController | undefined = undefined;
     switch (value.controllerNumber) {
       case MAIN_VOLUME:
-        const main_vol = this.getControllerByType("VOLUME");
-        const main_vol_ch = main_vol?.getChannel(value.channel);
-        main_vol_ch?.setLock(value.isLocked);
+        controller = this.getControllerByType("VOLUME");
         break;
       case PAN:
-        const main_pan = this.getControllerByType("PAN");
-        const main_pan_ch = main_pan?.getChannel(value.channel);
-        main_pan_ch?.setLock(value.isLocked);
+        controller = this.getControllerByType("PAN");
         break;
       case REVERB:
-        const main_reverb = this.getControllerByType("REVERB");
-        const main_reverb_ch = main_reverb?.getChannel(value.channel);
-        main_reverb_ch?.setLock(value.isLocked);
+        controller = this.getControllerByType("REVERB");
         break;
       case CHORUSDEPTH:
-        const main_chorus_depth = this.getControllerByType("CHORUSDEPTH");
-        const main_chorus_depth_ch = main_chorus_depth?.getChannel(
-          value.channel
-        );
-        main_chorus_depth_ch?.setLock(value.isLocked);
-        break;
-
-      default:
+        controller = this.getControllerByType("CHORUSDEPTH");
         break;
     }
+
+    const node = controller?.getChannel(value.channel);
+    const locked = node?.setLock(value.isLocked);
+    return locked;
   }
 
   public setUserHolding(hole: boolean) {
@@ -230,19 +211,19 @@ export class NodeController {
     }
 
     this.isMute = mute;
-
-    this.muteCallback.map((events) =>
-      events({
-        channel: this.channel,
-        eventType: "MUTE",
-        type: this.type!,
-        value: mute,
-      })
-    );
+    const eventContent: INodeCallBack<boolean> = {
+      channel: this.channel,
+      eventType: "MUTE",
+      // type: this.type!,
+      value: mute,
+    };
+    this.muteCallback.map((events) => events(eventContent));
 
     if (!this.muteCallback) {
       console.log(`muteCallback is null`);
     }
+
+    return eventContent;
   }
   public setLock(locked: boolean) {
     if (!this.type) {
@@ -251,18 +232,19 @@ export class NodeController {
 
     this.isLocked = locked;
 
-    this.lockCallback.map((events) =>
-      events({
-        channel: this.channel,
-        eventType: "LOCK",
-        type: this.type!,
-        value: locked,
-      })
-    );
+    const eventContent: INodeCallBack<boolean> = {
+      channel: this.channel,
+      eventType: "LOCK",
+      // type: this.type!,
+      value: locked,
+    };
+    this.lockCallback.map((events) => events(eventContent));
 
     if (!this.lockCallback) {
       console.log(`lockCallback is null`);
     }
+
+    return eventContent;
   }
   public setValue(value: number) {
     if (!this.type) {
@@ -271,18 +253,20 @@ export class NodeController {
 
     this.value = value;
 
-    this.changeCallback.map((events) =>
-      events({
-        channel: this.channel,
-        eventType: "CHANGE",
-        type: this.type!,
-        value: value,
-      })
-    );
+    const eventContent: INodeCallBack<number> = {
+      channel: this.channel,
+      eventType: "CHANGE",
+      // type: this.type!,
+      value: value,
+    };
+
+    this.changeCallback.map((events) => events(eventContent));
 
     if (!this.changeCallback) {
       console.log("this.callback Is Null");
     }
+
+    return eventContent;
   }
 
   public setProgram(program: number) {
@@ -292,18 +276,20 @@ export class NodeController {
 
     this.program = program;
 
-    this.programCallback.map((events) =>
-      events({
-        channel: this.channel,
-        eventType: "PROGARM",
-        type: this.type!,
-        value: program,
-      })
-    );
+    const eventContent: INodeCallBack<number> = {
+      channel: this.channel,
+      eventType: "PROGARM",
+      // type: this.type!,
+      value: program,
+    };
+
+    this.programCallback.map((events) => events(eventContent));
 
     if (!this.programCallback) {
       console.log(`programCallback is null`);
     }
+
+    return eventContent;
   }
 
   private initCode(type: NodeType) {

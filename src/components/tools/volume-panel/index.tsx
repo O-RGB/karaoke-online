@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   PiMicrophoneStageFill,
   PiUserMinusFill,
@@ -10,8 +10,6 @@ import Button from "../../common/button/button";
 import { MdArrowDropUp } from "react-icons/md";
 import { useOrientation } from "@/hooks/orientation-hook";
 import VolumeMeterV from "../../common/volume/volume-meter-v";
-import InstrumentsButton from "./instruments-button";
-import VolumeAction from "./volume-action";
 import VolumeHorizontal from "./volume-horizontal";
 import useConfigStore from "@/stores/config/config-store";
 import "@szhsin/react-menu/dist/index.css";
@@ -64,7 +62,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   className,
   show,
 }) => {
-  const VOCAL_CHANNEL = 9;
+  const VOCAL_CHANNEL = 8;
+
   const engine = useSynthesizerEngine((state) => state.engine);
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
@@ -129,6 +128,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   }
 
   console.log("#### volume panel render");
+
   return (
     <div
       className={

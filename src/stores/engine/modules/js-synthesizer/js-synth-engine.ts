@@ -10,6 +10,8 @@ import {
 } from "../../types/synth.type";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { MainNodeController } from "@/stores/engine/lib/node";
+import { AudioMeter } from "../../lib/gain";
+import { INodeCallBack } from "../../types/node.type";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -23,6 +25,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   public bassLocked: number | undefined = undefined;
 
   public controllerItem: MainNodeController | undefined = undefined;
+  public gainNode: AudioMeter | undefined = undefined;
 
   private setInstrument: ((instrument: IPersetSoundfont[]) => void) | undefined;
   constructor(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
@@ -50,12 +53,16 @@ export class JsSynthEngine implements BaseSynthEngine {
     if (audioContext) {
       const analysers = this.getAnalyserNode(audioContext);
       this.analysers = analysers;
+      this.gainNode = new AudioMeter(audioContext, analysers);
     }
 
     node.connect(audioContext.destination);
 
     this.player = new JsSynthPlayerEngine(synth);
     this.controllerItem = new MainNodeController();
+
+    this.controllerChange();
+    this.programChange();
 
     return { synth: synth, audio: this.audio };
   }
@@ -121,22 +128,22 @@ export class JsSynthEngine implements BaseSynthEngine {
     }
   }
 
-  controllerChange(callback: (event: IControllerChange) => void): void {
+  controllerChange(callback?: (event: IControllerChange) => void): void {
     if (this.player?.addEvent) {
       this.player.addEvent({
         controllerChangeCallback: (event) => {
-          callback(event);
+          callback?.(event);
           this.controllerItem?.onControllerChange(event, false);
         },
       });
     }
   }
   persetChange(): void {}
-  programChange(callback: (event: IProgramChange) => void): void {
+  programChange(callback?: (event: IProgramChange) => void): void {
     if (this.player?.addEvent) {
       this.player.addEvent({
         programChangeCallback: (event) => {
-          callback(event);
+          callback?.(event);
           this.controllerItem?.onProgramChange(event, false);
         },
       });

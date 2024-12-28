@@ -7,6 +7,7 @@ import { SpessaSynthEngine } from "./modules/spessasynth/spessa-synth-engine";
 import { BaseSynthEngine } from "./types/synth.type";
 import useMixerStoreNew from "../player/event-player/modules/event-mixer-store";
 import useConfigStore from "../config/config-store";
+import { usePeerStore } from "../remote/modules/peer-js-store";
 
 export type EngineType = "spessa" | "jsSynth";
 
@@ -19,10 +20,15 @@ export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
   engine: undefined,
   synth: undefined,
   setup: async (type: EngineType = "spessa") => {
+    const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
     const config = useConfigStore.getState().config.sound?.lockBase;
     const setInstrument = useMixerStoreNew.getState().setInstrument;
     if (type === "spessa") {
-      const spessaSynth = new SpessaSynthEngine(setInstrument, config);
+      const spessaSynth = new SpessaSynthEngine(
+        setInstrument,
+        config,
+        sendSuperUserMessage
+      );
       set({ engine: spessaSynth });
     } else {
       const jsSynth = new JsSynthEngine(setInstrument);

@@ -22,7 +22,7 @@ import DisplaySettingModal from "../modal/display";
 
 import { DragDrop } from "../tools/drag-drop/drag-drop";
 import DataStoresModal from "../modal/datastores";
-import useTracklistStore from "@/stores/tracklist-store";
+import useTracklistStore from "@/stores/tracklist/tracklist-store";
 import useNotificationStore from "@/stores/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/stores/config/config-store";
@@ -33,6 +33,7 @@ import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import SongInfo from "../tools/song-info";
 import SoundSettingModal from "../modal/sound-setting";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import RemoteEvent from "./remote-event";
 
 interface KaraokePageProps {}
 
@@ -80,14 +81,13 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
   };
 
-  console.log("main rerender");
-
   return (
     <FullScreen handle={handle}>
       {/* Process */}
       <WallpaperRender
         wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>
+      <RemoteEvent></RemoteEvent>
       {/* Contact */}
       <div id="modal-container">
         <ContextModal modal={modalMap}>

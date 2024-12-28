@@ -1,276 +1,307 @@
-import { create } from "zustand";
-import Peer, { DataConnection } from "peerjs";
-import {
-  RemoteReceivedMessages,
-  RemoteSendMessage,
-} from "./remote/types/remote.type";
+// import { create } from "zustand";
+// import Peer, { DataConnection } from "peerjs";
+// import {
+//   RemoteReceivedMessages,
+//   RemoteSendMessage,
+// } from "./remote/types/remote.type";
 
-interface PeerState {
-  normalPeer: Peer | null;
-  superUserPeer: Peer | null;
-  connections: DataConnection[];
-  superUserConnections: DataConnection[];
-  received?: RemoteReceivedMessages;
-  connectToPeer: (peerId: string, isSuperUser: boolean) => void;
-  sendMessage: (info: RemoteSendMessage) => void;
-  sendSuperUserMessage: (info: RemoteSendMessage) => void;
-  initializePeers: (isSuperUser?: boolean) => void;
-}
+// interface PeerState {
+//   normalPeer: Peer | null;
+//   superUserPeer: Peer | null;
+//   connections: DataConnection[];
+//   superUserConnections: DataConnection[];
+//   received?: RemoteReceivedMessages;
+//   connectToPeer: (peerId: string, isSuperUser: boolean) => void;
+//   sendMessage: (info: RemoteSendMessage) => void;
+//   sendSuperUserMessage: (info: RemoteSendMessage) => void;
+//   initializePeers: (isSuperUser?: boolean) => void;
+// }
 
-export const usePeerStore = create<PeerState>((set, get) => ({
-  normalPeer: null,
-  superUserPeer: null,
-  connections: [],
-  superUserConnections: [],
-  received: undefined,
+// export const usePeerStore = create<PeerState>((set, get) => ({
+//   normalPeer: null,
+//   superUserPeer: null,
+//   connections: [],
+//   superUserConnections: [],
+//   received: undefined,
 
-  connectToPeer: (peerId: string, isSuperUser: boolean) => {
-    const { normalPeer, superUserPeer } = get();
-    const peer = isSuperUser ? superUserPeer : normalPeer;
-    const peerType = isSuperUser ? "superUserPeer" : "normalPeer";
+//   connectToPeer: (peerId: string, isSuperUser: boolean) => {
+//     const { normalPeer, superUserPeer } = get();
+//     const peer = isSuperUser ? superUserPeer : normalPeer;
+//     const peerType = isSuperUser ? "superUserPeer" : "normalPeer";
 
-    // console.log(`Attempting to connect to ${peerId} using ${peerType}.`);
+//     // console.log(`Attempting to connect to ${peerId} using ${peerType}.`);
 
-    if (!peer || !peer.open) {
-      console.error(
-        `${peerType} is not open yet. Cannot connect to ${peerId}.`
-      );
-      return;
-    }
+//     if (!peer || !peer.open) {
+//       console.error(
+//         `${peerType} is not open yet. Cannot connect to ${peerId}.`
+//       );
+//       return;
+//     }
 
-    const conn = peer.connect(peerId);
+//     const conn = peer.connect(peerId);
 
-    conn.on("open", () => {
-      // console.log(`Connection established with ${peerId} on ${peerType}.`);
-      conn.send(`Hello from ${peer.id}`);
-    });
+//     conn.on("open", () => {
+//       // console.log(`Connection established with ${peerId} on ${peerType}.`);
+//       conn.send(`Hello from ${peer.id}`);
+//     });
 
-    conn.on("data", (data: any) => {
-      // console.log(`Received data from ${peerId} on ${peerType}:`, data);
-      set({
-        received: {
-          from: conn.peer,
-          content: data,
-          user: isSuperUser ? "SUPER" : "NORMAL",
-        },
-      });
-    });
+//     conn.on("data", (data: any) => {
+//       // console.log(`Received data from ${peerId} on ${peerType}:`, data);
+//       set({
+//         received: {
+//           from: conn.peer,
+//           content: data,
+//           user: isSuperUser ? "SUPER" : "NORMAL",
+//         },
+//       });
+//     });
 
-    conn.on("close", () => {
-      // console.log(`Connection closed with ${peerId} on ${peerType}.`);
-      set((state) => ({
-        [isSuperUser ? "superUserConnections" : "connections"]: state[
-          isSuperUser ? "superUserConnections" : "connections"
-        ].filter((c) => c !== conn),
-      }));
-    });
+//     conn.on("close", () => {
+//       // console.log(`Connection closed with ${peerId} on ${peerType}.`);
+//       set((state) => ({
+//         [isSuperUser ? "superUserConnections" : "connections"]: state[
+//           isSuperUser ? "superUserConnections" : "connections"
+//         ].filter((c) => c !== conn),
+//       }));
+//     });
 
-    conn.on("error", (error) => {
-      console.error(
-        `Error in connection with ${peerId} on ${peerType}:`,
-        error
-      );
-    });
+//     conn.on("error", (error) => {
+//       console.error(
+//         `Error in connection with ${peerId} on ${peerType}:`,
+//         error
+//       );
+//     });
 
-    set((state) => ({
-      [isSuperUser ? "superUserConnections" : "connections"]: [
-        ...state[isSuperUser ? "superUserConnections" : "connections"],
-        conn,
-      ],
-    }));
+//     set((state) => ({
+//       [isSuperUser ? "superUserConnections" : "connections"]: [
+//         ...state[isSuperUser ? "superUserConnections" : "connections"],
+//         conn,
+//       ],
+//     }));
 
-    setupConnectionTimeout(conn, isSuperUser, set);
-  },
+//     setupConnectionTimeout(conn, isSuperUser, set);
+//   },
 
-  sendMessage: (info: RemoteSendMessage) => {
-    const { connections, superUserConnections } = get();
-    // console.log(
-    //   `Sending message to all normalPeer connections:`,
-    //   info.message,
-    //   `with type:`,
-    //   info.type
-    // );
-    if (info.clientId) {
-      const userConnections =
-        info.user === "NORMAL" ? connections : superUserConnections;
-      const connection = userConnections.find(
-        (conn) => conn.peer === info.clientId
-      );
-      connection?.send(info);
-    } else {
-      connections.forEach((conn) => {
-        // console.log(`Sending message to ${conn.peer} on normalPeer.`);
-        conn.send(info);
-      });
-    }
-  },
+//   sendMessage: (info: RemoteSendMessage) => {
+//     const { connections, superUserConnections } = get();
 
-  sendSuperUserMessage: (info: RemoteSendMessage) => {
-    const { superUserConnections } = get();
-    // console.log(
-    //   `Sending message to all superUserPeer connections:`,
-    //   info.message,
-    //   `with type:`,
-    //   info.type
-    // );
-    superUserConnections.forEach((conn) => {
-      // console.log(`Sending message to ${conn.peer} on superUserPeer.`);
-      conn.send(info);
-    });
-  },
+//     if (info.clientId) {
+//       const userConnections =
+//         info.user === "NORMAL" ? connections : superUserConnections;
+//       const connection = userConnections.find(
+//         (conn) => conn.peer === info.clientId
+//       );
 
-  initializePeers: (isSuperUser?: boolean) => {
-    // console.log("Initializing peers...");
+//       if (connection) {
+//         if (connection.open) {
+//           connection.send(info);
+//         } else {
+//           console.warn(
+//             `Connection to ${connection.peer} is not open yet. Waiting for open event.`
+//           );
+//           connection.on("open", () => {
+//             connection.send(info);
+//             console.log(
+//               `Message sent to ${connection.peer} after connection opened`
+//             );
+//           });
+//         }
+//       }
+//     } else {
+//       connections.forEach((conn) => {
+//         if (conn.open) {
+//           conn.send(info);
+//         } else {
+//           console.warn(
+//             `Connection to ${conn.peer} is not open yet. Waiting for open event.`
+//           );
+//           conn.on("open", () => {
+//             conn.send(info);
+//             console.log(`Message sent to ${conn.peer} after connection opened`);
+//           });
+//         }
+//       });
+//     }
+//   },
 
-    if (isSuperUser === false || isSuperUser == undefined) {
-      const newPeer = new Peer();
-      // console.log("Created new normalPeer with temporary ID:", newPeer.id);
+//   sendSuperUserMessage: (info: RemoteSendMessage) => {
+//     const { superUserConnections } = get();
+//     console.log(
+//       `Sending message to all superUserPeer connections:`,
+//       info.message,
+//       `with type:`,
+//       info
+//     );
+//     superUserConnections.forEach((conn) => {
+//       // ตรวจสอบสถานะ connection ก่อนส่งข้อมูล
+//       if (conn.open) {
+//         conn.send(info);
+//       } else {
+//         console.warn(
+//           `Connection to ${conn.peer} is not open yet. Waiting for open event.`
+//         );
 
-      newPeer.on("open", (id) => {
-        // console.log("normalPeer connection opened with ID:", id);
-        set({ normalPeer: newPeer });
+//         // รอให้ connection เปิดก่อนแล้วค่อยส่งข้อมูล
+//         conn.on("open", () => {
+//           conn.send(info);
+//           console.log(`Message sent to ${conn.peer} after connection opened`);
+//         });
+//       }
+//     });
+//   },
 
-        newPeer.on("connection", (conn) => {
-          // console.log("normalPeer received new connection from:", conn.peer);
-          set((state) => ({ connections: [...state.connections, conn] }));
+//   initializePeers: (isSuperUser?: boolean) => {
+//     // console.log("Initializing peers...");
 
-          // const { addNotification } = useNotification();
-          // addNotification("มีการเชื่อมต่อ", <RiRemoteControlFill />);
+//     if (isSuperUser === false || isSuperUser == undefined) {
+//       const newPeer = new Peer();
+//       // console.log("Created new normalPeer with temporary ID:", newPeer.id);
 
-          conn.on("data", (data: any) => {
-            // console.log(`normalPeer received data from ${conn.peer}:`, data);
-            set({
-              received: { from: conn.peer, content: data, user: "NORMAL" },
-            });
-          });
+//       newPeer.on("open", (id) => {
+//         // console.log("normalPeer connection opened with ID:", id);
+//         set({ normalPeer: newPeer });
 
-          setupConnectionEvents(conn, false, set);
-        });
-      });
-    }
-    if (isSuperUser === true || isSuperUser == undefined) {
-      const newSuperUserPeer = new Peer();
-      // console.log(
-      //   "Created new superUserPeer with temporary ID:",
-      //   newSuperUserPeer.id
-      // );
+//         newPeer.on("connection", (conn) => {
+//           // console.log("normalPeer received new connection from:", conn.peer);
+//           set((state) => ({ connections: [...state.connections, conn] }));
 
-      newSuperUserPeer.on("open", (id) => {
-        // console.log("superUserPeer connection opened with ID:", id);
-        set({ superUserPeer: newSuperUserPeer });
+//           // const { addNotification } = useNotification();
+//           // addNotification("มีการเชื่อมต่อ", <RiRemoteControlFill />);
 
-        newSuperUserPeer.on("connection", (conn) => {
-          // console.log("superUserPeer received new connection from:", conn.peer);
-          set((state) => ({
-            superUserConnections: [...state.superUserConnections, conn],
-          }));
+//           conn.on("data", (data: any) => {
+//             // console.log(`normalPeer received data from ${conn.peer}:`, data);
+//             set({
+//               received: { from: conn.peer, content: data, user: "NORMAL" },
+//             });
+//           });
 
-          // const { addNotification } = useNotification();
-          // addNotification("มีการเชื่อมต่อ Admin", <RiRemoteControlFill />);
+//           setupConnectionEvents(conn, false, set);
+//         });
+//       });
+//     }
+//     if (isSuperUser === true || isSuperUser == undefined) {
+//       const newSuperUserPeer = new Peer();
+//       // console.log(
+//       //   "Created new superUserPeer with temporary ID:",
+//       //   newSuperUserPeer.id
+//       // );
 
-          conn.on("data", (data: any) => {
-            // console.log(`superUserPeer received data from ${conn.peer}:`, data);
-            set({
-              received: { from: conn.peer, content: data, user: "SUPER" },
-            });
-          });
+//       newSuperUserPeer.on("open", (id) => {
+//         // console.log("superUserPeer connection opened with ID:", id);
+//         set({ superUserPeer: newSuperUserPeer });
 
-          setupConnectionEvents(conn, true, set);
-        });
-      });
-    }
-  },
-}));
+//         newSuperUserPeer.on("connection", (conn) => {
+//           // console.log("superUserPeer received new connection from:", conn.peer);
+//           set((state) => ({
+//             superUserConnections: [...state.superUserConnections, conn],
+//           }));
 
-function setupConnectionEvents(
-  conn: DataConnection,
-  isSuperUser: boolean,
-  set: (
-    partial: Partial<PeerState> | ((state: PeerState) => Partial<PeerState>)
-  ) => void
-) {
-  const peerType = isSuperUser ? "superUserPeer" : "normalPeer";
+//           // const { addNotification } = useNotification();
+//           // addNotification("มีการเชื่อมต่อ Admin", <RiRemoteControlFill />);
 
-  conn.on("open", () => {
-    // console.log(`Connection opened with ${conn.peer} on ${peerType}.`);
-  });
+//           conn.on("data", (data: any) => {
+//             // console.log(`superUserPeer received data from ${conn.peer}:`, data);
+//             set({
+//               received: { from: conn.peer, content: data, user: "SUPER" },
+//             });
+//           });
 
-  conn.on("close", () => {
-    // console.log(`Connection closed with ${conn.peer} on ${peerType}.`);
-    set((state) => ({
-      [isSuperUser ? "superUserConnections" : "connections"]: state[
-        isSuperUser ? "superUserConnections" : "connections"
-      ].filter((c) => c !== conn),
-    }));
-  });
+//           setupConnectionEvents(conn, true, set);
+//         });
+//       });
+//     }
+//   },
+// }));
 
-  conn.on("error", (error) => {
-    console.error(
-      `Error in connection with ${conn.peer} on ${peerType}:`,
-      error
-    );
-  });
+// function setupConnectionEvents(
+//   conn: DataConnection,
+//   isSuperUser: boolean,
+//   set: (
+//     partial: Partial<PeerState> | ((state: PeerState) => Partial<PeerState>)
+//   ) => void
+// ) {
+//   const peerType = isSuperUser ? "superUserPeer" : "normalPeer";
 
-  setupConnectionTimeout(conn, isSuperUser, set);
-}
+//   conn.on("open", () => {
+//     // console.log(`Connection opened with ${conn.peer} on ${peerType}.`);
+//   });
 
-function setupConnectionTimeout(
-  conn: DataConnection,
-  isSuperUser: boolean,
-  set: (
-    partial: Partial<PeerState> | ((state: PeerState) => Partial<PeerState>)
-  ) => void
-) {
-  const peerType = isSuperUser ? "superUserPeer" : "normalPeer";
-  const timeoutDuration = 300000; // 5 minutes timeout duration
-  // console.log(
-  //   `Setting up ${timeoutDuration / 1000}s timeout for connection with ${
-  //     conn.peer
-  //   } on ${peerType}.`
-  // );
+//   conn.on("close", () => {
+//     // console.log(`Connection closed with ${conn.peer} on ${peerType}.`);
+//     set((state) => ({
+//       [isSuperUser ? "superUserConnections" : "connections"]: state[
+//         isSuperUser ? "superUserConnections" : "connections"
+//       ].filter((c) => c !== conn),
+//     }));
+//   });
 
-  let timeoutId: NodeJS.Timeout = setTimeout(() => {
-    console.warn(
-      `Connection with ${conn.peer} on ${peerType} timed out due to inactivity.`
-    );
-    conn.close();
-    set((state) => ({
-      [isSuperUser ? "superUserConnections" : "connections"]: state[
-        isSuperUser ? "superUserConnections" : "connections"
-      ].filter((c) => c !== conn),
-    }));
-  }, timeoutDuration);
+//   conn.on("error", (error) => {
+//     console.error(
+//       `Error in connection with ${conn.peer} on ${peerType}:`,
+//       error
+//     );
+//   });
 
-  conn.on("data", () => {
-    // console.log(
-    //   `Received data from ${conn.peer} on ${peerType}, resetting timeout.`
-    // );
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      console.warn(
-        `Connection with ${conn.peer} on ${peerType} timed out due to inactivity.`
-      );
-      conn.close();
-      set((state) => ({
-        [isSuperUser ? "superUserConnections" : "connections"]: state[
-          isSuperUser ? "superUserConnections" : "connections"
-        ].filter((c) => c !== conn),
-      }));
-    }, timeoutDuration);
-  });
+//   setupConnectionTimeout(conn, isSuperUser, set);
+// }
 
-  conn.on("close", () => {
-    // console.log(
-    //   `Clearing timeout for ${conn.peer} on ${peerType} due to closure.`
-    // );
-    clearTimeout(timeoutId);
-  });
+// function setupConnectionTimeout(
+//   conn: DataConnection,
+//   isSuperUser: boolean,
+//   set: (
+//     partial: Partial<PeerState> | ((state: PeerState) => Partial<PeerState>)
+//   ) => void
+// ) {
+//   const peerType = isSuperUser ? "superUserPeer" : "normalPeer";
+//   const timeoutDuration = 300000; // 5 minutes timeout duration
+//   // console.log(
+//   //   `Setting up ${timeoutDuration / 1000}s timeout for connection with ${
+//   //     conn.peer
+//   //   } on ${peerType}.`
+//   // );
 
-  conn.on("error", (error) => {
-    console.error(
-      `Error on connection with ${conn.peer} on ${peerType}:`,
-      error
-    );
-    clearTimeout(timeoutId);
-  });
-}
+//   let timeoutId: NodeJS.Timeout = setTimeout(() => {
+//     console.warn(
+//       `Connection with ${conn.peer} on ${peerType} timed out due to inactivity.`
+//     );
+//     conn.close();
+//     set((state) => ({
+//       [isSuperUser ? "superUserConnections" : "connections"]: state[
+//         isSuperUser ? "superUserConnections" : "connections"
+//       ].filter((c) => c !== conn),
+//     }));
+//   }, timeoutDuration);
+
+//   conn.on("data", () => {
+//     // console.log(
+//     //   `Received data from ${conn.peer} on ${peerType}, resetting timeout.`
+//     // );
+//     clearTimeout(timeoutId);
+//     timeoutId = setTimeout(() => {
+//       console.warn(
+//         `Connection with ${conn.peer} on ${peerType} timed out due to inactivity.`
+//       );
+//       conn.close();
+//       set((state) => ({
+//         [isSuperUser ? "superUserConnections" : "connections"]: state[
+//           isSuperUser ? "superUserConnections" : "connections"
+//         ].filter((c) => c !== conn),
+//       }));
+//     }, timeoutDuration);
+//   });
+
+//   conn.on("close", () => {
+//     // console.log(
+//     //   `Clearing timeout for ${conn.peer} on ${peerType} due to closure.`
+//     // );
+//     clearTimeout(timeoutId);
+//   });
+
+//   conn.on("error", (error) => {
+//     console.error(
+//       `Error on connection with ${conn.peer} on ${peerType}:`,
+//       error
+//     );
+//     clearTimeout(timeoutId);
+//   });
+// }

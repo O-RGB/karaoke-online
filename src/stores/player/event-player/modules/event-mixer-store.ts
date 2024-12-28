@@ -1,5 +1,6 @@
 import { CHANNEL_DEFAULT } from "@/config/value";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { INodeCallBack } from "@/stores/engine/types/node.type";
 import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
 
 import { modulatorSources, NON_CC_INDEX_OFFSET } from "spessasynth_lib";
@@ -32,7 +33,6 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
     if (!gainNode) {
       return;
     }
-
     const volumes = gainNode.gainChannels();
 
     if (get().hideMixer) {
@@ -45,9 +45,13 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
     }
 
     if (superUserConnections.length > 0) {
+      const remoteEvent: INodeCallBack = {
+        channel: 0,
+        eventType: "GAIN",
+        value: volumes,
+      };
       sendSuperUserMessage({
-        message: volumes,
-        type: "HOST_GAIN",
+        message: remoteEvent,
         user: "SUPER",
       });
     }

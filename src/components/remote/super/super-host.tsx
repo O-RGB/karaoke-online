@@ -122,10 +122,12 @@ const SuperHostRemote: React.FC<SuperHostRemoteProps> = ({}) => {
           </div>
           <div className="flex flex-col">
             <span>Remote URL:</span>
-            <Input
-              defaultValue={`${hostUrl}/remote/super/${hostId}`}
-              className="!text-black"
-            ></Input>
+            {hostUrl && hostId && (
+              <Input
+                defaultValue={`${hostUrl}/remote/super/${hostId}`}
+                className="!text-black"
+              ></Input>
+            )}
           </div>
         </div>
       </div>

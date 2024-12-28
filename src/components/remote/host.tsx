@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 
 import { useQRCode } from "next-qrcode";
 import Input from "../common/input-data/input";
-import { usePeerStore } from "@/stores/peer-store";
+
 import Button from "../common/button/button";
 import Label from "../common/display/label";
 import { RiRemoteControlFill } from "react-icons/ri";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
 
 interface HostRemoteProps {}
 
@@ -123,10 +124,12 @@ const HostRemote: React.FC<HostRemoteProps> = ({}) => {
         </div>
         <div className="flex flex-col">
           <span>Remote URL:</span>
-          <Input
-            defaultValue={`${hostUrl}/remote/${hostId}`}
-            className="!text-black"
-          ></Input>
+          {hostId && hostUrl && (
+            <Input
+              defaultValue={`${hostUrl}/remote/${hostId}`}
+              className="!text-black"
+            ></Input>
+          )}
         </div>
       </div>
     </div>

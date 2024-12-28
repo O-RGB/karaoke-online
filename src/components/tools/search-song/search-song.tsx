@@ -4,7 +4,7 @@ import { toOptions } from "@/lib/general";
 import { FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
-import useTracklistStore from "@/stores/tracklist-store";
+import useTracklistStore from "@/stores/tracklist/tracklist-store";
 import Tags from "@/components/common/display/tags";
 import useKeyboardStore from "@/stores/keyboard-state";
 import Button from "@/components/common/button/button";
@@ -20,8 +20,6 @@ import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
 interface SearchSongProps {}
 
 const SearchSong: React.FC<SearchSongProps> = ({}) => {
-  const config = useConfigStore((state) => state.config);
-
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const { orientation } = useOrientation();
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);

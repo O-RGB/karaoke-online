@@ -74,11 +74,12 @@
 //   },
 // }));
 
-
 import { create } from "zustand";
 import Peer, { DataConnection } from "peerjs";
-import { RemoteReceivedMessages, RemoteSendMessage } from "../types/remote.type";
-
+import {
+  RemoteReceivedMessages,
+  RemoteSendMessage,
+} from "../types/remote.type";
 
 interface PeerState {
   normalPeer: Peer | null;
@@ -186,7 +187,7 @@ export const usePeerStore = create<PeerState>((set, get) => ({
     //   `Sending message to all superUserPeer connections:`,
     //   info.message,
     //   `with type:`,
-    //   info.type
+    //   info
     // );
     superUserConnections.forEach((conn) => {
       // console.log(`Sending message to ${conn.peer} on superUserPeer.`);

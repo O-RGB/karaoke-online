@@ -20,6 +20,8 @@ import {
   ILockController,
   IProgramChange,
 } from "@/stores/engine/types/synth.type";
+import { DataConnection } from "peerjs";
+import { RemoteSendMessage } from "@/stores/remote/types/remote.type";
 
 interface InstrumentsButtonProps {
   channel: number;

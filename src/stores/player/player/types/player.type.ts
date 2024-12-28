@@ -64,3 +64,16 @@ export interface MidiPlayerProps {
   currentTick: number;
   currentTempo: number;
 }
+
+export type EventChangeType =
+  | "SEARCH"
+  | "SEARCH_LIST"
+  | "SET_SONG"
+  | "QUEUE"
+  | "QUEUE_LIST"
+  | "SET_QUEUE";
+
+export interface ISearchCallBack<T = any> {
+  value: T;
+  eventType: EventChangeType;
+}

@@ -8,6 +8,8 @@ import {
   BaseSynthEngine,
   BaseSynthPlayerEngine,
   IControllerChange,
+  ILockController,
+  IMuteController,
   IProgramChange,
   TimingModeType,
 } from "../../types/synth.type";
@@ -17,6 +19,11 @@ import { BASE_PROGRAM, DEFAULT_SOUND_FONT } from "@/config/value";
 import { MainNodeController } from "@/stores/engine/lib/node";
 import { SpessaPlayerEngine } from "./player/spessa-synth-player";
 import { AudioMeter } from "../../lib/gain";
+import {
+  RemoteReceivedMessages,
+  RemoteSendMessage,
+} from "@/stores/remote/types/remote.type";
+import { INodeCallBack } from "../../types/node.type";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -33,14 +40,18 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public controllerItem: MainNodeController | undefined = undefined;
   public gainNode: AudioMeter | undefined = undefined;
 
+  private sendMessage?: (info: RemoteSendMessage) => void;
+
   constructor(
     setInstrument?: (instrument: IPersetSoundfont[]) => void,
-    bassLocked?: number
+    bassLocked?: number,
+    sendMessage?: (info: RemoteSendMessage) => void
   ) {
     this.startup(setInstrument);
     if (bassLocked) {
       this.bassLocked = bassLocked;
     }
+    this.sendMessage = sendMessage;
   }
 
   async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
@@ -113,6 +124,28 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     });
   }
 
+  private sendMessageData(
+    node?: INodeCallBack,
+    value?:
+      | IControllerChange
+      | IProgramChange
+      | ILockController
+      | IMuteController
+  ) {
+    if (!this.sendMessage || !node || !value) {
+      return;
+    }
+
+    let message: INodeCallBack = {
+      ...node,
+      value,
+    };
+    this.sendMessage({
+      user: "SUPER",
+      message,
+    });
+  }
+
   async setSoundFont(file: File) {
     const bf = await file.arrayBuffer();
     try {
@@ -129,7 +162,9 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "controllerchange",
       "",
       (e: IControllerChange) => {
-        this.controllerItem?.onControllerChange(e, false);
+        const { event } =
+          this.controllerItem?.onControllerChange(e, false) ?? {};
+        this.sendMessageData(event, e);
       }
     );
   }
@@ -184,16 +219,15 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     controllerValue: number,
     force?: boolean
   ): void {
-    const isLocked = this.controllerItem?.onControllerChange(
-      {
-        channel,
-        controllerNumber,
-        controllerValue,
-      },
-      true
-    );
+    let controllerObj: IControllerChange = {
+      channel,
+      controllerNumber,
+      controllerValue,
+    };
+    let { event, isLock } =
+      this.controllerItem?.onControllerChange(controllerObj, true) ?? {};
 
-    if (isLocked === true) {
+    if (isLock === true) {
       this.lockController(channel, controllerNumber, false);
     }
 
@@ -204,9 +238,10 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       force
     );
 
-    if (isLocked === true) {
+    if (isLock === true) {
       this.lockController(channel, controllerNumber, true);
     }
+    this.sendMessageData(event, controllerObj);
   }
 
   lockController(

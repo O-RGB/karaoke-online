@@ -1,19 +1,15 @@
 import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
-import RangeBarClone from "@/components/common/input-data/range-bar-clone";
 import SliderCommon from "@/components/common/input-data/slider";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 import {
   IControllerChange,
   ILockController,
 } from "@/stores/engine/types/synth.type";
-import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
-import {
-  INodeCallBack,
-  NodeType,
-} from "@/stores/engine/types/node.type";
+import { INodeCallBack, NodeType } from "@/stores/engine/types/node.type";
 import React, { useEffect, useState } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
+import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
 
 interface MixNodeControllerProps {
   disabled?: boolean;
@@ -49,6 +45,15 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
     setLocked(event.value);
   };
 
+  const onSliderChange = (value: number) => {
+    const controllerEvent: IControllerChange = {
+      channel,
+      controllerNumber,
+      controllerValue: value,
+    };
+    onChange?.(controllerEvent);
+  };
+
   useEffect(() => {
     if (controllerItem) {
       controllerItem.addEventCallBack(
@@ -77,9 +82,7 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
       vertical={vertical}
       disabled={disabled}
       value={disabled ? 0 : volume}
-      onChange={(value) =>
-        onChange?.({ channel, controllerNumber, controllerValue: value })
-      }
+      onChange={onSliderChange}
       className="z-20"
       max={127}
       onPressStart={() => {

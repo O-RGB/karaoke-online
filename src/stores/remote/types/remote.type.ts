@@ -63,7 +63,7 @@ export interface RemoteReceivedMessages {
 
 export interface RemoteSendMessage {
   message: any;
-  type: SendType;
+  // type: SendType;
   user: TypeUserControl;
   clientId?: string;
 }

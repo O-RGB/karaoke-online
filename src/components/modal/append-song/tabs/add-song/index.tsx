@@ -4,7 +4,7 @@ import Label from "@/components/common/display/label";
 import TableList from "@/components/common/table/table-list";
 import Tags from "@/components/common/display/tags";
 import { createTrackList } from "@/lib/storage/tracklist";
-import useTracklistStore from "@/stores/tracklist-store";
+import useTracklistStore from "@/stores/tracklist/tracklist-store";
 import React, { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FaPlus, FaRegFileAudio, FaSearch } from "react-icons/fa";
