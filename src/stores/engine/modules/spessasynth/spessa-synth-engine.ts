@@ -10,11 +10,13 @@ import {
   IControllerChange,
   IProgramChange,
   TimingModeType,
-} from "../types/synth.type";
-import { SpessaPlayerEngine } from "../player/spessa-synth-player";
-import { loadAudioContext, loadPlayer } from "../lib/spessasynth";
+} from "../../types/synth.type";
+
+import { loadAudioContext, loadPlayer } from "./lib/spessasynth";
 import { BASE_PROGRAM, DEFAULT_SOUND_FONT } from "@/config/value";
-import { MainNodeController } from "@/stores/player/event-player/lib/node";
+import { MainNodeController } from "@/stores/engine/lib/node";
+import { SpessaPlayerEngine } from "./player/spessa-synth-player";
+import { AudioMeter } from "../../lib/gain";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -29,6 +31,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public bassDetect: IProgramChange | undefined = undefined;
 
   public controllerItem: MainNodeController | undefined = undefined;
+  public gainNode: AudioMeter | undefined = undefined;
 
   constructor(
     setInstrument?: (instrument: IPersetSoundfont[]) => void,
@@ -60,10 +63,14 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       const analysers = this.getAnalyserNode(audioContext);
       synth?.connectIndividualOutputs(analysers);
       this.analysers = analysers;
+      this.gainNode = new AudioMeter(audioContext, analysers);
     }
 
     this.player = new SpessaPlayerEngine(player);
     this.controllerItem = new MainNodeController();
+
+    this.controllerChange();
+    this.programChange();
 
     return { synth: synth, audio: this.audio };
   }
@@ -117,18 +124,19 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     }
   }
 
-  controllerChange(event: (event: IControllerChange) => void): void {
+  controllerChange(event?: (event: IControllerChange) => void): void {
     return this.synth?.eventHandler.addEvent(
       "controllerchange",
       "",
       (e: IControllerChange) => {
-        event(e);
+        // event(e);
+        console.log(e);
         this.controllerItem?.onControllerChange(e, false);
       }
     );
   }
 
-  programChange(event: (event: IProgramChange) => void): void {
+  programChange(event?: (event: IProgramChange) => void): void {
     return this.synth?.eventHandler.addEvent(
       "programchange",
       "",
@@ -149,10 +157,10 @@ export class SpessaSynthEngine implements BaseSynthEngine {
             let bassMapping = { channel, program: lockNum };
 
             this.controllerItem?.onProgramChange(bassMapping, false);
-            return event(bassMapping);
+            // return event(bassMapping);
           }
         } else {
-          event(e);
+          // event(e);
           this.controllerItem?.onProgramChange(e, false);
         }
       }

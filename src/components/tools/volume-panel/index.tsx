@@ -27,7 +27,7 @@ import {
   MAIN_VOLUME,
   PAN,
   REVERB,
-} from "@/stores/player/event-player/types/node.type";
+} from "@/stores/engine/types/node.type";
 import ChannelRender from "./channel";
 import {
   IControllerChange,
@@ -108,7 +108,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   };
 
   const onPersetChange = (value: IProgramChange) => {
-    engine?.updatePreset(value.channel, value.program);
+    engine?.setProgram(value.channel, value.program);
   };
 
   const onControllerChange = (value: IControllerChange) => {

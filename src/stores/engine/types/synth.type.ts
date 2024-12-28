@@ -1,11 +1,9 @@
 import { MIDI } from "spessasynth_lib/@types/midi_parser/midi_loader";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
-import {
-  DataController,
-  MainNodeController,
-} from "@/stores/player/event-player/lib/node";
-import { NodeType } from "@/stores/player/event-player/types/node.type";
+import { DataController, MainNodeController } from "@/stores/engine/lib/node";
+import { NodeType } from "@/stores/engine/types/node.type";
+import { AudioMeter } from "../lib/gain";
 export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
   time: TimingModeType;
@@ -55,6 +53,7 @@ export interface BaseSynthEngine {
   bassDetect?: IProgramChange;
 
   controllerItem?: MainNodeController;
+  gainNode?: AudioMeter;
 }
 
 export interface ControllerItemList {

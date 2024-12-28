@@ -23,7 +23,7 @@ import DisplaySettingModal from "../modal/display";
 import { DragDrop } from "../tools/drag-drop/drag-drop";
 import DataStoresModal from "../modal/datastores";
 import useTracklistStore from "@/stores/tracklist-store";
-import RemoteRender from "./remote-render/remote-render";
+// import RemoteRender from "./remote-render/remote-render";
 import useNotificationStore from "@/stores/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/stores/config/config-store";
@@ -93,7 +93,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <WallpaperRender
         wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>
-      <RemoteRender></RemoteRender>
+      {/* <RemoteRender></RemoteRender> */}
       {/* Contact */}
       <div id="modal-container">
         <ContextModal modal={modalMap}>

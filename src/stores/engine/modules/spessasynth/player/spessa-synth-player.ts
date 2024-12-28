@@ -1,7 +1,8 @@
 import { MIDI, Sequencer } from "spessasynth_lib";
-import { BaseSynthPlayerEngine } from "../types/synth.type";
+
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { calculateTicks, convertTicksToTime } from "@/lib/app-control";
+import { BaseSynthPlayerEngine } from "@/stores/engine/types/synth.type";
 
 export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   private player: Sequencer | undefined;

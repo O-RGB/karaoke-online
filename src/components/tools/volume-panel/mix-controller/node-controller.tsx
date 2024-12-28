@@ -11,7 +11,7 @@ import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-s
 import {
   INodeCallBack,
   NodeType,
-} from "@/stores/player/event-player/types/node.type";
+} from "@/stores/engine/types/node.type";
 import React, { useEffect, useState } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
 

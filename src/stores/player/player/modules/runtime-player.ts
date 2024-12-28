@@ -2,9 +2,10 @@ import { create } from "zustand";
 import { RuntimeProps } from "../types/player.type";
 import { sortTempoChanges } from "@/lib/app-control";
 import useQueuePlayer from "./queue-player";
-import useEventStore from "../../event-player/event-store";
+// import useEventStore from "../../event-player/event-store";
 import useLyricsStoreNew from "@/stores/lyrics/lyrics-store";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import useMixerStoreNew from "../../event-player/modules/event-mixer-store";
 
 const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   isPaused: false,
@@ -103,8 +104,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
       return;
     }
 
-    const setEventRun = useEventStore.getState().setEventRun;
-    const setGainRun = useEventStore.getState().setGainRun;
+    const setEventGain = useMixerStoreNew.getState().setEventGain;
     const nextMusic = useQueuePlayer.getState().nextMusic;
     const lyricsRender = useLyricsStoreNew.getState().lyricsRender;
 
@@ -113,11 +113,10 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
     const duration = midi.duration;
     const tempoChanges: ITempoChange[] = midi.tempoChanges;
 
-    setEventRun(isPlay);
     if (isPlay) {
       if (!intervalId) {
         setInterval(() => {
-          setGainRun();
+          setEventGain();
         }, 40);
         const newIntervalId = setInterval(async () => {
           const currentTime = await player.getCurrentTiming();

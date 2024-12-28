@@ -1,7 +1,13 @@
 import { MIDI, midiControllers } from "spessasynth_lib";
-import { BaseSynthEvent, BaseSynthPlayerEngine } from "../types/synth.type";
+import { BaseSynthEvent, BaseSynthPlayerEngine } from "../../../types/synth.type";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
+import {
+  CHORUSDEPTH,
+  MAIN_VOLUME,
+  PAN,
+  REVERB,
+} from "@/stores/engine/types/node.type";
 
 export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   private player: JsSynthesizer | undefined = undefined;
@@ -78,15 +84,15 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             let controller = event.getControl();
             let controllerNumber = 0;
             switch (controller) {
-              case 7:
-                controllerNumber = midiControllers.mainVolume;
+              case MAIN_VOLUME:
+                controllerNumber = MAIN_VOLUME;
                 break;
-              case midiControllers.pan:
-                controllerNumber = midiControllers.pan;
-              case 91:
-                controllerNumber = 91;
-              case 93:
-                controllerNumber = 93;
+              case PAN:
+                controllerNumber = PAN;
+              case REVERB:
+                controllerNumber = REVERB;
+              case CHORUSDEPTH:
+                controllerNumber = CHORUSDEPTH;
               default:
                 controllerNumber = controller;
                 break;

@@ -14,7 +14,7 @@ import {
   MAIN_VOLUME,
   PAN,
   REVERB,
-} from "@/stores/player/event-player/types/node.type";
+} from "@/stores/engine/types/node.type";
 import {
   IControllerChange,
   ILockController,

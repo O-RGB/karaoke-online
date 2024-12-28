@@ -6,7 +6,7 @@ import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 import {
   INodeCallBack,
   MAIN_VOLUME,
-} from "@/stores/player/event-player/types/node.type";
+} from "@/stores/engine/types/node.type";
 import SliderCommon from "@/components/common/input-data/slider";
 import MixNodeController from "../mix-controller/node-controller";
 import {
