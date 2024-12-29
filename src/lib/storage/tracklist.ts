@@ -45,6 +45,8 @@ export const jsonTracklistToDatabase = async (
         try {
           const data: SearchResult[] = JSON.parse(jsonData);
 
+          console.log("JSON parse length", data.length);
+
           await addTracklistsToDatabase(data, tracklistStore, onProgress);
 
           console.log("Data saved successfully");
@@ -114,7 +116,8 @@ export const addTracklistsToDatabase = async (
     for (let i = 0; i < objs.length; i++) {
       let obj = objs[i];
       if (obj.id) {
-        obj.id = obj.id.toUpperCase();
+        obj.id = `${obj.id}-${obj.fileId}`
+        // obj.id = `${i + 1}`;
         obj.from = tracklistStore;
       }
       try {

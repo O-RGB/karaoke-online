@@ -40,7 +40,7 @@ export function addAllTrie<T = any>(list: any[]) {
 export async function onSearchList<T = any>(
   value: string,
   trie: TrieSearch<T>,
-  limit: number = 10
+  limit: number = 20
 ) {
   return trie?.search(value, undefined, limit);
 }

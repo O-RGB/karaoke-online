@@ -8,6 +8,7 @@ import useRuntimePlayer from "./runtime-player";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
+  driveLoading: false,
   queue: [],
   addQueue: async (value) => {
     const runtime = useRuntimePlayer.getState();
@@ -36,28 +37,15 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   nextMusic: () => {
     const queue = get().queue;
 
-    console.log(
-      "%csrc/stores/player/update/modules/queue-player.ts:40 queue",
-      "color: #007acc;",
-      queue
-    );
     let nextSong: SearchResult | undefined = undefined;
     if (queue.length > 0) {
       nextSong = queue[0];
     }
 
     if (!nextSong) {
-      console.log(
-        "%csrc/stores/player/update/modules/queue-player.ts:47 return",
-        "color: #007acc;"
-      );
       return;
     }
 
-    console.log(
-      "%csrc/stores/player/update/modules/queue-player.ts:51 playMusic",
-      "color: white; background-color: #007acc;"
-    );
     get().playMusic(0);
     get().removeQueue(0);
   },
@@ -78,28 +66,19 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     }
 
     const url = useConfigStore.getState().config.system?.url;
+    if (music.from === "DRIVE_EXTHEME" || music.from === "DRIVE") {
+      runtime.paused();
+      set({ driveLoading: true });
+    }
     const song = await getSong(music, url);
+    set({ driveLoading: false });
 
     if (!song) {
       return;
     }
 
     runtime.stop();
-
-    console.log("prepae load new song");
-
     const parsedMidi = await player.player?.loadMidi(song.mid);
-
-    // let midiFileArrayBuffer = await song.mid.arrayBuffer();
-    // let parsedMidi = null;
-    // try {
-    //   parsedMidi = new MIDI(midiFileArrayBuffer, song.mid.name);
-    // } catch (e) {
-    //   // console.error(e);
-    //   const fix = await fixMidiHeader(song.mid);
-    //   const fixArrayBuffer = await fix.arrayBuffer();
-    //   parsedMidi = new MIDI(fixArrayBuffer, fix.name);
-    // }
 
     if (parsedMidi) {
       const timeDivision = parsedMidi.timeDivision;
@@ -115,10 +94,6 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
         song,
         music
       );
-
-      // player?.loadNewSongList([parsedMidi], false);
-
-      console.log(parsedMidi);
 
       setTimeout(() => {
         runtime.play();

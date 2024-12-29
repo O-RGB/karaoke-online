@@ -14,17 +14,17 @@ import { FaCat, FaGoogleDrive } from "react-icons/fa";
 
 interface AddFromDriveProps {
   onAddUrlDrvie?: (value: string) => Promise<boolean>;
-  onAddTrackListDrive?: (value: string) => Promise<boolean>;
+  // onAddTrackListDrive?: (value: string) => Promise<boolean>;
   onSystemChange: (value: string) => void;
-  getSystem?: () => boolean;
+  // getSystem?: () => boolean;
   driveCheckForUpdate: () => Promise<void>;
 }
 
 const AddFromDrive: React.FC<AddFromDriveProps> = ({
   onAddUrlDrvie,
-  onAddTrackListDrive,
+  // onAddTrackListDrive,
   onSystemChange,
-  getSystem,
+  // getSystem,
   driveCheckForUpdate,
 }) => {
   const config = useConfigStore((state) => state.config);
@@ -87,7 +87,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
         <div className="flex gap-1">
           <Link
             href={
-              "https://drive.google.com/drive/folders/11z9hlAAJVgGOiuJnkxA1gdsIJjDf3BpY?usp=sharing"
+              "https://drive.google.com/drive/folders/1wqib6TiFHcnJwXZuUN2cNc32DDYvvODl?usp=sharing"
             }
             target="_blank"
             className="w-fit"
@@ -170,68 +170,8 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
           อัปเดตเพลง
         </Button>
       </div>
-      <div className="py-2">
-        <div className="md:flex justify-between">
-          <Label
-            textSize={15}
-            textColor="text-gray-800"
-            headClass="bg-blue-500"
-            description="สำหรับเชื่อมต่อเพลง Extheme ที่อยู่บน Drive"
-          >
-            เชื่อมต่อ Extreme Drive
-          </Label>
-          <div className="flex gap-1">
-            <Link
-              href={
-                "https://drive.google.com/drive/folders/1-xSPjDnDKr3JpMp4VlghxwgAe2AM342s?usp=sharing"
-              }
-              target="_blank"
-              className="w-fit"
-            >
-              <Button
-                blur={false}
-                color="blue"
-                iconPosition="left"
-                className="text-white w-fit"
-                icon={<FaGoogleDrive className="text-white" />}
-              >
-                {/* ลิงก์ Drive */}
-              </Button>
-            </Link>
-            <Link
-              href={"https://catbox.moe/#"}
-              target="_blank"
-              className="w-fit"
-            >
-              <Button
-                blur={false}
-                color="amber"
-                iconPosition="left"
-                className="text-white w-fit"
-                icon={<FaCat className="text-white" />}
-              >
-                {/* ลิงก์ Drive */}
-              </Button>
-            </Link>
-            <Link
-              href={"https://youtu.be/pHzYj_EksNI"}
-              target="_blank"
-              className="w-fit"
-            >
-              <Button
-                blur={false}
-                color="red"
-                iconPosition="left"
-                className="text-white w-fit"
-                icon={<BsYoutube className="text-white" />}
-              >
-                {/* วิธีใช้งาน */}
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-      <DriveAction
+     
+      {/* <DriveAction
         ok={tracklistUrl ? true : false}
         title="ดาวน์โหลด Extheme Drive"
         onSave={onAddTrackListDrive}
@@ -243,7 +183,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
           value: tracklistUrl,
           placeholder: "https:...",
         }}
-      ></DriveAction>
+      ></DriveAction> */}
 
       {/* <div className="text-blue-500">
         หากใครสนใจทดสอบโหลดเพลงจาก Google drive ต้องติดต่อ Admin
@@ -253,3 +193,66 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
 };
 
 export default AddFromDrive;
+
+
+<div className="py-2">
+<div className="md:flex justify-between">
+  <Label
+    textSize={15}
+    textColor="text-gray-800"
+    headClass="bg-blue-500"
+    description="สำหรับเชื่อมต่อเพลง Extheme ที่อยู่บน Drive"
+  >
+    เชื่อมต่อ Extreme Drive
+  </Label>
+  <div className="flex gap-1">
+    <Link
+      href={
+        "https://drive.google.com/drive/folders/1wqib6TiFHcnJwXZuUN2cNc32DDYvvODl?usp=sharing"
+      }
+      target="_blank"
+      className="w-fit"
+    >
+      <Button
+        blur={false}
+        color="blue"
+        iconPosition="left"
+        className="text-white w-fit"
+        icon={<FaGoogleDrive className="text-white" />}
+      >
+        {/* ลิงก์ Drive */}
+      </Button>
+    </Link>
+    <Link
+      href={"https://catbox.moe/#"}
+      target="_blank"
+      className="w-fit"
+    >
+      <Button
+        blur={false}
+        color="amber"
+        iconPosition="left"
+        className="text-white w-fit"
+        icon={<FaCat className="text-white" />}
+      >
+        {/* ลิงก์ Drive */}
+      </Button>
+    </Link>
+    <Link
+      href={"https://youtu.be/pHzYj_EksNI"}
+      target="_blank"
+      className="w-fit"
+    >
+      <Button
+        blur={false}
+        color="red"
+        iconPosition="left"
+        className="text-white w-fit"
+        icon={<BsYoutube className="text-white" />}
+      >
+        {/* วิธีใช้งาน */}
+      </Button>
+    </Link>
+  </div>
+</div>
+</div>

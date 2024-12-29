@@ -102,10 +102,8 @@ export const getSong = async (
   driveSetting?: string
   // driveMode: boolean = false
 ) => {
-  console.log("seracsh ing ", selected);
   const { superId, fileId } = genSongPath(selected);
 
-  console.log("superId, fileId", superId, fileId);
   if (superId && fileId) {
     var superFile: File | undefined = undefined;
 

@@ -24,6 +24,7 @@ export default function Modal({
   overFlow = "overflow-auto",
   containerId = "modal-container",
   modalClassName = "",
+  fitHeight = false,
 }: ModalProps) {
   const { isMobile, orientation } = useOrientation();
   const [showModal, setShowModal] = useState(isOpen);
@@ -127,7 +128,7 @@ export default function Modal({
           <div
             style={{
               width: dimensions.width,
-              height: dimensions.height,
+              height: fitHeight ? "auto" : dimensions.height,
               maxWidth: dimensions.maxWidth,
             }}
             className={`relative bg-white rounded-lg shadow-xl z-10 transform 

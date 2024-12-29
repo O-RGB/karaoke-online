@@ -82,46 +82,48 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   return (
     <>
       <div className="fixed bottom-0 gap-2 w-full left-0 blur-overlay bg-black/10 border-t blur-border flex justify-between p-2 lg:p-0">
-        <div className="flex items-center w-full">
-          {!isPaused ? (
+        <div className="flex w-full">
+          <div className="flex w-fit ">
+            {!isPaused ? (
+              <Button
+                className="hover:bg-white/20"
+                blur={false}
+                border=""
+                shadow=""
+                padding="p-4"
+                onClick={() => {
+                  paused();
+                }}
+                shape={false}
+                icon={<TbPlayerPauseFilled className="text-white" />}
+              ></Button>
+            ) : (
+              <Button
+                className="hover:bg-white/20"
+                blur={false}
+                border=""
+                shadow=""
+                padding="p-4"
+                onClick={() => {
+                  play();
+                }}
+                shape={false}
+                icon={<TbPlayerPlayFilled className="text-white" />}
+              ></Button>
+            )}
             <Button
               className="hover:bg-white/20"
               blur={false}
+              disabled={queue.length == 0}
               border=""
               shadow=""
               padding="p-4"
-              onClick={() => {
-                paused();
-              }}
+              onClick={nextMusic}
               shape={false}
-              icon={<TbPlayerPauseFilled className="text-white" />}
+              icon={<TbPlayerSkipForwardFilled className="text-white" />}
             ></Button>
-          ) : (
-            <Button
-              className="hover:bg-white/20"
-              blur={false}
-              border=""
-              shadow=""
-              padding="p-4"
-              onClick={() => {
-                play();
-              }}
-              shape={false}
-              icon={<TbPlayerPlayFilled className="text-white" />}
-            ></Button>
-          )}
-          <Button
-            className="hover:bg-white/20"
-            blur={false}
-            disabled={queue.length == 0}
-            border=""
-            shadow=""
-            padding="p-4"
-            onClick={nextMusic}
-            shape={false}
-            icon={<TbPlayerSkipForwardFilled className="text-white" />}
-          ></Button>
-          <div className="w-full lg:w-[300px] px-2 flex items-center pt-0.5 relative">
+          </div>
+          <div className=" w-full px-2 flex items-center pt-0.5 relative">
             <SliderCommon
               tabIndex={-1}
               value={value}
@@ -132,12 +134,9 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               }}
               onChange={setCurrentTime}
             ></SliderCommon>
-            {/* <div className="absolute -bottom-2.5 left-0 p-0.5 text-[8px] text-white">
-              {timingMode==="Tick" ? "T" : "C"}{maxTimer}/{value}/{midi?.loop.end}
-            </div> */}
           </div>
-          <div className="hidden lg:block lg:w-full h-full p-1.5">
-            <div className="border border-white/20 rounded-md bg-black/15 h-full flex items-center py-1 text-white overflow-hidden">
+          {/* <div className="col-span-3 hidden lg:block lg:w-fit h-full p-1.5">
+            <div className="border border-white/20 rounded-md bg-black/15 h-full flex items-center py-1 text-white w-full overflow-hidden">
               {lyrics.length > 3 && (
                 <Marquee
                   className="flex gap-2 opacity-40 text-sm overflow-hidden"
@@ -159,7 +158,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
                 </Marquee>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="flex">

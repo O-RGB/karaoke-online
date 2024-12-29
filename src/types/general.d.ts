@@ -45,7 +45,7 @@ type ModalProps = {
   children: React.ReactNode;
   title?: string | React.ReactNode;
   width?: number;
-  height?: number
+  height?: number;
   footer?: React.ReactNode;
   cancelText?: string;
   okText?: string;
@@ -54,6 +54,7 @@ type ModalProps = {
   overFlow?: "overflow-hidden" | "overflow-auto";
   containerId?: string;
   modalClassName?: string;
+  fitHeight?: boolean;
 };
 
 interface CommonStyle {

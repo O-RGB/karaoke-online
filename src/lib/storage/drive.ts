@@ -21,20 +21,15 @@ export const getSongDrive = async (
   // check file in store
 
   let file = undefined;
-
-  console.log("custom", custom);
   if (custom) {
     file = await getSongDriveByKey(+key);
   } else {
     file = await getSongDriveExtremeByKey(+key);
   }
-  console.log("file", file);
-console.log("url", url)
   if (file !== undefined) {
     return file;
   } else if (url) {
     const res = await Fetcher(url, { index: key, custom: custom }, "LOAD");
-    console.log("res", res);
     const file = bytesToFile(res.bytes, res.contentType, res.fileName);
     const getFileId = file.name.split(".");
     saveSongByKey(file, +getFileId[0]);

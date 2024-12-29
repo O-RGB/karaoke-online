@@ -34,6 +34,7 @@ import SongInfo from "../tools/song-info";
 import SoundSettingModal from "../modal/sound-setting";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 import RemoteEvent from "./remote-event";
+import NotificationAlert from "../tools/noti-alert";
 
 interface KaraokePageProps {}
 
@@ -88,6 +89,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>
       <RemoteEvent></RemoteEvent>
+      <NotificationAlert></NotificationAlert>
       {/* Contact */}
       <div id="modal-container">
         <ContextModal modal={modalMap}>

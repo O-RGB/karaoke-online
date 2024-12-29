@@ -29,13 +29,25 @@ import {
 import useConfigStore from "@/stores/config/config-store";
 import useTracklistStore from "@/stores/tracklist/tracklist-store";
 import { Fetcher } from "@/utils/api/fetch";
-import { fileToBase64 } from "@/utils/file/file";
+import {
+  base64ByteToFile,
+  base64ToBlob,
+  fileToBase64,
+} from "@/utils/file/file";
 import Modal from "@/components/common/modal";
 import TableList from "@/components/common/table/table-list";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FaCheck } from "react-icons/fa";
 
 interface AppendSongModalProps {}
+
+interface FileResponse {
+  fileId: string;
+  fileName: string;
+  base64Data: string;
+  contentType: string;
+  size: number;
+}
 
 const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
   const config = useConfigStore((state) => state.config);
@@ -122,7 +134,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           show: true,
         });
         // setTracklistFile(file);
-        console.log("UPLOAD: Tracklist Loaded lenght", saved.length)
+        console.log("UPLOAD: Tracklist Loaded lenght", saved.length);
         addTracklist(saved);
         setMusicFilename(file?.name);
       } else {
@@ -165,8 +177,6 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           show: true,
           error: "ไม่มี Google Url",
         });
-        // setLocalDriveUrl("");
-        // setLocalDriveTested(false);
         setConfig({ system: { url: "", urlTested: false } });
         return false;
       }
@@ -184,8 +194,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           show: true,
         });
         setConfig({ system: { url: value, urlTested: true } });
-        // setLocalDriveTested(true);
-        // setLocalDriveUrl(value);
+        onAddTrackListDrive(value, "DRIVE_EXTHEME");
         return true;
       } else {
         setProgress({
@@ -195,8 +204,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           error: "ไม่สามารถระบุ Google Apps script",
         });
         setConfig({ system: { url: "", urlTested: false } });
-        // setLocalDriveUrl("");
-        // setLocalDriveTested(false);
+
         return false;
       }
     } catch (error) {
@@ -207,8 +215,7 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
         error: "Error uploading file: " + JSON.stringify(error),
       });
       setConfig({ system: { url: "", urlTested: false } });
-      // setLocalDriveUrl("");
-      // setLocalDriveTested(false);
+
       return false;
     }
   };
@@ -223,15 +230,22 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
       show: true,
       loading: true,
     });
-    return fetch(value)
+
+    var formdata = new FormData();
+    formdata.append("fun", "TRACKLIST");
+    return fetch(value, { body: formdata, method: "POST" })
       .then(async (response) => {
-        let file: File | undefined = undefined;
-        if (response.ok == true) {
-          const fileBlob = await response.blob();
-          file = new File([fileBlob], "song.json", {
-            type: fileBlob.type,
-          });
-        }
+        const data = await response.json();
+
+        let fileResponse: FileResponse =
+          data.files.length > 0 ? data.files[0] : undefined;
+        const blob = base64ToBlob(
+          fileResponse.base64Data,
+          fileResponse.contentType
+        );
+        let file = new File([blob], "tracklist.json", {
+          type: blob.type,
+        });
 
         if (file) {
           await onLoadFileJson(file, tracklistStore);
@@ -558,9 +572,6 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
               <AddFromDrive
                 driveCheckForUpdate={() => driveCheckForUpdate(true)}
                 onSystemChange={onSystemChange}
-                onAddTrackListDrive={(value) =>
-                  onAddTrackListDrive(value, "DRIVE_EXTHEME")
-                }
                 onAddUrlDrvie={onAddUrlDrvie}
               />
             ),

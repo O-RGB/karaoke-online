@@ -6,6 +6,7 @@ export interface PlayerProps {
 }
 
 export interface QueuePlayerProps {
+  driveLoading: boolean;
   queue: SearchResult[];
   addQueue: (value: SearchResult) => void;
   removeQueue: (index: number) => void;
