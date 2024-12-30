@@ -104,7 +104,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
           </Link>
 
           <Link
-            href={"https://www.youtube.com/watch?v=jgLmRHOPLO8"}
+            href={"https://www.youtube.com/watch?v=p422bTCAGRQ"}
             target="_blank"
             className="w-fit"
           >

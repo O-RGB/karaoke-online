@@ -59,6 +59,9 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
       ) : (
         <div className="flex h-screen w-screen -m-2.5 items-center justify-center">
           <div className="">
+            <span className="flex items-center flex-col text-white pb-2 text-sm">
+              <span>🌷 Happy new year 2025 🌷</span>
+            </span>
             {!pressed && (
               <span className="flex items-center flex-col text-white pb-2 text-sm">
                 <span>เวอร์ชันนี้</span>
@@ -89,7 +92,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                   </Button>
                 </div>
                 <span className="pt-1 text-xs text-white">
-                  🎇💥 Updated v.1.0.27 💥🎇
+                  🎇🔥 Updated v.1.0.28 🔥🎇
                 </span>
                 <br />
                 <span className="text-xs text-center text-white">

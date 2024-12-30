@@ -10,7 +10,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Karaoke Online",
+  title: "Next Karaoke",
   manifest: "/manifest.json",
 };
 
@@ -23,6 +23,21 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <script src="/js-synthesizer/libfluidsynth-2.3.0.js"></script>
+        <link
+          rel="icon"
+          type="image/png"
+          href="/favicon-96x96.png"
+          sizes="96x96"
+        />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <meta name="apple-mobile-web-app-title" content="Karaoke" />
+        {/*         
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icon.ico" sizes="48x48" />
         <link rel="icon" type="image/x-icon" href="./icon.ico" />
@@ -37,7 +52,7 @@ export default function RootLayout({
           href="/icon-mid?<generated>"
           type="image/<generated>"
           sizes="<generated>"
-        />
+        /> */}
         <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
@@ -47,7 +62,7 @@ export default function RootLayout({
         <meta name="google" content="notranslate" />
       </head>
 
-      <body className={`relative  p-2.5 bg-slate-500 `}>
+      <body className={`relative p-2.5 bg-slate-500 `}>
         <AllowSound>{children}</AllowSound>
       </body>
     </html>

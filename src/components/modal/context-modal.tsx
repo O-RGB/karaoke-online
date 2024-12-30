@@ -5,12 +5,12 @@ import Modal from "../common/modal";
 import { TbDeviceMobileShare, TbMusicPlus } from "react-icons/tb";
 import { VscSettings } from "react-icons/vsc";
 import { FaRegImage } from "react-icons/fa";
-import { SiMidi } from "react-icons/si";
 import { LuDatabase } from "react-icons/lu";
 import { ControlledMenu, Menu, MenuButton } from "@szhsin/react-menu";
 import ContextMenuCommon from "../common/context-menu/context-menu";
 import "@szhsin/react-menu/dist/index.css";
 import { CgScreen } from "react-icons/cg";
+import { BiSupport } from "react-icons/bi";
 
 interface ContextModalProps {
   children?: ReactNode;
@@ -30,8 +30,10 @@ const ContextModal: React.FC<ContextModalProps> = ({
   const [open, setOpen] = useState<boolean>(false);
   const [RenderModal, setRenderModal] = useState<React.ReactNode>();
   const [title, setTitle] = useState<ReactNode>();
+
   const handleSelectContext = (name: ModalType, title: ReactNode) => {
     const render = modal ? modal[name] : undefined;
+
     if (render) {
       setRenderModal(render);
       setOpen(true);
@@ -109,6 +111,12 @@ const ContextModal: React.FC<ContextModalProps> = ({
           text: "ภาพพื้นหลัง",
           onClick: handleSelectContext,
           type: "WALLPAPER",
+        },
+        {
+          icon: <BiSupport></BiSupport>,
+          text: "สนับสนุนเรา",
+          onClick: handleSelectContext,
+          type: "DONATE",
         },
       ],
       name: "ปรับแต่ง",

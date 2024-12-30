@@ -35,6 +35,8 @@ import SoundSettingModal from "../modal/sound-setting";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
 import RemoteEvent from "./remote-event";
 import NotificationAlert from "../tools/noti-alert";
+import DonateModal from "../modal/donate-modal";
+import AutoModal from "../modal/auto-modal";
 
 interface KaraokePageProps {}
 
@@ -80,6 +82,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
     SOUND_SETTING: <SoundSettingModal></SoundSettingModal>,
     DRIVE_SETTING: <DriveSetting></DriveSetting>,
+    DONATE: <DonateModal></DonateModal>,
   };
 
   return (
@@ -89,6 +92,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>
       <RemoteEvent></RemoteEvent>
+      <AutoModal auto title={""}></AutoModal>
       <NotificationAlert></NotificationAlert>
       {/* Contact */}
       <div id="modal-container">

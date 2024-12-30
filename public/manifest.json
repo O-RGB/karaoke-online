@@ -1,6 +1,6 @@
 {
-  "theme_color": "#8936FF",
-  "background_color": "#2EC6FE",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
   "icons": [
     {
       "purpose": "maskable",
@@ -19,8 +19,8 @@
   "display": "fullscreen",
   "dir": "auto",
   "lang": "th-TH",
-  "name": "Next Karaoke",
-  "short_name": "NextKaraoke",
+  "name": "Karaoke",
+  "short_name": "Karaoke",
   "start_url": "/",
   "screenshots": [
     {
