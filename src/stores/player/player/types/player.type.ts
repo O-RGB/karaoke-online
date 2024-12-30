@@ -74,7 +74,9 @@ export type EventChangeType =
   | "QUEUE_LIST"
   | "SET_QUEUE";
 
+export type QueueChangeType = "NEXT" | "PAUSE";
+
 export interface ISearchCallBack<T = any> {
   value: T;
-  eventType: EventChangeType;
+  eventType: EventChangeType | QueueChangeType;
 }

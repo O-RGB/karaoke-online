@@ -51,6 +51,12 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   },
 
   playMusic: async (index) => {
+    const isLoad = get().driveLoading;
+
+    if (isLoad) {
+      return;
+    }
+
     const player = useSynthesizerEngine.getState().engine;
     const runtime = useRuntimePlayer.getState();
 

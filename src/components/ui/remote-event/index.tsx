@@ -21,6 +21,7 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const addQueue = useQueuePlayer((state) => state.addQueue);
   const moveQueue = useQueuePlayer((state) => state.moveQueue);
+  const nextMusic = useQueuePlayer((state) => state.nextMusic);
   const queue = useQueuePlayer((state) => state.queue);
   const received = usePeerStore((state) => state.received);
   const engine = useSynthesizerEngine((state) => state.engine);
@@ -106,6 +107,9 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
         let newQueue: SearchResult[] = message.value as SearchResult[];
         moveQueue(newQueue);
         break;
+
+      case "NEXT":
+        nextMusic();
 
       default:
         break;
