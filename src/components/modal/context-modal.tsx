@@ -29,9 +29,9 @@ const ContextModal: React.FC<ContextModalProps> = ({
 
   const [open, setOpen] = useState<boolean>(false);
   const [RenderModal, setRenderModal] = useState<React.ReactNode>();
-  const [title, setTitle] = useState<ReactNode>();
+  const [title, setTitle] = useState<string>();
 
-  const handleSelectContext = (name: ModalType, title: ReactNode) => {
+  const handleSelectContext = (name: ModalType, title: string) => {
     const render = modal ? modal[name] : undefined;
 
     if (render) {

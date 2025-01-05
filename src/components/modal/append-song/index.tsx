@@ -503,14 +503,15 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     <>
       <Modal
         width={500}
-        title={
-          <span className="flex gap-1.5 items-center">
-            <span>
-              <img src="/icon/gd.ico" className="w-4 h-4" alt="" />
-            </span>
-            รายการอัปเดต
-          </span>
-        }
+        // title={
+        //   <span className="flex gap-1.5 items-center">
+        //     <span>
+        //       <img src="/icon/gd.ico" className="w-4 h-4" alt="" />
+        //     </span>
+        //     รายการอัปเดต
+        //   </span>
+        // }
+        title="รายการอัปเดต"
         isOpen={updatedModal}
         closable={!updateing}
         onClose={() => {

@@ -14,7 +14,7 @@ const ContextMenuCommon: React.FC<ContextMenuProps> = ({ items }) => {
     gap = "gap-2",
   }: {
     icon: React.ReactNode;
-    title: React.ReactNode;
+    title: string;
     size?: string;
     gap?: string;
   }) {
@@ -53,12 +53,13 @@ const ContextMenuCommon: React.FC<ContextMenuProps> = ({ items }) => {
                   onClick={() =>
                     group.onClick?.(
                       group.type,
-                      <MenuRender
-                        icon={group.icon}
-                        title={group.text}
-                        size="25px"
-                        gap="gap-3"
-                      ></MenuRender>
+                      // <MenuRender
+                      //   icon={group.icon}
+                      //   title={group.text}
+                      //   size="25px"
+                      //   gap="gap-3"
+                      // ></MenuRender>
+                      group.text
                     )
                   }
                   style={{
@@ -77,12 +78,13 @@ const ContextMenuCommon: React.FC<ContextMenuProps> = ({ items }) => {
             onClick={() =>
               data.contextMenus[0].onClick?.(
                 data.contextMenus[0].type,
-                <MenuRender
-                  icon={data.contextMenus[0].icon}
-                  title={data.contextMenus[0].text}
-                  size="25px"
-                  gap="gap-3"
-                ></MenuRender>
+                // <MenuRender
+                //   icon={data.contextMenus[0].icon}
+                //   title={data.contextMenus[0].text}
+                //   size="25px"
+                //   gap="gap-3"
+                // ></MenuRender>
+                data.contextMenus[0].text
               )
             }
             style={{

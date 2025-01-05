@@ -27,7 +27,7 @@ type ModalType =
   | "SONG_LIST"
   | "DRIVE_SETTING"
   | "DISPLAY"
-  | "DONATE"
+  | "DONATE";
 
 type InputBarLayout = "vertical" | "horizontal";
 type SystemMode = "SYSTEM" | "DRIVE";
@@ -44,7 +44,8 @@ type ModalProps = {
   okButtonProps?: ButtonProps;
   cancelProps?: ButtonProps;
   children: React.ReactNode;
-  title?: string | React.ReactNode;
+  title?: string;
+  icons?: React.ReactNode;
   width?: number;
   height?: number;
   footer?: React.ReactNode;
@@ -105,7 +106,7 @@ interface IContextMenuGroup<T = any> {
   icon?: React.ReactNode;
 }
 interface IContextMenuItem<T = any> {
-  onClick?: (type: T, title: ReactNode) => void;
+  onClick?: (type: T, title: string) => void;
   type: T;
   text: string;
   icon?: React.ReactNode;

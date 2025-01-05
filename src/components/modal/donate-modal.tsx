@@ -14,7 +14,15 @@ const DonateModal: React.FC<DonateModalProps> = () => {
       amount: 100,
     },
     {
-      name: "ไม่ทราบ",
+      name: "Sri Modify",
+      amount: 100,
+    },
+    {
+      name: "ไม่ระบุชื่อ",
+      amount: 100,
+    },
+    {
+      name: "ไม่ระบุชื่อ",
       amount: 99,
     },
   ];
@@ -40,11 +48,13 @@ const DonateModal: React.FC<DonateModalProps> = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-2 px-3">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <BiHeart className="w-5 h-5 text-red-500" />
-            <h3 className="text-lg font-bold text-gray-800">ผู้สนับสนุน</h3>
+          <div className="flex flex-col justify-center items-center mb-2">
+            <div className="flex items-center justify-center gap-2">
+              <BiHeart className="w-5 h-5 text-red-500" />
+              <h3 className="text-lg font-bold text-gray-800">ผู้สนับสนุน</h3>
+            </div>
+            <div className="text-xs text-gray-400">มกราคม 2568</div>
           </div>
-
           <div className="space-y-3">
             {donors.map((donor, index) => (
               <div
