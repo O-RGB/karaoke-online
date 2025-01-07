@@ -12,6 +12,7 @@ import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { MainNodeController } from "@/stores/engine/lib/node";
 import { AudioMeter } from "../../lib/gain";
 import { INodeCallBack } from "../../types/node.type";
+import { ChannelGainMonitor } from "./lib/channel-gain-monitor";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -50,11 +51,13 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.synth = synth;
     this.audio = audioContext;
 
-    if (audioContext) {
-      const analysers = this.getAnalyserNode(audioContext);
-      this.analysers = analysers;
-      this.gainNode = new AudioMeter(audioContext, analysers);
-    }
+    const gainMonitor = new ChannelGainMonitor(audioContext);
+    gainMonitor.connectToSynth(node);
+
+    // รับค่า analysers
+    this.analysers = gainMonitor.analyserNodes;
+    this.gainNode = new AudioMeter(audioContext, gainMonitor.analyserNodes);
+    this.analysers = gainMonitor.analyserNodes;
 
     node.connect(audioContext.destination);
 

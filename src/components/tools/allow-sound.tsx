@@ -59,9 +59,6 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
       ) : (
         <div className="flex h-screen w-screen -m-2.5 items-center justify-center">
           <div className="">
-            <span className="flex items-center flex-col text-white pb-2 text-sm">
-              <span>🌷 Happy new year 2025 🌷</span>
-            </span>
             {!pressed && (
               <span className="flex items-center flex-col text-white pb-2 text-sm">
                 <span>เวอร์ชันนี้</span>

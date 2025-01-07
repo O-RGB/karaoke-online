@@ -18,6 +18,10 @@ const DonateModal: React.FC<DonateModalProps> = () => {
       amount: 100,
     },
     {
+      name: "Pook Kittipan Khanteemok",
+      amount: 100,
+    },
+    {
       name: "ไม่ระบุชื่อ",
       amount: 100,
     },

@@ -12,9 +12,10 @@ export default function WinboxModal({
   title,
   icons,
   width = 800,
+  height,
   modalClassName = "",
   containerId = "modal-container",
-  closable,
+  closable = true,
 }: ModalProps) {
   const { isMobile, orientation } = useOrientation();
   const [showModal, setShowModal] = useState(isOpen);
@@ -34,18 +35,18 @@ export default function WinboxModal({
     if (isMobile) {
       if (orientation === "landscape") {
         return {
-          width: Math.min(window.innerWidth * 0.9, 1200),
-          height: window.innerHeight * 0.8,
+          width: width ? width : Math.min(window.innerWidth * 0.9, 1200),
+          height: height ? height : window.innerHeight * 0.8,
         };
       }
       return {
-        width: Math.min(window.innerWidth * 0.95, 600),
-        height: window.innerHeight * 0.8,
+        width: width ? width : Math.min(window.innerWidth * 0.95, 600),
+        height: height ? height : window.innerHeight * 0.8,
       };
     }
     return {
-      width: width || window.innerWidth * 0.9,
-      height: window.innerHeight * 0.8,
+      width: width ? width : window.innerWidth * 0.9,
+      height: height ? height : window.innerHeight * 0.8,
     };
   };
 
@@ -76,7 +77,7 @@ export default function WinboxModal({
       noFull={true}
       bottom={50}
       minWidth={200}
-      noClose={closable}
+      noClose={!closable}
       background="transparent"
     >
       <div className="p-4">{children}</div>

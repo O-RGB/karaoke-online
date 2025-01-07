@@ -19,10 +19,7 @@ import { BASE_PROGRAM, DEFAULT_SOUND_FONT } from "@/config/value";
 import { MainNodeController } from "@/stores/engine/lib/node";
 import { SpessaPlayerEngine } from "./player/spessa-synth-player";
 import { AudioMeter } from "../../lib/gain";
-import {
-  RemoteReceivedMessages,
-  RemoteSendMessage,
-} from "@/stores/remote/types/remote.type";
+import { RemoteSendMessage } from "@/stores/remote/types/remote.type";
 import { INodeCallBack } from "../../types/node.type";
 
 export class SpessaSynthEngine implements BaseSynthEngine {

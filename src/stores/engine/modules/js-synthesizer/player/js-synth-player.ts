@@ -1,5 +1,8 @@
 import { MIDI, midiControllers } from "spessasynth_lib";
-import { BaseSynthEvent, BaseSynthPlayerEngine } from "../../../types/synth.type";
+import {
+  BaseSynthEvent,
+  BaseSynthPlayerEngine,
+} from "../../../types/synth.type";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import {

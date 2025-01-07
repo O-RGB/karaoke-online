@@ -19,7 +19,7 @@ const ResetDatastore: React.FC<ResetDatastoreProps> = ({}) => {
       <Modal
         isOpen={message !== undefined}
         width={300}
-        // height={100}
+        height={200}
         fitHeight
         title={
           error === undefined
