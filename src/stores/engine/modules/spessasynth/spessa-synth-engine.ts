@@ -15,7 +15,7 @@ import {
 } from "../../types/synth.type";
 
 import { loadAudioContext, loadPlayer } from "./lib/spessasynth";
-import { BASE_PROGRAM, DEFAULT_SOUND_FONT } from "@/config/value";
+import { BASS, CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
 import { MainNodeController } from "@/stores/engine/lib/node";
 import { SpessaPlayerEngine } from "./player/spessa-synth-player";
 import { AudioMeter } from "../../lib/gain";
@@ -66,16 +66,24 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.audio = audioContext;
 
     this.persetChange((e) => setInstrument?.(e));
-
-    if (audioContext) {
-      const analysers = this.getAnalyserNode(audioContext);
-      synth?.connectIndividualOutputs(analysers);
-      this.analysers = analysers;
-      this.gainNode = new AudioMeter(audioContext, analysers);
-    }
+    this.synth?.setDrums(8, true);
 
     this.player = new SpessaPlayerEngine(player);
     this.controllerItem = new MainNodeController();
+
+    if (audioContext) {
+      const analysers: AnalyserNode[] = [];
+      for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        this.controllerItem.initAnalyser(ch, analyser);
+        analysers.push(analyser);
+      }
+      synth?.connectIndividualOutputs(analysers);
+
+      this.analysers = analysers;
+      this.gainNode = new AudioMeter(audioContext, analysers);
+    }
 
     this.controllerChange();
     this.programChange();
@@ -173,7 +181,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       (e: IProgramChange) => {
         const { channel, program } = e;
 
-        const isBass = BASE_PROGRAM.includes(program);
+        const isBass = BASS.includes(program);
 
         if (isBass) {
           this.bassDetect = e;
@@ -201,8 +209,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "",
       (perset: IPersetSoundfont[]) => {
         let sort = perset.sort((a, b) => a.program - b.program);
-        sort = sort.filter((x, i) => i !== 1);
-        event(sort);
+        let notFirst = sort.filter((x, i) => i !== 1);
+        event(notFirst);
       }
     );
   }

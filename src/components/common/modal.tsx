@@ -11,7 +11,7 @@ export default function WinboxModal({
   children,
   title,
   icons,
-  width = 800,
+  width,
   height,
   modalClassName = "",
   containerId = "modal-container",

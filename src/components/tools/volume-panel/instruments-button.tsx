@@ -1,6 +1,6 @@
 import ButtonDropdown from "@/components/common/button/button-dropdown";
 import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaDrum, FaUnlock } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { Menu, MenuButton } from "@szhsin/react-menu";
@@ -20,9 +20,6 @@ import {
   ILockController,
   IProgramChange,
 } from "@/stores/engine/types/synth.type";
-import { DataConnection } from "peerjs";
-import { RemoteSendMessage } from "@/stores/remote/types/remote.type";
-
 interface InstrumentsButtonProps {
   channel: number;
   perset?: IPersetSoundfont[];
@@ -38,7 +35,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   onProgramChange,
   onLockChange,
   channel,
-  perset,
+  perset = [],
   disabled,
 }) => {
   const bassLocked = useSynthesizerEngine((state) => state.engine?.bassLocked);
@@ -48,39 +45,31 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
     (state) => state.engine?.controllerItem
   );
 
-  const [program, setProgram] = useState<number>(0);
+  const [programOption, setProgramOptions] = useState<IOptions[]>([]);
+  const [programSelected, setProgramSelected] = useState<IOptions>();
+
+  const getPreset = useCallback(() => {
+    let mappingPerset = perset;
+    if (channel === 9) {
+      mappingPerset = perset.filter((v) => v.bank === 128);
+    }
+    const programOptions = mappingPerset.map((data) => ({
+      label: `${data.program} : ${data.presetName}`,
+      value: data.program.toString(),
+    }));
+    return programOptions;
+  }, [perset, channel]);
 
   const onValueChange = (event: INodeCallBack) => {
-    setProgram(event.value);
+    const search = programOption.find((v) => v.value === `${event.value}`);
+    setProgramSelected(search);
   };
-
-  useEffect(() => {
-    if (controllerItem) {
-      controllerItem.addEventCallBack(
-        "VOLUME",
-        "PROGARM",
-        channel,
-        onValueChange
-      );
-    }
-  }, [controllerItem]);
-
-  const persetOptions = useMemo(
-    () =>
-      perset?.map((data) => ({
-        label: `${data.program} : ${data.presetName}`,
-        value: data.program.toString(),
-      })),
-    [perset]
-  );
 
   const channelIcon = useMemo(() => {
     if (channel === 9) return <FaDrum />;
     if (channel === 8) return <PiMicrophoneStageFill />;
-    return getIconInstruments(program ?? 0)?.icon;
-  }, [channel, program]);
-
-  useEffect(() => {}, [program, bassLocked, bassDetect]);
+    return getIconInstruments(Number(programSelected?.value ?? 0))?.icon;
+  }, [channel, programSelected?.value]);
 
   function LabelTag({ name }: { name: string }) {
     return (
@@ -92,15 +81,24 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
     );
   }
 
-  const fullname = persetOptions
-    ? persetOptions.length > 0
-      ? persetOptions[program ?? 0].label
-      : "None"
-    : "None";
-
   const bassIsLocked: boolean = bassLocked
     ? bassDetect?.channel === channel
     : false;
+
+  useEffect(() => {
+    if (controllerItem) {
+      controllerItem.addEventCallBack(
+        "VOLUME",
+        "PROGARM",
+        channel,
+        onValueChange
+      );
+    }
+  }, [controllerItem, programOption]);
+
+  useEffect(() => {
+    setProgramOptions(getPreset());
+  }, [bassLocked, bassDetect, perset, channel, getPreset]);
 
   return (
     <Menu
@@ -117,7 +115,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
               <div className="w-full blur-overlay text-center text-white font-bold text-[10px] p-1 flex gap-0.5 justify-center items-center h-5">
                 <span className="w-2.5">{channelIcon}</span>
                 <span className="text-[8px] pb-[1px] font-bold text-white/70">
-                  {`${program ?? 0}`.padStart(3, "0")}
+                  {`${programSelected?.value ?? 0}`.padStart(3, "0")}
                 </span>
               </div>
             </div>
@@ -129,6 +127,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
         <div className="text-xs w-full pb-2 border-b">
           Channel {channel + 1}
         </div>
+
         <MixNodeController
           vertical={false}
           onLock={onLockChange}
@@ -139,6 +138,9 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           nodeType={"VOLUME"}
           label="ระดับเสียง"
         ></MixNodeController>
+        {/* <div className="text-xs break-all w-[50%]">
+            {JSON.stringify(programOption)}
+          </div> */}
         <div className="flex gap-1">
           <LabelTag name="เสียง"></LabelTag>
           <div className="pr-0.5">
@@ -147,17 +149,18 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
               className="!p-1.5 shadow-none border-none"
             ></Button>
           </div>
+
           <ButtonDropdown
             disabled={bassIsLocked}
             className={"w-full"}
-            value={`${program ?? 0}`}
+            value={programSelected?.value}
             onChange={(value) => {
               onProgramChange?.({
                 channel: channel,
                 program: parseInt(value),
               });
             }}
-            options={persetOptions}
+            options={programOption}
           >
             <div
               className={`${
@@ -171,7 +174,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
                   </span>
                   <span>{channelIcon}</span>
                 </div>
-                <span>{fullname}</span>
+                <span>{programSelected?.label}</span>
               </div>
             </div>
           </ButtonDropdown>

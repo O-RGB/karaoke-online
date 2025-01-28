@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   PiMicrophoneStageFill,
   PiUserMinusFill,
@@ -20,18 +20,13 @@ import useKeyboardStore from "@/stores/keyboard-state";
 import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
 import { CHANNEL_DEFAULT } from "@/config/value";
 import { useSynthesizerEngine } from "@/stores/engine/synth-store";
-import {
-  CHORUSDEPTH,
-  MAIN_VOLUME,
-  PAN,
-  REVERB,
-} from "@/stores/engine/types/node.type";
 import ChannelRender from "./channel";
 import {
   IControllerChange,
   ILockController,
   IProgramChange,
 } from "@/stores/engine/types/synth.type";
+import FullMixer from "./full-mixer";
 
 interface VolumePanelProps {
   onVolumeChange?: (value: ISetChannelGain) => void;
@@ -224,6 +219,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
             iconOpen={<FaList></FaList>}
             iconClose={<FaList></FaList>}
           ></SwitchButton>
+
+          {/* <FullMixer></FullMixer> */}
         </div>
         <div>{options}</div>
       </div>

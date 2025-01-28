@@ -37,6 +37,7 @@ import RemoteEvent from "./remote-event";
 import NotificationAlert from "../tools/noti-alert";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
+import MixerModal from "../modal/mixer/mixer-modal";
 
 interface KaraokePageProps {}
 

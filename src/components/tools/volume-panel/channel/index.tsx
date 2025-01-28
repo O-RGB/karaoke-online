@@ -1,18 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import InstrumentsButton from "../instruments-button";
 import VolumeAction from "../volume-action";
-import { IChannelEvent } from "../types/channel-type";
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
-import { INodeCallBack, MAIN_VOLUME } from "@/stores/engine/types/node.type";
-import SliderCommon from "@/components/common/input-data/slider";
+import { MAIN_VOLUME } from "@/stores/engine/types/node.type";
 import MixNodeController from "../mix-controller/node-controller";
 import {
   IControllerChange,
   ILockController,
   IProgramChange,
 } from "@/stores/engine/types/synth.type";
-import { DataConnection } from "peerjs";
-import { RemoteSendMessage } from "@/stores/remote/types/remote.type";
 
 interface ChannelRenderProps {
   isShow: boolean;

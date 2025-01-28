@@ -27,7 +27,8 @@ type ModalType =
   | "SONG_LIST"
   | "DRIVE_SETTING"
   | "DISPLAY"
-  | "DONATE";
+  | "DONATE"
+  | "MIXER"
 
 type InputBarLayout = "vertical" | "horizontal";
 type SystemMode = "SYSTEM" | "DRIVE";

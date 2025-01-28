@@ -8,9 +8,7 @@ import {
 } from "@/stores/engine/types/synth.type";
 import { INodeCallBack, NodeType } from "@/stores/engine/types/node.type";
 import React, { useEffect, useState } from "react";
-import { FaLock, FaUnlock } from "react-icons/fa";
-import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
-
+import { FaLock, FaUnlock } from "react-icons/fa"; 
 interface MixNodeControllerProps {
   disabled?: boolean;
   channel: number;

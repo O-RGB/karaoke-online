@@ -15,6 +15,7 @@ import {
   PAN,
   REVERB,
 } from "../types/node.type";
+import { AudioMeter } from "./gain";
 
 export class MainNodeController {
   public dataController: ControllerItemList[] = [];
@@ -117,6 +118,30 @@ export class MainNodeController {
   public setUserHolding(hole: boolean) {
     this.userIshold = hole;
   }
+
+  public getDataController() {
+    return this.dataController;
+  }
+
+  public searchProgram(program: number[]): NodeController | undefined {
+    for (const x of this.dataController) {
+      const found = x.controller.controller.find((y) =>
+        program.includes(y.program)
+      );
+      if (found) return found;
+    }
+
+    return undefined;
+  }
+
+  public initAnalyser(channel: number, analyser: AnalyserNode) {
+    const node = this.getDataController();
+    const volume = node.find((v) => v.name === "VOLUME");
+
+    if (volume) {
+      volume.controller.setAnalyser(channel, analyser);
+    }
+  }
 }
 
 export class DataController {
@@ -130,6 +155,10 @@ export class DataController {
       node.push(new NodeController(type, ch));
     }
     this.controller = node;
+  }
+
+  public setAnalyser(channel: number, analyserNode: AnalyserNode) {
+    this.controller[channel].setAnalyser(analyserNode);
   }
 
   public setMuteAll(mute: boolean) {
@@ -161,6 +190,8 @@ export class NodeController {
   public isLocked: boolean = false;
   public code: number = 0;
   public program: number = 0;
+  public analyserNode?: AnalyserNode | undefined = undefined;
+  public gainNode: AudioMeter | undefined = undefined;
 
   private changeCallback: ((event: INodeCallBack<number>) => void)[] = [];
   private programCallback: ((event: INodeCallBack<number>) => void)[] = [];
@@ -171,6 +202,22 @@ export class NodeController {
     this.type = type;
     this.channel = channel;
     this.initCode(type);
+  }
+
+  public setAnalyser(analyserNode: AnalyserNode) {
+    this.analyserNode = analyserNode;
+  }
+
+  public getGain() {
+    if (!this.analyserNode) {
+      return 0;
+    }
+    const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
+    this.analyserNode?.getByteFrequencyData(dataArray);
+    const value = Math.round(
+      dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
+    );
+    return value;
   }
 
   public setCallBack(
