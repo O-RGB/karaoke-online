@@ -90,7 +90,12 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                 </div>
                 <span className="pt-1 text-xs text-white">
                   🎇🔥 Updated v.1.0.28 🔥🎇
+                </span>{" "}
+                <br />
+                <span className="pt-1 text-xs text-white">
+                  แก้ไขเล็กน้อย สามารถเปลี่ยน Preset กลองได้แล้ว
                 </span>
+                <img src="/update_drums.png" alt="" className="h-[200px]" />
                 <br />
                 <span className="text-xs text-center text-white">
                   <span className="flex gap-1 items-center">
@@ -104,7 +109,6 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                   </span>
                   <span className="text-center">ทั้ง ios, android</span>
                 </span>
-
                 <span className="text-xs text-center text-white pt-1">
                   <span className="flex gap-1 items-center">
                     รองรับการโหลดเพลงจาก{" "}
