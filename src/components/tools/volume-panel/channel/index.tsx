@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import InstrumentsButton from "../instruments-button";
 import VolumeAction from "../volume-action";
-import { MAIN_VOLUME } from "@/stores/engine/types/node.type";
+import { MAIN_VOLUME } from "@/features/engine/types/node.type";
 import MixNodeController from "../mix-controller/node-controller";
 import {
   IControllerChange,
   ILockController,
   IProgramChange,
-} from "@/stores/engine/types/synth.type";
+} from "@/features/engine/types/synth.type";
 
 interface ChannelRenderProps {
   isShow: boolean;

@@ -34,48 +34,6 @@ export function getTicks(
   return currentTime * ticksPerSecond;
 }
 
-export function groupThaiCharacters(text?: string): string[][] {
-  if (!text) {
-    return [];
-  }
-  const groups: string[][] = [];
-  let currentGroup: string[] = [];
-
-  // Regular expressions to match Thai consonants, vowels, and tonal marks
-  const consonantPattern = /[\u0E01-\u0E2E]/; // พยัญชนะไทย
-  const vowelPattern = /[\u0E31-\u0E3A]/; // สระและวรรณยุกต์ที่อยู่บนล่างหรือข้างพยัญชนะ
-  const toneMarkPattern = /[\u0E47-\u0E4C]/; // วรรณยุกต์ต่างๆ
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-
-    // If character is a consonant, start a new group
-    if (consonantPattern.test(char)) {
-      if (currentGroup.length > 0) {
-        groups.push(currentGroup);
-      }
-      currentGroup = [char];
-    }
-    // If character is a vowel or tone mark, add it to the current group
-    else if (vowelPattern.test(char) || toneMarkPattern.test(char)) {
-      currentGroup.push(char);
-    } else {
-      // In case of non-Thai characters, treat them separately
-      if (currentGroup.length > 0) {
-        groups.push(currentGroup);
-        currentGroup = [];
-      }
-      groups.push([char]);
-    }
-  }
-
-  // Push the last group if there's any
-  if (currentGroup.length > 0) {
-    groups.push(currentGroup);
-  }
-
-  return groups;
-}
 export const convertCursorToTicks = (
   ticksPerBeat: number,
   cursor: number[]
@@ -89,25 +47,12 @@ export const convertCursorToTicks = (
   return curOnTick;
 };
 
-export const mapCursorToIndices = (cursorPositions: number[]) => {
-  const cursorMap = new Map<number, number[]>();
-
-  cursorPositions.forEach((tick, charIndex) => {
-    const indices = cursorMap.get(tick) || [];
-    indices.push(charIndex);
-    cursorMap.set(tick, indices);
-  });
-
-  return cursorMap;
-};
-
 export const sortTempoChanges = (
   tempoChanges: ITempoChange[]
 ): ITempoChange[] => {
   return [...tempoChanges].sort((a, b) => a.ticks - b.ticks);
 };
 
-// Function to convert ticks to time
 export function convertTicksToTime(
   timeDivision: number,
   tempoChanges: ITempoChange[]
@@ -122,10 +67,8 @@ export function convertTicksToTime(
   const tempoTimeChanges: ITempoTimeChange[] = [];
 
   for (const change of tempoChanges) {
-    // Calculate time for each tick change
     time += getTime(timeDivision, change.ticks - lastTicks, lastTempo);
 
-    // Store the calculated time and tempo
     tempoTimeChanges.push({
       time: Math.round(time * 100) / 100,
       tempo: change.tempo,
@@ -139,12 +82,11 @@ export function convertTicksToTime(
 }
 
 function getTime(timeDivision: number, ticks: number, tempo: number): number {
-  const secondsPerBeat = 60.0 / tempo; // Seconds per beat (quarter note)
-  const ticksPerSecond = timeDivision / secondsPerBeat; // Ticks per second
-  return ticks / ticksPerSecond; // Convert ticks to seconds
+  const secondsPerBeat = 60.0 / tempo;
+  const ticksPerSecond = timeDivision / secondsPerBeat;
+  return ticks / ticksPerSecond;
 }
 
-// Function to calculate ticks
 export function calculateTicks(
   timeDivision: number,
   currentTime: number,
@@ -175,24 +117,21 @@ export function timeToTick(
 ): number {
   let ticks = 0;
   let lastTime = 0;
-  let lastTempo = tempoChanges[0].tempo; // ใช้ค่า tempo เริ่มต้น
+  let lastTempo = tempoChanges[0].tempo;
 
   for (const change of tempoChanges) {
     if (timeInSeconds > change.time) {
-      // คำนวณ ticks ระหว่าง lastTime และ change.time
       ticks += getTicks(timeDivision, change.time - lastTime, lastTempo);
       lastTime = change.time;
       lastTempo = change.tempo;
     } else {
-      // ถ้าเวลาปัจจุบันอยู่ระหว่าง lastTime และ change.time
       break;
     }
   }
 
-  // คำนวณ ticks สำหรับเวลาที่เหลือหลังจาก lastTime
   ticks += getTicks(timeDivision, timeInSeconds - lastTime, lastTempo);
 
-  return Math.round(ticks); // คืนค่า ticks ที่คำนวณได้
+  return Math.round(ticks);
 }
 
 export function currentTickToTime(
@@ -202,22 +141,19 @@ export function currentTickToTime(
 ): number {
   let time = 0;
   let lastTicks = 0;
-  let lastTempo = tempoChanges[0].tempo; // ใช้ค่า tempo เริ่มต้น
+  let lastTempo = tempoChanges[0].tempo;
 
   for (const change of tempoChanges) {
     if (currentTick > change.time) {
-      // คำนวณเวลาในช่วงระหว่าง lastTicks และ change.ticks
       time += getTime(timeDivision, change.time - lastTicks, lastTempo);
       lastTicks = change.time;
       lastTempo = change.tempo;
     } else {
-      // ถ้า currentTick อยู่ระหว่าง lastTicks และ change.ticks
       break;
     }
   }
 
-  // คำนวณเวลาสำหรับ ticks ที่เหลือหลังจาก lastTicks
   time += getTime(timeDivision, currentTick - lastTicks, lastTempo);
 
-  return Math.round(time * 100) / 100; // คืนค่าเวลาในวินาทีที่คำนวณได้
+  return Math.round(time * 100) / 100;
 }

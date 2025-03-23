@@ -1,5 +1,5 @@
-import { NodeController } from "@/stores/engine/lib/node";
-import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import { NodeController } from "@/features/engine/lib/node";
+import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import { useEffect, useRef } from "react";
 
 interface VolumeMeterVProps {

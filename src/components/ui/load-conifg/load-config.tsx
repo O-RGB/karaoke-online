@@ -1,4 +1,4 @@
-import useConfigStore from "@/stores/config/config-store";
+import useConfigStore from "@/features/config/config-store";
 import { setupLocalConfig } from "@/lib/local-storege/config";
 import React, { useEffect } from "react";
 

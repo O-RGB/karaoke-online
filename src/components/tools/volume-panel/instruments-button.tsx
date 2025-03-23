@@ -5,7 +5,7 @@ import { FaDrum, FaUnlock } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { Menu, MenuButton } from "@szhsin/react-menu";
 import Label from "@/components/common/display/label";
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import Button from "@/components/common/button/button";
 import MixNodeController from "./mix-controller/node-controller";
 import {
@@ -14,12 +14,12 @@ import {
   MAIN_VOLUME,
   PAN,
   REVERB,
-} from "@/stores/engine/types/node.type";
+} from "@/features/engine/types/node.type";
 import {
   IControllerChange,
   ILockController,
   IProgramChange,
-} from "@/stores/engine/types/synth.type";
+} from "@/features/engine/types/synth.type";
 interface InstrumentsButtonProps {
   channel: number;
   perset?: IPersetSoundfont[];

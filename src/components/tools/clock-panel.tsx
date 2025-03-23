@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import useConfigStore from "../../stores/config/config-store";
+import useConfigStore from "../../features/config/config-store";
 
 interface ClockPanelProps {}
 

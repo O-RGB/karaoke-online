@@ -1,16 +1,16 @@
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
-import { INodeCallBack } from "@/stores/engine/types/node.type";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { INodeCallBack } from "@/features/engine/types/node.type";
 import {
   IControllerChange,
   ILockController,
   IMuteController,
-} from "@/stores/engine/types/synth.type";
-import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
-import useQueuePlayer from "@/stores/player/player/modules/queue-player";
-import { ISearchCallBack } from "@/stores/player/player/types/player.type";
-import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
-import { RemoteReceivedMessages } from "@/stores/remote/types/remote.type";
-import useTracklistStore from "@/stores/tracklist/tracklist-store";
+} from "@/features/engine/types/synth.type";
+import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
+import useQueuePlayer from "@/features/player/player/modules/queue-player";
+import { ISearchCallBack } from "@/features/player/player/types/player.type";
+import { usePeerStore } from "@/features/remote/modules/peer-js-store";
+import { RemoteReceivedMessages } from "@/features/remote/types/remote.type";
+import useTracklistStore from "@/features/tracklist/tracklist-store";
 
 import React, { useEffect } from "react";
 

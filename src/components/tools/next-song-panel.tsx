@@ -1,7 +1,7 @@
 import { useOrientation } from "@/hooks/orientation-hook";
-import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
-import useQueuePlayer from "@/stores/player/player/modules/queue-player";
-import useRuntimePlayer from "@/stores/player/player/modules/runtime-player";
+import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
+import useQueuePlayer from "@/features/player/player/modules/queue-player";
+import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import React, { useEffect, useState } from "react";
 
 interface NextSongPanelProps {}

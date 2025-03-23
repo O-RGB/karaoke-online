@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song/search-song";
-import LyricsPanel from "../tools/lyrics-panel";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super/super-host";
 
@@ -22,22 +21,23 @@ import DisplaySettingModal from "../modal/display";
 
 import { DragDrop } from "../tools/drag-drop/drag-drop";
 import DataStoresModal from "../modal/datastores";
-import useTracklistStore from "@/stores/tracklist/tracklist-store";
-import useNotificationStore from "@/stores/notification-store";
+import useTracklistStore from "@/features/tracklist/tracklist-store";
+import useNotificationStore from "@/features/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
-import useConfigStore from "@/stores/config/config-store";
+import useConfigStore from "@/features/config/config-store";
 import QueueSong from "../tools/queue-song/queue-song";
-import useKeyboardStore from "@/stores/keyboard-state";
+import useKeyboardStore from "@/features/keyboard-state";
 import NextSongPanel from "../tools/next-song-panel";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import SongInfo from "../tools/song-info";
 import SoundSettingModal from "../modal/sound-setting";
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import RemoteEvent from "./remote-event";
 import NotificationAlert from "../tools/noti-alert";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
 import MixerModal from "../modal/mixer/mixer-modal";
+import LyricsPlayer from "../../features/lyrics";
 
 interface KaraokePageProps {}
 
@@ -107,7 +107,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           <QueueSong></QueueSong>
           <NextSongPanel></NextSongPanel>
           <SearchSong></SearchSong>
-          <LyricsPanel></LyricsPanel>
+          <LyricsPlayer></LyricsPlayer>
           <PlayerPanel
             isFullScreen={handle.active}
             modalMap={modalMap}

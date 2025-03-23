@@ -1,11 +1,10 @@
 import ToggleCheckBox from "@/components/common/input-data/checkbox";
 import Select from "@/components/common/input-data/select/select";
 import Label from "@/components/common/display/label";
-import volumeSynth from "@/features/volume/volume-features";
-import useConfigStore from "@/stores/config/config-store";
+import useConfigStore from "@/features/config/config-store";
 import React, { useEffect, useState } from "react";
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
-import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 
 interface LockSoundModalProps {}
 

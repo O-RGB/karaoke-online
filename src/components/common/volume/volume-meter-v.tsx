@@ -1,4 +1,4 @@
-import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import { useEffect, useRef } from "react";
 
 interface VolumeMeterVProps {

@@ -1,5 +1,5 @@
 import SliderCommon from "@/components/common/input-data/slider";
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import React, { useEffect } from "react";
 import MixerNode from "./mixer-node";
 import {

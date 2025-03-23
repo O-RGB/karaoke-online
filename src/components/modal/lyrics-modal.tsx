@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import Label from "../common/display/label";
 import SwitchRadio from "../common/input-data/switch/switch-radio";
-import RandomLyrics from "../lyrics/random-lyrics";
 import Select from "../common/input-data/select/select";
 import ColorPicker from "../common/input-data/color-picker";
 import Button from "../common/button/button";
 import { TbRestore } from "react-icons/tb";
-import { lyricsConfig, lyricsGetFont } from "@/features/lyrics/lyrics.features";
-import useConfigStore from "@/stores/config/config-store";
+import { lyricsConfig, lyricsGetFont } from "@/features/lyrics/lib/lyrics.features";
+import useConfigStore from "@/features/config/config-store";
 import { DEFAULT_CONFIG } from "@/config/value";
 import { NextFont } from "next/dist/compiled/@next/font";
 import InputNumber from "../common/input-data/input-number";
 import ToggleCheckBox from "../common/input-data/checkbox";
-import CutLyrics from "../common/lyrics/cut-lyrics/cut-lyrics";
-import { SystemFont } from "@/stores/config/types/config.type";
+
+import { SystemFont } from "@/features/config/types/config.type";
+import LyricsCharacter from "../../features/lyrics/components/lyrics-character";
 
 interface LyricsModalProps {}
 
@@ -177,41 +177,18 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
 
       <div className="w-full relative p-2 border rounded-md bg-blue-400">
         <div className="flex w-full h-20 md:h-full items-center justify-center">
-          {lyrics.lyricsMode === "default" ? (
-            // <LyricsAnimation
-            //   activeColor={lyrics.active!}
-            //   color={lyrics.color!}
-            //   fontSize={
-            //     lyrics.fontAuto
-            //       ? "text-2xl md:text-3xl lg:text-6xl"
-            //       : Number(lyrics.fontSize)
-            //   }
-            //   display={Example}
-            //   font={FontState}
-            //   fixedCharIndex={3}
-            // ></LyricsAnimation>
-            <CutLyrics
-              preview
-              activeColor={lyrics.active!}
-              color={lyrics.color!}
-              fontSize={
-                lyrics.fontAuto
-                  ? "text-2xl md:text-3xl lg:text-6xl"
-                  : Number(lyrics.fontSize)
-              }
-              display={Example}
-              font={FontState}
-              fixedCharIndex={3}
-            ></CutLyrics>
-          ) : (
-            <div className="pt-12">
-              <RandomLyrics
-                position={Example.length !== 0}
-                display={Example}
-                displayBottom={Example}
-              ></RandomLyrics>
-            </div>
-          )}
+          <LyricsCharacter
+            clip={50}
+            lyr={"ตัวอย่าง"}
+            activeColor={lyrics.active!}
+            color={lyrics.color!}
+            fontSize={
+              lyrics.fontAuto
+                ? "text-2xl md:text-3xl lg:text-6xl"
+                : Number(lyrics.fontSize)
+            }
+            font={FontState}
+          ></LyricsCharacter>
         </div>
       </div>
     </div>

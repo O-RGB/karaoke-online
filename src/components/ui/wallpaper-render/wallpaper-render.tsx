@@ -1,4 +1,4 @@
-import { useWallpaperStore } from "@/stores/wallpaper-store";
+import { useWallpaperStore } from "@/features/wallpaper-store";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 

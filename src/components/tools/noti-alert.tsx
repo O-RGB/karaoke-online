@@ -1,4 +1,4 @@
-import useQueuePlayer from "@/stores/player/player/modules/queue-player";
+import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import React from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 

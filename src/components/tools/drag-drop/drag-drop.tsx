@@ -2,7 +2,7 @@
 import Button from "@/components/common/button/button";
 import { useDragDrop } from "@/hooks/drag-drop-hook";
 import { onSelectTestMusic } from "@/lib/karaoke/read";
-import useDragDropStore from "@/stores/drag-drop-store";
+import useDragDropStore from "@/features/drag-drop-store";
 
 import { FC, useEffect } from "react";
 import { AiOutlineFile } from "react-icons/ai";

@@ -1,6 +1,6 @@
 import { DEFAULT_CONFIG } from "@/config/value";
 import { crendentialKeys } from "./local-storage";
-import { ConfigDisplay } from "@/stores/config/types/config.type";
+import { ConfigDisplay } from "@/features/config/types/config.type";
 
 export const setupLocalConfig = async () => {
   const config = getLocalConfig();

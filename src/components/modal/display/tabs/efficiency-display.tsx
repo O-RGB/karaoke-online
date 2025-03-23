@@ -1,10 +1,10 @@
 import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
 import Label from "@/components/common/display/label";
-import useConfigStore from "@/stores/config/config-store";
+import useConfigStore from "@/features/config/config-store";
 import { REFRESH_RATE } from "@/config/value";
 import { appendLocalConfig, setLocalConfig } from "@/lib/local-storege/config";
 import React, { useEffect, useState } from "react";
-import { ConfigDisplay, RefreshRate } from "@/stores/config/types/config.type";
+import { ConfigDisplay, RefreshRate } from "@/features/config/types/config.type";
 
 interface EfficiencyDisplayProps {}
 

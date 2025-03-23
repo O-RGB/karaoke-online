@@ -16,8 +16,8 @@ import {
   saveSoundFontStorage,
 } from "@/lib/storage/soundfont";
 import TableList from "../common/table/table-list";
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
-import useRuntimePlayer from "@/stores/player/player/modules/runtime-player";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 
 interface SoundfontManagerProps {}
 

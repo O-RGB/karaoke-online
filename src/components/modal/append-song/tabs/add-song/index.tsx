@@ -4,13 +4,13 @@ import Label from "@/components/common/display/label";
 import TableList from "@/components/common/table/table-list";
 import Tags from "@/components/common/display/tags";
 import { createTrackList } from "@/lib/storage/tracklist";
-import useTracklistStore from "@/stores/tracklist/tracklist-store";
+import useTracklistStore from "@/features/tracklist/tracklist-store";
 import React, { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FaPlus, FaRegFileAudio, FaSearch } from "react-icons/fa";
 import DuplicateSongModal from "./duplicate-song";
 import IgnoreDupFile from "./ignore-dupfile";
-import useConfigStore from "@/stores/config/config-store";
+import useConfigStore from "@/features/config/config-store";
 import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
 import Modal from "@/components/common/modal";
 import Input from "@/components/common/input-data/input";
@@ -113,7 +113,6 @@ const AddSong: React.FC<AddSongProps> = ({
         errorCount = errorCount + 1;
       }
       let tl = createTrackList(data, "", "", "CUSTOM");
-
       let same: SearchResult[] = [];
       if (!isError) {
         same = findSimilarSongs({
@@ -218,7 +217,6 @@ const AddSong: React.FC<AddSongProps> = ({
         valid={modalSongSame}
         title="ตรวจสอบเพลงซ้ำ"
         isOpen={!!modalSongSame}
-
         onClose={() => {
           setModalSongSame(undefined);
           setWraningDupFile(false);

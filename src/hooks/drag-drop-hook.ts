@@ -1,4 +1,4 @@
-import useDragDropStore from "@/stores/drag-drop-store";
+import useDragDropStore from "@/features/drag-drop-store";
 import { useEffect } from "react";
 
 export const useDragDrop = () => {

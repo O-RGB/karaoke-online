@@ -4,18 +4,18 @@ import { toOptions } from "@/lib/general";
 import { FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
-import useTracklistStore from "@/stores/tracklist/tracklist-store";
+import useTracklistStore from "@/features/tracklist/tracklist-store";
 import Tags from "@/components/common/display/tags";
-import useKeyboardStore from "@/stores/keyboard-state";
+import useKeyboardStore from "@/features/keyboard-state";
 import Button from "@/components/common/button/button";
 import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
 import { MdPlayCircleFilled } from "react-icons/md";
 
-import useConfigStore from "@/stores/config/config-store";
+import useConfigStore from "@/features/config/config-store";
 
-import useQueuePlayer from "@/stores/player/player/modules/queue-player";
-import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
-import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
+import useQueuePlayer from "@/features/player/player/modules/queue-player";
+import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
+import { usePeerStore } from "@/features/remote/modules/peer-js-store";
 
 interface SearchSongProps {}
 

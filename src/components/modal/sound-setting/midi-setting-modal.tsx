@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Label from "../../common/display/label";
 import Select from "../../common/input-data/select/select";
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 
 interface MidiSettingModalProps {}
 

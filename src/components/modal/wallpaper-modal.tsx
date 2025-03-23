@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Upload from "../common/input-data/upload";
 import { FaCheck, FaImage } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { useWallpaperStore } from "@/stores/wallpaper-store";
+import { useWallpaperStore } from "@/features/wallpaper-store";
 
 interface WallpaperModalProps {}
 

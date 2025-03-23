@@ -26,8 +26,8 @@ import {
   setLocalLastUpdated,
   setLocalTracklistDriveTested,
 } from "@/lib/local-storege/local-storage";
-import useConfigStore from "@/stores/config/config-store";
-import useTracklistStore from "@/stores/tracklist/tracklist-store";
+import useConfigStore from "@/features/config/config-store";
+import useTracklistStore from "@/features/tracklist/tracklist-store";
 import { Fetcher } from "@/utils/api/fetch";
 import {
   base64ByteToFile,

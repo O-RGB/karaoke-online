@@ -7,7 +7,7 @@ import Button from "../common/button/button";
 import Label from "../common/display/label";
 import { RiRemoteControlFill } from "react-icons/ri";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { usePeerStore } from "@/stores/remote/modules/peer-js-store";
+import { usePeerStore } from "@/features/remote/modules/peer-js-store";
 
 interface HostRemoteProps {}
 

@@ -1,5 +1,5 @@
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
-import { INodeCallBack } from "@/stores/engine/types/node.type";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { INodeCallBack } from "@/features/engine/types/node.type";
 import { channel } from "diagnostics_channel";
 import React, { useCallback, useEffect, useState } from "react";
 import { BiSolidVolumeMute, BiSolidVolumeFull } from "react-icons/bi";

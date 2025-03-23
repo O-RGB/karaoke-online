@@ -1,4 +1,4 @@
-import useKeyboardStore from "@/stores/keyboard-state";
+import useKeyboardStore from "@/features/keyboard-state";
 import { useEffect } from "react";
 
 export const useKeyboardEvents = () => {

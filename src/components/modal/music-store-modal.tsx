@@ -11,7 +11,7 @@ import {
   getSongByKey,
 } from "@/lib/storage/song";
 import SearchDropdown from "../tools/search-song/search-dropdown";
-import useTracklistStore from "@/stores/tracklist/tracklist-store";
+import useTracklistStore from "@/features/tracklist/tracklist-store";
 
 interface MusicStoreModalProps {}
 

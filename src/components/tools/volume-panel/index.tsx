@@ -11,21 +11,21 @@ import { MdArrowDropUp } from "react-icons/md";
 import { useOrientation } from "@/hooks/orientation-hook";
 import VolumeMeterV from "../../common/volume/volume-meter-v";
 import VolumeHorizontal from "./volume-horizontal";
-import useConfigStore from "@/stores/config/config-store";
+import useConfigStore from "@/features/config/config-store";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
-import useNotificationStore from "@/stores/notification-store";
+import useNotificationStore from "@/features/notification-store";
 import { FaList } from "react-icons/fa";
-import useKeyboardStore from "@/stores/keyboard-state";
-import useMixerStoreNew from "@/stores/player/event-player/modules/event-mixer-store";
+import useKeyboardStore from "@/features/keyboard-state";
+import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import { CHANNEL_DEFAULT } from "@/config/value";
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import ChannelRender from "./channel";
 import {
   IControllerChange,
   ILockController,
   IProgramChange,
-} from "@/stores/engine/types/synth.type";
+} from "@/features/engine/types/synth.type";
 import FullMixer from "./full-mixer";
 
 interface VolumePanelProps {

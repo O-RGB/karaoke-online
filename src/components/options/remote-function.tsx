@@ -3,7 +3,7 @@ import { RiRemoteControlFill } from "react-icons/ri";
 import Button from "../common/button/button";
 import Modal from "../common/modal";
 import HostRemote from "../remote/host";
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 
 interface RemoteFunctionProps {
   buttonClass?: string;

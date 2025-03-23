@@ -1,7 +1,7 @@
 import Label from "@/components/common/display/label";
 import Select from "@/components/common/input-data/select/select";
-import useConfigStore from "@/stores/config/config-store";
-import { EngineType } from "@/stores/engine/synth-store";
+import useConfigStore from "@/features/config/config-store";
+import { EngineType } from "@/features/engine/synth-store";
 import React from "react";
 import { FaMusic, FaCogs } from "react-icons/fa";
 

@@ -6,7 +6,7 @@ import { toOptions } from "@/lib/general";
 import { getAllKeysDrive, deleteAllSong } from "@/lib/storage/drive";
 import { getSongByKey } from "@/lib/storage/song";
 import { extractFile } from "@/lib/zip";
-import useTracklistStore from "@/stores/tracklist/tracklist-store";
+import useTracklistStore from "@/features/tracklist/tracklist-store";
 import React, { useEffect, useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";

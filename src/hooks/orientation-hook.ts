@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
-import useOrientationStore from '@/stores/orientation-store';
+import { useEffect } from "react";
+import useOrientationStore from "@/features/orientation-store";
 
 export const useOrientation = () => {
   const {
     orientation,
     isMobile,
+    windowsWidth,
     initializeOrientationListeners,
   } = useOrientationStore();
 
@@ -16,5 +17,6 @@ export const useOrientation = () => {
   return {
     orientation,
     isMobile,
+    windowsWidth,
   };
 };

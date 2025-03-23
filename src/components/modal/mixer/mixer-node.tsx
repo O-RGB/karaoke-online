@@ -1,7 +1,7 @@
 import SliderCommon from "@/components/common/input-data/slider";
 import VolumeMeterIntervel from "@/components/common/volume/volume-meter-interver";
-import { NodeController } from "@/stores/engine/lib/node";
-import { useSynthesizerEngine } from "@/stores/engine/synth-store";
+import { NodeController } from "@/features/engine/lib/node";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import React, { useEffect, useState } from "react";
 
 interface MixerNodeProps {

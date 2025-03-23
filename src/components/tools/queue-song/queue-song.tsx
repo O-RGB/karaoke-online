@@ -18,12 +18,12 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { HiMiniBars2 } from "react-icons/hi2";
 import { MdLockOutline } from "react-icons/md";
-import useKeyboardStore from "@/stores/keyboard-state";
+import useKeyboardStore from "@/features/keyboard-state";
 import Button from "@/components/common/button/button";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import Tags from "@/components/common/display/tags";
-import useQueuePlayer from "@/stores/player/player/modules/queue-player";
-import useRuntimePlayer from "@/stores/player/player/modules/runtime-player";
+import useQueuePlayer from "@/features/player/player/modules/queue-player";
+import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 
 interface SongItem {
   id: string;
