@@ -60,6 +60,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     if (!synth)
       return { audio: undefined, synth: undefined, player: undefined };
 
+    synth.highPerformanceMode = false;
     const player = await loadPlayer(synth);
 
     this.synth = synth;

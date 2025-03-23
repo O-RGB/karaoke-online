@@ -27,15 +27,17 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
     lineHeight: "1.5",
   };
 
-  useEffect(() => {}, [font]);
+  useEffect(() => {}, [font, color, activeColor]);
 
   return (
     <div
-      className={`${
-        fontType === "string" ? fontSize : ""
-      } font-bold relative left-0 top-0`}
+      className={`${fontType === "string" ? fontSize : ""}`}
       style={{
         fontSize: fontType === "number" ? `${fontSize}px` : undefined,
+        position: "relative",
+        left: 0,
+        top: 0,
+        fontWeight: "bold",
         ...font?.style,
       }}
     >
@@ -51,7 +53,7 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
       </div>
 
       <div
-        className={`absolute font-outline-4 left-0 top-0 w-full h-full z-20`}
+        className={`absolute font-outline-2 md:font-outline-4 left-0 top-0 w-full h-full z-20`}
         style={{
           ...clipStyle,
           ...textOver,
@@ -67,10 +69,11 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
             ...textOver,
             color: activeColor?.colorBorder,
           }}
-          className="z-10 font-outline-4 absolute top-0 left-0"
+          className="z-10 font-outline-2 md:font-outline-4 absolute top-0 left-0"
         >
           {lyr}
         </div>
+
         <div
           style={{
             ...textOver,

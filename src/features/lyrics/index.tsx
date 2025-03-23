@@ -55,10 +55,17 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
 
   const className = `h-[400px] flex items-center justify-center relative w-full rounded-lg text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`;
   return (
-    <div className="fixed bottom-20 lg:bottom-16 left-0 w-full px-5 -z-40">
+    <div
+      className="w-full px-5 -z-40"
+      style={{
+        position: "fixed",
+        bottom: "40px",
+        left: 0,
+      }}
+    >
       <div className={className}>
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
-        <div className="flex flex-col py-7 lg:gap-3 items-center justify-center text-white drop-shadow-lg">
+        <div className="flex flex-col py-7 gap-6 lg:gap-10 items-center justify-center text-white drop-shadow-lg">
           <LyricsList
             tick={active.lyrics.tag === "top" ? currentTick : 0}
             containerWidth={windowsWidth}
