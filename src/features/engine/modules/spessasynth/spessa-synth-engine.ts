@@ -15,12 +15,19 @@ import {
 } from "../../types/synth.type";
 
 import { loadAudioContext, loadPlayer } from "./lib/spessasynth";
-import { BASS, CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
+import {
+  BASS,
+  CHANNEL_DEFAULT,
+  DEFAULT_SOUND_FONT,
+  MAX_CHANNEL,
+} from "@/config/value";
 import { MainNodeController } from "@/features/engine/lib/node";
 import { SpessaPlayerEngine } from "./player/spessa-synth-player";
 import { AudioMeter } from "../../lib/gain";
 import { RemoteSendMessage } from "@/features/remote/types/remote.type";
-import { INodeCallBack } from "../../types/node.type";
+import { INodeCallBack, MAIN_VOLUME } from "../../types/node.type";
+import { MixerConfig, SoundSetting } from "@/features/config/types/config.type";
+import { SynthChannel } from "../instrumentals-node/modules/channel";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -34,24 +41,29 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public bassLocked: number | undefined = undefined;
   public bassDetect: IProgramChange | undefined = undefined;
 
-  public controllerItem: MainNodeController | undefined = undefined;
+  public nodes: SynthChannel[] = [];
+
+  // public controllerItem: MainNodeController | undefined = undefined;
   public gainNode: AudioMeter | undefined = undefined;
+  public config: Partial<SoundSetting> | undefined;
 
   private sendMessage?: (info: RemoteSendMessage) => void;
 
   constructor(
     setInstrument?: (instrument: IPersetSoundfont[]) => void,
-    bassLocked?: number,
-    sendMessage?: (info: RemoteSendMessage) => void
+    sendMessage?: (info: RemoteSendMessage) => void,
+    config?: Partial<SoundSetting>
   ) {
-    this.startup(setInstrument);
-    if (bassLocked) {
-      this.bassLocked = bassLocked;
-    }
+    this.startup(setInstrument, config);
+
+    this.config = config;
     this.sendMessage = sendMessage;
   }
 
-  async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
+  async startup(
+    setInstrument?: (instrument: IPersetSoundfont[]) => void,
+    config?: Partial<SoundSetting>
+  ) {
     const { audioContext, channels } = await loadAudioContext();
     if (!audioContext)
       return { audio: undefined, synth: undefined, player: undefined };
@@ -69,15 +81,20 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.persetChange((e) => setInstrument?.(e));
     this.synth?.setDrums(8, true);
 
-    this.player = new SpessaPlayerEngine(player);
-    this.controllerItem = new MainNodeController();
+    this.player = new SpessaPlayerEngine(player, config);
+    // this.controllerItem = new MainNodeController();
+
+    // this.nodes = CHANNEL_DEFAULT.map((v) => new InstNode(v));
+    this.nodes = CHANNEL_DEFAULT.map((v, i) => new SynthChannel(i));
+    // this.categoryNode = new InstrumentalNode(this, this.nodes);
 
     if (audioContext) {
       const analysers: AnalyserNode[] = [];
       for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
         const analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
-        this.controllerItem.initAnalyser(ch, analyser);
+        // this.controllerItem.initAnalyser(ch, analyser);
+        this.nodes[ch].setAnalyser(analyser);
         analysers.push(analyser);
       }
       synth?.connectIndividualOutputs(analysers);
@@ -131,7 +148,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   }
 
   private sendMessageData(
-    node?: INodeCallBack,
+    node?: SynthChannel,
     value?:
       | IControllerChange
       | IProgramChange
@@ -142,8 +159,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       return;
     }
 
-    let message: INodeCallBack = {
-      ...node,
+    let message: any = {
+      node,
       value,
     };
     this.sendMessage({
@@ -168,12 +185,39 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "controllerchange",
       "",
       (e: IControllerChange) => {
-        const { event } =
-          this.controllerItem?.onControllerChange(e, false) ?? {};
-        this.sendMessageData(event, e);
+        const node = this.nodes[e.channel];
+        this.nodes[e.channel].controllerChange(e);
+        this.sendMessageData(node, e);
       }
     );
   }
+
+  // conifgInit() {
+  //   const mixer = this.config?.mixer;
+  //   if (!mixer) return;
+  //   const mixerObj = Object.values(mixer).map((item) => ({
+  //     ...item,
+  //     program: Object.values(item.program), // แปลง program เป็น array
+  //   }));
+
+  //   mixerObj?.map((v) => {
+  //     const { program, value } = v;
+  //     const node = this.controllerItem?.searchProgram(program);
+  //     if (node) {
+  //       const channel = node.channel;
+  //       this.setController({
+  //         channel,
+  //         controllerNumber: MAIN_VOLUME,
+  //         controllerValue: value,
+  //       });
+  //       this.lockController({
+  //         channel,
+  //         controllerNumber: MAIN_VOLUME,
+  //         controllerValue: true,
+  //       });
+  //     }
+  //   });
+  // }
 
   programChange(event?: (event: IProgramChange) => void): void {
     return this.synth?.eventHandler.addEvent(
@@ -181,9 +225,11 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "",
       (e: IProgramChange) => {
         const { channel, program } = e;
+        console.log(e);
 
         const isBass = BASS.includes(program);
 
+        // this.conifgInit();
         if (isBass) {
           this.bassDetect = e;
         }
@@ -192,13 +238,12 @@ export class SpessaSynthEngine implements BaseSynthEngine {
           const lockNum: number = this.bassLocked;
 
           if (this.bassDetect?.program !== lockNum) {
-            this.setProgram(channel, lockNum);
+            this.setProgram({ channel, program: lockNum });
             let bassMapping = { channel, program: lockNum };
-
-            this.controllerItem?.onProgramChange(bassMapping, false);
+            this.nodes[channel].programChange(bassMapping);
           }
         } else {
-          this.controllerItem?.onProgramChange(e, false);
+          this.nodes[channel].programChange(e);
         }
       }
     );
@@ -216,50 +261,41 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     );
   }
 
-  setProgram(channel: number, programNumber: number, userChange?: boolean) {
-    this.synth?.programChange(channel, programNumber, userChange);
+  setProgram(event: IProgramChange) {
+    this.synth?.programChange(event.channel, event.program, event.userChange);
   }
-  setController(
-    channel: number,
-    controllerNumber: number,
-    controllerValue: number,
-    force?: boolean
-  ): void {
-    let controllerObj: IControllerChange = {
-      channel,
-      controllerNumber,
-      controllerValue,
-    };
-    let { event, isLock } =
-      this.controllerItem?.onControllerChange(controllerObj, true) ?? {};
 
-    if (isLock === true) {
-      this.lockController(channel, controllerNumber, false);
+  setController(event: IControllerChange): void {
+    const node = this.nodes[event.channel];
+    const isLocked = node.volume?.isLocked;
+
+    if (isLocked === true) {
+      this.lockController({ ...event, controllerValue: false });
     }
-
     this.synth?.controllerChange(
-      channel,
-      controllerNumber,
-      controllerValue,
-      force
+      event.channel,
+      event.controllerNumber,
+      event.controllerValue,
+      event.force
     );
-
-    if (isLock === true) {
-      this.lockController(channel, controllerNumber, true);
+    if (isLocked === true) {
+      this.lockController({ ...event, controllerValue: true });
     }
-    this.sendMessageData(event, controllerObj);
+    this.sendMessageData(node, event);
   }
 
-  lockController(
-    channel: number,
-    controllerNumber: number,
-    isLocked: boolean
-  ): void {
-    this.synth?.lockController(channel, controllerNumber, isLocked);
-    this.controllerItem?.onLockChange(
-      { channel, controllerNumber, isLocked },
-      false
+  lockController(event: IControllerChange<boolean>): void {
+    this.synth?.lockController(
+      event.channel,
+      event.controllerNumber,
+      event.controllerValue
     );
+
+    this.nodes[event.channel].lockChange({
+      channel: event.channel,
+      controllerNumber: event.controllerNumber,
+      controllerValue: event.controllerValue,
+    });
   }
 
   updatePreset(channel: number, value: number): void {
@@ -267,47 +303,20 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   }
 
   updatePitch(channel: number, semitones: number = 0): void {
-    const PITCH_CENTER = 8192;
-    const PITCH_RANGE = 16384;
-    const SEMITONE_STEP = PITCH_RANGE / 24;
-    const pitchValue = Math.max(
-      0,
-      Math.min(
-        PITCH_RANGE - 1,
-        Math.round(PITCH_CENTER + semitones * SEMITONE_STEP)
-      )
-    );
-    const MSB = (pitchValue >> 7) & 0x7f;
-    const LSB = pitchValue & 0x7f;
-    const sendPitch = (channel: number) => {
-      this.lockController(
-        channel,
-        NON_CC_INDEX_OFFSET + modulatorSources.pitchWheel,
-        false
-      );
-
-      this.synth?.setPitchBendRange(channel, Math.abs(semitones));
-      this.synth?.pitchWheel(channel, MSB, LSB);
-      if (semitones !== 0) {
-        this.lockController(
-          channel,
-          NON_CC_INDEX_OFFSET + modulatorSources.pitchWheel,
-          true
-        );
-      }
-    };
-    if (channel !== null) {
-      sendPitch(channel);
+    if (channel) {
+      this.synth?.transposeChannel(channel, semitones);
     } else {
-      for (let i = 0; i < 16; i++) {
-        sendPitch(i);
-      }
+      this.synth?.transpose(semitones);
     }
   }
 
-  setMute(channel: number, isMuted: boolean): void {
-    this.synth?.muteChannel(channel, isMuted);
-    this.controllerItem?.onMuteChange({ channel, isMute: isMuted }, false);
+  setMute(event: IControllerChange<boolean>): void {
+    this.synth?.muteChannel(event.channel, event.controllerValue);
+    this.nodes[event.channel].muteChange({
+      channel: event.channel,
+      controllerNumber: event.controllerNumber,
+      controllerValue: event.controllerValue,
+    });
   }
 
   setBassLocked(bassNumber: number, isLock: boolean): void {
@@ -316,11 +325,11 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       this.bassLocked = bassNumber;
 
       if (backup) {
-        this.setProgram(backup.channel, bassNumber);
+        this.setProgram({ channel: backup.channel, program: bassNumber });
       }
     } else {
       if (backup) {
-        this.setProgram(backup.channel, backup.program);
+        this.setProgram({ channel: backup.channel, program: backup.program });
       }
 
       this.bassLocked = undefined;

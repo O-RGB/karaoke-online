@@ -21,13 +21,13 @@ export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
   synth: undefined,
   setup: async (type: EngineType = "spessa") => {
     const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
-    const config = useConfigStore.getState().config.sound?.lockBase;
+    const config = useConfigStore.getState().config.sound;
     const setInstrument = useMixerStoreNew.getState().setInstrument;
     if (type === "spessa") {
       const spessaSynth = new SpessaSynthEngine(
         setInstrument,
-        config,
-        sendSuperUserMessage
+        sendSuperUserMessage,
+        config
       );
       set({ engine: spessaSynth });
     } else {

@@ -94,8 +94,6 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
 
     const setEventGain = useMixerStoreNew.getState().setEventGain;
     const nextMusic = useQueuePlayer.getState().nextMusic;
-    // const lyricsRender = useLyricsStoreNew.getState().lyricsRender;
-    // const lyricsRender2 = useLyricsStoreNew.getState().lyricsRender2;
 
     const midi = player.midiData;
     const timeDivision = midi.timeDivision;

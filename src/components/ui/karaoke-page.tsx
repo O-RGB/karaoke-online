@@ -36,13 +36,12 @@ import RemoteEvent from "./remote-event";
 import NotificationAlert from "../tools/noti-alert";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
-import MixerModal from "../modal/mixer/mixer-modal";
 import LyricsPlayer from "../../features/lyrics";
-
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const setup = useSynthesizerEngine((state) => state.setup);
+
   const addTracklist = useTracklistStore((state) => state.addTracklist);
   const initializeKeyboardListeners = useKeyboardStore(
     (state) => state.initializeKeyboardListeners

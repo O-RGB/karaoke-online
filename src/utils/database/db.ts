@@ -49,20 +49,94 @@ export async function getDB(
   return db;
 }
 
+// export async function initDatabase(autoIncrement: boolean = true) {
+//   const db = await openDB(DB_NAME, DB_VERSION, {
+//     upgrade(db) {
+//       stores.forEach((store_name) => {
+//         if (!db.objectStoreNames.contains(store_name)) {
+//           db.createObjectStore(store_name, {
+//             keyPath: autoIncrement ? "id" : undefined,
+//             autoIncrement: autoIncrement,
+//           });
+//         }
+//       });
+//     },
+//   });
+//   return db;
+// }
+
 export async function initDatabase(autoIncrement: boolean = true) {
-  const db = await openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      stores.forEach((store_name) => {
-        if (!db.objectStoreNames.contains(store_name)) {
-          db.createObjectStore(store_name, {
-            keyPath: autoIncrement ? "id" : undefined,
-            autoIncrement: autoIncrement,
-          });
-        }
+  try {
+    // ปิดการเชื่อมต่อที่มีอยู่ก่อน
+    await closeDatabaseConnections();
+
+    const db = await openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        stores.forEach((store_name) => {
+          if (!db.objectStoreNames.contains(store_name)) {
+            db.createObjectStore(store_name, {
+              keyPath: autoIncrement ? "id" : undefined,
+              autoIncrement: autoIncrement,
+            });
+          }
+        });
+      },
+      blocked() {
+        console.warn("Database upgrade was blocked");
+      },
+      blocking() {
+        console.warn("Database is blocking upgrade");
+      },
+      terminated() {
+        console.error("Database connection was terminated unexpectedly");
+      },
+    });
+
+    return db;
+  } catch (error) {
+    console.error("Failed to initialize database:", error);
+
+    // ถ้าเกิดข้อผิดพลาด ให้ลบฐานข้อมูลและลองใหม่
+    console.log("Attempting to delete and recreate database...");
+
+    try {
+      // ปิดการเชื่อมต่อก่อนลบ
+      await closeDatabaseConnections();
+
+      // ลบฐานข้อมูล
+      const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
+
+      await new Promise((resolve, reject) => {
+        deleteRequest.onsuccess = () => {
+          console.log("Database deleted successfully");
+          resolve(true);
+        };
+
+        deleteRequest.onerror = (event) => {
+          console.error("Failed to delete database:", event);
+          reject(event);
+        };
       });
-    },
-  });
-  return db;
+
+      // สร้างฐานข้อมูลใหม่
+      const newDb = await openDB(DB_NAME, DB_VERSION, {
+        upgrade(db) {
+          stores.forEach((store_name) => {
+            db.createObjectStore(store_name, {
+              keyPath: autoIncrement ? "id" : undefined,
+              autoIncrement: autoIncrement,
+            });
+          });
+        },
+      });
+
+      console.log("Database recreated successfully");
+      return newDb;
+    } catch (retryError) {
+      console.error("Failed to recreate database:", retryError);
+      throw new Error("Cannot initialize database after reset attempt");
+    }
+  }
 }
 
 export const closeDatabaseConnections = () => {

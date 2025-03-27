@@ -2,8 +2,9 @@ import { MIDI } from "spessasynth_lib/@types/midi_parser/midi_loader";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
 import { DataController, MainNodeController } from "@/features/engine/lib/node";
-import { INodeCallBack, NodeType } from "@/features/engine/types/node.type";
+import { NodeType } from "@/features/engine/types/node.type";
 import { AudioMeter } from "../lib/gain";
+import { SynthChannel } from "../modules/instrumentals-node/modules/channel";
 export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
   time: TimingModeType;
@@ -11,6 +12,7 @@ export interface BaseSynthEngine {
   player: BaseSynthPlayerEngine | undefined;
   analysers: AnalyserNode[];
   synth: Spessasynth | JsSynthesizer | undefined;
+  nodes?: SynthChannel[] | undefined;
 
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;
@@ -25,26 +27,13 @@ export interface BaseSynthEngine {
   soundfontName: string | undefined;
   soundfontFile: File | undefined;
 
-  setController(
-    channel: number,
-    controllerNumber: number,
-    controllerValue: number,
-    force?: boolean
-  ): void;
-  lockController(
-    channel: number,
-    controllerNumber: number,
-    isLocked: boolean
-  ): void;
+  setController(event: IControllerChange): void;
+  lockController(event: IControllerChange<boolean>): void;
   updatePreset(channel: number, value: number): void;
   updatePitch(channel: number | null, semitones?: number): void;
-  setProgram(
-    channel: number,
-    programNumber: number,
-    userChange?: boolean
-  ): void;
+  setProgram(event: IProgramChange): void;
 
-  setMute(channel: number, isMuted: boolean): void;
+  setMute(event: IControllerChange<boolean>): void;
   setBassLocked(baseNumber: number, isLock: boolean): void;
 
   setupMIDIEventHook?(): void;
@@ -96,11 +85,13 @@ export interface IEventChange {
 
 export interface IProgramChange extends IEventChange {
   program: number;
+  userChange?: boolean;
 }
 
-export interface IControllerChange extends IEventChange {
+export interface IControllerChange<T = number> extends IEventChange {
   controllerNumber: number;
-  controllerValue: number;
+  controllerValue: T;
+  force?: boolean;
 }
 
 export interface ILockController {

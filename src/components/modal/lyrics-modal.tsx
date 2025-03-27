@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Label from "../common/display/label";
-import SwitchRadio from "../common/input-data/switch/switch-radio";
 import Select from "../common/input-data/select/select";
 import ColorPicker from "../common/input-data/color-picker";
 import Button from "../common/button/button";
 import { TbRestore } from "react-icons/tb";
-import { lyricsConfig, lyricsGetFont } from "@/features/lyrics/lib/lyrics.features";
+import { lyricsConfig } from "@/features/lyrics/lib/lyrics.features";
 import useConfigStore from "@/features/config/config-store";
 import { DEFAULT_CONFIG } from "@/config/value";
 import { NextFont } from "next/dist/compiled/@next/font";
@@ -51,15 +50,15 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
   }, [lyrics.lyricsMode]);
 
   const onFontChanage = (get: SystemFont) => {
-    const nextFont = lyricsGetFont(get);
-    setFontState(nextFont);
+    // const nextFont = lyricsGetFont(get);
+    // setFontState(nextFont);
   };
 
   return (
     <div className="flex flex-col-reverse md:flex-row gap-4 w-full md:h-[390px]">
       <div className="w-full h-full flex flex-col">
         <div className="h-full">
-          <div>
+          {/* <div>
             <Label className="pb-1">รูปแบบเนื้อเพลง</Label>
             <SwitchRadio<LyricsOptions>
               onChange={lyricsConfigf.setLyricsOptions}
@@ -75,7 +74,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
                 },
               ]}
             ></SwitchRadio>
-          </div>
+          </div> */}
 
           <div
             className={`${
@@ -85,7 +84,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
             } duration-300 flex flex-col gap-2 pt-2`}
           >
             <div className="flex gap-2 w-full">
-              <div className="w-full">
+              <div className="w-full pointer-events-none opacity-40">
                 <Label className="pb-1">ฟอนต์</Label>
                 <Select
                   defaultValue={lyrics.fontName}
@@ -95,6 +94,9 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
                   }}
                   options={fontList}
                 ></Select>
+                <span className="text-xs text-gray-500">
+                  *เกิดปัญหาการเรียกใช้ Font Admin ขอปิดการใช้งานไปก่อน
+                </span>
               </div>
 
               <div className="w-20">

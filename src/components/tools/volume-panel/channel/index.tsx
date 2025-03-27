@@ -8,15 +8,17 @@ import {
   ILockController,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
+import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
 
 interface ChannelRenderProps {
   isShow: boolean;
   channel: number;
   perset?: IPersetSoundfont[] | undefined;
-  onMutedVolume?: (channel: number, muted: boolean) => void;
+  onMutedVolume?: (event: IControllerChange<boolean>) => void;
   onChange?: (value: IControllerChange) => void;
   onProgramChange?: (value: IProgramChange) => void;
-  onLockChange?: (value: ILockController) => void;
+  onLockChange?: (event: IControllerChange<boolean>) => void;
+  node: SynthChannel;
 }
 
 const ChannelRender: React.FC<ChannelRenderProps> = ({
@@ -27,18 +29,24 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
   onProgramChange,
   onLockChange,
   onChange,
+  node,
 }) => {
-  useEffect(() => {}, [isShow]);
+  useEffect(() => {}, [isShow, node]);
+
+  if (!node) return <></>;
 
   return (
     <>
       <VolumeAction
         disabled={isShow}
+        controllerNumber={MAIN_VOLUME}
         channel={channel}
         onMuted={onMutedVolume}
+        node={node}
       ></VolumeAction>
       <div className="flex items-center justify-center h-full py-1.5 w-full border-x border-white/20">
         <MixNodeController
+          node={node}
           vertical={true}
           onLock={onLockChange}
           onChange={onChange}
@@ -50,6 +58,7 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
       </div>
       <InstrumentsButton
         disabled={isShow}
+        node={node}
         channel={channel}
         onContrllerChange={onChange}
         onLockChange={onLockChange}

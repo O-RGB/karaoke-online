@@ -73,16 +73,6 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
       hideMixer,
     })),
 
-  uploadLockedPitchWheel: (channel: number, isLocked: boolean) => {
-    const engine = useSynthesizerEngine.getState().engine;
-
-    engine?.lockController(
-      channel,
-      NON_CC_INDEX_OFFSET + modulatorSources.pitchWheel,
-      isLocked
-    );
-  },
-
   updatePitch: (channel, semitones = 0) => {
     const engine = useSynthesizerEngine.getState().engine;
     engine?.updatePitch(channel, semitones);

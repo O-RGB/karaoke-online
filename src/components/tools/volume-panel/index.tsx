@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   PiMicrophoneStageFill,
   PiUserMinusFill,
@@ -26,7 +26,8 @@ import {
   ILockController,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
-import FullMixer from "./full-mixer";
+// import FullMixer from "./full-mixer";
+import { MAIN_VOLUME } from "@/features/engine/types/node.type";
 
 interface VolumePanelProps {
   onVolumeChange?: (value: ISetChannelGain) => void;
@@ -72,11 +73,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     (state) => state.setNotification
   );
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
-
   const setHideMixer = useMixerStoreNew((state) => state.setHideMixer);
-
   const updatePitch = useMixerStoreNew((state) => state.updatePitch);
-
   const onPitchChange = (value: number) => {
     updatePitch(null, value);
 
@@ -85,33 +83,28 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
     }
   };
 
-  const onLockChange = (value: ILockController) => {
-    engine?.lockController(
-      value.channel,
-      value.controllerNumber,
-      value.isLocked
-    );
+  const onLockChange = (event: IControllerChange<boolean>) => {
+    engine?.lockController(event);
   };
 
-  const onMutedVolume = (channel: number, isMuted: boolean) => {
-    engine?.setMute(channel, isMuted);
+  const onMutedVolume = (event: IControllerChange<boolean>) => {
+    let isMuted = event.controllerValue;
+    engine?.setMute(event);
 
     if (onRemoteMutedVolume) {
-      onRemoteMutedVolume({ channel: channel - 1, mute: isMuted });
+      onRemoteMutedVolume({ channel: event.channel - 1, mute: isMuted });
     }
   };
 
   const onPersetChange = (value: IProgramChange) => {
-    engine?.setProgram(value.channel, value.program);
+    engine?.setProgram(value);
   };
 
   const onControllerChange = (value: IControllerChange) => {
-    engine?.setController(
-      value.channel,
-      value.controllerNumber,
-      value.controllerValue
-    );
+    engine?.setController(value);
   };
+
+  useEffect(() => {}, [engine?.nodes]);
 
   const grid =
     "grid grid-cols-8 lg:grid-cols-none grid-flow-row lg:grid-flow-col";
@@ -168,13 +161,14 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
             hideMixer ?? "pointer-events-none !cursor-none"
           } w-full gap-0.5 h-full`}
         >
-          {CHANNEL_DEFAULT.map((_, ch) => {
+          {engine?.nodes?.map((_, ch) => {
             return (
               <div
                 key={`vol-panel-${ch}`}
                 className="flex flex-col relative h-full "
               >
                 <ChannelRender
+                  node={_}
                   onLockChange={onLockChange}
                   onMutedVolume={onMutedVolume}
                   isShow={hideMixer}
@@ -204,7 +198,11 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
 
           <SwitchButton
             onChange={(muted) => {
-              onMutedVolume(VOCAL_CHANNEL, !muted);
+              onMutedVolume({
+                channel: VOCAL_CHANNEL,
+                controllerNumber: MAIN_VOLUME,
+                controllerValue: !muted,
+              });
             }}
             iconOpen={<PiUserSoundFill className="text-lg"></PiUserSoundFill>}
             iconClose={<PiUserMinusFill className="text-lg"></PiUserMinusFill>}

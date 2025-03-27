@@ -15,7 +15,6 @@ const VolumeMeterV: React.FC<VolumeMeterVProps> = ({
   max = 100,
 }) => {
   level = useMixerStoreNew((state) => state.gain[channel]);
-
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {

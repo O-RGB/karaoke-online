@@ -130,7 +130,6 @@ export class MainNodeController {
       );
       if (found) return found;
     }
-
     return undefined;
   }
 

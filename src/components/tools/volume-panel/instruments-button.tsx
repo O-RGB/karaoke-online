@@ -20,14 +20,17 @@ import {
   ILockController,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
+import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
+import { TEventType } from "@/features/engine/modules/instrumentals-node/modules/types/node.type";
 interface InstrumentsButtonProps {
   channel: number;
   perset?: IPersetSoundfont[];
   volRender?: React.ReactNode;
   disabled?: boolean;
+  node?: SynthChannel;
   onContrllerChange?: (value: IControllerChange) => void;
   onProgramChange?: (value: IProgramChange) => void;
-  onLockChange?: (value: ILockController) => void;
+  onLockChange?: (event: IControllerChange<boolean>) => void;
 }
 
 const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
@@ -37,13 +40,14 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   channel,
   perset = [],
   disabled,
+  node,
 }) => {
   const bassLocked = useSynthesizerEngine((state) => state.engine?.bassLocked);
   const bassDetect = useSynthesizerEngine((state) => state.engine?.bassDetect);
 
-  const controllerItem = useSynthesizerEngine(
-    (state) => state.engine?.controllerItem
-  );
+  // const controllerItem = useSynthesizerEngine(
+  //   (state) => state.engine?.controllerItem
+  // );
 
   const [programOption, setProgramOptions] = useState<IOptions[]>([]);
   const [programSelected, setProgramSelected] = useState<IOptions>();
@@ -60,7 +64,8 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
     return programOptions;
   }, [perset, channel]);
 
-  const onValueChange = (event: INodeCallBack) => {
+  const onValueChange = (event: TEventType<number>) => {
+    console.log("on program change, ", event);
     const search = programOption.find((v) => v.value === `${event.value}`);
     setProgramSelected(search);
   };
@@ -86,19 +91,16 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
     : false;
 
   useEffect(() => {
-    if (controllerItem) {
-      controllerItem.addEventCallBack(
-        "VOLUME",
-        "PROGARM",
-        channel,
-        onValueChange
-      );
+    if (node) {
+      node.setCallBackState(["PROGARM", "CHANGE"], channel, onValueChange);
     }
-  }, [controllerItem, programOption]);
+  }, [node, programOption]);
 
   useEffect(() => {
     setProgramOptions(getPreset());
-  }, [bassLocked, bassDetect, perset, channel, getPreset]);
+  }, [node?.program, bassLocked, bassDetect, perset, channel, getPreset]);
+
+  if (!node) return <></>;
 
   return (
     <Menu
@@ -129,6 +131,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
         </div>
 
         <MixNodeController
+          node={node}
           vertical={false}
           onLock={onLockChange}
           onChange={onContrllerChange}
@@ -138,9 +141,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           nodeType={"VOLUME"}
           label="ระดับเสียง"
         ></MixNodeController>
-        {/* <div className="text-xs break-all w-[50%]">
-            {JSON.stringify(programOption)}
-          </div> */}
+
         <div className="flex gap-1">
           <LabelTag name="เสียง"></LabelTag>
           <div className="pr-0.5">
@@ -180,6 +181,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           </ButtonDropdown>
         </div>
         <MixNodeController
+          node={node}
           onLock={onLockChange}
           onChange={onContrllerChange}
           controllerNumber={PAN}
@@ -189,6 +191,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           label="ซ้ายขวา"
         ></MixNodeController>
         <MixNodeController
+          node={node}
           onLock={onLockChange}
           onChange={onContrllerChange}
           controllerNumber={REVERB}
@@ -198,12 +201,13 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           label="เสียงก้อง"
         ></MixNodeController>
         <MixNodeController
+          node={node}
           onLock={onLockChange}
           onChange={onContrllerChange}
           controllerNumber={CHORUSDEPTH}
           channel={channel}
           disabled={disabled}
-          nodeType={"CHORUSDEPTH"}
+          nodeType={"CHORUS"}
           label="ประสาน"
         ></MixNodeController>
       </div>

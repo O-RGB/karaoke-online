@@ -30,94 +30,94 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
   );
   const updatePitch = useMixerStoreNew((state) => state.updatePitch);
 
-  const remoteTypeHandle = async (
-    received: RemoteReceivedMessages | undefined
-  ) => {
-    const message = received?.content.message as
-      | INodeCallBack
-      | ISearchCallBack;
+  // const remoteTypeHandle = async (
+  //   received: RemoteReceivedMessages | undefined
+  // ) => {
+  //   const message = received?.content.message as
+  //     | INodeCallBack
+  //     | ISearchCallBack;
 
-    if (!message) {
-      return;
-    }
+  //   if (!message) {
+  //     return;
+  //   }
 
-    switch (message.eventType) {
-      case "CHANGE":
-        controllerItem?.setUserHolding(true);
-        let controllerChange = message.value as IControllerChange;
-        engine?.setController?.(
-          controllerChange.channel,
-          controllerChange.controllerNumber,
-          controllerChange.controllerValue
-        );
-        controllerItem?.setUserHolding(false);
-        break;
-      case "LOCK":
-        let lockControllerChange = message.value as ILockController;
-        engine?.lockController?.(
-          lockControllerChange.channel,
-          lockControllerChange.controllerNumber,
-          lockControllerChange.isLocked
-        );
-        break;
+  //   switch (message.eventType) {
+  //     case "CHANGE":
+  //       controllerItem?.setUserHolding(true);
+  //       let controllerChange = message.value as IControllerChange;
+  //       engine?.setController?.(
+  //         controllerChange.channel,
+  //         controllerChange.controllerNumber,
+  //         controllerChange.controllerValue
+  //       );
+  //       controllerItem?.setUserHolding(false);
+  //       break;
+  //     case "LOCK":
+  //       let lockControllerChange = message.value as ILockController;
+  //       engine?.lockController?.(
+  //         lockControllerChange.channel,
+  //         lockControllerChange.controllerNumber,
+  //         lockControllerChange.isLocked
+  //       );
+  //       break;
 
-      case "MUTE":
-        let muteControllerChange = message.value as IMuteController;
-        engine?.setMute?.(
-          muteControllerChange.channel,
-          muteControllerChange.isMute
-        );
-        break;
+  //     case "MUTE":
+  //       let muteControllerChange = message.value as IMuteController;
+  //       engine?.setMute?.(
+  //         muteControllerChange.channel,
+  //         muteControllerChange.isMute
+  //       );
+  //       break;
 
-      case "PITCH":
-        let pitchNumber = message.value as number;
-        updatePitch(null, pitchNumber);
-        break;
+  //     case "PITCH":
+  //       let pitchNumber = message.value as number;
+  //       updatePitch(null, pitchNumber);
+  //       break;
 
-      case "SEARCH":
-        let searchSong: string = message.value as string;
-        const list = (await searchTracklist(searchSong)) ?? [];
-        let sendSearchList: ISearchCallBack = {
-          eventType: "SEARCH_LIST",
-          value: list,
-        };
-        send({
-          user: "SUPER",
-          message: sendSearchList,
-        });
-        break;
+  //     case "SEARCH":
+  //       let searchSong: string = message.value as string;
+  //       const list = (await searchTracklist(searchSong)) ?? [];
+  //       let sendSearchList: ISearchCallBack = {
+  //         eventType: "SEARCH_LIST",
+  //         value: list,
+  //       };
+  //       send({
+  //         user: "SUPER",
+  //         message: sendSearchList,
+  //       });
+  //       break;
 
-      case "SET_SONG":
-        let song: SearchResult = message.value as SearchResult;
-        addQueue(song);
-        break;
+  //     case "SET_SONG":
+  //       let song: SearchResult = message.value as SearchResult;
+  //       addQueue(song);
+  //       break;
 
-      case "QUEUE":
-        let sendQueuelist: ISearchCallBack = {
-          eventType: "QUEUE_LIST",
-          value: queue,
-        };
-        send({
-          user: "SUPER",
-          message: sendQueuelist,
-        });
-        break;
+  //     case "QUEUE":
+  //       let sendQueuelist: ISearchCallBack = {
+  //         eventType: "QUEUE_LIST",
+  //         value: queue,
+  //       };
+  //       send({
+  //         user: "SUPER",
+  //         message: sendQueuelist,
+  //       });
+  //       break;
 
-      case "SET_QUEUE":
-        let newQueue: SearchResult[] = message.value as SearchResult[];
-        moveQueue(newQueue);
-        break;
+  //     case "SET_QUEUE":
+  //       let newQueue: SearchResult[] = message.value as SearchResult[];
+  //       moveQueue(newQueue);
+  //       break;
 
-      case "NEXT":
-        nextMusic();
+  //     case "NEXT":
+  //       nextMusic();
 
-      default:
-        break;
-    }
-  };
+  //     default:
+  //       break;
+  //   }
+  // };
   useEffect(() => {
     if (engine) {
-      remoteTypeHandle(received);
+      // remoteTypeHandle(received);
     }
   }, [received, engine]);
   return <></>;

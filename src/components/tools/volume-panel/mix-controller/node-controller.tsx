@@ -8,16 +8,22 @@ import {
 } from "@/features/engine/types/synth.type";
 import { INodeCallBack, NodeType } from "@/features/engine/types/node.type";
 import React, { useEffect, useState } from "react";
-import { FaLock, FaUnlock } from "react-icons/fa"; 
+import { FaLock, FaUnlock } from "react-icons/fa";
+import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
+import {
+  INodeKey,
+  INodeState,
+} from "@/features/engine/modules/instrumentals-node/modules/types/node.type";
 interface MixNodeControllerProps {
   disabled?: boolean;
   channel: number;
-  nodeType: NodeType;
+  nodeType: INodeKey | INodeState;
   vertical?: boolean;
   label?: string;
   onChange?: (value: IControllerChange) => void;
-  onLock?: (value: ILockController) => void;
+  onLock?: (event: IControllerChange<boolean>) => void;
   controllerNumber: number;
+  node?: SynthChannel;
 }
 
 const MixNodeController: React.FC<MixNodeControllerProps> = ({
@@ -29,19 +35,10 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
   onChange,
   onLock,
   controllerNumber,
+  node,
 }) => {
-  const controllerItem = useSynthesizerEngine(
-    (state) => state.engine?.controllerItem
-  );
   const [volume, setValue] = useState<number>(100);
   const [locked, setLocked] = useState<boolean>(false);
-
-  const onValueChange = (event: INodeCallBack) => {
-    setValue(event.value);
-  };
-  const onLockChange = (event: INodeCallBack) => {
-    setLocked(event.value);
-  };
 
   const onSliderChange = (value: number) => {
     const controllerEvent: IControllerChange = {
@@ -53,16 +50,15 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
   };
 
   useEffect(() => {
-    if (controllerItem) {
-      controllerItem.addEventCallBack(
-        nodeType,
-        "CHANGE",
-        channel,
-        onValueChange
+    if (node) {
+      node?.setCallBack([nodeType, "CHANGE"], channel, (value) =>
+        setValue(value.value)
       );
-      controllerItem.addEventCallBack(nodeType, "LOCK", channel, onLockChange);
+      node?.setCallBack([nodeType, "LOCK"], channel, (value) =>
+        setLocked(value.value)
+      );
     }
-  }, [controllerItem, nodeType]);
+  }, [node]);
 
   function LabelTag({ name }: { name: string }) {
     return (
@@ -84,10 +80,10 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
       className="z-20"
       max={127}
       onPressStart={() => {
-        controllerItem?.setUserHolding(true);
+        // controllerItem?.setUserHolding(true);
       }}
       onPressEnd={() => {
-        controllerItem?.setUserHolding(false);
+        // controllerItem?.setUserHolding(false);
       }}
     ></SliderCommon>
   );
@@ -95,6 +91,8 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
   if (!label) {
     return SliderProps;
   }
+
+  if (!node) return <></>;
 
   return (
     <>
@@ -105,7 +103,11 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
             <div className="pr-0.5">
               <Button
                 onClick={() =>
-                  onLock?.({ channel, controllerNumber, isLocked: !locked })
+                  onLock?.({
+                    channel,
+                    controllerNumber,
+                    controllerValue: !locked,
+                  })
                 }
                 icon={
                   locked ? (

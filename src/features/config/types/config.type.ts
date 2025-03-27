@@ -42,9 +42,15 @@ export interface ConfigDisplay {
   sound: Partial<SoundSetting>;
 }
 
+export interface MixerConfig {
+  name: string;
+  program: number[];
+  value: number;
+}
 export interface SoundSetting {
   soundFont: string;
   lockBase: number;
+  mixer: MixerConfig[];
 }
 
 export interface SystemConfig {

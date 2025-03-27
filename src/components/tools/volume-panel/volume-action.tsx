@@ -1,37 +1,35 @@
+import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { INodeCallBack } from "@/features/engine/types/node.type";
+import { IControllerChange } from "@/features/engine/types/synth.type";
 import { channel } from "diagnostics_channel";
 import React, { useCallback, useEffect, useState } from "react";
 import { BiSolidVolumeMute, BiSolidVolumeFull } from "react-icons/bi";
 
 interface VolumeActionProps {
   channel: number;
-  onMuted?: (channel: number, muted: boolean) => void;
+  controllerNumber: number;
+  onMuted?: (event: IControllerChange<boolean>) => void;
   className?: string;
   disabled?: boolean;
+  node: SynthChannel;
 }
 
 const VolumeAction: React.FC<VolumeActionProps> = ({
   channel,
+  controllerNumber,
   onMuted,
   className,
   disabled,
+  node,
 }) => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const onMutedVolume = (value: INodeCallBack) => {
-    setIsMuted(value.value);
-  };
-
-  const controllerItem = useSynthesizerEngine(
-    (state) => state.engine?.controllerItem
-  );
-
   useEffect(() => {
-    if (controllerItem) {
-      controllerItem.addEventCallBack("VOLUME", "MUTE", channel, onMutedVolume);
+    if (node) {
+      node.setCallBack(["VOLUME", "MUTE"], channel, (v) => setIsMuted(v.value));
     }
-  }, [controllerItem]);
+  }, [node]);
 
   const buttonStyle = `text-center text-white font-bold text-[10px]  
         flex items-center justify-center gap-[2px] rounded-t-md
@@ -43,7 +41,11 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
         disabled
           ? undefined
           : () => {
-              onMuted?.(channel, !isMuted);
+              onMuted?.({
+                channel,
+                controllerNumber,
+                controllerValue: !isMuted,
+              });
             }
       }
       className={`${className} ${buttonStyle} ${
@@ -57,7 +59,7 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
       <span className=" ">
         {isMuted ? <BiSolidVolumeMute /> : <BiSolidVolumeFull />}
       </span>
-      <span>{channel + 1}</span>
+      <span>{(node.channel ?? 0) + 1}</span>
     </div>
   );
 };

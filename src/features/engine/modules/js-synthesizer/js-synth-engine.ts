@@ -13,6 +13,8 @@ import { MainNodeController } from "@/features/engine/lib/node";
 import { AudioMeter } from "../../lib/gain";
 import { INodeCallBack } from "../../types/node.type";
 import { ChannelGainMonitor } from "./lib/channel-gain-monitor";
+import { InstNode } from "../instrumentals-node/lib/inst-node";
+// import { InstrumentalNode } from "../instrumentals-node/lib/instrumental";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -24,6 +26,8 @@ export class JsSynthEngine implements BaseSynthEngine {
   public soundfontName: string | undefined;
   public soundfontFile: File | undefined;
   public bassLocked: number | undefined = undefined;
+  // public nodes: InstNode[] = [];
+  // public categoryNode: InstrumentalNode | undefined;
 
   public controllerItem: MainNodeController | undefined = undefined;
   public gainNode: AudioMeter | undefined = undefined;
@@ -155,54 +159,44 @@ export class JsSynthEngine implements BaseSynthEngine {
 
   setMidiOutput(): void {}
 
-  setController(
-    channel: number,
-    controllerNumber: number,
-    controllerValue: number,
-    force?: boolean
-  ): void {
-    const isLocked = this.controllerItem?.onControllerChange(
-      {
-        channel,
-        controllerNumber,
-        controllerValue,
-      },
-      true
+  setController(event: IControllerChange): void {
+    // const isLocked = this.controllerItem?.onControllerChange(
+    //   {
+    //     channel,
+    //     controllerNumber,
+    //     controllerValue,
+    //   },
+    //   true
+    // );
+
+    this.synth?.midiControl(
+      event.channel,
+      event.controllerNumber,
+      event.controllerValue
     );
-
-    // if (isLocked === true) {
-    //   this.lockController(channel, controllerNumber, false);
-    // }
-
-    this.synth?.midiControl(channel, controllerNumber, controllerValue);
 
     // if (isLocked === true) {
     //   this.lockController(channel, controllerNumber, true);
     // }
   }
 
-  lockController(
-    channel: number,
-    controllerNumber: number,
-    isLocked: boolean
-  ): void {}
+  lockController(): void {}
   updatePitch(channel: number, semitones?: number): void {}
   updatePreset(channel: number, value: number): void {}
 
-  setProgram(
-    channel: number,
-    programNumber: number,
-    userChange?: boolean
-  ): void {
-    this.synth?.midiProgramChange(channel, programNumber);
-    this.controllerItem?.onProgramChange(
-      { channel, program: programNumber },
-      true
-    );
+  setProgram(event: IProgramChange): void {
+    this.synth?.midiProgramChange(event.channel, event.program);
+    // this.controllerItem?.onProgramChange(
+    //   { event.channel, program: event.program },
+    //   true
+    // );
   }
 
-  setMute(channel: number, isMuted: boolean): void {
-    this.controllerItem?.onMuteChange({ channel, isMute: isMuted }, false);
+  setMute(event: IControllerChange<boolean>): void {
+    // this.controllerItem?.onMuteChange(
+    //   { channel: event.channel, isMute: event.controllerValue },
+    //   false
+    // );
   }
 
   setBassLocked(bassNumber: number): void {}
