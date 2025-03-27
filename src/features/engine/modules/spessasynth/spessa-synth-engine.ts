@@ -1,8 +1,4 @@
-import {
-  modulatorSources,
-  NON_CC_INDEX_OFFSET,
-  Synthetizer as Spessasynth,
-} from "spessasynth_lib";
+import { Synthetizer as Spessasynth } from "spessasynth_lib";
 
 import {
   BaseSynthEngine,
@@ -11,23 +7,18 @@ import {
   ILockController,
   IMuteController,
   IProgramChange,
+  IVelocityChange,
   TimingModeType,
 } from "../../types/synth.type";
 
 import { loadAudioContext, loadPlayer } from "./lib/spessasynth";
-import {
-  BASS,
-  CHANNEL_DEFAULT,
-  DEFAULT_SOUND_FONT,
-  MAX_CHANNEL,
-} from "@/config/value";
-import { MainNodeController } from "@/features/engine/lib/node";
+import { BASS, CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
 import { SpessaPlayerEngine } from "./player/spessa-synth-player";
 import { AudioMeter } from "../../lib/gain";
 import { RemoteSendMessage } from "@/features/remote/types/remote.type";
-import { INodeCallBack, MAIN_VOLUME } from "../../types/node.type";
-import { MixerConfig, SoundSetting } from "@/features/config/types/config.type";
+import { SoundSetting } from "@/features/config/types/config.type";
 import { SynthChannel } from "../instrumentals-node/modules/channel";
+import { InstrumentalNode } from "../instrumentals-node/modules/instrumental";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -42,8 +33,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public bassDetect: IProgramChange | undefined = undefined;
 
   public nodes: SynthChannel[] = [];
+  public instrumentalNodes: InstrumentalNode | undefined = undefined;
 
-  // public controllerItem: MainNodeController | undefined = undefined;
   public gainNode: AudioMeter | undefined = undefined;
   public config: Partial<SoundSetting> | undefined;
 
@@ -82,11 +73,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.synth?.setDrums(8, true);
 
     this.player = new SpessaPlayerEngine(player, config);
-    // this.controllerItem = new MainNodeController();
-
-    // this.nodes = CHANNEL_DEFAULT.map((v) => new InstNode(v));
     this.nodes = CHANNEL_DEFAULT.map((v, i) => new SynthChannel(i));
-    // this.categoryNode = new InstrumentalNode(this, this.nodes);
+    this.instrumentalNodes = new InstrumentalNode(this, this.nodes);
 
     if (audioContext) {
       const analysers: AnalyserNode[] = [];
@@ -244,6 +232,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
           }
         } else {
           this.nodes[channel].programChange(e);
+          this.instrumentalNodes?.regroupNodes();
         }
       }
     );
@@ -263,6 +252,11 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
   setProgram(event: IProgramChange) {
     this.synth?.programChange(event.channel, event.program, event.userChange);
+    this.instrumentalNodes?.regroupNodes();
+  }
+
+  setVelocity(event: IVelocityChange): void {
+    this.synth?.velocityOverride(event.channel, event.value);
   }
 
   setController(event: IControllerChange): void {
@@ -278,6 +272,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       event.controllerValue,
       event.force
     );
+    console.log(event);
     if (isLocked === true) {
       this.lockController({ ...event, controllerValue: true });
     }

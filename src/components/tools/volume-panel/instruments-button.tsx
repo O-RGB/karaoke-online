@@ -65,7 +65,6 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   }, [perset, channel]);
 
   const onValueChange = (event: TEventType<number>) => {
-    console.log("on program change, ", event);
     const search = programOption.find((v) => v.value === `${event.value}`);
     setProgramSelected(search);
   };

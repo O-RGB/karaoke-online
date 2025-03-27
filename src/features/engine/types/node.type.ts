@@ -5,7 +5,7 @@ export const MAIN_VOLUME = midiControllers.mainVolume; // 7
 export const PAN = midiControllers.pan; // 10
 export const REVERB = 91;
 export const CHORUSDEPTH = 93;
-export const EXPRESSION = 50;
+export const EXPRESSION = midiControllers.expressionController;
 
 export type NodeType = "VOLUME" | "PAN" | "REVERB" | "CHORUSDEPTH";
 export type EventChangeType =

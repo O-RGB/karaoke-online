@@ -1,4 +1,3 @@
-import { MAIN_VOLUME } from "@/features/engine/types/node.type";
 import { EventManager } from "../events";
 import { INodeKey, SynthNodeProps, TEventType } from "../types/node.type";
 

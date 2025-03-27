@@ -28,6 +28,7 @@ export class SynthChannel {
   public pan: SynthNode<number> | undefined = undefined;
 
   // State
+  public velocity: SynthNodeState<number> | undefined = undefined;
   public expression: SynthNodeState<number> | undefined = undefined;
   public program: SynthNodeState<number> | undefined = undefined;
   public isDrum: SynthNodeState<boolean> | undefined = undefined;
@@ -49,6 +50,12 @@ export class SynthChannel {
     this.pan = new SynthNode(this.nodeEvent, "PAN", channel, 100);
 
     this.program = new SynthNodeState(this.stateEvent, "PROGARM", channel);
+    this.velocity = new SynthNodeState(this.stateEvent, "VELOCITY", channel);
+    this.expression = new SynthNodeState(
+      this.stateEvent,
+      "EXPRESSION",
+      channel
+    );
   }
 
   public setAnalyser(analyserNode: AnalyserNode) {

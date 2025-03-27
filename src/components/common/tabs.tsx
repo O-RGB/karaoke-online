@@ -9,8 +9,8 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onTabChange }) => {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <div className="h-full w-full">
-      <div className="flex border-b border-gray-300 overflow-auto w-full h-10">
+    <div className="relative h-full w-full">
+      <div className="sticky top-0 flex border-b border-gray-300 w-full h-12 bg-white z-50">
         {tabs.map((tab, index) => (
           <button
             key={index}

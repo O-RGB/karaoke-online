@@ -5,13 +5,8 @@ export type INodeKey = "VOLUME" | "PAN" | "CHORUS" | "REVERB";
 export type INodeChange = "CHANGE";
 export type INodeOption = INodeChange | "MUTE" | "LOCK" | "ACTIVE";
 
-// Node Effect
-export type INodeState =
-  | "EXPRESSION"
-  | "TRANSPOSE"
-  | "PITCH"
-  | "PROGARM"
-  | "DRUM";
+// Node Effect velocity
+export type INodeState = "EXPRESSION" | "VELOCITY" | "PROGARM";
 
 export type EventKey = [INodeKey | INodeState, INodeOption];
 export type TEventType<T> = TEventCallBack<T>;

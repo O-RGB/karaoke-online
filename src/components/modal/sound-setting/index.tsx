@@ -6,6 +6,8 @@ import LockSoundModal from "./lock-sound-modal";
 import { FaLock } from "react-icons/fa";
 import EngineSoundModal from "./engine-sound-modal";
 import { PiEngineFill } from "react-icons/pi";
+import InstrumentalModal from "./instrumental-modal";
+import { GiGuitar } from "react-icons/gi";
 
 interface SoundSettingModalProps {}
 
@@ -23,6 +25,11 @@ const SoundSettingModal: React.FC<SoundSettingModalProps> = ({}) => {
             content: <LockSoundModal></LockSoundModal>,
             label: "ล็อกเสียง",
             icon: <FaLock></FaLock>,
+          },
+          {
+            content: <InstrumentalModal></InstrumentalModal>,
+            label: "อุปกรณ์เสียง",
+            icon: <GiGuitar></GiGuitar>,
           },
           {
             content: <EngineSoundModal></EngineSoundModal>,

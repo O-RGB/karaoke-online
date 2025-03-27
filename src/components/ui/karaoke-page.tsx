@@ -40,6 +40,9 @@ import LyricsPlayer from "../../features/lyrics";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
+  const instrumentalNodes = useSynthesizerEngine(
+    (state) => state.engine?.instrumentalNodes
+  );
   const setup = useSynthesizerEngine((state) => state.setup);
 
   const addTracklist = useTracklistStore((state) => state.addTracklist);
