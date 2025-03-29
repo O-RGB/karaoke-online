@@ -1,7 +1,7 @@
 import Button from "@/components/common/button/button";
 import Modal from "@/components/common/modal";
 import { destryoAllCredential } from "@/lib/local-storege/local-storage";
-import { closeDatabaseConnections, deleteDatabase } from "@/utils/database/db";
+import { closeDatabaseConnections, deleteAllStores, deleteDatabase } from "@/utils/database/db";
 import React, { ReactNode, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { CiSettings } from "react-icons/ci";
@@ -86,32 +86,33 @@ const ResetDatastore: React.FC<ResetDatastoreProps> = ({}) => {
                     <span>เริ่มการลบฐานข้อมูล</span>
                   </span>
                 );
-                const request = deleteDatabase();
+                const request = deleteAllStores();
 
-                request.onsuccess = () => {
-                  destryoAllCredential();
-                  setMessage(
-                    <span className="flex gap-2 items-center">
-                      <FaCheck className="text-xs"></FaCheck>
-                      <span>ลบฐานข้อมูลสำเร็จ</span>
-                    </span>
-                  );
-                  setError(false);
-                };
-                request.onerror = (event) => {
-                  setMessage(
-                    <span className="flex gap-2 items-center">
-                      <IoMdClose className="text-xs"></IoMdClose>
-                      <span>
-                        ไม่สามารถลบฐานข้อมูลได้
-                        กรุณารีโหลดหน้าจอแล้วลองใหม่อีกครั้ง{" "}
-                        {JSON.stringify(event)}
+                request
+                  .then((data) => {
+                    destryoAllCredential();
+                    setMessage(
+                      <span className="flex gap-2 items-center">
+                        <FaCheck className="text-xs"></FaCheck>
+                        <span>ลบฐานข้อมูลสำเร็จ</span>
                       </span>
-                    </span>
-                  );
+                    );
+                    setError(false);
+                  })
+                  .catch((event) => {
+                    setMessage(
+                      <span className="flex gap-2 items-center">
+                        <IoMdClose className="text-xs"></IoMdClose>
+                        <span>
+                          ไม่สามารถลบฐานข้อมูลได้
+                          กรุณารีโหลดหน้าจอแล้วลองใหม่อีกครั้ง{" "}
+                          {JSON.stringify(event)}
+                        </span>
+                      </span>
+                    );
 
-                  setError(true);
-                };
+                    setError(true);
+                  });
               }, 1000);
             }
           }}
