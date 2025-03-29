@@ -31,19 +31,21 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
   };
 
   const handleClick = () => {
-    if (audioRef.current && audioLoopRef.current) {
-      const audio = audioRef.current;
-      const audioLoop = audioLoopRef.current;
+    initDatabase().then(() => {
+      if (audioRef.current && audioLoopRef.current) {
+        const audio = audioRef.current;
+        const audioLoop = audioLoopRef.current;
 
-      setPressed(true);
-      audio.volume = 0.5;
-      audioLoop.volume = 0.2;
-      audio.play();
-      audioLoop.play();
-      audio.addEventListener("ended", () => {
-        setEnded(true);
-      });
-    }
+        setPressed(true);
+        audio.volume = 0.5;
+        audioLoop.volume = 0.2;
+        audio.play();
+        audioLoop.play();
+        audio.addEventListener("ended", () => {
+          setEnded(true);
+        });
+      }
+    });
   };
 
   useLayoutEffect(() => {

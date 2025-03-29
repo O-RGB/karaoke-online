@@ -37,7 +37,6 @@ import NotificationAlert from "../tools/noti-alert";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
-import { initDatabase } from "@/utils/database/db";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
@@ -52,11 +51,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const notification = useNotificationStore((state) => state.notification);
   const config = useConfigStore((state) => state.config);
   const [onPrepare, setPrepare] = useState<boolean>(false);
-  const [prepareMessage, setPrepareMessage] = useState<string>();
 
   const startup = async () => {
     setPrepare(true);
-    setPrepareMessage("กำลังโหลดเพลง");
     setup(config.system?.engine);
     initializeKeyboardListeners();
     let tl: SearchResult[] = [];
@@ -68,16 +65,11 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     addTracklist(tl);
     setTimeout(() => {
       setPrepare(false);
-      setPrepareMessage(undefined);
     }, 1000);
   };
 
   useEffect(() => {
-    setPrepare(true);
-    setPrepareMessage("ติดตั้ง Database");
-    initDatabase().then(() => {
-      startup();
-    });
+    startup();
   }, []);
 
   const modalMap: ModalComponents = {
@@ -97,7 +89,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     <FullScreen handle={handle}>
       {/* Process */}
       <WallpaperRender
-        wallpaperLoadingTitle={onPrepare ? prepareMessage : undefined}
+        wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>
       <RemoteEvent></RemoteEvent>
       <AutoModal auto title={""}></AutoModal>
