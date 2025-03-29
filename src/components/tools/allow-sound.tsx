@@ -48,7 +48,6 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
 
   useLayoutEffect(() => {
     requestMIDIAccess();
-    initDatabase();
   }, []);
 
   return (

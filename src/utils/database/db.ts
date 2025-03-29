@@ -15,7 +15,7 @@ import { IDBPDatabase, openDB } from "idb";
 const DB_NAME = "Karaoke-online";
 const DB_VERSION = 1;
 
-const stores = [
+const stores: string[] = [
   STORAGE_EXTREME_SONG,
   STORAGE_WALLPAPER,
   STORAGE_SOUNDFONT,
@@ -28,14 +28,34 @@ const stores = [
   STORAGE_DRIVE_TRACKLIST_SONG,
 ];
 
+export async function ensureDatabaseInitialized(): Promise<void> {
+  try {
+    const db = await openDB(DB_NAME, DB_VERSION);
+    const existingStores = Array.from(db.objectStoreNames);
+
+    const missingStores = stores.filter(
+      (store) => !existingStores.includes(store)
+    );
+
+    if (missingStores.length > 0) {
+      console.warn("Missing stores detected. Recreating database...");
+      db.close();
+      await deleteDatabase();
+      await initDatabase();
+    }
+  } catch (error) {
+    console.error("Error initializing database:", error);
+  }
+}
+
 export async function getDB(
   store_name: string,
   autoIncrement: boolean = false
-) {
-  // เปิดฐานข้อมูล
+): Promise<IDBPDatabase> {
+  await ensureDatabaseInitialized();
+
   const db = await openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
-      // ตรวจสอบว่ามีการสร้าง Object Store ใหม่หรือไม่
       if (!db.objectStoreNames.contains(store_name)) {
         db.createObjectStore(store_name, {
           keyPath: autoIncrement ? "id" : undefined,
@@ -45,29 +65,13 @@ export async function getDB(
     },
   });
 
-  // สร้างการทำธุรกรรมกับ Object Store ที่ต้องการ
   return db;
 }
 
-// export async function initDatabase(autoIncrement: boolean = true) {
-//   const db = await openDB(DB_NAME, DB_VERSION, {
-//     upgrade(db) {
-//       stores.forEach((store_name) => {
-//         if (!db.objectStoreNames.contains(store_name)) {
-//           db.createObjectStore(store_name, {
-//             keyPath: autoIncrement ? "id" : undefined,
-//             autoIncrement: autoIncrement,
-//           });
-//         }
-//       });
-//     },
-//   });
-//   return db;
-// }
-
-export async function initDatabase(autoIncrement: boolean = true) {
+export async function initDatabase(
+  autoIncrement: boolean = true
+): Promise<IDBPDatabase> {
   try {
-    // ปิดการเชื่อมต่อที่มีอยู่ก่อน
     await closeDatabaseConnections();
 
     const db = await openDB(DB_NAME, DB_VERSION, {
@@ -95,62 +99,23 @@ export async function initDatabase(autoIncrement: boolean = true) {
     return db;
   } catch (error) {
     console.error("Failed to initialize database:", error);
-
-    // ถ้าเกิดข้อผิดพลาด ให้ลบฐานข้อมูลและลองใหม่
-    console.log("Attempting to delete and recreate database...");
-
-    try {
-      // ปิดการเชื่อมต่อก่อนลบ
-      await closeDatabaseConnections();
-
-      // ลบฐานข้อมูล
-      const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
-
-      await new Promise((resolve, reject) => {
-        deleteRequest.onsuccess = () => {
-          console.log("Database deleted successfully");
-          resolve(true);
-        };
-
-        deleteRequest.onerror = (event) => {
-          console.error("Failed to delete database:", event);
-          reject(event);
-        };
-      });
-
-      // สร้างฐานข้อมูลใหม่
-      const newDb = await openDB(DB_NAME, DB_VERSION, {
-        upgrade(db) {
-          stores.forEach((store_name) => {
-            db.createObjectStore(store_name, {
-              keyPath: autoIncrement ? "id" : undefined,
-              autoIncrement: autoIncrement,
-            });
-          });
-        },
-      });
-
-      console.log("Database recreated successfully");
-      return newDb;
-    } catch (retryError) {
-      console.error("Failed to recreate database:", retryError);
-      throw new Error("Cannot initialize database after reset attempt");
-    }
+    await deleteDatabase();
+    return initDatabase();
   }
 }
 
-export const closeDatabaseConnections = () => {
+export const closeDatabaseConnections = (): Promise<boolean> => {
   return new Promise((resolve) => {
     const request = indexedDB.open(DB_NAME);
 
     request.onsuccess = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-      db.close(); // ปิดการเชื่อมต่อ
+      db.close();
       console.log("Database connection closed");
       resolve(true);
     };
 
-    request.onerror = (event) => {
+    request.onerror = () => {
       resolve(false);
     };
   });
@@ -158,7 +123,6 @@ export const closeDatabaseConnections = () => {
 
 export async function deleteAllStores(): Promise<IDBPDatabase> {
   const db = await openDB(DB_NAME);
-
   const storeNames = Array.from(db.objectStoreNames);
 
   if (storeNames.length > 0) {
@@ -173,10 +137,25 @@ export async function deleteAllStores(): Promise<IDBPDatabase> {
       },
     });
   }
-
   return db;
 }
 
-export function deleteDatabase(dbName: string = DB_NAME) {
-  return indexedDB.deleteDatabase(dbName);
+export function deleteDatabase(dbName: string = DB_NAME): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const deleteRequest = indexedDB.deleteDatabase(dbName);
+
+    deleteRequest.onsuccess = () => {
+      console.log("Database deleted successfully");
+      resolve(true);
+    };
+
+    deleteRequest.onerror = (event) => {
+      console.error("Failed to delete database:", event);
+      reject(event);
+    };
+
+    deleteRequest.onblocked = () => {
+      console.warn("Database deletion was blocked");
+    };
+  });
 }
