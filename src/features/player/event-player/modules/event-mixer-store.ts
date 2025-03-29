@@ -1,6 +1,10 @@
 import { CHANNEL_DEFAULT } from "@/config/value";
+import {
+  INodeState,
+  TEventType,
+} from "@/features/engine/modules/instrumentals-node/modules/types/node.type";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import { INodeCallBack } from "@/features/engine/types/node.type";
+// import { INodeCallBack } from "@/features/engine/types/node.type";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
 
 import { modulatorSources, NON_CC_INDEX_OFFSET } from "spessasynth_lib";
@@ -45,9 +49,9 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
     }
 
     if (superUserConnections.length > 0) {
-      const remoteEvent: INodeCallBack = {
+      const remoteEvent: TEventType<number[]> = {
         channel: 0,
-        eventType: "GAIN",
+        eventType: "VOLUME",
         value: volumes,
       };
       sendSuperUserMessage({

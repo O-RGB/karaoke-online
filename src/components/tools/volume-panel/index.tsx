@@ -23,11 +23,9 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import ChannelRender from "./channel";
 import {
   IControllerChange,
-  ILockController,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
-// import FullMixer from "./full-mixer";
-import { EXPRESSION, MAIN_VOLUME } from "@/features/engine/types/node.type";
+import { MAIN_VOLUME } from "@/features/engine/types/node.type";
 
 interface VolumePanelProps {
   onVolumeChange?: (value: ISetChannelGain) => void;
@@ -165,7 +163,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
             return (
               <div
                 key={`vol-panel-${ch}`}
-                className="flex flex-col relative h-full "
+                className="flex flex-col relative h-full"
               >
                 <ChannelRender
                   node={_}

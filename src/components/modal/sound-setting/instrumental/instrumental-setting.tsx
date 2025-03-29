@@ -1,5 +1,5 @@
 import SliderCommon from "@/components/common/input-data/slider";
-import { InstrumentalNode } from "@/features/engine/modules/instrumentals-node/modules/instrumental/update";
+import { InstrumentalNode } from "@/features/engine/modules/instrumentals-node/modules/instrumental";
 import { INodeState } from "@/features/engine/modules/instrumentals-node/modules/types/node.type";
 import { InstrumentType } from "@/features/engine/modules/instrumentals-node/types/inst.category.type";
 import React, { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ interface InstrumentalSettingProps {
   selectedType?: InstrumentType;
   selectedIndex?: number;
   valueKey: INodeState;
+  color: string;
 }
 
 const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
@@ -16,11 +17,14 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
   selectedType,
   selectedIndex,
   valueKey,
+  color,
 }) => {
-  const [value, setValue] = useState<number>(100);
+  const [value, setValue] = useState<number>(
+    valueKey === "EXPRESSION" ? 100 : 0
+  );
 
   const onValueChange = (value: number) => {
-    if (!selectedType || !selectedIndex) return;
+    if (selectedType === undefined || selectedIndex === undefined) return;
     if (valueKey === "EXPRESSION") {
       instrumental?.setExpression(selectedType, value, selectedIndex);
     } else {
@@ -29,7 +33,7 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
   };
 
   useEffect(() => {
-    if (!selectedIndex || !instrumental) return;
+    if (selectedIndex === undefined || !instrumental) return;
 
     instrumental.setCallBackState([valueKey, "CHANGE"], selectedIndex, (v) => {
       setValue(v.value);
@@ -42,7 +46,7 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
     };
   }, [instrumental, selectedIndex, selectedType]);
 
-  if (!selectedIndex) return <></>;
+  if (selectedIndex === undefined) return <></>;
 
   return (
     <>
@@ -58,12 +62,15 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
               )
               .join(" ")}
         </span>
-        <span className="text-sm text-gray-500">
-          {valueKey.charAt(0).toUpperCase() +
-            valueKey.substring(1, valueKey.length)}{" "}
-          ({value})
+        <span className="text-sm">
+          <span>
+            {valueKey.charAt(0).toUpperCase() +
+              valueKey.substring(1, valueKey.length).toLowerCase()}{" "}
+          </span>
+          <span style={{ color }}>{value}</span>
         </span>
         <SliderCommon
+          color={color}
           onChange={onValueChange}
           value={value}
           max={127}

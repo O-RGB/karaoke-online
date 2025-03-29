@@ -9,6 +9,8 @@ import {
   IProgramChange,
 } from "@/features/engine/types/synth.type";
 import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
+import ChannelLimit from "./limit";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 
 interface ChannelRenderProps {
   isShow: boolean;
@@ -31,12 +33,22 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
   onChange,
   node,
 }) => {
+  const instrumental = useSynthesizerEngine(
+    (state) => state.engine?.instrumental
+  );
   useEffect(() => {}, [isShow, node]);
 
   if (!node) return <></>;
 
   return (
     <>
+      {channel !== 8 && channel !== 9 && (
+        <ChannelLimit
+          channel={channel}
+          instrumental={instrumental}
+          node={node}
+        ></ChannelLimit>
+      )}
       <VolumeAction
         disabled={isShow}
         controllerNumber={MAIN_VOLUME}

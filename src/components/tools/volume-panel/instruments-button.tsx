@@ -10,14 +10,12 @@ import Button from "@/components/common/button/button";
 import MixNodeController from "./mix-controller/node-controller";
 import {
   CHORUSDEPTH,
-  INodeCallBack,
   MAIN_VOLUME,
   PAN,
   REVERB,
 } from "@/features/engine/types/node.type";
 import {
   IControllerChange,
-  ILockController,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
 import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
@@ -42,12 +40,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   disabled,
   node,
 }) => {
-  const bassLocked = useSynthesizerEngine((state) => state.engine?.bassLocked);
-  const bassDetect = useSynthesizerEngine((state) => state.engine?.bassDetect);
-
-  // const controllerItem = useSynthesizerEngine(
-  //   (state) => state.engine?.controllerItem
-  // );
+  const bassConfig = useSynthesizerEngine((state) => state.engine?.bassConfig);
 
   const [programOption, setProgramOptions] = useState<IOptions[]>([]);
   const [programSelected, setProgramSelected] = useState<IOptions>();
@@ -85,10 +78,6 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
     );
   }
 
-  const bassIsLocked: boolean = bassLocked
-    ? bassDetect?.channel === channel
-    : false;
-
   useEffect(() => {
     if (node) {
       node.setCallBackState(["PROGARM", "CHANGE"], channel, onValueChange);
@@ -97,7 +86,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
 
   useEffect(() => {
     setProgramOptions(getPreset());
-  }, [node?.program, bassLocked, bassDetect, perset, channel, getPreset]);
+  }, [node?.program, perset, channel, getPreset]);
 
   if (!node) return <></>;
 
@@ -151,7 +140,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           </div>
 
           <ButtonDropdown
-            disabled={bassIsLocked}
+            // disabled={bassIsLocked}
             className={"w-full"}
             value={programSelected?.value}
             onChange={(value) => {
@@ -164,13 +153,13 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           >
             <div
               className={`${
-                bassIsLocked ? "bg-yellow-400 text-red-600" : ""
+                false ? "bg-yellow-400 text-red-600" : ""
               } w-full rounded-md overflow-hidden border border-black/10 cursor-pointer group-hover:bg-gray-200 duration-300`}
             >
               <div className="w-full font-bold text-[10px] p-2 flex gap-0.5 justify-between items-center h-6">
                 <div className="flex gap-2 items-center">
                   <span>
-                    {bassIsLocked ? <FaUnlock className=""></FaUnlock> : <></>}
+                    {false ? <FaUnlock className=""></FaUnlock> : <></>}
                   </span>
                   <span>{channelIcon}</span>
                 </div>

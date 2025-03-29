@@ -1,11 +1,9 @@
 import { MIDI } from "spessasynth_lib/@types/midi_parser/midi_loader";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
-import { DataController, MainNodeController } from "@/features/engine/lib/node";
-import { NodeType } from "@/features/engine/types/node.type";
 import { AudioMeter } from "../lib/gain";
 import { SynthChannel } from "../modules/instrumentals-node/modules/channel";
-import { InstrumentalNode } from "../modules/instrumentals-node/modules/instrumental/update";
+import { InstrumentalNode } from "../modules/instrumentals-node/modules/instrumental";
 import { BassConfig } from "../modules/instrumentals-node/modules/config";
 export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
@@ -40,16 +38,16 @@ export interface BaseSynthEngine {
   setMute(event: IControllerChange<boolean>): void;
   setupMIDIEventHook?(): void;
 
-  controllerItem?: MainNodeController;
+  // controllerItem?: MainNodeController;
   gainNode?: AudioMeter;
   bassConfig?: BassConfig;
   setBassLock(program: number): void;
 }
 
-export interface ControllerItemList {
-  name: NodeType;
-  controller: DataController;
-}
+// export interface ControllerItemList {
+//   name: NodeType;
+//   controller: DataController;
+// }
 
 export interface BaseSynthEvent {
   controllerChangeCallback?: (event: IControllerChange) => void;

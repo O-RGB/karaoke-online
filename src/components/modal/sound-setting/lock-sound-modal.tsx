@@ -28,6 +28,7 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
     let sound: Partial<SoundSetting> = config.sound ?? {};
     if (!value) {
       delete sound.lockBase;
+      engine?.setBassLock(0);
     }
     setConfig({ sound });
   };

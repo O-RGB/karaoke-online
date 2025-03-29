@@ -2,7 +2,10 @@ import { MIDI, Sequencer, Synthetizer as Spessasynth } from "spessasynth_lib";
 
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { calculateTicks, convertTicksToTime } from "@/lib/app-control";
-import { BaseSynthPlayerEngine } from "@/features/engine/types/synth.type";
+import {
+  BaseSynthEngine,
+  BaseSynthPlayerEngine,
+} from "@/features/engine/types/synth.type";
 import { SoundSetting } from "@/features/config/types/config.type";
 import { SpessaSynthEngine } from "../spessa-synth-engine";
 import { MAIN_VOLUME } from "@/features/engine/types/node.type";
@@ -16,35 +19,16 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   public duration: number = 0;
   public durationTiming: number = 0;
   public config?: Partial<SoundSetting>;
+  public synth?: BaseSynthEngine;
 
-  constructor(player: Sequencer | undefined, config?: Partial<SoundSetting>) {
+  constructor(player: Sequencer | undefined, synth?: BaseSynthEngine) {
     this.player = player;
-    this.config = config;
+    this.synth = synth;
   }
-
-  // conifgInit() {
-  //   const mixer = this.config?.mixer;
-  //   if (!mixer) return;
-  //   const mixerObj = Object.values(mixer).map((item) => ({
-  //     ...item,
-  //     program: Object.values(item.program), // แปลง program เป็น array
-  //   }));
-  //   console.log("mixerObj", mixerObj);
-  //   mixerObj?.map((v) => {
-  //     const { program, value } = v;
-  //     const node = this.engine?.controllerItem?.searchProgram(program);
-  //     if (node) {
-  //       const channel = node.channel;
-  //       this.engine?.setController(channel, MAIN_VOLUME, value);
-  //       this.engine?.lockController(channel, MAIN_VOLUME, true);
-  //     }
-  //   });
-  // }
 
   play(): void {
     this.player?.play();
     this.paused = false;
-    // this.conifgInit();
   }
   stop(): void {
     this.player?.stop();
@@ -77,6 +61,7 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   }
 
   async loadMidi(midi: File) {
+    // this.synth?.instrumental?.group.clear()
     let midiFileArrayBuffer = await midi.arrayBuffer();
     let parsedMidi: MIDI | null = null;
     try {

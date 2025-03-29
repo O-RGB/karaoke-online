@@ -18,7 +18,7 @@ import { AudioMeter } from "../../lib/gain";
 import { RemoteSendMessage } from "@/features/remote/types/remote.type";
 import { SoundSetting } from "@/features/config/types/config.type";
 import { SynthChannel } from "../instrumentals-node/modules/channel";
-import { InstrumentalNode } from "../instrumentals-node/modules/instrumental/update";
+import { InstrumentalNode } from "../instrumentals-node/modules/instrumental";
 import {
   CHORUSDEPTH,
   EXPRESSION,
@@ -81,7 +81,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.persetChange((e) => setInstrument?.(e));
     this.synth?.setDrums(8, true);
 
-    this.player = new SpessaPlayerEngine(player, config);
+    this.player = new SpessaPlayerEngine(player, this);
 
     this.instrumental.setEngine(this);
     this.nodes = CHANNEL_DEFAULT.map(
@@ -104,6 +104,14 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
     this.controllerChange();
     this.programChange();
+
+    // CHANNEL_DEFAULT.map((_, ch) =>
+    //   this.lockController({
+    //     channel: ch,
+    //     controllerNumber: EXPRESSION,
+    //     controllerValue: true,
+    //   })
+    // );
 
     return { synth: synth, audio: this.audio };
   }
@@ -190,15 +198,23 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       }
     );
   }
-
   programChange(event?: (event: IProgramChange) => void): void {
     return this.synth?.eventHandler.addEvent(
       "programchange",
       "",
       (e: IProgramChange) => {
-        const { channel } = e;
-        const has = this.bassConfig?.onProgramChange(e, this);
-        this.nodes[channel].programChange(has ? has : e, "programChange");
+        const { channel, program } = e;
+        const has = this.bassConfig?.onProgramChange(e);
+
+        if (has?.isBass) {
+          const nodeProgram = this.nodes[channel].program?.value;
+          if (nodeProgram === program) return;
+
+          this.setProgram(has.event);
+          this.nodes[channel].programChange(has.event, "programChange");
+        } else {
+          this.nodes[channel].programChange(e, "programChange");
+        }
       }
     );
   }
@@ -217,6 +233,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
   setProgram(event: IProgramChange) {
     this.synth?.programChange(event.channel, event.program, event.userChange);
+    this.nodes[event.channel].programChange(event, "programChange");
   }
 
   setVelocity(event: IVelocityChange): void {

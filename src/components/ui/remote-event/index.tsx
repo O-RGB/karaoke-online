@@ -1,15 +1,7 @@
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import { INodeCallBack } from "@/features/engine/types/node.type";
-import {
-  IControllerChange,
-  ILockController,
-  IMuteController,
-} from "@/features/engine/types/synth.type";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
-import { ISearchCallBack } from "@/features/player/player/types/player.type";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
-import { RemoteReceivedMessages } from "@/features/remote/types/remote.type";
 import useTracklistStore from "@/features/tracklist/tracklist-store";
 
 import React, { useEffect } from "react";
@@ -17,17 +9,9 @@ import React, { useEffect } from "react";
 interface RemoteEventProps {}
 
 const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
-  const send = usePeerStore((state) => state.sendSuperUserMessage);
-  const searchTracklist = useTracklistStore((state) => state.searchTracklist);
-  const addQueue = useQueuePlayer((state) => state.addQueue);
-  const moveQueue = useQueuePlayer((state) => state.moveQueue);
-  const nextMusic = useQueuePlayer((state) => state.nextMusic);
-  const queue = useQueuePlayer((state) => state.queue);
   const received = usePeerStore((state) => state.received);
   const engine = useSynthesizerEngine((state) => state.engine);
-  const controllerItem = useSynthesizerEngine(
-    (state) => state.engine?.controllerItem
-  );
+
   const updatePitch = useMixerStoreNew((state) => state.updatePitch);
 
   // const remoteTypeHandle = async (

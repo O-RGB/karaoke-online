@@ -10,10 +10,9 @@ import {
   TimingModeType,
 } from "../../types/synth.type";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
-import { MainNodeController } from "@/features/engine/lib/node";
 import { AudioMeter } from "../../lib/gain";
 import { ChannelGainMonitor } from "./lib/channel-gain-monitor";
-import { InstrumentalNode } from "../instrumentals-node/modules/instrumental/update";
+import { InstrumentalNode } from "../instrumentals-node/modules/instrumental";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -27,7 +26,6 @@ export class JsSynthEngine implements BaseSynthEngine {
 
   instrumental: InstrumentalNode | undefined;
 
-  public controllerItem: MainNodeController | undefined = undefined;
   public gainNode: AudioMeter | undefined = undefined;
 
   private setInstrument: ((instrument: IPersetSoundfont[]) => void) | undefined;
@@ -64,7 +62,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     node.connect(audioContext.destination);
 
     this.player = new JsSynthPlayerEngine(synth);
-    this.controllerItem = new MainNodeController();
 
     this.controllerChange();
     this.programChange();
@@ -138,7 +135,7 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.player.addEvent({
         controllerChangeCallback: (event) => {
           callback?.(event);
-          this.controllerItem?.onControllerChange(event, false);
+          // this.controllerItem?.onControllerChange(event, false);
         },
       });
     }
@@ -149,7 +146,7 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.player.addEvent({
         programChangeCallback: (event) => {
           callback?.(event);
-          this.controllerItem?.onProgramChange(event, false);
+          // this.controllerItem?.onProgramChange(event, false);
         },
       });
     }

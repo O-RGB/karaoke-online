@@ -1,9 +1,6 @@
 import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import { INodeCallBack } from "@/features/engine/types/node.type";
 import { IControllerChange } from "@/features/engine/types/synth.type";
-import { channel } from "diagnostics_channel";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BiSolidVolumeMute, BiSolidVolumeFull } from "react-icons/bi";
 
 interface VolumeActionProps {
@@ -33,7 +30,7 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
 
   const buttonStyle = `text-center text-white font-bold text-[10px]  
         flex items-center justify-center gap-[2px] rounded-t-md
-        duration-300  border-t border-x border-white/20`;
+        duration-300  border-t border-x border-white/20 relative z-20`;
 
   return (
     <div

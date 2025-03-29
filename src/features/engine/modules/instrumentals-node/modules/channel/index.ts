@@ -14,7 +14,7 @@ import {
   CHORUSDEPTH,
   EXPRESSION,
 } from "@/features/engine/types/node.type";
-import { InstrumentalNode } from "../instrumental/update";
+import { InstrumentalNode } from "../instrumental";
 import { BassConfig } from "../config";
 import { SoundSetting } from "@/features/config/types/config.type";
 
@@ -108,8 +108,8 @@ export class SynthChannel {
     }
   }
   public programChange(event: IProgramChange, form: string) {
-    this.program?.setValue(event.program);
     const oldIndex: number = this.program?.value ?? 0;
+    this.program?.setValue(event.program);
     this.instrumental?.update(event, oldIndex, this);
   }
 

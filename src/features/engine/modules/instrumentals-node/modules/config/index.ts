@@ -3,7 +3,7 @@ import {
   BaseSynthEngine,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
-import { findProgramCategory } from "../instrumental/update";
+import { findProgramCategory } from "../instrumental";
 
 export class BassConfig {
   public lockBase: number | undefined = undefined;
@@ -23,19 +23,17 @@ export class BassConfig {
     this.active = bool;
   }
 
-  onProgramChange(
-    event: IProgramChange,
-    engine: BaseSynthEngine
-  ): IProgramChange {
-    if (!this.lockBase) return event;
-    if (!this.active) return event;
+  onProgramChange(event: IProgramChange): {
+    isBass: boolean;
+    event: IProgramChange;
+  } {
+    if (!this.lockBase) return { isBass: false, event };
+    if (!this.active) return { isBass: false, event };
     const find = findProgramCategory(event.program);
     if (find?.category === "bass") {
       const bass = { ...event, program: this.lockBase };
-      engine.setProgram(bass);
-      return bass;
+      return { isBass: true, event: bass };
     }
-
-    return event;
+    return { isBass: false, event };
   }
 }

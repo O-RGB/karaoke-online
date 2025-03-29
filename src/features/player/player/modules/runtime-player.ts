@@ -120,9 +120,6 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
           const lastTime = Math.floor(duration);
           const updateCountDown = lastTime - Math.floor(currentTime ?? 0);
 
-          // lyricsRender(tick);
-          // lyricsRender2(tick);
-
           if (get().countDown === 0) {
             get().reset();
             get().tickRun(false);

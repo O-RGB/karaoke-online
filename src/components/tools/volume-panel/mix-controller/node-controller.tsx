@@ -1,12 +1,7 @@
 import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
 import SliderCommon from "@/components/common/input-data/slider";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import {
-  IControllerChange,
-  ILockController,
-} from "@/features/engine/types/synth.type";
-import { INodeCallBack, NodeType } from "@/features/engine/types/node.type";
+import { IControllerChange } from "@/features/engine/types/synth.type";
 import React, { useEffect, useState } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
 import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
