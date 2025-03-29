@@ -6,9 +6,10 @@ export class SynthNodeState<T = any> extends SynthNode<T> {
   constructor(
     event: EventManager<TEventType<any>>,
     type?: INodeState,
-    channel?: number
+    channel?: number,
+    value?: T
   ) {
-    super(event, type as INodeKey, channel);
+    super(event, type as INodeKey, channel, value);
   }
 
   public setValue(value: T) {
@@ -19,6 +20,17 @@ export class SynthNodeState<T = any> extends SynthNode<T> {
       channel: this.channel,
       eventType: this.type,
       value: value,
+    });
+  }
+
+  public setLock(isLock: boolean) {
+    this.isLocked = isLock;
+
+    if (!this.type) return;
+    this.event?.trigger([this.type, "LOCK"], this.channel, {
+      channel: this.channel,
+      eventType: this.type,
+      value: isLock,
     });
   }
 }

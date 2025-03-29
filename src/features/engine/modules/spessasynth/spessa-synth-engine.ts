@@ -19,6 +19,14 @@ import { RemoteSendMessage } from "@/features/remote/types/remote.type";
 import { SoundSetting } from "@/features/config/types/config.type";
 import { SynthChannel } from "../instrumentals-node/modules/channel";
 import { InstrumentalNode } from "../instrumentals-node/modules/instrumental";
+import { InstrumentalNodeUpdate } from "../instrumentals-node/modules/instrumental/update";
+import {
+  CHORUSDEPTH,
+  EXPRESSION,
+  MAIN_VOLUME,
+  PAN,
+  REVERB,
+} from "../../types/node.type";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -33,7 +41,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public bassDetect: IProgramChange | undefined = undefined;
 
   public nodes: SynthChannel[] = [];
-  public instrumentalNodes: InstrumentalNode | undefined = undefined;
+  public instrumentalNodes = new InstrumentalNodeUpdate();
 
   public gainNode: AudioMeter | undefined = undefined;
   public config: Partial<SoundSetting> | undefined;
@@ -63,7 +71,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     if (!synth)
       return { audio: undefined, synth: undefined, player: undefined };
 
-    synth.highPerformanceMode = false;
+    synth.highPerformanceMode = true;
     const player = await loadPlayer(synth);
 
     this.synth = synth;
@@ -73,8 +81,10 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.synth?.setDrums(8, true);
 
     this.player = new SpessaPlayerEngine(player, config);
-    this.nodes = CHANNEL_DEFAULT.map((v, i) => new SynthChannel(i));
-    this.instrumentalNodes = new InstrumentalNode(this, this.nodes);
+    this.instrumentalNodes.setEngine(this);
+    this.nodes = CHANNEL_DEFAULT.map(
+      (v, i) => new SynthChannel(i, this.instrumentalNodes)
+    );
 
     if (audioContext) {
       const analysers: AnalyserNode[] = [];
@@ -93,6 +103,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
     this.controllerChange();
     this.programChange();
+
+    // CHANNEL_DEFAULT.map((_, ch) => synth.lockController(ch, EXPRESSION, true));
 
     return { synth: synth, audio: this.audio };
   }
@@ -212,28 +224,26 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "programchange",
       "",
       (e: IProgramChange) => {
-        const { channel, program } = e;
-        console.log(e);
+        const { channel } = e;
+        this.nodes[channel].programChange(e, "programChange");
+        // // console.log("programchange", e);
+        // const isBass = BASS.includes(program);
 
-        const isBass = BASS.includes(program);
+        // if (isBass) {
+        //   this.bassDetect = e;
+        // }
 
-        // this.conifgInit();
-        if (isBass) {
-          this.bassDetect = e;
-        }
+        // if (isBass && this.bassLocked) {
+        //   const lockNum: number = this.bassLocked;
 
-        if (isBass && this.bassLocked) {
-          const lockNum: number = this.bassLocked;
-
-          if (this.bassDetect?.program !== lockNum) {
-            this.setProgram({ channel, program: lockNum });
-            let bassMapping = { channel, program: lockNum };
-            this.nodes[channel].programChange(bassMapping);
-          }
-        } else {
-          this.nodes[channel].programChange(e);
-          this.instrumentalNodes?.regroupNodes();
-        }
+        //   if (this.bassDetect?.program !== lockNum) {
+        //     this.setProgram({ channel, program: lockNum });
+        //     let bassMapping = { channel, program: lockNum };
+        //     this.nodes[channel].programChange(bassMapping, "programChange");
+        //   }
+        // } else {
+        //   this.nodes[channel].programChange(e, "programChange");
+        // }
       }
     );
   }
@@ -252,18 +262,42 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
   setProgram(event: IProgramChange) {
     this.synth?.programChange(event.channel, event.program, event.userChange);
-    this.instrumentalNodes?.regroupNodes();
+    // this.instrumentalNodes?.regroupNodes();
   }
 
   setVelocity(event: IVelocityChange): void {
     this.synth?.velocityOverride(event.channel, event.value);
   }
 
-  setController(event: IControllerChange): void {
+  setController(event: IControllerChange, form?: string): void {
     const node = this.nodes[event.channel];
-    const isLocked = node.volume?.isLocked;
 
-    if (isLocked === true) {
+    let isLocked = false;
+
+    switch (event.controllerNumber) {
+      case MAIN_VOLUME:
+        isLocked = node.volume?.isLocked ?? false;
+        break;
+      case PAN:
+        isLocked = node.pan?.isLocked ?? false;
+        break;
+      case REVERB:
+        isLocked = node.reverb?.isLocked ?? false;
+        break;
+      case CHORUSDEPTH:
+        isLocked = node.chorus?.isLocked ?? false;
+        break;
+      case EXPRESSION:
+        isLocked = node.expression?.isLocked ?? false;
+        break;
+
+      default:
+        break;
+    }
+
+    console.log("isLocked", isLocked);
+
+    if (isLocked === true || event.force) {
       this.lockController({ ...event, controllerValue: false });
     }
     this.synth?.controllerChange(
@@ -272,8 +306,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       event.controllerValue,
       event.force
     );
-    console.log(event);
-    if (isLocked === true) {
+    console.log("Update Controller: ", event);
+    if (isLocked === true || event.force) {
       this.lockController({ ...event, controllerValue: true });
     }
     this.sendMessageData(node, event);

@@ -20,7 +20,11 @@ export interface SynthNodeProps<T = any> {
 }
 
 export interface TEventCallBack<T = any> {
-  channel: number;
   value: T;
-  eventType: INodeKey;
+  channel?: number;
+  eventType?: INodeKey;
+}
+export interface InstValueSetting {
+  velocity: number;
+  expression: number;
 }

@@ -6,6 +6,7 @@ import { NodeType } from "@/features/engine/types/node.type";
 import { AudioMeter } from "../lib/gain";
 import { SynthChannel } from "../modules/instrumentals-node/modules/channel";
 import { InstrumentalNode } from "../modules/instrumentals-node/modules/instrumental";
+import { InstrumentalNodeUpdate } from "../modules/instrumentals-node/modules/instrumental/update";
 export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
   time: TimingModeType;
@@ -14,7 +15,7 @@ export interface BaseSynthEngine {
   analysers: AnalyserNode[];
   synth: Spessasynth | JsSynthesizer | undefined;
   nodes?: SynthChannel[] | undefined;
-  instrumentalNodes: InstrumentalNode | undefined;
+  instrumentalNodes: InstrumentalNodeUpdate | undefined;
 
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;
@@ -29,7 +30,7 @@ export interface BaseSynthEngine {
   soundfontName: string | undefined;
   soundfontFile: File | undefined;
 
-  setController(event: IControllerChange): void;
+  setController(event: IControllerChange, from?: string): void;
   lockController(event: IControllerChange<boolean>): void;
   updatePreset(channel: number, value: number): void;
   updatePitch(channel: number | null, semitones?: number): void;

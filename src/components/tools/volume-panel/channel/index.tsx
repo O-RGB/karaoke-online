@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import InstrumentsButton from "../instruments-button";
 import VolumeAction from "../volume-action";
-import { MAIN_VOLUME } from "@/features/engine/types/node.type";
+import { EXPRESSION, MAIN_VOLUME } from "@/features/engine/types/node.type";
 import MixNodeController from "../mix-controller/node-controller";
 import {
   IControllerChange,
@@ -31,7 +31,14 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
   onChange,
   node,
 }) => {
-  useEffect(() => {}, [isShow, node]);
+  useEffect(() => {
+    onLockChange?.({
+      channel: channel,
+      controllerNumber: EXPRESSION,
+      controllerValue: true,
+      force: true,
+    });
+  }, [isShow, node]);
 
   if (!node) return <></>;
 

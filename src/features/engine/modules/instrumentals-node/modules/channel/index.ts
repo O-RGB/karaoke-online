@@ -2,6 +2,7 @@ import { AudioMeter } from "@/features/engine/lib/gain";
 import { SynthNode } from "../node";
 import { EventManager } from "../events";
 import { EventKey, TEventType } from "../types/node.type";
+import { SynthNodeState } from "../state";
 import {
   IControllerChange,
   IProgramChange,
@@ -11,8 +12,10 @@ import {
   PAN,
   REVERB,
   CHORUSDEPTH,
+  EXPRESSION,
 } from "@/features/engine/types/node.type";
-import { SynthNodeState } from "../state";
+import { InstrumentalNode } from "../instrumental";
+import { InstrumentalNodeUpdate } from "../instrumental/update";
 
 export class SynthChannel {
   // Index
@@ -42,8 +45,12 @@ export class SynthChannel {
   public nodeEvent = new EventManager<TEventType<any>>();
   public stateEvent = new EventManager<TEventType<any>>();
 
-  constructor(channel: number) {
+  // Group
+  public instrumental: InstrumentalNodeUpdate | undefined = undefined;
+
+  constructor(channel: number, instrumental: InstrumentalNodeUpdate) {
     this.channel = channel;
+    this.instrumental = instrumental;
     this.volume = new SynthNode(this.nodeEvent, "VOLUME", channel, 100);
     this.chorus = new SynthNode(this.nodeEvent, "CHORUS", channel, 100);
     this.reverb = new SynthNode(this.nodeEvent, "REVERB", channel, 100);
@@ -56,6 +63,7 @@ export class SynthChannel {
       "EXPRESSION",
       channel
     );
+    this.expression.setLock(true);
   }
 
   public setAnalyser(analyserNode: AnalyserNode) {
@@ -91,12 +99,17 @@ export class SynthChannel {
       case CHORUSDEPTH:
         this.chorus && action(this.chorus, event.controllerValue);
         break;
+      case EXPRESSION:
+        this.expression && action(this.expression, event.controllerValue);
+        break;
       default:
         break;
     }
   }
-  public programChange(event: IProgramChange) {
+  public programChange(event: IProgramChange, form: string) {
     this.program?.setValue(event.program);
+    const oldIndex: number = this.program?.value ?? 0;
+    this.instrumental?.update(event, oldIndex, this);
   }
 
   public controllerChange(event: IControllerChange<any>) {

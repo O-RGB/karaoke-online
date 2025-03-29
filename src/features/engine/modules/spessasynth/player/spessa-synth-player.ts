@@ -64,8 +64,6 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
     if (!this.player) {
       return;
     }
-    // const duration = this.duration ?? 0;
-    // const newCurrentTime = (timing / 100) * duration;
     this.player.currentTime = timing;
   }
 

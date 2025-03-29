@@ -6,7 +6,7 @@ import LockSoundModal from "./lock-sound-modal";
 import { FaLock } from "react-icons/fa";
 import EngineSoundModal from "./engine-sound-modal";
 import { PiEngineFill } from "react-icons/pi";
-import InstrumentalModal from "./instrumental-modal";
+import InstrumentalModal from "./instrumental";
 import { GiGuitar } from "react-icons/gi";
 
 interface SoundSettingModalProps {}

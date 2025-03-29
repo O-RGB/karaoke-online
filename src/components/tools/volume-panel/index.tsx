@@ -27,7 +27,7 @@ import {
   IProgramChange,
 } from "@/features/engine/types/synth.type";
 // import FullMixer from "./full-mixer";
-import { MAIN_VOLUME } from "@/features/engine/types/node.type";
+import { EXPRESSION, MAIN_VOLUME } from "@/features/engine/types/node.type";
 
 interface VolumePanelProps {
   onVolumeChange?: (value: ISetChannelGain) => void;
@@ -101,7 +101,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
   };
 
   const onControllerChange = (value: IControllerChange) => {
-    engine?.setController(value);
+    engine?.setController(value, "mixer.onControllerChange");
   };
 
   useEffect(() => {}, [engine?.nodes]);
