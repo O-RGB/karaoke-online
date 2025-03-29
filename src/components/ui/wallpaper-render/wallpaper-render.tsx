@@ -53,6 +53,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
     }
   }, [wallpaper, isVideo]);
 
+  useEffect(() => {}, [wallpaperLoadingTitle]);
   return (
     <>
       <div

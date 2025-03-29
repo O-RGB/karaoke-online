@@ -72,6 +72,7 @@ export async function initDatabase(
   autoIncrement: boolean = true
 ): Promise<IDBPDatabase> {
   try {
+    // ปิดฐานข้อมูลทั้งหมดก่อน
     await closeDatabaseConnections();
 
     const db = await openDB(DB_NAME, DB_VERSION, {
@@ -86,10 +87,18 @@ export async function initDatabase(
         });
       },
       blocked() {
-        console.warn("Database upgrade was blocked");
+        console.warn(
+          "Database upgrade was blocked. Closing old connections..."
+        );
+        alert("Database update blocked. Please reload the page.");
       },
       blocking() {
-        console.warn("Database is blocking upgrade");
+        console.warn("Database is blocking upgrade. Closing connection...");
+        indexedDB.databases().then((dbs) => {
+          dbs.forEach((dbInfo) => {
+            if (dbInfo.name === DB_NAME) indexedDB.deleteDatabase(DB_NAME);
+          });
+        });
       },
       terminated() {
         console.error("Database connection was terminated unexpectedly");
@@ -99,8 +108,18 @@ export async function initDatabase(
     return db;
   } catch (error) {
     console.error("Failed to initialize database:", error);
+
+    console.log("Attempting to delete and recreate database...");
+
+    await closeDatabaseConnections();
     await deleteDatabase();
-    return initDatabase();
+
+    // ลองใหม่หลังจากลบ
+    return new Promise((resolve) => {
+      setTimeout(async () => {
+        resolve(await initDatabase());
+      }, 500);
+    });
   }
 }
 

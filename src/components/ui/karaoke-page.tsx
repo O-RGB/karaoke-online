@@ -55,6 +55,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const [prepareMessage, setPrepareMessage] = useState<string>();
 
   const startup = async () => {
+    setPrepare(true);
     setPrepareMessage("กำลังโหลดเพลง");
     setup(config.system?.engine);
     initializeKeyboardListeners();
@@ -68,7 +69,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     setTimeout(() => {
       setPrepare(false);
       setPrepareMessage(undefined);
-    }, 500);
+    }, 1000);
   };
 
   useEffect(() => {
