@@ -32,7 +32,7 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
         }}
         className={`${
           selected === type ? "bg-blue-500 text-white" : ""
-        } h-32 border rounded text-center hover:bg-gray-100 duration-300 cursor-pointer`}
+        } h-20 border rounded text-center hover:bg-gray-100 duration-300 cursor-pointer`}
       >
         <div className="pt-2">
           <span className="text-sm">

@@ -5,8 +5,8 @@ import { DataController, MainNodeController } from "@/features/engine/lib/node";
 import { NodeType } from "@/features/engine/types/node.type";
 import { AudioMeter } from "../lib/gain";
 import { SynthChannel } from "../modules/instrumentals-node/modules/channel";
-import { InstrumentalNode } from "../modules/instrumentals-node/modules/instrumental";
-import { InstrumentalNodeUpdate } from "../modules/instrumentals-node/modules/instrumental/update";
+import { InstrumentalNode } from "../modules/instrumentals-node/modules/instrumental/update";
+import { BassConfig } from "../modules/instrumentals-node/modules/config";
 export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
   time: TimingModeType;
@@ -15,7 +15,7 @@ export interface BaseSynthEngine {
   analysers: AnalyserNode[];
   synth: Spessasynth | JsSynthesizer | undefined;
   nodes?: SynthChannel[] | undefined;
-  instrumentalNodes: InstrumentalNodeUpdate | undefined;
+  instrumental: InstrumentalNode | undefined;
 
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;
@@ -38,15 +38,12 @@ export interface BaseSynthEngine {
   setVelocity(event: IVelocityChange): void;
 
   setMute(event: IControllerChange<boolean>): void;
-  setBassLocked(baseNumber: number, isLock: boolean): void;
-
   setupMIDIEventHook?(): void;
-
-  bassLocked?: number;
-  bassDetect?: IProgramChange;
 
   controllerItem?: MainNodeController;
   gainNode?: AudioMeter;
+  bassConfig?: BassConfig;
+  setBassLock(program: number): void;
 }
 
 export interface ControllerItemList {

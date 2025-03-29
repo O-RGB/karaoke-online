@@ -14,8 +14,9 @@ import {
   CHORUSDEPTH,
   EXPRESSION,
 } from "@/features/engine/types/node.type";
-import { InstrumentalNode } from "../instrumental";
-import { InstrumentalNodeUpdate } from "../instrumental/update";
+import { InstrumentalNode } from "../instrumental/update";
+import { BassConfig } from "../config";
+import { SoundSetting } from "@/features/config/types/config.type";
 
 export class SynthChannel {
   // Index
@@ -46,9 +47,9 @@ export class SynthChannel {
   public stateEvent = new EventManager<TEventType<any>>();
 
   // Group
-  public instrumental: InstrumentalNodeUpdate | undefined = undefined;
+  public instrumental: InstrumentalNode | undefined = undefined;
 
-  constructor(channel: number, instrumental: InstrumentalNodeUpdate) {
+  constructor(channel: number, instrumental: InstrumentalNode) {
     this.channel = channel;
     this.instrumental = instrumental;
     this.volume = new SynthNode(this.nodeEvent, "VOLUME", channel, 100);

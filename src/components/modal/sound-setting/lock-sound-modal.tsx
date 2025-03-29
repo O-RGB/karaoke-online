@@ -5,6 +5,7 @@ import useConfigStore from "@/features/config/config-store";
 import React, { useEffect, useState } from "react";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
+import { SoundSetting } from "@/features/config/types/config.type";
 
 interface LockSoundModalProps {}
 
@@ -13,33 +14,22 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
   const config = useConfigStore((state) => state.config);
   const lockBased = config.sound?.lockBase;
   const [onLockBase, setLockBase] = useState<boolean>(false);
-
-  // const preset = useSynthesizerEngine((state) => state.engine?.preset);
   const instrument = useMixerStoreNew.getState().instrument;
-
   const engine = useSynthesizerEngine((state) => state.engine);
-  // const volumeSetting = synth ? volumeSynth(synth) : null;
 
   const updateLocked = (program: number) => {
-    engine?.setBassLocked(program, true);
-    // volumeSetting?.updateLockedPreset(1, false);
-    // volumeSetting?.updatePreset(1, program);
-    // volumeSetting?.updateLockedPreset(1, true);
-    // engine?.lockController()
+    engine?.bassConfig?.setLockBass(program);
+    engine?.setBassLock(program);
   };
 
   const onBaseLock = (value: boolean) => {
     setLockBase(value);
-    engine?.setBassLocked(0, value);
-
-    // if (!value) {
-    //   setConfig({ sound: { lockBase: undefined } });
-    //   volumeSetting?.updateLockedPreset(1, false);
-    // } else {
-    //   setConfig({ sound: { lockBase: 32 } });
-    //   updateLocked(32);
-    //   volumeSetting?.updateLockedPreset(1, true);
-    // }
+    engine?.bassConfig?.setActive(value);
+    let sound: Partial<SoundSetting> = config.sound ?? {};
+    if (!value) {
+      delete sound.lockBase;
+    }
+    setConfig({ sound });
   };
 
   const onBaseChange = (program: string) => {

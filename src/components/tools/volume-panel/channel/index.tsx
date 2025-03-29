@@ -31,14 +31,7 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
   onChange,
   node,
 }) => {
-  useEffect(() => {
-    onLockChange?.({
-      channel: channel,
-      controllerNumber: EXPRESSION,
-      controllerValue: true,
-      force: true,
-    });
-  }, [isShow, node]);
+  useEffect(() => {}, [isShow, node]);
 
   if (!node) return <></>;
 

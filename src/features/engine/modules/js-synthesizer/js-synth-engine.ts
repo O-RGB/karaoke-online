@@ -12,12 +12,8 @@ import {
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { MainNodeController } from "@/features/engine/lib/node";
 import { AudioMeter } from "../../lib/gain";
-import { INodeCallBack } from "../../types/node.type";
 import { ChannelGainMonitor } from "./lib/channel-gain-monitor";
-import { InstNode } from "../instrumentals-node/lib/inst-node";
-import { InstrumentalNode } from "../instrumentals-node/modules/instrumental";
-import { InstrumentalNodeUpdate } from "../instrumentals-node/modules/instrumental/update";
-// import { InstrumentalNode } from "../instrumentals-node/lib/instrumental";
+import { InstrumentalNode } from "../instrumentals-node/modules/instrumental/update";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -28,10 +24,8 @@ export class JsSynthEngine implements BaseSynthEngine {
   public analysers: AnalyserNode[] = [];
   public soundfontName: string | undefined;
   public soundfontFile: File | undefined;
-  public bassLocked: number | undefined = undefined;
-  // public nodes: InstNode[] = [];
-  // public categoryNode: InstrumentalNode | undefined;
-  instrumentalNodes: InstrumentalNodeUpdate | undefined;
+
+  instrumental: InstrumentalNode | undefined;
 
   public controllerItem: MainNodeController | undefined = undefined;
   public gainNode: AudioMeter | undefined = undefined;
@@ -205,5 +199,5 @@ export class JsSynthEngine implements BaseSynthEngine {
     // );
   }
 
-  setBassLocked(bassNumber: number): void {}
+  setBassLock(bassNumber: number): void {}
 }

@@ -11,22 +11,20 @@ const InstrumentalModal: React.FC<InstrumentalModalProps> = ({}) => {
   const [selectType, setSelectType] = useState<InstrumentType>();
   const [selectIndex, setSelectIndex] = useState<number>();
 
-  const inst = useSynthesizerEngine((state) => state.engine?.instrumentalNodes);
+  const instrumental = useSynthesizerEngine(
+    (state) => state.engine?.instrumental
+  );
 
   const onClickType = (type: InstrumentType, indexKey: number) => {
     setSelectType(type);
     setSelectIndex(indexKey);
-
-    // inst?.getExperssion(indexKey);
-    // inst?.getVelocity(indexKey);
   };
 
-  useEffect(() => {}, [inst?.group]);
+  useEffect(() => {}, [instrumental?.group]);
 
   return (
     <div className="grid grid-cols-8">
-      
-      <div className="col-span-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+      <div className="col-span-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
         {INSTRUMENT_TYPE_BY_INDEX.map((value, index) => {
           return (
             <React.Fragment key={`card-inst-${index}`}>
@@ -44,16 +42,16 @@ const InstrumentalModal: React.FC<InstrumentalModalProps> = ({}) => {
         {selectType && (
           <>
             <InstrumentalSetting
-              inst={inst}
+              instrumental={instrumental}
               selectedIndex={selectIndex}
               selectedType={selectType}
-              valueKey="expression"
+              valueKey="EXPRESSION"
             ></InstrumentalSetting>
             <InstrumentalSetting
-              inst={inst}
+              instrumental={instrumental}
               selectedIndex={selectIndex}
               selectedType={selectType}
-              valueKey="velocity"
+              valueKey="VELOCITY"
             ></InstrumentalSetting>
           </>
         )}
