@@ -140,22 +140,6 @@ export async function deleteAllStores(): Promise<IDBPDatabase> {
   return db;
 }
 
-export function deleteDatabase(dbName: string = DB_NAME): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const deleteRequest = indexedDB.deleteDatabase(dbName);
-
-    deleteRequest.onsuccess = () => {
-      console.log("Database deleted successfully");
-      resolve(true);
-    };
-
-    deleteRequest.onerror = (event) => {
-      console.error("Failed to delete database:", event);
-      reject(event);
-    };
-
-    deleteRequest.onblocked = () => {
-      console.warn("Database deletion was blocked");
-    };
-  });
+export function deleteDatabase(dbName: string = DB_NAME) {
+  return indexedDB.deleteDatabase(dbName);
 }
