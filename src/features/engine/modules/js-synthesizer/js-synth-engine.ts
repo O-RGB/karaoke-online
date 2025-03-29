@@ -16,6 +16,7 @@ import { INodeCallBack } from "../../types/node.type";
 import { ChannelGainMonitor } from "./lib/channel-gain-monitor";
 import { InstNode } from "../instrumentals-node/lib/inst-node";
 import { InstrumentalNode } from "../instrumentals-node/modules/instrumental";
+import { InstrumentalNodeUpdate } from "../instrumentals-node/modules/instrumental/update";
 // import { InstrumentalNode } from "../instrumentals-node/lib/instrumental";
 
 export class JsSynthEngine implements BaseSynthEngine {
@@ -30,7 +31,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   public bassLocked: number | undefined = undefined;
   // public nodes: InstNode[] = [];
   // public categoryNode: InstrumentalNode | undefined;
-  instrumentalNodes: InstrumentalNode | undefined;
+  instrumentalNodes: InstrumentalNodeUpdate | undefined;
 
   public controllerItem: MainNodeController | undefined = undefined;
   public gainNode: AudioMeter | undefined = undefined;
