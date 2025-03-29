@@ -92,6 +92,8 @@ export class InstrumentalNode {
       const oldTypeChannels = this.group.get(oldType.category);
       if (oldTypeChannels) {
         oldTypeChannels.delete(event.channel);
+        const oldExpression = this.expression[oldType.index].value ?? 100;
+        this.setExpression(oldType.category, oldExpression, oldType.index);
       }
     }
 
@@ -100,6 +102,8 @@ export class InstrumentalNode {
 
     byType.set(event.channel, value);
     this.group.set(type, byType);
+    const newExpression = this.expression[newType.index].value ?? 100;
+    this.setExpression(newType.category, newExpression, newType.index);
   }
 
   setExpression(type: InstrumentType, value: number, indexKey: number) {
