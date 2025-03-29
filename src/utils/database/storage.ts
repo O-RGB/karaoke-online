@@ -9,7 +9,7 @@ export async function storageGet<T = any>(
   mode: "readonly" = "readonly"
 ): Promise<IndexedDbReslut<T | undefined>> {
   try {
-    const db = await getDB(storage_name, true);
+    const db = await getDB(storage_name);
     const tx = db.transaction(storage_name, mode);
     const store = tx.objectStore(storage_name);
     const data = await store.get(key);
@@ -184,7 +184,7 @@ export async function storageAddAll(
   onProgress?: (progress?: IProgressBar) => void,
   mode: "readwrite" = "readwrite"
 ) {
-  const db = await getDB(storage_name, true);
+  const db = await getDB(storage_name);
   const tx = db.transaction(storage_name, mode);
   const store = tx.objectStore(storage_name);
   let error = undefined;

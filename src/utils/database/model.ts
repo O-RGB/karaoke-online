@@ -15,7 +15,7 @@ import { getDB } from "./db";
 // export const STORAGE_USER_TRACKLIST = "user_tracklist";
 export const UserSongModel = async () => {
   try {
-    const db = await getDB(STORAGE_USER_SONG, true);
+    const db = await getDB(STORAGE_USER_SONG);
     const tx = db.transaction(STORAGE_USER_SONG, "readwrite");
     const store = tx.objectStore(STORAGE_USER_SONG);
     return { store, tx, db, loaded: true };
@@ -25,7 +25,7 @@ export const UserSongModel = async () => {
 };
 export const UserTracklistModel = async () => {
   try {
-    const db = await getDB(STORAGE_USER_TRACKLIST, true);
+    const db = await getDB(STORAGE_USER_TRACKLIST);
     const tx = db.transaction(STORAGE_USER_TRACKLIST, "readwrite");
     const store = tx.objectStore(STORAGE_USER_TRACKLIST);
     return { store, tx, db, loaded: true };
@@ -39,7 +39,7 @@ export const UserTracklistModel = async () => {
 // export const STORAGE_EXTREME_SONG = "extreme_song";
 export const ExtremeTracklistModel = async () => {
   try {
-    const db = await getDB(STORAGE_EXTREME_TRACKLIST, true);
+    const db = await getDB(STORAGE_EXTREME_TRACKLIST);
     const tx = db.transaction(STORAGE_EXTREME_TRACKLIST, "readwrite");
     const store = tx.objectStore(STORAGE_EXTREME_TRACKLIST);
     return { store, tx, db, loaded: true };
@@ -49,7 +49,7 @@ export const ExtremeTracklistModel = async () => {
 };
 export const ExtremeSongModel = async () => {
   try {
-    const db = await getDB(STORAGE_EXTREME_SONG, true);
+    const db = await getDB(STORAGE_EXTREME_SONG);
     const tx = db.transaction(STORAGE_EXTREME_SONG, "readwrite");
     const store = tx.objectStore(STORAGE_EXTREME_SONG);
     return { store, tx, db, loaded: true };
@@ -63,7 +63,7 @@ export const ExtremeSongModel = async () => {
 
 export const DriveSongModel = async () => {
   try {
-    const db = await getDB(STORAGE_DRIVE_SONG, true);
+    const db = await getDB(STORAGE_DRIVE_SONG);
     const tx = db.transaction(STORAGE_DRIVE_SONG, "readwrite");
     const store = tx.objectStore(STORAGE_DRIVE_SONG);
     return { store, tx, db, loaded: true };
@@ -73,7 +73,7 @@ export const DriveSongModel = async () => {
 };
 export const DriveTracklistSongModel = async () => {
   try {
-    const db = await getDB(STORAGE_DRIVE_TRACKLIST_SONG, true);
+    const db = await getDB(STORAGE_DRIVE_TRACKLIST_SONG);
     const tx = db.transaction(STORAGE_DRIVE_TRACKLIST_SONG, "readwrite");
     const store = tx.objectStore(STORAGE_DRIVE_TRACKLIST_SONG);
     return { store, tx, db, loaded: true };
@@ -86,7 +86,7 @@ export const DriveTracklistSongModel = async () => {
 // export const STORAGE_DRIVE_EXTREME_TRACKLIST = "drive_extreme_tracklist";
 export const DriveExtremeModel = async () => {
   try {
-    const db = await getDB(STORAGE_DRIVE_EXTREME_SONG, true);
+    const db = await getDB(STORAGE_DRIVE_EXTREME_SONG);
     const tx = db.transaction(STORAGE_DRIVE_EXTREME_SONG, "readwrite");
     const store = tx.objectStore(STORAGE_DRIVE_EXTREME_SONG);
     return { store, tx, db, loaded: true };
@@ -96,7 +96,7 @@ export const DriveExtremeModel = async () => {
 };
 export const DriveExtremeTracklistModel = async () => {
   try {
-    const db = await getDB(STORAGE_DRIVE_EXTREME_TRACKLIST, true);
+    const db = await getDB(STORAGE_DRIVE_EXTREME_TRACKLIST);
     const tx = db.transaction(STORAGE_DRIVE_EXTREME_TRACKLIST, "readwrite");
     const store = tx.objectStore(STORAGE_DRIVE_EXTREME_TRACKLIST);
     return { store, tx, db, loaded: true };
