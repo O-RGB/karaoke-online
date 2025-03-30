@@ -80,11 +80,9 @@ export class InstrumentalNode {
     this.expression = INSTRUMENT_TYPE_BY_INDEX.map(
       (_, i) => new SynthNode(this.settingEvent, "EXPRESSION", i, 100)
     );
-    // this.velocity = INSTRUMENT_TYPE_BY_INDEX.map(
-    //   (_, i) => new SynthNode(this.settingEvent, "VELOCITY", i, 0)
-    // );
-
-    this.settingEvent.openDebug(true, "EXPRESSION");
+    this.velocity = INSTRUMENT_TYPE_BY_INDEX.map(
+      (_, i) => new SynthNode(this.settingEvent, "VELOCITY", i, 0)
+    );
   }
 
   public update(
@@ -106,7 +104,9 @@ export class InstrumentalNode {
       if (oldTypeChannels) {
         oldTypeChannels.delete(event.channel);
         const oldExpression = this.expression[oldType.index].value ?? 100;
+        const oldVelocity = this.velocity[oldType.index].value ?? 0;
         this.updateController(event.channel, oldExpression);
+        this.updateVelocity(event.channel, oldVelocity);
       }
     }
 
@@ -118,6 +118,8 @@ export class InstrumentalNode {
 
     const newExpression = this.expression[newType.index].value ?? 100;
     this.updateController(event.channel, newExpression);
+    const newVelocity = this.velocity[newType.index].value ?? 0;
+    this.updateVelocity(event.channel, newVelocity);
 
     this.groupEvent.trigger([newType.category, "CHANGE"], newType.index, {
       value: byType,
@@ -128,12 +130,15 @@ export class InstrumentalNode {
     const nodes: Map<number, SynthChannel> = this.group.get(type) ?? new Map();
     nodes.forEach((node) => {
       if (node.expression !== undefined && node.channel !== undefined) {
+        console.log("setExpression Link Ch:", node.channel + 1);
         if (node.channel !== 9) {
           this.updateController(node.channel, value);
           node.expression.setValue(value);
         }
       }
     });
+
+    console.log("this.expression", this.expression);
 
     this.expression[indexKey].setValue(value);
     this.settingEvent.trigger(["EXPRESSION", "CHANGE"], indexKey, { value });
@@ -163,6 +168,12 @@ export class InstrumentalNode {
     }
   }
 
+  updateVelocity(channel: number, value: number) {
+    if (channel !== 9 && channel !== 8) {
+      this.engine?.setVelocity({ channel, value });
+    }
+  }
+
   setCallBackState(
     eventType: EventKey,
     indexKey: number,
@@ -173,11 +184,18 @@ export class InstrumentalNode {
     let value: number = 100;
     if (eventType[0] === "EXPRESSION") {
       value = this.expression[indexKey].value ?? 100;
+    } else if (eventType[0] === "VELOCITY") {
+      value = this.velocity[indexKey].value ?? 0;
     }
-    // else if (eventType[0] === "VELOCITY") {
-    //   value = this.velocity[indexKey].value ?? 0;
-    // }
     callback({ value });
+  }
+
+  removeCallback(
+    eventType: EventKey,
+    indexKey: number,
+    componentId: string
+  ): boolean {
+    return this.settingEvent.remove(eventType, indexKey, componentId);
   }
 
   setCallBackGroup(
@@ -189,13 +207,5 @@ export class InstrumentalNode {
     this.groupEvent.add(eventType, indexKey, callback, componentId);
     const value = this.group.get(eventType[0]);
     callback({ value });
-  }
-
-  removeCallback(
-    eventType: EventKey,
-    indexKey: number,
-    componentId: string
-  ): boolean {
-    return this.settingEvent.remove(eventType, indexKey, componentId);
   }
 }

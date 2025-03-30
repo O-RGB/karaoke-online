@@ -20,15 +20,15 @@ const ChannelLimit: React.FC<ChannelLimitProps> = ({
 }) => {
   const componentId = useId();
   const [category, setCategory] = useState<number>(0);
-  const [program, setProgram] = useState<number | undefined>(undefined);
+  const [program, setProgram] = useState<number>(0);
 
   const onProgramChange = (value: TEventType<number>) => {
-    setProgram(undefined);
-    setTimeout(() => {
-      const category = findProgramCategory(value.value);
-      setProgram(value.value);
-      if (category?.index) setCategory(category?.index);
-    }, 50);
+    // setProgram(undefined);
+    // setTimeout(() => {
+    const category = findProgramCategory(value.value);
+    setProgram(value.value);
+    if (category?.index) setCategory(category?.index);
+    // }, 50);
   };
 
   useEffect(() => {

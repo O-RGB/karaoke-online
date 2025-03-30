@@ -10,7 +10,7 @@ import React, { useEffect, useId, useState } from "react";
 interface InstrumentalSettingProps {
   instrumental?: InstrumentalNode;
   selectedType?: InstrumentType;
-  selectedIndex?: number;
+  selectedIndex: number;
   valueKey: INodeState;
   color: string;
 }
@@ -29,7 +29,7 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
   );
 
   const onValueChange = (value: number) => {
-    if (selectedType === undefined || selectedIndex === undefined) return;
+    if (selectedType === undefined) return;
     if (valueKey === "EXPRESSION") {
       instrumental?.setExpression(selectedType, value, selectedIndex);
     } else {
@@ -38,7 +38,7 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
   };
 
   useEffect(() => {
-    if (selectedIndex === undefined || !instrumental) return;
+    if (!instrumental) return;
 
     instrumental.setCallBackState(
       [valueKey, "CHANGE"],
@@ -57,8 +57,6 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
       );
     };
   }, [instrumental, selectedIndex, selectedType]);
-
-  if (selectedIndex === undefined) return <></>;
 
   return (
     <>

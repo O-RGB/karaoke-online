@@ -76,19 +76,19 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
       onClick={() => onClick?.(type, index)}
       className={`${
         selected === type ? "border-blue-500 border-2" : "bg-white"
-      } flex items-center h-8 w-full border hover:bg-gray-100 duration-300 cursor-pointer p-2 relative`}
+      } flex items-center min-h-8 w-full border  cursor-pointer p-2 relative`}
     >
-      <div className="relative z-10 flex gap-1">
+      <div className="relative z-10 flex flex-wrap gap-1">
         <span className="text-sm font-medium">
           <span>{`${index + 1}`}.</span> {text}
         </span>
-        <div className="flex gap-1 text-xs">
+        <div className="flex flex-wrap gap-1 text-xs">
           {Array.from(channelRef.entries()).map(
             ([i, value]) =>
               value.channel !== undefined && (
                 <div
                   key={`ch-ref-${i}`}
-                  className="border m-auto px-1 rounded bg-white"
+                  className="border px-1 rounded bg-white w-fit"
                 >
                   ch:{value.channel + 1}{" "}
                 </div>

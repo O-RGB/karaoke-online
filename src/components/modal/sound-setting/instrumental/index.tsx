@@ -9,7 +9,7 @@ interface InstrumentalModalProps {}
 
 const InstrumentalModal: React.FC<InstrumentalModalProps> = ({}) => {
   const [selectType, setSelectType] = useState<InstrumentType>();
-  const [selectIndex, setSelectIndex] = useState<number>();
+  const [selectIndex, setSelectIndex] = useState<number>(0);
 
   const instrumental = useSynthesizerEngine(
     (state) => state.engine?.instrumental
