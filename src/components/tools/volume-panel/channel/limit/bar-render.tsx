@@ -1,4 +1,4 @@
-import { InstrumentalNode } from "@/features/engine/modules/instrumentals-node/modules/instrumental";
+import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
 import React, { useEffect, useState } from "react";
 
 interface LimitBarRenderProps {

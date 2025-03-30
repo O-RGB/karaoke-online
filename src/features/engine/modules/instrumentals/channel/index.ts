@@ -1,8 +1,7 @@
 import { AudioMeter } from "@/features/engine/lib/gain";
 import { SynthNode } from "../node";
 import { EventManager } from "../events";
-import { EventKey, TEventType } from "../types/node.type";
-import { SynthNodeState } from "../state";
+import { EventKey, INodeKey, INodeState, TEventType } from "../types/node.type";
 import {
   IControllerChange,
   IProgramChange,
@@ -15,36 +14,34 @@ import {
   EXPRESSION,
 } from "@/features/engine/types/node.type";
 import { InstrumentalNode } from "../instrumental";
-import { BassConfig } from "../config";
-import { SoundSetting } from "@/features/config/types/config.type";
 
 export class SynthChannel {
   // Index
   public channel: number | undefined;
 
   // Value
-  public volume: SynthNode | undefined = undefined;
+  public volume?: SynthNode<INodeKey, number> = undefined;
 
   // Effect
-  public chorus: SynthNode<number> | undefined = undefined;
-  public reverb: SynthNode<number> | undefined = undefined;
-  public transpose: SynthNode<number> | undefined = undefined;
-  public pan: SynthNode<number> | undefined = undefined;
+  public chorus: SynthNode<INodeKey, number> | undefined = undefined;
+  public reverb: SynthNode<INodeKey, number> | undefined = undefined;
+  public transpose: SynthNode<INodeKey, number> | undefined = undefined;
+  public pan: SynthNode<INodeKey, number> | undefined = undefined;
 
   // State
-  public velocity: SynthNodeState<number> | undefined = undefined;
-  public expression: SynthNodeState<number> | undefined = undefined;
-  public program: SynthNodeState<number> | undefined = undefined;
-  public isDrum: SynthNodeState<boolean> | undefined = undefined;
-  public isActive: SynthNodeState<boolean> | undefined = undefined;
+  public velocity: SynthNode<INodeState, number> | undefined = undefined;
+  public expression: SynthNode<INodeState, number> | undefined = undefined;
+  public program: SynthNode<INodeState, number> | undefined = undefined;
+  public isDrum: SynthNode<INodeState, boolean> | undefined = undefined;
+  public isActive: SynthNode<INodeState, boolean> | undefined = undefined;
 
   // Render
   public analyserNode?: AnalyserNode | undefined = undefined;
   public gain: AudioMeter | undefined = undefined;
 
   // Event
-  public nodeEvent = new EventManager<TEventType<any>>();
-  public stateEvent = new EventManager<TEventType<any>>();
+  public nodeEvent = new EventManager<INodeKey, TEventType<number>>();
+  public stateEvent = new EventManager<INodeState, TEventType<any>>();
 
   // Group
   public instrumental: InstrumentalNode | undefined = undefined;
@@ -57,13 +54,9 @@ export class SynthChannel {
     this.reverb = new SynthNode(this.nodeEvent, "REVERB", channel, 100);
     this.pan = new SynthNode(this.nodeEvent, "PAN", channel, 100);
 
-    this.program = new SynthNodeState(this.stateEvent, "PROGARM", channel);
-    this.velocity = new SynthNodeState(this.stateEvent, "VELOCITY", channel);
-    this.expression = new SynthNodeState(
-      this.stateEvent,
-      "EXPRESSION",
-      channel
-    );
+    this.program = new SynthNode(this.stateEvent, "PROGARM", channel);
+    this.velocity = new SynthNode(this.stateEvent, "VELOCITY", channel);
+    this.expression = new SynthNode(this.stateEvent, "EXPRESSION", channel);
     this.expression.setLock(true);
   }
 
@@ -109,8 +102,9 @@ export class SynthChannel {
   }
   public programChange(event: IProgramChange, form: string) {
     const oldIndex: number = this.program?.value ?? 0;
+    const oldChannel: number = this.channel ?? 0;
     this.program?.setValue(event.program);
-    this.instrumental?.update(event, oldIndex, this);
+    this.instrumental?.update(event, oldIndex, oldChannel, this);
   }
 
   public controllerChange(event: IControllerChange<any>) {
@@ -131,27 +125,27 @@ export class SynthChannel {
     });
   }
 
-  setCallBack<T = any>(
-    eventType: EventKey,
-    channel: number,
-    callback: (event: TEventType<T>) => void
+  setCallBack(
+    eventType: EventKey<INodeKey>,
+    index: number,
+    callback: (event: TEventType<number>) => void
   ): void {
-    this.nodeEvent.add(eventType, channel, callback);
+    this.nodeEvent.add(eventType, index, callback);
   }
 
-  setCallBackState<T = any>(
-    eventType: EventKey,
-    channel: number,
-    callback: (event: TEventType<T>) => void
+  setCallBackState(
+    eventType: EventKey<INodeState>,
+    index: number,
+    callback: (event: TEventType<any>) => void
   ): void {
-    this.stateEvent.add(eventType, channel, callback);
+    this.stateEvent.add(eventType, index, callback);
   }
 
   removeCallback(
-    eventType: EventKey,
-    channel: number,
-    callback: (event: TEventType<any>) => void
+    eventType: EventKey<INodeKey>,
+    index: number,
+    callback: (event: TEventType<number>) => void
   ): boolean {
-    return this.nodeEvent.remove(eventType, channel, callback);
+    return this.nodeEvent.remove(eventType, index, callback);
   }
 }

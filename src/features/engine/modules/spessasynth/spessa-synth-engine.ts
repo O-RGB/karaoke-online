@@ -17,8 +17,8 @@ import { SpessaPlayerEngine } from "./player/spessa-synth-player";
 import { AudioMeter } from "../../lib/gain";
 import { RemoteSendMessage } from "@/features/remote/types/remote.type";
 import { SoundSetting } from "@/features/config/types/config.type";
-import { SynthChannel } from "../instrumentals-node/modules/channel";
-import { InstrumentalNode } from "../instrumentals-node/modules/instrumental";
+import { SynthChannel } from "../instrumentals/channel";
+import { InstrumentalNode } from "../instrumentals/instrumental";
 import {
   CHORUSDEPTH,
   EXPRESSION,
@@ -26,7 +26,7 @@ import {
   PAN,
   REVERB,
 } from "../../types/node.type";
-import { BassConfig } from "../instrumentals-node/modules/config";
+import { BassConfig } from "../instrumentals/config";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";

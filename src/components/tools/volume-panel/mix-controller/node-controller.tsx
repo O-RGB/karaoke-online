@@ -4,15 +4,12 @@ import SliderCommon from "@/components/common/input-data/slider";
 import { IControllerChange } from "@/features/engine/types/synth.type";
 import React, { useEffect, useState } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
-import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
-import {
-  INodeKey,
-  INodeState,
-} from "@/features/engine/modules/instrumentals-node/modules/types/node.type";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
+import { INodeKey } from "@/features/engine/modules/instrumentals/types/node.type";
 interface MixNodeControllerProps {
   disabled?: boolean;
   channel: number;
-  nodeType: INodeKey | INodeState;
+  nodeType: INodeKey;
   vertical?: boolean;
   label?: string;
   onChange?: (value: IControllerChange) => void;

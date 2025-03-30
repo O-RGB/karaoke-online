@@ -1,8 +1,5 @@
 import { SoundSetting } from "@/features/config/types/config.type";
-import {
-  BaseSynthEngine,
-  IProgramChange,
-} from "@/features/engine/types/synth.type";
+import { IProgramChange } from "@/features/engine/types/synth.type";
 import { findProgramCategory } from "../instrumental";
 
 export class BassConfig {

@@ -8,7 +8,7 @@ import {
   ILockController,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
-import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import ChannelLimit from "./limit";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 

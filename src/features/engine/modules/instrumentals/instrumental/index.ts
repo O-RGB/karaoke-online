@@ -1,10 +1,14 @@
 import { PROGRAM_CATEGORY } from "@/config/value";
-import { InstrumentType } from "../../types/inst.category.type";
 import { SynthChannel } from "../channel";
 import { EventManager } from "../events";
-import { SynthNodeState } from "../state";
-import { EventKey, TEventType } from "../types/node.type";
+import {
+  EventKey,
+  INodeState,
+  InstrumentType,
+  TEventType,
+} from "../types/node.type";
 import { EXPRESSION } from "@/features/engine/types/node.type";
+import { SynthNode } from "../node";
 import {
   BaseSynthEngine,
   IProgramChange,
@@ -41,13 +45,19 @@ export const findProgramCategory = (
     ? { category: INSTRUMENT_TYPE_BY_INDEX[index], index }
     : null;
 };
+
 export class InstrumentalNode {
   public programGroup = PROGRAM_CATEGORY;
   public group = new Map<InstrumentType, Map<number, SynthChannel>>();
 
-  public expression: SynthNodeState<number>[] = [];
-  public velocity: SynthNodeState<number>[] = [];
-  public settingEvent = new EventManager<TEventType<number>>();
+  public expression: SynthNode<INodeState, number>[] = [];
+  public velocity: SynthNode<INodeState, number>[] = [];
+
+  public settingEvent = new EventManager<INodeState, TEventType<number>>();
+  public groupEvent = new EventManager<
+    InstrumentType,
+    TEventType<Map<number, SynthChannel>>
+  >();
 
   private engine: BaseSynthEngine | undefined = undefined;
 
@@ -68,16 +78,17 @@ export class InstrumentalNode {
 
   private initializeSettingNode() {
     this.expression = INSTRUMENT_TYPE_BY_INDEX.map(
-      (v, i) => new SynthNodeState(this.settingEvent, "EXPRESSION", i, 100)
+      (_, i) => new SynthNode(this.settingEvent, "EXPRESSION", i, 100)
     );
     this.velocity = INSTRUMENT_TYPE_BY_INDEX.map(
-      (v, i) => new SynthNodeState(this.settingEvent, "VELOCITY", i, 0)
+      (_, i) => new SynthNode(this.settingEvent, "VELOCITY", i, 0)
     );
   }
 
   public update(
     event: IProgramChange,
     oldProgram: number,
+    oldChannel: number,
     value: SynthChannel
   ): void {
     const oldType = findProgramCategory(oldProgram);
@@ -92,8 +103,6 @@ export class InstrumentalNode {
       const oldTypeChannels = this.group.get(oldType.category);
       if (oldTypeChannels) {
         oldTypeChannels.delete(event.channel);
-        const oldExpression = this.expression[oldType.index].value ?? 100;
-        this.setExpression(oldType.category, oldExpression, oldType.index);
       }
     }
 
@@ -102,8 +111,11 @@ export class InstrumentalNode {
 
     byType.set(event.channel, value);
     this.group.set(type, byType);
-    const newExpression = this.expression[newType.index].value ?? 100;
-    this.setExpression(newType.category, newExpression, newType.index);
+
+    console.log("GROUP INIT");
+    this.groupEvent.trigger([newType.category, "CHANGE"], newType.index, {
+      value: byType,
+    });
   }
 
   setExpression(type: InstrumentType, value: number, indexKey: number) {
@@ -120,10 +132,9 @@ export class InstrumentalNode {
         }
       }
     });
-    if (indexKey !== 9 && indexKey !== 8) {
-      this.expression[indexKey].setValue(value);
-      this.settingEvent.trigger(["EXPRESSION", "CHANGE"], indexKey, { value });
-    }
+
+    this.expression[indexKey].setValue(value);
+    this.settingEvent.trigger(["EXPRESSION", "CHANGE"], indexKey, { value });
   }
 
   setVelocity(type: InstrumentType, value: number, indexKey: number) {
@@ -136,17 +147,15 @@ export class InstrumentalNode {
         }
       }
     });
-    if (indexKey !== 9 && indexKey !== 8) {
-      this.velocity[indexKey].setValue(value);
-      this.settingEvent.trigger(["VELOCITY", "CHANGE"], indexKey, { value });
-    }
+    this.velocity[indexKey].setValue(value);
+    this.settingEvent.trigger(["VELOCITY", "CHANGE"], indexKey, { value });
   }
 
   setCallBackState(
     eventType: EventKey,
     indexKey: number,
     callback: (event: TEventType<number>) => void
-  ): void {
+  ) {
     this.settingEvent.add(eventType, indexKey, callback);
     let value: number = 100;
     if (eventType[0] === "EXPRESSION") {
@@ -154,6 +163,16 @@ export class InstrumentalNode {
     } else if (eventType[0] === "VELOCITY") {
       value = this.velocity[indexKey].value ?? 0;
     }
+    callback({ value });
+  }
+
+  setCallBackGroup(
+    eventType: EventKey<InstrumentType>,
+    indexKey: number,
+    callback: (event: TEventType<Map<number, SynthChannel>>) => void
+  ) {
+    this.groupEvent.add(eventType, indexKey, callback);
+    const value = this.group.get(eventType[0]);
     callback({ value });
   }
 

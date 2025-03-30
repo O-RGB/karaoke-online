@@ -18,8 +18,8 @@ import {
   IControllerChange,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
-import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
-import { TEventType } from "@/features/engine/modules/instrumentals-node/modules/types/node.type";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
+import { TEventType } from "@/features/engine/modules/instrumentals/types/node.type";
 interface InstrumentsButtonProps {
   channel: number;
   perset?: IPersetSoundfont[];

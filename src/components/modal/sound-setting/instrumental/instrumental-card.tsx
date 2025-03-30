@@ -1,5 +1,7 @@
-import { InstrumentalNode } from "@/features/engine/modules/instrumentals-node/modules/instrumental";
-import { InstrumentType } from "@/features/engine/modules/instrumentals-node/types/inst.category.type";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
+import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
+import { InstrumentType } from "@/features/engine/modules/instrumentals/types/node.type";
+
 import React, { useEffect, useState } from "react";
 
 interface InstrumentalCardProps {
@@ -26,6 +28,9 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
 
   const [expression, setExpression] = useState<number>(0);
   const [velocity, setVelocity] = useState<number>(0);
+  const [channelRef, setChannelRef] = useState<Map<number, SynthChannel>>(
+    new Map()
+  );
 
   useEffect(() => {
     if (!instrumental) return;
@@ -35,6 +40,10 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
     });
     instrumental.setCallBackState(["VELOCITY", "CHANGE"], index, (v) => {
       setVelocity(v.value);
+    });
+    instrumental.setCallBackGroup([type, "CHANGE"], index, (v) => {
+      console.log("ON GROUP CHANGE = ", v);
+      setChannelRef(v.value);
     });
 
     return () => {
@@ -61,6 +70,11 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
         <span className="text-sm font-medium">
           <span>{`${index + 1}`}.</span> {text}
         </span>
+        <div className="flex gap-1">
+          {Array.from(channelRef.entries()).map(
+            ([i, value]) => value.channel && <>ch:{value.channel + 1}</>
+          )}
+        </div>
       </div>
       <div className="absolute bottom-0 left-0 w-full h-full">
         <div

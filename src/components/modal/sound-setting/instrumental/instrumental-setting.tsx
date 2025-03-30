@@ -1,7 +1,10 @@
 import SliderCommon from "@/components/common/input-data/slider";
-import { InstrumentalNode } from "@/features/engine/modules/instrumentals-node/modules/instrumental";
-import { INodeState } from "@/features/engine/modules/instrumentals-node/modules/types/node.type";
-import { InstrumentType } from "@/features/engine/modules/instrumentals-node/types/inst.category.type";
+import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
+import {
+  INodeState,
+  InstrumentType,
+} from "@/features/engine/modules/instrumentals/types/node.type";
+
 import React, { useEffect, useState } from "react";
 
 interface InstrumentalSettingProps {

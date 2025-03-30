@@ -1,4 +1,4 @@
-import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { IControllerChange } from "@/features/engine/types/synth.type";
 import React, { useEffect, useState } from "react";
 import { BiSolidVolumeMute, BiSolidVolumeFull } from "react-icons/bi";

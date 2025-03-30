@@ -12,7 +12,7 @@ import {
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { AudioMeter } from "../../lib/gain";
 import { ChannelGainMonitor } from "./lib/channel-gain-monitor";
-import { InstrumentalNode } from "../instrumentals-node/modules/instrumental";
+import { InstrumentalNode } from "../instrumentals/instrumental";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";

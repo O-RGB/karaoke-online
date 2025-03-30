@@ -2,9 +2,9 @@ import { MIDI } from "spessasynth_lib/@types/midi_parser/midi_loader";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
 import { AudioMeter } from "../lib/gain";
-import { SynthChannel } from "../modules/instrumentals-node/modules/channel";
-import { InstrumentalNode } from "../modules/instrumentals-node/modules/instrumental";
-import { BassConfig } from "../modules/instrumentals-node/modules/config";
+import { SynthChannel } from "../modules/instrumentals/channel";
+import { InstrumentalNode } from "../modules/instrumentals/instrumental";
+import { BassConfig } from "../modules/instrumentals/config";
 export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
   time: TimingModeType;

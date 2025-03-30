@@ -1,19 +1,19 @@
 import { EventManager } from "../events";
-import { INodeKey, SynthNodeProps, TEventType } from "../types/node.type";
+import { SynthNodeProps, TEventType } from "../types/node.type";
 
-export class SynthNode<T = any> implements SynthNodeProps<T> {
-  public value: T | undefined = undefined;
+export class SynthNode<K = any, R = any> implements SynthNodeProps<K, R> {
+  public value: R | undefined = undefined;
   public isMute: boolean = false;
   public isLocked: boolean = false;
-  public type: INodeKey = "VOLUME";
+  public type: K | undefined;
   public channel: number = 0;
-  public event: EventManager<TEventType<any>> | undefined = undefined;
+  public event: EventManager<K, TEventType<R>> | undefined = undefined;
 
   constructor(
-    event?: EventManager<TEventType<any>>,
-    type?: INodeKey,
+    event?: EventManager<K, TEventType<R>>,
+    type?: K,
     channel?: number,
-    value?: T,
+    value?: R,
     isMute?: boolean,
     isLock?: boolean
   ) {
@@ -30,8 +30,6 @@ export class SynthNode<T = any> implements SynthNodeProps<T> {
 
     if (!this.type) return;
     this.event?.trigger([this.type, "LOCK"], this.channel, {
-      channel: this.channel,
-      eventType: this.type,
       value: isLock,
     });
   }
@@ -41,19 +39,15 @@ export class SynthNode<T = any> implements SynthNodeProps<T> {
 
     if (!this.type) return;
     this.event?.trigger([this.type, "MUTE"], this.channel, {
-      channel: this.channel,
-      eventType: this.type,
       value: mute,
     });
   }
 
-  public setValue(value: T) {
+  public setValue(value: R) {
     this.value = value;
 
     if (!this.type) return;
     this.event?.trigger([this.type, "CHANGE"], this.channel, {
-      channel: this.channel,
-      eventType: this.type,
       value: value,
     });
   }

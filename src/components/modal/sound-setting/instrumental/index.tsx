@@ -1,9 +1,9 @@
-import { InstrumentType } from "@/features/engine/modules/instrumentals-node/types/inst.category.type";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import InstrumentalCard from "./instrumental-card";
 import InstrumentalSetting from "./instrumental-setting";
-import { INSTRUMENT_TYPE_BY_INDEX } from "@/features/engine/modules/instrumentals-node/modules/instrumental";
+import { INSTRUMENT_TYPE_BY_INDEX } from "@/features/engine/modules/instrumentals/instrumental";
+import { InstrumentType } from "@/features/engine/modules/instrumentals/types/node.type";
 
 interface InstrumentalModalProps {}
 
@@ -16,7 +16,6 @@ const InstrumentalModal: React.FC<InstrumentalModalProps> = ({}) => {
   );
 
   const onClickType = (type: InstrumentType, indexKey: number) => {
-    console.log("type", type, indexKey);
     setSelectType(type);
     setSelectIndex(indexKey);
   };

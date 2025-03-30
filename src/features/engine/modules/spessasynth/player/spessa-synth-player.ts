@@ -7,9 +7,6 @@ import {
   BaseSynthPlayerEngine,
 } from "@/features/engine/types/synth.type";
 import { SoundSetting } from "@/features/config/types/config.type";
-import { SpessaSynthEngine } from "../spessa-synth-engine";
-import { MAIN_VOLUME } from "@/features/engine/types/node.type";
-
 export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   private player: Sequencer | undefined;
   public paused: boolean = false;

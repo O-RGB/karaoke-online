@@ -2,7 +2,7 @@ import { CHANNEL_DEFAULT } from "@/config/value";
 import {
   INodeState,
   TEventType,
-} from "@/features/engine/modules/instrumentals-node/modules/types/node.type";
+} from "@/features/engine/modules/instrumentals/types/node.type";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 // import { INodeCallBack } from "@/features/engine/types/node.type";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
@@ -49,15 +49,15 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
     }
 
     if (superUserConnections.length > 0) {
-      const remoteEvent: TEventType<number[]> = {
-        channel: 0,
-        eventType: "VOLUME",
-        value: volumes,
-      };
-      sendSuperUserMessage({
-        message: remoteEvent,
-        user: "SUPER",
-      });
+      // const remoteEvent: TEventType<number[]> = {
+      //   channel: 0,
+      //   eventType: "VOLUME",
+      //   value: volumes,
+      // };
+      // sendSuperUserMessage({
+      //   message: remoteEvent,
+      //   user: "SUPER",
+      // });
     }
   },
 

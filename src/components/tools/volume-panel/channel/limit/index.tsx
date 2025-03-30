@@ -1,9 +1,9 @@
-import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import {
   findProgramCategory,
   InstrumentalNode,
-} from "@/features/engine/modules/instrumentals-node/modules/instrumental";
-import { TEventType } from "@/features/engine/modules/instrumentals-node/modules/types/node.type";
+} from "@/features/engine/modules/instrumentals/instrumental";
+import { TEventType } from "@/features/engine/modules/instrumentals/types/node.type";
 import React, { useEffect, useState } from "react";
 import LimitBarRender from "./bar-render";
 
@@ -31,11 +31,7 @@ const ChannelLimit: React.FC<ChannelLimitProps> = ({
   };
 
   useEffect(() => {
-    node.setCallBackState<number>(
-      ["PROGARM", "CHANGE"],
-      channel,
-      onProgramChange
-    );
+    node.setCallBackState(["PROGARM", "CHANGE"], channel, onProgramChange);
   }, [node]);
 
   if (!node || program === undefined) return;

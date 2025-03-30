@@ -1,5 +1,4 @@
-import { InstNode } from "@/features/engine/modules/instrumentals-node/lib/inst-node";
-import { SynthChannel } from "@/features/engine/modules/instrumentals-node/modules/channel";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import React, { useEffect, useState } from "react";
 
 interface NodeRenderTestProps {
