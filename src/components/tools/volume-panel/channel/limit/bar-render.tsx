@@ -1,5 +1,5 @@
 import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 
 interface LimitBarRenderProps {
   category: number;
@@ -12,25 +12,40 @@ const LimitBarRender: React.FC<LimitBarRenderProps> = ({
   instrumental,
   program,
 }) => {
+  const componentId = useId();
   const [expression, setExpression] = useState<number>(0);
   const [velocity, setVelocity] = useState<number>(0);
 
   useEffect(() => {
     if (!instrumental) return;
-    instrumental?.setCallBackState(["EXPRESSION", "CHANGE"], category, (v) => {
-      setExpression(v.value);
-    });
-    instrumental?.setCallBackState(["VELOCITY", "CHANGE"], category, (v) => {
-      setVelocity(v.value);
-    });
+    instrumental?.setCallBackState(
+      ["EXPRESSION", "CHANGE"],
+      category,
+      (v) => {
+        setExpression(v.value);
+      },
+      componentId
+    );
+    instrumental?.setCallBackState(
+      ["VELOCITY", "CHANGE"],
+      category,
+      (v) => {
+        setVelocity(v.value);
+      },
+      componentId
+    );
 
     return () => {
-      instrumental?.removeCallback(["EXPRESSION", "CHANGE"], category, (v) => {
-        setExpression(v.value);
-      });
-      instrumental?.removeCallback(["VELOCITY", "CHANGE"], category, (v) => {
-        setVelocity(v.value);
-      });
+      instrumental?.removeCallback(
+        ["EXPRESSION", "CHANGE"],
+        category,
+        componentId
+      );
+      instrumental?.removeCallback(
+        ["VELOCITY", "CHANGE"],
+        category,
+        componentId
+      );
     };
   }, [category, instrumental, program]);
 

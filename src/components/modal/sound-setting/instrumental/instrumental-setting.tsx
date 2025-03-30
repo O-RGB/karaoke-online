@@ -5,7 +5,7 @@ import {
   InstrumentType,
 } from "@/features/engine/modules/instrumentals/types/node.type";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 
 interface InstrumentalSettingProps {
   instrumental?: InstrumentalNode;
@@ -22,6 +22,8 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
   valueKey,
   color,
 }) => {
+  const componentId = useId();
+
   const [value, setValue] = useState<number>(
     valueKey === "EXPRESSION" ? 100 : 0
   );
@@ -38,14 +40,21 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
   useEffect(() => {
     if (selectedIndex === undefined || !instrumental) return;
 
-    instrumental.setCallBackState([valueKey, "CHANGE"], selectedIndex, (v) => {
-      setValue(v.value);
-    });
+    instrumental.setCallBackState(
+      [valueKey, "CHANGE"],
+      selectedIndex,
+      (v) => {
+        setValue(v.value);
+      },
+      componentId
+    );
 
     return () => {
-      instrumental.removeCallback([valueKey, "CHANGE"], selectedIndex, (v) => {
-        setValue(v.value);
-      });
+      instrumental.removeCallback(
+        [valueKey, "CHANGE"],
+        selectedIndex,
+        componentId
+      );
     };
   }, [instrumental, selectedIndex, selectedType]);
 

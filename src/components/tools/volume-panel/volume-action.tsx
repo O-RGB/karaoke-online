@@ -1,6 +1,6 @@
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { IControllerChange } from "@/features/engine/types/synth.type";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import { BiSolidVolumeMute, BiSolidVolumeFull } from "react-icons/bi";
 
 interface VolumeActionProps {
@@ -20,12 +20,22 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
   disabled,
   node,
 }) => {
+  const componentId = useId();
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
   useEffect(() => {
     if (node) {
-      node.setCallBack(["VOLUME", "MUTE"], channel, (v) => setIsMuted(v.value));
+      node.setCallBack(
+        ["VOLUME", "MUTE"],
+        channel,
+        (v) => setIsMuted(v.value),
+        componentId
+      );
     }
+
+    return () => {
+      node.removeCallback(["VOLUME", "MUTE"], channel, componentId);
+    };
   }, [node]);
 
   const buttonStyle = `text-center text-white font-bold text-[10px]  

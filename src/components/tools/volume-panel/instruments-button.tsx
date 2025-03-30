@@ -1,6 +1,6 @@
 import ButtonDropdown from "@/components/common/button/button-dropdown";
 import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { FaDrum, FaUnlock } from "react-icons/fa";
 import { PiMicrophoneStageFill } from "react-icons/pi";
 import { Menu, MenuButton } from "@szhsin/react-menu";
@@ -40,7 +40,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
   disabled,
   node,
 }) => {
-  const bassConfig = useSynthesizerEngine((state) => state.engine?.bassConfig);
+  const componentId = useId();
 
   const [programOption, setProgramOptions] = useState<IOptions[]>([]);
   const [programSelected, setProgramSelected] = useState<IOptions>();
@@ -80,8 +80,17 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
 
   useEffect(() => {
     if (node) {
-      node.setCallBackState(["PROGARM", "CHANGE"], channel, onValueChange);
+      node.setCallBackState(
+        ["PROGARM", "CHANGE"],
+        channel,
+        onValueChange,
+        componentId
+      );
     }
+
+    return () => {
+      node?.removeCallState(["PROGARM", "CHANGE"], channel, componentId);
+    };
   }, [node, programOption]);
 
   useEffect(() => {

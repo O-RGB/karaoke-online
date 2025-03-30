@@ -128,24 +128,34 @@ export class SynthChannel {
   setCallBack(
     eventType: EventKey<INodeKey>,
     index: number,
-    callback: (event: TEventType<number>) => void
+    callback: (event: TEventType<number>) => void,
+    componentId: string
   ): void {
-    this.nodeEvent.add(eventType, index, callback);
-  }
-
-  setCallBackState(
-    eventType: EventKey<INodeState>,
-    index: number,
-    callback: (event: TEventType<any>) => void
-  ): void {
-    this.stateEvent.add(eventType, index, callback);
+    this.nodeEvent.add(eventType, index, callback, componentId);
   }
 
   removeCallback(
     eventType: EventKey<INodeKey>,
     index: number,
-    callback: (event: TEventType<number>) => void
+    componentId: string
   ): boolean {
-    return this.nodeEvent.remove(eventType, index, callback);
+    return this.nodeEvent.remove(eventType, index, componentId);
+  }
+
+  setCallBackState(
+    eventType: EventKey<INodeState>,
+    index: number,
+    callback: (event: TEventType<any>) => void,
+    componentId: string
+  ): void {
+    this.stateEvent.add(eventType, index, callback, componentId);
+  }
+
+  removeCallState(
+    eventType: EventKey<INodeState>,
+    index: number,
+    componentId: string
+  ): boolean {
+    return this.stateEvent.remove(eventType, index, componentId);
   }
 }

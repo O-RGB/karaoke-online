@@ -21,9 +21,6 @@ const NodeRenderTest: React.FC<NodeRenderTestProps> = ({ index, node }) => {
 
   useEffect(() => {
     if (node) {
-      node.setCallBack(["VOLUME", "CHANGE"], index, (value) =>
-        setChange(value.value)
-      );
       //   node.setCallBack("CHANGE", (value) => setChange(value.value));
       //   node.setCallBack("PROGARM", (value) => setProgram(value.value));
       //   node.setCallBack("LOCK", (value) => setLock(value.value));

@@ -2,7 +2,7 @@ import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
 import { InstrumentType } from "@/features/engine/modules/instrumentals/types/node.type";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 
 interface InstrumentalCardProps {
   instrumental?: InstrumentalNode;
@@ -19,6 +19,7 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
   type,
   onClick,
 }) => {
+  const componentId = useId();
   const text = type
     .split("_")
     .map((x) =>
@@ -35,24 +36,35 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
   useEffect(() => {
     if (!instrumental) return;
 
-    instrumental.setCallBackState(["EXPRESSION", "CHANGE"], index, (v) => {
-      setExpression(v.value);
-    });
-    instrumental.setCallBackState(["VELOCITY", "CHANGE"], index, (v) => {
-      setVelocity(v.value);
-    });
-    instrumental.setCallBackGroup([type, "CHANGE"], index, (v) => {
-      console.log("ON GROUP CHANGE = ", v);
-      setChannelRef(v.value);
-    });
+    instrumental.setCallBackState(
+      ["EXPRESSION", "CHANGE"],
+      index,
+      (v) => {
+        setExpression(v.value);
+      },
+      componentId
+    );
+    instrumental.setCallBackState(
+      ["VELOCITY", "CHANGE"],
+      index,
+      (v) => {
+        setVelocity(v.value);
+      },
+      componentId
+    );
+    instrumental.setCallBackGroup(
+      [type, "CHANGE"],
+      index,
+      (v) => {
+        console.log("ON GROUP CHANGE = ", v);
+        setChannelRef(v.value);
+      },
+      componentId
+    );
 
     return () => {
-      instrumental.removeCallback(["EXPRESSION", "CHANGE"], index, (v) => {
-        setExpression(v.value);
-      });
-      instrumental.removeCallback(["VELOCITY", "CHANGE"], index, (v) => {
-        setVelocity(v.value);
-      });
+      instrumental.removeCallback(["EXPRESSION", "CHANGE"], index, componentId);
+      instrumental.removeCallback(["VELOCITY", "CHANGE"], index, componentId);
     };
   }, [instrumental]);
 
@@ -66,13 +78,21 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
         selected === type ? "border-blue-500 border-2" : "bg-white"
       } flex items-center h-8 w-full border hover:bg-gray-100 duration-300 cursor-pointer p-2 relative`}
     >
-      <div className="relative z-10">
+      <div className="relative z-10 flex gap-1">
         <span className="text-sm font-medium">
           <span>{`${index + 1}`}.</span> {text}
         </span>
-        <div className="flex gap-1">
+        <div className="flex gap-1 text-xs">
           {Array.from(channelRef.entries()).map(
-            ([i, value]) => value.channel && <>ch:{value.channel + 1}</>
+            ([i, value]) =>
+              value.channel !== undefined && (
+                <div
+                  key={`ch-ref-${i}`}
+                  className="border m-auto px-1 rounded bg-white"
+                >
+                  ch:{value.channel + 1}{" "}
+                </div>
+              )
           )}
         </div>
       </div>

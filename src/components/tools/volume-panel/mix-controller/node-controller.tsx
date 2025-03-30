@@ -2,7 +2,7 @@ import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
 import SliderCommon from "@/components/common/input-data/slider";
 import { IControllerChange } from "@/features/engine/types/synth.type";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { INodeKey } from "@/features/engine/modules/instrumentals/types/node.type";
@@ -29,6 +29,7 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
   controllerNumber,
   node,
 }) => {
+  const componentId = useId();
   const [volume, setValue] = useState<number>(100);
   const [locked, setLocked] = useState<boolean>(false);
 
@@ -43,13 +44,24 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
 
   useEffect(() => {
     if (node) {
-      node?.setCallBack([nodeType, "CHANGE"], channel, (value) =>
-        setValue(value.value)
+      node?.setCallBack(
+        [nodeType, "CHANGE"],
+        channel,
+        (value) => setValue(value.value),
+        componentId
       );
-      node?.setCallBack([nodeType, "LOCK"], channel, (value) =>
-        setLocked(value.value)
+      node?.setCallBack(
+        [nodeType, "LOCK"],
+        channel,
+        (value) => setLocked(value.value),
+        componentId
       );
     }
+
+    return () => {
+      node?.removeCallback([nodeType, "CHANGE"], channel, componentId);
+      node?.removeCallback([nodeType, "LOCK"], channel, componentId);
+    };
   }, [node]);
 
   function LabelTag({ name }: { name: string }) {

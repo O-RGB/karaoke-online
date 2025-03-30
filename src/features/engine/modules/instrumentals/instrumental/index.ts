@@ -80,9 +80,11 @@ export class InstrumentalNode {
     this.expression = INSTRUMENT_TYPE_BY_INDEX.map(
       (_, i) => new SynthNode(this.settingEvent, "EXPRESSION", i, 100)
     );
-    this.velocity = INSTRUMENT_TYPE_BY_INDEX.map(
-      (_, i) => new SynthNode(this.settingEvent, "VELOCITY", i, 0)
-    );
+    // this.velocity = INSTRUMENT_TYPE_BY_INDEX.map(
+    //   (_, i) => new SynthNode(this.settingEvent, "VELOCITY", i, 0)
+    // );
+
+    this.settingEvent.openDebug(true, "EXPRESSION");
   }
 
   public update(
@@ -103,6 +105,8 @@ export class InstrumentalNode {
       const oldTypeChannels = this.group.get(oldType.category);
       if (oldTypeChannels) {
         oldTypeChannels.delete(event.channel);
+        const oldExpression = this.expression[oldType.index].value ?? 100;
+        this.updateController(event.channel, oldExpression);
       }
     }
 
@@ -112,7 +116,9 @@ export class InstrumentalNode {
     byType.set(event.channel, value);
     this.group.set(type, byType);
 
-    console.log("GROUP INIT");
+    const newExpression = this.expression[newType.index].value ?? 100;
+    this.updateController(event.channel, newExpression);
+
     this.groupEvent.trigger([newType.category, "CHANGE"], newType.index, {
       value: byType,
     });
@@ -123,11 +129,7 @@ export class InstrumentalNode {
     nodes.forEach((node) => {
       if (node.expression !== undefined && node.channel !== undefined) {
         if (node.channel !== 9) {
-          this.engine?.setController?.({
-            channel: node.channel,
-            controllerNumber: EXPRESSION,
-            controllerValue: value,
-          });
+          this.updateController(node.channel, value);
           node.expression.setValue(value);
         }
       }
@@ -151,27 +153,40 @@ export class InstrumentalNode {
     this.settingEvent.trigger(["VELOCITY", "CHANGE"], indexKey, { value });
   }
 
+  updateController(channel: number, value: number) {
+    if (channel !== 9 && channel !== 8) {
+      this.engine?.setController?.({
+        channel: channel,
+        controllerNumber: EXPRESSION,
+        controllerValue: value,
+      });
+    }
+  }
+
   setCallBackState(
     eventType: EventKey,
     indexKey: number,
-    callback: (event: TEventType<number>) => void
+    callback: (event: TEventType<number>) => void,
+    componentId: string
   ) {
-    this.settingEvent.add(eventType, indexKey, callback);
+    this.settingEvent.add(eventType, indexKey, callback, componentId);
     let value: number = 100;
     if (eventType[0] === "EXPRESSION") {
       value = this.expression[indexKey].value ?? 100;
-    } else if (eventType[0] === "VELOCITY") {
-      value = this.velocity[indexKey].value ?? 0;
     }
+    // else if (eventType[0] === "VELOCITY") {
+    //   value = this.velocity[indexKey].value ?? 0;
+    // }
     callback({ value });
   }
 
   setCallBackGroup(
     eventType: EventKey<InstrumentType>,
     indexKey: number,
-    callback: (event: TEventType<Map<number, SynthChannel>>) => void
+    callback: (event: TEventType<Map<number, SynthChannel>>) => void,
+    componentId: string
   ) {
-    this.groupEvent.add(eventType, indexKey, callback);
+    this.groupEvent.add(eventType, indexKey, callback, componentId);
     const value = this.group.get(eventType[0]);
     callback({ value });
   }
@@ -179,8 +194,8 @@ export class InstrumentalNode {
   removeCallback(
     eventType: EventKey,
     indexKey: number,
-    callback: (event: TEventType<number>) => void
+    componentId: string
   ): boolean {
-    return this.settingEvent.remove(eventType, indexKey, callback);
+    return this.settingEvent.remove(eventType, indexKey, componentId);
   }
 }
