@@ -61,7 +61,7 @@ const LimitBarRender: React.FC<LimitBarRenderProps> = ({
         className="absolute w-full h-full border-t border-t-white/50 bottom-0 -z-10 "
       >
         <div
-          style={{ opacity: (expressionPercent + 10) / 127 }}
+          style={{ opacity: (expressionPercent) / 127 }}
           className="absolute w-full h-2 bg-gradient-to-b from-white/40 to-transparent"
         ></div>
       </div>
@@ -70,7 +70,7 @@ const LimitBarRender: React.FC<LimitBarRenderProps> = ({
         className="absolute w-full h-full border-t border-t-white/50 border-dashed bottom-0 -z-10"
       >
         <div
-          style={{ opacity: (velocityPercent + 10) / 127 }}
+          style={{ opacity: (velocityPercent) / 127 }}
           className="absolute w-full h-2 bg-gradient-to-b from-white/40 to-transparent"
         ></div>
       </div>

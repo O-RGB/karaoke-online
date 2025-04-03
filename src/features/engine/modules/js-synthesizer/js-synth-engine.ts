@@ -1,4 +1,4 @@
-import { DEFAULT_SOUND_FONT } from "@/config/value";
+import { CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
 import { JsSynthPlayerEngine } from "./player/js-synth-player";
 
 import {
@@ -13,6 +13,16 @@ import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { AudioMeter } from "../../lib/gain";
 import { ChannelGainMonitor } from "./lib/channel-gain-monitor";
 import { InstrumentalNode } from "../instrumentals/instrumental";
+import { SynthChannel } from "../instrumentals/channel";
+import { BassConfig } from "../instrumentals/config";
+import { SoundSetting } from "@/features/config/types/config.type";
+import {
+  CHORUSDEPTH,
+  EXPRESSION,
+  MAIN_VOLUME,
+  PAN,
+  REVERB,
+} from "../../types/node.type";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -24,12 +34,18 @@ export class JsSynthEngine implements BaseSynthEngine {
   public soundfontName: string | undefined;
   public soundfontFile: File | undefined;
 
-  instrumental: InstrumentalNode | undefined;
+  public nodes: SynthChannel[] = [];
+  public instrumental = new InstrumentalNode();
 
   public gainNode: AudioMeter | undefined = undefined;
+  public bassConfig: BassConfig | undefined = undefined;
 
   private setInstrument: ((instrument: IPersetSoundfont[]) => void) | undefined;
-  constructor(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
+  constructor(
+    setInstrument?: (instrument: IPersetSoundfont[]) => void,
+    config?: Partial<SoundSetting>
+  ) {
+    this.bassConfig = config ? new BassConfig(config) : undefined;
     this.setInstrument = setInstrument;
     this.startup();
   }
@@ -63,18 +79,15 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     this.player = new JsSynthPlayerEngine(synth);
 
+    this.instrumental.setEngine(this);
+    this.nodes = CHANNEL_DEFAULT.map(
+      (v, i) => new SynthChannel(i, this.instrumental)
+    );
+
     this.controllerChange();
     this.programChange();
 
     return { synth: synth, audio: this.audio };
-  }
-
-  private getAnalyserNode(auto: AudioContext) {
-    return Array.from({ length: 16 }, () => {
-      const analyser = auto.createAnalyser();
-      analyser.fftSize = 256;
-      return analyser;
-    });
   }
 
   async loadPresetSoundFont(sfId?: number) {
@@ -133,9 +146,10 @@ export class JsSynthEngine implements BaseSynthEngine {
   controllerChange(callback?: (event: IControllerChange) => void): void {
     if (this.player?.addEvent) {
       this.player.addEvent({
-        controllerChangeCallback: (event) => {
-          callback?.(event);
-          // this.controllerItem?.onControllerChange(event, false);
+        controllerChangeCallback: (e) => {
+          callback?.(e);
+          console.log("controller change, e",e)
+          this.nodes[e.channel].controllerChange(e);
         },
       });
     }
@@ -144,57 +158,102 @@ export class JsSynthEngine implements BaseSynthEngine {
   programChange(callback?: (event: IProgramChange) => void): void {
     if (this.player?.addEvent) {
       this.player.addEvent({
-        programChangeCallback: (event) => {
-          callback?.(event);
-          // this.controllerItem?.onProgramChange(event, false);
+        programChangeCallback: (e) => {
+          callback?.(e);
+          const { channel, program } = e;
+          const has = this.bassConfig?.onProgramChange(e);
+
+          if (has?.isBass) {
+            const nodeProgram = this.nodes[channel].program?.value;
+            if (nodeProgram === program) return;
+
+            this.setProgram(has.event);
+            this.nodes[channel].programChange(has.event, "programChange");
+          } else {
+            this.nodes[channel].programChange(e, "programChange");
+          }
         },
       });
     }
   }
+  setProgram(event: IProgramChange): void {
+    this.synth?.midiProgramChange(event.channel, event.program);
+    this.nodes[event.channel].programChange(event, "programChange");
+  }
 
+  setMute(event: IControllerChange<boolean>): void {
+    this.nodes[event.channel].muteChange({
+      channel: event.channel,
+      controllerNumber: event.controllerNumber,
+      controllerValue: event.controllerValue,
+    });
+  }
   setVelocity(event: IVelocityChange): void {}
 
   setMidiOutput(): void {}
 
   setController(event: IControllerChange): void {
-    // const isLocked = this.controllerItem?.onControllerChange(
-    //   {
-    //     channel,
-    //     controllerNumber,
-    //     controllerValue,
-    //   },
-    //   true
-    // );
+    const node = this.nodes[event.channel];
 
+    let isLocked = false;
+
+    switch (event.controllerNumber) {
+      case MAIN_VOLUME:
+        isLocked = node.volume?.isLocked ?? false;
+        break;
+      case PAN:
+        isLocked = node.pan?.isLocked ?? false;
+        break;
+      case REVERB:
+        isLocked = node.reverb?.isLocked ?? false;
+        break;
+      case CHORUSDEPTH:
+        isLocked = node.chorus?.isLocked ?? false;
+        break;
+      case EXPRESSION:
+        isLocked = node.expression?.isLocked ?? false;
+        break;
+
+      default:
+        break;
+    }
+
+    if (isLocked === true || event.force) {
+      this.lockController({ ...event, controllerValue: false });
+    }
     this.synth?.midiControl(
       event.channel,
       event.controllerNumber,
       event.controllerValue
     );
-
-    // if (isLocked === true) {
-    //   this.lockController(channel, controllerNumber, true);
-    // }
+    if (isLocked === true || event.force) {
+      this.lockController({ ...event, controllerValue: true });
+    }
   }
 
-  lockController(): void {}
+  lockController(event: IControllerChange<boolean>): void {
+    // this.synth?.lockController(
+    //   event.channel,
+    //   event.controllerNumber,
+    //   event.controllerValue
+    // );
+
+    this.nodes[event.channel].lockChange({
+      channel: event.channel,
+      controllerNumber: event.controllerNumber,
+      controllerValue: event.controllerValue,
+    });
+  }
   updatePitch(channel: number, semitones?: number): void {}
   updatePreset(channel: number, value: number): void {}
 
-  setProgram(event: IProgramChange): void {
-    this.synth?.midiProgramChange(event.channel, event.program);
-    // this.controllerItem?.onProgramChange(
-    //   { event.channel, program: event.program },
-    //   true
-    // );
+  setBassLock(program: number): void {
+    this.bassConfig?.setLockBass(program);
+    const bass = this.instrumental.group.get("bass");
+    bass?.forEach((node) => {
+      if (node.channel !== undefined) {
+        this.setProgram({ channel: node.channel, program });
+      }
+    });
   }
-
-  setMute(event: IControllerChange<boolean>): void {
-    // this.controllerItem?.onMuteChange(
-    //   { channel: event.channel, isMute: event.controllerValue },
-    //   false
-    // );
-  }
-
-  setBassLock(bassNumber: number): void {}
 }

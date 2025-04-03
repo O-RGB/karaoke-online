@@ -83,6 +83,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.player?.hookPlayerMIDIEvents((s, type, event) => {
       switch (type) {
         case 176: // Controller Change
+        console.log(s, type)
           if (this.eventInit?.controllerChangeCallback) {
             let controller = event.getControl();
             let controllerNumber = 0;

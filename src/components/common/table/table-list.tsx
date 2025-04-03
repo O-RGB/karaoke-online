@@ -60,15 +60,16 @@ const TableList: React.FC<TableListProps> = ({
   }, [scrollToItem, list]);
 
   // สร้าง style object สำหรับ container โดยใช้ height ที่ส่งมาถ้ามี
-  const containerStyle = height ? {
-    height: typeof height === 'number' ? `${height}px` : height,
-  } : undefined;
+  const containerStyle = height
+    ? {
+        height: typeof height === "number" ? `${height}px` : height,
+      }
+    : undefined;
 
   return (
-    <div className="flex flex-col h-full">
-      <div 
-        style={containerStyle}
-        className={`${className} flex-1 flex flex-col divide-y w-full border p-2 overflow-auto rounded-md`}
+    <div className="flex flex-col h-full w-full">
+      <div
+        className={`${className} flex-1 flex flex-col divide-y w-full border p-2 rounded-md`}
       >
         {loading ? (
           <div className="flex items-center justify-center w-full h-full">
@@ -102,9 +103,7 @@ const TableList: React.FC<TableListProps> = ({
                     className="w-7 h-7"
                     color="red"
                     blur={false}
-                    icon={
-                      <RiDeleteBin5Line className="text-white" />
-                    }
+                    icon={<RiDeleteBin5Line className="text-white" />}
                   />
                 )}
               </div>

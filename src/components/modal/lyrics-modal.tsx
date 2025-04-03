@@ -13,6 +13,7 @@ import ToggleCheckBox from "../common/input-data/checkbox";
 
 import { SystemFont } from "@/features/config/types/config.type";
 import LyricsCharacter from "../../features/lyrics/components/lyrics-character";
+import Tabs from "../common/tabs";
 
 interface LyricsModalProps {}
 
@@ -49,33 +50,12 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
     };
   }, [lyrics.lyricsMode]);
 
-  const onFontChanage = (get: SystemFont) => {
-    // const nextFont = lyricsGetFont(get);
-    // setFontState(nextFont);
-  };
+  const onFontChanage = (get: SystemFont) => {};
 
   return (
-    <div className="flex flex-col-reverse md:flex-row gap-4 w-full md:h-[390px]">
-      <div className="w-full h-full flex flex-col">
+    <div className="flex flex-col-reverse md:flex-row gap-4 w-full h-full">
+      <div className="w-full h-full flex flex-col ">
         <div className="h-full">
-          {/* <div>
-            <Label className="pb-1">รูปแบบเนื้อเพลง</Label>
-            <SwitchRadio<LyricsOptions>
-              onChange={lyricsConfigf.setLyricsOptions}
-              value={lyrics.lyricsMode}
-              options={[
-                {
-                  children: "เริ่มต้น",
-                  value: "default",
-                },
-                {
-                  children: "เคลื่อนไหว",
-                  value: "random",
-                },
-              ]}
-            ></SwitchRadio>
-          </div> */}
-
           <div
             className={`${
               lyrics.lyricsMode === "random"
@@ -92,7 +72,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
                     lyricsConfigf.setFontChange(value);
                     onFontChanage(value);
                   }}
-                  options={fontList}
+                  // options={fontList}
                 ></Select>
                 <span className="text-xs text-gray-500">
                   *เกิดปัญหาการเรียกใช้ Font Admin ขอปิดการใช้งานไปก่อน
@@ -161,7 +141,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
             </div>
           </div>
         </div>
-        <div className="pt-2">
+        <div className="pt-4">
           <Button
             onClick={lyricsConfigf.reset}
             blur={false}
@@ -198,118 +178,3 @@ const LyricsModal: React.FC<LyricsModalProps> = ({}) => {
 };
 
 export default LyricsModal;
-
-export const fontList = [
-  {
-    label: "เริ่มต้น",
-    value: "null",
-  },
-  {
-    label: "Noto Serif Thai",
-    value: "notoSerifThai",
-  },
-  {
-    label: "Kanit",
-    value: "kanit",
-  },
-  {
-    label: "Sarabun",
-    value: "sarabun",
-  },
-  {
-    label: "Prompt",
-    value: "prompt",
-  },
-  {
-    label: "Mitr",
-    value: "mitr",
-  },
-  {
-    label: "Pattaya",
-    value: "pattaya",
-  },
-  {
-    label: "Taviraj",
-    value: "taviraj",
-  },
-  {
-    label: "Charm",
-    value: "charm",
-  },
-  {
-    label: "Itim",
-    value: "itim",
-  },
-  {
-    label: "Pridi",
-    value: "pridi",
-  },
-  {
-    label: "Mali",
-    value: "mali",
-  },
-  {
-    label: "Sriracha",
-    value: "sriracha",
-  },
-  {
-    label: "Athiti",
-    value: "athiti",
-  },
-  {
-    label: "Trirong",
-    value: "trirong",
-  },
-  {
-    label: "KoHo",
-    value: "koHo",
-  },
-  {
-    label: "Niramit",
-    value: "niramit",
-  },
-  {
-    label: "Srisakdi",
-    value: "srisakdi",
-  },
-  {
-    label: "Chonburi",
-    value: "chonburi",
-  },
-  {
-    label: "Fahkwang",
-    value: "fahkwang",
-  },
-  {
-    label: "Kodchasan",
-    value: "kodchasan",
-  },
-  {
-    label: "Krub",
-    value: "krub",
-  },
-  {
-    label: "Charmonman",
-    value: "charmonman",
-  },
-  {
-    label: "Bai Jamjuree",
-    value: "baiJamjuree",
-  },
-  {
-    label: "Chakra Petch",
-    value: "chakraPetch",
-  },
-  {
-    label: "Thasadith",
-    value: "thasadith",
-  },
-  {
-    label: "K2D",
-    value: "k2d",
-  },
-  {
-    label: "Libre Baskerville",
-    value: "libreBaskerville",
-  },
-];

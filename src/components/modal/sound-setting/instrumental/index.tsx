@@ -21,8 +21,8 @@ const InstrumentalModal: React.FC<InstrumentalModalProps> = ({}) => {
   };
 
   return (
-    <div className="relative grid grid-cols-8 h-full w-full overflow-auto">
-      <div className="col-span-6 flex flex-col gap-0.5">
+    <div className="relative flex flex-col-reverse lg:flex-row gap-4 h-full w-full">
+      <div className="w-full lg:w-[80%] flex flex-col gap-0.5">
         {INSTRUMENT_TYPE_BY_INDEX.map((value, index) => {
           return (
             <React.Fragment key={`card-inst-${index}`}>
@@ -37,8 +37,8 @@ const InstrumentalModal: React.FC<InstrumentalModalProps> = ({}) => {
           );
         })}
       </div>
-      <div className="relative top-0 col-span-2 px-4">
-        <div className="sticky top-0 flex flex-col gap-2">
+      <div className="w-full lg:w-[20%] sticky top-12 lg:top-14 flex h-full bg-white p-2 z-20">
+        <div className="flex flex-col gap-2 w-full h-full">
           {selectType && (
             <>
               <InstrumentalSetting

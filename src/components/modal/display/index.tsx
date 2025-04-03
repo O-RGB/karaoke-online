@@ -6,11 +6,16 @@ import EfficiencyDisplay from "./tabs/efficiency-display";
 import { LuCpu } from "react-icons/lu";
 import WidgetsDisplay from "./tabs/widgets-display";
 
-interface DisplaySettingModalProps {}
+interface DisplaySettingModalProps {
+  height?: number;
+}
 
-const DisplaySettingModal: React.FC<DisplaySettingModalProps> = ({}) => {
+const DisplaySettingModal: React.FC<DisplaySettingModalProps> = ({
+  height,
+}) => {
   return (
     <Tabs
+      height={height}
       tabs={[
         {
           content: <LyricsModal></LyricsModal>,

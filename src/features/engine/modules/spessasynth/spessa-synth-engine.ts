@@ -42,8 +42,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public instrumental = new InstrumentalNode();
 
   public gainNode: AudioMeter | undefined = undefined;
-  // Config
-  public config: Partial<SoundSetting> | undefined;
   public bassConfig: BassConfig | undefined = undefined;
 
   private sendMessage?: (info: RemoteSendMessage) => void;
@@ -53,17 +51,13 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     sendMessage?: (info: RemoteSendMessage) => void,
     config?: Partial<SoundSetting>
   ) {
-    this.startup(setInstrument, config);
+    this.startup(setInstrument);
 
-    this.config = config;
     this.bassConfig = config ? new BassConfig(config) : undefined;
     this.sendMessage = sendMessage;
   }
 
-  async startup(
-    setInstrument?: (instrument: IPersetSoundfont[]) => void,
-    config?: Partial<SoundSetting>
-  ) {
+  async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
     const { audioContext, channels } = await loadAudioContext();
     if (!audioContext)
       return { audio: undefined, synth: undefined, player: undefined };
@@ -72,7 +66,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     if (!synth)
       return { audio: undefined, synth: undefined, player: undefined };
 
-    // synth.highPerformanceMode = true;
     const player = await loadPlayer(synth);
 
     this.synth = synth;
@@ -104,14 +97,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
     this.controllerChange();
     this.programChange();
-
-    // CHANNEL_DEFAULT.map((_, ch) =>
-    //   this.lockController({
-    //     channel: ch,
-    //     controllerNumber: EXPRESSION,
-    //     controllerValue: true,
-    //   })
-    // );
 
     return { synth: synth, audio: this.audio };
   }

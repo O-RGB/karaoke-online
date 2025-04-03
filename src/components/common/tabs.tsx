@@ -1,16 +1,29 @@
-import { useState } from "react";
+import { CSSProperties, useState } from "react";
 
-type TabsProps = {
+interface TabsProps {
+  height?: number;
   tabs: TabProps[];
   onTabChange?: (activeIndex: number) => void;
-};
+}
 
-const Tabs: React.FC<TabsProps> = ({ tabs, onTabChange }) => {
+const Tabs: React.FC<TabsProps> = ({ tabs, onTabChange, height }) => {
   const [activeTab, setActiveTab] = useState(0);
 
+  const autoHeight: CSSProperties = height
+    ? { maxHeight: height + 2, overflowY: "auto" }
+    : {};
+
+  if (tabs.length <= 1) {
+    return (
+      <div style={{ ...autoHeight }} className="p-2 lg:p-4">
+        {tabs[0].content}
+      </div>
+    );
+  }
+
   return (
-    <div className="relative h-full w-full">
-      <div className="sticky top-0 flex border-b border-gray-300 w-full h-12 bg-white z-50">
+    <div className="relative h-full w-full" style={{ ...autoHeight }}>
+      <div className="sticky top-0 flex border-b border-gray-300 w-full h-12 bg-white z-50 overflow-auto">
         {tabs.map((tab, index) => (
           <button
             key={index}
@@ -29,8 +42,11 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onTabChange }) => {
           </button>
         ))}
       </div>
-      <div className="pt-3"></div>
-      <div key={activeTab} className="tab-content w-full">
+
+      <div
+        key={activeTab}
+        className="relative tab-content w-full h-[91%] p-2 lg:p-4"
+      >
         {tabs[activeTab].content}
       </div>
     </div>

@@ -12,12 +12,15 @@ import {
 } from "@/lib/storage/song";
 import { getAllKeysDrive, getSongDrive } from "@/lib/storage/drive";
 
-interface DataStoresModalProps {}
+interface DataStoresModalProps {
+  height?: number;
+}
 
-const DataStoresModal: React.FC<DataStoresModalProps> = ({}) => {
+const DataStoresModal: React.FC<DataStoresModalProps> = ({ height }) => {
   return (
     <>
       <Tabs
+        height={height}
         tabs={[
           {
             content: (

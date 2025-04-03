@@ -9,12 +9,15 @@ import { PiEngineFill } from "react-icons/pi";
 import InstrumentalModal from "./instrumental";
 import { GiGuitar } from "react-icons/gi";
 
-interface SoundSettingModalProps {}
+interface SoundSettingModalProps {
+  height?: number;
+}
 
-const SoundSettingModal: React.FC<SoundSettingModalProps> = ({}) => {
+const SoundSettingModal: React.FC<SoundSettingModalProps> = ({ height }) => {
   return (
     <>
       <Tabs
+        height={height}
         tabs={[
           {
             content: <MidiSettingModal></MidiSettingModal>,

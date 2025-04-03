@@ -52,7 +52,7 @@ const ContextModal: React.FC<ContextModalProps> = ({
         },
         {
           icon: <MdOutlineSpeaker />,
-          text: "อุปกรเสียง",
+          text: "อุปกรณ์เสียง",
           onClick: handleSelectContext,
           type: "SOUND_SETTING",
         },
@@ -62,12 +62,6 @@ const ContextModal: React.FC<ContextModalProps> = ({
     },
     {
       contextMenus: [
-        // {
-        //   icon: <TbDeviceMobileShare />,
-        //   text: "ขอเพลง",
-        //   onClick: handleSelectContext,
-        //   type: "JOIN",
-        // },
         {
           icon: <VscSettings />,
           text: "ควบคุม",
