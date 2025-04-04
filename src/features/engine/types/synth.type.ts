@@ -38,17 +38,10 @@ export interface BaseSynthEngine {
   setMute(event: IControllerChange<boolean>): void;
   setupMIDIEventHook?(): void;
 
-  // controllerItem?: MainNodeController;
   gainNode?: AudioMeter;
   bassConfig?: BassConfig;
   setBassLock(program: number): void;
 }
-
-// export interface ControllerItemList {
-//   name: NodeType;
-//   controller: DataController;
-// }
-
 export interface BaseSynthEvent {
   controllerChangeCallback?: (event: IControllerChange) => void;
   programChangeCallback?: (event: IProgramChange) => void;

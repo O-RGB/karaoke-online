@@ -12,9 +12,8 @@ import {
 } from "../../types/synth.type";
 
 import { loadAudioContext, loadPlayer } from "./lib/spessasynth";
-import { BASS, CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
+import { CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
 import { SpessaPlayerEngine } from "./player/spessa-synth-player";
-import { AudioMeter } from "../../lib/gain";
 import { RemoteSendMessage } from "@/features/remote/types/remote.type";
 import { SoundSetting } from "@/features/config/types/config.type";
 import { SynthChannel } from "../instrumentals/channel";
@@ -41,7 +40,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public nodes: SynthChannel[] = [];
   public instrumental = new InstrumentalNode();
 
-  public gainNode: AudioMeter | undefined = undefined;
   public bassConfig: BassConfig | undefined = undefined;
 
   private sendMessage?: (info: RemoteSendMessage) => void;
@@ -73,27 +71,22 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
     this.persetChange((e) => setInstrument?.(e));
     this.synth?.setDrums(8, true);
-
-    this.player = new SpessaPlayerEngine(player, this);
-
+    this.player = new SpessaPlayerEngine(player);
     this.instrumental.setEngine(this);
-    this.nodes = CHANNEL_DEFAULT.map(
-      (v, i) => new SynthChannel(i, this.instrumental)
-    );
 
-    if (audioContext) {
-      const analysers: AnalyserNode[] = [];
-      for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        this.nodes[ch].setAnalyser(analyser);
-        analysers.push(analyser);
-      }
-      synth?.connectIndividualOutputs(analysers);
+    const analysers: AnalyserNode[] = [];
 
-      this.analysers = analysers;
-      this.gainNode = new AudioMeter(audioContext, analysers);
+    for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      this.nodes.push(new SynthChannel(ch, this.instrumental, analyser));
+      analysers.push(analyser);
     }
+
+    // this.analysers = analysers;
+    // this.gainNode = new AudioMeter(analysers);
+
+    synth?.connectIndividualOutputs(analysers);
 
     this.controllerChange();
     this.programChange();
@@ -196,9 +189,9 @@ export class SpessaSynthEngine implements BaseSynthEngine {
           if (nodeProgram === program) return;
 
           this.setProgram(has.event);
-          this.nodes[channel].programChange(has.event, "programChange");
+          this.nodes[channel].programChange(has.event);
         } else {
-          this.nodes[channel].programChange(e, "programChange");
+          this.nodes[channel].programChange(e);
         }
       }
     );
@@ -218,7 +211,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
   setProgram(event: IProgramChange) {
     this.synth?.programChange(event.channel, event.program, event.userChange);
-    this.nodes[event.channel].programChange(event, "programChange");
+    this.nodes[event.channel].programChange(event);
   }
 
   setVelocity(event: IVelocityChange): void {

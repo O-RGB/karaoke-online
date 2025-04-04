@@ -72,7 +72,7 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     // รับค่า analysers
     this.analysers = gainMonitor.analyserNodes;
-    this.gainNode = new AudioMeter(audioContext, gainMonitor.analyserNodes);
+    this.gainNode = new AudioMeter(gainMonitor.analyserNodes);
     this.analysers = gainMonitor.analyserNodes;
 
     node.connect(audioContext.destination);
@@ -80,9 +80,9 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.player = new JsSynthPlayerEngine(synth);
 
     this.instrumental.setEngine(this);
-    this.nodes = CHANNEL_DEFAULT.map(
-      (v, i) => new SynthChannel(i, this.instrumental)
-    );
+    // this.nodes = CHANNEL_DEFAULT.map(
+    //   (v, i) => new SynthChannel(i, this.instrumental)
+    // );
 
     this.controllerChange();
     this.programChange();
@@ -148,7 +148,7 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.player.addEvent({
         controllerChangeCallback: (e) => {
           callback?.(e);
-          console.log("controller change, e",e)
+          console.log("controller change, e", e);
           this.nodes[e.channel].controllerChange(e);
         },
       });
@@ -168,9 +168,9 @@ export class JsSynthEngine implements BaseSynthEngine {
             if (nodeProgram === program) return;
 
             this.setProgram(has.event);
-            this.nodes[channel].programChange(has.event, "programChange");
+            this.nodes[channel].programChange(has.event);
           } else {
-            this.nodes[channel].programChange(e, "programChange");
+            this.nodes[channel].programChange(e);
           }
         },
       });
@@ -178,7 +178,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   }
   setProgram(event: IProgramChange): void {
     this.synth?.midiProgramChange(event.channel, event.program);
-    this.nodes[event.channel].programChange(event, "programChange");
+    this.nodes[event.channel].programChange(event);
   }
 
   setMute(event: IControllerChange<boolean>): void {

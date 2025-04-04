@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
 import InstrumentsButton from "../instruments-button";
 import VolumeAction from "../volume-action";
-import { EXPRESSION, MAIN_VOLUME } from "@/features/engine/types/node.type";
+import { MAIN_VOLUME } from "@/features/engine/types/node.type";
 import MixNodeController from "../mix-controller/node-controller";
 import {
   IControllerChange,
-  ILockController,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";

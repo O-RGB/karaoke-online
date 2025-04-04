@@ -9,7 +9,7 @@ import SwitchButton from "../../common/input-data/switch/switch-button";
 import Button from "../../common/button/button";
 import { MdArrowDropUp } from "react-icons/md";
 import { useOrientation } from "@/hooks/orientation-hook";
-import VolumeMeterV from "../../common/volume/volume-meter-v";
+import VolumeMeter from "../../common/volume/volume-meter";
 import VolumeHorizontal from "./volume-horizontal";
 import useConfigStore from "@/features/config/config-store";
 import "@szhsin/react-menu/dist/index.css";
@@ -144,12 +144,11 @@ const VolumePanel: React.FC<VolumePanelProps> = ({
           {CHANNEL_DEFAULT.map((data, ch) => {
             return (
               <div key={`gain-render-${ch}`} className="relative w-full">
-                <VolumeMeterV
+                <VolumeMeter
                   channel={ch}
                   max={127}
                   className="z-10 w-full absolute bottom-0 left-0 h-full"
-                  level={audioGain ? audioGain[ch] : data}
-                ></VolumeMeterV>
+                ></VolumeMeter>
               </div>
             );
           })}

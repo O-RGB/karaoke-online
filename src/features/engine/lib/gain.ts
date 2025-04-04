@@ -1,9 +1,7 @@
 export class AudioMeter {
-  private audio: AudioContext | undefined = undefined;
   private analysers: AnalyserNode[] = [];
 
-  constructor(audio: AudioContext, analysers: AnalyserNode[]) {
-    this.audio = audio;
+  constructor(analysers: AnalyserNode[]) {
     this.analysers = analysers;
   }
 

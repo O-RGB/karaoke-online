@@ -16,11 +16,9 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   public duration: number = 0;
   public durationTiming: number = 0;
   public config?: Partial<SoundSetting>;
-  public synth?: BaseSynthEngine;
 
-  constructor(player: Sequencer | undefined, synth?: BaseSynthEngine) {
+  constructor(player: Sequencer | undefined) {
     this.player = player;
-    this.synth = synth;
   }
 
   play(): void {

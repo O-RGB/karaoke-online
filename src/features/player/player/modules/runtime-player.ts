@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { RuntimeProps } from "../types/player.type";
 import { sortTempoChanges } from "@/lib/app-control";
 import useQueuePlayer from "./queue-player";
-
 import useLyricsStoreNew from "@/features/lyrics/store/lyrics.store";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import useMixerStoreNew from "../../event-player/modules/event-mixer-store";
@@ -92,7 +91,6 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
       return;
     }
 
-    const setEventGain = useMixerStoreNew.getState().setEventGain;
     const nextMusic = useQueuePlayer.getState().nextMusic;
 
     const midi = player.midiData;
@@ -102,9 +100,6 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
 
     if (isPlay) {
       if (!intervalId) {
-        setInterval(() => {
-          setEventGain();
-        }, 40);
         const newIntervalId = setInterval(async () => {
           const currentTime = await player.getCurrentTiming();
 

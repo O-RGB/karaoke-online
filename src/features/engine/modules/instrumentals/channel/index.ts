@@ -1,4 +1,3 @@
-import { AudioMeter } from "@/features/engine/lib/gain";
 import { SynthNode } from "../node";
 import { EventManager } from "../events";
 import { EventKey, INodeKey, INodeState, TEventType } from "../types/node.type";
@@ -37,7 +36,7 @@ export class SynthChannel {
 
   // Render
   public analyserNode?: AnalyserNode | undefined = undefined;
-  public gain: AudioMeter | undefined = undefined;
+  // public gain: AudioMeter | undefined = undefined;
 
   // Event
   public nodeEvent = new EventManager<INodeKey, TEventType<number>>();
@@ -46,30 +45,31 @@ export class SynthChannel {
   // Group
   public instrumental: InstrumentalNode | undefined = undefined;
 
-  constructor(channel: number, instrumental: InstrumentalNode) {
+  constructor(
+    channel: number,
+    instrumental: InstrumentalNode,
+    analyserNode: AnalyserNode
+  ) {
     this.channel = channel;
     this.instrumental = instrumental;
+    this.analyserNode = analyserNode;
     this.volume = new SynthNode(this.nodeEvent, "VOLUME", channel, 100);
     this.chorus = new SynthNode(this.nodeEvent, "CHORUS", channel, 100);
     this.reverb = new SynthNode(this.nodeEvent, "REVERB", channel, 100);
     this.pan = new SynthNode(this.nodeEvent, "PAN", channel, 100);
-
     this.program = new SynthNode(this.stateEvent, "PROGARM", channel);
     this.velocity = new SynthNode(this.stateEvent, "VELOCITY", channel);
     this.expression = new SynthNode(this.stateEvent, "EXPRESSION", channel);
     this.expression.setLock(true);
   }
 
-  public setAnalyser(analyserNode: AnalyserNode) {
-    this.analyserNode = analyserNode;
-  }
-
   public getGain() {
     if (!this.analyserNode) {
+      console.error("AnalyserNode is not initialized");
       return 0;
     }
     const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
-    this.analyserNode?.getByteFrequencyData(dataArray);
+    this.analyserNode.getByteFrequencyData(dataArray);
     const value = Math.round(
       dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
     );
@@ -100,7 +100,7 @@ export class SynthChannel {
         break;
     }
   }
-  public programChange(event: IProgramChange, form: string) {
+  public programChange(event: IProgramChange) {
     const oldIndex: number = this.program?.value ?? 0;
     const oldChannel: number = this.channel ?? 0;
     this.program?.setValue(event.program);
