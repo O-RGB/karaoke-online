@@ -119,7 +119,7 @@ const LyricsList: React.FC<LyricsListProps> = ({
   return (
     <div
       ref={textRef}
-      className="px-10"
+      className="px-10 w-fit"
       style={{
         transform: `scaleX(${scaleX})`,
         transformOrigin: "center center",

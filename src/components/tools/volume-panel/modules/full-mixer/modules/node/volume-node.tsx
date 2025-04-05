@@ -1,6 +1,5 @@
 import React, { useEffect, useId, useState } from "react";
 import ChannelVolumeRender from "../../../../renders/volume-meter";
-import ChannelRender from "../../../channel";
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { lowercaseToReadable } from "@/lib/general";
 import { InstrumentType } from "@/features/engine/modules/instrumentals/types/node.type";

@@ -1,28 +1,53 @@
 import Button from "@/components/common/button/button";
 import WinboxModal from "@/components/common/modal";
-import {
-  INSTRUMENT_DRUM,
-  INSTRUMENT_TYPE_BY_INDEX,
-} from "@/features/engine/modules/instrumentals/instrumental";
-import React, { useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import { RxMixerVertical } from "react-icons/rx";
-import InstrumentalVolumeNode from "./modules/node/volume-node";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import DrumChange from "./modules/drum";
 import MixerNodes from "./modules/node";
+import { DRUM_CHANNEL } from "@/config/value";
+import { BaseSynthEngine } from "@/features/engine/types/synth.type";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 
-interface FullMixerProps {}
+interface FullMixerProps {
+  nodes: SynthChannel[];
+}
 
-const FullMixer: React.FC<FullMixerProps> = ({}) => {
+const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
+  const componentId = useId();
+
   const instrumental = useSynthesizerEngine(
     (state) => state.engine?.instrumental
   );
+  const [drumProgarm, setDrumProgarm] = useState<number>(0);
 
   const [open, setOpen] = useState<boolean>(false);
   const openMixer = () => {
     setOpen(!open);
   };
+
+  useEffect(() => {
+    if (!nodes) return;
+    if (nodes.length < DRUM_CHANNEL) return;
+
+    const drumNode = nodes[DRUM_CHANNEL];
+    drumNode.setCallBackState?.(
+      ["PROGARM", "CHANGE"],
+      DRUM_CHANNEL,
+      (value) => {
+        setDrumProgarm(value.value);
+      },
+      componentId
+    );
+
+    return () => {
+      drumNode.removeCallState?.(
+        ["PROGARM", "CHANGE"],
+        DRUM_CHANNEL,
+        componentId
+      );
+    };
+  }, [nodes]);
 
   return (
     <>
@@ -36,7 +61,7 @@ const FullMixer: React.FC<FullMixerProps> = ({}) => {
           {instrumental && (
             <MixerNodes instrumental={instrumental}></MixerNodes>
           )}
-          <DrumChange></DrumChange>
+          <DrumChange program={drumProgarm}></DrumChange>
         </div>
       </WinboxModal>
       <Button

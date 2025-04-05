@@ -21,6 +21,8 @@ const MainVolumeRender: React.FC<MainVolumeRenderProps> = ({ hide }) => {
     }
   }, [gain, hide]);
 
+  if (hide) return <></>;
+
   return (
     <canvas
       ref={canvasRef}

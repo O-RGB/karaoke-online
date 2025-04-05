@@ -63,13 +63,14 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
     engine?.setController(value, "mixer.onControllerChange");
   };
 
-  useEffect(() => {}, [engine?.nodes]);
+  useEffect(() => {}, [engine?.nodes, engine]);
 
   const grid =
     "grid grid-cols-8 lg:grid-cols-none grid-flow-row lg:grid-flow-col";
   const hideElement = `${hideMixer ? "opacity-0" : "opacity-100"}`;
   const animation = `duration-300 transition-all`;
 
+  if (!engine) return <></>;
   return (
     <div
       className={`fixed left-0 px-5 flex flex-col gap-1.5 ${
@@ -133,17 +134,20 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
         </div>
       )}
 
-      <VolumeOptions
-        onPitchChange={onPitchChange}
-        onSpeedChange={onSpeedChange}
-        onMutedVolume={onMutedVolume}
-        setNotification={setNotification}
-        openQueue={() => {
-          setQueueOpen?.();
-          resetQueueingTimeout(5000);
-        }}
-        vocal={VOCAL_CHANNEL}
-      ></VolumeOptions>
+      {engine && (
+        <VolumeOptions
+          onPitchChange={onPitchChange}
+          onSpeedChange={onSpeedChange}
+          onMutedVolume={onMutedVolume}
+          setNotification={setNotification}
+          openQueue={() => {
+            setQueueOpen?.();
+            resetQueueingTimeout(5000);
+          }}
+          vocal={VOCAL_CHANNEL}
+          nodes={engine.nodes}
+        ></VolumeOptions>
+      )}
 
       {isShow?.show === true && (
         <div className="relative flex w-full lg:w-[620px] justify-center items-center h-0 z-10">

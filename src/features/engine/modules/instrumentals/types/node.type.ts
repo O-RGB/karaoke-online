@@ -38,7 +38,12 @@ export type InstrumentDrum =
 export type INodeKey = "MAX_VOLUME" | "VOLUME" | "PAN" | "CHORUS" | "REVERB";
 export type INodeChange = "CHANGE";
 export type INodeOption = INodeChange | "MUTE" | "LOCK" | "ACTIVE";
-export type INodeState = "EXPRESSION" | "VELOCITY" | "PROGARM" | "VOLUME";
+export type INodeState =
+  | "EXPRESSION"
+  | "VELOCITY"
+  | "PROGARM"
+  | "VOLUME"
+  | "DRUM";
 
 export type EventKey<K = any> = [K, INodeOption];
 export type TEventType<K = any, R = any> = TEventCallBack<K, R>;

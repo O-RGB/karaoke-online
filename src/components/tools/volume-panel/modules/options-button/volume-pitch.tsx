@@ -1,7 +1,7 @@
 import NumberButton from "@/components/common/input-data/number-button";
 import SwitchButton from "@/components/common/input-data/switch/switch-button";
 import { MAIN_VOLUME } from "@/features/engine/types/node.type";
-import React from "react";
+import React, { useEffect } from "react";
 import { FaList } from "react-icons/fa";
 import { IoSpeedometerSharp } from "react-icons/io5";
 import {
@@ -10,7 +10,11 @@ import {
   PiUserMinusFill,
 } from "react-icons/pi";
 import FullMixer from "../full-mixer";
-import { IControllerChange } from "@/features/engine/types/synth.type";
+import {
+  BaseSynthEngine,
+  IControllerChange,
+} from "@/features/engine/types/synth.type";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 
 interface VolumeOptionsProps {
   onPitchChange: (value: number) => void;
@@ -19,6 +23,7 @@ interface VolumeOptionsProps {
   onMutedVolume: (event: IControllerChange<boolean>) => void;
   setNotification: (notification: INotificationValue) => void;
   vocal: number;
+  nodes?: SynthChannel[];
 }
 
 const VolumeOptions: React.FC<VolumeOptionsProps> = ({
@@ -28,7 +33,9 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   onMutedVolume,
   setNotification,
   vocal,
+  nodes,
 }) => {
+  useEffect(() => {}, [nodes]);
   return (
     <>
       <div className="flex gap-2 justify-between lg:justify-normal w-full">
@@ -75,7 +82,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
           iconClose={<FaList></FaList>}
         ></SwitchButton>
 
-        <FullMixer></FullMixer>
+        {nodes && <FullMixer nodes={nodes}></FullMixer>}
       </div>
     </>
   );

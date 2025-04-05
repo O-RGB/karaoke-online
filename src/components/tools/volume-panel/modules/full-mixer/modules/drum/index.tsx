@@ -1,17 +1,34 @@
 import Button from "@/components/common/button/button";
 import { INSTRUMENT_DRUM } from "@/features/engine/modules/instrumentals/instrumental";
-import React from "react";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import React, { useEffect } from "react";
 
-interface DrumChangeProps {}
+interface DrumChangeProps {
+  program?: number;
+}
 
-const DrumChange: React.FC<DrumChangeProps> = ({}) => {
+const DrumChange: React.FC<DrumChangeProps> = ({ program }) => {
+  const engine = useSynthesizerEngine((state) => state.engine);
+
+  useEffect(() => {}, [program]);
+
   return (
     <>
       <div className="flex p-2">
         {INSTRUMENT_DRUM.map((data, i) => {
           return (
             <React.Fragment key={`card-inst-${data}`}>
-              <Button className="text-xs">
+              <Button
+                onClick={() => {
+                  engine?.setProgram?.({
+                    channel: 9,
+                    program: 100 + i,
+                  });
+                }}
+                className={`text-xs ${
+                  program === 100 + i ? "!bg-blue-500 text-white" : ""
+                }`}
+              >
                 <span className="text-nowrap">
                   {i + 1}. {data}
                 </span>

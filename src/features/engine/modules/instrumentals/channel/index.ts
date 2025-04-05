@@ -52,6 +52,9 @@ export class SynthChannel {
     analyserNode: AnalyserNode
   ) {
     this.channel = channel;
+    if (channel === 9) {
+      this.isDrum = new SynthNode(this.stateEvent, "DRUM", channel, true);
+    }
     this.instrumental = instrumental;
     this.analyserNode = analyserNode;
     this.volume = new SynthNode(this.nodeEvent, "VOLUME", channel, 100);
@@ -66,6 +69,9 @@ export class SynthChannel {
   }
 
   public getGain() {
+    if (this.isDrum?.value === true) {
+      return 0;
+    }
     if (!this.analyserNode) {
       console.error("AnalyserNode is not initialized");
       return 0;

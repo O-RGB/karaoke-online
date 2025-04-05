@@ -1,15 +1,7 @@
 import { CHANNEL_DEFAULT } from "@/config/value";
-import {
-  INodeState,
-  TEventType,
-} from "@/features/engine/modules/instrumentals/types/node.type";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-// import { INodeCallBack } from "@/features/engine/types/node.type";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
-
-import { modulatorSources, NON_CC_INDEX_OFFSET } from "spessasynth_lib";
 import { create } from "zustand";
-
 interface MixerStore {
   setEventGain: () => void;
 
@@ -84,7 +76,6 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
 
   instrument: [],
   setInstrument: (instrument) => {
-    console.log("instrument in sotre", instrument);
     set({ instrument });
   },
 }));

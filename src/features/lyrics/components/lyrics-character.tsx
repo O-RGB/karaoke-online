@@ -42,7 +42,7 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
       }}
     >
       <div
-        className={`absolute left-0 top-0 w-full h-full z-30`}
+        className={`absolute left-0 top-0 w-fit h-full z-30`}
         style={{
           ...clipStyle,
           ...textOver,
@@ -53,7 +53,7 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
       </div>
 
       <div
-        className={`absolute font-outline-2 md:font-outline-4 left-0 top-0 w-full h-full z-20`}
+        className={`absolute font-outline-2 md:font-outline-4 left-0 top-0 w-fit h-full z-20`}
         style={{
           ...clipStyle,
           ...textOver,
