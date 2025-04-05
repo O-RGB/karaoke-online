@@ -1,7 +1,7 @@
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import React, { useState } from "react";
 import InstrumentalCard from "./instrumental-card";
 import InstrumentalSetting from "./instrumental-setting";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { INSTRUMENT_TYPE_BY_INDEX } from "@/features/engine/modules/instrumentals/instrumental";
 import { InstrumentType } from "@/features/engine/modules/instrumentals/types/node.type";
 

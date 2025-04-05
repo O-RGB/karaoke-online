@@ -116,8 +116,7 @@ export const addTracklistsToDatabase = async (
     for (let i = 0; i < objs.length; i++) {
       let obj = objs[i];
       if (obj.id) {
-        obj.id = `${obj.id}-${obj.fileId}`
-        // obj.id = `${i + 1}`;
+        obj.id = `${obj.id}-${obj.fileId}`;
         obj.from = tracklistStore;
       }
       try {

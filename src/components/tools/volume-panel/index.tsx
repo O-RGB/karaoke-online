@@ -1,15 +1,8 @@
 import {
-  PiMicrophoneStageFill,
-  PiUserMinusFill,
-  PiUserSoundFill,
-} from "react-icons/pi";
-import {
   IControllerChange,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
 import React, { useEffect } from "react";
-import NumberButton from "../../common/input-data/number-button";
-import SwitchButton from "../../common/input-data/switch/switch-button";
 import Button from "../../common/button/button";
 import ChannelVolumeRender from "./renders/volume-meter";
 import MainVolumeRender from "./renders/volume-main-render";
@@ -17,17 +10,13 @@ import useConfigStore from "@/features/config/config-store";
 import useNotificationStore from "@/features/notification-store";
 import useKeyboardStore from "@/features/keyboard-state";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
+import VolumeOptions from "./modules/options-button/volume-pitch";
 import ChannelRender from "./modules/channel";
 import { MdArrowDropUp } from "react-icons/md";
 import { useOrientation } from "@/hooks/orientation-hook";
-import { FaList } from "react-icons/fa";
-import { CHANNEL_DEFAULT } from "@/config/value";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import { MAIN_VOLUME } from "@/features/engine/types/node.type";
-import { IoSpeedometerSharp } from "react-icons/io5";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
-import FullMixer from "./full-mixer";
 
 interface VolumePanelProps {}
 
@@ -63,7 +52,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   };
 
   const onMutedVolume = (event: IControllerChange<boolean>) => {
-    let isMuted = event.controllerValue;
     engine?.setMute(event);
   };
 
@@ -105,7 +93,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
           <div
             className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px]  left-0 p-2 py-[26px]`}
           >
-            {CHANNEL_DEFAULT.map((data, ch) => {
+            {engine?.nodes?.map((data, ch) => {
               return (
                 <div key={`gain-render-${ch}`} className="relative w-full">
                   <ChannelVolumeRender
@@ -145,55 +133,17 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
         </div>
       )}
 
-      <div className="flex gap-2 justify-between lg:justify-normal w-full">
-        <NumberButton
-          className="!w-full lg:!w-fit"
-          onChange={(value) => {
-            onPitchChange(value);
-            setNotification({ text: `Pitch ${value}` });
-          }}
-          value={0}
-          icon={
-            <PiMicrophoneStageFill className="text-[15px]"></PiMicrophoneStageFill>
-          }
-        ></NumberButton>
-        <NumberButton
-          className="!w-full lg:!w-fit"
-          onChange={(value) => {
-            onSpeedChange(value);
-            setNotification({ text: `Speed ${value}` });
-          }}
-          value={100}
-          icon={
-            <IoSpeedometerSharp className="text-[15px]"></IoSpeedometerSharp>
-          }
-        ></NumberButton>
-        <SwitchButton
-          className="!w-full lg:!w-fit"
-          onChange={(muted) => {
-            onMutedVolume({
-              channel: VOCAL_CHANNEL,
-              controllerNumber: MAIN_VOLUME,
-              controllerValue: !muted,
-            });
-          }}
-          iconOpen={<PiUserSoundFill className="text-lg"></PiUserSoundFill>}
-          iconClose={<PiUserMinusFill className="text-lg"></PiUserMinusFill>}
-          colorClose="red"
-        ></SwitchButton>
-
-        <SwitchButton
-          className="!w-full lg:!w-fit hidden lg:block "
-          onChange={(muted) => {
-            setQueueOpen?.();
-            resetQueueingTimeout(5000);
-          }}
-          iconOpen={<FaList></FaList>}
-          iconClose={<FaList></FaList>}
-        ></SwitchButton>
-
-        <FullMixer></FullMixer>
-      </div>
+      <VolumeOptions
+        onPitchChange={onPitchChange}
+        onSpeedChange={onSpeedChange}
+        onMutedVolume={onMutedVolume}
+        setNotification={setNotification}
+        openQueue={() => {
+          setQueueOpen?.();
+          resetQueueingTimeout(5000);
+        }}
+        vocal={VOCAL_CHANNEL}
+      ></VolumeOptions>
 
       {isShow?.show === true && (
         <div className="relative flex w-full lg:w-[620px] justify-center items-center h-0 z-10">

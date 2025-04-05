@@ -4,10 +4,11 @@ import { EventManager } from "../events";
 import {
   EventKey,
   INodeState,
+  InstrumentDrum,
   InstrumentType,
   TEventType,
 } from "../types/node.type";
-import { EXPRESSION } from "@/features/engine/types/node.type";
+import { EXPRESSION, MAIN_VOLUME } from "@/features/engine/types/node.type";
 import { SynthNode } from "../node";
 import {
   BaseSynthEngine,
@@ -37,6 +38,20 @@ export const INSTRUMENT_TYPE_BY_INDEX: InstrumentType[] = [
   "sound_effects",
 ];
 
+export const INSTRUMENT_DRUM: InstrumentDrum[] = [
+  "general",
+  "lukthung",
+  "lukkrung",
+  "phuea_chiwit",
+  "sixties",
+  "string",
+  "shock",
+  "jimmix",
+  "saching",
+  "jazz",
+  "thai_classical",
+];
+
 export const findProgramCategory = (
   program: number
 ): { category: InstrumentType; index: number } | null => {
@@ -52,6 +67,7 @@ export class InstrumentalNode {
 
   public expression: SynthNode<INodeState, number>[] = [];
   public velocity: SynthNode<INodeState, number>[] = [];
+  // public volume: SynthNode<INodeState, number>[] = [];
 
   public settingEvent = new EventManager<INodeState, TEventType<number>>();
   public groupEvent = new EventManager<
@@ -83,6 +99,9 @@ export class InstrumentalNode {
     this.velocity = INSTRUMENT_TYPE_BY_INDEX.map(
       (_, i) => new SynthNode(this.settingEvent, "VELOCITY", i, 0)
     );
+    // this.volume = INSTRUMENT_TYPE_BY_INDEX.map(
+    //   (_, i) => new SynthNode(this.settingEvent, "VOLUME", i, 100)
+    // );
   }
 
   public update(
@@ -104,9 +123,11 @@ export class InstrumentalNode {
       if (oldTypeChannels) {
         oldTypeChannels.delete(event.channel);
         const oldExpression = this.expression[oldType.index].value ?? 100;
-        const oldVelocity = this.velocity[oldType.index].value ?? 0;
         this.updateController(event.channel, oldExpression);
+        const oldVelocity = this.velocity[oldType.index].value ?? 0;
         this.updateVelocity(event.channel, oldVelocity);
+        // const oldVolume = this.volume[oldType.index].value ?? 100;
+        // this.updateVolumne(event.channel, oldVolume);
       }
     }
 
@@ -120,6 +141,8 @@ export class InstrumentalNode {
     this.updateController(event.channel, newExpression);
     const newVelocity = this.velocity[newType.index].value ?? 0;
     this.updateVelocity(event.channel, newVelocity);
+    // const newVolume = this.volume[newType.index].value ?? 100;
+    // this.updateVolumne(event.channel, newVolume);
 
     this.groupEvent.trigger([newType.category, "CHANGE"], newType.index, {
       value: byType,
@@ -158,11 +181,30 @@ export class InstrumentalNode {
     this.settingEvent.trigger(["VELOCITY", "CHANGE"], indexKey, { value });
   }
 
-  updateController(channel: number, value: number) {
-    if (channel !== 9 && channel !== 8) {
+  setVolume(type: InstrumentType, value: number, indexKey: number) {
+    const nodes: Map<number, SynthChannel> = this.group.get(type) ?? new Map();
+    nodes.forEach((node) => {
+      if (node.volume !== undefined && node.channel !== undefined) {
+        this.updateController(node.channel, value, "VOLUME");
+        node.volume.setValue(value);
+      }
+    });
+
+    console.log("this.expression", this.expression);
+
+    this.expression[indexKey].setValue(value);
+    this.settingEvent.trigger(["EXPRESSION", "CHANGE"], indexKey, { value });
+  }
+
+  updateController(
+    channel: number,
+    value: number,
+    type: "EXPRESSION" | "VOLUME" = "EXPRESSION"
+  ) {
+    if (channel !== 9) {
       this.engine?.setController?.({
         channel: channel,
-        controllerNumber: EXPRESSION,
+        controllerNumber: type === "EXPRESSION" ? EXPRESSION : MAIN_VOLUME,
         controllerValue: value,
       });
     }
@@ -171,6 +213,16 @@ export class InstrumentalNode {
   updateVelocity(channel: number, value: number) {
     if (channel !== 9 && channel !== 8) {
       this.engine?.setVelocity({ channel, value });
+    }
+  }
+
+  updateVolumne(channel: number, value: number) {
+    if (channel !== 9 && channel !== 8) {
+      this.engine?.setController?.({
+        channel: channel,
+        controllerNumber: MAIN_VOLUME,
+        controllerValue: value,
+      });
     }
   }
 
@@ -187,6 +239,9 @@ export class InstrumentalNode {
     } else if (eventType[0] === "VELOCITY") {
       value = this.velocity[indexKey].value ?? 0;
     }
+    // else if (eventType[0] === "VOLUME") {
+    //   value = this.volume[indexKey].value ?? 100;
+    // }
     callback({ value });
   }
 

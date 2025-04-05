@@ -1,7 +1,7 @@
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
 import { InstrumentType } from "@/features/engine/modules/instrumentals/types/node.type";
-
+import { lowercaseToReadable } from "@/lib/general";
 import React, { useEffect, useId, useState } from "react";
 
 interface InstrumentalCardProps {
@@ -20,13 +20,7 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
   onClick,
 }) => {
   const componentId = useId();
-  const text = type
-    .split("_")
-    .map((x) =>
-      x.length > 0 ? `${x.charAt(0).toUpperCase()}${x.substring(1)}` : ""
-    )
-    .join(" ");
-
+  const text = lowercaseToReadable(type);
   const [expression, setExpression] = useState<number>(0);
   const [velocity, setVelocity] = useState<number>(0);
   const [channelRef, setChannelRef] = useState<Map<number, SynthChannel>>(

@@ -83,8 +83,11 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       analysers.push(analyser);
     }
 
-    // this.analysers = analysers;
-    // this.gainNode = new AudioMeter(analysers);
+    // channels.forEach((channel, index) => {
+    //   const gainNode = channel as GainNode;
+    //   gainNode.gain.value = 0.5;
+    //   gainNode.gain.value = 0;
+    // });
 
     synth?.connectIndividualOutputs(analysers);
 

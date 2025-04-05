@@ -17,7 +17,6 @@ export const saveSoundFontStorage = async (file: File) => {
 
 export const deleteSoundFontStorage = async (filename: string) => {
   try {
-    // ลบออกจาก STORAGE_SOUNDFONT
     const db = await getDB(STORAGE_SOUNDFONT);
     const tx = db.transaction(STORAGE_SOUNDFONT, "readwrite");
     await tx.objectStore(STORAGE_SOUNDFONT).delete(filename);

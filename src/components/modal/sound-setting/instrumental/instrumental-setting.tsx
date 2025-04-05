@@ -1,11 +1,11 @@
 import SliderCommon from "@/components/common/input-data/slider";
 import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
+import { enumToReadable, lowercaseToReadable } from "@/lib/general";
+import React, { useEffect, useId, useState } from "react";
 import {
   INodeState,
   InstrumentType,
 } from "@/features/engine/modules/instrumentals/types/node.type";
-
-import React, { useEffect, useId, useState } from "react";
 
 interface InstrumentalSettingProps {
   instrumental?: InstrumentalNode;
@@ -62,21 +62,10 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
     <>
       <div className="flex flex-col gap-1">
         <span className="text-lg font-bold">
-          {selectedType &&
-            selectedType
-              .split("_")
-              .map((x) =>
-                x.length > 0
-                  ? `${x.charAt(0).toUpperCase()}${x.substring(1, x.length)}`
-                  : ""
-              )
-              .join(" ")}
+          {selectedType && lowercaseToReadable(selectedType)}
         </span>
         <span className="text-sm">
-          <span>
-            {valueKey.charAt(0).toUpperCase() +
-              valueKey.substring(1, valueKey.length).toLowerCase()}{" "}
-          </span>
+          <span>{enumToReadable(valueKey)} </span>
           <span style={{ color }}>{value}</span>
         </span>
         <SliderCommon

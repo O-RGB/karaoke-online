@@ -1,6 +1,5 @@
 import {
   CUR_FILE_TYPE,
-  CUSTOM_DRIVE_SONG_ZIP,
   CUSTOM_SONG_ZIP,
   LYR_FILE_TYPE,
   MID_FILE_TYPE,
@@ -23,7 +22,6 @@ import {
 } from "../local-storege/local-storage";
 import { createTrackList } from "./tracklist";
 import { UserSongModel } from "@/utils/database/model";
-import { base64ToImage } from "../image";
 import { base64ByteToFile } from "@/utils/file/file";
 import { getSongDrive } from "./drive";
 function QueryPost(params: any): FormData {
@@ -100,7 +98,6 @@ export const genSongPath = (selected?: SearchResult) => {
 export const getSong = async (
   selected: SearchResult,
   driveSetting?: string
-  // driveMode: boolean = false
 ) => {
   const { superId, fileId } = genSongPath(selected);
 

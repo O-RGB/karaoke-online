@@ -24,14 +24,14 @@ export async function loadAudioContext(): Promise<{
       new URL(WORKLET_URL_ABSOLUTE, window.location.origin).toString()
     );
 
-    // const splitter = audioContext.createChannelSplitter(16);
-    // const channels: AudioNode[] = Array.from({ length: 16 }, (_, i) => {
-    //   const channelGain = audioContext.createGain();
-    //   splitter.connect(channelGain, i);
-    //   return channelGain;
-    // });
+    const splitter = audioContext.createChannelSplitter(16);
+    const channels: AudioNode[] = Array.from({ length: 16 }, (_, i) => {
+      const channelGain = audioContext.createGain();
+      splitter.connect(channelGain, i);
+      return channelGain;
+    });
 
-    return { audioContext, channels: [] };
+    return { audioContext, channels };
   } catch (error) {
     console.error("Error loading AudioContext or adding audio worklet:", error);
     return { audioContext: undefined, channels: [] };

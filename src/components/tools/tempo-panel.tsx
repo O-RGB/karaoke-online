@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import useConfigStore from "../../features/config/config-store";
-
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 
 interface TempoPanelProps {}
@@ -33,7 +32,6 @@ const TempoPanel: React.FC<TempoPanelProps> = ({}) => {
   }
   return (
     <div className="fixed z-30 right-5 lg:top-6 blur-overlay blur-border border rounded-md p-2 w-44 hidden lg:block text-white">
-      {/* {JSON.stringify(timeDivision)} */}
       <div className="flex justify-between items-center mb-1">
         <span className=" text-xl font-bold">{Math.round(tempo)}</span>
 

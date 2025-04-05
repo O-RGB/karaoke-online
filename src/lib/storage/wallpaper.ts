@@ -3,7 +3,6 @@ import {
   storageGet,
   storageGetAll,
   storageDelete,
-  Add,
 } from "../../utils/database/storage";
 import { WallpaperModel } from "@/utils/database/model";
 

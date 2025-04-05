@@ -12,19 +12,19 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import VolumeNodesPanel from "../node-preset/volume-nodes-panel";
 
 interface ChannelRenderProps {
-  isShow: boolean;
   channel: number;
+  node: SynthChannel;
+  isShow?: boolean;
   perset?: IPersetSoundfont[] | undefined;
   onMutedVolume?: (event: IControllerChange<boolean>) => void;
   onChange?: (value: IControllerChange) => void;
   onProgramChange?: (value: IProgramChange) => void;
   onLockChange?: (event: IControllerChange<boolean>) => void;
-  node: SynthChannel;
 }
 
 const ChannelRender: React.FC<ChannelRenderProps> = ({
-  isShow = true,
   channel,
+  isShow = true,
   perset,
   onMutedVolume,
   onProgramChange,

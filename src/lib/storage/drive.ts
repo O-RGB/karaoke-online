@@ -18,8 +18,6 @@ export const getSongDrive = async (
   url?: string,
   custom?: boolean
 ) => {
-  // check file in store
-
   let file = undefined;
   if (custom) {
     file = await getSongDriveByKey(+key);
@@ -76,5 +74,3 @@ export const getAllKeysDrive = async (limit: number, offset: number) => {
 export const deleteAllSong = async () => {
   return await sortageDeleteAll(STORAGE_EXTREME_SONG);
 };
-
-DriveExtremeModel;

@@ -22,10 +22,23 @@ export type InstrumentType =
   | "percussive"
   | "sound_effects";
 
-export type INodeKey = "VOLUME" | "PAN" | "CHORUS" | "REVERB";
+export type InstrumentDrum =
+  | "general"
+  | "lukthung"
+  | "lukkrung"
+  | "phuea_chiwit"
+  | "sixties"
+  | "string"
+  | "shock"
+  | "jimmix"
+  | "saching"
+  | "jazz"
+  | "thai_classical";
+
+export type INodeKey = "MAX_VOLUME" | "VOLUME" | "PAN" | "CHORUS" | "REVERB";
 export type INodeChange = "CHANGE";
 export type INodeOption = INodeChange | "MUTE" | "LOCK" | "ACTIVE";
-export type INodeState = "EXPRESSION" | "VELOCITY" | "PROGARM";
+export type INodeState = "EXPRESSION" | "VELOCITY" | "PROGARM" | "VOLUME";
 
 export type EventKey<K = any> = [K, INodeOption];
 export type TEventType<K = any, R = any> = TEventCallBack<K, R>;

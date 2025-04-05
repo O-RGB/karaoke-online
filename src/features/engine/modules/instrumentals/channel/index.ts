@@ -19,7 +19,8 @@ export class SynthChannel {
   public channel: number | undefined;
 
   // Value
-  public volume?: SynthNode<INodeKey, number> = undefined;
+  public volume: SynthNode<INodeKey, number> | undefined = undefined;
+  public maxVolume: SynthNode<INodeKey, number> | undefined = undefined;
 
   // Effect
   public chorus: SynthNode<INodeKey, number> | undefined = undefined;
@@ -54,6 +55,7 @@ export class SynthChannel {
     this.instrumental = instrumental;
     this.analyserNode = analyserNode;
     this.volume = new SynthNode(this.nodeEvent, "VOLUME", channel, 100);
+    this.maxVolume = new SynthNode(this.nodeEvent, "MAX_VOLUME", channel, 10);
     this.chorus = new SynthNode(this.nodeEvent, "CHORUS", channel, 100);
     this.reverb = new SynthNode(this.nodeEvent, "REVERB", channel, 100);
     this.pan = new SynthNode(this.nodeEvent, "PAN", channel, 100);
@@ -109,6 +111,13 @@ export class SynthChannel {
 
   public controllerChange(event: IControllerChange<any>) {
     this.handleControllerChange(event, (control, value) => {
+      // if (event.controllerNumber === MAIN_VOLUME && this.maxVolume) {
+      //   const max = this.maxVolume.value;
+      //   const controllerValue = event.controllerValue;
+      //   const adjustedValue = (controllerValue / 127) * (max ?? 100);
+      //   control.setValue(Math.ceil(adjustedValue));
+      // } else {
+      // }
       control.setValue(value);
     });
   }
