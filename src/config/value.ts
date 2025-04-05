@@ -129,8 +129,8 @@ export const REFRESH_RATE: { [key: string]: number } = {
 
 export const DEFAULT_CONFIG: ConfigDisplay = {
   refreshRate: {
-    render: REFRESH_RATE["MIDDLE"],
-    type: "MIDDLE",
+    render: 100,
+    // type: "MIDDLE",
   },
   lyrics: {
     color: {
