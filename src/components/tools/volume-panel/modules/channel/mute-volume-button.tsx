@@ -3,7 +3,7 @@ import { IControllerChange } from "@/features/engine/types/synth.type";
 import React, { useEffect, useId, useState } from "react";
 import { BiSolidVolumeMute, BiSolidVolumeFull } from "react-icons/bi";
 
-interface VolumeActionProps {
+interface MuteVolumeButtonProps {
   channel: number;
   controllerNumber: number;
   onMuted?: (event: IControllerChange<boolean>) => void;
@@ -12,7 +12,7 @@ interface VolumeActionProps {
   node: SynthChannel;
 }
 
-const VolumeAction: React.FC<VolumeActionProps> = ({
+const MuteVolumeButton: React.FC<MuteVolumeButtonProps> = ({
   channel,
   controllerNumber,
   onMuted,
@@ -71,4 +71,4 @@ const VolumeAction: React.FC<VolumeActionProps> = ({
   );
 };
 
-export default VolumeAction;
+export default MuteVolumeButton;

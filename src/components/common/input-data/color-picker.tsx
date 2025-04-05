@@ -1,14 +1,14 @@
 import React from "react";
 
 interface ColorPickerProps {
-  value?: string; // ค่าสีที่เลือก
-  onChange?: (color: string) => void; // ฟังก์ชันที่จะเรียกเมื่อมีการเปลี่ยนแปลงสี
+  value?: string;
+  onChange?: (color: string) => void;
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedColor = event.target.value; // ดึงค่าสีที่เลือก
-    onChange?.(selectedColor); // เรียกฟังก์ชัน onChange
+    const selectedColor = event.target.value;
+    onChange?.(selectedColor);
   };
 
   return (

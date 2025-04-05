@@ -9,6 +9,7 @@ interface SwitchButtonProps {
   labelClose?: string;
   colorClose?: ColorType;
   onChange?: (open: boolean) => void;
+  className?: string;
 }
 
 const SwitchButton: React.FC<SwitchButtonProps> = ({
@@ -18,6 +19,7 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({
   labelOpen,
   colorClose,
   onChange,
+  className,
 }) => {
   const [open, setOpen] = useState<boolean>(true);
 
@@ -33,7 +35,7 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({
       blur={!open ? false : "blur-overlay bg-white/10 hover:bg-white/20"}
       onClick={handleOnClick}
       color={colorClose}
-      className={[open ? " hover:bg-white/30" : ""].join(" ")}
+      className={[open ? " hover:bg-white/30" : "", className].join(" ")}
       padding="p-1 px-2"
     >
       <div

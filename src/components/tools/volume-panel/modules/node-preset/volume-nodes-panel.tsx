@@ -1,13 +1,3 @@
-import ButtonDropdown from "@/components/common/button/button-dropdown";
-import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
-import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
-import { FaDrum, FaUnlock } from "react-icons/fa";
-import { PiMicrophoneStageFill } from "react-icons/pi";
-import { Menu, MenuButton } from "@szhsin/react-menu";
-import Label from "@/components/common/display/label";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import Button from "@/components/common/button/button";
-import MixNodeController from "./mix-controller/node-controller";
 import {
   CHORUSDEPTH,
   MAIN_VOLUME,
@@ -18,9 +8,19 @@ import {
   IControllerChange,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
+import ButtonDropdown from "@/components/common/button/button-dropdown";
+import Label from "@/components/common/display/label";
+import Button from "@/components/common/button/button";
+import VolumeNodePreset from "./volume-node-preset";
+import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { getIconInstruments } from "@/lib/spssasynth/icons-instruments";
+import { FaDrum, FaUnlock } from "react-icons/fa";
+import { PiMicrophoneStageFill } from "react-icons/pi";
+import { Menu, MenuButton } from "@szhsin/react-menu";
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { TEventType } from "@/features/engine/modules/instrumentals/types/node.type";
-interface InstrumentsButtonProps {
+
+interface VolumeNodesPanelProps {
   channel: number;
   perset?: IPersetSoundfont[];
   volRender?: React.ReactNode;
@@ -31,7 +31,7 @@ interface InstrumentsButtonProps {
   onLockChange?: (event: IControllerChange<boolean>) => void;
 }
 
-const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
+const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
   onContrllerChange,
   onProgramChange,
   onLockChange,
@@ -127,7 +127,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           Channel {channel + 1}
         </div>
 
-        <MixNodeController
+        <VolumeNodePreset
           node={node}
           vertical={false}
           onLock={onLockChange}
@@ -137,7 +137,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           disabled={disabled}
           nodeType={"VOLUME"}
           label="ระดับเสียง"
-        ></MixNodeController>
+        ></VolumeNodePreset>
 
         <div className="flex gap-1">
           <LabelTag name="เสียง"></LabelTag>
@@ -149,7 +149,6 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           </div>
 
           <ButtonDropdown
-            // disabled={bassIsLocked}
             className={"w-full"}
             value={programSelected?.value}
             onChange={(value) => {
@@ -177,7 +176,7 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
             </div>
           </ButtonDropdown>
         </div>
-        <MixNodeController
+        <VolumeNodePreset
           node={node}
           onLock={onLockChange}
           onChange={onContrllerChange}
@@ -186,8 +185,8 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           disabled={disabled}
           nodeType={"PAN"}
           label="ซ้ายขวา"
-        ></MixNodeController>
-        <MixNodeController
+        ></VolumeNodePreset>
+        <VolumeNodePreset
           node={node}
           onLock={onLockChange}
           onChange={onContrllerChange}
@@ -196,8 +195,8 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           disabled={disabled}
           nodeType={"REVERB"}
           label="เสียงก้อง"
-        ></MixNodeController>
-        <MixNodeController
+        ></VolumeNodePreset>
+        <VolumeNodePreset
           node={node}
           onLock={onLockChange}
           onChange={onContrllerChange}
@@ -206,10 +205,10 @@ const InstrumentsButton: React.FC<InstrumentsButtonProps> = ({
           disabled={disabled}
           nodeType={"CHORUS"}
           label="ประสาน"
-        ></MixNodeController>
+        ></VolumeNodePreset>
       </div>
     </Menu>
   );
 };
 
-export default InstrumentsButton;
+export default VolumeNodesPanel;

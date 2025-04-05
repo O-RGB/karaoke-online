@@ -44,7 +44,7 @@ type ModalProps = {
   onOk?: () => void;
   okButtonProps?: ButtonProps;
   cancelProps?: ButtonProps;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   title?: string;
   icons?: React.ReactNode;
   width?: number;

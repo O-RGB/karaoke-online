@@ -68,6 +68,7 @@ export interface BaseSynthPlayerEngine {
   resetMidiOutput(): void;
   eventChange?(): void;
   addEvent?(input: Partial<BaseSynthEvent>): void;
+  setPlayBackRate?(rate: number): void;
   eventInit?: BaseSynthEvent;
 }
 

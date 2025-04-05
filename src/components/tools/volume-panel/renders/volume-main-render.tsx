@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 
-interface VolumeHorizontalProps {
+interface MainVolumeRenderProps {
   hide: boolean;
 }
 
-const VolumeHorizontal: React.FC<VolumeHorizontalProps> = ({ hide }) => {
+const MainVolumeRender: React.FC<MainVolumeRenderProps> = ({ hide }) => {
   const gain = useMixerStoreNew((state) => state.gainMain);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -14,13 +14,8 @@ const VolumeHorizontal: React.FC<VolumeHorizontalProps> = ({ hide }) => {
     if (canvas) {
       const context = canvas.getContext("2d");
       if (context) {
-        // Clear the canvas
         context.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Set styles
         context.fillStyle = `rgba(255, 255, 255, ${hide ? 0.4 : 0})`;
-
-        // Draw the gain bar
         context.fillRect(0, 0, (gain / 100) * canvas.width, canvas.height);
       }
     }
@@ -29,11 +24,11 @@ const VolumeHorizontal: React.FC<VolumeHorizontalProps> = ({ hide }) => {
   return (
     <canvas
       ref={canvasRef}
-      width={300} // Set your canvas width
-      height={25} // Set your canvas height
+      width={300}
+      height={25}
       className="absolute top-0 left-0 w-full"
     ></canvas>
   );
 };
 
-export default VolumeHorizontal;
+export default MainVolumeRender;

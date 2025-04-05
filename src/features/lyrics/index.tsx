@@ -4,7 +4,6 @@ import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import useLyricsStoreNew from "@/features/lyrics/store/lyrics.store";
 import useConfigStore from "@/features/config/config-store";
 import { NextFont } from "next/dist/compiled/@next/font";
-// import { lyricsGetFont } from "@/features/lyrics/lib/lyrics.features";
 import { LyricsCharacterStyle } from "./types/lyrics-character.type";
 
 interface LyricsPlayerProps {}
@@ -25,13 +24,6 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
   const handleResize = () => {
     setWindowsWidth(window.innerWidth);
   };
-
-  // useEffect(() => {
-  //   if (fontName) {
-  //     const fontStyle = lyricsGetFont(fontName);
-  //     setFontState(fontStyle);
-  //   }
-  // }, [fontName]);
 
   useEffect(() => {
     setWindowsWidth(window.innerWidth);

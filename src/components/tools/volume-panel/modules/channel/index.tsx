@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
-import InstrumentsButton from "../instruments-button";
-import VolumeAction from "../volume-action";
+import MuteVolumeButton from "./mute-volume-button";
 import { MAIN_VOLUME } from "@/features/engine/types/node.type";
-import MixNodeController from "../mix-controller/node-controller";
+import VolumeNodePreset from "../node-preset/volume-node-preset";
 import {
   IControllerChange,
   IProgramChange,
@@ -10,6 +9,7 @@ import {
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import ChannelLimit from "./limit";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import VolumeNodesPanel from "../node-preset/volume-nodes-panel";
 
 interface ChannelRenderProps {
   isShow: boolean;
@@ -48,15 +48,15 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
           node={node}
         ></ChannelLimit>
       )}
-      <VolumeAction
+      <MuteVolumeButton
         disabled={isShow}
         controllerNumber={MAIN_VOLUME}
         channel={channel}
         onMuted={onMutedVolume}
         node={node}
-      ></VolumeAction>
+      ></MuteVolumeButton>
       <div className="flex items-center justify-center h-full py-1.5 w-full border-x border-white/20">
-        <MixNodeController
+        <VolumeNodePreset
           node={node}
           vertical={true}
           onLock={onLockChange}
@@ -65,9 +65,9 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
           channel={channel}
           disabled={isShow}
           nodeType={"VOLUME"}
-        ></MixNodeController>
+        ></VolumeNodePreset>
       </div>
-      <InstrumentsButton
+      <VolumeNodesPanel
         disabled={isShow}
         node={node}
         channel={channel}
@@ -75,7 +75,7 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
         onLockChange={onLockChange}
         onProgramChange={onProgramChange}
         perset={perset}
-      ></InstrumentsButton>
+      ></VolumeNodesPanel>
     </>
   );
 };

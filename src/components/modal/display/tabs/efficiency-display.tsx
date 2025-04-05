@@ -1,95 +1,65 @@
-import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
 import Label from "@/components/common/display/label";
 import useConfigStore from "@/features/config/config-store";
-import { REFRESH_RATE } from "@/config/value";
-import { appendLocalConfig, setLocalConfig } from "@/lib/local-storege/config";
 import React, { useEffect, useState } from "react";
-import { ConfigDisplay, RefreshRate } from "@/features/config/types/config.type";
+import { ConfigDisplay } from "@/features/config/types/config.type";
+import SliderCommon from "@/components/common/input-data/slider";
+import { CgPerformance } from "react-icons/cg";
+import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 
 interface EfficiencyDisplayProps {}
 
 const EfficiencyDisplay: React.FC<EfficiencyDisplayProps> = ({}) => {
   const setConfig = useConfigStore((state) => state.setConfig);
   const config = useConfigStore((state) => state.config);
-  const [refreshRate, setRefreshReate] = useState<RefreshRate>("MIDDLE");
+  const play = useRuntimePlayer((state) => state.play);
+  const isPaused = useRuntimePlayer((state) => state.isPaused);
+  const paused = useRuntimePlayer((state) => state.paused);
 
-  function updateBlurStyles(
-    blurAmount: number,
-    borderOpacity: number,
-    color: string = "transparent"
-  ) {
-    document.documentElement.style.setProperty(
-      "--blur-amount",
-      `${blurAmount}px`
-    );
-    document.documentElement.style.setProperty(
-      "--border-opacity",
-      `${borderOpacity}`
-    );
-    document.documentElement.style.setProperty(
-      "--background-color",
-      `${color}`
-    );
-  }
+  const [refreshRateValue, setRefreshRateValue] = useState<number>(100);
 
-  const onRefreshChange = (value: RefreshRate) => {
-    const refreshRate = { render: REFRESH_RATE[value], type: value };
-
-    if (refreshRate.type === "LOW") {
-      updateBlurStyles(0, 0.5, config.themes?.backgroundColor?.color);
-    } else {
-      updateBlurStyles(8, 0.5);
-    }
-    appendLocalConfig({ refreshRate: refreshRate });
-    setRefreshReate(value);
+  const onRangeChange = (value: number) => {
+    setRefreshRateValue(value);
     setConfig((cf) => {
       return {
         ...cf,
-        refreshRate: refreshRate,
+        refreshRate: {
+          render: value,
+        },
       } as ConfigDisplay;
     });
   };
-
   useEffect(() => {
-    setRefreshReate(config.refreshRate?.type ?? "MIDDLE");
+    setRefreshRateValue(config.refreshRate?.render ?? 100);
   }, [config]);
 
   return (
     <div className="flex flex-col gap-3 divide-y">
-      <div>
-        <Label>Refresh rate</Label>
-        <div className="flex justify-between gap-3 items-center">
-          <div>
-            <SwitchRadio<RefreshRate>
-              onChange={onRefreshChange}
-              value={refreshRate}
-              options={[
-                {
-                  value: "HIGH",
-                  children: "สูง",
-                },
-                {
-                  value: "MIDDLE",
-                  children: "กลาง",
-                },
-                {
-                  value: "LOW",
-                  children: "ต่ำ",
-                },
-              ]}
-            ></SwitchRadio>
-          </div>
-          <div>
-            <div className="bg-black p-2 text-base lg:text-xl text-yellow-300 flex justify-center items-center">
-              FPS:{" "}
-              {refreshRate === "HIGH"
-                ? "60"
-                : refreshRate === "MIDDLE"
-                ? "30"
-                : refreshRate === "LOW"
-                ? "20"
-                : ""}
+      <div className="grid grid-cols-2">
+        <div className="flex flex-col gap-1">
+          <Label className="flex gap-2 items-center">
+            <CgPerformance></CgPerformance>
+            <div>
+              Render every {refreshRateValue}ms (
+              {Math.floor(1000 / refreshRateValue)} FPS)
             </div>
+          </Label>
+          <div className="border rounded-md p-4">
+            <SliderCommon
+              defaultValue={100}
+              min={16}
+              max={200}
+              color={refreshRateValue < 50 ? "red" : undefined}
+              value={refreshRateValue}
+              onChange={onRangeChange}
+              onPressEnd={() => {
+                if (!isPaused) {
+                  paused();
+                  setTimeout(() => {
+                    play();
+                  }, 100);
+                }
+              }}
+            ></SliderCommon>
           </div>
         </div>
       </div>

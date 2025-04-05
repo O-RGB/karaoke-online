@@ -4,39 +4,39 @@ import { BiHeart } from "react-icons/bi";
 interface DonateModalProps {}
 
 const DonateModal: React.FC<DonateModalProps> = () => {
-  const donors = [
-    {
-      name: "Chawalit Srisont",
-      amount: 200,
-    },
-    {
-      name: "Wassana Polkhayun",
-      amount: 139,
-    },
-    {
-      name: "วินัย บุญเรืองสนิท",
-      amount: 100,
-    },
-    {
-      name: "Sri Modify",
-      amount: 100,
-    },
-    {
-      name: "Pook Kittipan Khanteemok",
-      amount: 100,
-    },
-    {
-      name: "ไม่ระบุชื่อ",
-      amount: 100,
-    },
-    {
-      name: "ไม่ระบุชื่อ",
-      amount: 100,
-    },
-    {
-      name: "ไม่ระบุชื่อ",
-      amount: 99,
-    },
+  const donors: { name: string; amount: number }[] = [
+    // {
+    //   name: "Chawalit Srisont",
+    //   amount: 200,
+    // },
+    // {
+    //   name: "Wassana Polkhayun",
+    //   amount: 139,
+    // },
+    // {
+    //   name: "วินัย บุญเรืองสนิท",
+    //   amount: 100,
+    // },
+    // {
+    //   name: "Sri Modify",
+    //   amount: 100,
+    // },
+    // {
+    //   name: "Pook Kittipan Khanteemok",
+    //   amount: 100,
+    // },
+    // {
+    //   name: "ไม่ระบุชื่อ",
+    //   amount: 100,
+    // },
+    // {
+    //   name: "ไม่ระบุชื่อ",
+    //   amount: 100,
+    // },
+    // {
+    //   name: "ไม่ระบุชื่อ",
+    //   amount: 99,
+    // },
   ];
 
   return (
@@ -65,7 +65,7 @@ const DonateModal: React.FC<DonateModalProps> = () => {
               <BiHeart className="w-5 h-5 text-red-500" />
               <h3 className="text-lg font-bold text-gray-800">ผู้สนับสนุน</h3>
             </div>
-            <div className="text-xs text-gray-400">มกราคม 2568</div>
+            <div className="text-xs text-gray-400">เมษายน 2568</div>
           </div>
           <div className="space-y-">
             {donors.map((donor, index) => (

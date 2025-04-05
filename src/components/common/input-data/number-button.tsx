@@ -6,12 +6,14 @@ interface NumberButtonProps {
   onChange?: (value: number) => void;
   value?: number;
   icon?: React.ReactNode;
+  className?: string;
 }
 
 const NumberButton: React.FC<NumberButtonProps> = ({
   value = 0,
   onChange,
   icon,
+  className,
 }) => {
   const [int, setInt] = useState<number>(0);
 
@@ -30,7 +32,9 @@ const NumberButton: React.FC<NumberButtonProps> = ({
     setInt(value);
   }, [value]);
   return (
-    <div className="blur-overlay border  blur-border rounded-md px-2 py-1  h-fit w-fit ">
+    <div
+      className={`blur-overlay border blur-border rounded-md px-2 py-1 h-fit w-fit ${className}`}
+    >
       <div className="flex justify-center items-center gap-2 text-white">
         {icon}{" "}
         <div className="flex gap-2 items-center">

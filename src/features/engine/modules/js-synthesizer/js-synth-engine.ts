@@ -247,6 +247,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   updatePitch(channel: number, semitones?: number): void {}
   updatePreset(channel: number, value: number): void {}
 
+  updateSpeed(value: number) {}
   setBassLock(program: number): void {
     this.bassConfig?.setLockBass(program);
     const bass = this.instrumental.group.get("bass");

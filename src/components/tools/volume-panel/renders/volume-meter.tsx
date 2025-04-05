@@ -2,13 +2,13 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import { useEffect, useRef } from "react";
 
-interface VolumeMeterVProps {
+interface ChannelVolumeRenderProps {
   channel: number;
   max: number;
   className: string;
 }
 
-const VolumeMeter: React.FC<VolumeMeterVProps> = ({
+const ChannelVolumeRender: React.FC<ChannelVolumeRenderProps> = ({
   className,
   channel,
   max = 100,
@@ -42,4 +42,4 @@ const VolumeMeter: React.FC<VolumeMeterVProps> = ({
   return <canvas ref={canvasRef} className={className}></canvas>;
 };
 
-export default VolumeMeter;
+export default ChannelVolumeRender;

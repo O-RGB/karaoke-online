@@ -8,7 +8,7 @@ import {
 } from "@/features/engine/types/synth.type";
 import { SoundSetting } from "@/features/config/types/config.type";
 export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
-  private player: Sequencer | undefined;
+  private player: Sequencer;
   public paused: boolean = false;
   public isFinished: boolean = false;
   public currentTiming: number = 0;
@@ -17,26 +17,26 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   public durationTiming: number = 0;
   public config?: Partial<SoundSetting>;
 
-  constructor(player: Sequencer | undefined) {
+  constructor(player: Sequencer) {
     this.player = player;
   }
 
   play(): void {
-    this.player?.play();
+    this.player.play();
     this.paused = false;
   }
   stop(): void {
-    this.player?.stop();
-    this.player?.pause();
+    this.player.stop();
+    this.player.pause();
     this.paused = true;
   }
   pause(): void {
-    this.player?.pause();
+    this.player.pause();
     this.paused = true;
   }
 
   async getCurrentTiming() {
-    return this.player?.currentTime ?? 0;
+    return this.player.currentTime ?? 0;
   }
 
   setCurrentTiming(timing: number): void {
@@ -56,7 +56,6 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   }
 
   async loadMidi(midi: File) {
-    // this.synth?.instrumental?.group.clear()
     let midiFileArrayBuffer = await midi.arrayBuffer();
     let parsedMidi: MIDI | null = null;
     try {
@@ -69,17 +68,21 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
     }
     this.midiData = parsedMidi;
     this.duration = parsedMidi.duration;
-    this.player?.loadNewSongList([parsedMidi], false);
+    this.player.loadNewSongList([parsedMidi], false);
 
     this.durationTiming = parsedMidi.duration;
 
     return parsedMidi;
   }
 
+  setPlayBackRate(rate: number) {
+    this.player.playbackRate = rate;
+  }
+
   setMidiOutput(output: MIDIOutput): void {
-    this.player?.connectMidiOutput(output);
+    this.player.connectMidiOutput(output);
   }
   resetMidiOutput(): void {
-    this.player?.resetMIDIOut();
+    this.player.resetMIDIOut();
   }
 }

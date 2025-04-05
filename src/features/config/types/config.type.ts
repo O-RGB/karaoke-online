@@ -84,7 +84,7 @@ export interface WidgetsSettingConfig {
 }
 
 export interface RefreshRateConfig {
-  type: RefreshRate;
+  // type: RefreshRate;
   render: number;
 }
 

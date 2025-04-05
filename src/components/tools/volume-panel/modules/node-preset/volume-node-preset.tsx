@@ -6,7 +6,7 @@ import React, { useEffect, useId, useState } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { INodeKey } from "@/features/engine/modules/instrumentals/types/node.type";
-interface MixNodeControllerProps {
+interface VolumeNodePresetProps {
   disabled?: boolean;
   channel: number;
   nodeType: INodeKey;
@@ -18,7 +18,7 @@ interface MixNodeControllerProps {
   node?: SynthChannel;
 }
 
-const MixNodeController: React.FC<MixNodeControllerProps> = ({
+const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
   disabled,
   channel,
   nodeType,
@@ -83,12 +83,6 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
       onChange={onSliderChange}
       className="z-20"
       max={127}
-      onPressStart={() => {
-        // controllerItem?.setUserHolding(true);
-      }}
-      onPressEnd={() => {
-        // controllerItem?.setUserHolding(false);
-      }}
     ></SliderCommon>
   );
 
@@ -131,4 +125,4 @@ const MixNodeController: React.FC<MixNodeControllerProps> = ({
   );
 };
 
-export default MixNodeController;
+export default VolumeNodePreset;

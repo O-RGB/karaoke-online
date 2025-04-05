@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import SearchSelect from "../../common/input-data/select/search-select";
 import { toOptions } from "@/lib/general";
-import { FaUser } from "react-icons/fa";
+import { FaList, FaUser } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import SearchDropdown from "./search-dropdown";
 import useTracklistStore from "@/features/tracklist/tracklist-store";
@@ -11,11 +11,10 @@ import Button from "@/components/common/button/button";
 import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
 import { MdPlayCircleFilled } from "react-icons/md";
 
-import useConfigStore from "@/features/config/config-store";
-
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
+import SwitchButton from "@/components/common/input-data/switch/switch-button";
 
 interface SearchSongProps {}
 
@@ -25,6 +24,10 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
 
   const addQueue = useQueuePlayer((state) => state.addQueue);
+  const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
+  const resetQueueingTimeout = useKeyboardStore(
+    (state) => state.resetQueueingTimeout
+  );
 
   const superUserConnections = usePeerStore(
     (state) => state.superUserConnections
@@ -294,25 +297,38 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
       <div
         className={`fixed z-50 px-5 block lg:hidden ${
           orientation === "landscape"
-            ? `right-0 top-4 lg:top-4 ${fullUi ? "w-full" : "w-40"}`
+            ? `right-0 top-4 lg:top-4 ${fullUi ? "w-full" : "w-56"}`
             : "left-0 top-4 lg:top-4 w-full"
         } duration-300`}
       >
-        <div className="w-full blur-overlay flex flex-col rounded-md overflow-hidden">
-          <SearchSelect
-            border="blur-border border"
-            onBlur={handleSearchBlur}
-            onFocus={handleSearchFocus}
-            className={
-              "!placeholder-white appearance-none !bg-transparent w-full"
-            }
-            onSelectItem={(value: IOptions<SearchResult>) => {
-              if (value.option) {
-                setSongPlayer(value.option);
+        <div className="flex gap-1.5 w-full">
+          <div className="w-full blur-overlay flex flex-col rounded-md overflow-hidden">
+            <SearchSelect
+              border="blur-border border"
+              onBlur={handleSearchBlur}
+              onFocus={handleSearchFocus}
+              className={
+                "!placeholder-white appearance-none !bg-transparent w-full"
               }
-            }}
-            onSearch={onSearch}
-          ></SearchSelect>
+              onSelectItem={(value: IOptions<SearchResult>) => {
+                if (value.option) {
+                  setSongPlayer(value.option);
+                }
+              }}
+              onSearch={onSearch}
+            ></SearchSelect>
+          </div>
+          <div>
+            <SwitchButton
+              className="!w-12 !h-9 block lg:hidden"
+              onChange={(muted) => {
+                setQueueOpen?.();
+                resetQueueingTimeout(5000);
+              }}
+              iconOpen={<FaList></FaList>}
+              iconClose={<FaList></FaList>}
+            ></SwitchButton>
+          </div>
         </div>
       </div>
     </div>

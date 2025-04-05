@@ -4,7 +4,7 @@ import { sortTempoChanges } from "@/lib/app-control";
 import useQueuePlayer from "./queue-player";
 import useLyricsStoreNew from "@/features/lyrics/store/lyrics.store";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import useMixerStoreNew from "../../event-player/modules/event-mixer-store";
+import useConfigStore from "@/features/config/config-store";
 
 const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   isPaused: false,
@@ -86,6 +86,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   tickRun: (isPlay: boolean) => {
     const { intervalId } = get();
     const player = useSynthesizerEngine.getState().engine?.player;
+    const render = useConfigStore.getState().config.refreshRate?.render;
 
     if (!player || !player.midiData) {
       return;
@@ -131,7 +132,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
             currentTempo: tempo,
             currentTime: currentTime,
           });
-        }, 100);
+        }, render);
 
         set({ intervalId: newIntervalId });
       }
