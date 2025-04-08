@@ -23,96 +23,68 @@ const LyricsList: React.FC<LyricsListProps> = ({
   textStyle,
 }) => {
   const [clipPercent, setClipPercent] = useState(0);
-  const [scaleX, setScaleX] = useState(1);
+  const [scale, setScale] = useState(1);
   const textRef = useRef<HTMLDivElement>(null);
+  const eventsRef = useRef({ started: false, completed: false });
 
-  const hasCalledStarted = useRef<boolean>(false);
-  const hasCalledCompleted = useRef<boolean>(false);
-
-  const cubicEaseInOut = (t: number): number => {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  };
-
+  // Reset event flags when text or sentence changes
   useEffect(() => {
-    hasCalledStarted.current = false;
-    hasCalledCompleted.current = false;
+    eventsRef.current = { started: false, completed: false };
   }, [text, sentence]);
 
+  // Core logic for syncing lyrics with audio
   useEffect(() => {
-    if (!text || !sentence || text.length === 0) {
+    // Check for valid data
+    if (!text || !sentence || !text.length) {
       setClipPercent(0);
       return;
     }
 
+    // Before the sentence starts
     if (tick < sentence.start) {
       setClipPercent(0);
       return;
     }
 
-    if (tick >= sentence.start && !hasCalledStarted.current && onStarted) {
+    // Fire onStarted callback
+    if (!eventsRef.current.started && onStarted) {
       onStarted();
-      hasCalledStarted.current = true;
+      eventsRef.current.started = true;
     }
 
+    // After the last character time
     const lastCharTime = sentence.valueName[text.length - 1] || 0;
     if (tick >= lastCharTime) {
       setClipPercent(100);
 
-      if (!hasCalledCompleted.current && onCompleted) {
+      // Fire onCompleted callback
+      if (!eventsRef.current.completed && onCompleted) {
         onCompleted();
-        hasCalledCompleted.current = true;
+        eventsRef.current.completed = true;
       }
       return;
     }
 
-    let targetIndex = -1;
+    // Find the character we're currently at
+    for (let i = 0; i < text.length - 1; i++) {
+      const currentTime = sentence.valueName[i] || 0;
+      const nextTime = sentence.valueName[i + 1] || 0;
 
-    for (let i = 0; i < text.length; i++) {
-      const charTime = sentence.valueName[i] || 0;
-      if (tick >= charTime) {
-        targetIndex = i;
-      } else {
-        break;
+      if (tick >= currentTime && tick < nextTime) {
+        // Calculate the precise percentage within this character interval
+        const charProgress = (tick - currentTime) / (nextTime - currentTime);
+        const charPercent = i + charProgress;
+        setClipPercent((charPercent / text.length) * 100);
+        return;
       }
     }
-
-    if (targetIndex < 0) {
-      setClipPercent(0);
-      return;
-    }
-
-    const textLength = text.length;
-    const currentCharTime = sentence.valueName[targetIndex];
-    let percent = ((targetIndex + 1) / textLength) * 100;
-
-    if (targetIndex + 1 < textLength) {
-      const nextCharTime = sentence.valueName[targetIndex + 1];
-      const timeBetween = nextCharTime - currentCharTime;
-
-      if (timeBetween > 0 && tick < nextCharTime) {
-        const rawProgress = (tick - currentCharTime) / timeBetween;
-        const easedProgress = cubicEaseInOut(rawProgress);
-
-        if (timeBetween <= 150) {
-          percent = ((targetIndex + 1 + easedProgress) / textLength) * 100;
-        } else {
-          percent = ((targetIndex + 1) / textLength) * 100;
-        }
-      }
-    }
-
-    setClipPercent(percent);
   }, [tick, text, sentence, onStarted, onCompleted]);
 
+  // Handle text resizing
   useEffect(() => {
     if (textRef.current && containerWidth) {
       const textWidth = textRef.current.scrollWidth;
-
-      if (textWidth > containerWidth) {
-        setScaleX(containerWidth / textWidth);
-      } else {
-        setScaleX(1);
-      }
+      setScale(textWidth > containerWidth ? containerWidth / textWidth : 1);
     }
   }, [text, containerWidth]);
 
@@ -121,7 +93,7 @@ const LyricsList: React.FC<LyricsListProps> = ({
       ref={textRef}
       className="px-10 w-fit"
       style={{
-        transform: `scaleX(${scaleX})`,
+        transform: `scaleX(${scale})`,
         transformOrigin: "center center",
       }}
     >

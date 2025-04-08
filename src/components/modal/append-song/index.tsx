@@ -38,6 +38,8 @@ import Modal from "@/components/common/modal";
 import TableList from "@/components/common/table/table-list";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FaCheck } from "react-icons/fa";
+import { GrDatabase } from "react-icons/gr";
+import AddFromApi from "./tabs/add-from-api";
 
 interface AppendSongModalProps {}
 
@@ -503,14 +505,6 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     <>
       <Modal
         width={500}
-        // title={
-        //   <span className="flex gap-1.5 items-center">
-        //     <span>
-        //       <img src="/icon/gd.ico" className="w-4 h-4" alt="" />
-        //     </span>
-        //     รายการอัปเดต
-        //   </span>
-        // }
         title="รายการอัปเดต"
         isOpen={updatedModal}
         closable={!updateing}
@@ -567,6 +561,11 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
             ),
           },
           {
+            icon: <GrDatabase></GrDatabase>,
+            label: "เพลง API",
+            content: <AddFromApi />,
+          },
+          {
             icon: <SiGoogledrive></SiGoogledrive>,
             label: "เพิ่มจาก Drive",
             content: (
@@ -594,47 +593,6 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
               />
             ),
           },
-          // {
-          //   label: "วิธีใช้โปรแกรม",
-          //   content: (
-          //     <div className="flex flex-col gap-1 p-2 w-full">
-          //       <Label className="flex gap-1 items-center ">
-          //         <FaDownload></FaDownload> โปรแกรมนำเข้าเพลง
-          //       </Label>
-
-          //       <span className="flex gap-2">
-          //         <Button
-          //           color="blue"
-          //           className="text-white"
-          //           shadow=""
-          //           border=""
-          //           blur=""
-          //         >
-          //           <FaWindows></FaWindows>
-          //         </Button>
-          //         <Button
-          //           color="blue"
-          //           padding=""
-          //           className="text-white w-20 h-10"
-          //           shadow=""
-          //           border=""
-          //           blur=""
-          //         >
-          //           <span className="">
-          //             <SiMacos className="text-5xl"></SiMacos>
-          //           </span>
-          //         </Button>
-          //       </span>
-          //       <div className="pt-2">
-          //         <hr />
-          //       </div>
-          //       <span className="text-sm">
-          //         วิธีใช้ นำโปรแกรมไปวางไว้ที่ตำแหน่ง Karaoke Extreme
-          //         และเปิดโปรแกรมนำเข้าเพลง <br />
-          //       </span>
-          //     </div>
-          //   ),
-          // },
         ]}
       ></Tabs>
     </>

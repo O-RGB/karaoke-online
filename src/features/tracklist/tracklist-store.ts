@@ -1,6 +1,7 @@
 import { addAllTrie, onSearchList } from "@/lib/trie-search";
 import TrieSearch from "trie-search";
 import { create } from "zustand";
+import useConfigStore from "../config/config-store";
 
 interface TrackListStore {
   tracklist: TrieSearch<SearchResult> | undefined;
@@ -38,16 +39,25 @@ const useTracklistStore = create<TrackListStore>((set, get) => ({
   removeTracklist: () => {
     set(() => ({ tracklist: undefined }));
   },
-  searchTracklist: (value: string) => {
-    const { tracklist } = get();
-    if (!tracklist) return undefined;
-    return onSearchList<SearchResult>(value, tracklist);
+  searchTracklist: async (value: string) => {
+    const searchByApi = useConfigStore.getState().config.system?.api;
+    if (searchByApi) {
+      const json = await fetch(
+        `http://45.154.26.197:5000/search?query=${value}`
+      );
+      return await json.json();
+    } else {
+      const { tracklist } = get();
+      if (!tracklist) return []; // 👈 return an empty array, not undefined
+      return await onSearchList<SearchResult>(value, tracklist);
+    }
   },
+
   findSimilarSongs: (song: SongDetail) => {
     const { tracklist } = get();
     console.log("tracklist", tracklist?.keyFields);
     if (!tracklist) return [];
-    console.log(song)
+    console.log(song);
 
     // Perform initial searches
     const nameResults = tracklist.get(song.name);

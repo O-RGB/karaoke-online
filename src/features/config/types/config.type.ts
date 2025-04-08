@@ -54,6 +54,7 @@ export interface SoundSetting {
 }
 
 export interface SystemConfig {
+  api: boolean;
   drive: boolean;
   url: string;
   urlTested: boolean;

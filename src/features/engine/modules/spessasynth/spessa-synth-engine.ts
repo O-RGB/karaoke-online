@@ -56,6 +56,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   }
 
   async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
+    // audioContext = AudioContext
+    // channels = AudioNode[]
     const { audioContext, channels } = await loadAudioContext();
     if (!audioContext)
       return { audio: undefined, synth: undefined, player: undefined };

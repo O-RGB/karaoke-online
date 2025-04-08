@@ -330,20 +330,6 @@ const AddSong: React.FC<AddSongProps> = ({
         )}
 
         <div className="relative">
-          {/* {result && (
-            <div
-              className={`${
-                resultAnimation ? "opacity-100" : "opacity-0"
-              } duration-500 absolute w-full h-full flex justify-center items-center bg-white/80`}
-            >
-              <div className="flex flex-col justify-center items-center h-20 bg-white shadow-sm rounded-md text-lg">
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500 overflow-hidden">
-                  <FaCheck className="text-white "></FaCheck>
-                </div>
-                <div>เพิ่มเพลงสำเร็จ</div>
-              </div>
-            </div>
-          )} */}
           {searchDupFile && (
             <div
               className={`duration-500 absolute w-full h-full flex justify-center items-center bg-white/80`}

@@ -166,6 +166,7 @@ export const DEFAULT_CONFIG: ConfigDisplay = {
     },
   },
   system: {
+    api: true,
     drive: false,
     tracklistUrl: "",
     url: "",
