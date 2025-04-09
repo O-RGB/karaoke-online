@@ -21,6 +21,7 @@ import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import useConfigStore from "@/features/config/config-store";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import SliderCommon from "../common/input-data/slider";
+import { usePeerStore } from "@/features/remote/modules/peer-js-store";
 interface PlayerRemote {
   onPause?: () => void;
   onPlay?: () => void;
@@ -59,10 +60,24 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   const queue = useQueuePlayer((state) => state.queue);
   const nextMusic = useQueuePlayer((state) => state.nextMusic);
 
+  const superUserConnections = usePeerStore.getState().superUserConnections;
+  const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
+
   const gain =
     useSynthesizerEngine.getState().engine?.instrumental?.getGain() ?? [];
 
   useEffect(() => {
+    if (superUserConnections.length > 0) {
+      sendSuperUserMessage({
+        message: gain,
+        user: "SUPER",
+        type: {
+          type: "GAIN",
+          event: "CHANGE",
+        },
+      });
+    }
+
     if (midi) {
       if (timingMode === "Tick") {
         setMaxTimer(midi.loop.end);

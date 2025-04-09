@@ -151,7 +151,6 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.player.addEvent({
         controllerChangeCallback: (e) => {
           callback?.(e);
-          console.log("controller change, e", e);
           this.nodes[e.channel].controllerChange(e);
         },
       });

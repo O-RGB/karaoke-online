@@ -53,7 +53,6 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   };
 
   const setSongPlayer = async (value: SearchResult) => {
-    console.log(value);
     addQueue(value);
   };
 

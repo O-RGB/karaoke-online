@@ -65,7 +65,6 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     }
 
     const queue = get().queue;
-    console.log("queue", queue);
     const music = queue[index];
 
     if (!music) {

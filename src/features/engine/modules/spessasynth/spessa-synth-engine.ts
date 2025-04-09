@@ -26,6 +26,7 @@ import {
   REVERB,
 } from "../../types/node.type";
 import { BassConfig } from "../instrumentals/config";
+import { INodeKey } from "../instrumentals/types/node.type";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -153,10 +154,12 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       node,
       value,
     };
-    this.sendMessage({
-      user: "SUPER",
-      message,
-    });
+
+    if (value)
+      this.sendMessage({
+        user: "SUPER",
+        message,
+      });
   }
 
   async setSoundFont(file: File) {
@@ -177,7 +180,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       (e: IControllerChange) => {
         const node = this.nodes[e.channel];
         this.nodes[e.channel].controllerChange(e);
-        this.sendMessageData(node, e);
+        // this.sendMessageData(node, e);
       }
     );
   }
@@ -261,7 +264,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     if (isLocked === true || event.force) {
       this.lockController({ ...event, controllerValue: true });
     }
-    this.sendMessageData(node, event);
+    // this.sendMessageData(e, event);
   }
 
   lockController(event: IControllerChange<boolean>): void {

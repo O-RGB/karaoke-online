@@ -109,10 +109,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
           break;
 
         case 192: // Program Change
-          console.log("program change= ", {
-            program: event.getProgram(),
-            channel: event.getChannel(),
-          });
+         
           if (this.eventInit?.programChangeCallback) {
             this.eventInit?.programChangeCallback({
               program: event.getProgram(),

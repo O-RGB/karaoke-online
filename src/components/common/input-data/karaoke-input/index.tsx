@@ -153,7 +153,6 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
   };
 
   const handlePlaySong = () => {
-    console.log("Play song", selectedSong);
     if (!selectedSong) return;
     onSelectSong?.(selectedSong);
     setSelectedIndex(0);

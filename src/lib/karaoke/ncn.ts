@@ -4,10 +4,7 @@ export const readLyricsFile = async (file: File) => {
   const arrayBuffer = await file.arrayBuffer();
   const decoder = new TextDecoder("windows-874");
   const contentUtf8 = decoder.decode(arrayBuffer);
-  console.log("contentUtf8", contentUtf8)
-  var lines = contentUtf8.split("\r\n"); // หรือ '\r\n' ตามที่เหมาะสม
-  // lines = lines.filter((data) => data !== "");
-  console.log("lines", lines)
+  var lines = contentUtf8.split("\r\n");
   return lines;
 };
 export const readCursorFile = async (file: File) => {
@@ -106,5 +103,3 @@ export function fixMidiHeader(file: File): Promise<File> {
     reader.readAsArrayBuffer(file);
   });
 }
-
-
