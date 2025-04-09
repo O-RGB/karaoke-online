@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import useConfigStore from "../../features/config/config-store";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 
 interface TempoPanelProps {}
 

@@ -49,7 +49,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
 
   const engine = useSynthesizerEngine((state) => state.engine);
   const isPaused = useRuntimePlayer((state) => state.isPaused);
-  const lyrics = useRuntimePlayer((state) => state.lyrics);
   const paused = useRuntimePlayer((state) => state.paused);
   const play = useRuntimePlayer((state) => state.play);
   const setCurrentTime = useRuntimePlayer((state) => state.setCurrentTime);
@@ -59,6 +58,9 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
 
   const queue = useQueuePlayer((state) => state.queue);
   const nextMusic = useQueuePlayer((state) => state.nextMusic);
+
+  const gain =
+    useSynthesizerEngine.getState().engine?.instrumental?.getGain() ?? [];
 
   useEffect(() => {
     if (midi) {

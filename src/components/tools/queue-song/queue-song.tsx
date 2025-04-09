@@ -198,7 +198,6 @@ const QueueSong: React.FC<QueueSongProps> = ({
       }
 
       const newItems = arrayMove(queue, oldIndex, newIndex);
-      // setSelected(newIndex)
       const updated = newItems.map((item, index) => ({
         ...item,
         number: index + 1,
@@ -260,18 +259,6 @@ const QueueSong: React.FC<QueueSongProps> = ({
         let removed = clone.filter((_, i) => i !== selected);
         moveQueue(removed);
       }
-
-      // if (clone.length > 0) {
-      //   let songPlaying = clone[selected];
-      //   if (songPlaying) {
-      //     let removed = clone.filter((_, i) => i !== selected);
-      //     moveQueue(removed);
-      //     nextMusic();
-      //     // playMusic(songPlaying, )
-      //     // setSongPlaying(songPlaying.file, songPlaying.songInfo);
-      //     resetQueueingTimeout(0);
-      //   }
-      // }
     }
   }, [onEnter]);
 
@@ -285,8 +272,6 @@ const QueueSong: React.FC<QueueSongProps> = ({
     return <></>;
   }
 
-  // if (!player) return <></>;
-
   return (
     <div
       onClick={() => {
@@ -294,10 +279,9 @@ const QueueSong: React.FC<QueueSongProps> = ({
       }}
       className={`z-[99] pt-[58px] h-screen bg-black/30 fixed text-white w-full px-5 duration-300`}
     >
-      selected: {JSON.stringify(selected)}
       <div
         onClick={(e) => {
-          e.stopPropagation(); // หยุดการส่งต่อ event
+          e.stopPropagation();
           resetQueueingTimeout(5000);
         }}
         className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2 overflow-x-auto"

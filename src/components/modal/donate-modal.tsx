@@ -5,10 +5,10 @@ interface DonateModalProps {}
 
 const DonateModal: React.FC<DonateModalProps> = () => {
   const donors: { name: string; amount: number }[] = [
-    // {
-    //   name: "Chawalit Srisont",
-    //   amount: 200,
-    // },
+    {
+      name: "ไม่ระบุชื่อ",
+      amount: 100,
+    },
     // {
     //   name: "Wassana Polkhayun",
     //   amount: 139,

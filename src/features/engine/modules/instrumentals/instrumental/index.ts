@@ -67,7 +67,6 @@ export class InstrumentalNode {
 
   public expression: SynthNode<INodeState, number>[] = [];
   public velocity: SynthNode<INodeState, number>[] = [];
-  // public volume: SynthNode<INodeState, number>[] = [];
 
   public settingEvent = new EventManager<INodeState, TEventType<number>>();
   public groupEvent = new EventManager<
@@ -99,9 +98,6 @@ export class InstrumentalNode {
     this.velocity = INSTRUMENT_TYPE_BY_INDEX.map(
       (_, i) => new SynthNode(this.settingEvent, "VELOCITY", i, 0)
     );
-    // this.volume = INSTRUMENT_TYPE_BY_INDEX.map(
-    //   (_, i) => new SynthNode(this.settingEvent, "VOLUME", i, 100)
-    // );
   }
 
   public update(
@@ -126,8 +122,6 @@ export class InstrumentalNode {
         this.updateController(event.channel, oldExpression);
         const oldVelocity = this.velocity[oldType.index].value ?? 0;
         this.updateVelocity(event.channel, oldVelocity);
-        // const oldVolume = this.volume[oldType.index].value ?? 100;
-        // this.updateVolumne(event.channel, oldVolume);
       }
     }
 
@@ -141,8 +135,6 @@ export class InstrumentalNode {
     this.updateController(event.channel, newExpression);
     const newVelocity = this.velocity[newType.index].value ?? 0;
     this.updateVelocity(event.channel, newVelocity);
-    // const newVolume = this.volume[newType.index].value ?? 100;
-    // this.updateVolumne(event.channel, newVolume);
 
     this.groupEvent.trigger([newType.category, "CHANGE"], newType.index, {
       value: byType,
@@ -181,19 +173,15 @@ export class InstrumentalNode {
     this.settingEvent.trigger(["VELOCITY", "CHANGE"], indexKey, { value });
   }
 
-  setVolume(type: InstrumentType, value: number, indexKey: number) {
-    const nodes: Map<number, SynthChannel> = this.group.get(type) ?? new Map();
-    nodes.forEach((node) => {
-      if (node.volume !== undefined && node.channel !== undefined) {
-        this.updateController(node.channel, value, "VOLUME");
-        node.volume.setValue(value);
-      }
+  getGain() {
+    let gain: number[] = [];
+    this.group.forEach((types) => {
+      let node: SynthChannel[] = Array.from(types.values());
+      const volumes = node.map((n) => n.getGain());
+      const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
+      gain.push(totalGain);
     });
-
-    console.log("this.expression", this.expression);
-
-    this.expression[indexKey].setValue(value);
-    this.settingEvent.trigger(["EXPRESSION", "CHANGE"], indexKey, { value });
+    return gain;
   }
 
   updateController(
@@ -216,16 +204,6 @@ export class InstrumentalNode {
     }
   }
 
-  updateVolumne(channel: number, value: number) {
-    if (channel !== 9 && channel !== 8) {
-      this.engine?.setController?.({
-        channel: channel,
-        controllerNumber: MAIN_VOLUME,
-        controllerValue: value,
-      });
-    }
-  }
-
   setCallBackState(
     eventType: EventKey,
     indexKey: number,
@@ -239,9 +217,6 @@ export class InstrumentalNode {
     } else if (eventType[0] === "VELOCITY") {
       value = this.velocity[indexKey].value ?? 0;
     }
-    // else if (eventType[0] === "VOLUME") {
-    //   value = this.volume[indexKey].value ?? 100;
-    // }
     callback({ value });
   }
 

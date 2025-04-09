@@ -170,7 +170,6 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log("onEnter", onEnter);
     handlePlaySong();
   }, [onEnter]);
 
