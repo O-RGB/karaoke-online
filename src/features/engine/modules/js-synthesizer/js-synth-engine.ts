@@ -37,7 +37,6 @@ export class JsSynthEngine implements BaseSynthEngine {
   public nodes: SynthChannel[] = [];
   public instrumental = new InstrumentalNode();
 
-  public gainNode: AudioMeter | undefined = undefined;
   public bassConfig: BassConfig | undefined = undefined;
 
   private setInstrument: ((instrument: IPersetSoundfont[]) => void) | undefined;
@@ -72,17 +71,21 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     // รับค่า analysers
     this.analysers = gainMonitor.analyserNodes;
-    this.gainNode = new AudioMeter(gainMonitor.analyserNodes);
-    this.analysers = gainMonitor.analyserNodes;
 
     node.connect(audioContext.destination);
 
     this.player = new JsSynthPlayerEngine(synth);
 
     this.instrumental.setEngine(this);
-    // this.nodes = CHANNEL_DEFAULT.map(
-    //   (v, i) => new SynthChannel(i, this.instrumental)
-    // );
+
+    const analysers: AnalyserNode[] = [];
+
+    for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      this.nodes.push(new SynthChannel(ch, this.instrumental, analyser));
+      analysers.push(analyser);
+    }
 
     this.controllerChange();
     this.programChange();

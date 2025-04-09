@@ -12,7 +12,7 @@ interface LyricsPlayerProps {}
 const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
   const { orientation } = useOrientation();
   const [windowsWidth, setWindowsWidth] = useState<number>(window.innerWidth);
-  const currentTick = useRuntimePlayer((state) => state.currentTick) + 200;
+  const currentTick = useRuntimePlayer((state) => state.currentTick) ;
   const lyricsProcessed = useLyricsStoreNew((state) => state.lyricsProcessed);
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
   const fontSize = useConfigStore((state) => state.config.lyrics?.fontSize);
