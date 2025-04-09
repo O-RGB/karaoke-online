@@ -65,18 +65,29 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     }
 
     const queue = get().queue;
+    console.log("queue", queue);
     const music = queue[index];
 
     if (!music) {
       return;
     }
 
-    const url = useConfigStore.getState().config.system?.url;
-    if (music.from === "DRIVE_EXTHEME" || music.from === "DRIVE") {
+    let url = useConfigStore.getState().config.system?.url;
+    const api = useConfigStore.getState().config.system?.api;
+    if (api) {
+      music.from = "DRIVE_EXTHEME";
+      url = "https://script.google.com/macros/s/AKfycbxyjT972t0EKoIdYcx9nwFfTWssHm_aSFSufR4LLC4dGciAkVYm5kCUYfy2jRI3CC6tzQ/exec"
+    }
+    if (music.from === "DRIVE_EXTHEME" || music.from === "DRIVE" || api) {
       runtime.paused();
       set({ driveLoading: true });
     }
-    const song = await getSong(music, url);
+    let song = undefined;
+    if (api) {
+      song = await getSong(music, url);
+    } else {
+      song = await getSong(music, url);
+    }
     set({ driveLoading: false });
 
     if (!song) {

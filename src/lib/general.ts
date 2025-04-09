@@ -1,13 +1,13 @@
 export function toOptions<T = any>({
   value,
-  list,
+  list = [],
   render,
 }: {
   list: any[];
   value?: string;
   render?: (callback: T) => React.ReactNode;
 }) {
-  return list.map(
+  return list?.map(
     (data) =>
       ({
         value: value ? data[value] : undefined,

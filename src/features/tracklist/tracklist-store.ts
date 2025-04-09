@@ -41,16 +41,30 @@ const useTracklistStore = create<TrackListStore>((set, get) => ({
   },
   searchTracklist: async (value: string) => {
     const searchByApi = useConfigStore.getState().config.system?.api;
-    if (searchByApi) {
-      const json = await fetch(
-        `http://45.154.26.197:5000/search?query=${value}`
-      );
-      return await json.json();
-    } else {
-      const { tracklist } = get();
-      if (!tracklist) return []; // 👈 return an empty array, not undefined
-      return await onSearchList<SearchResult>(value, tracklist);
+    let musics: SearchResult[] = [];
+
+    const { tracklist } = get();
+    if (tracklist) {
+      const client = await onSearchList<SearchResult>(value, tracklist);
+      musics.push(...client);
     }
+
+    if (searchByApi && value.length > 0) {
+      const res = await fetch(`/api/search?query=${value}`);
+      const response: SearchResult[] = await res.json();
+      if (response) {
+        if (response.length > 0) {
+          musics.push(
+            ...response.map((t: SearchResult) => ({
+              ...t,
+              from: "DRIVE_EXTHEME" as TracklistFrom,
+            }))
+          );
+        }
+      }
+    }
+
+    return musics;
   },
 
   findSimilarSongs: (song: SongDetail) => {

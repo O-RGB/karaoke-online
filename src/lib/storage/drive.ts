@@ -16,9 +16,11 @@ import { DriveExtremeModel } from "@/utils/database/model";
 export const getSongDrive = async (
   key: string | number,
   url?: string,
-  custom?: boolean
+  custom?: boolean,
+  fromApi?: boolean
 ) => {
   let file = undefined;
+
   if (custom) {
     file = await getSongDriveByKey(+key);
   } else {

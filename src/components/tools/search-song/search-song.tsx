@@ -15,6 +15,7 @@ import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
 import SwitchButton from "@/components/common/input-data/switch/switch-button";
+import { AiOutlineLoading } from "react-icons/ai";
 
 interface SearchSongProps {}
 
@@ -22,6 +23,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const { orientation } = useOrientation();
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
+  const [searchLoad, setSearchLoad] = useState<boolean>(false);
 
   const addQueue = useQueuePlayer((state) => state.addQueue);
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
@@ -52,7 +54,10 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const [indexSelect, setIndexSelect] = useState<number>(0);
 
   async function onSearch<T = any>(value: string) {
+    setSearchResult([]);
+    setSearchLoad(true);
     const se = (await searchTracklist(value)) ?? [];
+    setSearchLoad(false);
     const op = toOptions<SearchResult>({
       render: (value) => <SearchDropdown value={value}></SearchDropdown>,
       list: se,
@@ -260,6 +265,11 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
                 {searching}
               </span>
             </div>
+            {searchLoad && (
+              <div className="h-full flex items-center justify-center mt-3">
+                <AiOutlineLoading className="text-2xl text-white animate-spin"></AiOutlineLoading>
+              </div>
+            )}
             {searchResult.length > 0 && (
               <div className="flex flex-wrap gap-3 items-center text-2xl duration-300 transition-all ">
                 {searchResult[indexSelect].option?.type === 0 && (
@@ -304,6 +314,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
         <div className="flex gap-1.5 w-full">
           <div className="w-full blur-overlay flex flex-col rounded-md overflow-hidden">
             <SearchSelect
+              loading={searchLoad}
               border="blur-border border"
               onBlur={handleSearchBlur}
               onFocus={handleSearchFocus}
