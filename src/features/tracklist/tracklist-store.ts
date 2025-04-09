@@ -50,6 +50,7 @@ const useTracklistStore = create<TrackListStore>((set, get) => ({
     }
 
     if (searchByApi && value.length > 0) {
+      console.log("api fetching...")
       const res = await fetch(`/api/search?query=${value}`);
       const response: SearchResult[] = await res.json();
       if (response) {

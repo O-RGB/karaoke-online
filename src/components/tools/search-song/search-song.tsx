@@ -56,6 +56,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   async function onSearch<T = any>(value: string) {
     setSearchResult([]);
     setSearchLoad(true);
+    console.log("search api")
     const se = (await searchTracklist(value)) ?? [];
     setSearchLoad(false);
     const op = toOptions<SearchResult>({
@@ -93,7 +94,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
 
   useEffect(() => {
     if (searching !== "") {
-      onKeyUpSearch(searching);
+      // onKeyUpSearch(searching);
       resetSearchingTimeout(5000);
     } else {
       setSearchResult([]);
@@ -314,7 +315,6 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
         <div className="flex gap-1.5 w-full">
           <div className="w-full blur-overlay flex flex-col rounded-md overflow-hidden">
             <SearchSelect
-              loading={searchLoad}
               border="blur-border border"
               onBlur={handleSearchBlur}
               onFocus={handleSearchFocus}
