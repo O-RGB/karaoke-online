@@ -81,6 +81,16 @@ export class InstrumentalNode {
     this.initializeSettingNode();
   }
 
+  private getGroupType(type: InstrumentType | number) {
+    let groupType: InstrumentType | undefined = undefined;
+    if (typeof type === "number") {
+      groupType = INSTRUMENT_TYPE_BY_INDEX[type];
+    } else {
+      groupType = type;
+    }
+    return groupType;
+  }
+
   public setEngine(engine: BaseSynthEngine) {
     this.engine = engine;
   }
@@ -141,8 +151,14 @@ export class InstrumentalNode {
     });
   }
 
-  setExpression(type: InstrumentType, value: number, indexKey: number) {
-    const nodes: Map<number, SynthChannel> = this.group.get(type) ?? new Map();
+  setExpression(
+    type: InstrumentType | number,
+    value: number,
+    indexKey: number
+  ) {
+    let groupType = this.getGroupType(type);
+    const nodes: Map<number, SynthChannel> =
+      this.group.get(groupType) ?? new Map();
     nodes.forEach((node) => {
       if (node.expression !== undefined && node.channel !== undefined) {
         console.log("setExpression Link Ch:", node.channel + 1);
@@ -153,14 +169,14 @@ export class InstrumentalNode {
       }
     });
 
-    console.log("this.expression", this.expression);
-
     this.expression[indexKey].setValue(value);
     this.settingEvent.trigger(["EXPRESSION", "CHANGE"], indexKey, { value });
   }
 
-  setVelocity(type: InstrumentType, value: number, indexKey: number) {
-    const nodes: Map<number, SynthChannel> = this.group.get(type) ?? new Map();
+  setVelocity(type: InstrumentType | number, value: number, indexKey: number) {
+    let groupType = this.getGroupType(type);
+    const nodes: Map<number, SynthChannel> =
+      this.group.get(groupType) ?? new Map();
     nodes?.forEach((node) => {
       if (node.velocity !== undefined && node.channel !== undefined) {
         if (node.channel !== 9) {
@@ -179,7 +195,8 @@ export class InstrumentalNode {
       let node: SynthChannel[] = Array.from(types.values());
       const volumes = node.map((n) => n.getGain());
       const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
-      gain.push(totalGain);
+      const averageGain = totalGain / volumes.length;
+      gain.push(averageGain);
     });
     return gain;
   }

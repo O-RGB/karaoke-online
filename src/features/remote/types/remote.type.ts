@@ -12,7 +12,21 @@ export interface RemoteReceivedMessages {
 }
 
 export interface TypeMessage {
-  type: INodeKey | "GAIN" | "SEARCH" | "SET_SONG";
+  type:
+    | INodeKey
+    | "GAIN"
+    | "SEARCH"
+    | "SET_SONG"
+    | "CONTROLLER"
+    | "EXPRESSION"
+    | "INIT_REMOTE"
+    | "INIT_REMOTE_RETURN"
+    | "QUEUE"
+    | "SET_QUEUE"
+    | "QUEUE_LIST"
+    | "QUEUE_MOVE"
+    | "NEXT_SONG"
+    | "MUTE_VOCAL";
   event: INodeOption;
 }
 

@@ -19,7 +19,20 @@ const AddFromApi: React.FC<AddFromApiProps> = ({}) => {
   const apiEnabled = config.system?.api;
   return (
     <>
-      <Label>โหลดเพลงจาก API</Label>
+      <Label
+        textSize={15}
+        textColor="text-gray-800"
+        headClass="bg-blue-500"
+        description={
+          <span>
+            เพลงจะถูกโหลดจาก Server ทั้งหมด <br /> (รายการเพลงอัปเดตล่าสุด 1
+            เมษายน 2568)
+          </span>
+        }
+      >
+        โหลดเพลงจาก API
+      </Label>
+
       <SwitchRadio
         value={apiEnabled ? "on" : "off"}
         onChange={onChange}

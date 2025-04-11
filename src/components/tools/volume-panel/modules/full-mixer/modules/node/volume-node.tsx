@@ -46,7 +46,7 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
     };
   }, [indexKey, instrumental]);
   return (
-    <div className="relative flex flex-col gap-2 min-w-16 w-16 max-w-16">
+    <div className="relative flex flex-col gap-2 min-w-14 w-14 max-w-14">
       <div className="relative bg-black">
         <ChannelVolumeRender
           max={127}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import LyricsList from "./components/lyrics-list";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
-import useLyricsStoreNew from "@/features/lyrics/store/lyrics.store";
+import useLyricsStore from "@/features/lyrics/store/lyrics.store";
 import useConfigStore from "@/features/config/config-store";
 import { LyricsCharacterStyle } from "./types/lyrics-character.type";
 import useMixerStoreNew from "../player/event-player/modules/event-mixer-store";
@@ -13,7 +13,7 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
   const { orientation } = useOrientation();
   const [windowsWidth, setWindowsWidth] = useState<number>(window.innerWidth);
   const currentTick = useRuntimePlayer((state) => state.currentTick) ;
-  const lyricsProcessed = useLyricsStoreNew((state) => state.lyricsProcessed);
+  const lyricsProcessed = useLyricsStore((state) => state.lyricsProcessed);
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
   const fontSize = useConfigStore((state) => state.config.lyrics?.fontSize);
   const fontAuto = useConfigStore((state) => state.config.lyrics?.fontAuto);

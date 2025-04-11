@@ -6,6 +6,7 @@ import useConfigStore from "@/features/config/config-store";
 import { convertCursorToTicks } from "@/lib/app-control";
 import useRuntimePlayer from "./runtime-player";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import useLyricsStore from "@/features/lyrics/store/lyrics.store";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   driveLoading: false,
@@ -43,6 +44,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     }
 
     if (!nextSong) {
+      useRuntimePlayer.getState().stop();
       return;
     }
 
@@ -75,7 +77,8 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     const api = useConfigStore.getState().config.system?.api;
     if (api) {
       music.from = "DRIVE_EXTHEME";
-      url = "https://script.google.com/macros/s/AKfycbxyjT972t0EKoIdYcx9nwFfTWssHm_aSFSufR4LLC4dGciAkVYm5kCUYfy2jRI3CC6tzQ/exec"
+      url =
+        "https://script.google.com/macros/s/AKfycbxyjT972t0EKoIdYcx9nwFfTWssHm_aSFSufR4LLC4dGciAkVYm5kCUYfy2jRI3CC6tzQ/exec";
     }
     if (music.from === "DRIVE_EXTHEME" || music.from === "DRIVE" || api) {
       runtime.paused();
@@ -94,6 +97,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     }
 
     runtime.stop();
+
     const parsedMidi = await player.player?.loadMidi(song.mid);
 
     if (parsedMidi) {

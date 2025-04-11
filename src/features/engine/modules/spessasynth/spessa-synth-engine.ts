@@ -12,7 +12,11 @@ import {
 } from "../../types/synth.type";
 
 import { loadAudioContext, loadPlayer } from "./lib/spessasynth";
-import { CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
+import {
+  CHANNEL_DEFAULT,
+  DEFAULT_SOUND_FONT,
+  DRUM_CHANNEL,
+} from "@/config/value";
 import { SpessaPlayerEngine } from "./player/spessa-synth-player";
 import { RemoteSendMessage } from "@/features/remote/types/remote.type";
 import { SoundSetting } from "@/features/config/types/config.type";
@@ -97,10 +101,21 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.controllerChange();
     this.programChange();
 
+    synth.eventHandler.addEvent("noteon", "note-on-listener", (data: any) => {
+      if (data.channel == DRUM_CHANNEL) {
+        console.log(data);
+        // console.log(
+        //   `Note ${data.midiNote} played for channel ${data.channel} with velocity ${data.velocity}.`
+        // );
+      }
+    });
+
     return { synth: synth, audio: this.audio };
   }
 
   async loadDefaultSoundFont(audio?: AudioContext): Promise<any> {
+    // this.synth?.keyModifierManager.addModifier(9,)
+
     let arraybuffer: ArrayBuffer | undefined = undefined;
     if (this.soundfontFile) {
       arraybuffer = await this.soundfontFile.arrayBuffer();
@@ -138,27 +153,19 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     });
   }
 
-  private sendMessageData(
-    node?: SynthChannel,
-    value?:
-      | IControllerChange
-      | IProgramChange
-      | ILockController
-      | IMuteController
-  ) {
-    if (!this.sendMessage || !node || !value) {
+  private sendMessageData(value?: IControllerChange) {
+    if (!this.sendMessage || !value) {
       return;
     }
-
-    let message: any = {
-      node,
-      value,
-    };
 
     if (value)
       this.sendMessage({
         user: "SUPER",
-        message,
+        message: value,
+        type: {
+          event: "CHANGE",
+          type: "CONTROLLER",
+        },
       });
   }
 
@@ -178,9 +185,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "controllerchange",
       "",
       (e: IControllerChange) => {
-        const node = this.nodes[e.channel];
         this.nodes[e.channel].controllerChange(e);
-        // this.sendMessageData(node, e);
+        this.sendMessageData(e);
       }
     );
   }

@@ -8,6 +8,8 @@ import {
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
   TbPlayerSkipForwardFilled,
+  TbPlayerStop,
+  TbPlayerStopFilled,
 } from "react-icons/tb";
 import Button from "../common/button/button";
 import ContextModal from "../modal/context-modal";
@@ -57,7 +59,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   const currentTick = useRuntimePlayer((state) => state.currentTick);
   const midi = useRuntimePlayer((state) => state.midi);
 
-  const queue = useQueuePlayer((state) => state.queue);
   const nextMusic = useQueuePlayer((state) => state.nextMusic);
 
   const superUserConnections = usePeerStore.getState().superUserConnections;
@@ -93,9 +94,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
     engine?.player?.eventChange?.();
   }, [isPaused]);
 
-  // if (show !== true) {
-  //   return <></>;
-  // }
   return (
     <>
       <div className="fixed bottom-0 gap-2 w-full left-0 blur-overlay bg-black/10 border-t blur-border flex justify-between p-2 lg:p-0">
@@ -131,7 +129,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
             <Button
               className="hover:bg-white/20"
               blur={false}
-              disabled={queue.length == 0}
               border=""
               shadow=""
               padding="p-4"
@@ -140,7 +137,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               icon={<TbPlayerSkipForwardFilled className="text-white" />}
             ></Button>
           </div>
-          <div className=" w-full px-2 flex items-center pt-0.5 relative">
+          <div className="w-full px-4 pl-8 flex items-center relative">
             <SliderCommon
               tabIndex={-1}
               value={value}

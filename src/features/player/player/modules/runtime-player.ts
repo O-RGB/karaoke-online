@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { RuntimeProps } from "../types/player.type";
 import { sortTempoChanges } from "@/lib/app-control";
 import useQueuePlayer from "./queue-player";
-import useLyricsStoreNew from "@/features/lyrics/store/lyrics.store";
+import useLyricsStore from "@/features/lyrics/store/lyrics.store";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import useConfigStore from "@/features/config/config-store";
 
@@ -36,10 +36,10 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   },
 
   stop: () => {
-    const player = useSynthesizerEngine.getState().engine?.player;
-    player?.stop();
+    useLyricsStore.getState().reset();
+    get().paused();
+    get().reset();
     set({ isPaused: true, isFinished: true });
-    get().tickRun(false);
   },
 
   paused: () => {
@@ -72,7 +72,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   },
 
   setMidiInfo(cursors, timeDivision, lyrics, midi, midiDecoded, musicInfo) {
-    const lyricsInit = useLyricsStoreNew.getState().lyricsInit;
+    const lyricsInit = useLyricsStore.getState().lyricsInit;
     lyricsInit(lyrics, cursors);
     set({
       cursors,
@@ -117,7 +117,7 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
           const updateCountDown = lastTime - Math.floor(currentTime ?? 0);
 
           if (get().countDown === 0) {
-            get().reset();
+            get().stop();
             get().tickRun(false);
 
             setTimeout(() => {

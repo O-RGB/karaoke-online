@@ -6,7 +6,7 @@ interface LabelProps {
   headClass?: string;
   textSize?: number;
   textColor?: string;
-  description?: string;
+  description?: React.ReactNode;
 }
 
 const Label: React.FC<LabelProps> = ({

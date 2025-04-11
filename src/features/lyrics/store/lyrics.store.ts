@@ -6,9 +6,10 @@ interface LyricsStore {
   lyricsProcessed: LyricsRangeArray<ISentence> | undefined;
   cursors: number[];
   lyricsInit: (lyrics: string[], cursors: number[]) => void;
+  reset: () => void;
 }
 
-const useLyricsStoreNew = create<LyricsStore>((set, get) => ({
+const useLyricsStore = create<LyricsStore>((set, get) => ({
   lyricsProcessed: undefined,
   cursors: [],
 
@@ -21,9 +22,12 @@ const useLyricsStoreNew = create<LyricsStore>((set, get) => ({
       cursors,
     });
   },
+  reset: () => {
+    set({ cursors: [], lyricsProcessed: undefined });
+  },
 }));
 
-export default useLyricsStoreNew;
+export default useLyricsStore;
 
 const processedLyrics = (
   lyrics: string[],

@@ -1,6 +1,12 @@
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { MAIN_VOLUME } from "@/features/engine/types/node.type";
+import {
+  IControllerChange,
+  IMuteController,
+} from "@/features/engine/types/synth.type";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
+import { ISearchCallBack } from "@/features/player/player/types/player.type";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
 import { RemoteReceivedMessages } from "@/features/remote/types/remote.type";
 import useTracklistStore from "@/features/tracklist/tracklist-store";
@@ -17,7 +23,10 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
   const engine = useSynthesizerEngine((state) => state.engine);
   const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const addQueue = useQueuePlayer((state) => state.addQueue);
+  const moveQueue = useQueuePlayer((state) => state.moveQueue);
+  const queue = useQueuePlayer((state) => state.queue);
 
+  const nextMusic = useQueuePlayer((state) => state.nextMusic);
   const updatePitch = useMixerStoreNew((state) => state.updatePitch);
 
   const remoteTypeHandle = async (
@@ -26,9 +35,7 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
     const message = received?.content.message;
     const type = received?.content.type;
 
-    if (!message) {
-      return;
-    }
+    console.log(message, type);
 
     switch (type?.type) {
       case "SEARCH":
@@ -42,6 +49,15 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
             type: "SEARCH",
           },
         });
+        break;
+
+      case "EXPRESSION":
+        let experssion: IControllerChange = message.value;
+        engine?.instrumental?.setExpression(
+          experssion.channel,
+          experssion.controllerValue,
+          experssion.channel
+        );
         break;
 
       // case "CHANGE":
@@ -63,13 +79,15 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
       //   // );
       //   break;
 
-      // case "MUTE":
-      //   // let muteControllerChange = message.value as IMuteController;
-      //   // engine?.setMute?.(
-      //   //   muteControllerChange.channel,
-      //   //   muteControllerChange.isMute
-      //   // );
-      //   break;
+      case "MUTE_VOCAL":
+        let muteControllerChange = message as IControllerChange<boolean>;
+        console.log("muteControllerChange", muteControllerChange);
+        engine?.setMute?.({
+          channel: muteControllerChange.channel,
+          controllerValue: muteControllerChange.controllerValue,
+          controllerNumber: MAIN_VOLUME,
+        });
+        break;
 
       // case "PITCH":
       //   let pitchNumber = message.value as number;
@@ -96,24 +114,38 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
         }
         break;
 
-      // case "QUEUE":
-      //   // let sendQueuelist: ISearchCallBack = {
-      //   //   eventType: "QUEUE_LIST",
-      //   //   value: queue,
-      //   // };
-      //   // send({
-      //   //   user: "SUPER",
-      //   //   message: sendQueuelist,
-      //   // });
-      //   break;
+      case "INIT_REMOTE":
+        const expression = engine?.instrumental?.expression;
+        if (expression) {
+          sendSuperUserMessage({
+            user: "SUPER",
+            message: expression.map((v) => v.value),
+            type: {
+              event: "CHANGE",
+              type: "INIT_REMOTE_RETURN",
+            },
+          });
+        }
+        break;
 
-      // case "SET_QUEUE":
-      //   // let newQueue: SearchResult[] = message.value as SearchResult[];
-      //   // moveQueue(newQueue);
-      //   break;
+      case "QUEUE":
+        sendSuperUserMessage({
+          user: "SUPER",
+          message: queue,
+          type: {
+            event: "CHANGE",
+            type: "QUEUE_LIST",
+          },
+        });
+        break;
 
-      // case "NEXT":
-      // // nextMusic();
+      case "QUEUE_MOVE":
+        let newQueue: SearchResult[] = message as SearchResult[];
+        moveQueue(newQueue);
+        break;
+
+      case "NEXT_SONG":
+        nextMusic();
 
       default:
         break;
