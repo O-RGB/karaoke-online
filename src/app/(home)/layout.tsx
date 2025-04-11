@@ -62,7 +62,7 @@ export default function RootLayout({
         <meta name="google" content="notranslate" />
       </head>
 
-      <body className={`relative p-2.5 bg-slate-500 `}>
+      <body className={`relative`}>
         <AllowSound>{children}</AllowSound>
       </body>
     </html>
