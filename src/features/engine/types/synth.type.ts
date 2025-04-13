@@ -91,6 +91,13 @@ export interface IControllerChange<T = number> extends IEventChange {
   force?: boolean;
 }
 
+export interface INoteChange extends IEventChange {
+  midiNote: number;
+  velocity: number;
+}
+
+export interface INoteModifier extends Omit<INoteChange, "midiNote"> {}
+
 export interface ILockController {
   channel: number;
   controllerNumber: number;

@@ -1,4 +1,5 @@
 import { ConfigDisplay } from "@/features/config/types/config.type";
+import { DrumNotesType } from "@/features/engine/modules/instrumentals/types/node.type";
 
 export const DRUM_CHANNEL = 9;
 export const WALLPAPER = "wallpaper-3.png";
@@ -38,6 +39,12 @@ export const VOLUME_DEFAULT: number[] = Array(16).fill(100);
 export const MAX_CHANNEL: number[] = Array(128).fill(0);
 export const VOLUME_MIDDLE_DEFAULT_128: number[] = Array(16).fill(64);
 export const VOLUME_MIDDLE_DEFAULT_100: number[] = Array(16).fill(50);
+
+export const DRUM_NOTES_LIST: number[] = [
+  35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
+  54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72,
+  73, 74, 75, 76, 77, 78, 79, 80, 81,
+];
 
 // 1. Piano
 export const PIANO: number[] = [0, 1, 2, 3, 4, 5, 6, 7];

@@ -8,6 +8,7 @@ export class SynthNode<K = any, R = any> implements SynthNodeProps<K, R> {
   public type: K | undefined;
   public channel: number = 0;
   public event: EventManager<K, TEventType<R>> | undefined = undefined;
+  public backupValue: R | undefined = undefined;
 
   constructor(
     event?: EventManager<K, TEventType<R>>,
@@ -17,12 +18,15 @@ export class SynthNode<K = any, R = any> implements SynthNodeProps<K, R> {
     isMute?: boolean,
     isLock?: boolean
   ) {
-    if (value) this.value = value;
-    if (isMute) this.isMute = isMute;
-    if (isLock) this.isLocked = isLock;
-    if (event) this.event = event;
-    if (type) this.type = type;
-    if (channel) this.channel = channel;
+    if (value !== undefined) {
+      this.value = value;
+      this.backupValue = value;
+    }
+    if (isMute !== undefined) this.isMute = isMute;
+    if (isLock !== undefined) this.isLocked = isLock;
+    if (event !== undefined) this.event = event;
+    if (type !== undefined) this.type = type;
+    if (channel !== undefined) this.channel = channel;
   }
 
   public setLock(isLock: boolean) {
@@ -50,5 +54,12 @@ export class SynthNode<K = any, R = any> implements SynthNodeProps<K, R> {
     this.event?.trigger([this.type, "CHANGE"], this.channel, {
       value: value,
     });
+  }
+
+  public reset() {
+    if (this.backupValue !== undefined) {
+      console.log("reset value", this.backupValue);
+      this.setValue(this.backupValue);
+    }
   }
 }

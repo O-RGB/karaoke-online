@@ -37,6 +37,7 @@ import NotificationAlert from "../tools/noti-alert";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
+import KeyboardRender from "./test";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
@@ -99,6 +100,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         <ContextModal modal={modalMap}>
           {/* <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel> */}
           <StatusPanel notification={notification}></StatusPanel>
+          <KeyboardRender></KeyboardRender>
           <VolumePanel></VolumePanel>
           <TempoPanel></TempoPanel>
           <ClockPanel></ClockPanel>

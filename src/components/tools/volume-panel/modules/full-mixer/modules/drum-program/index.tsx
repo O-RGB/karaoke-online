@@ -7,7 +7,7 @@ interface DrumChangeProps {
   program?: number;
 }
 
-const DrumChange: React.FC<DrumChangeProps> = ({ program }) => {
+const DrumProgramChange: React.FC<DrumChangeProps> = ({ program }) => {
   const engine = useSynthesizerEngine((state) => state.engine);
 
   useEffect(() => {}, [program]);
@@ -41,4 +41,4 @@ const DrumChange: React.FC<DrumChangeProps> = ({ program }) => {
   );
 };
 
-export default DrumChange;
+export default DrumProgramChange;

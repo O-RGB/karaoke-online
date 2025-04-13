@@ -60,7 +60,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   };
 
   const onControllerChange = (value: IControllerChange) => {
-    engine?.setController(value, "mixer.onControllerChange");
+    engine?.setController(value);
   };
 
   useEffect(() => {}, [engine?.nodes, engine]);

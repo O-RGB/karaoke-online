@@ -15,6 +15,7 @@ import {
   IControllerChange,
 } from "@/features/engine/types/synth.type";
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
+import DrumMixer from "../drum-mixer";
 
 interface VolumeOptionsProps {
   onPitchChange: (value: number) => void;
@@ -83,6 +84,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
         ></SwitchButton>
 
         {nodes && <FullMixer nodes={nodes}></FullMixer>}
+        {nodes && <DrumMixer></DrumMixer>}
       </div>
     </>
   );

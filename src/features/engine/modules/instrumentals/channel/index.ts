@@ -1,8 +1,15 @@
 import { SynthNode } from "../node";
 import { EventManager } from "../events";
-import { EventKey, INodeKey, INodeState, TEventType } from "../types/node.type";
+import {
+  EventKey,
+  INodeKey,
+  INodeState,
+  INoteState,
+  TEventType,
+} from "../types/node.type";
 import {
   IControllerChange,
+  INoteChange,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
 import {
@@ -13,10 +20,15 @@ import {
   EXPRESSION,
 } from "@/features/engine/types/node.type";
 import { InstrumentalNode } from "../instrumental";
+import { KeyboardNode } from "../keyboard-node";
+import { KeyModifierManager } from "spessasynth_lib/@types/synthetizer/key_modifier_manager";
 
 export class SynthChannel {
   // Index
   public channel: number | undefined;
+
+  // Note
+  public note: KeyboardNode | undefined = undefined;
 
   // Value
   public volume: SynthNode<INodeKey, number> | undefined = undefined;
@@ -37,11 +49,11 @@ export class SynthChannel {
 
   // Render
   public analyserNode?: AnalyserNode | undefined = undefined;
-  // public gain: AudioMeter | undefined = undefined;
 
   // Event
   public nodeEvent = new EventManager<INodeKey, TEventType<number>>();
   public stateEvent = new EventManager<INodeState, TEventType<any>>();
+  public noteEvent: EventManager<INoteState, TEventType<boolean>>[] = [];
 
   // Group
   public instrumental: InstrumentalNode | undefined = undefined;
@@ -49,7 +61,8 @@ export class SynthChannel {
   constructor(
     channel: number,
     instrumental: InstrumentalNode,
-    analyserNode: AnalyserNode
+    analyserNode: AnalyserNode,
+    keyModifierManager: KeyModifierManager
   ) {
     this.channel = channel;
     if (channel === 9) {
@@ -66,10 +79,11 @@ export class SynthChannel {
     this.velocity = new SynthNode(this.stateEvent, "VELOCITY", channel);
     this.expression = new SynthNode(this.stateEvent, "EXPRESSION", channel);
     this.expression.setLock(true);
+    this.note = new KeyboardNode(channel, keyModifierManager);
   }
 
-  public getGain() {
-    if (this.isDrum?.value === true) {
+  public getGain(getDrum: boolean = false) {
+    if (this.isDrum?.value === true && getDrum === false) {
       return 0;
     }
     if (!this.analyserNode) {
@@ -115,15 +129,18 @@ export class SynthChannel {
     this.instrumental?.update(event, oldIndex, oldChannel, this);
   }
 
+  public noteOnChange(event: INoteChange) {
+    if (!this.note) return;
+    this.note?.setOn(event);
+  }
+
+  public noteOffChange(event: INoteChange) {
+    if (!this.note) return;
+    this.note?.setOff(event);
+  }
+
   public controllerChange(event: IControllerChange<any>) {
     this.handleControllerChange(event, (control, value) => {
-      // if (event.controllerNumber === MAIN_VOLUME && this.maxVolume) {
-      //   const max = this.maxVolume.value;
-      //   const controllerValue = event.controllerValue;
-      //   const adjustedValue = (controllerValue / 127) * (max ?? 100);
-      //   control.setValue(Math.ceil(adjustedValue));
-      // } else {
-      // }
       control.setValue(value);
     });
   }
@@ -172,5 +189,37 @@ export class SynthChannel {
     componentId: string
   ): boolean {
     return this.stateEvent.remove(eventType, index, componentId);
+  }
+
+  setCallBackNote(
+    eventType: EventKey<INoteState>,
+    index: number,
+    keyNote: number,
+    callback: (event: TEventType<any>) => void,
+    componentId: string
+  ): void {
+    this.noteEvent[keyNote].add(eventType, index, callback, componentId);
+  }
+
+  removeCallNote(
+    eventType: EventKey<INoteState>,
+    index: number,
+    keyNote: number,
+    componentId: string
+  ): boolean {
+    return this.noteEvent[keyNote].remove(eventType, index, componentId);
+  }
+
+  reset() {
+    this.isDrum?.reset();
+    this.volume?.reset();
+    this.maxVolume?.reset();
+    this.chorus?.reset();
+    this.reverb?.reset();
+    this.pan?.reset();
+    this.program?.reset();
+    this.velocity?.reset();
+    this.expression?.reset();
+    this.expression?.reset();
   }
 }

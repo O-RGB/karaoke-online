@@ -31,7 +31,7 @@ const ChannelVolumeRender: React.FC<ChannelVolumeRenderProps> = ({
       const averageGain = totalGain / volumes.length;
       level = averageGain;
     } else if (channel) {
-      level = engine.nodes[channel]?.getGain();
+      level = engine.nodes[channel]?.getGain(true);
     }
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");

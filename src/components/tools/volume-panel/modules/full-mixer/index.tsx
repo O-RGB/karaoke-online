@@ -3,7 +3,7 @@ import WinboxModal from "@/components/common/modal";
 import React, { useEffect, useId, useState } from "react";
 import { RxMixerVertical } from "react-icons/rx";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import DrumChange from "./modules/drum";
+import DrumProgramChange from "./modules/drum-program";
 import MixerNodes from "./modules/node";
 import { DRUM_CHANNEL } from "@/config/value";
 import { BaseSynthEngine } from "@/features/engine/types/synth.type";
@@ -19,7 +19,7 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
   const instrumental = useSynthesizerEngine(
     (state) => state.engine?.instrumental
   );
-  const [drumProgarm, setDrumProgarm] = useState<number>(0);
+  const [program, setProgarm] = useState<number>(0);
 
   const [open, setOpen] = useState<boolean>(false);
   const openMixer = () => {
@@ -35,7 +35,7 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
       ["PROGARM", "CHANGE"],
       DRUM_CHANNEL,
       (value) => {
-        setDrumProgarm(value.value);
+        setProgarm(value.value);
       },
       componentId
     );
@@ -61,7 +61,7 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
           {instrumental && (
             <MixerNodes instrumental={instrumental}></MixerNodes>
           )}
-          <DrumChange program={drumProgarm}></DrumChange>
+          <DrumProgramChange program={program}></DrumProgramChange>
         </div>
       </WinboxModal>
       <Button

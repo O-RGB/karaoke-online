@@ -43,7 +43,7 @@ export async function loadSoundFontPlayer(audio: AudioContext) {
   const ab = await res.arrayBuffer();
   const synthInstance = new Synthetizer(audio.destination, ab);
 
-  synthInstance.setMainVolume(0.7);
+  synthInstance.setMainVolume(2);
   synthInstance.highPerformanceMode = false;
 
   await synthInstance.isReady;

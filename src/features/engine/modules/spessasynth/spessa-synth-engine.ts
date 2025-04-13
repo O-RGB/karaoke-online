@@ -1,27 +1,12 @@
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
-
-import {
-  BaseSynthEngine,
-  BaseSynthPlayerEngine,
-  IControllerChange,
-  ILockController,
-  IMuteController,
-  IProgramChange,
-  IVelocityChange,
-  TimingModeType,
-} from "../../types/synth.type";
-
 import { loadAudioContext, loadPlayer } from "./lib/spessasynth";
-import {
-  CHANNEL_DEFAULT,
-  DEFAULT_SOUND_FONT,
-  DRUM_CHANNEL,
-} from "@/config/value";
+import { CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
 import { SpessaPlayerEngine } from "./player/spessa-synth-player";
 import { RemoteSendMessage } from "@/features/remote/types/remote.type";
 import { SoundSetting } from "@/features/config/types/config.type";
 import { SynthChannel } from "../instrumentals/channel";
 import { InstrumentalNode } from "../instrumentals/instrumental";
+import { BassConfig } from "../instrumentals/config";
 import {
   CHORUSDEPTH,
   EXPRESSION,
@@ -29,9 +14,15 @@ import {
   PAN,
   REVERB,
 } from "../../types/node.type";
-import { BassConfig } from "../instrumentals/config";
-import { INodeKey } from "../instrumentals/types/node.type";
-
+import {
+  BaseSynthEngine,
+  BaseSynthPlayerEngine,
+  IControllerChange,
+  INoteChange,
+  IProgramChange,
+  IVelocityChange,
+  TimingModeType,
+} from "../../types/synth.type";
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
   public synth: Spessasynth | undefined;
@@ -55,14 +46,11 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     config?: Partial<SoundSetting>
   ) {
     this.startup(setInstrument);
-
     this.bassConfig = config ? new BassConfig(config) : undefined;
     this.sendMessage = sendMessage;
   }
 
   async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
-    // audioContext = AudioContext
-    // channels = AudioNode[]
     const { audioContext, channels } = await loadAudioContext();
     if (!audioContext)
       return { audio: undefined, synth: undefined, player: undefined };
@@ -77,7 +65,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.audio = audioContext;
 
     this.persetChange((e) => setInstrument?.(e));
-    this.synth?.setDrums(8, true);
+    this.synth?.setDrums(9, true);
     this.player = new SpessaPlayerEngine(player);
     this.instrumental.setEngine(this);
 
@@ -86,36 +74,34 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
-      this.nodes.push(new SynthChannel(ch, this.instrumental, analyser));
+      this.nodes.push(
+        new SynthChannel(
+          ch,
+          this.instrumental,
+          analyser,
+          synth.keyModifierManager
+        )
+      );
       analysers.push(analyser);
     }
 
     // channels.forEach((channel, index) => {
     //   const gainNode = channel as GainNode;
-    //   gainNode.gain.value = 0.5;
-    //   gainNode.gain.value = 0;
+    //   gainNode.gain.value = 5;
     // });
 
     synth?.connectIndividualOutputs(analysers);
 
     this.controllerChange();
     this.programChange();
-
-    synth.eventHandler.addEvent("noteon", "note-on-listener", (data: any) => {
-      if (data.channel == DRUM_CHANNEL) {
-        console.log(data);
-        // console.log(
-        //   `Note ${data.midiNote} played for channel ${data.channel} with velocity ${data.velocity}.`
-        // );
-      }
-    });
+    this.noteOnChange();
+    this.noteOffChange();
+    this.polyPressureChange();
 
     return { synth: synth, audio: this.audio };
   }
 
   async loadDefaultSoundFont(audio?: AudioContext): Promise<any> {
-    // this.synth?.keyModifierManager.addModifier(9,)
-
     let arraybuffer: ArrayBuffer | undefined = undefined;
     if (this.soundfontFile) {
       arraybuffer = await this.soundfontFile.arrayBuffer();
@@ -125,7 +111,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       if (audio) {
         const synthInstance = new Spessasynth(audio.destination, arraybuffer);
 
-        synthInstance.setMainVolume(0.7);
+        synthInstance.setMainVolume(1);
         synthInstance.highPerformanceMode = false;
 
         const blob = new Blob([arraybuffer], {
@@ -180,6 +166,37 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     }
   }
 
+  noteOnChange(event?: (event: INoteChange) => void): void {
+    return this.synth?.eventHandler.addEvent(
+      "noteon",
+      "note-on-listener",
+      (e: INoteChange) => {
+        this.nodes[e.channel].noteOnChange(e);
+        // this.sendMessageData(e);
+      }
+    );
+  }
+  polyPressureChange(event?: (event: INoteChange) => void): void {
+    return this.synth?.eventHandler.addEvent(
+      "polypressure",
+      "poly-perssure-listener",
+      (e: any) => {
+        console.log(e);
+        // this.nodes[e.channel].noteOffChange(e);
+        // this.sendMessageData(e);
+      }
+    );
+  }
+  noteOffChange(event?: (event: INoteChange) => void): void {
+    return this.synth?.eventHandler.addEvent(
+      "noteoff",
+      "note-off-listener",
+      (e: INoteChange) => {
+        this.nodes[e.channel].noteOffChange(e);
+        // this.sendMessageData(e);
+      }
+    );
+  }
   controllerChange(event?: (event: IControllerChange) => void): void {
     return this.synth?.eventHandler.addEvent(
       "controllerchange",

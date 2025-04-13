@@ -22,6 +22,8 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   musicInfo: undefined,
 
   reset: () => {
+    const nodes = useSynthesizerEngine.getState().engine?.nodes;
+    nodes?.map((c) => c.note?.reset());
     set({
       lyrics: [],
       cursors: [],
@@ -43,6 +45,9 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   },
 
   paused: () => {
+    const nodes = useSynthesizerEngine.getState().engine?.nodes;
+    console.log("nodes", nodes);
+    nodes?.map((c) => c.note?.reset());
     const player = useSynthesizerEngine.getState().engine?.player;
     player?.pause();
     set({ isPaused: true });
@@ -67,6 +72,8 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   setCountDown: (queue) => {},
 
   setCurrentTime: (timing) => {
+    const nodes = useSynthesizerEngine.getState().engine?.nodes;
+    nodes?.map((c) => c.note?.reset());
     const player = useSynthesizerEngine.getState().engine?.player;
     player?.setCurrentTiming(timing);
   },

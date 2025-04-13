@@ -23,12 +23,9 @@ const ChannelLimit: React.FC<ChannelLimitProps> = ({
   const [program, setProgram] = useState<number>(0);
 
   const onProgramChange = (value: TEventType<number>) => {
-    // setProgram(undefined);
-    // setTimeout(() => {
     const category = findProgramCategory(value.value);
     setProgram(value.value);
     if (category?.index) setCategory(category?.index);
-    // }, 50);
   };
 
   useEffect(() => {
