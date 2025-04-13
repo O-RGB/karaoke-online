@@ -22,6 +22,7 @@ import {
 import { InstrumentalNode } from "../instrumental";
 import { KeyboardNode } from "../keyboard-node";
 import { KeyModifierManager } from "spessasynth_lib/@types/synthetizer/key_modifier_manager";
+import { DRUM_CHANNEL } from "@/config/value";
 
 export class SynthChannel {
   // Index
@@ -62,10 +63,10 @@ export class SynthChannel {
     channel: number,
     instrumental: InstrumentalNode,
     analyserNode: AnalyserNode,
-    keyModifierManager: KeyModifierManager
+    keyModifierManager: KeyModifierManager | undefined
   ) {
     this.channel = channel;
-    if (channel === 9) {
+    if (channel === DRUM_CHANNEL) {
       this.isDrum = new SynthNode(this.stateEvent, "DRUM", channel, true);
     }
     this.instrumental = instrumental;
@@ -79,7 +80,9 @@ export class SynthChannel {
     this.velocity = new SynthNode(this.stateEvent, "VELOCITY", channel);
     this.expression = new SynthNode(this.stateEvent, "EXPRESSION", channel);
     this.expression.setLock(true);
-    this.note = new KeyboardNode(channel, keyModifierManager);
+    if (keyModifierManager) {
+      this.note = new KeyboardNode(channel, keyModifierManager);
+    }
   }
 
   public getGain(getDrum: boolean = false) {

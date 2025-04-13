@@ -83,7 +83,7 @@ export class JsSynthEngine implements BaseSynthEngine {
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
-      this.nodes.push(new SynthChannel(ch, this.instrumental, analyser));
+      this.nodes.push(new SynthChannel(ch, this.instrumental, analyser, undefined));
       analysers.push(analyser);
     }
 
