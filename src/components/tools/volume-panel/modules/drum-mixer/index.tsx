@@ -3,7 +3,6 @@ import WinboxModal from "@/components/common/modal";
 import React, { useId, useState } from "react";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { FaDrum } from "react-icons/fa";
-import DrumNode from "./node";
 import DrumPanel from "./drum-panel";
 
 interface DrumMixerProps {}

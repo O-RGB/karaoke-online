@@ -100,7 +100,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         <ContextModal modal={modalMap}>
           {/* <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel> */}
           <StatusPanel notification={notification}></StatusPanel>
-          <KeyboardRender></KeyboardRender>
+          {/* <KeyboardRender></KeyboardRender> */}
           <VolumePanel></VolumePanel>
           <TempoPanel></TempoPanel>
           <ClockPanel></ClockPanel>

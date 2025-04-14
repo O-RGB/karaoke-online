@@ -68,13 +68,12 @@ const DrumPanel: React.FC<DrumPanelProps> = ({}) => {
 
   return (
     <>
-      <div className="flex gap-1">
-        {DRUM_NOTES_LIST.map((_, keyNote) => {
+      <div className="flex flex-wrap gap-1">
+        {DRUM_NOTES_LIST.map((keyNote, _) => {
           const name = DrumNoteMap[keyNote];
           return (
             <div className="p-1 border" key={`drum-note-${keyNote}`}>
               <DrumNode note={drum} keyNote={keyNote}></DrumNode>
-              {lowercaseToReadable(name)}
             </div>
           );
         })}
