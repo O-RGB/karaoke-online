@@ -43,7 +43,7 @@ export async function loadSoundFontPlayer(audio: AudioContext) {
   const ab = await res.arrayBuffer();
   const synthInstance = new Synthetizer(audio.destination, ab);
 
-  synthInstance.setMainVolume(2);
+  synthInstance.setMainVolume(0.3);
   synthInstance.highPerformanceMode = false;
 
   await synthInstance.isReady;
@@ -54,14 +54,4 @@ export async function loadPlayer(synth: Synthetizer) {
   const seq = new Sequencer([], synth);
   seq.loop = false;
   return seq;
-}
-
-export async function loadSoundMeter(synth: Synthetizer, audio: AudioContext) {
-  const newAnalysers: AnalyserNode[] = Array.from({ length: 16 }, () => {
-    const analyser = audio.createAnalyser();
-    analyser.fftSize = 256;
-    return analyser;
-  });
-  synth.connectIndividualOutputs(newAnalysers);
-  return newAnalysers;
 }

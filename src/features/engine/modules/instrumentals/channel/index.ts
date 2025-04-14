@@ -101,6 +101,10 @@ export class SynthChannel {
     return value;
   }
 
+  public getAnalyser() {
+    return this.analyserNode;
+  }
+
   public handleControllerChange<T>(
     event: IControllerChange<T>,
     action: (control: any, value: T) => void
