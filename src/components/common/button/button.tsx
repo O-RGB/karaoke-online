@@ -99,7 +99,7 @@ const Button: React.FC<ButtonCommonProps> = ({
         "",
       ].join(" ")}
     >
-      {icon && <span>{icon}</span>}
+      {icon && <div>{icon}</div>}
       {props.children}
     </button>
   );

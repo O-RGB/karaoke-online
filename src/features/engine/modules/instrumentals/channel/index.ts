@@ -23,6 +23,7 @@ import { InstrumentalNode } from "../instrumental";
 import { KeyboardNode } from "../keyboard-node";
 import { KeyModifierManager } from "spessasynth_lib/@types/synthetizer/key_modifier_manager";
 import { DRUM_CHANNEL } from "@/config/value";
+import { ChannelEqualizer } from "@/features/engine/lib/gain";
 
 export class SynthChannel {
   // Index
@@ -59,18 +60,26 @@ export class SynthChannel {
   // Group
   public instrumental: InstrumentalNode | undefined = undefined;
 
+  public equalizer: ChannelEqualizer | undefined = undefined;
+  public audioContext: AudioContext | undefined = undefined;
+
   constructor(
     channel: number,
     instrumental: InstrumentalNode,
-    analyserNode: AnalyserNode,
+    audioContext: AudioContext,
     keyModifierManager: KeyModifierManager | undefined
   ) {
+    if (!audioContext) {
+      console.warn("No audioContext!");
+      return;
+    }
+
     this.channel = channel;
     if (channel === DRUM_CHANNEL) {
       this.isDrum = new SynthNode(this.stateEvent, "DRUM", channel, true);
     }
     this.instrumental = instrumental;
-    this.analyserNode = analyserNode;
+    this.audioContext = audioContext;
     this.volume = new SynthNode(this.nodeEvent, "VOLUME", channel, 100);
     this.maxVolume = new SynthNode(this.nodeEvent, "MAX_VOLUME", channel, 10);
     this.chorus = new SynthNode(this.nodeEvent, "CHORUS", channel, 100);
@@ -80,25 +89,44 @@ export class SynthChannel {
     this.velocity = new SynthNode(this.stateEvent, "VELOCITY", channel);
     this.expression = new SynthNode(this.stateEvent, "EXPRESSION", channel);
     this.expression.setLock(true);
+
     if (keyModifierManager) {
       this.note = new KeyboardNode(channel, keyModifierManager);
     }
+
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+
+    this.equalizer = new ChannelEqualizer(audioContext);
+
+    analyser.connect(this.equalizer.input);
+    this.equalizer.output.connect(audioContext.destination);
+
+    this.analyserNode = analyser;
+    console.log("Audio routing complete for channel", channel);
   }
 
   public getGain(getDrum: boolean = false) {
     if (this.isDrum?.value === true && getDrum === false) {
       return 0;
     }
-    if (!this.analyserNode) {
-      console.error("AnalyserNode is not initialized");
+    if (!this.equalizer) {
+      console.error("equalizer is not initialized");
       return 0;
     }
-    const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
-    this.analyserNode.getByteFrequencyData(dataArray);
-    const value = Math.round(
-      dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
-    );
-    return value;
+
+    if (this.equalizer.isEQEnabled() || this.equalizer.getBoostLevel() > 0) {
+      return this.equalizer.getVolumeLevel();
+    } else if (this.analyserNode) {
+      const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
+      this.analyserNode.getByteFrequencyData(dataArray);
+      const value = Math.round(
+        dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
+      );
+      return value;
+    }
+
+    return 0;
   }
 
   public getAnalyser() {
@@ -215,18 +243,5 @@ export class SynthChannel {
     componentId: string
   ): boolean {
     return this.noteEvent[keyNote].remove(eventType, index, componentId);
-  }
-
-  reset() {
-    this.isDrum?.reset();
-    this.volume?.reset();
-    this.maxVolume?.reset();
-    this.chorus?.reset();
-    this.reverb?.reset();
-    this.pan?.reset();
-    this.program?.reset();
-    this.velocity?.reset();
-    this.expression?.reset();
-    this.expression?.reset();
   }
 }

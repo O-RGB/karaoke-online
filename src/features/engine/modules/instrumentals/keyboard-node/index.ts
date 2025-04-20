@@ -7,7 +7,9 @@ import { KeyModifierManager } from "spessasynth_lib/@types/synthetizer/key_modif
 
 export class KeyboardNode {
   public notes: SynthNode<INoteState, INoteChange>[] | undefined = undefined;
-  public event: EventManager<INoteState, TEventType<INoteChange>>[] = [];
+  public notesOff: SynthNode<INoteState, INoteChange>[] | undefined = undefined;
+  public eventNo: EventManager<INoteState, TEventType<INoteChange>>[] = [];
+  public eventOff: EventManager<INoteState, TEventType<INoteChange>>[] = [];
 
   private activeNotes: Map<number, INoteChange> = new Map();
 
@@ -16,9 +18,24 @@ export class KeyboardNode {
   constructor(channel: number, keyModifierManager: KeyModifierManager) {
     this.keyModifierManager = keyModifierManager;
     this.notes = MAX_CHANNEL.map((_, midiNote) => {
-      const noteEvent = new EventManager<INoteState, TEventType<INoteChange>>();
-      this.event.push(noteEvent);
-      return new SynthNode(noteEvent, "NOTE_ON", channel, {
+      const noteOnEvent = new EventManager<
+        INoteState,
+        TEventType<INoteChange>
+      >();
+      this.eventNo.push(noteOnEvent);
+      return new SynthNode(noteOnEvent, "NOTE_ON", channel, {
+        channel,
+        midiNote,
+        velocity: 0,
+      });
+    });
+    this.notesOff = MAX_CHANNEL.map((_, midiNote) => {
+      const noteOffEvent = new EventManager<
+        INoteState,
+        TEventType<INoteChange>
+      >();
+      this.eventOff.push(noteOffEvent);
+      return new SynthNode(noteOffEvent, "NOTE_OFF", channel, {
         channel,
         midiNote,
         velocity: 0,

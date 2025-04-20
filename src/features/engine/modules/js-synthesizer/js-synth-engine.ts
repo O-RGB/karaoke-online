@@ -10,7 +10,6 @@ import {
   TimingModeType,
 } from "../../types/synth.type";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
-import { AudioMeter } from "../../lib/gain";
 import { ChannelGainMonitor } from "./lib/channel-gain-monitor";
 import { InstrumentalNode } from "../instrumentals/instrumental";
 import { SynthChannel } from "../instrumentals/channel";
@@ -23,6 +22,7 @@ import {
   PAN,
   REVERB,
 } from "../../types/node.type";
+import { GlobalEqualizer } from "../../lib/gain";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -33,6 +33,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   public analysers: AnalyserNode[] = [];
   public soundfontName: string | undefined;
   public soundfontFile: File | undefined;
+  public globalEqualizer: GlobalEqualizer | undefined;
 
   public nodes: SynthChannel[] = [];
   public instrumental = new InstrumentalNode();
@@ -57,8 +58,6 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     synth.init(audioContext.sampleRate);
 
-    const node = synth.createAudioNode(audioContext, 8192);
-
     synth.setGain(0.3);
 
     this.loadDefaultSoundFont();
@@ -66,24 +65,24 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.synth = synth;
     this.audio = audioContext;
 
-    const gainMonitor = new ChannelGainMonitor(audioContext);
-    gainMonitor.connectToSynth(node);
-
-    // รับค่า analysers
-    this.analysers = gainMonitor.analyserNodes;
-
-    node.connect(audioContext.destination);
-
     this.player = new JsSynthPlayerEngine(synth);
-
     this.instrumental.setEngine(this);
 
     const analysers: AnalyserNode[] = [];
+    this.nodes = [];
+
+    const finalOutputNode = synth.createAudioNode(audioContext, 8192);
+
+    this.globalEqualizer = new GlobalEqualizer(finalOutputNode.context);
+    finalOutputNode.connect(this.globalEqualizer.input);
+    this.globalEqualizer.output.connect(audioContext.destination);
 
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
-      this.nodes.push(new SynthChannel(ch, this.instrumental, analyser, undefined));
+      this.nodes.push(
+        new SynthChannel(ch, this.instrumental, audioContext, undefined)
+      );
       analysers.push(analyser);
     }
 

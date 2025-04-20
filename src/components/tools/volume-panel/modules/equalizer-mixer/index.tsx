@@ -1,13 +1,13 @@
 import Button from "@/components/common/button/button";
 import WinboxModal from "@/components/common/modal";
-import React, { useId, useState } from "react";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import { FaDrum } from "react-icons/fa";
-import DrumPanel from "./drum-panel";
+import React, { useState } from "react";
+import { FaList } from "react-icons/fa";
+import DrumPanel from "../drum-mixer/drum-panel";
+import GlobalEqualizer from "./global-equalizer";
 
-interface DrumMixerProps {}
+interface EqualizerProps {}
 
-const DrumMixer: React.FC<DrumMixerProps> = ({}) => {
+const EqualizerPanel: React.FC<EqualizerProps> = ({}) => {
   const [open, setOpen] = useState<boolean>(false);
   const openMixer = () => {
     setOpen(!open);
@@ -17,28 +17,26 @@ const DrumMixer: React.FC<DrumMixerProps> = ({}) => {
     <>
       <WinboxModal
         onClose={() => setOpen(false)}
-        title="Drum"
-        height={313}
+        title="Globals Equalizer"
         isOpen={open}
+        width={400}
+        height={580}
       >
-        <div className="overflow-auto w-full h-full">
-          <DrumPanel></DrumPanel>
-        </div>
+        <GlobalEqualizer></GlobalEqualizer>
       </WinboxModal>
-
       <Button
         className="text-white"
         shadow=""
         onClick={openMixer}
-        icon={<FaDrum></FaDrum>}
+        icon={<FaList></FaList>}
         border="border blur-border"
         padding="p-1 px-2"
         iconPosition="left"
       >
-        กลอง
+        Equalizer
       </Button>
     </>
   );
 };
 
-export default DrumMixer;
+export default EqualizerPanel;

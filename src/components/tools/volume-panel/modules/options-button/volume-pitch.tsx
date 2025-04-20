@@ -16,6 +16,11 @@ import {
 } from "@/features/engine/types/synth.type";
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import DrumMixer from "../drum-mixer";
+import { Menu, MenuButton } from "@szhsin/react-menu";
+import Button from "@/components/common/button/button";
+import { CgOptions } from "react-icons/cg";
+import ContextMenuCommon from "@/components/common/context-menu/context-menu";
+import EqualizerPanel from "../equalizer-mixer";
 
 interface VolumeOptionsProps {
   onPitchChange: (value: number) => void;
@@ -39,7 +44,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   useEffect(() => {}, [nodes]);
   return (
     <>
-      <div className="flex gap-2 justify-between lg:justify-normal w-full">
+      <div className="flex gap-2 justify-between lg:justify-normal w-full overflow-auto">
         <NumberButton
           className="!w-full lg:!w-fit"
           onChange={(value) => {
@@ -62,6 +67,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
             <IoSpeedometerSharp className="text-[15px]"></IoSpeedometerSharp>
           }
         ></NumberButton>
+
         <SwitchButton
           className="!w-full lg:!w-fit"
           onChange={(muted) => {
@@ -76,15 +82,44 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
           colorClose="red"
         ></SwitchButton>
 
-        <SwitchButton
-          className="!w-full lg:!w-fit hidden lg:block "
-          onChange={openQueue}
-          iconOpen={<FaList></FaList>}
-          iconClose={<FaList></FaList>}
-        ></SwitchButton>
-
-        {nodes && <FullMixer nodes={nodes}></FullMixer>}
-        {nodes && <DrumMixer></DrumMixer>}
+        <Menu
+          transition
+          boundingBoxPadding="10 10 10 10"
+          className={"szh-menu-custom"}
+          menuButton={(open) => {
+            return (
+              <MenuButton>
+                <Button
+                  className="text-white"
+                  shadow=""
+                  border="border blur-border"
+                  padding="p-2 px-2"
+                >
+                  <CgOptions></CgOptions>
+                </Button>
+              </MenuButton>
+            );
+          }}
+        >
+          <div className="px-2 ">
+            <div className="flex flex-col gap-2">
+              <Button
+                className="text-white"
+                shadow=""
+                onClick={openQueue}
+                icon={<FaList></FaList>}
+                border="border blur-border"
+                padding="p-1 px-2"
+                iconPosition="left"
+              >
+                คิวเพลง
+              </Button>
+              {nodes && <FullMixer nodes={nodes}></FullMixer>}
+              {nodes && <DrumMixer></DrumMixer>}
+              <EqualizerPanel></EqualizerPanel>
+            </div>
+          </div>
+        </Menu>
       </div>
     </>
   );

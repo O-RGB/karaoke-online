@@ -17,6 +17,7 @@ import { useOrientation } from "@/hooks/orientation-hook";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
+import VolumeVelocityRender from "./renders/volume-velocity";
 
 interface VolumePanelProps {}
 
@@ -24,6 +25,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   const VOCAL_CHANNEL = 8;
 
   const engine = useSynthesizerEngine((state) => state.engine);
+
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
   const resetQueueingTimeout = useKeyboardStore(
@@ -71,6 +73,9 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   const animation = `duration-300 transition-all`;
 
   if (!engine) return <></>;
+  if (!engine?.nodes) return <></>;
+
+  const nodes = engine.nodes;
   return (
     <div
       className={`fixed left-0 px-5 flex flex-col gap-1.5 ${
@@ -94,7 +99,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
           <div
             className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px]  left-0 p-2 py-[26px]`}
           >
-            {engine?.nodes?.map((data, ch) => {
+            {nodes.map((data, ch) => {
               return (
                 <div key={`gain-render-${ch}`} className="relative w-full">
                   <ChannelVolumeRender
@@ -111,7 +116,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
               hideMixer ?? "pointer-events-none !cursor-none"
             } w-full gap-0.5 h-full`}
           >
-            {engine?.nodes?.map((_, ch) => {
+            {nodes.map((_, ch) => {
               return (
                 <div
                   key={`vol-panel-${ch}`}
@@ -131,6 +136,20 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
               );
             })}
           </div>
+
+          {/* <div className="flex gap-2">
+            {nodes.map((node, channel) => {
+              return (
+                <div key={`test-ch-${channel}`}>
+                  evetn {channel}
+                  <VolumeVelocityRender
+                    node={node}
+                    channel={channel}
+                  ></VolumeVelocityRender>
+                </div>
+              );
+            })}
+          </div> */}
         </div>
       )}
 

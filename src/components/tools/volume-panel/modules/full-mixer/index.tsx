@@ -6,7 +6,6 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import DrumProgramChange from "./modules/drum-program";
 import MixerNodes from "./modules/node";
 import { DRUM_CHANNEL } from "@/config/value";
-import { BaseSynthEngine } from "@/features/engine/types/synth.type";
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 
 interface FullMixerProps {
@@ -64,14 +63,18 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
           <DrumProgramChange program={program}></DrumProgramChange>
         </div>
       </WinboxModal>
+
       <Button
-        className="!w-full lg:!w-fit"
+        className="w-full text-white"
         shadow=""
         onClick={openMixer}
-        icon={<RxMixerVertical className="text-white"></RxMixerVertical>}
+        icon={<RxMixerVertical></RxMixerVertical>}
         border="border blur-border"
         padding="p-1 px-2"
-      ></Button>
+        iconPosition="left"
+      >
+        เครื่องดนตรี
+      </Button>
     </>
   );
 };

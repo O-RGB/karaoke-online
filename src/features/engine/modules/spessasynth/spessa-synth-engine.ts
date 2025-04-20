@@ -23,7 +23,7 @@ import {
   IVelocityChange,
   TimingModeType,
 } from "../../types/synth.type";
-import { AudioEqualizer } from "../../lib/gain";
+import { ChannelEqualizer, GlobalEqualizer } from "../../lib/gain";
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
   public synth: Spessasynth | undefined;
@@ -38,8 +38,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public instrumental = new InstrumentalNode();
 
   public bassConfig: BassConfig | undefined = undefined;
-  public eqNodes: AudioNode[][] = [];
-  public equalizers: AudioEqualizer[] = [];
+  public globalEqualizer: GlobalEqualizer | undefined = undefined;
 
   private sendMessage?: (info: RemoteSendMessage) => void;
 
@@ -63,6 +62,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       return { audio: undefined, synth: undefined, player: undefined };
 
     const player = await loadPlayer(synth);
+    synth.setMainVolume(1);
 
     this.synth = synth;
     this.audio = audioContext;
@@ -73,37 +73,25 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.instrumental.setEngine(this);
 
     const analysers: AnalyserNode[] = [];
-    this.eqNodes = [];
-    this.equalizers = [];
 
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
-
-      const equalizer = new AudioEqualizer(audioContext);
-      this.equalizers.push(equalizer);
-
-      const [eqInput, eqOutput, bypassNode] = equalizer.connectEQ();
-
-      analyser.connect(eqInput);
-
-      eqOutput.connect(audioContext.destination);
-
-      bypassNode.connect(audioContext.destination);
-
-      this.eqNodes.push([eqInput, eqOutput, bypassNode]);
-
-      this.nodes.push(
-        new SynthChannel(
-          ch,
-          this.instrumental,
-          analyser,
-          synth.keyModifierManager
-        )
+      const synthChannel = new SynthChannel(
+        ch,
+        this.instrumental,
+        audioContext,
+        synth.keyModifierManager
       );
 
-      analysers.push(analyser);
+      this.nodes.push(synthChannel);
+      const analyser = synthChannel.getAnalyser();
+      if (analyser) {
+        analysers.push(analyser);
+      }
     }
+
+    this.globalEqualizer = new GlobalEqualizer(synth.context);
+    synth.worklet.connect(this.globalEqualizer.input);
+    this.globalEqualizer.output.connect(synth.context.destination);
 
     synth?.connectIndividualOutputs(analysers);
 
@@ -115,93 +103,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
     return { synth: synth, audio: this.audio };
   }
-
-  toggleChannelEqualizer(channelIndex: number, enabled: boolean): void {
-    if (
-      !this.equalizers ||
-      channelIndex < 0 ||
-      channelIndex >= this.equalizers.length
-    )
-      return;
-
-    const eq = this.equalizers[channelIndex];
-    eq.toggleEQ(enabled);
-
-    if (enabled) {
-      const [eqInput, eqOutput, bypassNode] = this.eqNodes[channelIndex];
-      const analyser = this.nodes[channelIndex].getAnalyser();
-
-      analyser?.disconnect(bypassNode);
-
-      analyser?.connect(eqInput);
-    } else {
-      const [eqInput, eqOutput, bypassNode] = this.eqNodes[channelIndex];
-      const analyser = this.nodes[channelIndex].getAnalyser();
-
-      analyser?.disconnect(eqInput);
-
-      analyser?.connect(bypassNode);
-    }
-  }
-
-  toggleAllEqualizers(enabled: boolean): void {
-    if (!this.equalizers) return;
-
-    this.equalizers.forEach((_, index) => {
-      this.toggleChannelEqualizer(index, enabled);
-    });
-  }
-
-  isChannelEQEnabled(channelIndex: number): boolean {
-    if (
-      !this.equalizers ||
-      channelIndex < 0 ||
-      channelIndex >= this.equalizers.length
-    ) {
-      return false;
-    }
-    return this.equalizers[channelIndex].isEQEnabled();
-  }
-
-  updateChannelEQBand(
-    channelIndex: number,
-    bandIndex: number,
-    gainValue: number
-  ): void {
-    if (
-      !this.equalizers ||
-      channelIndex < 0 ||
-      channelIndex >= this.equalizers.length
-    ) {
-      return;
-    }
-    this.equalizers[channelIndex].updateBandGain(bandIndex, gainValue);
-  }
-
-  resetChannelEQ(channelIndex: number): void {
-    if (
-      !this.equalizers ||
-      channelIndex < 0 ||
-      channelIndex >= this.equalizers.length
-    ) {
-      return;
-    }
-    this.equalizers[channelIndex].resetEQ();
-  }
-
-  getChannelEQSettings(
-    channelIndex: number
-  ): { frequency: number; gain: number }[] | null {
-    if (
-      !this.equalizers ||
-      channelIndex < 0 ||
-      channelIndex >= this.equalizers.length
-    ) {
-      return null;
-    }
-    return this.equalizers[channelIndex].getEQSettings();
-  }
-
   async loadDefaultSoundFont(audio?: AudioContext): Promise<any> {
     let arraybuffer: ArrayBuffer | undefined = undefined;
     if (this.soundfontFile) {
@@ -212,7 +113,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       if (audio) {
         const synthInstance = new Spessasynth(audio.destination, arraybuffer);
 
-        synthInstance.setMainVolume(1);
         synthInstance.highPerformanceMode = false;
 
         const blob = new Blob([arraybuffer], {

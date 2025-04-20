@@ -113,7 +113,7 @@ const Piano: React.FC<PianoProps> = ({
       <div className="relative h-full w-full">
         {dimensions.actualWidth > 0 &&
           node.note?.notes?.map((_, i) => {
-            const event = node.note?.event[i];
+            const event = node.note?.eventNo[i];
             if (!event || !node.note) return <></>;
             const keyStyle = getKeyPosition(i);
             return (

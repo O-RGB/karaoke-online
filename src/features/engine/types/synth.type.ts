@@ -1,10 +1,10 @@
 import { MIDI } from "spessasynth_lib/@types/midi_parser/midi_loader";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
-import { AudioEqualizer, AudioMeter } from "../lib/gain";
 import { SynthChannel } from "../modules/instrumentals/channel";
 import { InstrumentalNode } from "../modules/instrumentals/instrumental";
 import { BassConfig } from "../modules/instrumentals/config";
+import { GlobalEqualizer } from "../lib/gain";
 export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
   time: TimingModeType;
@@ -13,8 +13,7 @@ export interface BaseSynthEngine {
   analysers: AnalyserNode[];
   synth: Spessasynth | JsSynthesizer | undefined;
   nodes?: SynthChannel[] | undefined;
-  eqNodes?: AudioNode[][];
-  equalizers?: AudioEqualizer[];
+  globalEqualizer: GlobalEqualizer | undefined;
   instrumental: InstrumentalNode | undefined;
 
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
@@ -25,7 +24,11 @@ export interface BaseSynthEngine {
   toggleAllEqualizers?(enabled: boolean): void;
   isChannelEQEnabled?(channelIndex: number): boolean;
   resetChannelEQ?(channelIndex: number): void;
-  updateChannelEQBand?(channelIndex: number, bandIndex: number, gainValue: number): void
+  updateChannelEQBand?(
+    channelIndex: number,
+    bandIndex: number,
+    gainValue: number
+  ): void;
   getChannelEQSettings?(channelIndex: number):
     | {
         frequency: number;
@@ -52,7 +55,6 @@ export interface BaseSynthEngine {
   setMute(event: IControllerChange<boolean>): void;
   setupMIDIEventHook?(): void;
 
-  gainNode?: AudioMeter;
   bassConfig?: BassConfig;
   setBassLock(program: number): void;
 }

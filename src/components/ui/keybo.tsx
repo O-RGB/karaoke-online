@@ -11,7 +11,7 @@ const KeyRender: React.FC<KeyRenderProps> = ({ nodes, channel }) => {
   return (
     <div className="border p-1 text-nowrap w-full flex">
       {nodes.note?.notes?.map((re, i) => {
-        const event = nodes.note?.event[i];
+        const event = nodes.note?.eventNo[i];
         if (!event) return <></>;
         return (
           <React.Fragment key={`key-min-${i}`}>

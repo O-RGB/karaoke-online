@@ -3,8 +3,6 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
 import { create } from "zustand";
 interface MixerStore {
-  setEventGain: () => void;
-
   gain: number[];
   setCurrntGain: (gain: number[]) => void;
 
@@ -21,38 +19,6 @@ interface MixerStore {
 }
 
 const useMixerStoreNew = create<MixerStore>((set, get) => ({
-  setEventGain: () => {
-    const superUserConnections = usePeerStore.getState().superUserConnections;
-    const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
-
-    const gainNode = useSynthesizerEngine.getState().engine?.gainNode;
-    if (!gainNode) {
-      return;
-    }
-    const volumes = gainNode.gainChannels();
-
-    if (get().hideMixer) {
-      const totalGain = volumes?.reduce((acc, volume) => acc + volume, 0) || 0;
-      const mainGain = (totalGain / (volumes.length * 20)) * 100;
-      let gainMain = Math.round(mainGain);
-      get().setCurrntGainMain(gainMain);
-    } else {
-      get().setCurrntGain(volumes);
-    }
-
-    if (superUserConnections.length > 0) {
-      // const remoteEvent: TEventType<number[]> = {
-      //   channel: 0,
-      //   eventType: "VOLUME",
-      //   value: volumes,
-      // };
-      // sendSuperUserMessage({
-      //   message: remoteEvent,
-      //   user: "SUPER",
-      // });
-    }
-  },
-
   gain: CHANNEL_DEFAULT,
   setCurrntGain: (gain) =>
     set((state) => ({
