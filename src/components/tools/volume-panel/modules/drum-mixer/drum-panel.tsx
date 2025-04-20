@@ -1,9 +1,18 @@
 import { DRUM_NOTES_LIST } from "@/config/value";
-import { DrumNotesType } from "@/features/engine/modules/instrumentals/types/node.type";
+import {
+  DrumNotesType,
+  INoteState,
+  TEventType,
+} from "@/features/engine/modules/instrumentals/types/node.type";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DrumNode from "./node";
 import { lowercaseToReadable } from "@/lib/general";
+import { midiService } from "./node/output";
+import { INoteChange } from "@/features/engine/types/synth.type";
+import { channel } from "diagnostics_channel";
+import Label from "@/components/common/display/label";
+import Select from "@/components/common/input-data/select/select";
 
 export const DrumNoteMap: DrumNotesType[] = [
   "acoustic_bass_drum",
@@ -59,6 +68,18 @@ interface DrumPanelProps {}
 
 const DrumPanel: React.FC<DrumPanelProps> = ({}) => {
   const engine = useSynthesizerEngine((state) => state.engine);
+
+  const [outputs, setOutputs] = useState<MIDIOutput[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    midiService.init().then(() => {
+      setOutputs(midiService.outputs);
+      setSelectedId(midiService.selectedOutput?.id || null);
+    });
+    midiService.onOutputsChanged(setOutputs);
+  }, []);
+
   if (!engine?.nodes) return <></>;
   const nodes = engine.nodes;
 
@@ -66,19 +87,60 @@ const DrumPanel: React.FC<DrumPanelProps> = ({}) => {
   const drum = nodes[9].note;
   if (!drum) return <></>;
 
+  const handleOutputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    midiService.setOutputById(e.target.value);
+    setSelectedId(e.target.value);
+  };
+
+  const handleNoteEvent = (v: TEventType<INoteState, INoteChange>) => {
+    const newVelocity = v.value.velocity;
+    const midiNote = v.value.midiNote;
+    const channel = v.value.channel;
+
+    if (newVelocity > 0) {
+      midiService.sendNoteOn(midiNote, newVelocity, channel);
+    } else {
+      midiService.sendNoteOff(midiNote, channel);
+    }
+  };
+
   return (
-    <>
+    <div className="p-2 flex flex-col gap-2">
+      {/* MIDI Output Selector */}
+      <div className="flex flex-col gap-2">
+        <Label>Drum Midi Output</Label>
+        <Select
+          value={selectedId ?? ""}
+          onChange={handleOutputChange}
+          className="text-xs p-1 rounded border bg-white text-gray-800"
+          options={
+            outputs.length === 0
+              ? [{ value: "", label: "No MIDI Output" }]
+              : [
+                  { value: "", label: "Next Karaoke" },
+                  ...outputs.map((out) => ({
+                    value: out.id,
+                    label: out.name ?? "",
+                  })),
+                ]
+          }
+        ></Select>
+      </div>
       <div className="flex flex-wrap gap-1">
         {DRUM_NOTES_LIST.map((keyNote, _) => {
           const name = DrumNoteMap[keyNote];
           return (
             <div className="p-1 border" key={`drum-note-${keyNote}`}>
-              <DrumNode note={drum} keyNote={keyNote}></DrumNode>
+              <DrumNode
+                onNoteChange={handleNoteEvent}
+                note={drum}
+                keyNote={keyNote}
+              ></DrumNode>
             </div>
           );
         })}
       </div>
-    </>
+    </div>
   );
 };
 

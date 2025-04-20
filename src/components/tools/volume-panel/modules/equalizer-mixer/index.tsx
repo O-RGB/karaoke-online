@@ -19,7 +19,6 @@ const EqualizerPanel: React.FC<EqualizerProps> = ({}) => {
         onClose={() => setOpen(false)}
         title="Globals Equalizer"
         isOpen={open}
-        width={400}
         height={580}
       >
         <GlobalEqualizer></GlobalEqualizer>

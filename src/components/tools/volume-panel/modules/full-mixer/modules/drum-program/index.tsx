@@ -19,6 +19,7 @@ const DrumProgramChange: React.FC<DrumChangeProps> = ({ program }) => {
           return (
             <React.Fragment key={`card-inst-${data}`}>
               <Button
+                padding="p-2"
                 onClick={() => {
                   engine?.setProgram?.({
                     channel: 9,

@@ -78,14 +78,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
     equalizer.toggleEQ(enabled);
   };
 
-  const handleReset = () => {
-    if (!equalizer) return;
-
-    equalizer.reset();
-    setGains([...equalizer.gains]);
-    setSelectedPreset("flat");
-  };
-
   const applyPreset = (preset: EqPreset) => {
     if (!equalizer) return;
 

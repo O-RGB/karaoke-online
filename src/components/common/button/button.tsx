@@ -96,7 +96,7 @@ const Button: React.FC<ButtonCommonProps> = ({
         shapeStyle,
         props.className,
         position,
-        "",
+        "z-50",
       ].join(" ")}
     >
       {icon && <div>{icon}</div>}

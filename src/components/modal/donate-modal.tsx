@@ -7,9 +7,8 @@ const DonateModal: React.FC<DonateModalProps> = () => {
   const donors: { name: string; amount: number; date?: string }[] = [
     { name: "Pook Kittipan Khanteemok", amount: 200, date: "11 เม.ย. 2568" },
     { name: "Werpan Suttwoang", amount: 100, date: "11 เม.ย. 2568" },
-    // { name: "ไม่ระบุชื่อ", amount: 500, date: "10 เม.ย. 2568" },
-    { name: "ไม่ระบุชื่อ", amount: 100, date: "10 เม.ย. 2568" },
-    { name: "ไม่ระบุชื่อ", amount: 100, date: "10 เม.ย. 2568" },
+    { name: "Wittaya Tongyoo", amount: 100, date: "10 เม.ย. 2568" },
+    { name: "ไม่ระบุชื่อ", amount: 500, date: "รวมทั้งหมด" },
   ];
 
   const totalDonations = donors.reduce((sum, donor) => sum + donor.amount, 0);

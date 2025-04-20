@@ -46,14 +46,14 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
     };
   }, [indexKey, instrumental]);
   return (
-    <div className="relative flex flex-col gap-2 min-w-14 w-14 max-w-14">
+    <div className="relative flex flex-col gap-2 min-w-10 w-10 max-w-10">
       <div className="relative bg-black">
         <ChannelVolumeRender
           max={127}
           node={node}
           className="z-0 w-full absolute bottom-0 left-0 h-full"
         ></ChannelVolumeRender>
-        <div className="relative h-40 flex py-4 z-50">
+        <div className="relative h-32 flex py-4 z-50">
           <SliderCommon
             max={127}
             value={expression}

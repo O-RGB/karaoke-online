@@ -1,5 +1,5 @@
 import Slider, { SliderProps } from "rc-slider";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import "rc-slider/assets/index.css";
 
 interface SliderCommonProps extends Omit<SliderProps, "onChange"> {
@@ -39,6 +39,12 @@ const SliderCommon: React.FC<SliderCommonProps> = ({
           transitionDuration: isUserInteracting ? "0s" : "1s",
           borderColor: color,
           backgroundColor: color,
+          width: 20,
+          height: 20,
+          borderRadius: "50%",
+          borderWidth: 3,
+          marginLeft: props.vertical ? -8 : 0,
+          marginTop: !props.vertical ? -8 : 0,
         },
         track: {
           backgroundColor: color,
