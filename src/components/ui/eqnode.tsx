@@ -1,474 +1,369 @@
-import React, { useEffect, useState, useRef } from "react";
-import { ChannelEqualizer } from "@/features/engine/lib/gain";
+import React, { useEffect, useId, useState } from "react";
 import SliderCommon from "../common/input-data/slider";
+import SwitchRadio from "../common/input-data/switch/switch-radio";
+import Tabs from "../common/tabs";
+import Button from "../common/button/button";
+import { BiReset } from "react-icons/bi";
+import { EQConfig } from "@/features/engine/modules/equalizer/types/equalizer.type";
+import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
+import useConfigStore from "@/features/config/config-store";
 
 interface EQNodeProps {
-  channel: number | undefined;
-  eq: ChannelEqualizer | undefined;
+  instrumental?: InstrumentalNode;
+  indexKey: number;
+  node: SynthChannel[];
+  name: string;
+  onEnabled?: () => void;
+  onDisabled?: () => void;
 }
 
-const EQNode: React.FC<EQNodeProps> = ({ channel, eq }) => {
-  const [initialized, setInitialized] = useState(false);
-  const [eqEnabled, setEqEnabled] = useState(true);
-  const [gains, setGains] = useState([0, 0, 0]);
-  const [boostEnabled, setBoostEnabled] = useState(false);
-  const [boostLevel, setBoostLevel] = useState(0);
-  const [compressorEnabled, setCompressorEnabled] = useState(false);
-  const [compressorSettings, setCompressorSettings] = useState({
-    threshold: -20,
-    knee: 10,
-    ratio: 4,
-    attack: 0.005,
-    release: 0.25,
+const EQNode: React.FC<EQNodeProps> = ({
+  instrumental,
+  indexKey,
+  node,
+  name,
+  onEnabled,
+  onDisabled,
+}) => {
+  const VolumeMeter: React.FC<{ level: number | undefined }> = ({ level }) => (
+    <div className="relative w-full h-12 bg-gray-900 rounded-lg overflow-hidden border border-gray-200">
+      <div
+        className="absolute h-full bg-white/50 transition-all duration-100"
+        style={{ width: `${level || 0}%` }}
+      ></div>
+    </div>
+  );
+
+  const render =
+    useConfigStore((state) => state.config.refreshRate?.render) ?? 100;
+
+  const componnetId = useId();
+  const [volumeLevel, setVolumeLevel] = useState<number>(0);
+
+  const [eqConfig, setEqConfig] = useState<EQConfig>({
+    enabled: false,
+    gains: [0, 0, 0],
+    boostLevel: 100,
+    inputVolume: 1,
+    outputVolume: 1,
+    volumeCompensation: 1,
   });
-  const [activeTab, setActiveTab] = useState("eq");
-  const [inputVolume, setInputVolume] = useState(1);
-  const [outputVolume, setOutputVolume] = useState(1);
-  const [volumeCompensation, setVolumeCompensation] = useState(1);
 
-  const [xxx, setV] = useState<number>();
+  const frequencyLabels = ["100 Hz", "1 kHz", "10 kHz"];
 
-  // Initialize equalizer state when component mounts
   useEffect(() => {
-    if (eq && !initialized) {
-      setEqEnabled(eq.isEQEnabled());
-      setGains([...eq.gains]);
-      setBoostEnabled(eq.isBoostActive());
-      setBoostLevel(eq.getBoostLevel());
-      setInitialized(true);
+    if (!instrumental) return;
 
-      setInterval(() => {
-        setV(eq.getVolumeLevel());
-      }, 100);
-    }
-  }, [eq, initialized]);
+    instrumental.setCallBackEQ(
+      ["EQUALIZER", "CHANGE"],
+      indexKey,
+      (e) => {
+        setEqConfig(e.value);
+      },
+      componnetId
+    );
 
-  // EQ Controls
+    const intervalId = setInterval(() => {
+      const volumes = node.map((n) => n.getGain());
+      const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
+      const averageGain = totalGain / volumes.length;
+      setVolumeLevel(averageGain);
+    }, render);
+
+    return () => {
+      instrumental.removeCallbackEQ(
+        ["EQUALIZER", "CHANGE"],
+        indexKey,
+        componnetId
+      );
+      clearInterval(intervalId);
+    };
+  }, [instrumental]);
+
   const handleEQToggle = () => {
-    if (eq) {
-      const newState = !eqEnabled;
-      setEqEnabled(newState);
-      eq.toggleEQ(newState);
+    if (instrumental) {
+      const newState = !eqConfig.enabled;
+      const newBoostLevel = newState ? 100 : 0;
+
+      if (newState) {
+        onEnabled?.();
+      } else {
+        onDisabled?.();
+      }
+
+      instrumental.updateEQ(
+        indexKey,
+        {
+          ...eqConfig,
+          enabled: newState,
+          boostLevel: newBoostLevel,
+        },
+        indexKey
+      );
     }
   };
 
   const handleGainChange = (index: number, value: number) => {
-    if (eq) {
-      const newGains = [...gains];
+    if (instrumental) {
+      const newGains = [...eqConfig.gains];
       newGains[index] = value;
-      setGains(newGains);
-      eq.updateBandGain(index, value);
+      instrumental.updateEQ(
+        indexKey,
+        {
+          ...eqConfig,
+          gains: newGains,
+        },
+        indexKey
+      );
     }
   };
 
   const handleResetEQ = () => {
-    if (eq) {
-      eq.resetEQ();
-      setGains([0, 0, 0]);
-    }
-  };
-
-  // Boost Controls
-  const handleBoostToggle = () => {
-    if (eq) {
-      const newState = !boostEnabled;
-      setBoostEnabled(newState);
-      eq.toggleBoost(newState);
+    if (instrumental) {
+      instrumental.updateEQ(
+        indexKey,
+        {
+          ...eqConfig,
+          gains: [0, 0, 0],
+        },
+        indexKey
+      );
     }
   };
 
   const handleBoostChange = (value: number) => {
-    if (eq) {
-      setBoostLevel(value);
-      eq.setBoostLevel(value);
+    if (instrumental) {
+      instrumental.updateEQ(
+        indexKey,
+        {
+          ...eqConfig,
+          boostLevel: value,
+        },
+        indexKey
+      );
     }
   };
 
-  // Compressor Controls
-  const handleCompressorToggle = () => {
-    if (eq) {
-      const newState = !compressorEnabled;
-      setCompressorEnabled(newState);
-      eq.toggleCompressor(newState);
-    }
-  };
-
-  const updateCompressorSetting = (setting: string, value: number) => {
-    if (eq) {
-      const newSettings = { ...compressorSettings, [setting]: value };
-      setCompressorSettings(newSettings);
-      eq.setCompressorSettings({ [setting]: value });
-    }
-  };
-
-  // Volume Controls
   const handleInputVolumeChange = (value: number) => {
-    if (eq) {
-      setInputVolume(value);
-      eq.setInputVolume(value);
+    if (instrumental) {
+      instrumental.updateEQ(
+        indexKey,
+        {
+          ...eqConfig,
+          inputVolume: value,
+        },
+        indexKey
+      );
     }
   };
 
   const handleOutputVolumeChange = (value: number) => {
-    if (eq) {
-      setOutputVolume(value);
-      eq.setOutputVolume(value);
+    if (instrumental) {
+      instrumental.updateEQ(
+        indexKey,
+        {
+          ...eqConfig,
+          outputVolume: value,
+        },
+        indexKey
+      );
     }
   };
 
-  // Volume Compensation Control
   const handleVolumeCompensationChange = (value: number) => {
-    if (eq) {
-      setVolumeCompensation(value);
-      eq.setVolumeCompensation(value);
+    if (instrumental) {
+      instrumental.updateEQ(
+        indexKey,
+        {
+          ...eqConfig,
+          volumeCompensation: value,
+        },
+        indexKey
+      );
     }
   };
-
-  // Frequency labels
-  const frequencyLabels = ["100 Hz", "1 kHz", "10 kHz"];
-
-  if (!eq) {
-    return <div className="text-center p-4">Equalizer not available</div>;
-  }
 
   return (
-    <div className="bg-gray-900 text-white rounded-lg shadow-lg p-4 w-full max-w-3xl">
-      {/* Header with master power and visualizer */}
-      <div className="flex flex-col space-y-4 mb-4">
+    <div className="bg-white text-gray-800 p-3 w-full ">
+      <div className="flex flex-col">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">Audio Equalizer</h2>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm">{eqEnabled ? "ON" : "OFF"}</span>
-            <button
-              onClick={handleEQToggle}
-              className={`w-12 h-6 rounded-full relative flex items-center transition-colors duration-300 ${
-                eqEnabled ? "bg-blue-500" : "bg-gray-600"
-              }`}
-            >
-              <span
-                className={`w-5 h-5 bg-white rounded-full absolute transform transition-transform duration-300 ${
-                  eqEnabled ? "translate-x-6" : "translate-x-1"
-                }`}
-              ></span>
-            </button>
-          </div>
+          <h2 className="text-xl font-bold text-gray-800">{name} Equalizer</h2>
+          <SwitchRadio
+            value={eqConfig.enabled}
+            onChange={handleEQToggle}
+            options={[
+              {
+                children: "ON",
+                value: true,
+                label: "ON",
+              },
+              {
+                children: "OFF",
+                value: false,
+                label: "OFF",
+              },
+            ]}
+          ></SwitchRadio>
         </div>
 
-        {/* Audio Visualizer */}
-        <div className="relative w-full h-24 bg-gray-800 text-white rounded overflow-hidden">
-          <div
-            className="absolute h-full bg-blue-500/50"
-            style={{ width: `${xxx}%` }}
-          ></div>
+        <div className="mt-2">
+          <p className="text-sm text-gray-600 mb-1 ">Input Level</p>
+          <VolumeMeter level={volumeLevel} />
         </div>
       </div>
 
-      {/* Main tabs navigation */}
-      <div className="mb-4">
-        <div className="flex border-b border-gray-700">
-          <button
-            className={`px-4 py-2 font-medium ${
-              activeTab === "eq"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-400"
-            }`}
-            onClick={() => setActiveTab("eq")}
-          >
-            Equalizer
-          </button>
-          <button
-            className={`px-4 py-2 font-medium ${
-              activeTab === "boost"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-400"
-            }`}
-            onClick={() => setActiveTab("boost")}
-          >
-            Boost
-          </button>
-          <button
-            className={`px-4 py-2 font-medium ${
-              activeTab === "compressor"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-400"
-            }`}
-            onClick={() => setActiveTab("compressor")}
-          >
-            Compressor
-          </button>
-          <button
-            className={`px-4 py-2 font-medium ${
-              activeTab === "volume"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-400"
-            }`}
-            onClick={() => setActiveTab("volume")}
-          >
-            Volume
-          </button>
-        </div>
-      </div>
+      <div className="flex border-gray-200">
+        <Tabs
+          tabs={[
+            {
+              content: (
+                <div>
+                  <div className="flex justify-between mb-6">
+                    <h3 className="text-lg font-medium text-gray-800">
+                      Equalizer Settings
+                    </h3>
+                    <Button
+                      disabled={!eqConfig.enabled}
+                      onClick={handleResetEQ}
+                      padding={"p-1 px-2"}
+                      icon={<BiReset></BiReset>}
+                      iconPosition="right"
+                    >
+                      Reset
+                    </Button>
+                  </div>
 
-      {/* Tab content */}
-      {activeTab === "eq" && (
-        <div>
-          <div className="flex justify-between mb-4">
-            <h3 className="text-lg font-medium">EQ Bands</h3>
-            <button
-              onClick={handleResetEQ}
-              className="flex items-center bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded text-sm"
-            >
-              <span className="mr-1">Reset</span>
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                ></path>
-              </svg>
-            </button>
-          </div>
+                  <div className="mb-8">
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">
+                        Boost Level: {eqConfig.boostLevel}%
+                      </span>
+                      <span className="text-sm text-gray-600">
+                        {(eqConfig.boostLevel / 100).toFixed(2)}x
+                      </span>
+                    </div>
+                    <SliderCommon
+                      disabled={!eqConfig.enabled}
+                      min={0}
+                      max={500}
+                      value={eqConfig.boostLevel}
+                      onChange={handleBoostChange}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Controls the strength of the equalizer effect
+                    </p>
+                  </div>
 
-          <div className="flex justify-between space-x-4">
-            {gains.map((gain, index) => (
-              <div key={index} className="flex flex-col items-center flex-1">
-                <div className="mb-2 text-center">
-                  <span className="text-sm font-medium">
-                    {gain.toFixed(1)} dB
-                  </span>
-                </div>
-                <div className="h-44 mb-2 w-full flex justify-center">
-                  <SliderCommon
-                    vertical
-                    min={-12}
-                    max={12}
-                    step={0.1}
-                    value={gain}
-                    onChange={(value) => handleGainChange(index, value)}
-                    className="w-40 h-10"
-                  />
-                </div>
-                <div className="text-center">
-                  <div className="text-sm font-medium">
-                    {frequencyLabels[index]}
+                  <div className="flex justify-between space-x-4">
+                    {eqConfig.gains.map((gain, index) => (
+                      <div className="flex flex-col items-center flex-1">
+                        <div className="mb-2 text-center">
+                          <span className="text-sm font-medium text-gray-700">
+                            {gain.toFixed(1)} dB
+                          </span>
+                        </div>
+                        <div className="h-32 mb-2 w-full flex justify-center">
+                          <SliderCommon
+                            disabled={!eqConfig.enabled}
+                            vertical
+                            min={-12}
+                            max={12}
+                            step={0.1}
+                            value={gain}
+                            onChange={(v) => handleGainChange(index, v)}
+                            className="w-40 h-10"
+                          />
+                        </div>
+                        <div className="text-center">
+                          <div className="text-sm font-medium text-gray-600">
+                            {frequencyLabels[index]}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+              ),
+              label: "Equalizer",
+            },
+            {
+              content: (
+                <div>
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-gray-700">
+                        Input Volume: {Math.round(eqConfig.inputVolume * 100)}%
+                      </label>
+                      <SliderCommon
+                        disabled={!eqConfig.enabled}
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        value={eqConfig.inputVolume}
+                        onChange={handleInputVolumeChange}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Controls the signal level entering the equalizer
+                      </p>
+                    </div>
 
-      {activeTab === "boost" && (
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-medium">Audio Boost</h3>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm">{boostEnabled ? "ON" : "OFF"}</span>
-              <button
-                onClick={handleBoostToggle}
-                className={`w-12 h-6 rounded-full relative flex items-center transition-colors duration-300 ${
-                  boostEnabled ? "bg-blue-500" : "bg-gray-600"
-                }`}
-              >
-                <span
-                  className={`w-5 h-5 bg-white rounded-full absolute transform transition-transform duration-300 ${
-                    boostEnabled ? "translate-x-6" : "translate-x-1"
-                  }`}
-                ></span>
-              </button>
-            </div>
-          </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-gray-700">
+                        Output Volume: {Math.round(eqConfig.outputVolume * 100)}
+                        %
+                      </label>
+                      <SliderCommon
+                        disabled={!eqConfig.enabled}
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        value={eqConfig.outputVolume}
+                        onChange={handleOutputVolumeChange}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Controls the final signal level after processing
+                      </p>
+                    </div>
 
-          <div className="mb-8">
-            <div className="flex justify-between mb-2">
-              <span className="text-sm">Boost Level: {boostLevel}%</span>
-              <span className="text-sm">{(boostLevel / 100).toFixed(2)}x</span>
-            </div>
-            <SliderCommon
-              min={0}
-              max={500}
-              value={boostLevel}
-              onChange={handleBoostChange}
-              className="w-full"
-            />
-          </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-gray-700">
+                        Volume Compensation:{" "}
+                        {Math.round(eqConfig.volumeCompensation * 100)}%
+                      </label>
+                      <SliderCommon
+                        disabled={!eqConfig.enabled}
+                        min={0.1}
+                        max={1}
+                        step={0.01}
+                        value={eqConfig.volumeCompensation}
+                        onChange={handleVolumeCompensationChange}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Helps prevent distortion when EQ gains are high
+                      </p>
+                    </div>
+                  </div>
 
-          <div className="bg-gray-800 p-4 rounded">
-            <p className="text-sm text-gray-400">
-              Boost increases the gain of the audio signal, which can make
-              quieter sounds more audible. Use with caution as high boost levels
-              may introduce distortion.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "compressor" && (
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-medium">Compressor</h3>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm">
-                {compressorEnabled ? "ON" : "OFF"}
-              </span>
-              <button
-                onClick={handleCompressorToggle}
-                className={`w-12 h-6 rounded-full relative flex items-center transition-colors duration-300 ${
-                  compressorEnabled ? "bg-blue-500" : "bg-gray-600"
-                }`}
-              >
-                <span
-                  className={`w-5 h-5 bg-white rounded-full absolute transform transition-transform duration-300 ${
-                    compressorEnabled ? "translate-x-6" : "translate-x-1"
-                  }`}
-                ></span>
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Threshold ({compressorSettings.threshold} dB)
-              </label>
-              <SliderCommon
-                min={-60}
-                max={0}
-                value={compressorSettings.threshold}
-                onChange={(value) =>
-                  updateCompressorSetting("threshold", value)
-                }
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Knee ({compressorSettings.knee} dB)
-              </label>
-              <SliderCommon
-                min={0}
-                max={40}
-                value={compressorSettings.knee}
-                onChange={(value) => updateCompressorSetting("knee", value)}
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Ratio ({compressorSettings.ratio}:1)
-              </label>
-              <SliderCommon
-                min={1}
-                max={20}
-                value={compressorSettings.ratio}
-                onChange={(value) => updateCompressorSetting("ratio", value)}
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Attack ({compressorSettings.attack.toFixed(3)} s)
-              </label>
-              <SliderCommon
-                min={0}
-                max={1}
-                step={0.001}
-                value={compressorSettings.attack}
-                onChange={(value) => updateCompressorSetting("attack", value)}
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Release ({compressorSettings.release.toFixed(2)} s)
-              </label>
-              <SliderCommon
-                min={0}
-                max={1}
-                step={0.01}
-                value={compressorSettings.release}
-                onChange={(value) => updateCompressorSetting("release", value)}
-                className="w-full"
-              />
-            </div>
-          </div>
-
-          <div className="bg-gray-800 p-4 rounded mt-4">
-            <p className="text-sm text-gray-400">
-              Compressor reduces the volume of loud sounds or amplifies quiet
-              sounds by narrowing an audio signal's dynamic range.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "volume" && (
-        <div>
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Input Volume: {Math.round(inputVolume * 100)}%
-              </label>
-              <SliderCommon
-                min={0}
-                max={1}
-                step={0.01}
-                value={inputVolume}
-                onChange={handleInputVolumeChange}
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Output Volume: {Math.round(outputVolume * 100)}%
-              </label>
-              <SliderCommon
-                min={0}
-                max={1}
-                step={0.01}
-                value={outputVolume}
-                onChange={handleOutputVolumeChange}
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Volume Compensation: {Math.round(volumeCompensation * 100)}%
-              </label>
-              <SliderCommon
-                min={0.1}
-                max={1}
-                step={0.01}
-                value={volumeCompensation}
-                onChange={handleVolumeCompensationChange}
-                className="w-full"
-              />
-            </div>
-          </div>
-
-          <div className="bg-gray-800 p-4 rounded mt-4">
-            <p className="text-sm text-gray-400">
-              Adjust input volume to control the signal level entering the
-              equalizer. Output volume controls the final signal level after all
-              processing. Volume compensation helps prevent distortion when EQ
-              gains are high.
-            </p>
-          </div>
-        </div>
-      )}
+                  <div className="bg-gray-50 p-4 rounded-lg mt-6 border border-gray-200">
+                    <p className="text-sm text-gray-600">
+                      These settings control the overall volume levels
+                      throughout the processing chain. Proper adjustment can
+                      help maintain optimal audio quality and prevent
+                      distortion.
+                    </p>
+                  </div>
+                </div>
+              ),
+              label: "Volume",
+            },
+          ]}
+        ></Tabs>
+      </div>
     </div>
   );
 };

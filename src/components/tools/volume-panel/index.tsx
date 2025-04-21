@@ -17,7 +17,6 @@ import { useOrientation } from "@/hooks/orientation-hook";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
-import VolumeVelocityRender from "./renders/volume-velocity";
 
 interface VolumePanelProps {}
 
@@ -136,20 +135,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
               );
             })}
           </div>
-
-          {/* <div className="flex gap-2">
-            {nodes.map((node, channel) => {
-              return (
-                <div key={`test-ch-${channel}`}>
-                  evetn {channel}
-                  <VolumeVelocityRender
-                    node={node}
-                    channel={channel}
-                  ></VolumeVelocityRender>
-                </div>
-              );
-            })}
-          </div> */}
         </div>
       )}
 

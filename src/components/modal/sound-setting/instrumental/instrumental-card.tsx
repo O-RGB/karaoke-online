@@ -50,7 +50,6 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
       [type, "CHANGE"],
       index,
       (v) => {
-        console.log("ON GROUP CHANGE = ", v);
         setChannelRef(v.value);
       },
       componentId

@@ -23,7 +23,7 @@ import { InstrumentalNode } from "../instrumental";
 import { KeyboardNode } from "../keyboard-node";
 import { KeyModifierManager } from "spessasynth_lib/@types/synthetizer/key_modifier_manager";
 import { DRUM_CHANNEL } from "@/config/value";
-import { ChannelEqualizer } from "@/features/engine/lib/gain";
+import { ChannelEqualizer } from "../../equalizer/channel-equalizer";
 
 export class SynthChannel {
   // Index
@@ -161,7 +161,7 @@ export class SynthChannel {
     const oldIndex: number = this.program?.value ?? 0;
     const oldChannel: number = this.channel ?? 0;
     this.program?.setValue(event.program);
-    this.instrumental?.update(event, oldIndex, oldChannel, this);
+    this.instrumental?.update(event, oldIndex, this);
   }
 
   public noteOnChange(event: INoteChange) {

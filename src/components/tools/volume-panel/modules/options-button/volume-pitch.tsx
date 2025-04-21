@@ -19,7 +19,6 @@ import DrumMixer from "../drum-mixer";
 import { Menu, MenuButton } from "@szhsin/react-menu";
 import Button from "@/components/common/button/button";
 import { CgOptions } from "react-icons/cg";
-import ContextMenuCommon from "@/components/common/context-menu/context-menu";
 import EqualizerPanel from "../equalizer-mixer";
 
 interface VolumeOptionsProps {
@@ -44,9 +43,8 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   useEffect(() => {}, [nodes]);
   return (
     <>
-      <div className="flex gap-2 justify-between lg:justify-normal w-full overflow-auto">
+      <div className="flex gap-2 w-full overflow-auto">
         <NumberButton
-          className="!w-full lg:!w-fit"
           onChange={(value) => {
             onPitchChange(value);
             setNotification({ text: `Pitch ${value}` });
@@ -57,7 +55,6 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
           }
         ></NumberButton>
         <NumberButton
-          className="!w-full lg:!w-fit"
           onChange={(value) => {
             onSpeedChange(value);
             setNotification({ text: `Speed ${value}` });
@@ -69,7 +66,6 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
         ></NumberButton>
 
         <SwitchButton
-          className="!w-full lg:!w-fit"
           onChange={(muted) => {
             onMutedVolume({
               channel: vocal,

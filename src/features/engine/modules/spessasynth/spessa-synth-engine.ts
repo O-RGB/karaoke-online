@@ -23,7 +23,7 @@ import {
   IVelocityChange,
   TimingModeType,
 } from "../../types/synth.type";
-import { ChannelEqualizer, GlobalEqualizer } from "../../lib/gain";
+import { GlobalEqualizer } from "../equalizer/global-equalizer";
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
   public synth: Spessasynth | undefined;

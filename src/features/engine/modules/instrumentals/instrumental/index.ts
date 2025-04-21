@@ -14,6 +14,7 @@ import {
   BaseSynthEngine,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
+import { EQConfig } from "../../equalizer/types/equalizer.type";
 
 export const INSTRUMENT_TYPE_BY_INDEX: InstrumentType[] = [
   "piano",
@@ -67,7 +68,9 @@ export class InstrumentalNode {
 
   public expression: SynthNode<INodeState, number>[] = [];
   public velocity: SynthNode<INodeState, number>[] = [];
+  public equalizer: SynthNode<INodeState, EQConfig>[] = [];
 
+  public equalizerEvent = new EventManager<INodeState, TEventType<EQConfig>>();
   public settingEvent = new EventManager<INodeState, TEventType<number>>();
   public groupEvent = new EventManager<
     InstrumentType,
@@ -108,12 +111,27 @@ export class InstrumentalNode {
     this.velocity = INSTRUMENT_TYPE_BY_INDEX.map(
       (_, i) => new SynthNode(this.settingEvent, "VELOCITY", i, 0)
     );
+    this.equalizer = INSTRUMENT_TYPE_BY_INDEX.map(
+      (_, i) =>
+        new SynthNode<INodeState, EQConfig>(
+          this.equalizerEvent,
+          "EQUALIZER",
+          i,
+          {
+            enabled: false,
+            gains: [0, 0, 0],
+            boostLevel: 0,
+            inputVolume: 1,
+            outputVolume: 1,
+            volumeCompensation: 1,
+          }
+        )
+    );
   }
 
   public update(
     event: IProgramChange,
     oldProgram: number,
-    oldChannel: number,
     value: SynthChannel
   ): void {
     const oldType = findProgramCategory(oldProgram);
@@ -132,6 +150,9 @@ export class InstrumentalNode {
         this.updateController(event.channel, oldExpression);
         const oldVelocity = this.velocity[oldType.index].value ?? 0;
         this.updateVelocity(event.channel, oldVelocity);
+        const oldEqualizer = this.equalizer[oldType.index].value;
+        if (oldEqualizer)
+          this.updateEQ(oldType.category, oldEqualizer, oldType.index);
       }
     }
 
@@ -145,10 +166,24 @@ export class InstrumentalNode {
     this.updateController(event.channel, newExpression);
     const newVelocity = this.velocity[newType.index].value ?? 0;
     this.updateVelocity(event.channel, newVelocity);
+    const oldEqualizer = this.equalizer[newType.index].value;
+    if (oldEqualizer)
+      this.updateEQ(newType.category, oldEqualizer, newType.index);
 
     this.groupEvent.trigger([newType.category, "CHANGE"], newType.index, {
       value: byType,
     });
+  }
+
+  updateEQ(type: InstrumentType | number, value: EQConfig, indexKey: number) {
+    let groupType = this.getGroupType(type);
+    const nodes: Map<number, SynthChannel> =
+      this.group.get(groupType) ?? new Map();
+    nodes.forEach((node) => {
+      node.equalizer?.applyConfig(value);
+    });
+    this.equalizer[indexKey].setValue(value);
+    this.equalizerEvent.trigger(["EQUALIZER", "CHANGE"], indexKey, { value });
   }
 
   setExpression(
@@ -243,6 +278,25 @@ export class InstrumentalNode {
     componentId: string
   ): boolean {
     return this.settingEvent.remove(eventType, indexKey, componentId);
+  }
+
+  setCallBackEQ(
+    eventType: EventKey,
+    indexKey: number,
+    callback: (event: TEventType<EQConfig>) => void,
+    componentId: string
+  ) {
+    this.equalizerEvent.add(eventType, indexKey, callback, componentId);
+    const value = this.equalizer[indexKey].value;
+    callback({ value });
+  }
+
+  removeCallbackEQ(
+    eventType: EventKey,
+    indexKey: number,
+    componentId: string
+  ): boolean {
+    return this.equalizerEvent.remove(eventType, indexKey, componentId);
   }
 
   setCallBackGroup(

@@ -92,7 +92,8 @@ export type INodeState =
   | "VELOCITY"
   | "PROGARM"
   | "VOLUME"
-  | "DRUM";
+  | "DRUM"
+  | "EQUALIZER";
 export type INoteState = "VELOCITY" | "NOTE_ON" | "NOTE_OFF";
 
 export type EventKey<K = any> = [K, INodeOption];

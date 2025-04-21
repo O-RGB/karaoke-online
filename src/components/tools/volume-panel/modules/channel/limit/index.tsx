@@ -6,6 +6,7 @@ import {
 import { TEventType } from "@/features/engine/modules/instrumentals/types/node.type";
 import React, { useEffect, useId, useState } from "react";
 import LimitBarRender from "./bar-render";
+import EqTag from "../eq-tag";
 
 interface ChannelLimitProps {
   instrumental?: InstrumentalNode;
@@ -44,13 +45,22 @@ const ChannelLimit: React.FC<ChannelLimitProps> = ({
   if (!node || program === undefined) return;
 
   return (
-    <div className="absolute w-full h-[73%] bottom-5">
-      <LimitBarRender
-        program={program}
-        category={category}
-        instrumental={instrumental}
-      ></LimitBarRender>
-    </div>
+    <>
+      <div className="absolute top-0">
+        <EqTag
+          category={category}
+          channel={channel}
+          instrumental={instrumental}
+        ></EqTag>
+      </div>
+      <div className="absolute w-full h-[73%] bottom-5">
+        <LimitBarRender
+          program={program}
+          category={category}
+          instrumental={instrumental}
+        ></LimitBarRender>
+      </div>
+    </>
   );
 };
 

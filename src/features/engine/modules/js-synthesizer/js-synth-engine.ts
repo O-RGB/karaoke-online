@@ -22,7 +22,7 @@ import {
   PAN,
   REVERB,
 } from "../../types/node.type";
-import { GlobalEqualizer } from "../../lib/gain";
+import { GlobalEqualizer } from "../equalizer/global-equalizer";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";

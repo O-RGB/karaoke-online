@@ -4,7 +4,7 @@ import { Synthetizer as Spessasynth } from "spessasynth_lib";
 import { SynthChannel } from "../modules/instrumentals/channel";
 import { InstrumentalNode } from "../modules/instrumentals/instrumental";
 import { BassConfig } from "../modules/instrumentals/config";
-import { GlobalEqualizer } from "../lib/gain";
+import { GlobalEqualizer } from "../modules/equalizer/global-equalizer";
 export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
   time: TimingModeType;

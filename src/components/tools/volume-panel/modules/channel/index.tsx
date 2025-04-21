@@ -10,6 +10,7 @@ import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import ChannelLimit from "./limit";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import VolumeNodesPanel from "../node-preset/volume-nodes-panel";
+import EqTag from "./eq-tag";
 
 interface ChannelRenderProps {
   channel: number;
