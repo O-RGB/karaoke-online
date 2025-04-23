@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 type KeyboardState = {
   lastKey: string | null;
+  openSearchBox: boolean;
   searching: string;
   queueing: boolean;
   onEnter: number;
@@ -20,6 +21,7 @@ type KeyboardState = {
   initializeKeyboardListeners: () => void;
   clearSearchingTimeout: () => void;
   setQueueOpen?: () => void;
+  setOpenSearchBox?: (open: boolean) => void
   resetQueueingTimeout: (time?: number) => void;
   resetSearchingTimeout: (time?: number) => void;
 };
@@ -39,7 +41,7 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
   const resetSearchingTimeout = (time = 10000) => {
     clearSearchingTimeout();
     searchingTimeout = setTimeout(() => {
-      set({ searching: "" });
+      set({ searching: "", openSearchBox: false });
     }, time);
   };
 
@@ -58,7 +60,7 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
   };
 
   const setQueueOpen = () => {
-    set({ queueing: true, searching: "" });
+    set({ queueing: true, searching: "", openSearchBox: false });
   };
 
   const handleKeyUp = (event: KeyboardEvent) => {
@@ -106,6 +108,15 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
     });
   };
 
+  const setOpenSearchBox = (open: boolean) => {
+    set({ openSearchBox: open })
+    if (open) {
+      resetSearchingTimeout();
+    } else {
+      clearSearchingTimeout();
+    }
+  }
+
   const initializeKeyboardListeners = () => {
     if (!isListenerInitialized) {
       window.addEventListener("keyup", handleKeyUp);
@@ -116,6 +127,7 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
   return {
     lastKey: null,
     searching: "",
+    openSearchBox: false,
     queueing: false,
     onEnter: 0,
     arrowDown: 0,
@@ -138,6 +150,7 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
     resetQueueingTimeout,
     resetSearchingTimeout,
     setQueueOpen,
+    setOpenSearchBox
   };
 });
 

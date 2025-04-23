@@ -24,6 +24,7 @@ import useConfigStore from "@/features/config/config-store";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import SliderCommon from "../common/input-data/slider";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
+import useKeyboardStore from "@/features/keyboard-state";
 interface PlayerRemote {
   onPause?: () => void;
   onPlay?: () => void;
@@ -58,6 +59,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   const currentTime = useRuntimePlayer((state) => state.currentTime);
   const currentTick = useRuntimePlayer((state) => state.currentTick);
   const midi = useRuntimePlayer((state) => state.midi);
+  const { setOpenSearchBox } = useKeyboardStore()
 
   const nextMusic = useQueuePlayer((state) => state.nextMusic);
 
@@ -209,9 +211,10 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <Button
             className="hidden lg:block hover:bg-white/20"
             onClick={() => {
-              if (inputRef.current) {
-                inputRef.current.focus();
-              }
+              // if (inputRef.current) {
+              //   inputRef.current.focus();
+              // }
+              setOpenSearchBox?.(true)
             }}
             blur={false}
             border=""

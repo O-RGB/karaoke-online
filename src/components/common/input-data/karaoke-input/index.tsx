@@ -101,7 +101,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
 
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
 
-  const { arrowLeft, arrowRight, onEnter, queueing, searching } =
+  const { arrowLeft, arrowRight, onEnter, queueing, searching, openSearchBox } =
     useKeyboardEvents();
   const resetSearchingTimeout = useKeyboardStore(
     (state) => state.resetSearchingTimeout
@@ -174,7 +174,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
 
   useEffect(() => {
     setLoading(true);
-    if (searching) {
+    if (searching || openSearchBox) {
       debouncedSearch(searching);
       resetSearchingTimeout(5000);
     } else {
@@ -182,7 +182,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
       resetSearchingTimeout(0);
     }
     setSelectedIndex(0);
-  }, [searching]);
+  }, [searching, openSearchBox]);
 
   useEffect(() => {
     handleNextSong();
@@ -194,7 +194,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
 
   const positionClass = hideMixer ? "top-32" : "top-64";
 
-  if (searching.length === 0) return;
+  if (searching.length === 0 && !openSearchBox) return;
 
   return (
     <div
@@ -238,8 +238,8 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
       {/* Search box and results */}
       <div className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2">
         {/* Search query display */}
-        <div className="p-2 bg-white/20 w-64 overflow-hidden rounded-md flex-none">
-          <span className="text-2xl flex items-center h-full">{searching}</span>
+        <div className="p-2 bg-white/20 w-64 overflow-hidden rounded-md flex-none relative">
+          <input type="text" value={searching} autoFocus className="text-2xl appearance-none focus:!outline-none !bg-transparent" />
         </div>
 
         {/* Loading indicator */}

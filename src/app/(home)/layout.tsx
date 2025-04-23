@@ -37,22 +37,7 @@ export default function RootLayout({
           href="/apple-touch-icon.png"
         />
         <meta name="apple-mobile-web-app-title" content="Karaoke" />
-        {/*         
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" href="/icon.ico" sizes="48x48" />
-        <link rel="icon" type="image/x-icon" href="./icon.ico" />
-        <link
-          rel="icon"
-          href="/icon?<generated>"
-          type="image/<generated>"
-          sizes="<generated>"
-        />
-        <link
-          rel="apple-touch-icon"
-          href="/icon-mid?<generated>"
-          type="image/<generated>"
-          sizes="<generated>"
-        /> */}
+        
         <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta

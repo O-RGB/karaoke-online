@@ -11,7 +11,9 @@ export const useKeyboardEvents = () => {
     arrowLeft,
     arrowRight,
     queueing,
+    openSearchBox,
     setQueueOpen,
+    setOpenSearchBox,
     initializeKeyboardListeners,
   } = useKeyboardStore();
 
@@ -26,6 +28,7 @@ export const useKeyboardEvents = () => {
     arrowDown,
     arrowUp,
     arrowLeft,
+    openSearchBox,
     arrowRight,
     queueing,
     setQueueOpen,
