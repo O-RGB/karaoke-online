@@ -1,4 +1,5 @@
 import { EventManager } from "@/features/engine/modules/instrumentals/events";
+import { SynthNode } from "@/features/engine/modules/instrumentals/node";
 import {
   INoteState,
   TEventType,
@@ -7,26 +8,26 @@ import { INoteChange } from "@/features/engine/types/synth.type";
 import React, { useEffect, useId, useState } from "react";
 
 interface KeyMinProps {
-  event: EventManager<INoteState, TEventType<INoteChange>>;
-  channel: number;
+  synthNode: SynthNode<INoteState, INoteChange>
 }
 
-const KeyMin: React.FC<KeyMinProps> = ({ event, channel }) => {
+const KeyMin: React.FC<KeyMinProps> = ({ synthNode }) => {
   const componentId = useId();
   const [on, setOn] = useState<boolean>(false);
 
   useEffect(() => {
-    if (event) {
-      event.add(
+    if (synthNode) {
+      synthNode.linkEvent(
         ["NOTE_ON", "CHANGE"],
-        channel,
-        (v) => {
-          setOn(v.value);
-        },
+        (v) => setOn(v.value),
         componentId
       );
     }
-  }, [event]);
+
+    return () => {
+      synthNode.unlinkEvent(["NOTE_ON", "CHANGE"], componentId)
+    }
+  }, [synthNode]);
 
   return (
     <div className={`w-3 text-sm ${!on ? "text-white/40" : "text-white"}`}>

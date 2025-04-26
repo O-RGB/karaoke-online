@@ -91,18 +91,17 @@ const DrumNode: React.FC<DrumNodeProps> = ({ note, keyNote, onNoteChange }) => {
   };
 
   useEffect(() => {
-    const noteByIndex = note.eventNo[keyNote];
+    const noteByIndex = note.notes[keyNote];
     if (!noteByIndex) return;
 
-    noteByIndex.add(
+    noteByIndex.linkEvent(
       ["NOTE_ON", "CHANGE"],
-      channel,
       handleNoteEvent,
       componentId
     );
 
     return () => {
-      noteByIndex.remove(["NOTE_ON", "CHANGE"], channel, componentId);
+      noteByIndex.unlinkEvent(["NOTE_ON", "CHANGE"], componentId);
 
       if (animationIntervalRef.current) {
         clearInterval(animationIntervalRef.current);

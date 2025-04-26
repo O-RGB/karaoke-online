@@ -80,16 +80,15 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
 
   useEffect(() => {
     if (node) {
-      node.setCallBackState(
+      node.program?.linkEvent(
         ["PROGARM", "CHANGE"],
-        channel,
         onValueChange,
         componentId
       );
     }
 
     return () => {
-      node?.removeCallState(["PROGARM", "CHANGE"], channel, componentId);
+      node?.program?.unlinkEvent(["PROGARM", "CHANGE"], componentId);
     };
   }, [node, programOption]);
 
@@ -107,9 +106,8 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
         return (
           <MenuButton disabled={disabled}>
             <div
-              className={`${
-                disabled ? "cursor-auto" : "cursor-pointer"
-              } w-full lg:w-9 border-b border-x border-white/20  hover:bg-white/20 duration-300`}
+              className={`${disabled ? "cursor-auto" : "cursor-pointer"
+                } w-full lg:w-9 border-b border-x border-white/20  hover:bg-white/20 duration-300`}
             >
               <div className="w-full blur-overlay text-center text-white font-bold text-[10px] p-1 flex gap-0.5 justify-center items-center h-5">
                 <span className="w-2.5">{channelIcon}</span>
@@ -128,7 +126,7 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
         </div>
 
         <VolumeNodePreset
-          node={node}
+          synthNode={node.volume}
           vertical={false}
           onLock={onLockChange}
           onChange={onContrllerChange}
@@ -160,9 +158,8 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
             options={programOption}
           >
             <div
-              className={`${
-                false ? "bg-yellow-400 text-red-600" : ""
-              } w-full rounded-md overflow-hidden border border-black/10 cursor-pointer group-hover:bg-gray-200 duration-300`}
+              className={`${false ? "bg-yellow-400 text-red-600" : ""
+                } w-full rounded-md overflow-hidden border border-black/10 cursor-pointer group-hover:bg-gray-200 duration-300`}
             >
               <div className="w-full font-bold text-[10px] p-2 flex gap-0.5 justify-between items-center h-6">
                 <div className="flex gap-2 items-center">
@@ -177,7 +174,7 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
           </ButtonDropdown>
         </div>
         <VolumeNodePreset
-          node={node}
+          synthNode={node.pan}
           onLock={onLockChange}
           onChange={onContrllerChange}
           controllerNumber={PAN}
@@ -187,7 +184,7 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
           label="ซ้ายขวา"
         ></VolumeNodePreset>
         <VolumeNodePreset
-          node={node}
+          synthNode={node.reverb}
           onLock={onLockChange}
           onChange={onContrllerChange}
           controllerNumber={REVERB}
@@ -197,7 +194,7 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
           label="เสียงก้อง"
         ></VolumeNodePreset>
         <VolumeNodePreset
-          node={node}
+          synthNode={node.chorus}
           onLock={onLockChange}
           onChange={onContrllerChange}
           controllerNumber={CHORUSDEPTH}

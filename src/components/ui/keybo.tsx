@@ -11,11 +11,11 @@ const KeyRender: React.FC<KeyRenderProps> = ({ nodes, channel }) => {
   return (
     <div className="border p-1 text-nowrap w-full flex">
       {nodes.note?.notes?.map((re, i) => {
-        const event = nodes.note?.eventNo[i];
-        if (!event) return <></>;
+        const note = nodes.note?.notes[i];
+        if (!note) return <></>;
         return (
           <React.Fragment key={`key-min-${i}`}>
-            <KeyMin event={event} channel={channel}></KeyMin>
+            <KeyMin synthNode={note} ></KeyMin>
           </React.Fragment>
         );
       })}

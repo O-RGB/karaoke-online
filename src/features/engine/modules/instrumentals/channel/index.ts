@@ -1,5 +1,5 @@
 import { SynthNode } from "../node";
-import { EventManager, SingleCallbackEventManager } from "../events";
+import { EventManager } from "../events";
 import {
   EventKey,
   INodeKey,
@@ -54,9 +54,6 @@ export class SynthChannel {
   public analyserNode?: AnalyserNode | undefined = undefined;
 
   // Event
-  public nodeEvent = new EventManager<INodeKey, TEventType<number>>();
-  public stateEvent = new EventManager<INodeState, TEventType<any>>();
-  public noteEvent: EventManager<INoteState, TEventType<boolean>>[] = [];
   public globalNoteOnEvent = new EventManager<INoteState, INoteChange>();
 
 
@@ -81,18 +78,18 @@ export class SynthChannel {
 
     this.channel = channel;
     if (channel === DRUM_CHANNEL) {
-      this.isDrum = new SynthNode(this.stateEvent, "DRUM", channel, true);
+      this.isDrum = new SynthNode(undefined, "DRUM", channel, true);
     }
     this.instrumental = instrumental;
     this.audioContext = audioContext;
-    this.volume = new SynthNode(this.nodeEvent, "VOLUME", channel, 100);
-    this.maxVolume = new SynthNode(this.nodeEvent, "MAX_VOLUME", channel, 10);
-    this.chorus = new SynthNode(this.nodeEvent, "CHORUS", channel, 100);
-    this.reverb = new SynthNode(this.nodeEvent, "REVERB", channel, 100);
-    this.pan = new SynthNode(this.nodeEvent, "PAN", channel, 100);
-    this.program = new SynthNode(this.stateEvent, "PROGARM", channel);
-    this.velocity = new SynthNode(this.stateEvent, "VELOCITY", channel);
-    this.expression = new SynthNode(this.stateEvent, "EXPRESSION", channel);
+    this.volume = new SynthNode(undefined, "VOLUME", channel, 100);
+    this.maxVolume = new SynthNode(undefined, "MAX_VOLUME", channel, 10);
+    this.chorus = new SynthNode(undefined, "CHORUS", channel, 100);
+    this.reverb = new SynthNode(undefined, "REVERB", channel, 100);
+    this.pan = new SynthNode(undefined, "PAN", channel, 100);
+    this.program = new SynthNode(undefined, "PROGARM", channel);
+    this.velocity = new SynthNode(undefined, "VELOCITY", channel);
+    this.expression = new SynthNode(undefined, "EXPRESSION", channel);
     this.expression.setLock(true);
 
     if (keyModifierManager) {
@@ -203,61 +200,4 @@ export class SynthChannel {
       control.setMute(value);
     });
   }
-
-  setCallBack(
-    eventType: EventKey<INodeKey>,
-    index: number,
-    callback: (event: TEventType<number>) => void,
-    componentId: string
-  ): void {
-    this.nodeEvent.add(eventType, index, callback, componentId);
-  }
-
-  removeCallback(
-    eventType: EventKey<INodeKey>,
-    index: number,
-    componentId: string
-  ): boolean {
-    return this.nodeEvent.remove(eventType, index, componentId);
-  }
-
-  setCallBackState(
-    eventType: EventKey<INodeState>,
-    index: number,
-    callback: (event: TEventType<any>) => void,
-    componentId: string
-  ): void {
-    this.stateEvent.add(eventType, index, callback, componentId);
-  }
-
-  removeCallState(
-    eventType: EventKey<INodeState>,
-    index: number,
-    componentId: string
-  ): boolean {
-    return this.stateEvent.remove(eventType, index, componentId);
-  }
-
-  setCallBackNoteByKey(
-    eventType: EventKey<INoteState>,
-    index: number,
-    keyNote: number,
-    callback: (event: TEventType<any>) => void,
-    componentId: string
-  ): void {
-    this.noteEvent[keyNote].add(eventType, index, callback, componentId);
-  }
-
-  removeCallNoteByKey(
-    eventType: EventKey<INoteState>,
-    index: number,
-    keyNote: number,
-    componentId: string
-  ): boolean {
-    return this.noteEvent[keyNote].remove(eventType, index, componentId);
-  }
-
-
-
-
 }

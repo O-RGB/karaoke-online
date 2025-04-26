@@ -12,23 +12,15 @@ interface MixerNodesProps {
 }
 
 const MixerNodes: React.FC<MixerNodesProps> = ({ instrumental }) => {
-
-  useEffect(() => {
-
-  }, [])
   return (
     <div className="flex p-2 divide-x border ">
       {INSTRUMENT_TYPE_BY_INDEX.map((value, index) => {
-        const group = instrumental.group.get(value);
-        const nodes: SynthChannel[] = group ? Array.from(group.values()) : [];
-
         return (
           <React.Fragment key={`card-inst-${index}`}>
             <InstrumentalVolumeNode
               indexKey={index}
               instrumental={instrumental}
               type={value}
-              node={nodes}
             ></InstrumentalVolumeNode>
           </React.Fragment>
         );

@@ -76,11 +76,8 @@ export class InstrumentalNode {
   public velocity: SynthNode<INodeState, number>[] = [];
   public equalizer: SynthNode<INodeState, EQConfig>[] = [];
 
-  public equalizerEvent = new EventManager<INodeState, TEventType<EQConfig>>();
-  public settingEvent = new EventManager<INodeState, TEventType<number>>();
-  public groupByTypeEvent = new EventManager<InstrumentType, TEventType<Map<number, SynthChannel>>>();
-
   private engine: BaseSynthEngine | undefined = undefined;
+  public groupEvent = new EventManager<InstrumentType, Map<number, SynthChannel>>()
 
   constructor() {
     this.initializeGroupMap();
@@ -110,22 +107,21 @@ export class InstrumentalNode {
     for (let index = 0; index < this.programGroup.length; index++) {
       this.group.set(INSTRUMENT_TYPE_BY_INDEX[index], new Map());
       this.notesEvent.set(INSTRUMENT_TYPE_BY_INDEX[index], new Map())
+      this.groupEvent.trigger([INSTRUMENT_TYPE_BY_INDEX[index], "CHANGE"], index, new Map())
     }
   }
 
   private initializeSettingNode() {
     this.expression = INSTRUMENT_TYPE_BY_INDEX.map(
-      (_, i) => new SynthNode(this.settingEvent, "EXPRESSION", i, 100)
+      (_, i) => new SynthNode(undefined, "EXPRESSION", i, 100)
     );
     this.velocity = INSTRUMENT_TYPE_BY_INDEX.map(
-      (_, i) => new SynthNode(this.settingEvent, "VELOCITY", i, 0)
+      (_, i) => new SynthNode(undefined, "VELOCITY", i, 0)
     );
-
 
     this.equalizer = INSTRUMENT_TYPE_BY_INDEX.map(
       (_, i) =>
-        new SynthNode<INodeState, EQConfig>(
-          // this.equalizerEvent,
+        new SynthNode(
           undefined,
           "EQUALIZER",
           i,
@@ -136,7 +132,7 @@ export class InstrumentalNode {
             inputVolume: 1,
             outputVolume: 1,
             volumeCompensation: 1,
-          }
+          } as EQConfig
         )
     );
   }
@@ -165,6 +161,7 @@ export class InstrumentalNode {
         const oldEqualizer = this.equalizer[oldType.index].value;
         if (oldEqualizer)
           this.updateEQ(oldType.category, oldEqualizer, oldType.index);
+        this.groupEvent.trigger([oldType.category, "CHANGE"], oldType.index, oldTypeChannels)
       }
     }
 
@@ -174,7 +171,6 @@ export class InstrumentalNode {
     byType.set(event.channel, value);
     this.group.set(type, byType);
 
-
     const newExpression = this.expression[newType.index].value ?? 100;
     this.updateController(event.channel, newExpression);
     const newVelocity = this.velocity[newType.index].value ?? 0;
@@ -182,23 +178,16 @@ export class InstrumentalNode {
     const oldEqualizer = this.equalizer[newType.index].value;
     if (oldEqualizer)
       this.updateEQ(newType.category, oldEqualizer, newType.index);
+    this.groupEvent.trigger([newType.category, "CHANGE"], newType.index, byType)
 
-    this.groupByTypeEvent.trigger([newType.category, "CHANGE"], newType.index, {
-      value: byType,
-    });
   }
 
   updateEQ(type: InstrumentType | number, value: EQConfig, indexKey: number) {
     let groupType = this.getGroupType(type);
-    const nodes: Map<number, SynthChannel> =
-      this.group.get(groupType) ?? new Map();
-    nodes.forEach((node) => {
-      node.equalizer?.applyConfig(value);
-    });
+    const nodes: Map<number, SynthChannel> = this.group.get(groupType) ?? new Map();
+    nodes.forEach((node) => node.equalizer?.applyConfig(value));
     this.equalizer[indexKey].setValue(value);
-    // this.equalizerEvent.trigger(["EQUALIZER", "CHANGE"], indexKey, { value });
   }
-
 
   setExpression(
     type: InstrumentType | number,
@@ -218,7 +207,6 @@ export class InstrumentalNode {
     });
 
     this.expression[indexKey].setValue(value);
-    this.settingEvent.trigger(["EXPRESSION", "CHANGE"], indexKey, { value });
   }
 
   setVelocity(type: InstrumentType | number, value: number, indexKey: number) {
@@ -234,7 +222,6 @@ export class InstrumentalNode {
       }
     });
     this.velocity[indexKey].setValue(value);
-    this.settingEvent.trigger(["VELOCITY", "CHANGE"], indexKey, { value });
   }
 
   getGain() {
@@ -328,67 +315,25 @@ export class InstrumentalNode {
     }
   }
 
-  setCallBackState(
-    eventType: EventKey,
+  linkEvent(
+    eventKey: EventKey<InstrumentType>,
     indexKey: number,
-    callback: (event: TEventType<number>) => void,
+    callback: (event: Map<number, SynthChannel>) => void,
     componentId: string
   ) {
-    this.settingEvent.add(eventType, indexKey, callback, componentId);
-    let value: number = 100;
-    if (eventType[0] === "EXPRESSION") {
-      value = this.expression[indexKey].value ?? 100;
-    } else if (eventType[0] === "VELOCITY") {
-      value = this.velocity[indexKey].value ?? 0;
+    this.groupEvent.add(eventKey, indexKey, callback, componentId)
+    const event = this.group.get(eventKey[0])
+    if (event) {
+      callback(event)
     }
-    callback({ value });
   }
 
-  removeCallback(
-    eventType: EventKey,
+  unlinkEvent(
+    eventKey: EventKey<InstrumentType>,
     indexKey: number,
-    componentId: string
-  ): boolean {
-    return this.settingEvent.remove(eventType, indexKey, componentId);
-  }
-
-  setCallBackEQ(
-    eventType: EventKey,
-    indexKey: number,
-    callback: (event: TEventType<EQConfig>) => void,
     componentId: string
   ) {
-    this.equalizer[indexKey].event?.add(eventType, indexKey, callback, componentId)
-    // this.equalizerEvent.add(eventType, indexKey, callback, componentId);
-    const value = this.equalizer[indexKey].value;
-    callback({ value });
+    this.groupEvent.remove(eventKey, indexKey, componentId)
   }
 
-  removeCallbackEQ(
-    eventType: EventKey,
-    indexKey: number,
-    componentId: string
-  ): boolean {
-    return this.equalizerEvent.remove(eventType, indexKey, componentId);
-  }
-
-  setCallBackGroupByType(
-    eventType: EventKey<InstrumentType>,
-    indexKey: number,
-    callback: (event: TEventType<Map<number, SynthChannel>>) => void,
-    componentId: string
-  ) {
-    this.groupByTypeEvent.add(eventType, indexKey, callback, componentId);
-    const value = this.group.get(eventType[0]);
-    callback({ value });
-  }
-
-  setCallBackGroup(
-    eventType: EventKey<InstrumentType>,
-    indexKey: number,
-    callback: (event: TEventType<Map<number, SynthChannel>>) => void,
-    componentId: string
-  ) {
-
-  }
 }

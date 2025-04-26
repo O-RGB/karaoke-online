@@ -9,6 +9,7 @@ import WinboxModal from "@/components/common/modal";
 import EQNode from "@/components/ui/eqnode";
 import Button from "@/components/common/button/button";
 import useConfigStore from "@/features/config/config-store";
+import { EQConfig } from "@/features/engine/modules/equalizer/types/equalizer.type";
 
 function connectToMIDIOutput(instrumental: InstrumentalNode) {
   // ตรวจสอบการรองรับ Web MIDI API
@@ -36,22 +37,29 @@ function connectToMIDIOutput(instrumental: InstrumentalNode) {
 
 
 interface InstrumentalVolumeNodeProps {
-  node: SynthChannel[];
   indexKey: number;
   type: InstrumentType;
   instrumental: InstrumentalNode;
 }
 
 const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
-  node,
   indexKey,
   type,
   instrumental,
 }) => {
   const componentId = useId();
+  const [groupCh, setGroupCh] = useState<SynthChannel[]>([])
   const [expression, setExpression] = useState<number>(100);
   const text = lowercaseToReadable(type);
   const config = useConfigStore((state) => state.config)
+  const [eqConfig, setQeConfig] = useState<EQConfig>({
+    enabled: false,
+    gains: [0, 0, 0],
+    boostLevel: 100,
+    inputVolume: 1,
+    outputVolume: 1,
+    volumeCompensation: 1,
+  })
   const [isOutput, setOutput] = useState<boolean>(false)
 
   const [eqOpen, setEqOpen] = useState<boolean>(false);
@@ -72,22 +80,26 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
 
 
   useEffect(() => {
-    instrumental.setCallBackState(
+    instrumental.expression[indexKey].linkEvent(
       ["EXPRESSION", "CHANGE"],
-      indexKey,
-      (v) => {
-        setExpression(v.value);
-      },
+      (v) => setExpression(v.value),
       componentId
     );
-
-
+    instrumental.equalizer[indexKey].linkEvent(["EQUALIZER", "CHANGE"], (v) => {
+      console.log("setQeConfig(v.value)",v)
+      setEqOpen(v.value.enabledEq)
+      setQeConfig(v.value)
+    }, componentId)
+    instrumental.linkEvent([type, "CHANGE"], indexKey, ((v: Map<number, SynthChannel>) => {
+      setGroupCh(Array.from(v.values()))
+    }), componentId)
     return () => {
-      instrumental.removeCallback(
+      instrumental.expression[indexKey].unlinkEvent(
         ["EXPRESSION", "CHANGE"],
-        indexKey,
         componentId
       );
+      instrumental.equalizer[indexKey].unlinkEvent(["EQUALIZER", "CHANGE"], componentId)
+      instrumental.unlinkEvent([type, "CHANGE"], indexKey, componentId)
     };
   }, [indexKey, instrumental]);
   return (
@@ -99,19 +111,20 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
         isOpen={open}
       >
         <EQNode
+          eqConfig={eqConfig}
           name={text}
           onEnabled={() => setEqOpen(true)}
           onDisabled={() => setEqOpen(false)}
           instrumental={instrumental}
           indexKey={indexKey}
-          node={node}
+          node={groupCh}
         ></EQNode>
       </WinboxModal>
       <div className="relative flex flex-col gap-2 min-w-10 w-10 max-w-10">
         {config.sound?.equalizer && <Button
           onClick={openEq}
           padding={"p-1 px-2"}
-          className={`${eqOpen ? "!bg-blue-500 !text-white" : ""}`}
+          className={`${eqConfig.enabled ? "!bg-blue-500 !text-white" : ""}`}
         >
           EQ
         </Button>}
@@ -130,7 +143,7 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
         <div className="relative bg-black">
           <ChannelVolumeRender
             max={127}
-            node={node}
+            node={groupCh}
             className="z-0 w-full absolute bottom-0 left-0 h-full"
           ></ChannelVolumeRender>
           <div className="relative h-32 flex py-4 z-50">

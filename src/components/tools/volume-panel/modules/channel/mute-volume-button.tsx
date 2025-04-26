@@ -25,16 +25,15 @@ const MuteVolumeButton: React.FC<MuteVolumeButtonProps> = ({
 
   useEffect(() => {
     if (node) {
-      node.setCallBack(
+      node.volume?.linkEvent(
         ["VOLUME", "MUTE"],
-        channel,
         (v) => setIsMuted(v.value),
         componentId
       );
     }
 
     return () => {
-      node.removeCallback(["VOLUME", "MUTE"], channel, componentId);
+      node.volume?.unlinkEvent(["VOLUME", "MUTE"], componentId);
     };
   }, [node]);
 
@@ -48,20 +47,18 @@ const MuteVolumeButton: React.FC<MuteVolumeButtonProps> = ({
         disabled
           ? undefined
           : () => {
-              onMuted?.({
-                channel,
-                controllerNumber,
-                controllerValue: !isMuted,
-              });
-            }
+            onMuted?.({
+              channel,
+              controllerNumber,
+              controllerValue: !isMuted,
+            });
+          }
       }
-      className={`${className} ${buttonStyle} ${
-        disabled
-          ? "cursor-auto"
-          : `${
-              isMuted ? "bg-red-500 hover:bg-red-500/50" : "hover:bg-white/30"
-            } cursor-pointer`
-      } `}
+      className={`${className} ${buttonStyle} ${disabled
+        ? "cursor-auto"
+        : `${isMuted ? "bg-red-500 hover:bg-red-500/50" : "hover:bg-white/30"
+        } cursor-pointer`
+        } `}
     >
       <span className=" ">
         {isMuted ? <BiSolidVolumeMute /> : <BiSolidVolumeFull />}

@@ -113,14 +113,13 @@ const Piano: React.FC<PianoProps> = ({
       <div className="relative h-full w-full">
         {dimensions.actualWidth > 0 &&
           node.note?.notes?.map((_, i) => {
-            const event = node.note?.eventNo[i];
-            if (!event || !node.note) return <></>;
+            const notes = node.note?.notes[i]
+            if (!notes) return <></>;
             const keyStyle = getKeyPosition(i);
             return (
               <React.Fragment key={`key-${i}`}>
                 <PianoNote
-                  keyboard={node.note}
-                  event={event}
+                  synthNode={notes}
                   channel={channel}
                   index={i}
                   keyStyle={keyStyle}

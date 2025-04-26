@@ -9,8 +9,8 @@ export class GlobalEqualizer {
   private analyserDataArray: Uint8Array;
 
   public isEnabled: boolean = true;
-  public frequencies: number[] = [60, 170, 310, 600, 1000, 3000, 6000, 12000];
-  public gains: number[] = new Array(8).fill(0);
+  public frequencies: number[] = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+  public gains: number[] = new Array(10).fill(0);
 
   constructor(context: BaseAudioContext) {
     this.audioContext = context;
@@ -37,7 +37,7 @@ export class GlobalEqualizer {
       const filter = this.audioContext.createBiquadFilter();
       filter.type = "peaking";
       filter.frequency.value = frequency;
-      filter.Q.value = 1;
+      filter.Q.value = 1.2;
       filter.gain.value = this.gains[index];
       return filter;
     });
@@ -77,7 +77,9 @@ export class GlobalEqualizer {
 
   public applyPreset(preset: EQPreset): void {
     preset.gains.forEach((gain, index) => {
-      this.setBandGain(index, gain);
+      if (index < this.eqNodes.length) {
+        this.setBandGain(index, gain);
+      }
     });
   }
 

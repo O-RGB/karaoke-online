@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import SwitchRadio from "../../../../common/input-data/switch/switch-radio";
 import SliderCommon from "../../../../common/input-data/slider";
 
-interface GlobalEqProps {}
+interface GlobalEqProps { }
 
 // Define preset type
 interface EqPreset {
@@ -11,32 +11,41 @@ interface EqPreset {
   name: string;
   gains: number[];
 }
-
 const defaultPresets: EqPreset[] = [
   {
     id: "flat",
     name: "Flat",
-    gains: [0, 0, 0, 0, 0, 0, 0, 0],
+    gains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   },
   {
     id: "bass-boost",
     name: "Bass Boost",
-    gains: [6, 4, 2, 0, 0, 0, 0, 0],
+    gains: [12, 10, 8, 5, 2, 0, 0, 0, -2, -3],
   },
   {
     id: "vocal-enhance",
     name: "Vocal Enhance",
-    gains: [0, 0, 0, 2, 4, 3, 0, 0],
+    gains: [-4, -6, -2, 3, 10, 12, 8, 3, 0, -5],
   },
   {
     id: "treble-boost",
     name: "Treble Boost",
-    gains: [0, 0, 0, 0, 0, 2, 4, 6],
+    gains: [-3, -3, -2, -2, -4, 0, 6, 10, 12, 14],
   },
   {
     id: "v-shape",
     name: "V-Shape",
-    gains: [4, 2, 0, -2, -2, 0, 2, 4],
+    gains: [10, 8, 5, 0, -8, -8, 0, 5, 8, 10],
+  },
+  {
+    id: "club",
+    name: "Club",
+    gains: [6, 6, 3, 3, 3, 2, 2, 0, 0, 0],
+  },
+  {
+    id: "rock",
+    name: "Rock",
+    gains: [8, 5, 3, -4, -6, -3, 3, 8, 10, 10],
   },
 ];
 
@@ -45,7 +54,7 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
     (state) => state.engine?.globalEqualizer
   );
   const [gains, setGains] = useState<number[]>(
-    equalizer?.gains || new Array(8).fill(0)
+    equalizer?.gains || new Array(10).fill(0)
   );
   const [isEnabled, setIsEnabled] = useState<boolean>(
     equalizer?.isEnabled || false
@@ -97,20 +106,22 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
   }
 
   const frequencyLabels = [
-    "60Hz",
-    "170Hz",
-    "310Hz",
-    "600Hz",
+    "32Hz",
+    "64Hz",
+    "125Hz",
+    "250Hz",
+    "500Hz",
     "1kHz",
-    "3kHz",
-    "6kHz",
-    "12kHz",
+    "2kHz",
+    "4kHz",
+    "8kHz",
+    "16kHz",
   ];
 
   return (
-    <div className="w-full bg-gray-50 rounded-lg p-4 ">
+    <div className="w-full bg-gray-50 rounded-lg p-4">
       {/* Main container with two sections */}
-      <div className="   gap-4">
+      <div className="gap-4">
         {/* Left side - Presets and controls */}
         <div className="p-4 w-full bg-white border-b md:border-b-0 md:border-r border-gray-200">
           <div className="flex justify-between items-center mb-4">
@@ -134,11 +145,10 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                 <button
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
-                  className={`w-fit p-1 text-left rounded transition-all text-xs ${
-                    selectedPreset === preset.id
+                  className={`w-fit p-1 text-left rounded transition-all text-xs ${selectedPreset === preset.id
                       ? "bg-blue-100 text-blue-800 font-medium border-l-4 border-blue-600"
                       : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                  }`}
+                    }`}
                 >
                   {preset.name}
                 </button>
@@ -153,17 +163,17 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
           <div className="relative">
             {/* dB scale on left */}
             <div className="absolute -left-6 top-5 h-40 text-right flex flex-col justify-between text-[8px] text-gray-500">
-              <div>+12dB</div>
-              <div>+6dB</div>
+              <div>+30dB</div>
+              <div>+15dB</div>
               <div>0dB</div>
-              <div>-6dB</div>
-              <div>-12dB</div>
+              <div>-15dB</div>
+              <div>-30dB</div>
             </div>
 
             {/* Actual EQ visualization */}
             <div className="ml-2">
               {/* Frequency labels */}
-              <div className="grid grid-cols-8 gap-1 mb-1">
+              <div className="grid grid-cols-10 gap-1 mb-1">
                 {frequencyLabels.map((label, i) => (
                   <div
                     key={i}
@@ -175,7 +185,7 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
               </div>
 
               {/* Sliders area with horizontal lines */}
-              <div className="relative h-40   mb-2 border border-gray-200 rounded bg-white">
+              <div className="relative h-40 mb-2 border border-gray-200 rounded bg-white">
                 {/* Horizontal guide lines */}
                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                   <div className="border-t border-gray-200"></div>
@@ -186,8 +196,8 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                 </div>
 
                 {/* Vertical frequency dividers */}
-                <div className="absolute inset-0 grid grid-cols-8 gap-0 pointer-events-none">
-                  {[...Array(7)].map((_, i) => (
+                <div className="absolute inset-0 grid grid-cols-10 gap-0 pointer-events-none">
+                  {[...Array(9)].map((_, i) => (
                     <div
                       key={i}
                       className="border-r border-gray-100 h-full"
@@ -196,7 +206,7 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                 </div>
 
                 {/* Sliders container */}
-                <div className="grid grid-cols-8 gap-1 h-full px-2 py-1">
+                <div className="grid grid-cols-10 gap-1 h-full px-2 py-1">
                   {gains.map((gain, index) => (
                     <div
                       key={index}
@@ -207,26 +217,25 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                           disabled={!isEnabled}
                           vertical
                           value={[gain]}
-                          min={-12}
-                          max={12}
-                          step={0.1}
+                          min={-30}
+                          max={30}
+                          step={0.5}
                           onChange={(value) => handleGainChange(index, value)}
                           className={`h-full ${!isEnabled ? "opacity-50" : ""}`}
                         />
 
                         {/* Custom fill indicator */}
                         <div
-                          className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 rounded-t ${
-                            gain > 0
+                          className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 rounded-t ${gain > 0
                               ? "bg-blue-500"
                               : gain < 0
-                              ? "bg-orange-500"
-                              : "bg-gray-400"
-                          }`}
+                                ? "bg-orange-500"
+                                : "bg-gray-400"
+                            }`}
                           style={{
-                            height: `${(Math.abs(gain) / 24) * 100}%`,
+                            height: `${(Math.abs(gain) / 60) * 100}%`,
                             top:
-                              gain > 0 ? `${((12 - gain) / 24) * 100}%` : "50%",
+                              gain > 0 ? `${((30 - gain) / 60) * 100}%` : "50%",
                           }}
                         ></div>
                       </div>
@@ -236,7 +245,7 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
               </div>
 
               {/* Value labels */}
-              <div className="grid grid-cols-8 gap-1">
+              <div className="grid grid-cols-10 gap-1">
                 {gains.map((gain, index) => (
                   <div key={index} className="text-center text-[10px]">
                     {gain > 0 ? "+" : ""}
@@ -249,7 +258,7 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
               <div className="mt-4 relative h-16 border border-gray-200 rounded bg-white overflow-hidden">
                 <svg
                   className="w-full h-full"
-                  viewBox="0 0 800 100"
+                  viewBox="0 0 1000 100"
                   preserveAspectRatio="none"
                 >
                   <defs>
@@ -271,40 +280,46 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                   <line
                     x1="0"
                     y1="50"
-                    x2="800"
+                    x2="1000"
                     y2="50"
                     stroke="#cbd5e1"
                     strokeWidth="1"
                   />
 
-                  {/* Draw smooth curve using values */}
+                  {/* Draw smooth curve using values - scaled for -30 to +30 range */}
                   <path
                     d={`
-                      M 0,${50 - gains[0] * 2}
-                      C ${100 / 3},${50 - gains[0] * 2}
-                        ${100 / 3},${50 - gains[1] * 2}
-                        ${100},${50 - gains[1] * 2}
-                      C ${100 + 100 / 3},${50 - gains[1] * 2}
-                        ${200 - 100 / 3},${50 - gains[2] * 2}
-                        ${200},${50 - gains[2] * 2}
-                      C ${200 + 100 / 3},${50 - gains[2] * 2}
-                        ${300 - 100 / 3},${50 - gains[3] * 2}
-                        ${300},${50 - gains[3] * 2}
-                      C ${300 + 100 / 3},${50 - gains[3] * 2}
-                        ${400 - 100 / 3},${50 - gains[4] * 2}
-                        ${400},${50 - gains[4] * 2}
-                      C ${400 + 100 / 3},${50 - gains[4] * 2}
-                        ${500 - 100 / 3},${50 - gains[5] * 2}
-                        ${500},${50 - gains[5] * 2}
-                      C ${500 + 100 / 3},${50 - gains[5] * 2}
-                        ${600 - 100 / 3},${50 - gains[6] * 2}
-                        ${600},${50 - gains[6] * 2}
-                      C ${600 + 100 / 3},${50 - gains[6] * 2}
-                        ${700 - 100 / 3},${50 - gains[7] * 2}
-                        ${700},${50 - gains[7] * 2}
-                      C ${700 + 100 / 3},${50 - gains[7] * 2}
-                        ${800 - 100 / 3},${50 - gains[7] * 2}
-                        ${800},${50 - gains[7] * 2}
+                      M 0,${50 - (gains[0] / 30) * 50}
+                      C ${100 / 3},${50 - (gains[0] / 30) * 50}
+                        ${100 / 3},${50 - (gains[1] / 30) * 50}
+                        ${100},${50 - (gains[1] / 30) * 50}
+                      C ${100 + 100 / 3},${50 - (gains[1] / 30) * 50}
+                        ${200 - 100 / 3},${50 - (gains[2] / 30) * 50}
+                        ${200},${50 - (gains[2] / 30) * 50}
+                      C ${200 + 100 / 3},${50 - (gains[2] / 30) * 50}
+                        ${300 - 100 / 3},${50 - (gains[3] / 30) * 50}
+                        ${300},${50 - (gains[3] / 30) * 50}
+                      C ${300 + 100 / 3},${50 - (gains[3] / 30) * 50}
+                        ${400 - 100 / 3},${50 - (gains[4] / 30) * 50}
+                        ${400},${50 - (gains[4] / 30) * 50}
+                      C ${400 + 100 / 3},${50 - (gains[4] / 30) * 50}
+                        ${500 - 100 / 3},${50 - (gains[5] / 30) * 50}
+                        ${500},${50 - (gains[5] / 30) * 50}
+                      C ${500 + 100 / 3},${50 - (gains[5] / 30) * 50}
+                        ${600 - 100 / 3},${50 - (gains[6] / 30) * 50}
+                        ${600},${50 - (gains[6] / 30) * 50}
+                      C ${600 + 100 / 3},${50 - (gains[6] / 30) * 50}
+                        ${700 - 100 / 3},${50 - (gains[7] / 30) * 50}
+                        ${700},${50 - (gains[7] / 30) * 50}
+                      C ${700 + 100 / 3},${50 - (gains[7] / 30) * 50}
+                        ${800 - 100 / 3},${50 - (gains[8] / 30) * 50}
+                        ${800},${50 - (gains[8] / 30) * 50}
+                      C ${800 + 100 / 3},${50 - (gains[8] / 30) * 50}
+                        ${900 - 100 / 3},${50 - (gains[9] / 30) * 50}
+                        ${900},${50 - (gains[9] / 30) * 50}
+                      C ${900 + 100 / 3},${50 - (gains[9] / 30) * 50}
+                        ${1000 - 100 / 3},${50 - (gains[9] / 30) * 50}
+                        ${1000},${50 - (gains[9] / 30) * 50}
                     `}
                     fill="none"
                     stroke="#2563eb"
@@ -314,32 +329,38 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                   {/* Fill area from curve to center */}
                   <path
                     d={`
-                      M 0,${50 - gains[0] * 2}
-                      C ${100 / 3},${50 - gains[0] * 2}
-                        ${100 / 3},${50 - gains[1] * 2}
-                        ${100},${50 - gains[1] * 2}
-                      C ${100 + 100 / 3},${50 - gains[1] * 2}
-                        ${200 - 100 / 3},${50 - gains[2] * 2}
-                        ${200},${50 - gains[2] * 2}
-                      C ${200 + 100 / 3},${50 - gains[2] * 2}
-                        ${300 - 100 / 3},${50 - gains[3] * 2}
-                        ${300},${50 - gains[3] * 2}
-                      C ${300 + 100 / 3},${50 - gains[3] * 2}
-                        ${400 - 100 / 3},${50 - gains[4] * 2}
-                        ${400},${50 - gains[4] * 2}
-                      C ${400 + 100 / 3},${50 - gains[4] * 2}
-                        ${500 - 100 / 3},${50 - gains[5] * 2}
-                        ${500},${50 - gains[5] * 2}
-                      C ${500 + 100 / 3},${50 - gains[5] * 2}
-                        ${600 - 100 / 3},${50 - gains[6] * 2}
-                        ${600},${50 - gains[6] * 2}
-                      C ${600 + 100 / 3},${50 - gains[6] * 2}
-                        ${700 - 100 / 3},${50 - gains[7] * 2}
-                        ${700},${50 - gains[7] * 2}
-                      C ${700 + 100 / 3},${50 - gains[7] * 2}
-                        ${800 - 100 / 3},${50 - gains[7] * 2}
-                        ${800},${50 - gains[7] * 2}
-                      L 800,50
+                      M 0,${50 - (gains[0] / 30) * 50}
+                      C ${100 / 3},${50 - (gains[0] / 30) * 50}
+                        ${100 / 3},${50 - (gains[1] / 30) * 50}
+                        ${100},${50 - (gains[1] / 30) * 50}
+                      C ${100 + 100 / 3},${50 - (gains[1] / 30) * 50}
+                        ${200 - 100 / 3},${50 - (gains[2] / 30) * 50}
+                        ${200},${50 - (gains[2] / 30) * 50}
+                      C ${200 + 100 / 3},${50 - (gains[2] / 30) * 50}
+                        ${300 - 100 / 3},${50 - (gains[3] / 30) * 50}
+                        ${300},${50 - (gains[3] / 30) * 50}
+                      C ${300 + 100 / 3},${50 - (gains[3] / 30) * 50}
+                        ${400 - 100 / 3},${50 - (gains[4] / 30) * 50}
+                        ${400},${50 - (gains[4] / 30) * 50}
+                      C ${400 + 100 / 3},${50 - (gains[4] / 30) * 50}
+                        ${500 - 100 / 3},${50 - (gains[5] / 30) * 50}
+                        ${500},${50 - (gains[5] / 30) * 50}
+                      C ${500 + 100 / 3},${50 - (gains[5] / 30) * 50}
+                        ${600 - 100 / 3},${50 - (gains[6] / 30) * 50}
+                        ${600},${50 - (gains[6] / 30) * 50}
+                      C ${600 + 100 / 3},${50 - (gains[6] / 30) * 50}
+                        ${700 - 100 / 3},${50 - (gains[7] / 30) * 50}
+                        ${700},${50 - (gains[7] / 30) * 50}
+                      C ${700 + 100 / 3},${50 - (gains[7] / 30) * 50}
+                        ${800 - 100 / 3},${50 - (gains[8] / 30) * 50}
+                        ${800},${50 - (gains[8] / 30) * 50}
+                      C ${800 + 100 / 3},${50 - (gains[8] / 30) * 50}
+                        ${900 - 100 / 3},${50 - (gains[9] / 30) * 50}
+                        ${900},${50 - (gains[9] / 30) * 50}
+                      C ${900 + 100 / 3},${50 - (gains[9] / 30) * 50}
+                        ${1000 - 100 / 3},${50 - (gains[9] / 30) * 50}
+                        ${1000},${50 - (gains[9] / 30) * 50}
+                      L 1000,50
                       L 0,50
                       Z
                     `}
@@ -348,11 +369,11 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                   />
 
                   {/* Frequency bands markers */}
-                  {[...Array(8)].map((_, i) => (
+                  {[...Array(10)].map((_, i) => (
                     <circle
                       key={i}
                       cx={i * 100 + 50}
-                      cy={50 - gains[i] * 2}
+                      cy={50 - (gains[i] / 30) * 50}
                       r="3"
                       fill="#2563eb"
                       stroke="#fff"

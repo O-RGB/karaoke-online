@@ -29,26 +29,19 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
 
   useEffect(() => {
     if (!instrumental) return;
-
-    instrumental.setCallBackState(
+    instrumental.expression[index].linkEvent(
       ["EXPRESSION", "CHANGE"],
-      index,
-      (v) => {
-        setExpression(v.value);
-      },
+      (v) => setExpression(v.value),
       componentId
     );
-    instrumental.setCallBackState(
+    instrumental.velocity[index].linkEvent(
       ["VELOCITY", "CHANGE"],
-      index,
-      (v) => {
-        setVelocity(v.value);
-      },
+      (v) => setVelocity(v.value),
       componentId
     );
     return () => {
-      instrumental.removeCallback(["EXPRESSION", "CHANGE"], index, componentId);
-      instrumental.removeCallback(["VELOCITY", "CHANGE"], index, componentId);
+      instrumental.expression[index].unlinkEvent(["EXPRESSION", "CHANGE"], componentId);
+      instrumental.velocity[index].unlinkEvent(["VELOCITY", "CHANGE"], componentId);
     };
   }, [instrumental]);
 
@@ -58,9 +51,8 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
   return (
     <div
       onClick={() => onClick?.(type, index)}
-      className={`${
-        selected === type ? "border-blue-500 border-2" : "bg-white"
-      } flex items-center min-h-8 w-full border  cursor-pointer p-2 relative`}
+      className={`${selected === type ? "border-blue-500 border-2" : "bg-white"
+        } flex items-center min-h-8 w-full border  cursor-pointer p-2 relative`}
     >
       <div className="relative z-10 flex flex-wrap gap-1">
         <span className="text-sm font-medium">

@@ -30,19 +30,15 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
     if (nodes.length < DRUM_CHANNEL) return;
 
     const drumNode = nodes[DRUM_CHANNEL];
-    drumNode.setCallBackState?.(
+    drumNode.program?.linkEvent(
       ["PROGARM", "CHANGE"],
-      DRUM_CHANNEL,
-      (value) => {
-        setProgarm(value.value);
-      },
+      (value) => setProgarm(value.value),
       componentId
     );
 
     return () => {
-      drumNode.removeCallState?.(
+      drumNode.program?.unlinkEvent?.(
         ["PROGARM", "CHANGE"],
-        DRUM_CHANNEL,
         componentId
       );
     };

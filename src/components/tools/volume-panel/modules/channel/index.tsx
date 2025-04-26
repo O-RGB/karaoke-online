@@ -36,7 +36,7 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
   const instrumental = useSynthesizerEngine(
     (state) => state.engine?.instrumental
   );
-  useEffect(() => {}, [isShow, node]);
+  useEffect(() => { }, [isShow, node]);
 
   if (!node) return <></>;
 
@@ -58,7 +58,7 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
       ></MuteVolumeButton>
       <div className="flex items-center justify-center h-full py-1.5 w-full border-x border-white/20">
         <VolumeNodePreset
-          node={node}
+          synthNode={node.volume}
           vertical={true}
           onLock={onLockChange}
           onChange={onChange}

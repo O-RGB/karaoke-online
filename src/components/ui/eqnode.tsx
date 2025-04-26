@@ -14,6 +14,7 @@ interface EQNodeProps {
   indexKey: number;
   node: SynthChannel[];
   name: string;
+  eqConfig: EQConfig
   onEnabled?: () => void;
   onDisabled?: () => void;
 }
@@ -23,6 +24,7 @@ const EQNode: React.FC<EQNodeProps> = ({
   indexKey,
   node,
   name,
+  eqConfig,
   onEnabled,
   onDisabled,
 }) => {
@@ -41,28 +43,25 @@ const EQNode: React.FC<EQNodeProps> = ({
   const componnetId = useId();
   const [volumeLevel, setVolumeLevel] = useState<number>(0);
 
-  const [eqConfig, setEqConfig] = useState<EQConfig>({
-    enabled: false,
-    gains: [0, 0, 0],
-    boostLevel: 100,
-    inputVolume: 1,
-    outputVolume: 1,
-    volumeCompensation: 1,
-  });
+  // const [eqConfig, setEqConfig] = useState<EQConfig>({
+  //   enabled: false,
+  //   gains: [0, 0, 0],
+  //   boostLevel: 100,
+  //   inputVolume: 1,
+  //   outputVolume: 1,
+  //   volumeCompensation: 1,
+  // });
 
   const frequencyLabels = ["100 Hz", "1 kHz", "10 kHz"];
 
   useEffect(() => {
-    if (!instrumental) return;
+    // if (!instrumental) return;
 
-    instrumental.setCallBackEQ(
-      ["EQUALIZER", "CHANGE"],
-      indexKey,
-      (e) => {
-        setEqConfig(e.value);
-      },
-      componnetId
-    );
+    // instrumental.equalizer[indexKey].linkEvent(
+    //   ["EQUALIZER", "CHANGE"],
+    //   (e) => setEqConfig(e.value),
+    //   componnetId
+    // );
 
     const intervalId = setInterval(() => {
       const volumes = node.map((n) => n.getGain());
@@ -72,14 +71,13 @@ const EQNode: React.FC<EQNodeProps> = ({
     }, render);
 
     return () => {
-      instrumental.removeCallbackEQ(
-        ["EQUALIZER", "CHANGE"],
-        indexKey,
-        componnetId
-      );
+      //   instrumental.equalizer[indexKey].unlinkEvent(
+      //     ["EQUALIZER", "CHANGE"],
+      //     componnetId
+      //   );
       clearInterval(intervalId);
     };
-  }, [instrumental]);
+  }, [eqConfig]);
 
   const handleEQToggle = () => {
     if (instrumental) {

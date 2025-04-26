@@ -6,6 +6,7 @@ import {
   INodeState,
   InstrumentType,
 } from "@/features/engine/modules/instrumentals/types/node.type";
+import { SynthNode } from "@/features/engine/modules/instrumentals/node";
 
 interface InstrumentalSettingProps {
   instrumental?: InstrumentalNode;
@@ -40,9 +41,15 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
   useEffect(() => {
     if (!instrumental) return;
 
-    instrumental.setCallBackState(
+    let synthNode: SynthNode<INodeState, number> | undefined = undefined
+    if (valueKey === "EXPRESSION") {
+      synthNode = instrumental.expression[selectedIndex]
+    } else {
+      synthNode = instrumental.velocity[selectedIndex]
+    }
+
+    synthNode.linkEvent(
       [valueKey, "CHANGE"],
-      selectedIndex,
       (v) => {
         setValue(v.value);
       },
@@ -50,9 +57,8 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
     );
 
     return () => {
-      instrumental.removeCallback(
+      synthNode.unlinkEvent(
         [valueKey, "CHANGE"],
-        selectedIndex,
         componentId
       );
     };

@@ -6,6 +6,7 @@ import React, { useEffect, useId, useState } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { INodeKey } from "@/features/engine/modules/instrumentals/types/node.type";
+import { SynthNode } from "@/features/engine/modules/instrumentals/node";
 interface VolumeNodePresetProps {
   disabled?: boolean;
   channel: number;
@@ -15,7 +16,7 @@ interface VolumeNodePresetProps {
   onChange?: (value: IControllerChange) => void;
   onLock?: (event: IControllerChange<boolean>) => void;
   controllerNumber: number;
-  node?: SynthChannel;
+  synthNode?: SynthNode<INodeKey, number>;
 }
 
 const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
@@ -27,7 +28,7 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
   onChange,
   onLock,
   controllerNumber,
-  node,
+  synthNode,
 }) => {
   const componentId = useId();
   const [volume, setValue] = useState<number>(100);
@@ -43,26 +44,24 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
   };
 
   useEffect(() => {
-    if (node) {
-      node?.setCallBack(
+    if (synthNode) {
+      synthNode.linkEvent(
         [nodeType, "CHANGE"],
-        channel,
         (value) => setValue(value.value),
         componentId
       );
-      node?.setCallBack(
+      synthNode?.linkEvent(
         [nodeType, "LOCK"],
-        channel,
         (value) => setLocked(value.value),
         componentId
       );
     }
 
     return () => {
-      node?.removeCallback([nodeType, "CHANGE"], channel, componentId);
-      node?.removeCallback([nodeType, "LOCK"], channel, componentId);
+      synthNode?.unlinkEvent([nodeType, "CHANGE"], componentId);
+      synthNode?.unlinkEvent([nodeType, "LOCK"], componentId);
     };
-  }, [node]);
+  }, [synthNode]);
 
   function LabelTag({ name }: { name: string }) {
     return (
@@ -90,7 +89,7 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
     return SliderProps;
   }
 
-  if (!node) return <></>;
+  if (!synthNode) return <></>;
 
   return (
     <>

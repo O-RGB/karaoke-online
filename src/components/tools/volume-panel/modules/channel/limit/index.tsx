@@ -30,15 +30,12 @@ const ChannelLimit: React.FC<ChannelLimitProps> = ({
   };
 
   useEffect(() => {
-    node.setCallBackState(
-      ["PROGARM", "CHANGE"],
-      channel,
-      onProgramChange,
-      componentId
+    node.program?.linkEvent(
+      ["PROGARM", "CHANGE"],onProgramChange,componentId
     );
 
     return () => {
-      node.removeCallState(["PROGARM", "CHANGE"], channel, componentId);
+      node.program?.unlinkEvent(["PROGARM", "CHANGE"], componentId);
     };
   }, [node]);
 

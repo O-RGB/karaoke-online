@@ -7,21 +7,20 @@ import {
   INoteState,
   TEventType,
 } from "@/features/engine/modules/instrumentals/types/node.type";
+import { SynthNode } from "@/features/engine/modules/instrumentals/node";
 
 interface PianoNoteProps {
-  event: EventManager<INoteState, TEventType<INoteChange>>;
+  synthNode: SynthNode<INoteState, INoteChange>
   channel: number;
   index: number;
   keyStyle: IPianoKey;
-  keyboard: KeyboardNode;
 }
 
 const PianoNote: React.FC<PianoNoteProps> = ({
   index,
   keyStyle,
-  event,
+  synthNode,
   channel,
-  keyboard,
 }) => {
   const componentId = useId();
   const [on, setOn] = useState<INoteChange>({
@@ -31,26 +30,24 @@ const PianoNote: React.FC<PianoNoteProps> = ({
   });
 
   useEffect(() => {
-    if (event) {
-      event.add(
+    if (synthNode) {
+      synthNode.linkEvent(
         ["NOTE_ON", "CHANGE"],
-        channel,
         (v) => setOn(v.value),
         componentId
       );
     }
 
     return () => {
-      event.remove(["NOTE_ON", "CHANGE"], channel, componentId);
+      synthNode.unlinkEvent(["NOTE_ON", "CHANGE"], componentId);
     };
-  }, [event]);
+  }, [synthNode]);
 
   return (
     <div
       key={`key-${index}`}
-      className={`absolute top-0 flex items-end justify-center border-l border-gray-400 ${
-        on.velocity > 0 ? "bg-blue-500" : keyStyle.bgColor
-      }`}
+      className={`absolute top-0 flex items-end justify-center border-l border-gray-400 ${on.velocity > 0 ? "bg-blue-500" : keyStyle.bgColor
+        }`}
       style={{
         left: `${keyStyle.left}px`,
         width: `${keyStyle.width}px`,

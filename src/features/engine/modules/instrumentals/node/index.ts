@@ -1,5 +1,5 @@
 import { EventManager } from "../events";
-import { SynthNodeProps, TEventType } from "../types/node.type";
+import { EventKey, SynthNodeProps, TEventType } from "../types/node.type";
 
 export class SynthNode<K = any, R = any> implements SynthNodeProps<K, R> {
   public value: R | undefined = undefined;
@@ -27,8 +27,11 @@ export class SynthNode<K = any, R = any> implements SynthNodeProps<K, R> {
     if (type !== undefined) this.type = type;
     if (channel !== undefined) this.channel = channel;
 
-    if (event !== undefined) { this.event = event; }
-    else { event = new EventManager<K, TEventType<R>>() }
+    if (event !== undefined) {
+      this.event = event;
+    } else {
+      this.event = new EventManager<K, TEventType<R>>()
+    }
   }
 
   public setLock(isLock: boolean) {
@@ -63,5 +66,34 @@ export class SynthNode<K = any, R = any> implements SynthNodeProps<K, R> {
       console.log("reset value", this.backupValue);
       this.setValue(this.backupValue);
     }
+  }
+
+  public linkEvent(
+    eventKey: EventKey<K>,
+    callback: (event: TEventType<R>) => void,
+    componentId: string
+  ) {
+    if (!this.type || !this.event) return;
+
+    this.event.add(eventKey, this.channel, callback, componentId);
+
+    let currentValue: any;
+    if (eventKey[1] === "CHANGE") {
+      currentValue = this.value;
+    } else if (eventKey[1] === "MUTE") {
+      currentValue = this.isMute;
+    } else if (eventKey[1] === "LOCK") {
+      currentValue = this.isLocked;
+    }
+
+    callback({ value: currentValue });
+  }
+
+  public unlinkEvent(
+    eventKey: EventKey<K>,
+    componentId: string
+  ) {
+    if (!this.type || !this.event) return;
+    this.event.remove(eventKey, this.channel, componentId);
   }
 }

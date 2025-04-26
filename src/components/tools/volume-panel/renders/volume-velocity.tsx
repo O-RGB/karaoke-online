@@ -1,5 +1,6 @@
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { EventManager } from "@/features/engine/modules/instrumentals/events";
+import { SynthNode } from "@/features/engine/modules/instrumentals/node";
 import {
   INoteState,
   TEventType,
@@ -123,13 +124,13 @@ const VolumeVelocityRender: React.FC<VolumeVelocityRenderProps> = ({
       {/* ใช้ MiniNoteListener สำหรับแต่ละ note แต่ดึงข้อมูลมาใช้สำหรับทั้ง channel */}
       <div className="hidden">
         {node.note?.notes?.map((re, i) => {
-          const event = node.note?.eventNo[i];
-          if (!event) return null;
+          const note = node.note?.notes[i];
+          if (!note) return null;
           return (
             <React.Fragment key={`key-min-${i}`}>
               <MiniNoteListener
                 channel={channel}
-                event={event}
+                synthNode={note}
                 onNoteOn={onVolumeChange}
                 onNoteOff={(e) => {
                   console.log(e);
@@ -146,14 +147,14 @@ const VolumeVelocityRender: React.FC<VolumeVelocityRenderProps> = ({
 export default VolumeVelocityRender;
 
 interface MiniNoteListenerProps {
-  event: EventManager<INoteState, TEventType<INoteChange>>;
+  synthNode: SynthNode<INoteState, INoteChange>
   channel: number;
   onNoteOn: (value: TEventType<INoteChange>) => void;
   onNoteOff: (value: TEventType<boolean>) => void;
 }
 
 const MiniNoteListener: React.FC<MiniNoteListenerProps> = ({
-  event,
+  synthNode,
   channel,
   onNoteOn,
   onNoteOff,
@@ -161,13 +162,13 @@ const MiniNoteListener: React.FC<MiniNoteListenerProps> = ({
   const componentId = useId();
 
   useEffect(() => {
-    event.add(["NOTE_ON", "CHANGE"], channel, onNoteOn, componentId);
-    event.add(["NOTE_ON", "MUTE"], channel, onNoteOff as any, componentId);
+    synthNode.linkEvent(["NOTE_ON", "CHANGE"], onNoteOn, componentId);
+    synthNode.linkEvent(["NOTE_ON", "MUTE"], onNoteOff as any, componentId);
     return () => {
-      event.remove(["NOTE_ON", "CHANGE"], channel, componentId);
-      event.remove(["NOTE_ON", "MUTE"], channel, componentId);
+      synthNode.unlinkEvent(["NOTE_ON", "CHANGE"], componentId);
+      synthNode.unlinkEvent(["NOTE_ON", "MUTE"], componentId);
     };
-  }, [event, channel, onNoteOn]);
+  }, [synthNode, channel, onNoteOn]);
 
   return null;
 };

@@ -18,32 +18,24 @@ const LimitBarRender: React.FC<LimitBarRenderProps> = ({
 
   useEffect(() => {
     if (!instrumental) return;
-    instrumental.setCallBackState(
+    instrumental.expression[category].linkEvent(
       ["EXPRESSION", "CHANGE"],
-      category,
-      (v) => {
-        setExpression(v.value);
-      },
+      (v) => setExpression(v.value),
       componentId
     );
-    instrumental.setCallBackState(
+    instrumental.velocity[category].linkEvent(
       ["VELOCITY", "CHANGE"],
-      category,
-      (v) => {
-        setVelocity(v.value);
-      },
+      (v) => setVelocity(v.value),
       componentId
     );
 
     return () => {
-      instrumental.removeCallback(
+      instrumental.expression[category].unlinkEvent(
         ["EXPRESSION", "CHANGE"],
-        category,
         componentId
       );
-      instrumental.removeCallback(
+      instrumental.velocity[category].unlinkEvent(
         ["VELOCITY", "CHANGE"],
-        category,
         componentId
       );
     };

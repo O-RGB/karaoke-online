@@ -16,19 +16,15 @@ const EqTag: React.FC<EqTagProps> = ({ instrumental, category, channel }) => {
   useEffect(() => {
     if (!instrumental) return;
 
-    instrumental.setCallBackEQ(
+    instrumental.equalizer[category].linkEvent(
       ["EQUALIZER", "CHANGE"],
-      category,
-      (v) => {
-        setEqEnabled(v.value.enabled);
-      },
+      (v) => setEqEnabled(v.value.enabled),
       componentId
     );
 
     return () => {
-      instrumental.removeCallbackEQ(
+      instrumental.equalizer[category].unlinkEvent(
         ["EQUALIZER", "CHANGE"],
-        category,
         componentId
       );
     };
