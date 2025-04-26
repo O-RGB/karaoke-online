@@ -16,6 +16,7 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
   process,
   onClose,
 }) => {
+
   const [open, setOpen] = useState<boolean>(false);
 
   const onCloseModal = () => {
@@ -36,7 +37,7 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
         height={180}
         isOpen={open}
       >
-        <div>
+        <div className="p-2">
           <div className="flex flex-col w-full pb-2">
             <div className="flex items-center justify-between">
               <span className="flex items-center justify-between gap-1">

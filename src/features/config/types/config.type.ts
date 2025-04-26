@@ -33,7 +33,7 @@ export type SystemFont =
   | "k2d"
   | "libreBaskerville";
 
-export interface ConfigDisplay {
+export interface ConfigSystem {
   refreshRate: Partial<RefreshRateConfig>;
   lyrics: Partial<LyricsConfig>;
   widgets: Partial<WidgetsConfig>;
@@ -51,6 +51,7 @@ export interface SoundSetting {
   soundFont: string;
   lockBase: number;
   mixer: MixerConfig[];
+  equalizer: boolean
 }
 
 export interface SystemConfig {
@@ -105,10 +106,10 @@ export interface LyricsColorConfig {
 }
 
 export interface ConfigStoreProps {
-  config: Partial<ConfigDisplay>;
+  config: Partial<ConfigSystem>;
   setConfig: (
     config:
-      | Partial<ConfigDisplay>
-      | ((config: Partial<ConfigDisplay>) => Partial<ConfigDisplay>)
+      | Partial<ConfigSystem>
+      | ((config: Partial<ConfigSystem>) => Partial<ConfigSystem>)
   ) => void;
 }

@@ -7,24 +7,27 @@ import { getLocalTracklistDriveUrl } from "@/lib/local-storege/local-storage";
 import useConfigStore from "@/features/config/config-store";
 import Button from "@/components/common/button/button";
 import { GrUpdate } from "react-icons/gr";
-import Tags from "@/components/common/display/tags";
 import { BsYoutube } from "react-icons/bs";
 import Link from "next/link";
 import { FaCat, FaGoogleDrive } from "react-icons/fa";
+import { FiFilePlus } from "react-icons/fi";
+import UpdateFile from "@/components/common/input-data/upload";
+import { TbMusicPlus } from "react-icons/tb";
+import { SiJson } from "react-icons/si";
 
 interface AddFromDriveProps {
   onAddUrlDrvie?: (value: string) => Promise<boolean>;
-  // onAddTrackListDrive?: (value: string) => Promise<boolean>;
+  onAddTrackListDrive?: (value: string) => Promise<boolean>;
+  onAddTrackListFormCom?: (file: File) => Promise<boolean>
   onSystemChange: (value: string) => void;
-  // getSystem?: () => boolean;
   driveCheckForUpdate: () => Promise<void>;
 }
 
 const AddFromDrive: React.FC<AddFromDriveProps> = ({
   onAddUrlDrvie,
-  // onAddTrackListDrive,
+  onAddTrackListDrive,
+  onAddTrackListFormCom,
   onSystemChange,
-  // getSystem,
   driveCheckForUpdate,
 }) => {
   const config = useConfigStore((state) => state.config);
@@ -32,6 +35,7 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
   const [driveUrl, setDriveUrl] = useState<string>();
   const [tracklistUrl, setTrackListUrl] = useState<string>();
   const [onDriveTested, setDriveTested] = useState<boolean>(false);
+  const [openAdSetting, setOpenAd] = useState<boolean>(false)
   useEffect(() => {
     const isSaved = config.system?.url;
     const isTested = config.system?.urlTested;
@@ -169,21 +173,42 @@ const AddFromDrive: React.FC<AddFromDriveProps> = ({
         >
           อัปเดตเพลง
         </Button>
+        <Label>กรณีไฟล์ขนาดใหญ่เกินไป</Label>
+        <Button color={openAdSetting ? "default" : "blue"} icon={<FiFilePlus></FiFilePlus>} onClick={() => { setOpenAd((p) => !p) }} iconPosition="left" padding="px-4" className="h-8">ติดตั้งเพลงเอง</Button>
       </div>
-     
-      {/* <DriveAction
-        ok={tracklistUrl ? true : false}
-        title="ดาวน์โหลด Extheme Drive"
-        onSave={onAddTrackListDrive}
-        onSaveButton="ดาวน์โหลด"
-        buttonProps={{
-          icon: <IoDownload></IoDownload>,
-        }}
-        inputProps={{
-          value: tracklistUrl,
-          placeholder: "https:...",
-        }}
-      ></DriveAction> */}
+
+      {openAdSetting && <div>
+        <div className="flex flex-col gap-1">
+          <Label>เพิ่มจากเครื่อง</Label>
+          <UpdateFile
+            accept=".json"
+            className="border border-blue-500 p-3 rounded-md hover:bg-gray-50 duration-300"
+            onSelectFile={onAddTrackListFormCom}
+          >
+            <span className="w-full  text-sm flex items-center gap-2">
+              <span>
+                <SiJson className="text-blue-500"></SiJson>
+              </span>
+              <span>อัปโหลดไฟล์</span>
+              <Label>ไม่เกิน 500 Gb.</Label>
+            </span>
+          </UpdateFile>
+        </div>
+        <DriveAction
+          ok={tracklistUrl ? true : false}
+          title="กรณีไม่สามารถเชื่อมต่อได้เพราะ File ขนาดใหญ่เกินไป"
+          onSave={onAddTrackListDrive}
+          onSaveButton="ดาวน์โหลด"
+          buttonProps={{
+            icon: <IoDownload></IoDownload>,
+          }}
+          inputProps={{
+            value: tracklistUrl,
+            placeholder: "https:...",
+          }}
+        ></DriveAction>
+
+      </div>}
 
       {/* <div className="text-blue-500">
         หากใครสนใจทดสอบโหลดเพลงจาก Google drive ต้องติดต่อ Admin
@@ -196,63 +221,63 @@ export default AddFromDrive;
 
 
 <div className="py-2">
-<div className="md:flex justify-between">
-  <Label
-    textSize={15}
-    textColor="text-gray-800"
-    headClass="bg-blue-500"
-    description="สำหรับเชื่อมต่อเพลง Extheme ที่อยู่บน Drive"
-  >
-    เชื่อมต่อ Extreme Drive
-  </Label>
-  <div className="flex gap-1">
-    <Link
-      href={
-        "https://drive.google.com/drive/folders/1wqib6TiFHcnJwXZuUN2cNc32DDYvvODl?usp=sharing"
-      }
-      target="_blank"
-      className="w-fit"
+  <div className="md:flex justify-between">
+    <Label
+      textSize={15}
+      textColor="text-gray-800"
+      headClass="bg-blue-500"
+      description="สำหรับเชื่อมต่อเพลง Extheme ที่อยู่บน Drive"
     >
-      <Button
-        blur={false}
-        color="blue"
-        iconPosition="left"
-        className="text-white w-fit"
-        icon={<FaGoogleDrive className="text-white" />}
+      เชื่อมต่อ Extreme Drive
+    </Label>
+    <div className="flex gap-1">
+      <Link
+        href={
+          "https://drive.google.com/drive/folders/1wqib6TiFHcnJwXZuUN2cNc32DDYvvODl?usp=sharing"
+        }
+        target="_blank"
+        className="w-fit"
       >
-        {/* ลิงก์ Drive */}
-      </Button>
-    </Link>
-    <Link
-      href={"https://catbox.moe/#"}
-      target="_blank"
-      className="w-fit"
-    >
-      <Button
-        blur={false}
-        color="amber"
-        iconPosition="left"
-        className="text-white w-fit"
-        icon={<FaCat className="text-white" />}
+        <Button
+          blur={false}
+          color="blue"
+          iconPosition="left"
+          className="text-white w-fit"
+          icon={<FaGoogleDrive className="text-white" />}
+        >
+          {/* ลิงก์ Drive */}
+        </Button>
+      </Link>
+      <Link
+        href={"https://catbox.moe/#"}
+        target="_blank"
+        className="w-fit"
       >
-        {/* ลิงก์ Drive */}
-      </Button>
-    </Link>
-    <Link
-      href={"https://youtu.be/pHzYj_EksNI"}
-      target="_blank"
-      className="w-fit"
-    >
-      <Button
-        blur={false}
-        color="red"
-        iconPosition="left"
-        className="text-white w-fit"
-        icon={<BsYoutube className="text-white" />}
+        <Button
+          blur={false}
+          color="amber"
+          iconPosition="left"
+          className="text-white w-fit"
+          icon={<FaCat className="text-white" />}
+        >
+          {/* ลิงก์ Drive */}
+        </Button>
+      </Link>
+      <Link
+        href={"https://youtu.be/pHzYj_EksNI"}
+        target="_blank"
+        className="w-fit"
       >
-        {/* วิธีใช้งาน */}
-      </Button>
-    </Link>
+        <Button
+          blur={false}
+          color="red"
+          iconPosition="left"
+          className="text-white w-fit"
+          icon={<BsYoutube className="text-white" />}
+        >
+          {/* วิธีใช้งาน */}
+        </Button>
+      </Link>
+    </div>
   </div>
-</div>
 </div>

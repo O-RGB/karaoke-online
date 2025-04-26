@@ -7,6 +7,8 @@ import { MdOutlineCloudUpload } from "react-icons/md";
 import LoadConfig from "../ui/load-conifg/load-config";
 import { initDatabase } from "@/utils/database/db";
 import Button from "../common/button/button";
+import ToggleCheckBox from "../common/input-data/checkbox";
+import useConfigStore from "@/features/config/config-store";
 
 interface AllowSoundProps {
   children?: React.ReactNode;
@@ -17,6 +19,8 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
   const [pressed, setPressed] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioLoopRef = useRef<HTMLAudioElement>(null);
+  const setConfig = useConfigStore((state) => state.setConfig)
+  const config = useConfigStore((state) => state.config)
 
   const requestMIDIAccess = async () => {
     if (navigator.requestMIDIAccess) {
@@ -89,27 +93,27 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                   <span>กำลังเริ่มโปรแกรม...</span>
                 </div>
               ) : (
-                // <button
-                //   onClick={handleClick}
-                //   className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-medium transition-colors mb-8 shadow-sm hover:shadow"
-                // >
-                //   เริ่มใช้งาน
-                // </button>
-
-                <div className="relative w-fit mb-8">
-                  <div className="absolute -right-0.5 -top-0.5 w-fit">
-                    <span className="relative flex h-3 w-3 ">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-600 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-                    </span>
+                <div className="flex flex-col gap-2 mb-4">
+                  <div className="relative w-fit">
+                    <div className="absolute -right-0.5 -top-0.5 w-fit">
+                      <span className="relative flex h-3 w-3 ">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-600 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                      </span>
+                    </div>
+                    <Button
+                      blur={false}
+                      className="w-fit !bg-blue-600 hover:!bg-blue-500 "
+                      onClick={handleClick}
+                    >
+                      <div className="px-2 text-white">เปิดใช้งานโปรแกรม</div>
+                    </Button>
                   </div>
-                  <Button
-                    blur={false}
-                    className="w-fit !bg-blue-600 hover:!bg-blue-500 "
-                    onClick={handleClick}
-                  >
-                    <div className="px-2 text-white">เปิดใช้งานโปรแกรม</div>
-                  </Button>
+                  <div>
+                    <ToggleCheckBox defaultChecked={config.sound?.equalizer ?? false} onChange={(checked) => {
+                      setConfig({ sound: { ...config.sound, equalizer: checked } })
+                    }} label="เปิดใช้งาน Equalizer (ใช้ CPU)" ></ToggleCheckBox>
+                  </div>
                 </div>
               )}
 

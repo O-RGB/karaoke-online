@@ -3,7 +3,7 @@ import { loadAudioContext, loadPlayer } from "./lib/spessasynth";
 import { CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
 import { SpessaPlayerEngine } from "./player/spessa-synth-player";
 import { RemoteSendMessage } from "@/features/remote/types/remote.type";
-import { SoundSetting } from "@/features/config/types/config.type";
+import { ConfigSystem, SoundSetting } from "@/features/config/types/config.type";
 import { SynthChannel } from "../instrumentals/channel";
 import { InstrumentalNode } from "../instrumentals/instrumental";
 import { BassConfig } from "../instrumentals/config";
@@ -31,7 +31,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public player: BaseSynthPlayerEngine | undefined;
   public preset: number[] = [];
   public analysers: AnalyserNode[] = [];
-  public soundfontName: string | undefined;
+  public soundfontName: string = "Default Soundfont sf2";
   public soundfontFile: File | undefined;
 
   public nodes: SynthChannel[] = [];
@@ -40,19 +40,23 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public bassConfig: BassConfig | undefined = undefined;
   public globalEqualizer: GlobalEqualizer | undefined = undefined;
 
+  public systemConfig?: Partial<ConfigSystem> = undefined
+
   private sendMessage?: (info: RemoteSendMessage) => void;
 
   constructor(
     setInstrument?: (instrument: IPersetSoundfont[]) => void,
     sendMessage?: (info: RemoteSendMessage) => void,
-    config?: Partial<SoundSetting>
+    config?: Partial<SoundSetting>,
+    systemConfig?: Partial<ConfigSystem>
   ) {
-    this.startup(setInstrument);
+    this.startup(setInstrument, systemConfig);
     this.bassConfig = config ? new BassConfig(config) : undefined;
     this.sendMessage = sendMessage;
+    this.systemConfig = systemConfig
   }
 
-  async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void) {
+  async startup(setInstrument?: (instrument: IPersetSoundfont[]) => void, systemConfig?: Partial<ConfigSystem>) {
     const { audioContext, channels } = await loadAudioContext();
     if (!audioContext)
       return { audio: undefined, synth: undefined, player: undefined };
@@ -79,7 +83,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
         ch,
         this.instrumental,
         audioContext,
-        synth.keyModifierManager
+        synth.keyModifierManager,
+        systemConfig
       );
 
       this.nodes.push(synthChannel);
@@ -89,9 +94,11 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       }
     }
 
-    this.globalEqualizer = new GlobalEqualizer(synth.context);
-    synth.worklet.connect(this.globalEqualizer.input);
-    this.globalEqualizer.output.connect(synth.context.destination);
+    if(systemConfig?.sound?.equalizer){
+      this.globalEqualizer = new GlobalEqualizer(synth.context);
+      synth.worklet.connect(this.globalEqualizer.input);
+      this.globalEqualizer.output.connect(synth.context.destination);
+    }
 
     synth?.connectIndividualOutputs(analysers);
 

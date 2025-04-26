@@ -1,7 +1,7 @@
 import Label from "@/components/common/display/label";
 import useConfigStore from "@/features/config/config-store";
 import React, { useEffect, useState } from "react";
-import { ConfigDisplay } from "@/features/config/types/config.type";
+import { ConfigSystem } from "@/features/config/types/config.type";
 import SliderCommon from "@/components/common/input-data/slider";
 import { CgPerformance } from "react-icons/cg";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
@@ -25,7 +25,7 @@ const EfficiencyDisplay: React.FC<EfficiencyDisplayProps> = ({}) => {
         refreshRate: {
           render: value,
         },
-      } as ConfigDisplay;
+      } as ConfigSystem;
     });
   };
   useEffect(() => {

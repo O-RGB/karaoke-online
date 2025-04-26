@@ -116,3 +116,10 @@ export interface InstValueSetting {
   velocity: number;
   expression: number;
 }
+
+
+
+export interface IMidiOutput {
+  port: MIDIOutput | null;
+  isConnected: boolean;
+}

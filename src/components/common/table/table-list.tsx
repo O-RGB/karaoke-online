@@ -14,7 +14,7 @@ interface TableListProps {
   renderKey?: string;
   scrollToItem?: string;
   deleteItem?: boolean;
-  itemAction?: (value: any, index: number) => ReactNode;
+  itemAction?: (value: any, index: number, name: string) => ReactNode;
   className?: string;
   hoverFocus?: boolean;
 }
@@ -59,13 +59,6 @@ const TableList: React.FC<TableListProps> = ({
     }
   }, [scrollToItem, list]);
 
-  // สร้าง style object สำหรับ container โดยใช้ height ที่ส่งมาถ้ามี
-  const containerStyle = height
-    ? {
-        height: typeof height === "number" ? `${height}px` : height,
-      }
-    : undefined;
-
   return (
     <div className="flex flex-col h-full w-full">
       <div
@@ -80,20 +73,17 @@ const TableList: React.FC<TableListProps> = ({
             <div
               ref={(el: any) => (itemRefs.current[i] = el)}
               onClick={() => handleClick?.(data.value, i)}
-              className={`${
-                hoverFocus
-                  ? `${
-                      onFocus === i ? "bg-gray-300" : ""
-                    } hover:bg-gray-200 duration-300 cursor-pointer`
-                  : ""
-              } p-1 w-full text-sm flex items-center justify-between ${
-                data.className
-              }`}
+              className={`${hoverFocus
+                ? `${onFocus === i ? "bg-gray-300" : ""
+                } hover:bg-gray-200 duration-300 cursor-pointer`
+                : ""
+                } p-1 w-full text-sm flex items-center justify-between ${data.className
+                }`}
               key={`${listKey}-${i}`}
             >
               {data.row}
               <div className="flex gap-2">
-                {itemAction?.(data.value, i)}
+                {itemAction?.(data.value, i, data.row)}
                 {deleteItem && (
                   <Button
                     shadow={false}

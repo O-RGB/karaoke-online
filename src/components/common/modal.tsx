@@ -16,12 +16,17 @@ export default function WinboxModal({
   onClose,
   children,
   title,
-  icons,
   width,
   height,
   modalClassName = "",
   containerId = "modal-container",
   closable = true,
+  index = 0,
+  noMin,
+  noMove,
+  noResize,
+  noFull = true,
+  noMax
 }: ModalProps) {
   const { isMobile, orientation } = useOrientation();
   const [showModal, setShowModal] = useState(isOpen);
@@ -117,7 +122,7 @@ export default function WinboxModal({
     if (onClose) onClose();
   };
 
-  const handleResize = (width: number, height: number) => {
+  const handleResize = (_: number, height: number) => {
     const newContentHeight = height - 38;
     setContentHeight(newContentHeight);
   };
@@ -140,12 +145,16 @@ export default function WinboxModal({
       width={modalDimensions.width}
       height={modalDimensions.height}
       title={title}
+      noMin={noMin}
+      noMove={noMove}
+      noResize={noResize}
+      noFull={noFull}
+      noMax={noMax}
       onResize={handleResize}
       onClose={handleClose}
       className={`modern ${modalClassName} blur-overlay !bg-black/30`}
       x="center"
       y="center"
-      noFull={true}
       bottom={50}
       minWidth={200}
       noClose={!closable}

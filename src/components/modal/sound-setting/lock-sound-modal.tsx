@@ -49,7 +49,7 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
       <div className="flex gap-2 items-center border rounded-md p-2">
         <ToggleCheckBox
           defaultChecked={lockBased !== undefined}
-          className="m-2"
+          // className="m-2"
           onChange={onBaseLock}
         ></ToggleCheckBox>
         <Select

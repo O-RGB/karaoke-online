@@ -1,9 +1,11 @@
 import { PROGRAM_CATEGORY } from "@/config/value";
 import { SynthChannel } from "../channel";
-import { EventManager } from "../events";
+import { EventManager, } from "../events";
 import {
   EventKey,
+  IMidiOutput,
   INodeState,
+  INoteState,
   InstrumentDrum,
   InstrumentType,
   TEventType,
@@ -12,6 +14,7 @@ import { EXPRESSION, MAIN_VOLUME } from "@/features/engine/types/node.type";
 import { SynthNode } from "../node";
 import {
   BaseSynthEngine,
+  INoteChange,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
 import { EQConfig } from "../../equalizer/types/equalizer.type";
@@ -64,7 +67,10 @@ export const findProgramCategory = (
 
 export class InstrumentalNode {
   public programGroup = PROGRAM_CATEGORY;
+  public isMidiOutput: boolean = false
   public group = new Map<InstrumentType, Map<number, SynthChannel>>();
+  public midiOutput: IMidiOutput = { port: null, isConnected: false };
+  public notesEvent = new Map<InstrumentType, Map<number, EventManager<INoteState, INoteChange>>>();
 
   public expression: SynthNode<INodeState, number>[] = [];
   public velocity: SynthNode<INodeState, number>[] = [];
@@ -72,16 +78,18 @@ export class InstrumentalNode {
 
   public equalizerEvent = new EventManager<INodeState, TEventType<EQConfig>>();
   public settingEvent = new EventManager<INodeState, TEventType<number>>();
-  public groupEvent = new EventManager<
-    InstrumentType,
-    TEventType<Map<number, SynthChannel>>
-  >();
+  public groupByTypeEvent = new EventManager<InstrumentType, TEventType<Map<number, SynthChannel>>>();
 
   private engine: BaseSynthEngine | undefined = undefined;
 
   constructor() {
     this.initializeGroupMap();
     this.initializeSettingNode();
+  }
+
+  public connectMIDIOutput(outputPort: MIDIOutput) {
+    this.midiOutput = { port: outputPort, isConnected: true };
+    console.log(`Connected to MIDI output: ${outputPort.name}`);
   }
 
   private getGroupType(type: InstrumentType | number) {
@@ -101,6 +109,7 @@ export class InstrumentalNode {
   private initializeGroupMap() {
     for (let index = 0; index < this.programGroup.length; index++) {
       this.group.set(INSTRUMENT_TYPE_BY_INDEX[index], new Map());
+      this.notesEvent.set(INSTRUMENT_TYPE_BY_INDEX[index], new Map())
     }
   }
 
@@ -111,10 +120,13 @@ export class InstrumentalNode {
     this.velocity = INSTRUMENT_TYPE_BY_INDEX.map(
       (_, i) => new SynthNode(this.settingEvent, "VELOCITY", i, 0)
     );
+
+
     this.equalizer = INSTRUMENT_TYPE_BY_INDEX.map(
       (_, i) =>
         new SynthNode<INodeState, EQConfig>(
-          this.equalizerEvent,
+          // this.equalizerEvent,
+          undefined,
           "EQUALIZER",
           i,
           {
@@ -162,6 +174,7 @@ export class InstrumentalNode {
     byType.set(event.channel, value);
     this.group.set(type, byType);
 
+
     const newExpression = this.expression[newType.index].value ?? 100;
     this.updateController(event.channel, newExpression);
     const newVelocity = this.velocity[newType.index].value ?? 0;
@@ -170,7 +183,7 @@ export class InstrumentalNode {
     if (oldEqualizer)
       this.updateEQ(newType.category, oldEqualizer, newType.index);
 
-    this.groupEvent.trigger([newType.category, "CHANGE"], newType.index, {
+    this.groupByTypeEvent.trigger([newType.category, "CHANGE"], newType.index, {
       value: byType,
     });
   }
@@ -183,8 +196,9 @@ export class InstrumentalNode {
       node.equalizer?.applyConfig(value);
     });
     this.equalizer[indexKey].setValue(value);
-    this.equalizerEvent.trigger(["EQUALIZER", "CHANGE"], indexKey, { value });
+    // this.equalizerEvent.trigger(["EQUALIZER", "CHANGE"], indexKey, { value });
   }
+
 
   setExpression(
     type: InstrumentType | number,
@@ -196,7 +210,6 @@ export class InstrumentalNode {
       this.group.get(groupType) ?? new Map();
     nodes.forEach((node) => {
       if (node.expression !== undefined && node.channel !== undefined) {
-        console.log("setExpression Link Ch:", node.channel + 1);
         if (node.channel !== 9) {
           this.updateController(node.channel, value);
           node.expression.setValue(value);
@@ -235,6 +248,65 @@ export class InstrumentalNode {
     });
     return gain;
   }
+
+  onNoteOnEvent(type: InstrumentType) {
+    if (this.isMidiOutput) {
+      const channels = this.group.get(type)
+      channels?.forEach((k) => {
+        k.globalNoteOnEvent.add(["NOTE_ON", "CHANGE"], 0, ((c) => {
+          console.log(k, c)
+          if (this.midiOutput.isConnected && this.midiOutput.port) {
+            const channel = k.channel || 0;
+            const noteNumber = c.midiNote || 60;
+            const velocity = c.velocity || 127;
+
+            // MIDI Note On command (0x90 = 144)
+            this.midiOutput.port.send([0x90 + channel, noteNumber, velocity]);
+          }
+        }), "instrumentall-system")
+        k.globalNoteOnEvent.add(["NOTE_OFF", "CHANGE"], 0, ((c) => {
+          console.log(k, c)
+          if (this.midiOutput.isConnected && this.midiOutput.port) {
+            const channel = k.channel || 0;
+            const noteNumber = c.midiNote || 60;
+            const velocity = c.velocity || 127;
+
+            // MIDI Note On command (0x80 = 128)
+            this.midiOutput.port.send([0x80 + channel, noteNumber, velocity]);
+          }
+        }), "instrumentall-system")
+        if (k.channel) {
+          this.engine?.setController({ channel: k.channel, controllerNumber: MAIN_VOLUME, controllerValue: 0 })
+          this.updateController(k.channel, 0);
+        }
+      })
+    }
+  }
+
+  setMidiOutput(callback: (isMidiOutput: boolean) => { type: InstrumentType, isOutput: boolean }) {
+    const { isOutput, type } = callback(this.isMidiOutput)
+    this.isMidiOutput = isOutput
+    if (isOutput) {
+      this.onNoteOnEvent(type)
+    } else {
+      const channels = this.group.get(type)
+      channels?.forEach((k) => {
+        k.globalNoteOnEvent.remove(["NOTE_ON", "CHANGE"], 0, "instrumentall-system")
+        if (k.channel) {
+          this.engine?.setController({ channel: k.channel, controllerNumber: MAIN_VOLUME, controllerValue: 100 })
+          this.updateController(k.channel, 100);
+        }
+      })
+    }
+  }
+
+  sendMIDIControlChange(channel: number, controlNumber: number, value: number) {
+    if (this.midiOutput.isConnected && this.midiOutput.port) {
+      // MIDI Control Change command (0xB0 = 176)
+      this.midiOutput.port.send([0xB0 + channel, controlNumber, value]);
+    }
+  }
+
 
   updateController(
     channel: number,
@@ -286,7 +358,8 @@ export class InstrumentalNode {
     callback: (event: TEventType<EQConfig>) => void,
     componentId: string
   ) {
-    this.equalizerEvent.add(eventType, indexKey, callback, componentId);
+    this.equalizer[indexKey].event?.add(eventType, indexKey, callback, componentId)
+    // this.equalizerEvent.add(eventType, indexKey, callback, componentId);
     const value = this.equalizer[indexKey].value;
     callback({ value });
   }
@@ -299,14 +372,23 @@ export class InstrumentalNode {
     return this.equalizerEvent.remove(eventType, indexKey, componentId);
   }
 
+  setCallBackGroupByType(
+    eventType: EventKey<InstrumentType>,
+    indexKey: number,
+    callback: (event: TEventType<Map<number, SynthChannel>>) => void,
+    componentId: string
+  ) {
+    this.groupByTypeEvent.add(eventType, indexKey, callback, componentId);
+    const value = this.group.get(eventType[0]);
+    callback({ value });
+  }
+
   setCallBackGroup(
     eventType: EventKey<InstrumentType>,
     indexKey: number,
     callback: (event: TEventType<Map<number, SynthChannel>>) => void,
     componentId: string
   ) {
-    this.groupEvent.add(eventType, indexKey, callback, componentId);
-    const value = this.group.get(eventType[0]);
-    callback({ value });
+
   }
 }

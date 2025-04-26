@@ -1,5 +1,5 @@
 import { SynthNode } from "../node";
-import { EventManager } from "../events";
+import { EventManager, SingleCallbackEventManager } from "../events";
 import {
   EventKey,
   INodeKey,
@@ -24,6 +24,7 @@ import { KeyboardNode } from "../keyboard-node";
 import { KeyModifierManager } from "spessasynth_lib/@types/synthetizer/key_modifier_manager";
 import { DRUM_CHANNEL } from "@/config/value";
 import { ChannelEqualizer } from "../../equalizer/channel-equalizer";
+import { ConfigSystem } from "@/features/config/types/config.type";
 
 export class SynthChannel {
   // Index
@@ -56,18 +57,22 @@ export class SynthChannel {
   public nodeEvent = new EventManager<INodeKey, TEventType<number>>();
   public stateEvent = new EventManager<INodeState, TEventType<any>>();
   public noteEvent: EventManager<INoteState, TEventType<boolean>>[] = [];
+  public globalNoteOnEvent = new EventManager<INoteState, INoteChange>();
+
 
   // Group
   public instrumental: InstrumentalNode | undefined = undefined;
 
   public equalizer: ChannelEqualizer | undefined = undefined;
   public audioContext: AudioContext | undefined = undefined;
+  public systemConfig?: Partial<ConfigSystem>
 
   constructor(
     channel: number,
     instrumental: InstrumentalNode,
     audioContext: AudioContext,
-    keyModifierManager: KeyModifierManager | undefined
+    keyModifierManager: KeyModifierManager | undefined,
+    systemConfig?: Partial<ConfigSystem>
   ) {
     if (!audioContext) {
       console.warn("No audioContext!");
@@ -94,13 +99,15 @@ export class SynthChannel {
       this.note = new KeyboardNode(channel, keyModifierManager);
     }
 
+
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
 
-    this.equalizer = new ChannelEqualizer(audioContext);
-
-    analyser.connect(this.equalizer.input);
-    this.equalizer.output.connect(audioContext.destination);
+    if (systemConfig?.sound?.equalizer) {
+      this.equalizer = new ChannelEqualizer(audioContext);
+      analyser.connect(this.equalizer.input);
+      this.equalizer.output.connect(audioContext.destination);
+    }
 
     this.analyserNode = analyser;
     console.log("Audio routing complete for channel", channel);
@@ -110,20 +117,24 @@ export class SynthChannel {
     if (this.isDrum?.value === true && getDrum === false) {
       return 0;
     }
-    if (!this.equalizer) {
-      console.error("equalizer is not initialized");
-      return 0;
-    }
 
-    if (this.equalizer.isEQEnabled() || this.equalizer.getBoostLevel() > 0) {
-      return this.equalizer.getVolumeLevel();
-    } else if (this.analyserNode) {
-      const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
-      this.analyserNode.getByteFrequencyData(dataArray);
-      const value = Math.round(
-        dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
-      );
-      return value;
+    if (this.systemConfig?.sound?.equalizer) {
+      if (!this.equalizer) {
+        console.error("equalizer is not initialized");
+        return 0;
+      }
+      if (this.equalizer && (this.equalizer.isEQEnabled() || this.equalizer.getBoostLevel() > 0)) {
+        return this.equalizer.getVolumeLevel();
+      }
+    } else {
+      if (this.analyserNode) {
+        const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
+        this.analyserNode.getByteFrequencyData(dataArray);
+        const value = Math.round(
+          dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
+        );
+        return value;
+      }
     }
 
     return 0;
@@ -159,19 +170,20 @@ export class SynthChannel {
   }
   public programChange(event: IProgramChange) {
     const oldIndex: number = this.program?.value ?? 0;
-    const oldChannel: number = this.channel ?? 0;
     this.program?.setValue(event.program);
     this.instrumental?.update(event, oldIndex, this);
   }
 
   public noteOnChange(event: INoteChange) {
-    if (!this.note) return;
+    if (!this.note || !this.channel) return;
     this.note?.setOn(event);
+    this.globalNoteOnEvent.trigger(["NOTE_ON", "CHANGE"], 0, event)
   }
 
   public noteOffChange(event: INoteChange) {
-    if (!this.note) return;
+    if (!this.note || !this.channel) return;
     this.note?.setOff(event);
+    this.globalNoteOnEvent.trigger(["NOTE_OFF", "CHANGE"], 0, event)
   }
 
   public controllerChange(event: IControllerChange<any>) {
@@ -226,7 +238,7 @@ export class SynthChannel {
     return this.stateEvent.remove(eventType, index, componentId);
   }
 
-  setCallBackNote(
+  setCallBackNoteByKey(
     eventType: EventKey<INoteState>,
     index: number,
     keyNote: number,
@@ -236,7 +248,7 @@ export class SynthChannel {
     this.noteEvent[keyNote].add(eventType, index, callback, componentId);
   }
 
-  removeCallNote(
+  removeCallNoteByKey(
     eventType: EventKey<INoteState>,
     index: number,
     keyNote: number,
@@ -244,4 +256,8 @@ export class SynthChannel {
   ): boolean {
     return this.noteEvent[keyNote].remove(eventType, index, componentId);
   }
+
+
+
+
 }

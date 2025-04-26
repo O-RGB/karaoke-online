@@ -24,9 +24,11 @@ export class SynthNode<K = any, R = any> implements SynthNodeProps<K, R> {
     }
     if (isMute !== undefined) this.isMute = isMute;
     if (isLock !== undefined) this.isLocked = isLock;
-    if (event !== undefined) this.event = event;
     if (type !== undefined) this.type = type;
     if (channel !== undefined) this.channel = channel;
+
+    if (event !== undefined) { this.event = event; }
+    else { event = new EventManager<K, TEventType<R>>() }
   }
 
   public setLock(isLock: boolean) {

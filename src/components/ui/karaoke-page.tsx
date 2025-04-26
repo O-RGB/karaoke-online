@@ -7,7 +7,7 @@ import SearchSong from "../tools/search-song/search-song";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super/super-host";
 
-import SoundfontManager from "../modal/sound-font-manager";
+import SoundfontManager from "../modal/soundfont/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
 import AppendSongModal from "../modal/append-song";
@@ -37,9 +37,10 @@ import NotificationAlert from "../tools/noti-alert";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
-interface KaraokePageProps {}
+import Processing2Modal from "../common/processing/processing-update";
+interface KaraokePageProps { }
 
-const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
+const KaraokePage: React.FC<KaraokePageProps> = ({ }) => {
   const setup = useSynthesizerEngine((state) => state.setup);
 
   const addTracklist = useTracklistStore((state) => state.addTracklist);
@@ -88,6 +89,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   return (
     <FullScreen handle={handle}>
       {/* Process */}
+      <Processing2Modal></Processing2Modal>
       <WallpaperRender
         wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>

@@ -132,7 +132,7 @@ export const addTracklistsToDatabase = async (
       } finally {
         onProgress?.({
           progress: Math.round(((i + 1) / objs.length) * 100),
-          title: "กำลังประมวลผล...",
+          title: `กำลังประมวลผล ${i + 1}/${objs.length}`,
           show: true,
         });
       }

@@ -3,7 +3,7 @@ import {
   INSTRUMENT_TYPE_BY_INDEX,
   InstrumentalNode,
 } from "@/features/engine/modules/instrumentals/instrumental";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InstrumentalVolumeNode from "./volume-node";
 import WinboxModal from "@/components/common/modal";
 
@@ -12,6 +12,10 @@ interface MixerNodesProps {
 }
 
 const MixerNodes: React.FC<MixerNodesProps> = ({ instrumental }) => {
+
+  useEffect(() => {
+
+  }, [])
   return (
     <div className="flex p-2 divide-x border ">
       {INSTRUMENT_TYPE_BY_INDEX.map((value, index) => {

@@ -46,15 +46,6 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
       },
       componentId
     );
-    instrumental.setCallBackGroup(
-      [type, "CHANGE"],
-      index,
-      (v) => {
-        setChannelRef(v.value);
-      },
-      componentId
-    );
-
     return () => {
       instrumental.removeCallback(["EXPRESSION", "CHANGE"], index, componentId);
       instrumental.removeCallback(["VELOCITY", "CHANGE"], index, componentId);

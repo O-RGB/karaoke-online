@@ -8,6 +8,32 @@ import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instru
 import WinboxModal from "@/components/common/modal";
 import EQNode from "@/components/ui/eqnode";
 import Button from "@/components/common/button/button";
+import useConfigStore from "@/features/config/config-store";
+
+function connectToMIDIOutput(instrumental: InstrumentalNode) {
+  // ตรวจสอบการรองรับ Web MIDI API
+  if (!navigator.requestMIDIAccess) {
+    console.error("Web MIDI API ไม่รองรับในเบราว์เซอร์นี้");
+    return;
+  }
+
+  navigator.requestMIDIAccess()
+    .then((midiAccess) => {
+      // แสดงรายการ MIDI output ports ที่มีให้เลือก
+      const outputs = Array.from(midiAccess.outputs.values());
+      if (outputs.length === 0) {
+        console.warn("ไม่พบ MIDI output ports");
+        return;
+      }
+
+      // เชื่อมต่อกับ MIDI output port แรก (หรือให้ผู้ใช้เลือก)
+      instrumental.connectMIDIOutput(outputs[0]);
+    })
+    .catch((error) => {
+      console.error("เกิดข้อผิดพลาดในการเข้าถึง MIDI devices:", error);
+    });
+}
+
 
 interface InstrumentalVolumeNodeProps {
   node: SynthChannel[];
@@ -25,6 +51,8 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
   const componentId = useId();
   const [expression, setExpression] = useState<number>(100);
   const text = lowercaseToReadable(type);
+  const config = useConfigStore((state) => state.config)
+  const [isOutput, setOutput] = useState<boolean>(false)
 
   const [eqOpen, setEqOpen] = useState<boolean>(false);
 
@@ -38,6 +66,11 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
     setExpression(value);
   };
 
+  const connectMIDI = () => {
+    connectToMIDIOutput(instrumental);
+  };
+
+
   useEffect(() => {
     instrumental.setCallBackState(
       ["EXPRESSION", "CHANGE"],
@@ -47,6 +80,8 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
       },
       componentId
     );
+
+
     return () => {
       instrumental.removeCallback(
         ["EXPRESSION", "CHANGE"],
@@ -73,13 +108,25 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
         ></EQNode>
       </WinboxModal>
       <div className="relative flex flex-col gap-2 min-w-10 w-10 max-w-10">
-        <Button
+        {config.sound?.equalizer && <Button
           onClick={openEq}
           padding={"p-1 px-2"}
           className={`${eqOpen ? "!bg-blue-500 !text-white" : ""}`}
         >
           EQ
-        </Button>
+        </Button>}
+        {/* <div onClick={() => {
+          instrumental.setMidiOutput((isOutput) => {
+            setOutput(!isOutput)
+            if (!isOutput) {
+              // เมื่อเปิดใช้งาน MIDI output ให้ลองเชื่อมต่อ
+              connectMIDI();
+            }
+            return { isOutput: !isOutput, type }
+          })
+        }}>{isOutput ?
+          "O" : "I"
+          }</div> */}
         <div className="relative bg-black">
           <ChannelVolumeRender
             max={127}

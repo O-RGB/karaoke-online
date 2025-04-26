@@ -12,7 +12,9 @@ export const saveSoundFontStorage = async (file: File) => {
     const tx = db.transaction(STORAGE_SOUNDFONT, "readwrite");
     await tx.objectStore(STORAGE_SOUNDFONT).put({ value: file, id: file.name });
     await tx.done;
-  } catch (error) {}
+  } catch (error) {
+    console.log(error)
+  }
 };
 
 export const deleteSoundFontStorage = async (filename: string) => {

@@ -1,4 +1,4 @@
-import { ConfigDisplay } from "@/features/config/types/config.type";
+import { ConfigSystem } from "@/features/config/types/config.type";
 import { DrumNotesType } from "@/features/engine/modules/instrumentals/types/node.type";
 
 export const DRUM_CHANNEL = 9;
@@ -135,7 +135,7 @@ export const REFRESH_RATE: { [key: string]: number } = {
   LOW: 50, // 20Fps
 };
 
-export const DEFAULT_CONFIG: ConfigDisplay = {
+export const DEFAULT_CONFIG: ConfigSystem = {
   refreshRate: {
     render: 100,
     // type: "MIDDLE",
@@ -183,5 +183,7 @@ export const DEFAULT_CONFIG: ConfigDisplay = {
     engine: "spessa",
     timingModeType: "Time",
   },
-  sound: {},
+  sound: {
+    equalizer: true,
+  },
 };

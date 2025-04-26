@@ -58,6 +58,13 @@ type ModalProps = {
   containerId?: string;
   modalClassName?: string;
   fitHeight?: boolean;
+  index?: number
+
+  noMin?: boolean
+  noMove?: boolean
+  noResize?: boolean
+  noFull?: boolean
+  noMax?: boolean
 };
 
 interface CommonStyle {
@@ -88,11 +95,13 @@ interface IOptions<T = any> {
 
 interface IProgressBar {
   title?: string;
+  discription?: string,
   progress?: number;
   processing?: string;
   error?: string;
   show?: boolean;
   loading?: boolean;
+  cancel?: boolean
 }
 
 interface MapContextMenu {

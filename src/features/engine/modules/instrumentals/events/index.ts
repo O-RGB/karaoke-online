@@ -90,3 +90,52 @@ export class EventManager<K = any, R = any> {
     }
   }
 }
+
+export class SingleCallbackEventManager<K = any, R = any> {
+  private callbacks: Map<string, (event: R) => any> = new Map();
+  public debug: boolean = false;
+  public debugName?: string;
+
+  openDebug(bool: boolean, debugName?: string) {
+    this.debug = bool;
+    this.debugName = debugName;
+  }
+
+  private generateKey(eventKey: EventKey<K>): string {
+    return eventKey.join("-");
+  }
+
+  setCallback(eventKey: EventKey<K>, callback: (event: R) => any): void {
+    const key = this.generateKey(eventKey);
+    this.callbacks.set(key, callback);
+
+    if (this.debug) {
+      console.log(this.debugName, `Callback set for key:`, key);
+    }
+  }
+
+  clearCallback(eventKey: EventKey<K>): void {
+    const key = this.generateKey(eventKey);
+    this.callbacks.delete(key);
+
+    if (this.debug) {
+      console.log(this.debugName, `Callback cleared for key:`, key);
+    }
+  }
+
+  trigger(eventKey: EventKey<K>, event: R): any {
+    const key = this.generateKey(eventKey);
+    const callback = this.callbacks.get(key);
+
+    if (callback) {
+      if (this.debug) {
+        console.log(this.debugName, `Triggering callback for key:`, key, "with", event);
+      }
+      return callback(event);
+    }
+
+    if (this.debug) {
+      console.warn(this.debugName, `No callback set for key:`, key);
+    }
+  }
+}

@@ -1,8 +1,8 @@
 import { DEFAULT_CONFIG } from "@/config/value";
-import { ConfigDisplay } from "@/features/config/types/config.type";
+import { ConfigSystem } from "@/features/config/types/config.type";
 
 export const lyricsConfig = (
-  setConfig: (config: Partial<ConfigDisplay>) => void
+  setConfig: (config: Partial<ConfigSystem>) => void
 ): any => {
   const reset = () => {
     setConfig({ lyrics: DEFAULT_CONFIG.lyrics });

@@ -19,7 +19,7 @@ import { PiMusicNotesPlusBold } from "react-icons/pi";
 import { SiGoogledrive } from "react-icons/si";
 import { TbMicrophone2 } from "react-icons/tb";
 import ProcessingModal from "../../common/processing/processing";
-import { testUrl } from "@/lib/fetch/test-api";
+import { testUrl, useDownloadWithProgress } from "@/lib/fetch/fetch-lib";
 import AddFromDrive from "./tabs/add-from-drive";
 import {
   getLocalLastUpdated,
@@ -41,7 +41,7 @@ import { FaCheck } from "react-icons/fa";
 import { GrDatabase } from "react-icons/gr";
 import AddFromApi from "./tabs/add-from-api";
 
-interface AppendSongModalProps {}
+interface AppendSongModalProps { }
 
 interface FileResponse {
   fileId: string;
@@ -51,7 +51,7 @@ interface FileResponse {
   size: number;
 }
 
-const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
+const AppendSongModal: React.FC<AppendSongModalProps> = ({ }) => {
   const config = useConfigStore((state) => state.config);
   const setConfig = useConfigStore((state) => state.setConfig);
   const setTracklist = useTracklistStore((state) => state.setTracklist);
@@ -135,7 +135,6 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
           title: "บันทึกรายชื่อเพลงสำเร็จ",
           show: true,
         });
-        // setTracklistFile(file);
         console.log("UPLOAD: Tracklist Loaded lenght", saved.length);
         addTracklist(saved);
         setMusicFilename(file?.name);
@@ -222,6 +221,25 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
     }
   };
 
+
+  const onAddTrackListDriveCustom2 = async (value: string,
+    tracklistStore: TracklistFrom) => {
+    const download = await useDownloadWithProgress(value, "tracklist")
+    if (download) {
+      await onLoadFileJson(download, tracklistStore);
+      setLocalTracklistDriveTested(value);
+      return true;
+    } else {
+      return false
+    }
+  }
+  const onAddTrackListFormCom = async (value: File,
+    tracklistStore: TracklistFrom) => {
+    await onLoadFileJson(value, tracklistStore);
+    setLocalTracklistDriveTested("");
+    return true
+  }
+
   const onAddTrackListDrive = async (
     value: string,
     tracklistStore: TracklistFrom
@@ -233,44 +251,42 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
       loading: true,
     });
 
-    var formdata = new FormData();
+    const formdata = new FormData();
     formdata.append("fun", "TRACKLIST");
-    return fetch(value, { body: formdata, method: "POST" })
-      .then(async (response) => {
-        const data = await response.json();
 
-        let fileResponse: FileResponse =
-          data.files.length > 0 ? data.files[0] : undefined;
-        const blob = base64ToBlob(
-          fileResponse.base64Data,
-          fileResponse.contentType
-        );
-        let file = new File([blob], "tracklist.json", {
-          type: blob.type,
-        });
+    try {
+      const response = await fetch(value, { body: formdata, method: "POST" });
+      const data = await response.json();
+
+      const fileResponse: FileResponse | undefined = data.files?.length > 0 ? data.files[0] : undefined;
+
+      if (fileResponse && fileResponse.base64Data) {
+        const blob = base64ToBlob(fileResponse.base64Data, fileResponse.contentType);
+        const file = new File([blob], "tracklist.json", { type: blob.type });
 
         if (file) {
           await onLoadFileJson(file, tracklistStore);
           setLocalTracklistDriveTested(value);
           return true;
         }
-        setProgress({
-          progress: 0,
-          title: "ดาวน์โหลดไม่สำเร็จ",
-          show: true,
-          error: "ไม่สามารถติดต่อกับ Server",
-        });
-        return false;
-      })
-      .catch((error) => {
-        setProgress({
-          progress: 0,
-          title: "ดาวน์โหลดไม่สำเร็จ",
-          show: true,
-          error: JSON.stringify(error),
-        });
-        return false;
+      }
+
+      setProgress({
+        progress: 0,
+        title: "ดาวน์โหลดไม่สำเร็จ",
+        show: true,
+        error: "ไม่สามารถติดต่อกับ Server",
       });
+      return false;
+    } catch (error) {
+      setProgress({
+        progress: 0,
+        title: "ดาวน์โหลดไม่สำเร็จ",
+        show: true,
+        error: JSON.stringify(error),
+      });
+      return false;
+    }
   };
 
   const onSystemChange = async (value: string) => {
@@ -342,14 +358,14 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
       setLocalLastUpdated(lastRow);
       const searchObj: SearchResult[] = data.map(
         (data: any) =>
-          ({
-            id: data[0],
-            name: data[1],
-            artist: data[2],
-            type: data[3],
-            fileId: data[4],
-            from: data[5],
-          } as SearchResult)
+        ({
+          id: data[0],
+          name: data[1],
+          artist: data[2],
+          type: data[3],
+          fileId: data[4],
+          from: data[5],
+        } as SearchResult)
       );
 
       const driveAdded = await addTracklistsToDatabase(searchObj, "DRIVE");
@@ -570,6 +586,8 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({}) => {
             label: "เพิ่มจาก Drive",
             content: (
               <AddFromDrive
+                onAddTrackListDrive={(v) => onAddTrackListDriveCustom2(v, "DRIVE_EXTHEME")}
+                onAddTrackListFormCom={(v) => onAddTrackListFormCom(v, "DRIVE_EXTHEME")}
                 driveCheckForUpdate={() => driveCheckForUpdate(true)}
                 onSystemChange={onSystemChange}
                 onAddUrlDrvie={onAddUrlDrvie}
