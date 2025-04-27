@@ -21,7 +21,7 @@ const ChannelLimit: React.FC<ChannelLimitProps> = ({
 }) => {
   const componentId = useId();
   const [category, setCategory] = useState<number>(0);
-  const [program, setProgram] = useState<number>(0);
+  const [program, setProgram] = useState<number | undefined>(0);
 
   const onProgramChange = (value: TEventType<number>) => {
     const category = findProgramCategory(value.value);
@@ -30,13 +30,8 @@ const ChannelLimit: React.FC<ChannelLimitProps> = ({
   };
 
   useEffect(() => {
-    node.program?.linkEvent(
-      ["PROGARM", "CHANGE"],onProgramChange,componentId
-    );
-
-    return () => {
-      node.program?.unlinkEvent(["PROGARM", "CHANGE"], componentId);
-    };
+    node.program?.linkEvent(["PROGARM", "CHANGE"], onProgramChange, componentId);
+    return () => node.program?.unlinkEvent(["PROGARM", "CHANGE"], componentId);
   }, [node]);
 
   if (!node || program === undefined) return;

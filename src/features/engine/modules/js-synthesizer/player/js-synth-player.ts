@@ -1,5 +1,6 @@
 import { MIDI, midiControllers } from "spessasynth_lib";
 import {
+  BaseSynthEngine,
   BaseSynthEvent,
   BaseSynthPlayerEngine,
 } from "../../../types/synth.type";
@@ -26,8 +27,8 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.eventInit = { ...this.eventInit, ...input };
   }
 
-  constructor(synth: JsSynthesizer) {
-    this.player = synth;
+  constructor(player: JsSynthesizer) {
+    this.player = player;
   }
 
   play(): void {
@@ -77,10 +78,29 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     return parsedMidi;
   }
 
-  setMidiOutput(): void {}
-  resetMidiOutput(): void {}
+  setMidiOutput(): void { }
+  resetMidiOutput(): void { }
   eventChange(): void {
     this.player?.hookPlayerMIDIEvents((s, type, event) => {
+      const eventType = event.getType();
+      const velocity = event.getVelocity();
+      const midiNote = event.getKey();
+      const channel = event.getChannel()
+
+      if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
+        this.eventInit?.onNoteOnChangeCallback({
+          channel,
+          midiNote,
+          velocity
+        })
+      } else if (eventType === 0x80 && this.eventInit?.onNoteOffChangeCallback) {
+        this.eventInit?.onNoteOffChangeCallback({
+          channel,
+          midiNote,
+          velocity
+        })
+      }
+
       switch (type) {
         case 176: // Controller Change
           if (this.eventInit?.controllerChangeCallback) {
@@ -109,7 +129,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
           break;
 
         case 192: // Program Change
-         
+
           if (this.eventInit?.programChangeCallback) {
             this.eventInit?.programChangeCallback({
               program: event.getProgram(),

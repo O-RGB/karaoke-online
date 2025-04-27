@@ -52,6 +52,8 @@ export class SynthChannel {
 
   // Render
   public analyserNode?: AnalyserNode | undefined = undefined;
+  public velocityMode?: boolean = false
+  private simulatedVelocityGain: number = 0;
 
   // Event
   public globalNoteOnEvent = new EventManager<INoteState, INoteChange>();
@@ -108,12 +110,23 @@ export class SynthChannel {
 
     this.analyserNode = analyser;
     console.log("Audio routing complete for channel", channel);
+
   }
 
+  public setVelocityRender(bool: boolean) {
+    this.velocityMode = bool
+  }
+
+
   public getGain(getDrum: boolean = false) {
+    if (this.velocityMode) {
+      return this.simulatedVelocityGain;
+    }
+
     if (this.isDrum?.value === true && getDrum === false) {
       return 0;
     }
+
 
     if (this.systemConfig?.sound?.equalizer) {
       if (!this.equalizer) {
@@ -165,6 +178,7 @@ export class SynthChannel {
         break;
     }
   }
+
   public programChange(event: IProgramChange) {
     const oldIndex: number = this.program?.value ?? 0;
     this.program?.setValue(event.program);
@@ -172,14 +186,15 @@ export class SynthChannel {
   }
 
   public noteOnChange(event: INoteChange) {
-    if (!this.note || !this.channel) return;
-    this.note?.setOn(event);
+    // this.note?.setOn(event);
     this.globalNoteOnEvent.trigger(["NOTE_ON", "CHANGE"], 0, event)
+    if (this.velocityMode) {
+      this.simulatedVelocityGain = event.velocity;
+    }
   }
 
   public noteOffChange(event: INoteChange) {
-    if (!this.note || !this.channel) return;
-    this.note?.setOff(event);
+    // this.note?.setOff(event);
     this.globalNoteOnEvent.trigger(["NOTE_OFF", "CHANGE"], 0, event)
   }
 

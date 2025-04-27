@@ -31,14 +31,16 @@ export interface BaseSynthEngine {
   ): void;
   getChannelEQSettings?(channelIndex: number):
     | {
-        frequency: number;
-        gain: number;
-      }[]
+      frequency: number;
+      gain: number;
+    }[]
     | null;
 
   preset: number[];
   programChange(event: (event: IProgramChange) => void): void;
   controllerChange(event: (event: IControllerChange) => void): void;
+  noteOnChange(event?: (event: INoteChange) => void): void;
+  noteOffChange(event?: (event: INoteChange) => void): void;
   persetChange(event: (event: IPersetSoundfont[]) => void): void;
   loadDefaultSoundFont(audio?: AudioContext): Promise<any>;
 
@@ -61,6 +63,8 @@ export interface BaseSynthEngine {
 export interface BaseSynthEvent {
   controllerChangeCallback?: (event: IControllerChange) => void;
   programChangeCallback?: (event: IProgramChange) => void;
+  onNoteOnChangeCallback?: (event: INoteChange) => void
+  onNoteOffChangeCallback?: (event: INoteChange) => void
 }
 
 export interface BaseSynthPlayerEngine {
@@ -112,7 +116,7 @@ export interface INoteChange extends IEventChange {
   velocity: number;
 }
 
-export interface INoteModifier extends Omit<INoteChange, "midiNote"> {}
+export interface INoteModifier extends Omit<INoteChange, "midiNote"> { }
 
 export interface ILockController {
   channel: number;

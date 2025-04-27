@@ -94,7 +94,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       }
     }
 
-    if(systemConfig?.sound?.equalizer){
+    if (systemConfig?.sound?.equalizer) {
       this.globalEqualizer = new GlobalEqualizer(synth.context);
       synth.worklet.connect(this.globalEqualizer.input);
       this.globalEqualizer.output.connect(synth.context.destination);
@@ -174,21 +174,22 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     }
   }
 
-  noteOnChange(event?: (event: INoteChange) => void): void {
-    return this.synth?.eventHandler.addEvent(
-      "noteon",
-      "note-on-listener",
-      (e: INoteChange) => {
-        this.nodes[e.channel].noteOnChange(e);
-      }
-    );
-  }
+
   polyPressureChange(event?: (event: INoteChange) => void): void {
     return this.synth?.eventHandler.addEvent(
       "polypressure",
       "poly-perssure-listener",
       (e: any) => {
         console.log(e);
+      }
+    );
+  }
+  noteOnChange(event?: (event: INoteChange) => void): void {
+    return this.synth?.eventHandler.addEvent(
+      "noteon",
+      "note-on-listener",
+      (e: INoteChange) => {
+        this.nodes[e.channel].noteOnChange(e);
       }
     );
   }
