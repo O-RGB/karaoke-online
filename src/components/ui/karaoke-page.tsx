@@ -10,12 +10,12 @@ import SuperHostRemote from "../remote/super/super-host";
 import SoundfontManager from "../modal/soundfont/sound-font-manager";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
-import AppendSongModal from "../modal/append-song";
+// import AppendSongModal from "../modal/append-song/index-none";
 import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status/status-panel";
 import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper-modal";
-import { getTracklist } from "@/lib/storage/tracklist";
+// import { getTracklist } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
 import DisplaySettingModal from "../modal/display";
 
@@ -38,9 +38,12 @@ import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
 import Processing2Modal from "../common/processing/processing-update";
-interface KaraokePageProps { }
+import { DatabaseService } from "@/utils/indexedDB/service";
+import FileSystemManager from "@/utils/file/file-system";
+import AppendSongModal from "../modal/append-song";
+interface KaraokePageProps {}
 
-const KaraokePage: React.FC<KaraokePageProps> = ({ }) => {
+const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const setup = useSynthesizerEngine((state) => state.setup);
 
   const addTracklist = useTracklistStore((state) => state.addTracklist);
@@ -54,16 +57,18 @@ const KaraokePage: React.FC<KaraokePageProps> = ({ }) => {
   const [onPrepare, setPrepare] = useState<boolean>(false);
 
   const startup = async () => {
+    const db = new DatabaseService();
+    await db.initialize();
     setPrepare(true);
     setup(config.system?.engine);
     initializeKeyboardListeners();
-    let tl: SearchResult[] = [];
-    if (config.system?.drive) {
-      tl = await getTracklist(["DRIVE", "DRIVE_EXTHEME"]);
-    } else {
-      tl = await getTracklist(["CUSTOM", "EXTHEME"]);
-    }
-    addTracklist(tl);
+    // let tl: SearchResult[] = [];
+    // if (config.system?.drive) {
+    //   tl = await getTracklist(["DRIVE", "DRIVE_EXTHEME"]);
+    // } else {
+    //   tl = await getTracklist(["CUSTOM", "EXTHEME"]);
+    // }
+    // addTracklist(tl);
     setTimeout(() => {
       setPrepare(false);
     }, 1000);
@@ -95,6 +100,24 @@ const KaraokePage: React.FC<KaraokePageProps> = ({ }) => {
       ></WallpaperRender>
       <RemoteEvent></RemoteEvent>
       <AutoModal auto title={""}></AutoModal>
+      {/* <div className="fixed top-52 left-60 z-50">
+        <button
+          onClick={async () => {
+            const fsManager = FileSystemManager.getInstance();
+            await fsManager.selectDirectory();
+          }}
+        >
+          delete database
+        </button>
+        <button
+          onClick={async () => {
+            const fsManager = FileSystemManager.getInstance();
+            console.log(await fsManager.listDirectory());
+          }}
+        >
+          list files
+        </button>
+      </div> */}
       <NotificationAlert></NotificationAlert>
       {/* Contact */}
       <div id="modal-container">

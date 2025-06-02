@@ -16,7 +16,6 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
   process,
   onClose,
 }) => {
-
   const [open, setOpen] = useState<boolean>(false);
 
   const onCloseModal = () => {
