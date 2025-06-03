@@ -78,7 +78,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     if (api) {
       music.from = "DRIVE_EXTHEME";
       url =
-        "https://script.google.com/macros/s/AKfycbxyjT972t0EKoIdYcx9nwFfTWssHm_aSFSufR4LLC4dGciAkVYm5kCUYfy2jRI3CC6tzQ/exec";
+        "https://script.google.com/macros/s/AKfycbz5M8AFoT-VWqfzfQ4GC_LRx-I-PCjxu23_EP3-eYdOI7lm6XpWSLIo2waFwqKbSUw/exec";
     }
     if (music.from === "DRIVE_EXTHEME" || music.from === "DRIVE" || api) {
       runtime.paused();
