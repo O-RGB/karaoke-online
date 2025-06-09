@@ -1,9 +1,10 @@
 import Tags from "@/components/common/display/tags";
+import { ITrackData } from "@/features/songs/types/songs.type";
 import React from "react";
 import { FaGoogleDrive, FaUser } from "react-icons/fa";
 
 interface SearchDropdownProps {
-  value: SearchResult;
+  value: ITrackData;
 }
 
 const SearchDropdown: React.FC<SearchDropdownProps> = ({ value }) => {
@@ -55,18 +56,18 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ value }) => {
     <>
       <div className="flex justify-between w-full gap-4">
         <span className="flex flex-col md:flex-row gap-2 md:items-center justify-between ">
-          <span className="">{value.name}</span>
+          <span className="">{value.TITLE}</span>
           <span className="flex gap-1 items-center text-sm p-1 px-1.5 bg-white/20 rounded-md w-fit">
             <span>
               <FaUser className="text-xs"></FaUser>
             </span>
-            <span>{value.artist}</span>
+            <span>{value.ARTIST}</span>
           </span>
         </span>
         <span className="rounded-md flex items-center gap-2">
-          {value.type === 0 && <Tags color="red">EMK</Tags>}
-          {value.type === 1 && <Tags color="green">NCN</Tags>}
-          <GetFromType from={value.from}></GetFromType>
+          {value.SUB_TYPE === "EMK" && <Tags color="red">EMK</Tags>}
+          {value.SUB_TYPE === "NCN" && <Tags color="green">NCN</Tags>}
+          {/* <GetFromType from={value.from}></GetFromType> */}
         </span>
       </div>
     </>

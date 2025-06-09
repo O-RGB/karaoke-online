@@ -3,7 +3,8 @@ import { DatabaseConfig } from "../../types/database";
 export enum TableLocalSongs {
   DIRECTORY = "directory",
   FILES = "files",
-  TRACKLIST = "tracklist",
+  CHUNKDATA = "chunk-data",
+  MASTER_INDEX = "master-index",
 }
 
 export const LOCAL_SONGS: DatabaseConfig = {
@@ -12,6 +13,7 @@ export const LOCAL_SONGS: DatabaseConfig = {
   stores: [
     { name: TableLocalSongs.DIRECTORY, keyPath: "id", autoIncrement: true },
     { name: TableLocalSongs.FILES, keyPath: "id", autoIncrement: true },
-    { name: TableLocalSongs.TRACKLIST, keyPath: "id", autoIncrement: true },
+    { name: TableLocalSongs.CHUNKDATA },
+    { name: TableLocalSongs.MASTER_INDEX },
   ],
 };

@@ -33,19 +33,19 @@ export interface DatabaseStats {
  * DatabaseManagerCore - จัดการ IndexedDB แบบ Singleton
  * TypeScript 2025 Version with modern features
  */
-export class DatabaseManagerCore {
-  private static instance: DatabaseManagerCore | null = null;
+export class DatabaseCommonCore {
+  private static instance: DatabaseCommonCore | null = null;
   private readonly databases: Map<string, IDBPDatabase> = new Map();
   private readonly configs: Map<string, DatabaseConfig> = new Map();
 
-  private constructor() {}
+  constructor() {}
 
   /**
    * Singleton pattern - รับ instance เดียว
    */
-  public static getInstance(): DatabaseManagerCore {
-    DatabaseManagerCore.instance ??= new DatabaseManagerCore();
-    return DatabaseManagerCore.instance;
+  public static getInstance(): DatabaseCommonCore {
+    DatabaseCommonCore.instance ??= new DatabaseCommonCore();
+    return DatabaseCommonCore.instance;
   }
 
   // ==================== Configuration Management ====================
@@ -191,7 +191,7 @@ export class DatabaseManagerCore {
    */
   public async getDatabaseForStore(storeName: string): Promise<IDBPDatabase> {
     // หาใน configs ที่ลงทะเบียนไว้
-    for (const config of this.configs.values().toArray()) {
+    for (const config of Array.from(this.configs.values())) {
       if (config.stores.some((store) => store.name === storeName)) {
         return await this.getDatabase(config.name);
       }
@@ -211,7 +211,8 @@ export class DatabaseManagerCore {
     data: T
   ): Promise<IDBValidKey> {
     const db = await this.getDatabase(dbName);
-    return await db.add(storeName, data);
+    const key = (data as any).id;
+    return await db.add(storeName, data, key);
   }
 
   /**
@@ -222,7 +223,8 @@ export class DatabaseManagerCore {
     data: T
   ): Promise<IDBValidKey> {
     const db = await this.getDatabaseForStore(storeName);
-    return await db.add(storeName, data);
+    const key = (data as any).id;
+    return await db.add(storeName, data, key);
   }
 
   /**
@@ -757,7 +759,7 @@ export class DatabaseManagerCore {
   public async getDatabaseStats(): Promise<DatabaseStats> {
     const stats: DatabaseStats = {};
 
-    for (const config of this.configs.values().toArray()) {
+    for (const config of Array.from(this.configs.values())) {
       stats[config.name] = {
         version: config.version,
         stores: {},

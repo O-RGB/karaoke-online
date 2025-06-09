@@ -3,6 +3,7 @@ import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import React, { useEffect, useState } from "react";
+import { ITrackData } from "@/features/songs/types/songs.type";
 
 interface NextSongPanelProps {}
 
@@ -11,7 +12,7 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
   const countDown = useRuntimePlayer((state) => state.countDown);
   const queue = useQueuePlayer((state) => state.queue);
-  const [saveInfo, setInfo] = useState<SearchResult>();
+  const [saveInfo, setInfo] = useState<ITrackData>();
 
   useEffect(() => {
     if (queue.length > 0 && countDown <= 3) {
@@ -60,9 +61,9 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
           </div>
         </div>
         <div className="lg:text-xl text-white text-end lg:text-center leading-none lg:leading-normal">
-          <span>{saveInfo?.name}</span>
+          <span>{saveInfo?.TITLE}</span>
           <br />
-          <span className="text-xs lg:text-base">{saveInfo?.artist}</span>
+          <span className="text-xs lg:text-base">{saveInfo?.ARTIST}</span>
         </div>
       </div>
     </>

@@ -1,3 +1,4 @@
+import { ITrackData, KaraokeExtension } from "@/features/songs/types/songs.type";
 import { MIDI } from "spessasynth_lib";
 
 export interface PlayerProps {
@@ -7,10 +8,10 @@ export interface PlayerProps {
 
 export interface QueuePlayerProps {
   driveLoading: boolean;
-  queue: SearchResult[];
-  addQueue: (value: SearchResult) => void;
+  queue: ITrackData[];
+  addQueue: (value: ITrackData) => void;
   removeQueue: (index: number) => void;
-  moveQueue: (value: SearchResult[]) => void;
+  moveQueue: (value: ITrackData[]) => void;
   playMusic: (index: number) => void;
   nextMusic: () => void;
 }
@@ -24,8 +25,8 @@ export interface RuntimePlayer {
     timeDivision: number,
     lyrics: string[],
     midi: MIDI,
-    midiDecoded: SongFilesDecode,
-    musicInfo: SearchResult
+    midiDecoded: KaraokeExtension,
+    musicInfo: ITrackData
   ) => void;
   play: () => void;
   paused: () => void;
@@ -58,8 +59,8 @@ export interface MidiPlayerProps {
   // ticksIndices: Map<number, number[]> | undefined;
   timeDivision: number;
   midi?: MIDI;
-  midiDecoded?: SongFilesDecode;
-  musicInfo?: SearchResult;
+  midiDecoded?: KaraokeExtension;
+  musicInfo?: ITrackData;
 
   currentTick: number;
   currentTempo: number;

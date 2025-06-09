@@ -1,15 +1,15 @@
 import { BaseTable } from "../../core/base";
-import { TableDisplaySongs } from "./setup";
+import { DISPLAY, TableDisplaySongs } from "./setup";
 import { IFontDisplay, IWallpaperDisplay } from "./types";
 
 export class FontDisplayManager extends BaseTable<IFontDisplay> {
   constructor() {
-    super(TableDisplaySongs.FONT);
+    super(TableDisplaySongs.FONT, DISPLAY.stores[0]);
   }
 }
 
 export class WallpaperDisplayManager extends BaseTable<IWallpaperDisplay> {
   constructor() {
-    super(TableDisplaySongs.WALLPAPER);
+    super(TableDisplaySongs.WALLPAPER, DISPLAY.stores[1]);
   }
 }

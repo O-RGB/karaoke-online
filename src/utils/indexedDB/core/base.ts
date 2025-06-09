@@ -1,11 +1,11 @@
-import { DatabaseManagerCore } from "./common";
+import { DatabaseCommonCore, StoreConfig } from "./common";
 
-export class BaseTable<T extends { id: number }> {
-  protected db = DatabaseManagerCore.getInstance();
+export class BaseTable<T> {
+  protected db = DatabaseCommonCore.getInstance();
 
-  constructor(private storeName: string) {}
+  constructor(private storeName: string, private storeDetail: StoreConfig) {}
 
-  async add(data: Omit<T, "id">): Promise<IDBValidKey> {
+  async add(data: Partial<T>): Promise<IDBValidKey> {
     return this.db.addToStore(this.storeName, data);
   }
 
@@ -31,5 +31,9 @@ export class BaseTable<T extends { id: number }> {
       const updated = { ...existing, ...updatedFields };
       await this.db.putToStore(this.storeName, updated);
     }
+  }
+
+  getStoreDetail(): StoreConfig {
+    return this.storeDetail;
   }
 }

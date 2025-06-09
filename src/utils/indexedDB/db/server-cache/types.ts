@@ -1,3 +1,5 @@
+import { SearchResult } from "@/features/songs/types/songs.type";
+
 export enum TableLocalSongs {
   FILES = "files",
   TRACKLIST = "tracklist",

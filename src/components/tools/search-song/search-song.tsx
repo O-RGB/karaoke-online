@@ -1,6 +1,5 @@
 import SearchSelect from "../../common/input-data/select/search-select";
 import SearchDropdown from "./search-dropdown";
-import useTracklistStore from "@/features/tracklist/tracklist-store";
 import useKeyboardStore from "@/features/keyboard-state";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import SwitchButton from "@/components/common/input-data/switch/switch-button";
@@ -10,11 +9,14 @@ import { toOptions } from "@/lib/general";
 import { FaList } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
+import { ITrackData } from "@/features/songs/types/songs.type";
+import useSongsStore from "@/features/songs/store/songs.store";
 
 interface SearchSongProps {}
 
 const SearchSong: React.FC<SearchSongProps> = ({}) => {
-  const searchTracklist = useTracklistStore((state) => state.searchTracklist);
+  const songsManager = useSongsStore((state) => state.songsManager);
+  // const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const { orientation } = useOrientation();
 
   const addQueue = useQueuePlayer((state) => state.addQueue);
@@ -36,10 +38,10 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const [fullUi, setFullUi] = useState<boolean>(false);
 
   async function onSearch<T = any>(value: string) {
-    const se = (await searchTracklist(value)) ?? [];
-    const op = toOptions<SearchResult>({
+    const se = await songsManager?.manager?.search(value);
+    const op = toOptions<ITrackData>({
       render: (value) => <SearchDropdown value={value}></SearchDropdown>,
-      list: se,
+      list: se?.records ?? [],
     });
     return op as T;
   }
@@ -52,7 +54,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
     setFullUi(false);
   };
 
-  const setSongPlayer = async (value: SearchResult) => {
+  const setSongPlayer = async (value: ITrackData) => {
     addQueue(value);
   };
 
@@ -86,7 +88,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
               className={
                 "!placeholder-white appearance-none !bg-transparent w-full"
               }
-              onSelectItem={(value: IOptions<SearchResult>) => {
+              onSelectItem={(value: IOptions<ITrackData>) => {
                 if (value.option) {
                   setSongPlayer(value.option);
                 }

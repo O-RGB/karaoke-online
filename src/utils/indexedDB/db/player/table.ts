@@ -1,9 +1,9 @@
 import { BaseTable } from "../../core/base";
 import { ISoundfontPlayer } from "./types";
-import { TablePlayerSongs } from "./setup";
+import { PLAYER, TablePlayerSongs } from "./setup";
 
 export class SoundfontPlayerManager extends BaseTable<ISoundfontPlayer> {
   constructor() {
-    super(TablePlayerSongs.SOUND_FONT);
+    super(TablePlayerSongs.SOUND_FONT, PLAYER.stores[0]);
   }
 }

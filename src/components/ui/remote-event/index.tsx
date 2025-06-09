@@ -9,7 +9,7 @@ import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import { ISearchCallBack } from "@/features/player/player/types/player.type";
 import { usePeerStore } from "@/features/remote/modules/peer-js-store";
 import { RemoteReceivedMessages } from "@/features/remote/types/remote.type";
-import useTracklistStore from "@/features/tracklist/tracklist-store";
+// import useTracklistStore from "@/features/tracklist/tracklist-store";
 
 import React, { useEffect } from "react";
 
@@ -21,7 +21,7 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
     (state) => state.sendSuperUserMessage
   );
   const engine = useSynthesizerEngine((state) => state.engine);
-  const searchTracklist = useTracklistStore((state) => state.searchTracklist);
+  // const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const addQueue = useQueuePlayer((state) => state.addQueue);
   const moveQueue = useQueuePlayer((state) => state.moveQueue);
   const queue = useQueuePlayer((state) => state.queue);
@@ -40,15 +40,15 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
     switch (type?.type) {
       case "SEARCH":
         let searchSong: string = message;
-        const list = (await searchTracklist(searchSong)) ?? [];
-        sendSuperUserMessage({
-          user: "SUPER",
-          message: list,
-          type: {
-            event: "CHANGE",
-            type: "SEARCH",
-          },
-        });
+        // const list = (await searchTracklist(searchSong)) ?? [];
+        // sendSuperUserMessage({
+        //   user: "SUPER",
+        //   message: list,
+        //   type: {
+        //     event: "CHANGE",
+        //     type: "SEARCH",
+        //   },
+        // });
         break;
 
       case "EXPRESSION":
@@ -107,12 +107,12 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
       //   });
       //   break;
 
-      case "SET_SONG":
-        let song: SearchResult = message;
-        if (song) {
-          addQueue(song);
-        }
-        break;
+      // case "SET_SONG":
+      //   let song: SearchResult = message;
+      //   if (song) {
+      //     addQueue(song);
+      //   }
+      //   break;
 
       case "INIT_REMOTE":
         const expression = engine?.instrumental?.expression;
@@ -139,10 +139,10 @@ const RemoteEvent: React.FC<RemoteEventProps> = ({}) => {
         });
         break;
 
-      case "QUEUE_MOVE":
-        let newQueue: SearchResult[] = message as SearchResult[];
-        moveQueue(newQueue);
-        break;
+      // case "QUEUE_MOVE":
+      //   let newQueue: SearchResult[] = message as SearchResult[];
+      //   moveQueue(newQueue);
+      //   break;
 
       case "NEXT_SONG":
         nextMusic();

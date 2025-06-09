@@ -1,14 +1,14 @@
-import { DatabaseManagerCore } from "./core/common";
+import { DatabaseCommonCore } from "./core/common";
 import { DISPLAY } from "./db/display/setup";
 import { LOCAL_SONGS } from "./db/local-songs/setup";
 import { PLAYER } from "./db/player/setup";
 import { SERVER_SONGS } from "./db/server-cache/setup";
 
 export class DatabaseService {
-  private dbManager: DatabaseManagerCore;
+  private dbManager: DatabaseCommonCore;
 
   constructor() {
-    this.dbManager = DatabaseManagerCore.getInstance();
+    this.dbManager = DatabaseCommonCore.getInstance();
   }
 
   async initialize() {

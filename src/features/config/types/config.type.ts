@@ -32,6 +32,11 @@ export type SystemFont =
   | "thasadith"
   | "k2d"
   | "libreBaskerville";
+export type SoundSystemMode =
+  | "LOAD_JSON_FILE"
+  | "EXTREME_FILE_SYSTEM"
+  | "DRIVE_API"
+  | "SERVER_API";
 
 export interface ConfigSystem {
   refreshRate: Partial<RefreshRateConfig>;
@@ -51,7 +56,7 @@ export interface SoundSetting {
   soundFont: string;
   lockBase: number;
   mixer: MixerConfig[];
-  equalizer: boolean
+  equalizer: boolean;
 }
 
 export interface SystemConfig {
@@ -61,6 +66,7 @@ export interface SystemConfig {
   urlTested: boolean;
   tracklistUrl: string;
   tracklistUrlTested: boolean;
+  soundMode: SoundSystemMode;
   uploadToDrive: boolean;
   engine: EngineType;
   timingModeType: TimingModeType;
@@ -69,6 +75,7 @@ export interface SystemConfig {
 export interface ThemesConfig {
   backgroundBlur: boolean;
   backgroundColor: ThemesSettingConfig;
+  wallpaperId: number;
 }
 export interface ThemesSettingConfig {
   active: boolean;

@@ -1,7 +1,7 @@
 export interface StoreConfig {
   name: string;
-  keyPath: string;
-  autoIncrement: boolean;
+  keyPath?: string;
+  autoIncrement?: boolean;
   indexes?: IndexConfig[];
 }
 

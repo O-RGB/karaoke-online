@@ -186,8 +186,8 @@ const QueueSong: React.FC<QueueSongProps> = ({
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      const oldIndex = queue.findIndex((item) => item.id === active.id);
-      const newIndex = queue.findIndex((item) => item.id === over.id);
+      const oldIndex = queue.findIndex((item) => item.CODE === active.CODE);
+      const newIndex = queue.findIndex((item) => item.CODE === over.CODE);
 
       if (lockFirstIndex && newIndex === 0) {
         return;
@@ -303,17 +303,17 @@ const QueueSong: React.FC<QueueSongProps> = ({
             </thead>
             <tbody className="relative">
               <SortableContext
-                items={queue.map((item) => item.id)}
+                items={queue.map((item) => item.CODE)}
                 strategy={verticalListSortingStrategy}
               >
                 {queue.map((item, index) => (
                   <SortableTableRow
-                    key={`queue-${item.id}-${index}`}
+                    key={`queue-${item.CODE}-${index}`}
                     item={{
-                      details: `${item.id} ${item.name} - ${item.artist}`,
-                      id: item.id,
+                      details: `${item.CODE} ${item.TITLE} - ${item.ARTIST}`,
+                      id: item.CODE,
                       number: index,
-                      type: item.type.toString(),
+                      type: item.SUB_TYPE ?? "",
                     }}
                     index={index}
                     isFirst={index == 0}

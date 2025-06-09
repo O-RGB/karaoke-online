@@ -19,9 +19,9 @@ import WallpaperModal from "../modal/wallpaper-modal";
 import DriveSetting from "../modal/drive-setting-modal";
 import DisplaySettingModal from "../modal/display";
 
-import { DragDrop } from "../tools/drag-drop/drag-drop";
-import DataStoresModal from "../modal/datastores";
-import useTracklistStore from "@/features/tracklist/tracklist-store";
+// import { DragDrop } from "../tools/drag-drop/drag-drop";
+// import DataStoresModal from "../modal/datastores";
+// import useTracklistStore from "@/features/tracklist/tracklist-store";
 import useNotificationStore from "@/features/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/features/config/config-store";
@@ -41,12 +41,16 @@ import Processing2Modal from "../common/processing/processing-update";
 import { DatabaseService } from "@/utils/indexedDB/service";
 import FileSystemManager from "@/utils/file/file-system";
 import AppendSongModal from "../modal/append-song";
+import { SongsSystem } from "@/features/songs";
+import useSongsStore from "@/features/songs/store/songs.store";
+// import { PathSystem } from "@/utils/file/path-system";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const setup = useSynthesizerEngine((state) => state.setup);
 
-  const addTracklist = useTracklistStore((state) => state.addTracklist);
+  // const addTracklist = useTracklistStore((state) => state.addTracklist);
+  const setSongsManager = useSongsStore((state) => state.setSongsManager);
   const initializeKeyboardListeners = useKeyboardStore(
     (state) => state.initializeKeyboardListeners
   );
@@ -62,6 +66,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     setPrepare(true);
     setup(config.system?.engine);
     initializeKeyboardListeners();
+
+    const soundSystem = new SongsSystem(config.system);
+    setSongsManager(soundSystem);
+
     // let tl: SearchResult[] = [];
     // if (config.system?.drive) {
     //   tl = await getTracklist(["DRIVE", "DRIVE_EXTHEME"]);
@@ -82,7 +90,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     SOUNDFONT_MODEL: <SoundfontManager></SoundfontManager>,
     JOIN: <HostRemote></HostRemote>,
     SUPER_JOIN: <SuperHostRemote></SuperHostRemote>,
-    MUSIC_STORE: <DataStoresModal></DataStoresModal>,
+    // MUSIC_STORE: <DataStoresModal></DataStoresModal>,
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
@@ -102,22 +110,27 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <AutoModal auto title={""}></AutoModal>
       {/* <div className="fixed top-52 left-60 z-50">
         <button
+          className="p-10 border m-2"
           onClick={async () => {
-            const fsManager = FileSystemManager.getInstance();
-            await fsManager.selectDirectory();
+            const pathSystem = PathSystem.getPathInstance();
+            await pathSystem.createPath("company/department/employees");
+            await pathSystem.createPath("images/2025/30/11");
+          }}
+        >
+          add database
+        </button>
+        <button
+          className="p-10 border m-2"
+          onClick={async () => {
+            const pathSystem = PathSystem.getPathInstance();
+            await pathSystem.deletePath("company/department/employees");
+            await pathSystem.deletePath("images/2025/30/11");
           }}
         >
           delete database
         </button>
-        <button
-          onClick={async () => {
-            const fsManager = FileSystemManager.getInstance();
-            console.log(await fsManager.listDirectory());
-          }}
-        >
-          list files
-        </button>
       </div> */}
+
       <NotificationAlert></NotificationAlert>
       {/* Contact */}
       <div id="modal-container">

@@ -1,85 +1,82 @@
 import { create } from "zustand";
 import { WALLPAPER } from "@/config/value";
-import {
-  getLocalWallpaper,
-  setLocalWallpaper,
-} from "@/lib/local-storege/local-storage";
-import {
-  saveWallpaperStorage,
-  getWallpaperStorage,
-  deleteWallpaperStorage,
-  getAllWallpaperStorage,
-} from "@/lib/storage/wallpaper";
+import { WallpaperDisplayManager } from "@/utils/indexedDB/db/display/table";
+import useConfigStore from "./config/config-store";
+import { IWallpaperDisplay } from "@/utils/indexedDB/db/display/types";
 
 interface WallpaperState {
   wallpaper: string;
-  wallpaperName: string;
+  wallpaperId: number;
   isVideo: boolean;
   addWallpaper: (file: File) => Promise<void>;
   loadWallpaper: () => Promise<void>;
-  getAllWallpaper: () => Promise<File[] | undefined>;
-  changeWallpaper: (filename: string) => Promise<void>;
-  deleteWallpaper: (filename: string) => Promise<void>;
+  getAllWallpaper: () => Promise<IWallpaperDisplay[]>;
+  changeWallpaper: (wallpaperId: number) => Promise<void>;
+  deleteWallpaper: (wallpaperId: number) => Promise<void>;
 }
 
 export const useWallpaperStore = create<WallpaperState>((set, get) => ({
   wallpaper: WALLPAPER,
-  wallpaperName: "",
+  wallpaperId: -1,
   isVideo: false,
 
   addWallpaper: async (file: File) => {
-    const res = await saveWallpaperStorage(file);
+    const manager = new WallpaperDisplayManager();
+    const onCreated = await manager.add({ file: file, createdAt: new Date() });
     const mediaUrl = URL.createObjectURL(file);
-    if (res) {
-      setLocalWallpaper(file.name);
+    if (onCreated) {
       set({
         wallpaper: mediaUrl,
         isVideo: file.type.startsWith("video/"),
-        wallpaperName: file.name,
+        wallpaperId: onCreated as number,
       });
     }
   },
 
   loadWallpaper: async () => {
-    const key = getLocalWallpaper();
-    if (key) {
-      const wallpaper = await getWallpaperStorage(key);
-      if (wallpaper.value) {
-        const mediaUrl = URL.createObjectURL(wallpaper.value);
-        set({
-          wallpaper: mediaUrl,
-          isVideo: wallpaper.value.type.startsWith("video/"),
-          wallpaperName: wallpaper.value.name,
-        });
-      }
+    const wallpaperId = useConfigStore.getState().config.themes?.wallpaperId;
+    const manager = new WallpaperDisplayManager();
+    if (!wallpaperId) return;
+    const wallpaper = await manager.get(wallpaperId);
+    if (wallpaper?.file) {
+      const mediaUrl = URL.createObjectURL(wallpaper?.file);
+      set({
+        wallpaper: mediaUrl,
+        isVideo: wallpaper.file.type.startsWith("video/"),
+        wallpaperId: wallpaper.id,
+      });
     }
   },
 
   getAllWallpaper: async () => {
-    return await getAllWallpaperStorage();
+    const manager = new WallpaperDisplayManager();
+    return await manager.getAll();
   },
 
-  changeWallpaper: async (filename: string) => {
-    setLocalWallpaper(filename);
-    const localfile = await getWallpaperStorage(filename);
-    if (localfile.value) {
-      const mediaUrl = URL.createObjectURL(localfile.value);
+  changeWallpaper: async (wallpaperId: number) => {
+    const setConfig = useConfigStore.getState().setConfig;
+    const manager = new WallpaperDisplayManager();
+    const wallpaper = await manager.get(wallpaperId);
+    if (wallpaper) {
+      const mediaUrl = URL.createObjectURL(wallpaper.file);
       set({
         wallpaper: mediaUrl,
-        isVideo: localfile.value.type.startsWith("video/"),
-        wallpaperName: localfile.value.name,
+        isVideo: wallpaper.file.type.startsWith("video/"),
+        wallpaperId: wallpaper.id,
       });
+      setConfig({ themes: { wallpaperId } });
     }
   },
 
-  deleteWallpaper: async (filename: string) => {
-    const res = await deleteWallpaperStorage(filename);
-    if (res) {
-      set({
-        wallpaper: WALLPAPER,
-        wallpaperName: "",
-        isVideo: false,
-      });
+  deleteWallpaper: async (wallpaperId: number) => {
+    const setConfig = useConfigStore.getState().setConfig;
+    const configWallpaperId =
+      useConfigStore.getState().config.themes?.wallpaperId;
+    const manager = new WallpaperDisplayManager();
+    await manager.delete(wallpaperId);
+
+    if (configWallpaperId === wallpaperId) {
+      setConfig({ themes: { wallpaperId: undefined } });
     }
   },
 }));

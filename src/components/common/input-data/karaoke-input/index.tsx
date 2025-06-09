@@ -8,10 +8,11 @@ import Tags from "../../display/tags";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import useKeyboardStore from "@/features/keyboard-state";
 import { useKeyboardEvents } from "@/hooks/keyboard-hook";
+import { ITrackData, SoundSubType, SoundType } from "@/features/songs/types/songs.type";
 
 interface KaraokeSearchInputProps {
   onSearch?: (value: string) => Promise<IOptions[]>;
-  onSelectSong?: (song: SearchResult) => void;
+  onSelectSong?: (song: ITrackData) => void;
 }
 
 const SourceTag = ({ from }: { from?: TracklistFrom }) => {
@@ -73,14 +74,14 @@ const ArtistTag = ({ artist = "" }: { artist?: string }) => {
   );
 };
 
-const SongTypeTag = ({ type }: { type?: number }) => {
-  if (type === 0)
+const SongTypeTag = ({ type }: { type?: SoundSubType }) => {
+  if (type === "EMK")
     return (
       <Tags color="red" className="!text-lg">
         EMK
       </Tags>
     );
-  if (type === 1)
+  if (type === "NCN")
     return (
       <Tags color="green" className="!text-lg">
         NCN
@@ -94,7 +95,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
   onSelectSong,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [searchResult, setSearchResult] = useState<IOptions<SearchResult>[]>(
+  const [searchResult, setSearchResult] = useState<IOptions<ITrackData>[]>(
     []
   );
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -252,11 +253,11 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
         {/* Selected result display */}
         {hasResults && selectedSong && (
           <div className="flex flex-wrap gap-3 items-center text-2xl animate-fadeIn">
-            <SongTypeTag type={selectedSong.type} />
-            <SourceTag from={selectedSong.from} />
-            <span className="uppercase">{selectedSong.id}</span>
-            <span>{selectedSong.name}</span>
-            <ArtistTag artist={selectedSong.artist} />
+            <SongTypeTag type={selectedSong.SUB_TYPE} />
+            {/* <SourceTag from={selectedSong.from} /> */}
+            <span className="uppercase">{selectedSong.CODE}</span>
+            <span>{selectedSong.TITLE}</span>
+            <ArtistTag artist={selectedSong.ARTIST} />
           </div>
         )}
       </div>

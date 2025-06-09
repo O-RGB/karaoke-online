@@ -31,19 +31,50 @@ class FileSystemManager {
       return this.rootHandle;
     }
 
-    const savedHandle = await this.fileSystemStore.get(this.pathId);
+    const savedHandle = await this.queryPermission();
     if (savedHandle) {
-      try {
-        await savedHandle.handle.queryPermission();
-        this.rootHandle = savedHandle.handle;
-        return savedHandle.handle;
-      } catch {}
+      this.rootHandle = savedHandle;
+      return savedHandle;
     }
 
     return await this.selectDirectory();
   }
 
-  async getFileByPath(path: string): Promise<File> {
+  async queryPermission(): Promise<FileSystemDirectoryHandle | null> {
+    const savedHandle = await this.fileSystemStore.get(this.pathId);
+    if (savedHandle) {
+      try {
+        console.log("Permission ...");
+        const permission = await savedHandle.handle.queryPermission();
+
+        // ตรวจสอบ permission status
+        if (permission === "granted") {
+          this.rootHandle = savedHandle.handle;
+          console.log("Permission granted");
+          return savedHandle.handle;
+        } else if (permission === "prompt") {
+          // ถ้า permission เป็น prompt ให้ขอ permission
+          const newPermission = await savedHandle.handle.requestPermission();
+          if (newPermission === "granted") {
+            this.rootHandle = savedHandle.handle;
+            console.log("Permission granted after request");
+            return savedHandle.handle;
+          }
+        }
+
+        console.log("Permission denied or not available");
+        return null;
+      } catch (error) {
+        console.log("Error checking permission:", error);
+        return null;
+      }
+    }
+
+    console.log("No saved handle found");
+    return null;
+  }
+
+  async getFileByPath(path: string): Promise<File | undefined> {
     const rootHandle = await this.getRootHandle();
     const pathParts = path.split("/").filter((part) => part.length > 0);
 
@@ -52,6 +83,8 @@ class FileSystemManager {
 
     for (let i = 0; i < pathParts.length; i++) {
       const part = pathParts[i];
+      console.log(part);
+
 
       if (i === pathParts.length - 1) {
         if (currentHandle.kind !== "directory") {
@@ -256,14 +289,14 @@ class FileSystemManager {
     this.rootHandle = null;
   }
 
-  async readFileAsText(path: string): Promise<string> {
+  async readFileAsText(path: string): Promise<string | undefined> {
     const file = await this.getFileByPath(path);
-    return await file.text();
+    return await file?.text();
   }
 
-  async readFileAsArrayBuffer(path: string): Promise<ArrayBuffer> {
+  async readFileAsArrayBuffer(path: string): Promise<ArrayBuffer | undefined> {
     const file = await this.getFileByPath(path);
-    return await file.arrayBuffer();
+    return await file?.arrayBuffer();
   }
 
   async listDirectory(
@@ -289,6 +322,16 @@ class FileSystemManager {
 
   hasHandle(): boolean {
     return this.rootHandle !== null;
+  }
+
+  getRootHandleSync(): FileSystemDirectoryHandle | null {
+    return this.rootHandle;
+  }
+
+  // เพิ่มฟังก์ชันสำหรับตรวจสอบ permission โดยไม่แสดง popup
+  async hasSavedDirectory(): Promise<boolean> {
+    const savedHandle = await this.queryPermission();
+    return savedHandle !== null;
   }
 }
 

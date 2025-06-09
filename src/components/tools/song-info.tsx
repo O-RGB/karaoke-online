@@ -32,8 +32,8 @@ const SongInfo: React.FC<SongInfoProps> = ({}) => {
         }  w-fit h-20 px-5   flex flex-col   gap-2 `}
       >
         <div className="p-3 border blur-overlay rounded-md text-white ">
-          ชื่อเพลง: {musicInfo?.name} <br />
-          นักร้อง: {musicInfo?.artist}
+          ชื่อเพลง: {musicInfo?.TITLE} <br />
+          นักร้อง: {musicInfo?.ARTIST}
         </div>
       </div>
     </>

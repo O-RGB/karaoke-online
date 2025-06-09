@@ -1,13 +1,15 @@
 "use client";
+import Tabs from "../../common/tabs";
 import React, { useEffect, useState } from "react";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import SoundfontFolder from "./tabs/sound-font-folder";
 import SoundfontFree from "./tabs/sound-font-free";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { BiDownload, BiFolder } from "react-icons/bi";
-import { deleteSoundFontStorage, getAllKeySoundfont } from "@/lib/storage/soundfont";
-import Tabs from "../../common/tabs";
+import { SoundfontPlayerManager } from "@/utils/indexedDB/db/player/table";
+import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 
+const soundfont = new SoundfontPlayerManager();
 interface SoundfontManagerProps {
   height?: number;
 }
@@ -17,20 +19,17 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
   const isPaused = useRuntimePlayer((state) => state.isPaused);
 
   const [soundFontStorage, setSoundFontStorage] = useState<
-    ListItem<IDBValidKey>[]
+    ListItem<ISoundfontPlayer>[]
   >([]);
 
   const [loading, setLoading] = useState<boolean>(false);
 
   const getSoundFontList = async () => {
-    let sf = await getAllKeySoundfont();
-    const lists = sf.map(
-      (data) =>
-      ({
-        row: data.toString(),
-        value: data,
-      } as ListItem<IDBValidKey>)
-    );
+    let sf = await soundfont.getAll();
+    const lists = sf.map((data) => ({
+      row: data.id,
+      value: data,
+    }));
     setSoundFontStorage(lists);
     return lists;
   };
@@ -42,8 +41,8 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
     }
   };
 
-  const removeSF2Local = async (filename: string) => {
-    await deleteSoundFontStorage(filename);
+  const removeSF2Local = async (id: number) => {
+    await soundfont.delete(id);
     await getSoundfontLocal();
   };
 
@@ -74,16 +73,29 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
       tabs={[
         {
           content: (
-            <SoundfontFolder engine={engine} getSoundFontList={getSoundFontList} loading={loading} removeSF2Local={removeSF2Local} setLoading={setLoading} soundFontStorage={soundFontStorage} updateSoundFont={updateSoundFont} ></SoundfontFolder>
+            <SoundfontFolder
+              engine={engine}
+              getSoundFontList={getSoundFontList}
+              loading={loading}
+              removeSF2Local={removeSF2Local}
+              setLoading={setLoading}
+              soundFontStorage={soundFontStorage}
+              updateSoundFont={updateSoundFont}
+            ></SoundfontFolder>
           ),
           label: "โฟลเดอร์",
           icon: <BiFolder></BiFolder>,
         },
         {
-          content: <SoundfontFree getSoundFontList={getSoundFontList} soundFontStorage={soundFontStorage}></SoundfontFree>,
+          content: (
+            <SoundfontFree
+              getSoundFontList={getSoundFontList}
+              soundFontStorage={soundFontStorage}
+            ></SoundfontFree>
+          ),
           label: "แจกฟรี",
-          icon: <BiDownload></BiDownload>
-        }
+          icon: <BiDownload></BiDownload>,
+        },
       ]}
     ></Tabs>
   );
