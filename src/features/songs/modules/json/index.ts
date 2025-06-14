@@ -1,49 +1,50 @@
 import {
   ITrackData,
   KaraokeExtension,
+  MasterIndex,
+  PreviewChunk,
 } from "@/features/songs/types/songs.type";
 import {
   MasterIndexLocalSongsManager,
-  TracklistLocalSongsManager,
+  ChunkDataLocalSongsManager,
 } from "@/utils/indexedDB/db/local-songs/table";
 import { BaseSongsSystemReader } from "../../base";
-import { ChunkData, MasterIndex } from "../../types/songs.type";
-import { ITracklistLocalSongs } from "@/utils/indexedDB/db/local-songs/types";
 
 export class JSONDBSongsSystemReader extends BaseSongsSystemReader {
-  private tracklistDb: TracklistLocalSongsManager;
+  private chunkDataDb: ChunkDataLocalSongsManager;
   private masterIndexDb: MasterIndexLocalSongsManager;
   private jsonData: ITrackData[] = [];
   private predefinedFields: string[] = [];
 
   constructor(jsonData?: ITrackData[], predefinedFields?: string[]) {
     super();
-    this.tracklistDb = new TracklistLocalSongsManager();
+    this.chunkDataDb = new ChunkDataLocalSongsManager();
     this.masterIndexDb = new MasterIndexLocalSongsManager();
-    this.jsonData = jsonData ?? [];
+    if (jsonData) {
+      this.setJSONData(jsonData); // Use setter to ensure _originalIndex is set
+    }
     this.predefinedFields = predefinedFields || [];
-    this.initializeDataSource();
+    // No need to call initializeDataSource here, setJSONData handles it.
   }
+
+  // --- Data Source Methods ---
 
   async initializeDataSource(): Promise<void> {
-    try {
-      this.jsonData = this.jsonData.map((record, index) => ({
-        ...record,
-        _originalIndex:
-          record._originalIndex !== undefined ? record._originalIndex : index,
-      }));
-
-      console.log("JSON data source initialized successfully", {
-        totalRecords: this.jsonData.length,
-      });
-    } catch (error) {
-      console.error("Failed to initialize JSON data source:", error);
-      throw error;
-    }
+    // This method is part of the abstract class contract.
+    // The main logic is handled by setJSONData in this implementation.
+    console.log("JSON data source is ready.");
+    return Promise.resolve();
   }
 
-  setJsonData(data: ITrackData[]): void {
-    this.jsonData = data;
+  setJSONData(data: ITrackData[]): void {
+    this.jsonData = data.map((record, index) => ({
+      ...record,
+      _originalIndex:
+        record._originalIndex !== undefined ? record._originalIndex : index,
+    }));
+    console.log("JSON data source updated.", {
+      totalRecords: this.jsonData.length,
+    });
   }
 
   async getTotalRecords(): Promise<number> {
@@ -58,42 +59,58 @@ export class JSONDBSongsSystemReader extends BaseSongsSystemReader {
     return this.jsonData.slice(startIndex, actualEndIndex);
   }
 
-  async saveChunkData(chunkData: ChunkData): Promise<void> {
+  // --- V6 Persistence Methods (CHANGED) ---
+
+  /**
+   * CHANGED: Renamed from saveChunkData to savePreviewChunk to match V6 Base Class.
+   */
+  async savePreviewChunk(
+    chunkId: number,
+    chunkData: PreviewChunk
+  ): Promise<void> {
     try {
-      await this.tracklistDb.add({
-        id: chunkData.chunkId,
+      // IndexedDB manager expects a specific format.
+      await this.chunkDataDb.add({
+        id: chunkId,
         createdAt: new Date(),
         data: chunkData,
       });
     } catch (error) {
-      console.error(`Error saving chunk ${chunkData.chunkId}:`, error);
+      console.error(`Error saving preview chunk ${chunkId}:`, error);
       throw error;
     }
   }
 
-  async loadChunkData(chunkId: number): Promise<ChunkData | null> {
+  /**
+   * CHANGED: Renamed from loadChunkData to loadPreviewChunk to match V6 Base Class.
+   */
+  async loadPreviewChunk(chunkId: number): Promise<PreviewChunk | null> {
     try {
-      const chunkRecord = await this.tracklistDb.get(chunkId);
-      return chunkRecord ? chunkRecord.data : null;
+      const chunkRecord = await this.chunkDataDb.get(chunkId);
+      // The data stored is already in the PreviewChunk format.
+      return chunkRecord ? (chunkRecord.data as PreviewChunk) : null;
     } catch (error) {
-      console.error(`Error loading chunk ${chunkId}:`, error);
+      console.error(`Error loading preview chunk ${chunkId}:`, error);
       return null;
     }
   }
 
   async saveMasterIndex(masterIndex: MasterIndex): Promise<void> {
     try {
+      // The logic for adding fields can be kept.
+      const finalMasterIndex: any = { ...masterIndex };
       if (this.predefinedFields.length > 0) {
-        masterIndex.fields = this.predefinedFields;
+        finalMasterIndex.fields = this.predefinedFields;
       } else if (this.jsonData.length > 0) {
-        masterIndex.fields = Object.keys(this.jsonData[0]).filter(
+        finalMasterIndex.fields = Object.keys(this.jsonData[0]).filter(
           (key) => !key.startsWith("_")
         );
       }
 
+      // Use a fixed ID for the single master index record.
       await this.masterIndexDb.add({
         id: 1,
-        data: masterIndex,
+        data: finalMasterIndex,
         createdAt: new Date(),
       });
     } catch (error) {
@@ -105,20 +122,26 @@ export class JSONDBSongsSystemReader extends BaseSongsSystemReader {
   async loadMasterIndex(): Promise<MasterIndex | null> {
     try {
       const indexRecord = await this.masterIndexDb.get(1);
-      return indexRecord ? indexRecord.data : null;
+      return indexRecord ? (indexRecord.data as MasterIndex) : null;
     } catch (error) {
       console.error("Failed to load master index:", error);
       return null;
     }
   }
 
-  public setJSONData(data: ITrackData[]): void {
-    this.jsonData = data.map((record, index) => ({
-      ...record,
-      _originalIndex:
-        record._originalIndex !== undefined ? record._originalIndex : index,
-    }));
+  // --- V6 Full Data Fetching (ADDED) ---
+
+  /**
+   * ADDED: Required by V6 Base Class to fetch full track details after a search.
+   */
+  async getRecordByOriginalIndex(index: number): Promise<ITrackData | null> {
+    if (index >= 0 && index < this.jsonData.length) {
+      return this.jsonData[index];
+    }
+    return null;
   }
+
+  // --- Class-Specific Helper Methods ---
 
   public getJSONData(): ITrackData[] {
     return this.jsonData;
@@ -128,28 +151,24 @@ export class JSONDBSongsSystemReader extends BaseSongsSystemReader {
     this.predefinedFields = fields;
   }
 
-  public async getAllChunkIds(): Promise<ITracklistLocalSongs[]> {
-    try {
-      return await this.tracklistDb.getAll();
-    } catch (error) {
-      console.error("Error getting chunk IDs:", error);
-      return [];
-    }
-  }
-
-  public async buildIndex(chunkSize: number = 500): Promise<boolean> {
-    return await super.buildIndex(chunkSize);
-  }
+  /**
+   * REMOVED: buildIndex override is no longer needed as the base class handles it.
+   * To build the index, simply call `await instance.buildIndex(setProgress)`.
+   */
 
   public async updateJSONDataAndRebuildIndex(
     newData: ITrackData[],
-    chunkSize: number = 500
+    setProgress?: (value: IProgressBar) => void
   ): Promise<boolean> {
     this.setJSONData(newData);
-    return await this.buildIndex(chunkSize);
+    // CHANGED: Removed chunkSize parameter.
+    return await this.buildIndex(setProgress);
   }
 
-  public async addRecordsToIndex(newRecords: ITrackData[]): Promise<void> {
+  public async addRecordsAndRebuild(
+    newRecords: ITrackData[],
+    setProgress?: (value: IProgressBar) => void
+  ): Promise<boolean> {
     const currentLength = this.jsonData.length;
     const recordsWithIndex = newRecords.map((record, index) => ({
       ...record,
@@ -157,11 +176,13 @@ export class JSONDBSongsSystemReader extends BaseSongsSystemReader {
     }));
 
     this.jsonData.push(...recordsWithIndex);
-
-    recordsWithIndex.forEach((record) => this.addRecord(record));
+    console.log(`${newRecords.length} records added. Rebuilding index...`);
+    return await this.buildIndex(setProgress);
   }
 
+  // This method is not applicable for a pure JSON data source.
   public getSong(trackData: ITrackData): Promise<KaraokeExtension | undefined> {
-    throw new Error("Method not implemented.");
+    console.warn("getSong is not implemented for JSONDBSongsSystemReader.");
+    return Promise.resolve(undefined);
   }
 }

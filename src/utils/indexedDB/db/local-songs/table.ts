@@ -3,7 +3,7 @@ import {
   IDirectoryLocalSongs,
   IFilesLocalSongs,
   IMasterIndexLocalSongs,
-  ITracklistLocalSongs,
+  IChunkDataLocalSongs as IChunkDataLocalSongs,
 } from "./types";
 import { LOCAL_SONGS, TableLocalSongs } from "./setup";
 
@@ -19,7 +19,7 @@ export class FilesLocalSongsManager extends BaseTable<IFilesLocalSongs> {
   }
 }
 
-export class TracklistLocalSongsManager extends BaseTable<ITracklistLocalSongs> {
+export class ChunkDataLocalSongsManager extends BaseTable<IChunkDataLocalSongs> {
   constructor() {
     super(TableLocalSongs.CHUNKDATA, LOCAL_SONGS.stores[2]);
   }

@@ -26,7 +26,7 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({}) => {
   const onSelectFileSystem = async () => {
     const onLoadIndex = (await songsManager?.extremeFileSystem()) ?? false;
     if (!onLoadIndex) {
-      await songsManager?.manager?.buildIndex(500, setProgress);
+      await songsManager?.manager?.buildIndex(setProgress);
     } else {
       setProgress({
         show: true,

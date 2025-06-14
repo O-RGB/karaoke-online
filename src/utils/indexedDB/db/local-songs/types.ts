@@ -1,5 +1,5 @@
-import { ChunkData, MasterIndex } from "@/features/songs/types/songs.type";
-import { ITrackData } from "@/features/songs/types/songs.type";
+import { MasterIndex, PreviewChunk } from "@/features/songs/types/songs.type";
+
 
 export interface IDirectoryLocalSongs {
   id: number;
@@ -12,9 +12,9 @@ export interface IFilesLocalSongs {
   createdAt: Date;
 }
 
-export interface ITracklistLocalSongs {
+export interface IChunkDataLocalSongs {
   id: number;
-  data: ChunkData;
+  data: PreviewChunk;
   createdAt: Date;
 }
 export interface IMasterIndexLocalSongs {
