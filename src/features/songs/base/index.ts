@@ -1,5 +1,3 @@
-// src/features/songs/core/base-songs-system-reader.ts
-
 import {
   ITrackData,
   MasterIndex,
@@ -79,8 +77,6 @@ export abstract class BaseSongsSystemReader {
     await this.initializeDataSource();
     const totalRecords = await this.getTotalRecords();
 
-    // Step 1: รวบรวมข้อมูลทั้งหมดใน Memory ก่อน (One Pass)
-    // ใช้ RAM เยอะขึ้นชั่วคราว แต่ลดภาระ CPU ได้มหาศาล
     setProgress?.({
       loading: true,
       show: true,
@@ -111,7 +107,6 @@ export abstract class BaseSongsSystemReader {
       });
     });
 
-    // Step 2: สร้าง Sorted Word List และ แบ่งข้อมูลลง Preview Chunks
     setProgress?.({
       loading: true,
       show: true,
@@ -126,14 +121,14 @@ export abstract class BaseSongsSystemReader {
     let currentChunk: PreviewChunk = {};
     let currentChunkSize = 0;
     let chunkId = 0;
-    const MAX_CHUNK_SIZE_BYTES = 5 * 1024 * 1024; // กำหนดขนาด Chunk ที่ 5MB
+    const MAX_CHUNK_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
     for (const word of sortedWords) {
       const previews = wordToPreviewsMap.get(word)!;
       currentChunk[word] = previews;
       wordToChunkMap[word] = chunkId;
 
-      currentChunkSize += JSON.stringify(previews).length + word.length * 2; // Rough size estimation
+      currentChunkSize += JSON.stringify(previews).length + word.length * 2;
 
       if (currentChunkSize > MAX_CHUNK_SIZE_BYTES) {
         await this.savePreviewChunk(chunkId, currentChunk);
@@ -146,7 +141,6 @@ export abstract class BaseSongsSystemReader {
       await this.savePreviewChunk(chunkId, currentChunk);
     }
 
-    // Step 3: บันทึก Master Index
     setProgress?.({
       loading: true,
       show: true,
@@ -182,32 +176,68 @@ export abstract class BaseSongsSystemReader {
       console.error("Failed to load V6 master index or index is corrupted.");
       return false;
     }
+    await this.initializeDataSource(); 
     this.sortedWords = masterIndex.words;
     this.wordToChunkMap = masterIndex.wordToChunkMap;
     console.log("Optimized Index (V6) loaded successfully.");
     return true;
   }
 
+  /**
+   * ADDED: เมธอดใหม่สำหรับให้คะแนนผลลัพธ์
+   */
+  protected calculateV6Score(
+    preview: ISearchRecordPreview,
+    originalQuery: string,
+    searchTerms: string[]
+  ): number {
+    const title = preview.t.toLowerCase();
+    const artist = preview.a.toLowerCase();
+    const query = originalQuery.toLowerCase().trim();
+
+    // Priority 1: ตรงกับชื่อเพลงทั้งประโยคแบบเป๊ะๆ
+    if (title === query) return 1;
+    // Priority 2: ขึ้นต้นด้วยคำค้นหาในชื่อเพลง
+    if (title.startsWith(query)) return 2;
+    // Priority 3: คำค้นหาทุกคำอยู่ในชื่อเพลง
+    if (searchTerms.every((term) => title.includes(term))) return 3;
+    // Priority 4: คำค้นหาทุกคำอยู่ในชื่อศิลปิน
+    if (searchTerms.every((term) => artist.includes(term))) return 4;
+    // Priority 5: คำค้นหาทุกคำกระจายอยู่ในชื่อเพลงและศิลปิน
+    const fullText = `${title} ${artist}`;
+    if (searchTerms.every((term) => fullText.includes(term))) return 5;
+    // ถ้าไม่เข้าเงื่อนไขไหนเลย ให้ความสำคัญต่ำสุด
+    return 99;
+  }
+
+  /**
+   * CHANGED: แก้ไขฟังก์ชัน search ทั้งหมดเพื่อเพิ่ม Scoring และ Sorting
+   */
   public async search(
     query: string,
     options: SearchOptions = {}
   ): Promise<SearchResult> {
     const { maxResults = this.DEFAULT_MAX_RESULTS } = options;
     const startTime = Date.now();
+
+    if (this.sortedWords.length === 0) {
+      return { records: [], searchTime: 0, totalFound: 0 };
+    }
+
     const searchTerms = this.extractWords(query);
-    if (searchTerms.length === 0 || this.sortedWords.length === 0) {
+    if (searchTerms.length === 0) {
       return { records: [], searchTime: 0, totalFound: 0 };
     }
 
     const prefix = searchTerms[0];
 
-    // Step 1: ใช้ Binary Search เพื่อหาตำแหน่งเริ่มต้นของคำ
+    // Step 1: ใช้ Binary Search เพื่อหาตำแหน่งเริ่มต้น (เหมือนเดิม)
     const startIndex = this.findFirstWordWithPrefix(prefix);
     if (startIndex === -1) {
       return { records: [], searchTime: 0, totalFound: 0 };
     }
 
-    // Step 2: รวบรวมคำทั้งหมดที่ตรงกับ Prefix และ Chunk ID ที่ไม่ซ้ำกัน
+    // Step 2: รวบรวมคำและ Chunk ID ที่เกี่ยวข้อง (เหมือนเดิม)
     const matchedWords: string[] = [];
     const chunksToLoad = new Set<number>();
     for (let i = startIndex; i < this.sortedWords.length; i++) {
@@ -223,7 +253,7 @@ export abstract class BaseSongsSystemReader {
       }
     }
 
-    // Step 3: โหลด Preview Chunks ที่จำเป็น
+    // Step 3: โหลด Preview Chunks ที่จำเป็น (เหมือนเดิม)
     const chunkPromises = Array.from(chunksToLoad).map((id) =>
       this.loadPreviewChunk(id)
     );
@@ -232,7 +262,7 @@ export abstract class BaseSongsSystemReader {
     ) as PreviewChunk[];
     const allPreviewsMap: PreviewChunk = Object.assign({}, ...loadedChunks);
 
-    // Step 4: ดึงข้อมูล Preview, กรอง, และประมวลผล
+    // Step 4: ดึงข้อมูล Preview (เหมือนเดิม)
     let resultsPreview: ISearchRecordPreview[] = [];
     matchedWords.forEach((word) => {
       if (allPreviewsMap[word]) {
@@ -240,40 +270,49 @@ export abstract class BaseSongsSystemReader {
       }
     });
 
-    if (searchTerms.length > 1) {
-      const subsequentTerms = searchTerms.slice(1);
-      resultsPreview = resultsPreview.filter((p) => {
-        const fullText = `${p.t} ${p.a}`.toLowerCase();
-        return subsequentTerms.every((term) => fullText.includes(term));
-      });
-    }
+    // --- NEW SCORING & SORTING LOGIC ---
 
-    const uniqueResults = new Map<number, ISearchRecordPreview>();
+    // Step 5: กรอง, ลดความซ้ำซ้อน, และ "ให้คะแนน" ผลลัพธ์
+    const uniqueScoredResults = new Map<
+      number,
+      { preview: ISearchRecordPreview; score: number }
+    >();
+
     for (const preview of resultsPreview) {
-      if (!uniqueResults.has(preview.i)) {
-        uniqueResults.set(preview.i, preview);
+      const fullText = `${preview.t} ${preview.a}`.toLowerCase();
+      if (searchTerms.every((term) => fullText.includes(term))) {
+        const score = this.calculateV6Score(preview, query, searchTerms);
+        if (
+          !uniqueScoredResults.has(preview.i) ||
+          score < uniqueScoredResults.get(preview.i)!.score
+        ) {
+          uniqueScoredResults.set(preview.i, { preview, score });
+        }
       }
     }
 
-    const finalRecords: ITrackData[] = Array.from(uniqueResults.values())
-      .slice(0, maxResults)
-      .map(
-        (preview) =>
-          ({
-            TITLE: preview.t,
-            ARTIST: preview.a,
-            _originalIndex: preview.i,
-            CODE: "",
-            TYPE: "MIDI",
-          } as ITrackData)
-      );
+    // Step 6: จัดเรียงผลลัพธ์ตามคะแนน (น้อยไปมาก)
+    const sortedResults = Array.from(uniqueScoredResults.values()).sort(
+      (a, b) => a.score - b.score
+    );
+
+    // Step 7: ตัดจำนวนผลลัพธ์ และแปลงเป็นรูปแบบที่ต้องการ
+    const finalRecords: ITrackData[] = sortedResults.slice(0, maxResults).map(
+      (item) =>
+        ({
+          TITLE: item.preview.t,
+          ARTIST: item.preview.a,
+          _originalIndex: item.preview.i,
+          _priority: item.score,
+        } as ITrackData)
+    );
 
     const searchTime = Date.now() - startTime;
     return {
       records: finalRecords,
       searchTime,
-      totalFound: uniqueResults.size,
-      terminatedEarly: uniqueResults.size > maxResults,
+      totalFound: uniqueScoredResults.size,
+      terminatedEarly: uniqueScoredResults.size > maxResults,
     };
   }
 

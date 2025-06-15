@@ -69,7 +69,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
     const soundSystem = new SongsSystem(config.system);
     setSongsManager(soundSystem);
-
+    soundSystem.init("EXTREME_FILE_SYSTEM");
     // let tl: SearchResult[] = [];
     // if (config.system?.drive) {
     //   tl = await getTracklist(["DRIVE", "DRIVE_EXTHEME"]);

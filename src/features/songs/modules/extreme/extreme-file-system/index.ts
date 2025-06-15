@@ -23,7 +23,6 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
     this.dbfFilePath = dbfFilePath;
   }
 
-  // --- Data Source Methods (Unchanged) ---
   async initializeDataSource(): Promise<void> {
     try {
       const fileData = await this.fileSystemManager.getFileByPath(
@@ -70,7 +69,6 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
     }));
   }
 
-  // --- V6 Persistence Methods ---
   async saveMasterIndex(masterIndex: MasterIndex): Promise<void> {
     const filePath = "Data/master_index_v6.json";
     await this.fileSystemManager.createFile(
@@ -112,7 +110,6 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
     }
   }
 
-  // --- Full Data Fetching Methods (Unchanged) ---
   async getRecordByOriginalIndex(index: number): Promise<ITrackData | null> {
     if (index < 0) return null;
     const records = await this.getRecordsBatch(index, index + 1);
@@ -122,7 +119,12 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
   public async getSong(
     trackData: ITrackData
   ): Promise<KaraokeExtension | undefined> {
-    const { CODE, TYPE, SUB_TYPE } = trackData;
+    const fullTrackData = await this.getRecordByOriginalIndex(
+      trackData._originalIndex
+    );
+
+    if (!fullTrackData) return;
+    const { CODE, TYPE, SUB_TYPE } = fullTrackData;
     if (!CODE || !TYPE || !SUB_TYPE) {
       console.warn(
         "TrackData is missing required fields for getSong",
@@ -171,7 +173,6 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
     return undefined;
   }
 
-  // --- Helper Methods (Unchanged) ---
   private async getFile(
     path: string,
     secondaryPath: string

@@ -73,12 +73,15 @@ const TableList: React.FC<TableListProps> = ({
             <div
               ref={(el: any) => (itemRefs.current[i] = el)}
               onClick={() => handleClick?.(data.value, i)}
-              className={`${hoverFocus
-                ? `${onFocus === i ? "bg-gray-300" : ""
-                } hover:bg-gray-200 duration-300 cursor-pointer`
-                : ""
-                } p-1 w-full text-sm flex items-center justify-between ${data.className
-                }`}
+              className={`${
+                hoverFocus
+                  ? `${
+                      onFocus === i ? "bg-gray-300" : ""
+                    } hover:bg-gray-200 duration-300 cursor-pointer`
+                  : ""
+              } p-1 w-full text-sm flex items-center justify-between ${
+                data.className
+              }`}
               key={`${listKey}-${i}`}
             >
               {data.row}

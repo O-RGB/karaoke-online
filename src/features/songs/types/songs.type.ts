@@ -1,6 +1,3 @@
-// src/features/songs/types/songs.types.ts
-
-// === Core Data Types ===
 export type SoundType = "MIDI" | "VIDEO" | "MUSIC";
 export type SoundSubType = "NCN" | "EMK";
 
@@ -37,34 +34,21 @@ export interface ITrackData extends ITrackFlags {
   AUDIO_VOL?: number;
 }
 
-// === V6 Optimized Index Types ===
-
-/**
- * Interface สำหรับข้อมูลแสดงผลฉบับย่อที่จะถูกเก็บใน Preview Chunk
- */
 export interface ISearchRecordPreview {
-  t: string; // Title
-  a: string; // Artist
-  i: number; // _originalIndex
+  t: string;
+  a: string;
+  i: number;
 }
 
-/**
- * MasterIndex V6 จะเก็บ Sorted Array และ Word-to-Chunk Map
- */
 export interface MasterIndex {
   totalRecords: number;
-  words: string[]; // Sorted array ของคำทั้งหมด
-  wordToChunkMap: Record<string, number>; // บอกว่าคำนี้อยู่ preview chunk ไหน
+  words: string[];
+  wordToChunkMap: Record<string, number>;
   buildTime: number;
   lastBuilt: string;
 }
 
-/**
- * Preview Chunk เป็นแค่ Object ธรรมดาที่ map คำไปยังข้อมูล Preview
- */
 export type PreviewChunk = Record<string, ISearchRecordPreview[]>;
-
-// === Utility & Result Types ===
 
 export interface SearchResult {
   records: ITrackData[];
@@ -79,6 +63,16 @@ export interface SearchOptions {
 
 export interface KaraokeExtension {
   midi: File;
-  lyr: File;
-  cur: File;
+  lyr: File | string[];
+  cur: File | number[];
+}
+export interface KaraokeCompress {
+  emk: File;
+}
+
+export interface KaraokeDecoded
+  extends Partial<KaraokeExtension>,
+    Partial<KaraokeCompress> {
+  error?: boolean;
+  fileName?: string;
 }
