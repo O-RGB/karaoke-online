@@ -48,6 +48,7 @@ type ModalProps = {
   title?: string;
   icons?: React.ReactNode;
   width?: number;
+  maxWidth?: number;
   height?: number;
   footer?: React.ReactNode;
   cancelText?: string;
@@ -58,13 +59,13 @@ type ModalProps = {
   containerId?: string;
   modalClassName?: string;
   fitHeight?: boolean;
-  index?: number
+  index?: number;
 
-  noMin?: boolean
-  noMove?: boolean
-  noResize?: boolean
-  noFull?: boolean
-  noMax?: boolean
+  noMin?: boolean;
+  noMove?: boolean;
+  noResize?: boolean;
+  noFull?: boolean;
+  noMax?: boolean;
 };
 
 interface CommonStyle {

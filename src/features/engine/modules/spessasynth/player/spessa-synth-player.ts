@@ -1,3 +1,4 @@
+// src/features/engine/modules/spessasynth/player/spessa-synth-player.ts
 import { MIDI, Sequencer } from "spessasynth_lib";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { calculateTicks, convertTicksToTime } from "@/lib/app-control";

@@ -38,10 +38,10 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const [fullUi, setFullUi] = useState<boolean>(false);
 
   async function onSearch<T = any>(value: string) {
-    const se = await songsManager?.manager?.search(value);
+    const se = (await songsManager?.onSearch(value)) ?? [];
     const op = toOptions<ITrackData>({
       render: (value) => <SearchDropdown value={value}></SearchDropdown>,
-      list: se?.records ?? [],
+      list: se,
     });
     return op as T;
   }
@@ -64,14 +64,11 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
 
   return (
     <div>
-      {/* // Default UI */}
-
       <KaraokeSearchInput
         onSearch={onSearch}
         onSelectSong={setSongPlayer}
       ></KaraokeSearchInput>
 
-      {/* // Mobile UI */}
       <div
         className={`fixed z-50 px-5 block lg:hidden ${
           orientation === "landscape"

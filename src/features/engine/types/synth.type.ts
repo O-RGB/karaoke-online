@@ -1,3 +1,4 @@
+//src/features/engine/types/synth.type.ts
 import { MIDI } from "spessasynth_lib/@types/midi_parser/midi_loader";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";

@@ -1,12 +1,13 @@
+import { ITrackData } from "@/features/songs/types/songs.type";
 import TrieSearch from "trie-search";
 
-const options = {
-  ignoreCase: true, // ยังจำเป็นต้องใช้
-  splitOnRegEx: /\s+/, // ยังจำเป็นต้องใช้
+const trieOptions = {
+  ignoreCase: true,
+  splitOnRegEx: /\s+/,
   min: 0,
-  keepAll: false, // ปิดการเก็บข้อมูลทั้งหมด
-  cache: false, // ปิด cache เพื่อลดการใช้ memory
-  fuzzy: true, // เปิด fuzzy matching
+  keepAll: false,
+  cache: false,
+  fuzzy: true,
   expandRegexes: [
     {
       regex: /[่้๊๋]/g,
@@ -15,32 +16,55 @@ const options = {
   ],
 };
 
-export async function addSongList<T = any>(file: File): Promise<TrieSearch<T>> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      try {
-        const contentArrayBuffer = e.target.result;
-        let parsedJSON = JSON.parse(contentArrayBuffer) as T[];
-        const trie = new TrieSearch<T>(["name", "artist"], options);
-        trie.addAll(parsedJSON);
-        resolve(trie);
-      } catch (error) {}
-    };
-    reader.readAsText(file as File);
-  });
-}
+export class TrieSearchService<T extends { [key: string]: any }> {
+  private static instance: TrieSearchService<any>;
 
-export function addAllTrie<T = any>(list: any[]) {
-  const trie = new TrieSearch<T>(["name", "artist"], options);
-  trie.addAll(list);
-  return trie;
-}
+  private trie: TrieSearch<T>;
 
-export async function onSearchList<T = any>(
-  value: string,
-  trie: TrieSearch<T>,
-  limit: number = 20
-) {
-  return trie?.search(value, undefined, limit);
+  private constructor() {
+    this.trie = new TrieSearch<T>(
+      ["CODE", "TITLE", "ARTIST", "LYR_TITLE"],
+      trieOptions
+    );
+    console.log("TrieSearchService instance created.");
+  }
+
+  public static getInstance<
+    U extends { [key: string]: any } = ITrackData
+  >(): TrieSearchService<U> {
+    if (!TrieSearchService.instance) {
+      TrieSearchService.instance = new TrieSearchService<U>();
+    }
+    return TrieSearchService.instance;
+  }
+
+  public addAll(list: T[]): void {
+    this.trie.addAll(list);
+  }
+
+  // ===== 👇 เพิ่มฟังก์ชันนี้เข้ามาใหม่ =====
+  /**
+   * Adds a single item to the trie index.
+   * @param item The item to add.
+   */
+  public add(item: T): void {
+    this.trie.add(item);
+  }
+  // ===== 👆 สิ้นสุดส่วนที่เพิ่มใหม่ =====
+
+  public search(value: string, limit: number = 20): T[] {
+    if (!this.trie || !value) {
+      return [];
+    }
+
+    const results = this.trie.search(value, undefined, limit);
+    return results || [];
+  }
+
+  public clear(): void {
+    this.trie = new TrieSearch<T>(
+      ["CODE", "TITLE", "ARTIST", "LYR_TITLE"],
+      trieOptions
+    );
+  }
 }

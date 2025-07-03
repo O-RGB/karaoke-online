@@ -90,7 +90,16 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     // }
     // let song = undefined;
     let songsManager = useSongsStore.getState().songsManager;
-    const song = await songsManager?.manager?.getSong(music);
+
+    if (!songsManager) {
+      console.log("Erro Song manager not init");
+      throw "Erro Song manager not init";
+    } else {
+      console.log("not error");
+    }
+    console.log("music", music, songsManager);
+    const song = await songsManager.getSong(music);
+    console.log(song);
 
     // if (api) {
     //   song = await getSong(music, url);

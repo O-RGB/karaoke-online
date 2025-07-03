@@ -11,6 +11,9 @@ import { useOrientation } from "@/hooks/orientation-hook";
 import "winbox/dist/css/winbox.min.css";
 import "winbox/dist/css/themes/white.min.css";
 
+// สมมติว่า ModalProps ถูกประกาศไว้ที่อื่น
+// interface ModalProps { ... }
+
 export default function WinboxModal({
   isOpen,
   onClose,
@@ -18,6 +21,7 @@ export default function WinboxModal({
   title,
   width,
   height,
+  maxWidth, // 1. เพิ่ม maxWidth ใน props
   modalClassName = "",
   containerId = "modal-container",
   closable = true,
@@ -26,8 +30,9 @@ export default function WinboxModal({
   noMove,
   noResize,
   noFull = true,
-  noMax
+  noMax,
 }: ModalProps) {
+  // อย่าลืมเพิ่ม maxWidth ใน Type ของ ModalProps ด้วย
   const { isMobile, orientation } = useOrientation();
   const [showModal, setShowModal] = useState(isOpen);
   const [modalDimensions, setModalDimensions] = useState({
@@ -42,17 +47,18 @@ export default function WinboxModal({
       return { width, height };
     }
 
+    // 3. ใช้ maxWidth ที่รับมาในการคำนวณ โดยมีค่า fallback เป็นค่าเดิม
     const defaultSizes = {
       desktop: {
-        width: Math.min(window.innerWidth * 0.8, 1200),
+        width: Math.min(window.innerWidth * 0.8, maxWidth || 1200),
         height: Math.min(window.innerHeight * 0.8, 800),
       },
       mobileLandscape: {
-        width: Math.min(window.innerWidth * 0.9, 800),
+        width: Math.min(window.innerWidth * 0.9, maxWidth || 800),
         height: Math.min(window.innerHeight * 0.8, 600),
       },
       mobilePortrait: {
-        width: Math.min(window.innerWidth * 0.95, 500),
+        width: Math.min(window.innerWidth * 0.95, maxWidth || 500),
         height: Math.min(window.innerHeight * 0.7, 700),
       },
     };
@@ -71,7 +77,7 @@ export default function WinboxModal({
       width: width || size.width,
       height: height || size.height,
     };
-  }, [isMobile, orientation, width, height]);
+  }, [isMobile, orientation, width, height, maxWidth]); // 2. เพิ่ม maxWidth เป็น dependency ของ useCallback
 
   useEffect(() => {
     const updateDimensions = () => {

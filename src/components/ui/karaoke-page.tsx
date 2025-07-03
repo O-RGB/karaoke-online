@@ -39,17 +39,14 @@ import AutoModal from "../modal/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
 import Processing2Modal from "../common/processing/processing-update";
 import { DatabaseService } from "@/utils/indexedDB/service";
-import FileSystemManager from "@/utils/file/file-system";
 import AppendSongModal from "../modal/append-song";
 import { SongsSystem } from "@/features/songs";
 import useSongsStore from "@/features/songs/store/songs.store";
-// import { PathSystem } from "@/utils/file/path-system";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const setup = useSynthesizerEngine((state) => state.setup);
 
-  // const addTracklist = useTracklistStore((state) => state.addTracklist);
   const setSongsManager = useSongsStore((state) => state.setSongsManager);
   const initializeKeyboardListeners = useKeyboardStore(
     (state) => state.initializeKeyboardListeners
@@ -69,16 +66,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
     const soundSystem = new SongsSystem(config.system);
     setSongsManager(soundSystem);
-    soundSystem.init("EXTREME_FILE_SYSTEM");
-    // let tl: SearchResult[] = [];
-    // if (config.system?.drive) {
-    //   tl = await getTracklist(["DRIVE", "DRIVE_EXTHEME"]);
-    // } else {
-    //   tl = await getTracklist(["CUSTOM", "EXTHEME"]);
-    // }
-    // addTracklist(tl);
+
     setTimeout(() => {
       setPrepare(false);
+      soundSystem.init("PYTHON_FILE_ENCODE");
     }, 1000);
   };
 
@@ -107,30 +98,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>
       <RemoteEvent></RemoteEvent>
-      <AutoModal auto title={""}></AutoModal>
-      {/* <div className="fixed top-52 left-60 z-50">
-        <button
-          className="p-10 border m-2"
-          onClick={async () => {
-            const pathSystem = PathSystem.getPathInstance();
-            await pathSystem.createPath("company/department/employees");
-            await pathSystem.createPath("images/2025/30/11");
-          }}
-        >
-          add database
-        </button>
-        <button
-          className="p-10 border m-2"
-          onClick={async () => {
-            const pathSystem = PathSystem.getPathInstance();
-            await pathSystem.deletePath("company/department/employees");
-            await pathSystem.deletePath("images/2025/30/11");
-          }}
-        >
-          delete database
-        </button>
-      </div> */}
-
+      <AutoModal auto title={""}></AutoModal>​
       <NotificationAlert></NotificationAlert>
       {/* Contact */}
       <div id="modal-container">

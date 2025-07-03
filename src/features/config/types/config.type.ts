@@ -33,7 +33,7 @@ export type SystemFont =
   | "k2d"
   | "libreBaskerville";
 export type SoundSystemMode =
-  | "LOAD_JSON_FILE"
+  | "PYTHON_FILE_ENCODE"
   | "EXTREME_FILE_SYSTEM"
   | "DRIVE_API"
   | "SERVER_API";

@@ -1,26 +1,27 @@
 import FileSystemManager from "@/utils/file/file-system";
 import { SoundSystemMode, SystemConfig } from "../config/types/config.type";
 import { DBFSongsSystemReader } from "./modules/extreme/extreme-file-system";
-import { BaseSongsSystemReader } from "./base";
-import { JSONDBSongsSystemReader } from "./modules/json";
-import { ITrackData } from "./types/songs.type";
+import { BaseSongsSystemReader } from "./base/index-search";
+import { ITrackData, KaraokeExtension } from "./types/songs.type";
+import { BaseUserSongsSystemReader } from "./base/tride-search";
+import { PythonIndexReader } from "./modules/extreme/extreme-import";
 
 export const dbfPath = "Data/SONG.DBF";
 
 export class SongsSystem {
   public manager: BaseSongsSystemReader | undefined = undefined;
+  public userSong = new BaseUserSongsSystemReader();
   private currentMode: SoundSystemMode | undefined = undefined;
   private isInitializing: boolean = false;
 
   constructor(config?: Partial<SystemConfig>) {
-    // Auto-init เมื่อโปรแกรมเปิดใช้งาน
     if (config?.soundMode) {
       this.init(config.soundMode);
     }
   }
 
   async init(soundMode: SoundSystemMode, options?: any) {
-    // ป้องกันการ init ซ้อนกัน
+    console.log(this.userSong);
     if (this.isInitializing) {
       console.warn("System is already initializing...");
       return;
@@ -42,8 +43,8 @@ export class SongsSystem {
         case "EXTREME_FILE_SYSTEM":
           await this.extremeFileSystem();
           break;
-        case "LOAD_JSON_FILE":
-          await this.jsonFileSystem(options?.jsonData);
+        case "PYTHON_FILE_ENCODE":
+          await this.pythonSystem();
           break;
         case "SERVER_API":
           await this.serverAPI(options);
@@ -55,9 +56,13 @@ export class SongsSystem {
           throw new Error(`Unsupported sound system mode: ${soundMode}`);
       }
 
-      console.log(`Successfully initialized ${soundMode} mode`);
+      console.log(`Successfully initialized ${soundMode} mode`, this.userSong);
     } catch (error) {
-      console.error(`Failed to initialize ${soundMode} mode:`, error);
+      console.error(
+        `Failed to initialize ${soundMode} mode:`,
+        error,
+        this.userSong
+      );
       this.manager = undefined;
       this.currentMode = undefined;
       throw error;
@@ -68,25 +73,22 @@ export class SongsSystem {
 
   async extremeFileSystem() {
     const fsManager = FileSystemManager.getInstance();
-    const hasRoot = await fsManager.hasSavedDirectory();
+    const hasRoot = await fsManager.getRootHandle();
+    // console.log("hasRoot", hasRoot);
+    // if (!hasRoot) {
+    //   const root = await fsManager.selectDirectory();
+    //   const name = root.name;
+    // }
 
-    if (!hasRoot) {
-      const root = await fsManager.selectDirectory();
-      const name = root.name;
+    if (fsManager) {
+      this.manager = new DBFSongsSystemReader(fsManager, dbfPath);
+      return await this.manager.loadIndex();
     }
-
-    this.manager = new DBFSongsSystemReader(fsManager, dbfPath);
-    return await this.manager.loadIndex();
   }
 
-  async jsonFileSystem(jsonData?: ITrackData[]) {
-    if (jsonData) {
-      this.manager = new JSONDBSongsSystemReader(jsonData);
-      await this.manager.buildIndex();
-    } else {
-      this.manager = new JSONDBSongsSystemReader();
-      await this.manager.loadIndex();
-    }
+  async pythonSystem() {
+    this.manager = new PythonIndexReader();
+    this.manager.loadIndex();
   }
 
   async serverAPI(options?: { apiUrl?: string; token?: string }) {
@@ -114,13 +116,31 @@ export class SongsSystem {
     return !this.isInitializing && this.manager !== undefined;
   }
 
-  // สำหรับ reinit mode เดิม
   async reinitialize(options?: any) {
     if (!this.currentMode) {
       throw new Error("No current mode to reinitialize");
     }
     const mode = this.currentMode;
-    this.currentMode = undefined; // Reset เพื่อให้ init ใหม่
+    this.currentMode = undefined;
     await this.init(mode, options);
+  }
+
+  async onSearch(query: string) {
+    const managerSong = (await this.manager?.search(query)) ?? [];
+    const userSong = this.userSong.search(query);
+    return [...userSong, ...managerSong];
+  }
+
+  async getSong(trackData: ITrackData) {
+    console.log("on get song song system ", trackData);
+    if (trackData._superIndex !== undefined) {
+      return this.manager?.getSong(trackData);
+      try {
+        return this.userSong.getSong(trackData);
+      } catch (error) {
+      }
+    } else {
+      return this.manager?.getSong(trackData);
+    }
   }
 }

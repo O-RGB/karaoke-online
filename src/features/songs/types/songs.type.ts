@@ -3,6 +3,7 @@ export type SoundSubType = "NCN" | "EMK";
 
 export interface ITrackFlags {
   _originalIndex: number;
+  _superIndex?: number;
   _isNew?: boolean;
   _isModified?: boolean;
   _matchedTerms?: string[];
@@ -38,6 +39,7 @@ export interface ISearchRecordPreview {
   t: string;
   a: string;
   i: number;
+  s: number;
 }
 
 export interface MasterIndex {
@@ -46,6 +48,7 @@ export interface MasterIndex {
   wordToChunkMap: Record<string, number>;
   buildTime: number;
   lastBuilt: string;
+  initialToChunkMap: Record<string, number>;
 }
 
 export type PreviewChunk = Record<string, ISearchRecordPreview[]>;
@@ -61,18 +64,24 @@ export interface SearchOptions {
   maxResults?: number;
 }
 
-export interface KaraokeExtension {
+type LyrData = string[];
+type CurData = number[];
+
+export interface KaraokeExtension<T = any> {
+  emk?: File;
   midi: File;
-  lyr: File | string[];
-  cur: File | number[];
-}
-export interface KaraokeCompress {
-  emk: File;
+  lyr: T extends File ? File : LyrData;
+  cur: T extends File ? File : CurData;
 }
 
-export interface KaraokeDecoded
-  extends Partial<KaraokeExtension>,
-    Partial<KaraokeCompress> {
+export interface KaraokeDecoded extends KaraokeExtension<string> {
   error?: boolean;
+  isDuplicate?: boolean;
   fileName?: string;
+  raw?: KaraokeExtension<File>;
+}
+
+export interface TrackDataAndFile {
+  records: ITrackData;
+  raw: KaraokeExtension<File>;
 }

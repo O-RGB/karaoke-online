@@ -1,3 +1,4 @@
+// src/features/engine/types/node.type.ts
 import { midiControllers } from "spessasynth_lib";
 
 export const MAIN_VOLUME = midiControllers.mainVolume; // 7

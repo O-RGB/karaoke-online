@@ -6,7 +6,16 @@ class FileSystemManager {
   private rootHandle: FileSystemDirectoryHandle | null = null;
   private fileSystemStore = new DircetoryLocalSongsManager();
 
-  private constructor() {}
+  private constructor() {
+    this.init();
+  }
+
+  async init() {
+    const savedHandle = await this.fileSystemStore.get(this.pathId);
+    if (savedHandle) {
+      this.rootHandle = savedHandle.handle;
+    }
+  }
 
   static getInstance(): FileSystemManager {
     if (!FileSystemManager.instance) {
@@ -22,7 +31,7 @@ class FileSystemManager {
 
     const handle = await window.showDirectoryPicker();
     this.rootHandle = handle;
-    await this.fileSystemStore.add({ handle });
+    await this.fileSystemStore.add({ id: this.pathId, handle });
     return handle;
   }
 
@@ -84,7 +93,6 @@ class FileSystemManager {
     for (let i = 0; i < pathParts.length; i++) {
       const part = pathParts[i];
       console.log(part);
-
 
       if (i === pathParts.length - 1) {
         if (currentHandle.kind !== "directory") {

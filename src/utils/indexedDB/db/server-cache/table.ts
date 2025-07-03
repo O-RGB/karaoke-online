@@ -4,11 +4,15 @@ import { IFilesServerSongs, ITracklistServerSongs } from "./types";
 
 export class FilesServerSongsManager extends BaseTable<IFilesServerSongs> {
   constructor() {
-    super(TableServerSongs.FILES, SERVER_SONGS.stores[0]);
+    super(SERVER_SONGS.name, TableServerSongs.FILES, SERVER_SONGS.stores[0]);
   }
 }
 export class TracklistServerSongsManager extends BaseTable<ITracklistServerSongs> {
   constructor() {
-    super(TableServerSongs.TRACKLIST, SERVER_SONGS.stores[1]);
+    super(
+      SERVER_SONGS.name,
+      TableServerSongs.TRACKLIST,
+      SERVER_SONGS.stores[1]
+    );
   }
 }

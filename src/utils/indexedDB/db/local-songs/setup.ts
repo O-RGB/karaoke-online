@@ -11,8 +11,8 @@ export const LOCAL_SONGS: DatabaseConfig = {
   name: "local-songs",
   version: 1,
   stores: [
-    { name: TableLocalSongs.DIRECTORY, keyPath: "id", autoIncrement: true },
-    { name: TableLocalSongs.FILES, keyPath: "id", autoIncrement: true },
+    { name: TableLocalSongs.DIRECTORY },
+    { name: TableLocalSongs.FILES },
     { name: TableLocalSongs.CHUNKDATA },
     { name: TableLocalSongs.MASTER_INDEX },
   ],

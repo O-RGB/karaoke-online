@@ -33,7 +33,13 @@ export const loadKaraokeTracks = async (
               cur: cur ?? [],
               lyr: lyr,
               emk: group.emk,
-              fileName: group.emk.name.replace(".emk", "")
+              raw: {
+                emk: group.emk,
+                midi: decode.mid,
+                cur: decode.cur,
+                lyr: decode.lyr,
+              },
+              fileName: group.emk.name.replace(".emk", ""),
             });
             return;
           }
@@ -58,6 +64,11 @@ export const loadKaraokeTracks = async (
           cur: cur ?? [],
           lyr: lyr,
           fileName: group.mid.name.replace(".mid", ""),
+          raw: {
+            midi: group.mid,
+            cur: group.cur,
+            lyr: group.lyr,
+          },
         });
       }
     })

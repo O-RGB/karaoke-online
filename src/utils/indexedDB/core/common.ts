@@ -289,6 +289,25 @@ export class DatabaseCommonCore {
     return await db.getAll(storeName, query, count);
   }
 
+  public async getAllKeys(
+    dbName: string,
+    storeName: string,
+    query?: IDBValidKey | IDBKeyRange,
+    count?: number
+  ): Promise<IDBValidKey[]> {
+    const db = await this.getDatabase(dbName);
+    return await db.getAllKeys(storeName, query, count);
+  }
+
+  public async getAllKeysFromStore(
+    storeName: string,
+    query?: IDBValidKey | IDBKeyRange,
+    count?: number
+  ): Promise<IDBValidKey[]> {
+    const db = await this.getDatabaseForStore(storeName);
+    return await db.getAllKeys(storeName, query, count);
+  }
+
   /**
    * ดึงข้อมูลแบบมีเงื่อนไข
    */

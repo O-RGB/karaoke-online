@@ -12,12 +12,12 @@ const Button: React.FC<ButtonCommonProps> = ({
   padding = "p-3",
   shadow = "shadow-md",
   border = "border",
-  blur = true,
+  blur = false,
 
   ...props
 }) => {
   var butStyle = `${padding} ${shadow} ${border} flex items-center justify-center gap-2 text-sm`;
-  var colorStyle = ""; //bg-blue-500 hover:bg-blue-500/90 active:bg-blue-500/80
+  var colorStyle = "";
   var animation = "duration-300 transition-all";
   var shapeStyle = "";
   var position = "";
@@ -36,31 +36,31 @@ const Button: React.FC<ButtonCommonProps> = ({
   switch (color) {
     case "white":
       colorStyle =
-        "bg-white hover:bg-gray-200/50 active:bg-white/90 disabled:bg-white ";
+        "bg-white hover:bg-blue-200/50 active:bg-white/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-white disabled:bg-gray-200! border border-blue-500 disabled:border-gray-200";
       break;
     case "blue":
       colorStyle =
-        "bg-blue-500 hover:bg-blue-500/80 active:bg-blue-500 disabled:bg-gray-300";
+        "text-white bg-blue-500 hover:bg-blue-500/80 active:bg-blue-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-blue-500!";
       break;
     case "green":
       colorStyle =
-        "bg-green-500 hover:bg-green-500/80 active:bg-green-500 disabled:bg-gray-300";
+        "text-white bg-green-500 hover:bg-green-500/80 active:bg-green-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-green-500!";
       break;
     case "yellow":
       colorStyle =
-        "bg-yellow-500 hover:bg-yellow-500/80 active:bg-yellow-500 disabled:bg-gray-300";
+        "text-white bg-yellow-500 hover:bg-yellow-500/80 active:bg-yellow-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-yellow-500!";
       break;
     case "amber":
       colorStyle =
-        "bg-amber-500 hover:bg-amber-500/80 active:bg-amber-500 disabled:bg-gray-300";
+        "text-white bg-amber-500 hover:bg-amber-500/80 active:bg-amber-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-amber-500!";
       break;
     case "red":
       colorStyle =
-        "bg-red-500 hover:bg-red-500/80 active:bg-red-500 disabled:bg-gray-300";
+        "text-white bg-red-600 hover:bg-red-600/80 active:bg-red-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-red-500!";
       break;
     case "gray":
       colorStyle =
-        "bg-gray-500 hover:bg-gray-500/80 active:bg-gray-500 disabled:bg-gray-300";
+        "text-white bg-gray-500 hover:bg-gray-500/80 active:bg-gray-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-gray-500!";
       break;
 
     default:
@@ -96,7 +96,7 @@ const Button: React.FC<ButtonCommonProps> = ({
         shapeStyle,
         props.className,
         position,
-        "z-50",
+        "z-30",
       ].join(" ")}
     >
       {icon && <div>{icon}</div>}

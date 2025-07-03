@@ -4,12 +4,12 @@ import { IFontDisplay, IWallpaperDisplay } from "./types";
 
 export class FontDisplayManager extends BaseTable<IFontDisplay> {
   constructor() {
-    super(TableDisplaySongs.FONT, DISPLAY.stores[0]);
+    super(DISPLAY.name, TableDisplaySongs.FONT, DISPLAY.stores[0]);
   }
 }
 
 export class WallpaperDisplayManager extends BaseTable<IWallpaperDisplay> {
   constructor() {
-    super(TableDisplaySongs.WALLPAPER, DISPLAY.stores[1]);
+    super(DISPLAY.name, TableDisplaySongs.WALLPAPER, DISPLAY.stores[1]);
   }
 }

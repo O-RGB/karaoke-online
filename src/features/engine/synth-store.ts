@@ -1,3 +1,4 @@
+//src/features/engine/synth-store.ts
 import { create } from "zustand";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
@@ -22,7 +23,7 @@ export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
   setup: async (type: EngineType = "spessa") => {
     const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
     const config = useConfigStore.getState().config.sound;
-    const configs = useConfigStore.getState().config
+    const configs = useConfigStore.getState().config;
     const setInstrument = useMixerStoreNew.getState().setInstrument;
     if (type === "spessa") {
       const spessaSynth = new SpessaSynthEngine(

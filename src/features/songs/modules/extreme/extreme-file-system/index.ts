@@ -1,4 +1,4 @@
-import { BaseSongsSystemReader } from "@/features/songs/base";
+import { BaseSongsSystemReader } from "@/features/songs/base/index-search";
 import {
   ITrackData,
   MasterIndex,

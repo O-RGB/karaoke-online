@@ -4,6 +4,7 @@ import { MasterIndex, PreviewChunk } from "@/features/songs/types/songs.type";
 export interface IDirectoryLocalSongs {
   id: number;
   handle: FileSystemDirectoryHandle;
+  createdAt: Date;
 }
 
 export interface IFilesLocalSongs {
