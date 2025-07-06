@@ -115,14 +115,17 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
         else if (item.isDuplicate) tagColor = "yellow";
 
         return {
-          row: (
+          render: () => (
             <div className="w-fit flex gap-2">
               {item.fileName && (
-                <Tags color={tagColor} className="text-[10px] min-w-10 text-center">
+                <Tags
+                  color={tagColor}
+                  className="text-[10px] min-w-10 text-center"
+                >
                   {item.fileName}
                 </Tags>
               )}
-             <div className="m-auto">{name}</div>
+              <div className="m-auto">{name}</div>
             </div>
           ),
           value: item,
@@ -131,7 +134,7 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
             : item.isDuplicate
             ? "text-yellow-600"
             : "",
-        };
+        } as ListItem<KaraokeDecoded>;
       }
     );
 
@@ -193,18 +196,21 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
 
         return {
           ...item,
-          row: (
+          render: () => (
             <div className="w-fit flex gap-2">
               {item.value.fileName && (
-                <Tags color={tagColor} className="text-[10px] min-w-10 text-center">
+                <Tags
+                  color={tagColor}
+                  className="text-[10px] min-w-10 text-center"
+                >
                   {item.value.fileName}
                 </Tags>
               )}
-             <div className="m-auto">{name}</div>
+              <div className="m-auto">{name}</div>
             </div>
           ),
           className: item.value.error ? "text-red-500" : "",
-        };
+        } as ListItem<KaraokeDecoded>;
       }
       return item;
     });
@@ -266,7 +272,7 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
   ): ListItem<DuplicateMatch>[] => {
     return duplicates.map((duplicate) => ({
       value: duplicate,
-      row: (
+      render: () => (
         <div className="flex flex-col text-sm w-full p-1">
           <div className="flex justify-between items-center">
             <span className="font-semibold text-gray-800">

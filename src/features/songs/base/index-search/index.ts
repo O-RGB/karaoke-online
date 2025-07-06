@@ -8,6 +8,7 @@ import {
   SearchOptions,
 } from "../../types/songs.type";
 import { ProcessingDialogProps } from "@/components/common/alert/processing";
+import FileSystemManager from "@/utils/file/file-system";
 
 export abstract class BaseSongsSystemReader {
   protected system: SoundSystemMode | undefined;
@@ -26,6 +27,8 @@ export abstract class BaseSongsSystemReader {
   ];
   protected readonly FIELD_PRIORITY = { TITLE: 1, ARTIST: 2, LYR_TITLE: 3 };
   protected readonly DEFAULT_MAX_RESULTS = 50;
+
+  public setFileSystem?(fileSystemManager: FileSystemManager): void;
 
   abstract initializeDataSource(): Promise<void>;
   abstract getTotalRecords(): Promise<number>;
@@ -176,7 +179,9 @@ export abstract class BaseSongsSystemReader {
   public async loadIndex(): Promise<boolean> {
     const masterIndex = await this.loadMasterIndex();
     if (!masterIndex || !masterIndex.words || !masterIndex.wordToChunkMap) {
-      console.error("Failed to load V6 master index or index is corrupted.");
+      console.error(
+        "[BaseSongsSystemReader] Failed to load V6 master index or index is corrupted."
+      );
       return false;
     }
     await this.initializeDataSource();

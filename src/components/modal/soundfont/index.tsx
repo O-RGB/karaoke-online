@@ -6,11 +6,9 @@ import useSongsStore from "@/features/songs/store/songs.store";
 import React, { useEffect, useState } from "react";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { BiDownload, BiFolder } from "react-icons/bi";
-import { SoundfontPlayerManager } from "@/utils/indexedDB/db/player/table";
 import { SoundSystemMode } from "@/features/config/types/config.type";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
 
-const soundfont = new SoundfontPlayerManager();
 interface SoundfontManagerProps {
   height?: number;
 }
@@ -29,7 +27,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
   const [selected, setSelected] = useState<string | undefined>(
     DEFAULT_SOUND_FONT
   );
-  const [from, setFrom] = useState<SoundSystemMode>("EXTREME_FILE_SYSTEM");
+  const [from, setFrom] = useState<SoundSystemMode>("PYTHON_API_SYSTEM");
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -37,32 +35,24 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
     const list = await soundfontBaseManager?.getSoundfonts();
     if (!list) return [];
     const extreme = list?.manager.map((data) => ({
-      row: data.name,
+      label: data.name,
       value: data,
     }));
     const local = list?.local.map((data) => ({
-      row: data.name,
+      label: data.name,
       value: data,
     }));
 
-    extreme.sort((a, b) => a.row.localeCompare(b.row));
-    local.sort((a, b) => a.row.localeCompare(b.row));
+    extreme.sort((a, b) => a.label.localeCompare(b.label));
+    local.sort((a, b) => a.label.localeCompare(b.label));
 
     setSoundFontStorage(local);
     setSoundFontExtreme(extreme);
     return extreme;
   };
 
-  const getSoundfontLocal = async () => {
-    const sf = await getSoundFontList();
-    if (sf.length === 0) {
-      engine?.loadDefaultSoundFont();
-    }
-  };
-
-  const removeSF2Local = async (id: number) => {
-    await soundfont.delete(id);
-    await getSoundfontLocal();
+  const removeSF2Local = async (id: File) => {
+    soundfontBaseManager?.removeSoundfont(id.name);
   };
 
   const updateSoundFont = async (
@@ -75,10 +65,15 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
   };
 
   useEffect(() => {
+    console.log("useeffect");
     getSoundFontList();
     setSelected(soundfontBaseManager?.selected);
-    setFrom(soundfontBaseManager?.selectedFrom ?? "EXTREME_FILE_SYSTEM");
-  }, [engine?.soundfontName, soundfontBaseManager?.selected]);
+    setFrom(soundfontBaseManager?.selectedFrom ?? "PYTHON_API_SYSTEM");
+  }, [
+    engine?.soundfontName,
+    soundfontBaseManager?.selected,
+    soundfontBaseManager?.selectedFrom,
+  ]);
 
   return (
     <Tabs
@@ -91,6 +86,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
               from={from}
               onClickDefault={async () => {
                 await engine?.loadDefaultSoundFont();
+                soundfontBaseManager?.reset();
                 setSelected(DEFAULT_SOUND_FONT);
                 setFrom("DATABASE_FILE_SYSTEM");
               }}

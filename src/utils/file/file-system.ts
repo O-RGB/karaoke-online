@@ -1,5 +1,7 @@
 import { DircetoryLocalSongsManager } from "../indexedDB/db/local-songs/table";
 
+type DirectoryStatus = "GRANTED" | "PROMPT_REQUIRED" | "SELECTION_NEEDED";
+
 class FileSystemManager {
   private pathId: number = 1;
   private static instance: FileSystemManager;
@@ -359,6 +361,37 @@ class FileSystemManager {
     return this.rootHandle;
   }
 
+  async checkDirectoryStatus(): Promise<DirectoryStatus> {
+    // 1. ตรวจสอบ handle ที่เคยบันทึกไว้ใน IndexedDB
+    const savedHandleInfo = await this.fileSystemStore.get(this.pathId);
+    if (!savedHandleInfo) {
+      console.log("No saved handle. Needs selection.");
+      return "SELECTION_NEEDED";
+    }
+
+    // 2. ตรวจสอบ Permission ของ handle ที่มีอยู่ (แบบเงียบ)
+    // handle.queryPermission() จะไม่แสดง popup ใดๆ
+    const permissionStatus = await savedHandleInfo.handle.queryPermission({
+      mode: "readwrite",
+    });
+
+    if (permissionStatus === "granted") {
+      console.log("Permission is already granted.");
+      // ถ้าสิทธิ์ยังอยู่ ให้เก็บ handle ไว้ใน instance เพื่อการใช้งานครั้งต่อไป
+      this.rootHandle = savedHandleInfo.handle;
+      return "GRANTED";
+    }
+
+    if (permissionStatus === "prompt") {
+      console.log("Permission needs to be requested again.");
+      return "PROMPT_REQUIRED";
+    }
+
+    // กรณี permissionStatus === 'denied' หรืออื่นๆ
+    console.log("Permission was denied or is in an unknown state.");
+    return "SELECTION_NEEDED";
+  }
+
   // เพิ่มฟังก์ชันสำหรับตรวจสอบ permission โดยไม่แสดง popup
   async hasSavedDirectory(): Promise<boolean> {
     const savedHandle = await this.queryPermission();
@@ -367,3 +400,48 @@ class FileSystemManager {
 }
 
 export default FileSystemManager;
+
+// ผลลัพธ์จากการตรวจสอบ จะมีสถานะและ handle (ถ้ามี)
+export type DirectoryStatusResult = {
+  status: DirectoryStatus;
+  handle?: FileSystemDirectoryHandle;
+};
+
+/**
+ * ฟังก์ชันสำหรับตรวจสอบสถานะของ Directory ที่บันทึกไว้ใน IndexedDB
+ * โดยจะรับ dependency เข้ามา และไม่ยุ่งเกี่ยวกับ state ของคลาสอื่นโดยตรง
+ *
+ * @param fileSystemStore - instance ของ DircetoryLocalSongsManager เพื่อใช้เข้าถึง DB
+ * @param pathId - id ของ handle ที่จะตรวจสอบ
+ * @returns Promise<DirectoryStatusResult> - อ็อบเจกต์ที่ประกอบด้วย status และ handle (ถ้ามีสิทธิ์)
+ */
+export async function checkDirectoryStatus(
+  fileSystemStore: DircetoryLocalSongsManager,
+  pathId: number = 1
+): Promise<DirectoryStatusResult> {
+  const savedHandleInfo = await fileSystemStore.get(pathId);
+
+  if (!savedHandleInfo) {
+    console.log("No saved handle. Needs selection.");
+    return { status: "SELECTION_NEEDED" };
+  }
+
+  const permissionStatus = await savedHandleInfo.handle.queryPermission({
+    mode: "readwrite",
+  });
+
+  if (permissionStatus === "granted") {
+    console.log("Permission is already granted.");
+    // คืนค่าทั้งสถานะและ handle ที่พร้อมใช้งาน
+    return { status: "GRANTED", handle: savedHandleInfo.handle };
+  }
+
+  if (permissionStatus === "prompt") {
+    console.log("Permission needs to be requested again.");
+    return { status: "PROMPT_REQUIRED" }; // ไม่คืน handle เพราะยังใช้ไม่ได้
+  }
+
+  // กรณี permissionStatus === 'denied' หรืออื่นๆ
+  console.log("Permission was denied or is in an unknown state.");
+  return { status: "SELECTION_NEEDED" };
+}

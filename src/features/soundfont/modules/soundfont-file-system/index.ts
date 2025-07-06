@@ -4,20 +4,32 @@ import FileSystemManager from "@/utils/file/file-system";
 import { BaseSynthEngine } from "@/features/engine/types/synth.type";
 
 export class SoundfontFileSystemManager extends SoundfontBase {
-  private fileSystemManager: FileSystemManager;
+  private fileSystemManager: FileSystemManager | undefined = undefined;
   protected system: SoundSystemMode = "EXTREME_FILE_SYSTEM";
   constructor(engine: BaseSynthEngine) {
     super(engine);
-    this.fileSystemManager = FileSystemManager.getInstance();
+  }
+
+  setFileSystem(fileSystemManager: FileSystemManager) {
+    this.fileSystemManager = fileSystemManager;
+    console.log("Set File systme Manager")
   }
 
   getSoundfont(filename: string): Promise<File | undefined> {
+    if (!this.fileSystemManager) {
+      new Promise((resolve) => resolve(undefined));
+      throw "File system Manager Is Null";
+    }
     return this.fileSystemManager.getFileByPath(`SoundFont/${filename}`);
   }
   deleteSoundfont(id: string): boolean {
     throw new Error("Method not implemented.");
   }
   soundfonts(): Promise<File[]> {
-    return this.fileSystemManager.listFiles("SoundFont");
+    if (!this.fileSystemManager) {
+      new Promise((resolve) => resolve(undefined));
+      throw "File system Manager Is Null";
+    }
+    return this.fileSystemManager?.listFiles("SoundFont");
   }
 }

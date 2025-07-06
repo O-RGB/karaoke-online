@@ -7,7 +7,7 @@ import SearchSong from "../tools/search-song/search-song";
 import HostRemote from "../remote/host";
 import SuperHostRemote from "../remote/super/super-host";
 
-import SoundfontManager from "../modal/soundfont/sound-font-manager";
+import SoundfontManager from "../modal/soundfont";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
 // import AppendSongModal from "../modal/append-song/index-none";
@@ -43,6 +43,7 @@ import AppendSongModal from "../modal/append-song";
 import { SongsSystem } from "@/features/songs";
 import useSongsStore from "@/features/songs/store/songs.store";
 import { SoundfontSystemManager } from "@/features/soundfont";
+import DataStoresModal from "../modal/datastores";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
@@ -68,11 +69,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
     const soundSystem = new SongsSystem(config.system);
     setSongsManager(soundSystem);
-    soundSystem.init("EXTREME_FILE_SYSTEM");
+    soundSystem.init(config.system?.soundMode ?? "PYTHON_API_SYSTEM");
 
-    const soundfontSystem = new SoundfontSystemManager(engine, {
-      soundMode: "EXTREME_FILE_SYSTEM",
-    });
+    const soundfontSystem = new SoundfontSystemManager(engine);
+
     setSoundfontManaer(soundfontSystem);
 
     setTimeout(() => {
@@ -88,7 +88,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     SOUNDFONT_MODEL: <SoundfontManager></SoundfontManager>,
     JOIN: <HostRemote></HostRemote>,
     SUPER_JOIN: <SuperHostRemote></SuperHostRemote>,
-    // MUSIC_STORE: <DataStoresModal></DataStoresModal>,
+    MUSIC_STORE: <DataStoresModal></DataStoresModal>,
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     DISPLAY: <DisplaySettingModal></DisplaySettingModal>,

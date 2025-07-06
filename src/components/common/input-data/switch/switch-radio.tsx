@@ -38,7 +38,7 @@ const SwitchRadio = <T,>({
   };
 
   return (
-    <div className={`flex gap-2 flex-wrap`}>
+    <div className={`flex gap-2 flex-nowrap`}>
       {options.map((option, index) => {
         const isChecked = option.value === selectedValue;
         return (

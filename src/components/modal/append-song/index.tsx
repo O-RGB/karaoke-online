@@ -26,20 +26,12 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({ height }) => {
         {
           icon: <TbMicrophone2></TbMicrophone2>,
           label: "เล่นจากเครื่องคุณ",
-          content: (
-            <AlertWapper>
-              <AddDBFSong></AddDBFSong>
-            </AlertWapper>
-          ),
+          content: <AddDBFSong></AddDBFSong>,
         },
         {
           icon: <TbMicrophone2></TbMicrophone2>,
           label: "เพิ่มจาก Extreme",
-          content: (
-            <AlertWapper>
-              <AddExtremeAndManage></AddExtremeAndManage>
-            </AlertWapper>
-          ),
+          content: <AddExtremeAndManage></AddExtremeAndManage>,
         },
       ]}
     ></Tabs>

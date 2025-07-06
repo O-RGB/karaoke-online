@@ -6,6 +6,7 @@ import { ITrackData } from "./types/songs.type";
 import { BaseUserSongsSystemReader } from "./base/tride-search";
 import { PythonIndexReader } from "./modules/extreme/extreme-import";
 import { ApiSongsSystemReader } from "./modules/extreme/extreme-api-system";
+import { DircetoryLocalSongsManager } from "@/utils/indexedDB/db/local-songs/table";
 
 type ReaderCreator = () =>
   | BaseSongsSystemReader
@@ -13,8 +14,7 @@ type ReaderCreator = () =>
 
 const readerCreators: Record<SoundSystemMode, ReaderCreator | null> = {
   EXTREME_FILE_SYSTEM: () => {
-    const fsManager = FileSystemManager.getInstance();
-    return new DBFSongsSystemReader(fsManager);
+    return new DBFSongsSystemReader();
   },
   PYTHON_FILE_ENCODE: () => new PythonIndexReader(),
   PYTHON_API_SYSTEM: () => new ApiSongsSystemReader(),
@@ -38,6 +38,7 @@ export class SongsSystem {
   public readonly userSong = new BaseUserSongsSystemReader();
   public currentMode: SoundSystemMode | undefined = undefined;
 
+  private dircetoryLocalSongsManager = new DircetoryLocalSongsManager();
   private initializationPromise: Promise<void> | null = null;
 
   constructor(config?: Partial<SystemConfig>) {
@@ -62,6 +63,13 @@ export class SongsSystem {
       return this.initializationPromise;
     }
 
+    if (soundMode === "DATABASE_FILE_SYSTEM") {
+      console.log("Clearing main song system. User songs will remain active.");
+      this.manager = undefined;
+      this.currentMode = soundMode;
+      return;
+    }
+
     if (this.currentMode === soundMode && this.manager) {
       console.log(`Already initialized with ${soundMode} mode.`);
       return;
@@ -76,6 +84,13 @@ export class SongsSystem {
 
         const newManager = await ReaderFactory.create(soundMode);
         this.manager = newManager;
+
+        if (soundMode === "EXTREME_FILE_SYSTEM") {
+          const handle = await this.dircetoryLocalSongsManager.get(1);
+          if (handle?.handle) {
+            this.manager.setFileSystem?.(FileSystemManager.getInstance());
+          }
+        }
 
         if (this.manager && typeof this.manager.loadIndex === "function") {
           await this.manager.loadIndex();
@@ -101,6 +116,11 @@ export class SongsSystem {
     }
   }
 
+  public async switchMode(mode: SoundSystemMode, options?: any): Promise<void> {
+    console.log(`Requesting to switch mode to: ${mode}`);
+    await this.init(mode, options);
+  }
+
   public getCurrentMode(): SoundSystemMode | undefined {
     return this.currentMode;
   }
@@ -110,6 +130,9 @@ export class SongsSystem {
   }
 
   public isReady(): boolean {
+    if (this.currentMode === "DATABASE_FILE_SYSTEM") {
+      return !this.getIsInitializing();
+    }
     return !this.getIsInitializing() && this.manager !== undefined;
   }
 
@@ -119,22 +142,23 @@ export class SongsSystem {
       throw new Error("Cannot reinitialize. No mode has been set.");
     }
 
+    const previousMode = this.currentMode;
     this.currentMode = undefined;
-    await this.init(modeToReinit, options);
+    await this.init(previousMode ?? "DATABASE_FILE_SYSTEM", options);
   }
 
   public async onSearch(query: string): Promise<ITrackData[]> {
-    if (!this.isReady() || !this.manager) {
-      console.warn("System is not ready for search.");
-      return [];
+    const userSongsPromise = this.userSong.search(query);
+
+    if (this.manager && this.isReady()) {
+      const [userSongs, managerSongs] = await Promise.all([
+        userSongsPromise,
+        this.manager.search(query, {}),
+      ]);
+      return [...userSongs, ...managerSongs];
     }
 
-    const [userSongs, managerSongs] = await Promise.all([
-      this.userSong.search(query),
-      this.manager.search(query, {}),
-    ]);
-
-    return [...userSongs, ...managerSongs];
+    return userSongsPromise;
   }
 
   public async getSong(trackData: ITrackData): Promise<any | undefined> {
@@ -145,7 +169,6 @@ export class SongsSystem {
 
     try {
       const userSong = await this.userSong.getSong(trackData);
-
       if (userSong) {
         return userSong;
       }

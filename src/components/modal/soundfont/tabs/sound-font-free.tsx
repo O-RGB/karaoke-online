@@ -50,7 +50,7 @@ const SoundfontFree: React.FC<SoundfontFreeProps> = ({
   };
 
   const soundfontListItems: ListItem<string>[] = freeSoundfonts.map((font) => ({
-    row: font.name,
+    label: font.name,
     value: font.downloadUrl,
   }));
 
@@ -70,14 +70,14 @@ const SoundfontFree: React.FC<SoundfontFreeProps> = ({
         </Label>
 
         <TableList
-          // height={"auto"}
           hoverFocus={false}
           listKey={"id"}
-          renderKey="name"
           deleteItem={false}
           list={soundfontListItems}
-          itemAction={(value, index, name) => {
-            const isDownloaded = soundFontStorage.find((v) => v.row === name);
+          itemAction={(value, index, option) => {
+            const isDownloaded = soundFontStorage.find(
+              (v) => v.label === option?.value
+            );
             return (
               <>
                 <Button
@@ -85,7 +85,9 @@ const SoundfontFree: React.FC<SoundfontFreeProps> = ({
                   disabled={!!isDownloaded}
                   className="w-7 h-7"
                   onClick={() =>
-                    !isDownloaded ? handleDownload(value, name) : undefined
+                    !isDownloaded
+                      ? handleDownload(value, option.label as string)
+                      : undefined
                   }
                   color="default"
                   blur={false}

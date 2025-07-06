@@ -16,6 +16,7 @@ import { TbMusicPlus } from "react-icons/tb";
 import useSongsStore from "@/features/songs/store/songs.store";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
+import useConfigStore from "@/features/config/config-store";
 
 type SoundFontListItem = ListItem<File>;
 
@@ -29,7 +30,7 @@ interface SoundfontFolderProps extends IAlertCommon {
   setLoading: (isLoad: boolean) => void;
   getSoundFontList: () => Promise<SoundFontListItem[]>;
   updateSoundFont: (idOrFilename: string, from: SoundSystemMode) => void;
-  removeSF2Local: (id: number) => void;
+  removeSF2Local?: (id: File, index: number) => void;
   onClickDefault?: () => void;
 }
 
@@ -109,7 +110,7 @@ const CurrentlyPlaying: FC<CurrentlyPlayingProps> = ({
             )}
           </div>
           <div className="text-sm text-wrap break-all text-center">
-            {selected ?? "ยังไม่ได้เลือก"}
+            {selected ?? DEFAULT_SOUND_FONT}
           </div>
 
           {getSourceLabel()}
@@ -137,7 +138,7 @@ interface SoundfontListViewProps {
   list: SoundFontListItem[];
   loading: boolean;
   onItemSelect: (fileName: string) => void;
-  onItemDelete?: (id: number) => void;
+  onItemDelete?: (value: File, index: number) => void;
   isSelected: (fileName: string) => boolean;
 }
 
@@ -160,7 +161,7 @@ const SoundfontListView: FC<SoundfontListViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-1 h-full overflow-auto">
+    <div className="flex flex-col gap-1 h-full w-full overflow-auto">
       <Label>
         <FaFolder className="inline-block mb-1" /> <span>{title}</span>
       </Label>
@@ -199,7 +200,8 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
   updateSoundFont,
   onClickDefault,
 }) => {
-  const soundManager = useSongsStore((state) => state.songsManager);
+  const config = useConfigStore((state) => state.config);
+
   return (
     <div className="flex flex-col lg:flex-row gap-4 w-full h-full relative">
       <div className="w-full lg:w-1/4 flex flex-col gap-4 h-full ">
@@ -218,7 +220,13 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
         />
       </div>
 
-      <div className="w-full lg:w-9/12 grid lg:grid-cols-2 gap-4">
+      <div
+        className={`grid ${
+          config?.system?.soundMode === "EXTREME_FILE_SYSTEM"
+            ? "lg:grid-cols-2"
+            : "grid-cols-1"
+        } w-full lg:w-9/12 gap-4`}
+      >
         <SoundfontListView
           title="โฟลเดอร์ Soundfont"
           list={soundFontStorage}
@@ -232,7 +240,7 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
           }
         />
 
-        {soundManager?.currentMode === "EXTREME_FILE_SYSTEM" && (
+        {config?.system?.soundMode === "EXTREME_FILE_SYSTEM" && (
           <SoundfontListView
             title="Karaoke Extreme Soundfont"
             list={soundFontExtreme}

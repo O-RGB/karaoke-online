@@ -98,7 +98,9 @@ export class PythonIndexReader extends BaseSongsSystemReader {
   public override async loadIndex(): Promise<boolean> {
     const masterIndex = await this.loadMasterIndex();
     if (!masterIndex || !masterIndex.words || !masterIndex.wordToChunkMap) {
-      console.error("Failed to load V6 master index or index is corrupted.");
+      console.error(
+        "[PythonIndexReader] Failed to load V6 master index or index is corrupted."
+      );
       return false;
     }
     await this.initializeDataSource();

@@ -78,10 +78,12 @@ interface CommonStyle {
   border?: boolean | string;
 }
 
-interface ListItem<T = any> {
-  row: any;
+interface ListItem<TValue> {
+  value: TValue;
+  label?: string;
+  key?: string;
   className?: string;
-  value: T;
+  render?: () => React.ReactNode;
 }
 
 interface IconsProps {

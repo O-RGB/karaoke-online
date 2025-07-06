@@ -119,6 +119,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   }
   async loadDefaultSoundFont(audio?: AudioContext): Promise<any> {
     let arraybuffer: ArrayBuffer | undefined = undefined;
+
+    console.log("this.soundfontFile", this.soundfontFile);
     if (this.soundfontFile) {
       arraybuffer = await this.soundfontFile.arrayBuffer();
     } else {

@@ -13,16 +13,19 @@ import FileSystemManager from "@/utils/file/file-system";
 
 export class DBFSongsSystemReader extends BaseSongsSystemReader {
   private dbfParser: DBFParser | null = null;
-  private fileSystemManager: FileSystemManager;
+  private fileSystemManager: FileSystemManager | undefined = undefined;
   private fileBuffer: ArrayBuffer | undefined = undefined;
   private dbfFilePath: string;
   private header: DBFHeader | null = null;
 
-  constructor(fileSystemManager: FileSystemManager) {
+  constructor() {
     super();
-    this.fileSystemManager = fileSystemManager;
     this.dbfFilePath = "Data/SONG.DBF";
     this.system = "EXTREME_FILE_SYSTEM";
+  }
+
+  public setFileSystem(fileSystemManager: FileSystemManager) {
+    this.fileSystemManager = fileSystemManager;
   }
 
   public buildIndex(
@@ -33,7 +36,7 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
 
   async initializeDataSource(): Promise<void> {
     try {
-      const fileData = await this.fileSystemManager.getFileByPath(
+      const fileData = await this.fileSystemManager?.getFileByPath(
         this.dbfFilePath
       );
       if (!fileData) {
@@ -79,7 +82,7 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
 
   async saveMasterIndex(masterIndex: MasterIndex): Promise<void> {
     const filePath = "Data/master_index_v6.json";
-    await this.fileSystemManager.createFile(
+    await this.fileSystemManager?.createFile(
       filePath,
       JSON.stringify(masterIndex)
     );
@@ -88,7 +91,7 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
   async loadMasterIndex(): Promise<MasterIndex | null> {
     const filePath = "Data/master_index_v6.json";
     try {
-      const indexFile = await this.fileSystemManager.getFileByPath(filePath);
+      const indexFile = await this.fileSystemManager?.getFileByPath(filePath);
       const indexContent = await indexFile?.text();
       return indexContent ? (JSON.parse(indexContent) as MasterIndex) : null;
     } catch (error) {
@@ -101,7 +104,7 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
     chunkData: PreviewChunk
   ): Promise<void> {
     const filePath = `Data/preview_chunk_v6/${chunkId}.json`;
-    await this.fileSystemManager.createFile(
+    await this.fileSystemManager?.createFile(
       filePath,
       JSON.stringify(chunkData)
     );
@@ -110,7 +113,7 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
   async loadPreviewChunk(chunkId: number): Promise<PreviewChunk | null> {
     const filePath = `Data/preview_chunk_v6/${chunkId}.json`;
     try {
-      const chunkFile = await this.fileSystemManager.getFileByPath(filePath);
+      const chunkFile = await this.fileSystemManager?.getFileByPath(filePath);
       const chunkContent = await chunkFile?.text();
       return chunkContent ? (JSON.parse(chunkContent) as PreviewChunk) : null;
     } catch (error) {
@@ -185,11 +188,11 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
     path: string,
     secondaryPath: string
   ): Promise<File | undefined> {
-    const primaryFile = await this.fileSystemManager.getFileByPath(path);
+    const primaryFile = await this.fileSystemManager?.getFileByPath(path);
     if (primaryFile) {
       return primaryFile;
     }
-    return this.fileSystemManager.getFileByPath(secondaryPath);
+    return this.fileSystemManager?.getFileByPath(secondaryPath);
   }
 
   public getDBFHeader(): DBFHeader | null {

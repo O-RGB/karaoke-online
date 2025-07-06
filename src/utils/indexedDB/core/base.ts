@@ -1,12 +1,15 @@
 import { DatabaseCommonCore, StoreConfig } from "./common";
 
-// ADDED: Interface สำหรับการจัดการเวลา
 interface TimeStamped {
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-// MODIFIED: Generic T ต้องสืบทอดจาก TimeStamped
+export interface GetAllOptions {
+  limit?: number;
+  offset?: number;
+}
+
 export class BaseTable<T extends TimeStamped> {
   protected db = DatabaseCommonCore.getInstance();
 
@@ -21,7 +24,6 @@ export class BaseTable<T extends TimeStamped> {
    */
   async add(data: Partial<T>): Promise<IDBValidKey> {
     const now = new Date();
-    // MODIFIED: เพิ่ม timestamps อัตโนมัติ
     const dataToAdd = {
       ...data,
       createdAt: now,
@@ -31,17 +33,29 @@ export class BaseTable<T extends TimeStamped> {
   }
 
   /**
-   * ดึงข้อมูลทั้งหมดจากตาราง
+   * MODIFIED: ดึงข้อมูลทั้งหมดจากตาราง
+   * รองรับการทำ Pagination ด้วย limit และ offset
+   * @param options - ตัวเลือกสำหรับ limit และ offset
    */
-  async getAll(): Promise<T[]> {
+  async getAll(options?: GetAllOptions): Promise<T[]> {
+    if (options?.limit || options?.offset) {
+      return this.db.getAllWithOffset(this.dbName, this.storeName, options);
+    }
+
     return this.db.getAll(this.dbName, this.storeName);
   }
 
   /**
-   * ADDED: ดึง ID ทั้งหมดในตาราง โดยไม่โหลดข้อมูลทั้งหมด (ประสิทธิภาพสูง)
+   * MODIFIED: ดึง ID ทั้งหมดในตาราง
+   * รองรับการทำ Pagination ด้วย limit และ offset (ประสิทธิภาพสูง)
+   * @param options - ตัวเลือกสำหรับ limit และ offset
    * @returns Promise<IDBValidKey[]>
    */
-  async getAllIds(): Promise<IDBValidKey[]> {
+  async getAllIds(options?: GetAllOptions): Promise<IDBValidKey[]> {
+    if (options?.limit || options?.offset) {
+      return this.db.getAllKeysWithOffset(this.dbName, this.storeName, options);
+    }
+
     return this.db.getAllKeys(this.dbName, this.storeName);
   }
 
@@ -54,6 +68,8 @@ export class BaseTable<T extends TimeStamped> {
 
   /**
    * ค้นหาข้อมูลตามเงื่อนไข
+   * หมายเหตุ: การ find แบบนี้จะดึงข้อมูลทั้งหมดมา filter ใน memory ก่อน
+   * หากต้องการประสิทธิภาพสูงสุดสำหรับ query ที่ซับซ้อน ควรพิจารณาใช้ index
    */
   async find(predicate: (item: T) => boolean): Promise<T[]> {
     return this.db.find(this.dbName, this.storeName, predicate);
@@ -72,7 +88,6 @@ export class BaseTable<T extends TimeStamped> {
   async update(id: number, updatedFields: Partial<T>): Promise<void> {
     const existing = await this.get(id);
     if (existing) {
-      // MODIFIED: อัปเดต updatedAt อัตโนมัติ
       const updated = {
         ...existing,
         ...updatedFields,
@@ -87,5 +102,9 @@ export class BaseTable<T extends TimeStamped> {
    */
   getStoreDetail(): StoreConfig {
     return this.storeDetail;
+  }
+
+  deleteDatabase(): Promise<boolean> {
+    return this.db.forceDeleteDatabase(this.dbName);
   }
 }

@@ -7,6 +7,7 @@ export interface IFilesUserSongs {
 }
 
 export interface ITracklistUserSongs {
+  id: number;
   data: ITrackData;
   createdAt: Date;
 }

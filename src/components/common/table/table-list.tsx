@@ -3,45 +3,39 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import Button from "../button/button";
 import { RiDeleteBin5Line } from "react-icons/ri";
 
-interface ListItem {
-  value: any;
-  row: string;
-  className?: string;
-}
-
-interface TableListProps {
-  label?: string;
-  list?: ListItem[];
-  onClickItem?: (value: any, index: number) => void;
-  onDeleteItem?: (value: any, index: number) => void;
+interface TableListProps<TValue = any> {
+  list?: ListItem<TValue>[];
+  onClickItem?: (value: TValue, index: number) => void;
+  onDeleteItem?: (value: TValue, index: number) => void;
   loading?: boolean;
   listKey: string;
-  renderKey?: string;
-  scrollToItem?: string;
+  scrollToItem?: TValue;
   deleteItem?: boolean;
-  itemAction?: (value: any, index: number, name: string) => ReactNode;
+  itemAction?: (
+    value: TValue,
+    index: number,
+    option: ListItem<TValue>
+  ) => ReactNode;
   className?: string;
   hoverFocus?: boolean;
 }
 
-const TableList: React.FC<TableListProps> = ({
-  label,
+const TableList = <TValue,>({
   list,
   onClickItem,
   onDeleteItem,
   loading,
   listKey,
-  renderKey,
   scrollToItem,
   itemAction,
   deleteItem = true,
   className = "",
   hoverFocus = true,
-}) => {
+}: TableListProps<TValue>) => {
   const [onFocus, setFocus] = useState<number>(-1);
   const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
 
-  const handleClick = (data: any, index: number) => {
+  const handleClick = (data: TValue, index: number) => {
     setFocus(index);
     onClickItem?.(data, index);
   };
@@ -89,9 +83,13 @@ const TableList: React.FC<TableListProps> = ({
                 }`}
                 key={`${listKey}-${i}`}
               >
-                <span className="line-clamp-1">{data.row}</span>
+                {data.render
+                  ? data.render()
+                  : data.label && (
+                      <span className="line-clamp-1">{data.label}</span>
+                    )}
                 <div className="flex gap-2">
-                  {itemAction?.(data.value, i, data.row)}
+                  {itemAction?.(data.value, i, data)}
                   {deleteItem && (
                     <Button
                       shadow={false}

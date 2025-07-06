@@ -308,6 +308,90 @@ export class DatabaseCommonCore {
     return await db.getAllKeys(storeName, query, count);
   }
 
+  // ในไฟล์ common.ts ภายในคลาส DatabaseCommonCore
+
+  /**
+   * ADDED: ดึงข้อมูลแบบมี limit และ offset (Lazy Loading)
+   * ใช้ Cursor เพื่อประสิทธิภาพสูงสุดในการข้ามข้อมูล (offset)
+   */
+  public async getAllWithOffset<T = any>(
+    dbName: string,
+    storeName: string,
+    options: { limit?: number; offset?: number } = {}
+  ): Promise<T[]> {
+    const { limit, offset = 0 } = options;
+    const db = await this.getDatabase(dbName);
+    const tx = db.transaction(storeName, "readonly");
+    const store = tx.objectStore(storeName);
+    const results: T[] = [];
+
+    let cursor = await store.openCursor();
+    if (!cursor) {
+      return results; // Store ว่างเปล่า
+    }
+
+    // ข้ามข้อมูลตาม offset
+    if (offset > 0) {
+      await cursor.advance(offset);
+    }
+
+    let collected = 0;
+    while (cursor) {
+      // หยุดเมื่อเก็บครบตาม limit
+      if (limit !== undefined && collected >= limit) {
+        break;
+      }
+
+      results.push(cursor.value);
+      collected++;
+      cursor = await cursor.continue();
+    }
+
+    await tx.done;
+    return results;
+  }
+
+  /**
+   * ADDED: ดึง Key ทั้งหมดแบบมี limit และ offset (Lazy Loading)
+   * ใช้ Cursor เพื่อประสิทธิภาพสูงสุด
+   */
+  public async getAllKeysWithOffset(
+    dbName: string,
+    storeName: string,
+    options: { limit?: number; offset?: number } = {}
+  ): Promise<IDBValidKey[]> {
+    const { limit, offset = 0 } = options;
+    const db = await this.getDatabase(dbName);
+    const tx = db.transaction(storeName, "readonly");
+    const store = tx.objectStore(storeName);
+    const results: IDBValidKey[] = [];
+
+    let cursor = await store.openKeyCursor(); // ใช้ Key Cursor เพื่อประสิทธิภาพ
+    if (!cursor) {
+      return results; // Store ว่างเปล่า
+    }
+
+    // ข้ามข้อมูลตาม offset
+    if (offset > 0) {
+      await cursor.advance(offset);
+    }
+
+    let collected = 0;
+    while (cursor) {
+      // หยุดเมื่อเก็บครบตาม limit
+      if (limit !== undefined && collected >= limit) {
+        break;
+      }
+
+      results.push(cursor.key);
+      collected++;
+      cursor = await cursor.continue();
+    }
+
+    await tx.done;
+    return results;
+  }
+
   /**
    * ดึงข้อมูลแบบมีเงื่อนไข
    */

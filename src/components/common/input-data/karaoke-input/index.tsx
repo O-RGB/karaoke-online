@@ -13,7 +13,7 @@ import {
   SoundSubType,
   SoundType,
 } from "@/features/songs/types/songs.type";
-import { SourceTag } from "@/components/tools/search-song/search-dropdown";
+import { SourceTag } from "@/components/tools/search-song/source-tag";
 
 interface KaraokeSearchInputProps {
   onSearch?: (value: string) => Promise<IOptions[]>;
