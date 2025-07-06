@@ -11,24 +11,27 @@ import {
   BsXCircleFill,
 } from "react-icons/bs";
 import { MdDeleteForever } from "react-icons/md";
-import { AlertDialogProps } from "@/components/common/alert";
+import { AlertDialogProps } from "@/components/common/alert/notification";
 import JSZip from "jszip";
 import { FaFileArchive } from "react-icons/fa";
 import { FaFileZipper } from "react-icons/fa6";
 import { extractFile } from "@/lib/zip";
 import { FilesLocalSongsManager } from "@/utils/indexedDB/db/local-songs/table";
+import { SoundfontFileSystemManager } from "@/features/soundfont/modules/soundfont-file-system";
+import FileSystemManager from "@/utils/file/file-system";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 
 // --- Component Props ---
-interface AddExtremeAndManageProps {
-  setAlert?: (props?: AlertDialogProps) => void;
-  closeAlert?: () => void;
-}
+interface AddExtremeAndManageProps extends IAlertCommon {}
 
 // --- Component ---
 const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
   setAlert,
   closeAlert,
+  setProcessing,
 }) => {
+  const engine = useSynthesizerEngine((state) => state.engine);
   // State สำหรับการประมวลผลและสถานะต่างๆ
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>("");
@@ -99,11 +102,11 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
       await filesDb.add({ id, file: file });
     }
 
-    // setAlert?.({
-    //   description: `อ่านข้อมูลจากไฟล์ ${file.name} สำเร็จ`,
-    //   title: "อ่านข้อมูลเรียบร้อยแล้ว",
-    //   variant: "success",
-    // });
+    setAlert?.({
+      description: `อ่านข้อมูลจากไฟล์ ${file.name} สำเร็จ`,
+      title: "อ่านข้อมูลเรียบร้อยแล้ว",
+      variant: "success",
+    });
   };
 
   const handleMasterFile = useCallback(
@@ -114,7 +117,7 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
       try {
         const fileContent = await file.text();
         const masterData = JSON.parse(fileContent) as MasterIndex;
-        
+
         await pythonIndexReader.saveMasterIndex(masterData);
         setStatusMessage("✅ บันทึก Master Index สำเร็จ!");
         await fetchStoredData();

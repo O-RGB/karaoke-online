@@ -1,9 +1,12 @@
+import { SoundSystemMode } from "@/features/config/types/config.type";
+
 export type SoundType = "MIDI" | "VIDEO" | "MUSIC";
 export type SoundSubType = "NCN" | "EMK";
 
 export interface ITrackFlags {
   _originalIndex: number;
   _superIndex?: number;
+  _system: SoundSystemMode;
   _isNew?: boolean;
   _isModified?: boolean;
   _matchedTerms?: string[];

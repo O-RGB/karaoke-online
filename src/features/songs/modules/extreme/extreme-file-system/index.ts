@@ -1,3 +1,4 @@
+import { ProcessingDialogProps } from "@/components/common/alert/processing";
 import { BaseSongsSystemReader } from "@/features/songs/base/index-search";
 import {
   ITrackData,
@@ -17,10 +18,17 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
   private dbfFilePath: string;
   private header: DBFHeader | null = null;
 
-  constructor(fileSystemManager: FileSystemManager, dbfFilePath: string) {
+  constructor(fileSystemManager: FileSystemManager) {
     super();
     this.fileSystemManager = fileSystemManager;
-    this.dbfFilePath = dbfFilePath;
+    this.dbfFilePath = "Data/SONG.DBF";
+    this.system = "EXTREME_FILE_SYSTEM";
+  }
+
+  public buildIndex(
+    setProgress?: (value: ProcessingDialogProps) => void
+  ): Promise<boolean> {
+    return super.buildIndex(setProgress);
   }
 
   async initializeDataSource(): Promise<void> {

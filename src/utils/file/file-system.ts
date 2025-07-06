@@ -17,8 +17,8 @@ class FileSystemManager {
     }
   }
 
-  static getInstance(): FileSystemManager {
-    if (!FileSystemManager.instance) {
+  static getInstance(autoInstance: boolean = true): FileSystemManager {
+    if (!FileSystemManager.instance && autoInstance) {
       FileSystemManager.instance = new FileSystemManager();
     }
     return FileSystemManager.instance;
@@ -115,6 +115,29 @@ class FileSystemManager {
     }
 
     throw new Error("ไม่พบไฟล์");
+  }
+
+  /**
+   * ฟังก์ชันสำหรับลิสต์ไฟล์ทั้งหมด (เฉพาะ kind: 'file') ในโฟลเดอร์ที่ระบุ
+   */
+  async listFiles(path: string = ""): Promise<File[]> {
+    // 1. ใช้ฟังก์ชันที่มีอยู่แล้วเพื่อหา handle ของโฟลเดอร์เป้าหมาย
+    const directoryHandle = await this.getDirectoryByPath(path);
+
+    const files: File[] = [];
+
+    // 2. วนลูปอ่าน entries ทั้งหมดในโฟลเดอร์
+    for await (const entry of directoryHandle.values()) {
+      // 3. ตรวจสอบว่า entry เป็นไฟล์หรือไม่ (ข้ามโฟลเดอร์ย่อย)
+      if (entry.kind === "file") {
+        // 4. หากเป็นไฟล์ ให้แปลง FileSystemFileHandle เป็นอ็อบเจกต์ File
+        const file = await entry.getFile();
+        files.push(file);
+      }
+    }
+
+    // 5. คืนค่าอาร์เรย์ของไฟล์ทั้งหมดที่พบ
+    return files;
   }
 
   // ฟังก์ชันสำหรับสร้างโฟลเดอร์ตามเส้นทาง

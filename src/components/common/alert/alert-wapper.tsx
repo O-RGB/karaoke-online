@@ -1,34 +1,54 @@
 import React, { cloneElement, useState } from "react";
-import AlertDialog, { AlertDialogProps } from ".";
+import AlertDialog, { AlertDialogProps } from "./notification";
+import ProcessingDialog, { ProcessingDialogProps } from "./processing";
+import { IAlertCommon } from "./types/alert.type";
 
 interface AlertWapperProps {
   children?: React.ReactNode;
 }
 
 const AlertWapper: React.FC<AlertWapperProps> = ({ children }) => {
-  const [props, setProps] = useState<AlertDialogProps>();
+  const [alertProps, setAlertProps] = useState<AlertDialogProps>();
+  const [processingProps, setProcessingProps] =
+    useState<ProcessingDialogProps>();
 
   const setAlert = (props: AlertDialogProps) =>
-    setProps({ ...props, open: props.open === undefined ? true : props.open });
+    setAlertProps({
+      ...props,
+      open: props.open !== undefined ? props.open : true,
+      onCancel: closeAlert,
+    });
 
   const closeAlert = () => {
-    setProps({ open: false });
+    setAlertProps({ open: false });
   };
 
-  const clone = React.isValidElement(children)
-    ? cloneElement(
-        children as React.ReactElement<{
-          setAlert?: (props: AlertDialogProps) => void;
-          closeAlert?: () => void;
-        }>,
-        { setAlert, closeAlert }
-      )
+  const setProcessing = (props: ProcessingDialogProps) => {
+    setProcessingProps({
+      ...props,
+      isOpen: props.isOpen !== undefined ? props.isOpen : true,
+      onClose: closeProcessing,
+    });
+  };
+
+  const closeProcessing = () => {
+    setProcessingProps({ isOpen: false });
+  };
+
+  const cloned = React.isValidElement(children)
+    ? cloneElement(children as React.ReactElement<IAlertCommon>, {
+        setAlert,
+        closeAlert,
+        setProcessing,
+        closeProcessing,
+      })
     : children;
 
   return (
-    <div>
-      <AlertDialog {...props} />
-      {clone}
+    <div className="w-full h-full">
+      {cloned}
+      <AlertDialog {...alertProps} />
+      <ProcessingDialog {...processingProps} />
     </div>
   );
 };

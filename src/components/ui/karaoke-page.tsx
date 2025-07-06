@@ -37,17 +37,19 @@ import NotificationAlert from "../tools/noti-alert";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
-import Processing2Modal from "../common/processing/processing-update";
+import Processing2Modal from "../common/alert/processing/processing-update";
 import { DatabaseService } from "@/utils/indexedDB/service";
 import AppendSongModal from "../modal/append-song";
 import { SongsSystem } from "@/features/songs";
 import useSongsStore from "@/features/songs/store/songs.store";
+import { SoundfontSystemManager } from "@/features/soundfont";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const setup = useSynthesizerEngine((state) => state.setup);
 
   const setSongsManager = useSongsStore((state) => state.setSongsManager);
+  const setSoundfontManaer = useSongsStore((state) => state.setSoundfontManaer);
   const initializeKeyboardListeners = useKeyboardStore(
     (state) => state.initializeKeyboardListeners
   );
@@ -61,15 +63,20 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     const db = new DatabaseService();
     await db.initialize();
     setPrepare(true);
-    setup(config.system?.engine);
+    const engine = await setup(config.system?.engine);
     initializeKeyboardListeners();
 
     const soundSystem = new SongsSystem(config.system);
     setSongsManager(soundSystem);
+    soundSystem.init("EXTREME_FILE_SYSTEM");
+
+    const soundfontSystem = new SoundfontSystemManager(engine, {
+      soundMode: "EXTREME_FILE_SYSTEM",
+    });
+    setSoundfontManaer(soundfontSystem);
 
     setTimeout(() => {
       setPrepare(false);
-      soundSystem.init("PYTHON_FILE_ENCODE");
     }, 1000);
   };
 

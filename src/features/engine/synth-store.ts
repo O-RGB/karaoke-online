@@ -15,7 +15,7 @@ export type EngineType = "spessa" | "jsSynth";
 interface ISynthesizerEngine {
   engine: BaseSynthEngine | undefined;
   synth: Spessasynth | JsSynthesizer | undefined;
-  setup: (engine?: EngineType) => void;
+  setup: (engine?: EngineType) => Promise<BaseSynthEngine>;
 }
 export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
   engine: undefined,
@@ -33,9 +33,11 @@ export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
         configs
       );
       set({ engine: spessaSynth });
+      return spessaSynth;
     } else {
       const jsSynth = new JsSynthEngine(setInstrument);
       set({ engine: jsSynth });
+      return jsSynth;
     }
   },
 }));

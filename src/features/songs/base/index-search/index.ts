@@ -1,3 +1,4 @@
+import { SoundSystemMode } from "@/features/config/types/config.type";
 import {
   ITrackData,
   MasterIndex,
@@ -6,8 +7,10 @@ import {
   ISearchRecordPreview,
   SearchOptions,
 } from "../../types/songs.type";
+import { ProcessingDialogProps } from "@/components/common/alert/processing";
 
 export abstract class BaseSongsSystemReader {
+  protected system: SoundSystemMode | undefined;
   protected sortedWords: string[] = [];
   protected wordToChunkMap: Record<string, number> = {};
 
@@ -55,38 +58,39 @@ export abstract class BaseSongsSystemReader {
   }
 
   public async buildIndex(
-    setProgress?: (value: IProgressBar) => void
+    setProgress?: (value: ProcessingDialogProps) => void
   ): Promise<boolean> {
     const startTime = Date.now();
 
     setProgress?.({
-      loading: true,
-      show: true,
-      title: "Building Optimized Index (V6)",
-      discription: "Initializing...",
-      progress: 0,
+      status: {
+        progress: 0,
+        text: "Building Optimized Index (V6)",
+        working: "Initializing",
+      },
     });
 
     await this.initializeDataSource();
     const totalRecords = await this.getTotalRecords();
 
     setProgress?.({
-      loading: true,
-      show: true,
-      title: "Building Optimized Index (V6)",
-      discription: `Loading ${totalRecords.toLocaleString()} records into memory...`,
-      progress: 5,
+      status: {
+        text: "Building Optimized Index (V6)",
+        working: `Loading ${totalRecords.toLocaleString()} records into memory...`,
+        progress: 5,
+      },
     });
     const allRecords = await this.getRecordsBatch(0, totalRecords);
     const wordToPreviewsMap = new Map<string, ISearchRecordPreview[]>();
 
     setProgress?.({
-      loading: true,
-      show: true,
-      title: "Building Optimized Index (V6)",
-      discription: "Analyzing records...",
-      progress: 20,
+      status: {
+        working: `Analyzing records...`,
+        text: "Building Optimized Index (V6)",
+        progress: 20,
+      },
     });
+
     allRecords.forEach((record) => {
       const preview: ISearchRecordPreview = {
         t: record.TITLE,
@@ -102,12 +106,13 @@ export abstract class BaseSongsSystemReader {
     });
 
     setProgress?.({
-      loading: true,
-      show: true,
-      title: "Building Optimized Index (V6)",
-      discription: "Sorting words and creating chunks...",
-      progress: 70,
+      status: {
+        text: "Building Optimized Index (V6)",
+        working: `Sorting words and creating chunks...`,
+        progress: 70,
+      },
     });
+
     const sortedWords = Array.from(wordToPreviewsMap.keys()).sort((a, b) =>
       a.localeCompare(b, "th-TH-u-co-trad")
     );
@@ -136,12 +141,13 @@ export abstract class BaseSongsSystemReader {
     }
 
     setProgress?.({
-      loading: true,
-      show: true,
-      title: "Building Optimized Index (V6)",
-      discription: "Saving master index...",
-      progress: 95,
+      status: {
+        text: "Building Optimized Index (V6)",
+        working: `Saving master index...`,
+        progress: 95,
+      },
     });
+
     const masterIndexToSave: MasterIndex = {
       totalRecords,
       words: sortedWords,
@@ -156,12 +162,14 @@ export abstract class BaseSongsSystemReader {
     this.wordToChunkMap = wordToChunkMap;
 
     setProgress?.({
-      loading: false,
-      show: true,
-      title: "Complete",
-      discription: `Optimized Index (V6) built in ${masterIndexToSave.buildTime}ms.`,
-      progress: 100,
+      variant: "success",
+      status: {
+        text: "Building Optimized Index (V6)",
+        working: `Optimized Index (V6) built in ${masterIndexToSave.buildTime}ms.`,
+        progress: 100,
+      },
     });
+
     return true;
   }
 
@@ -202,6 +210,8 @@ export abstract class BaseSongsSystemReader {
     query: string,
     options: SearchOptions = {}
   ): Promise<ITrackData[]> {
+    if (!this.system) return [];
+
     const { maxResults = this.DEFAULT_MAX_RESULTS } = options;
     const startTime = Date.now();
 
@@ -281,6 +291,7 @@ export abstract class BaseSongsSystemReader {
           _originalIndex: item.preview.i,
           _superIndex: item.preview.s,
           _priority: item.score,
+          _system: this.system,
         } as ITrackData)
     );
 

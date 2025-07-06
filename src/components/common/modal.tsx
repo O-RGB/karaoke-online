@@ -11,9 +11,6 @@ import { useOrientation } from "@/hooks/orientation-hook";
 import "winbox/dist/css/winbox.min.css";
 import "winbox/dist/css/themes/white.min.css";
 
-// สมมติว่า ModalProps ถูกประกาศไว้ที่อื่น
-// interface ModalProps { ... }
-
 export default function WinboxModal({
   isOpen,
   onClose,
@@ -21,7 +18,7 @@ export default function WinboxModal({
   title,
   width,
   height,
-  maxWidth, // 1. เพิ่ม maxWidth ใน props
+  maxWidth,
   modalClassName = "",
   containerId = "modal-container",
   closable = true,
@@ -31,8 +28,8 @@ export default function WinboxModal({
   noResize,
   noFull = true,
   noMax,
+  onFocus,
 }: ModalProps) {
-  // อย่าลืมเพิ่ม maxWidth ใน Type ของ ModalProps ด้วย
   const { isMobile, orientation } = useOrientation();
   const [showModal, setShowModal] = useState(isOpen);
   const [modalDimensions, setModalDimensions] = useState({
@@ -47,7 +44,6 @@ export default function WinboxModal({
       return { width, height };
     }
 
-    // 3. ใช้ maxWidth ที่รับมาในการคำนวณ โดยมีค่า fallback เป็นค่าเดิม
     const defaultSizes = {
       desktop: {
         width: Math.min(window.innerWidth * 0.8, maxWidth || 1200),
@@ -77,11 +73,14 @@ export default function WinboxModal({
       width: width || size.width,
       height: height || size.height,
     };
-  }, [isMobile, orientation, width, height, maxWidth]); // 2. เพิ่ม maxWidth เป็น dependency ของ useCallback
+  }, [isMobile, orientation, width, height, maxWidth]);
 
   useEffect(() => {
     const updateDimensions = () => {
-      setModalDimensions(calculateDimensions());
+      const dimensions = calculateDimensions();
+      setModalDimensions(dimensions);
+      // คำนวณ content height (ลบ title bar height ประมาณ 38px)
+      setContentHeight(dimensions.height - 38);
     };
 
     updateDimensions();
@@ -109,6 +108,11 @@ export default function WinboxModal({
         backdrop-filter: blur(4px);
         z-index: -1;
       }
+      
+      /* ป้องกัน scroll bar ใน modal content */
+      .winbox .wb-body {
+        overflow: hidden !important;
+      }
     `;
     document.head.appendChild(styleElement);
 
@@ -129,6 +133,7 @@ export default function WinboxModal({
   };
 
   const handleResize = (_: number, height: number) => {
+    // อัปเดต content height เมื่อ modal ถูก resize
     const newContentHeight = height - 38;
     setContentHeight(newContentHeight);
   };
@@ -142,11 +147,12 @@ export default function WinboxModal({
     document.body.appendChild(modalRoot);
   }
 
+  // ส่ง height ไปให้ children เพื่อให้ component ปรับขนาดตัวเอง
   const childrenWithHeight = isValidElement(children)
     ? cloneElement(children, { height: contentHeight } as any)
     : children;
 
-  const modal = (
+  return (
     <WinBox
       width={modalDimensions.width}
       height={modalDimensions.height}
@@ -166,9 +172,9 @@ export default function WinboxModal({
       noClose={!closable}
       background="transparent"
     >
-      <>{childrenWithHeight}</>
+      <div style={{ height: contentHeight, overflow: "hidden" }}>
+        {childrenWithHeight}
+      </div>
     </WinBox>
   );
-
-  return createPortal(modal, modalRoot);
 }

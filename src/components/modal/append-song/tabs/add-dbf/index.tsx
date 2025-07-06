@@ -1,53 +1,51 @@
 import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
 import FileSystemManager from "@/utils/file/file-system";
+import useSongsStore from "@/features/songs/store/songs.store";
 import React, { useEffect, useState } from "react";
 import { BsFolder, BsFolderCheck } from "react-icons/bs";
-import useSongsStore from "@/features/songs/store/songs.store";
-import ProcessingModal from "@/components/common/processing/processing";
 import { MdBuild, MdDeleteForever } from "react-icons/md";
+import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 
-import { AlertDialogProps } from "@/components/common/alert";
+interface AddDBFSongProps extends IAlertCommon {}
 
-interface AddDBFSongProps {
-  setAlert?: (props?: AlertDialogProps) => void;
-  closeAlert?: () => void;
-}
-
-interface IProgressBar {
-  show: boolean;
-  title?: string;
-  progress?: number;
-}
-
-const AddDBFSong: React.FC<AddDBFSongProps> = ({ setAlert, closeAlert }) => {
+const AddDBFSong: React.FC<AddDBFSongProps> = ({
+  setAlert,
+  closeAlert,
+  setProcessing,
+}) => {
   const [name, setName] = useState<string>();
-  const [progress, setProgress] = useState<IProgressBar>();
+
   const songsManager = useSongsStore((state) => state.songsManager);
 
   const rebuildIndex = async () => {
+    closeAlert?.();
     if (songsManager) {
-      await songsManager?.manager?.buildIndex();
-      closeAlert?.();
+      await songsManager?.manager?.buildIndex(setProcessing);
     }
   };
 
   const onSelectFileSystem = async () => {
-    const onLoadIndex = (await songsManager?.extremeFileSystem()) ?? false;
+    const onLoadIndex = songsManager?.isReady();
     if (!onLoadIndex) {
-      await songsManager?.manager?.buildIndex();
+      await songsManager?.manager?.buildIndex(setProcessing);
     } else {
-      setProgress({
-        show: true,
-        title: "Tracklist Loaded!",
-        progress: 100,
-      });
+      const fsManager = FileSystemManager.getInstance();
+      await fsManager.getRootHandle();
+      await songsManager?.reloadInit();
+      const isLastReady = songsManager?.isReady();
+      if (isLastReady) {
+        const indexLoaded = await songsManager?.manager?.loadIndex();
+        if (!indexLoaded) {
+          await songsManager?.manager?.buildIndex(setProcessing);
+        }
+      }
     }
     await detectPath();
   };
 
   const detectPath = async () => {
-    const fsManager = FileSystemManager.getInstance();
+    const fsManager = FileSystemManager.getInstance(false);
     const root = fsManager.getRootHandleSync();
     if (root) {
       setName(root.name);
@@ -57,7 +55,6 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({ setAlert, closeAlert }) => {
   };
 
   const handleDelete = async () => {
-    console.log("Deleting folder reference...");
     const fsManager = FileSystemManager.getInstance();
     fsManager.clearDirectory();
     setName(undefined);
@@ -70,10 +67,6 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({ setAlert, closeAlert }) => {
 
   return (
     <>
-      <ProcessingModal
-        process={progress}
-        onClose={() => setProgress({ show: false })}
-      />
       <div className="flex flex-col h-full space-y-4">
         <div>
           <Label

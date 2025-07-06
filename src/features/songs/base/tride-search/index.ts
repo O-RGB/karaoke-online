@@ -18,6 +18,7 @@ import {
   FilesUserSongsManager,
   TracklistUserSongsManager,
 } from "@/utils/indexedDB/db/user-songs/table";
+import { SoundSystemMode } from "@/features/config/types/config.type";
 
 export interface DuplicateMatch {
   track: ITrackData;
@@ -26,6 +27,7 @@ export interface DuplicateMatch {
 }
 
 export class BaseUserSongsSystemReader {
+  protected system: SoundSystemMode = "DATABASE_FILE_SYSTEM";
   private tracklistUserSongsManager = new TracklistUserSongsManager();
   private filesUserSongsManager = new FilesUserSongsManager();
   private trieSearchService = TrieSearchService.getInstance();
@@ -63,8 +65,8 @@ export class BaseUserSongsSystemReader {
       ARTIST: artist,
       _originalIndex: 0,
       KEY: key,
-      LYR_TITLE: `${lyr1} ${lyr2} ${lyr3} ${lyr4} ${lyr5} ${lyr6} ${lyr7}
-      `,
+      LYR_TITLE: `${lyr1} ${lyr2} ${lyr3} ${lyr4} ${lyr5} ${lyr6} ${lyr7}`,
+      _system: this.system,
     };
   }
 
@@ -330,6 +332,8 @@ export class BaseUserSongsSystemReader {
   }
 
   public search(query: string): ITrackData[] {
-    return this.trieSearchService.search(query);
+    return this.trieSearchService
+      .search(query)
+      .map((x) => ({ ...x, _isUser: true }));
   }
 }

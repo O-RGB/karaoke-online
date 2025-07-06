@@ -1,6 +1,6 @@
 import React, { cloneElement } from "react";
-import Modal from "../modal";
-import Button from "../button/button";
+import Modal from "../../modal";
+import Button from "../../button/button";
 import { BiCheck } from "react-icons/bi";
 import { MdClose, MdError } from "react-icons/md";
 import { IoWarning } from "react-icons/io5";
@@ -64,6 +64,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
       noMin={true}
       title={title}
       fitHeight
+      index={99}
     >
       <div className="p-4 flex flex-col gap-2 h-full">
         <div className="flex gap-3  h-full">

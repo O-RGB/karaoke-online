@@ -39,6 +39,7 @@ export class PythonIndexReader extends BaseSongsSystemReader {
     this.chunkDataDb = new ChunkDataLocalSongsManager();
     this.masterIndexDb = new MasterIndexLocalSongsManager();
     this.filesDb = new FilesLocalSongsManager();
+    this.system = "PYTHON_FILE_ENCODE";
   }
 
   public async importIndexFromZip(

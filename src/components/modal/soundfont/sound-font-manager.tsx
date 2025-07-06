@@ -1,13 +1,14 @@
 "use client";
 import Tabs from "../../common/tabs";
-import React, { useEffect, useState } from "react";
-import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import SoundfontFolder from "./tabs/sound-font-folder";
 import SoundfontFree from "./tabs/sound-font-free";
+import useSongsStore from "@/features/songs/store/songs.store";
+import React, { useEffect, useState } from "react";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { BiDownload, BiFolder } from "react-icons/bi";
 import { SoundfontPlayerManager } from "@/utils/indexedDB/db/player/table";
-import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
+import { SoundSystemMode } from "@/features/config/types/config.type";
+import { DEFAULT_SOUND_FONT } from "@/config/value";
 
 const soundfont = new SoundfontPlayerManager();
 interface SoundfontManagerProps {
@@ -15,23 +16,41 @@ interface SoundfontManagerProps {
 }
 
 const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
+  const soundfontBaseManager = useSongsStore(
+    (state) => state.soundfontBaseManager
+  );
   const engine = useSynthesizerEngine((state) => state.engine);
-  const isPaused = useRuntimePlayer((state) => state.isPaused);
-
-  const [soundFontStorage, setSoundFontStorage] = useState<
-    ListItem<ISoundfontPlayer>[]
-  >([]);
+  const [soundFontStorage, setSoundFontStorage] = useState<ListItem<File>[]>(
+    []
+  );
+  const [soundFontExtreme, setSoundFontExtreme] = useState<ListItem<File>[]>(
+    []
+  );
+  const [selected, setSelected] = useState<string | undefined>(
+    DEFAULT_SOUND_FONT
+  );
+  const [from, setFrom] = useState<SoundSystemMode>("EXTREME_FILE_SYSTEM");
 
   const [loading, setLoading] = useState<boolean>(false);
 
   const getSoundFontList = async () => {
-    let sf = await soundfont.getAll();
-    const lists = sf.map((data) => ({
-      row: data.id,
+    const list = await soundfontBaseManager?.getSoundfonts();
+    if (!list) return [];
+    const extreme = list?.manager.map((data) => ({
+      row: data.name,
       value: data,
     }));
-    setSoundFontStorage(lists);
-    return lists;
+    const local = list?.local.map((data) => ({
+      row: data.name,
+      value: data,
+    }));
+
+    extreme.sort((a, b) => a.row.localeCompare(b.row));
+    local.sort((a, b) => a.row.localeCompare(b.row));
+
+    setSoundFontStorage(local);
+    setSoundFontExtreme(extreme);
+    return extreme;
   };
 
   const getSoundfontLocal = async () => {
@@ -46,26 +65,20 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
     await getSoundfontLocal();
   };
 
-  const updateSoundFont = async (file: File) => {
-    setLoading(true);
-    if (engine) engine.player?.pause();
-    if (file && engine) {
-      engine.setSoundFont(file);
-    }
-
-    if (!isPaused) {
-      setTimeout(() => {
-        if (engine) engine.player?.play();
-        setLoading(false);
-      }, 2000);
-    } else {
-      setLoading(false);
-    }
+  const updateSoundFont = async (
+    idOrFilename: string,
+    from: SoundSystemMode
+  ) => {
+    soundfontBaseManager?.setSoundfont(idOrFilename, from);
+    setFrom(from);
+    setSelected(idOrFilename);
   };
 
   useEffect(() => {
     getSoundFontList();
-  }, [engine]);
+    setSelected(soundfontBaseManager?.selected);
+    setFrom(soundfontBaseManager?.selectedFrom ?? "EXTREME_FILE_SYSTEM");
+  }, [engine?.soundfontName, soundfontBaseManager?.selected]);
 
   return (
     <Tabs
@@ -75,11 +88,19 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
           content: (
             <SoundfontFolder
               engine={engine}
+              from={from}
+              onClickDefault={async () => {
+                await engine?.loadDefaultSoundFont();
+                setSelected(DEFAULT_SOUND_FONT);
+                setFrom("DATABASE_FILE_SYSTEM");
+              }}
+              selected={selected}
               getSoundFontList={getSoundFontList}
               loading={loading}
               removeSF2Local={removeSF2Local}
               setLoading={setLoading}
               soundFontStorage={soundFontStorage}
+              soundFontExtreme={soundFontExtreme}
               updateSoundFont={updateSoundFont}
             ></SoundfontFolder>
           ),

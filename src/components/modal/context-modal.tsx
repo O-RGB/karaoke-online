@@ -124,6 +124,7 @@ const ContextModal: React.FC<ContextModalProps> = ({
         isOpen={open}
         removeFooter={false}
         cancelText="ปิด"
+        index={1}
         okButtonProps={{
           hidden: true,
         }}

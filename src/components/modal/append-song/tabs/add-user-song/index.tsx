@@ -1,6 +1,6 @@
 import Label from "@/components/common/display/label";
 import Upload from "@/components/common/input-data/upload";
-import ProcessingModal from "@/components/common/processing/processing";
+import ProcessingModal from "@/components/common/alert/processing/processing";
 import React, { useState } from "react";
 import { loadKaraokeTracks } from "@/lib/karaoke/read";
 import { FaPlus, FaRegFileAudio, FaSearch } from "react-icons/fa";
@@ -16,7 +16,7 @@ import {
   BaseUserSongsSystemReader,
   DuplicateMatch,
 } from "@/features/songs/base/tride-search";
-import { AlertDialogProps } from "@/components/common/alert";
+import { AlertDialogProps } from "@/components/common/alert/notification";
 import Modal from "@/components/common/modal";
 
 interface AddSongCount {
@@ -118,11 +118,11 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
           row: (
             <div className="w-fit flex gap-2">
               {item.fileName && (
-                <Tags color={tagColor} className="text-[10px]">
+                <Tags color={tagColor} className="text-[10px] min-w-10 text-center">
                   {item.fileName}
                 </Tags>
               )}
-              {name}
+             <div className="m-auto">{name}</div>
             </div>
           ),
           value: item,
@@ -196,11 +196,11 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
           row: (
             <div className="w-fit flex gap-2">
               {item.value.fileName && (
-                <Tags color={tagColor} className="text-[10px]">
+                <Tags color={tagColor} className="text-[10px] min-w-10 text-center">
                   {item.value.fileName}
                 </Tags>
               )}
-              {name}
+             <div className="m-auto">{name}</div>
             </div>
           ),
           className: item.value.error ? "text-red-500" : "",
@@ -297,13 +297,6 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
 
   return (
     <>
-      <ProcessingModal
-        process={progress}
-        onClose={() => {
-          setProgress({ show: false });
-        }}
-      />
-
       <Modal
         maxWidth={800}
         height={470}
@@ -387,42 +380,43 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
         )}
       </Modal>
 
-      <div className="flex flex-col h-full gap-1.5">
-        <div className="flex flex-col gap-1">
-          <Label>
-            เลือกไฟล์เพลง (.emk หรือ .mid, .cur, .lyr) - สูงสุด 200 เพลง
-          </Label>
-          <Upload
-            className="border border-blue-500 p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
-            onSelectFile={onAddFile}
-            inputProps={{
-              multiple: true,
-            }}
-          >
-            <span className="w-full text-sm flex items-center gap-2">
-              <FaRegFileAudio className="text-blue-500" />
-              <span>อัปโหลดไฟล์เพลง (ปัจจุบัน: {decoded.length}/200)</span>
-            </span>
-          </Upload>
-        </div>
+      <div className="flex flex-col gap-2 h-full">
+        <div className="h-fit space-y-1.5">
+          <div>
+            <Label>
+              เลือกไฟล์เพลง (.emk หรือ .mid, .cur, .lyr) - สูงสุด 200 เพลง
+            </Label>
+            <Upload
+              className="border border-blue-500 p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
+              onSelectFile={onAddFile}
+              inputProps={{
+                multiple: true,
+              }}
+            >
+              <span className="w-full text-sm flex items-center gap-2">
+                <FaRegFileAudio className="text-blue-500" />
+                <span>อัปโหลดไฟล์เพลง (ปัจจุบัน: {decoded.length}/200)</span>
+              </span>
+            </Upload>
+          </div>
 
-        <div className="flex gap-4">
-          <Label headClass="bg-gray-300">ทั้งหมด: {soundCount.length}</Label>
-          <Label headClass="bg-green-500">
-            ใช้ได้:{" "}
-            {Math.max(
-              0,
-              soundCount.length - soundCount.error - soundCount.duplicate
-            )}
-          </Label>
-          <Label headClass="bg-red-500">ผิดพลาด: {soundCount.error}</Label>
-          <Label headClass="bg-yellow-500">ซ้ำ: {soundCount.duplicate}</Label>
+          <div className="row-span-4 flex gap-4">
+            <Label headClass="bg-gray-300">ทั้งหมด: {soundCount.length}</Label>
+            <Label headClass="bg-green-500">
+              ใช้ได้:{" "}
+              {Math.max(
+                0,
+                soundCount.length - soundCount.error - soundCount.duplicate
+              )}
+            </Label>
+            <Label headClass="bg-red-500">ผิดพลาด: {soundCount.error}</Label>
+            <Label headClass="bg-yellow-500">ซ้ำ: {soundCount.duplicate}</Label>
+          </div>
         </div>
 
         <TableList
           listKey="add-song-file"
           list={decoded}
-          className="overflow-y-auto h-full"
           onDeleteItem={removeItem}
           deleteItem={false}
           itemAction={(value: KaraokeDecoded) => (
@@ -453,18 +447,17 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
             </div>
           )}
         />
-        <div className="flex gap-2 -mb-2">
-          <Button
-            color="blue"
-            iconPosition="left"
-            className="flex-1"
-            icon={<FaPlus />}
-            disabled={decoded.length === 0 || hasProblematicItems}
-            onClick={handleAddSong}
-          >
-            เพิ่มเพลง
-          </Button>
-        </div>
+
+        <Button
+          color="blue"
+          iconPosition="left"
+          className="w-full"
+          icon={<FaPlus />}
+          disabled={decoded.length === 0 || hasProblematicItems}
+          onClick={handleAddSong}
+        >
+          เพิ่มเพลง
+        </Button>
       </div>
     </>
   );

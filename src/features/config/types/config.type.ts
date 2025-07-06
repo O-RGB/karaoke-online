@@ -35,8 +35,8 @@ export type SystemFont =
 export type SoundSystemMode =
   | "PYTHON_FILE_ENCODE"
   | "EXTREME_FILE_SYSTEM"
-  | "DRIVE_API"
-  | "SERVER_API";
+  | "DATABASE_FILE_SYSTEM"
+  | "PYTHON_API_SYSTEM"
 
 export interface ConfigSystem {
   refreshRate: Partial<RefreshRateConfig>;

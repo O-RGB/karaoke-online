@@ -9,8 +9,8 @@ import { SoundfontPlayerManager } from "@/utils/indexedDB/db/player/table";
 import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 
 interface SoundfontFreeProps {
-  soundFontStorage: ListItem<ISoundfontPlayer>[];
-  getSoundFontList: () => Promise<ListItem<ISoundfontPlayer>[]>;
+  soundFontStorage: ListItem<File>[];
+  getSoundFontList: () => Promise<ListItem<File>[]>;
 }
 const soundfont = new SoundfontPlayerManager();
 
@@ -70,7 +70,7 @@ const SoundfontFree: React.FC<SoundfontFreeProps> = ({
         </Label>
 
         <TableList
-          height={"auto"}
+          // height={"auto"}
           hoverFocus={false}
           listKey={"id"}
           renderKey="name"

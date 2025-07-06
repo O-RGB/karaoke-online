@@ -40,27 +40,27 @@ const Button: React.FC<ButtonCommonProps> = ({
       break;
     case "blue":
       colorStyle =
-        "text-white bg-blue-500 hover:bg-blue-500/80 active:bg-blue-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-blue-500!";
+        "text-white bg-blue-500 hover:bg-blue-500/80 active:bg-blue-500/80 disabled:bg-blue-500/60 disabled:cursor-not-allowed disabled:hover:bg-blue-500!";
       break;
     case "green":
       colorStyle =
-        "text-white bg-green-500 hover:bg-green-500/80 active:bg-green-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-green-500!";
+        "text-white bg-green-500 hover:bg-green-500/80 active:bg-green-500/80 disabled:bg-green-500/60 disabled:cursor-not-allowed disabled:hover:bg-green-500!";
       break;
     case "yellow":
       colorStyle =
-        "text-white bg-yellow-500 hover:bg-yellow-500/80 active:bg-yellow-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-yellow-500!";
+        "text-white bg-yellow-500 hover:bg-yellow-500/80 active:bg-yellow-500/80 disabled:bg-yellow-500/60 disabled:cursor-not-allowed disabled:hover:bg-yellow-500!";
       break;
     case "amber":
       colorStyle =
-        "text-white bg-amber-500 hover:bg-amber-500/80 active:bg-amber-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-amber-500!";
+        "text-white bg-amber-500 hover:bg-amber-500/80 active:bg-amber-500/80 disabled:bg-amber-500/60 disabled:cursor-not-allowed disabled:hover:bg-amber-500!";
       break;
     case "red":
       colorStyle =
-        "text-white bg-red-600 hover:bg-red-600/80 active:bg-red-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-red-500!";
+        "text-white bg-red-600 hover:bg-red-600/80 active:bg-red-500/80 disabled:bg-red-600/60 disabled:cursor-not-allowed disabled:hover:bg-red-500!";
       break;
     case "gray":
       colorStyle =
-        "text-white bg-gray-500 hover:bg-gray-500/80 active:bg-gray-500/80 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-gray-500!";
+        "text-white bg-gray-500 hover:bg-gray-500/80 active:bg-gray-500/80 disabled:bg-gray-500/60 disabled:cursor-not-allowed disabled:hover:bg-gray-500/60!";
       break;
 
     default:

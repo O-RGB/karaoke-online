@@ -28,7 +28,7 @@ type ModalType =
   | "DRIVE_SETTING"
   | "DISPLAY"
   | "DONATE"
-  | "MIXER"
+  | "MIXER";
 
 type InputBarLayout = "vertical" | "horizontal";
 type SystemMode = "SYSTEM" | "DRIVE";
@@ -66,6 +66,8 @@ type ModalProps = {
   noResize?: boolean;
   noFull?: boolean;
   noMax?: boolean;
+
+  onFocus?: boolean;
 };
 
 interface CommonStyle {
@@ -96,13 +98,13 @@ interface IOptions<T = any> {
 
 interface IProgressBar {
   title?: string;
-  discription?: string,
+  discription?: string;
   progress?: number;
   processing?: string;
   error?: string;
   show?: boolean;
   loading?: boolean;
-  cancel?: boolean
+  cancel?: boolean;
 }
 
 interface MapContextMenu {
