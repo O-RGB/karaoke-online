@@ -1,68 +1,137 @@
-import { IAlertCommon } from "@/components/common/alert/types/alert.type";
-import {
-  FontDisplayManager,
-  WallpaperDisplayManager,
-} from "@/utils/indexedDB/db/display/table";
-import {
-  DircetoryLocalSongsManager,
-  FilesLocalSongsManager,
-  ChunkDataLocalSongsManager,
-  MasterIndexLocalSongsManager,
-} from "@/utils/indexedDB/db/local-songs/table";
-import { SoundfontPlayerManager } from "@/utils/indexedDB/db/player/table";
-import {
-  FilesServerSongsManager,
-  TracklistServerSongsManager,
-} from "@/utils/indexedDB/db/server-cache/table";
-import {
-  FilesUserSongsManager,
-  TracklistUserSongsManager,
-} from "@/utils/indexedDB/db/user-songs/table";
-import { DatabaseService } from "@/utils/indexedDB/service";
 import React from "react";
+import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
+import useSongsStore from "@/features/songs/store/songs.store";
+import { IAlertCommon } from "@/components/common/alert/types/alert.type";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { DatabaseService } from "@/utils/indexedDB/service";
 
 interface ResetDatabaseProps extends IAlertCommon {}
 
-const ResetDatabase: React.FC<ResetDatabaseProps> = ({ setAlert }) => {
-  //   // user songs
-  //   const filesUserSongsManager = new FilesUserSongsManager();
-  //   const tracklistUserSongsManager = new TracklistUserSongsManager();
+const ResetDatabase: React.FC<ResetDatabaseProps> = ({
+  setProcessing,
+  setAlert,
+}) => {
+  const engine = useSynthesizerEngine((state) => state.uninsatll);
+  const uninstall = useRuntimePlayer((state) => state.uninstall);
+  const songsManager = useSongsStore((state) => state.songsManager);
+  const soundfontBaseManager = useSongsStore(
+    (state) => state.soundfontBaseManager
+  );
 
-  //   // server songs
-  //   const filesServerSongsManager = new FilesServerSongsManager();
-  //   const tracklistServerSongsManager = new TracklistServerSongsManager();
+  const deleteAllSetting = async () => {
+    try {
+      uninstall();
+      setProcessing?.({
+        title: "Reset System",
+        status: {
+          progress: 0,
+          text: "กำลังรีเซ็ตระบบใหม่ทั้งหมด",
+          working: "เตรียมตัวหยุดการทำงาน",
+        },
+        variant: "processing",
+      });
+      setTimeout(() => {
+        engine();
+        setProcessing?.({
+          title: "Reset System",
+          status: {
+            progress: 20,
+            text: "กำลังรีเซ็ตระบบใหม่ทั้งหมด",
+            working: "หยุดการทำงาน Engine",
+          },
+          variant: "processing",
+        });
+      }, 500);
+      setTimeout(() => {
+        songsManager?.uninstall();
+        setProcessing?.({
+          title: "Reset System",
+          status: {
+            progress: 40,
+            text: "กำลังรีเซ็ตระบบใหม่ทั้งหมด",
+            working: "หยุดการทำงาน Songs Manager",
+          },
+          variant: "processing",
+        });
+      }, 500);
+      setTimeout(() => {
+        soundfontBaseManager?.uninstall();
+        setProcessing?.({
+          title: "Reset System",
+          status: {
+            progress: 60,
+            text: "กำลังรีเซ็ตระบบใหม่ทั้งหมด",
+            working: "หยุดการทำงาน Soundfont Manager",
+          },
+          variant: "processing",
+        });
+      }, 500);
+      const service = new DatabaseService();
+      setProcessing?.({
+        title: "Reset System",
+        status: {
+          progress: 80,
+          text: "กำลังรีเซ็ตระบบใหม่ทั้งหมด",
+          working: "ถอนการติดตั้ง Database",
+        },
+        variant: "processing",
+      });
+      await service.uninstall();
 
-  //   // file system songs
-  //   const dircetoryLocalSongsManager = new DircetoryLocalSongsManager();
-
-  //   // python songs
-  //   const filesLocalSongsManager = new FilesLocalSongsManager();
-  //   const chunkDataLocalSongsManager = new ChunkDataLocalSongsManager();
-  //   const masterIndexLocalSongsManager = new MasterIndexLocalSongsManager();
-
-  //   // optional reset
-  //   const soundfontPlayerManager = new SoundfontPlayerManager();
-  //   const fontDisplayManager = new FontDisplayManager();
-  //   const wallpaperDisplayManager = new WallpaperDisplayManager();
-
-  //   const onResetUserSong = async () => {
-  //     await filesUserSongsManager.deleteDatabase();
-  //     await tracklistUserSongsManager.deleteDatabase();
-  //   };
-
-  const deleteAllSetting = () => {
-    const service = new DatabaseService();
-    service.uninstall();
+      localStorage.clear();
+      setProcessing?.({
+        title: "Reset System",
+        status: {
+          progress: 100,
+          text: "สำเร็จ",
+          working: "รีเซ็ตระบบเรียบร้อยแล้ว",
+        },
+        variant: "success",
+        onClose() {
+          window.location.reload();
+        },
+      });
+    } catch (error) {
+      setProcessing?.({
+        title: "Reset System",
+        status: {
+          progress: 100,
+          text: "ผิดพลาด",
+          working: `เกิดข้อผิดพลาดเกี่ยวกับ ${JSON.stringify(error)}`,
+        },
+        onClose() {
+          window.location.reload();
+        },
+        variant: "error",
+      });
+    }
   };
 
   return (
     <>
-      <div
-        onClick={() => {
-          deleteAllSetting();
-        }}
-      >
-        Delete Database User song
+      <div className="w-full max-w-md mx-auto  p-4 border border-red-300 rounded-lg bg-red-50 shadow-md">
+        <h2 className="text-lg font-semibold text-red-700 mb-2">
+          ⚠️ รีเซ็ตระบบทั้งหมด
+        </h2>
+        <p className="text-sm text-red-600 mb-4">
+          การกระทำนี้จะลบข้อมูลทั้งหมดในระบบของคุณ รวมถึงไฟล์เพลง การตั้งค่า
+          Engine และฐานข้อมูลภายใน <strong>ถาวร</strong>
+          <br />
+          โปรดตรวจสอบให้แน่ใจก่อนดำเนินการ
+        </p>
+        <button
+          onClick={() => {
+            setAlert?.({
+              title: "ยืนยันการลบข้อมูล",
+              description: "ระบบจะไม่สามารถกู้การตั้งค่าทั้งหมดของคุณได้",
+              onOk: deleteAllSetting,
+              variant: "error",
+            });
+          }}
+          className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md transition duration-200 shadow"
+        >
+          ลบข้อมูลทั้งหมด (ถาวร)
+        </button>
       </div>
     </>
   );

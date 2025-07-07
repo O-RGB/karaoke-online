@@ -346,4 +346,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       }
     });
   }
+
+  async unintsall() {
+    await this.audio?.suspend();
+  }
 }

@@ -6,19 +6,26 @@ import useConfigStore from "@/features/config/config-store";
 import { LyricsCharacterStyle } from "./types/lyrics-character.type";
 import useMixerStoreNew from "../player/event-player/modules/event-mixer-store";
 import { useOrientation } from "@/hooks/orientation-hook";
+import { FontDisplayManager } from "@/utils/indexedDB/db/display/table";
 
 interface LyricsPlayerProps {}
 
 const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
   const { orientation } = useOrientation();
   const [windowsWidth, setWindowsWidth] = useState<number>(window.innerWidth);
-  const currentTick = useRuntimePlayer((state) => state.currentTick) ;
+  const currentTick = useRuntimePlayer((state) => state.currentTick);
   const lyricsProcessed = useLyricsStore((state) => state.lyricsProcessed);
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
   const fontSize = useConfigStore((state) => state.config.lyrics?.fontSize);
   const fontAuto = useConfigStore((state) => state.config.lyrics?.fontAuto);
   const colorActive = useConfigStore((state) => state.config.lyrics?.active);
   const color = useConfigStore((state) => state.config.lyrics?.color);
+
+  const fontDisplayManager = new FontDisplayManager();
+  const config = useConfigStore((state) => state.config);
+  const [fontUrl, setFontUrl] = useState<string>();
+
+  const fontSetting = config.lyrics?.fontName;
 
   const handleResize = () => {
     setWindowsWidth(window.innerWidth);
@@ -31,6 +38,26 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  const initFont = async () => {
+    if (Number(fontSetting)) {
+      const response = await fontDisplayManager.get(Number(fontSetting));
+      console.log("response", response);
+      const file = response?.file;
+
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      setFontUrl(url);
+    } else {
+      setFontUrl(undefined);
+    }
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      initFont();
+    }, 100);
+  }, [fontSetting]);
 
   if (!lyricsProcessed) return null;
   const active = lyricsProcessed.search(currentTick);
@@ -58,9 +85,22 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
         left: 0,
       }}
     >
+      {fontUrl && (
+        <style>
+          {`
+            @font-face {
+              font-family: 'customFont';
+              src: url(${fontUrl}) format('truetype');
+            }
+          `}
+        </style>
+      )}
       <div className={className}>
         <div className="text-sm gap-2 absolute text-white text-start top-2 left-2"></div>
-        <div className="flex flex-col py-2 lg:py-7 gap-0 lg:gap-10 items-center justify-center text-white drop-shadow-lg w-fit overflow-hidden">
+        <div
+          style={{ fontFamily: fontUrl ? "customFont" : "sans-serif" }}
+          className="flex flex-col py-2 lg:py-7 gap-0 lg:gap-10 items-center justify-center text-white drop-shadow-lg w-fit overflow-hidden"
+        >
           <LyricsList
             tick={active.lyrics.tag === "top" ? currentTick : 0}
             containerWidth={windowsWidth}

@@ -13,7 +13,8 @@ export class SoundfontSystemManager {
   public currentMode: SoundSystemMode | undefined = undefined;
   public selected?: string | undefined = undefined;
   public selectedFrom?: SoundSystemMode | undefined = undefined;
-  private dircetoryLocalSongsManager = new DircetoryLocalSongsManager();
+  private dircetoryLocalSongsManager: DircetoryLocalSongsManager | undefined =
+    new DircetoryLocalSongsManager();
 
   constructor(engine: BaseSynthEngine, config?: Partial<SystemConfig>) {
     this.engine = engine;
@@ -33,7 +34,7 @@ export class SoundfontSystemManager {
       case "EXTREME_FILE_SYSTEM":
         this.manager = new SoundfontFileSystemManager(engine);
 
-        const handle = await this.dircetoryLocalSongsManager.get(1);
+        const handle = await this.dircetoryLocalSongsManager?.get(1);
         if (handle?.handle) {
           this.manager.setFileSystem?.(FileSystemManager.getInstance());
         }
@@ -103,5 +104,11 @@ export class SoundfontSystemManager {
     }
     this.selected = idOrFilename;
     this.selectedFrom = targetMode;
+  }
+
+  uninstall() {
+    this.dircetoryLocalSongsManager = undefined;
+    this.local = undefined;
+    this.engine = undefined;
   }
 }

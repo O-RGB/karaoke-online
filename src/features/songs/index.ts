@@ -38,7 +38,8 @@ export class SongsSystem {
   public readonly userSong = new BaseUserSongsSystemReader();
   public currentMode: SoundSystemMode | undefined = undefined;
 
-  private dircetoryLocalSongsManager = new DircetoryLocalSongsManager();
+  private dircetoryLocalSongsManager: DircetoryLocalSongsManager | undefined =
+    new DircetoryLocalSongsManager();
   private initializationPromise: Promise<void> | null = null;
 
   constructor(config?: Partial<SystemConfig>) {
@@ -86,7 +87,7 @@ export class SongsSystem {
         this.manager = newManager;
 
         if (soundMode === "EXTREME_FILE_SYSTEM") {
-          const handle = await this.dircetoryLocalSongsManager.get(1);
+          const handle = await this.dircetoryLocalSongsManager?.get(1);
           if (handle?.handle) {
             this.manager.setFileSystem?.(FileSystemManager.getInstance());
           }
@@ -180,5 +181,10 @@ export class SongsSystem {
     }
 
     return this.manager?.getSong(trackData);
+  }
+
+  uninstall() {
+    this.manager = undefined;
+    this.dircetoryLocalSongsManager = undefined;
   }
 }

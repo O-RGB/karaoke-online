@@ -216,11 +216,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
         {hasResults && selectedSong && (
           <div className="flex flex-wrap gap-3 items-center text-2xl animate-fadeIn">
             <SongTypeTag type={selectedSong.SUB_TYPE} />
-            <SourceTag
-              from={
-                selectedSong._superIndex !== undefined ? "CUSTOM" : "EXTHEME"
-              }
-            ></SourceTag>
+            <SourceTag from={selectedSong._system}></SourceTag>
             {selectedSong.CODE && (
               <span className="uppercase">{selectedSong.CODE}</span>
             )}

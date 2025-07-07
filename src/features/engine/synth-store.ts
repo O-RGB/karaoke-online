@@ -16,6 +16,7 @@ interface ISynthesizerEngine {
   engine: BaseSynthEngine | undefined;
   synth: Spessasynth | JsSynthesizer | undefined;
   setup: (engine?: EngineType) => Promise<BaseSynthEngine>;
+  uninsatll: () => void;
 }
 export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
   engine: undefined,
@@ -39,5 +40,9 @@ export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
       set({ engine: jsSynth });
       return jsSynth;
     }
+  },
+  uninsatll: async () => {
+    await get().engine?.unintsall();
+    set({ engine: undefined, synth: undefined });
   },
 }));

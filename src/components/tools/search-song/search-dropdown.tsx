@@ -34,10 +34,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
           {/* {value.SUB_TYPE === "EMK" && <Tags color="red">EMK</Tags>}
           {value.SUB_TYPE === "NCN" && <Tags color="green">NCN</Tags>} */}
 
-          <SourceTag
-            from={value._superIndex !== undefined ? "CUSTOM" : "EXTHEME"}
-            size={size}
-          ></SourceTag>
+          <SourceTag from={value._system} size={size}></SourceTag>
         </span>
       </div>
     </>

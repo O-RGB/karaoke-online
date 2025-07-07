@@ -150,6 +150,24 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
       }
     }
   },
+  uninstall() {
+    get().stop();
+    set({
+      isPaused: false,
+      isFinished: true,
+      hasTransitioned: true,
+      countDown: 10,
+      currentTime: 0,
+      currentTick: 0,
+      intervalId: undefined,
+      lyrics: [],
+      cursors: [],
+      currentTempo: 0,
+      timeDivision: 0,
+      midi: undefined,
+      musicInfo: undefined,
+    });
+  },
 }));
 
 export default useRuntimePlayer;

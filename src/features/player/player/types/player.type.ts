@@ -32,6 +32,7 @@ export interface RuntimePlayer {
   paused: () => void;
   stop: () => void;
   reset: () => void;
+  uninstall: () => void;
 }
 
 export interface RuntimeTick {

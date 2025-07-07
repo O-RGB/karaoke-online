@@ -19,6 +19,7 @@ export interface BaseSynthEngine {
 
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;
+  unintsall(): Promise<void>;
   setSoundFont(file: File): void;
 
   toggleChannelEqualizer?(channelIndex: number, enabled: boolean): void;
@@ -32,9 +33,9 @@ export interface BaseSynthEngine {
   ): void;
   getChannelEQSettings?(channelIndex: number):
     | {
-      frequency: number;
-      gain: number;
-    }[]
+        frequency: number;
+        gain: number;
+      }[]
     | null;
 
   preset: number[];
@@ -64,8 +65,8 @@ export interface BaseSynthEngine {
 export interface BaseSynthEvent {
   controllerChangeCallback?: (event: IControllerChange) => void;
   programChangeCallback?: (event: IProgramChange) => void;
-  onNoteOnChangeCallback?: (event: INoteChange) => void
-  onNoteOffChangeCallback?: (event: INoteChange) => void
+  onNoteOnChangeCallback?: (event: INoteChange) => void;
+  onNoteOffChangeCallback?: (event: INoteChange) => void;
 }
 
 export interface BaseSynthPlayerEngine {
@@ -117,7 +118,7 @@ export interface INoteChange extends IEventChange {
   velocity: number;
 }
 
-export interface INoteModifier extends Omit<INoteChange, "midiNote"> { }
+export interface INoteModifier extends Omit<INoteChange, "midiNote"> {}
 
 export interface ILockController {
   channel: number;

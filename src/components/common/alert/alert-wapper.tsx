@@ -17,6 +17,7 @@ const AlertWapper: React.FC<AlertWapperProps> = ({ children }) => {
       ...props,
       open: props.open !== undefined ? props.open : true,
       onCancel: closeAlert,
+      onOk: props.onOk ? props.onOk : closeAlert,
     });
 
   const closeAlert = () => {
@@ -27,7 +28,8 @@ const AlertWapper: React.FC<AlertWapperProps> = ({ children }) => {
     setProcessingProps({
       ...props,
       isOpen: props.isOpen !== undefined ? props.isOpen : true,
-      onClose: closeProcessing,
+      onClose: props.onClose ? props.onClose : closeProcessing,
+      onCancel: props.onClose ? props.onClose : props.onCancel,
     });
   };
 
