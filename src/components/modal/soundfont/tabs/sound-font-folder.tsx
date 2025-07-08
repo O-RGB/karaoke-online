@@ -17,20 +17,19 @@ import useSongsStore from "@/features/songs/store/songs.store";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
 import useConfigStore from "@/features/config/config-store";
-
-type SoundFontListItem = ListItem<File>;
+import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 
 interface SoundfontFolderProps extends IAlertCommon {
   loading: boolean;
   engine: BaseSynthEngine | undefined;
-  soundFontStorage: SoundFontListItem[];
-  soundFontExtreme: SoundFontListItem[];
+  soundFontStorage: ListItem<ISoundfontPlayer>[];
+  soundFontExtreme: ListItem<ISoundfontPlayer>[];
   selected?: string;
   from?: SoundSystemMode;
   setLoading: (isLoad: boolean) => void;
-  getSoundFontList: () => Promise<SoundFontListItem[]>;
+  getSoundFontList: () => Promise<ListItem<ISoundfontPlayer>[]>;
   updateSoundFont: (idOrFilename: string, from: SoundSystemMode) => void;
-  removeSF2Local?: (id: File, index: number) => void;
+  removeSF2Local?: (id: ISoundfontPlayer, index: number) => void;
   onClickDefault?: () => void;
 }
 
@@ -135,11 +134,16 @@ const CurrentlyPlaying: FC<CurrentlyPlayingProps> = ({
 
 interface SoundfontListViewProps {
   title: string;
-  list: SoundFontListItem[];
+  list: ListItem<ISoundfontPlayer>[];
   loading: boolean;
-  onItemSelect: (fileName: string) => void;
-  onItemDelete?: (value: File, index: number) => void;
+  onItemSelect: (
+    fileName: string,
+    index: number,
+    option: ListItem<ISoundfontPlayer>
+  ) => void;
+  onItemDelete?: (value: ISoundfontPlayer, index: number) => void;
   isSelected: (fileName: string) => boolean;
+  from?: SoundSystemMode;
 }
 
 const SoundfontListView: FC<SoundfontListViewProps> = ({
@@ -149,6 +153,7 @@ const SoundfontListView: FC<SoundfontListViewProps> = ({
   onItemSelect,
   onItemDelete,
   isSelected,
+  from,
 }) => {
   const renderActionButtonIcon = (fileName: string): ReactNode => {
     if (loading) {
@@ -165,21 +170,23 @@ const SoundfontListView: FC<SoundfontListViewProps> = ({
       <Label>
         <FaFolder className="inline-block mb-1" /> <span>{title}</span>
       </Label>
-      <TableList
+      <TableList<ISoundfontPlayer>
         listKey="id"
         hoverFocus={false}
         list={list}
         deleteItem={!!onItemDelete}
         onDeleteItem={onItemDelete}
-        itemAction={(item: File) => (
+        itemAction={(item: ISoundfontPlayer, index: number, option) => (
           <Button
             padding=""
             className="w-7 h-7"
             disabled={loading}
-            onClick={() => onItemSelect(item.name)}
+            onClick={() => onItemSelect(item.file.name, index, option)}
             color="default"
             blur={false}
-            icon={renderActionButtonIcon(item.name)}
+            icon={renderActionButtonIcon(
+              from === "EXTREME_FILE_SYSTEM" ? item.file.name : `${item.id}`
+            )}
           />
         )}
       />
@@ -231,9 +238,12 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
           title="โฟลเดอร์ Soundfont"
           list={soundFontStorage}
           loading={loading}
-          onItemSelect={(fileName) =>
-            updateSoundFont(fileName, "DATABASE_FILE_SYSTEM")
-          }
+          from="DATABASE_FILE_SYSTEM"
+          onItemSelect={(fileName, index, option) => {
+            if (option.value.id) {
+              updateSoundFont(String(option.value.id), "DATABASE_FILE_SYSTEM");
+            }
+          }}
           onItemDelete={removeSF2Local}
           isSelected={(fileName) =>
             selected === fileName && from === "DATABASE_FILE_SYSTEM"
@@ -242,6 +252,7 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
 
         {config?.system?.soundMode === "EXTREME_FILE_SYSTEM" && (
           <SoundfontListView
+            from="EXTREME_FILE_SYSTEM"
             title="Karaoke Extreme Soundfont"
             list={soundFontExtreme}
             loading={loading}

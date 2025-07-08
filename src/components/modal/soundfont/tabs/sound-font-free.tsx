@@ -9,8 +9,8 @@ import { SoundfontPlayerManager } from "@/utils/indexedDB/db/player/table";
 import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 
 interface SoundfontFreeProps {
-  soundFontStorage: ListItem<File>[];
-  getSoundFontList: () => Promise<ListItem<File>[]>;
+  soundFontStorage: ListItem<ISoundfontPlayer>[];
+  getSoundFontList: () => Promise<ListItem<ISoundfontPlayer>[]>;
 }
 const soundfont = new SoundfontPlayerManager();
 

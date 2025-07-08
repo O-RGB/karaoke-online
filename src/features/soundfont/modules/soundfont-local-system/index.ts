@@ -3,6 +3,7 @@ import { SoundfontBase } from "../../base";
 import FileSystemManager from "@/utils/file/file-system";
 import { BaseSynthEngine } from "@/features/engine/types/synth.type";
 import { SoundfontPlayerManager } from "@/utils/indexedDB/db/player/table";
+import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 
 export class SoundfontLocalSystemManager extends SoundfontBase {
   private soundfontDatabase: SoundfontPlayerManager;
@@ -30,8 +31,7 @@ export class SoundfontLocalSystemManager extends SoundfontBase {
 
     return false;
   }
-  async soundfonts(): Promise<File[]> {
-    const response = await this.soundfontDatabase.getAll();
-    return response.map((data) => data.file);
+  async soundfonts(): Promise<ISoundfontPlayer[]> {
+    return this.soundfontDatabase.getAll();
   }
 }

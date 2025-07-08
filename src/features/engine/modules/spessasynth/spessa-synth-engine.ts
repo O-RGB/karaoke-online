@@ -1,4 +1,3 @@
-//src/features/engine/modules/spessasynth/spessa-synth-engine.ts
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
 import { loadAudioContext, loadPlayer } from "./lib/spessasynth";
 import { CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
@@ -26,8 +25,10 @@ import {
   IProgramChange,
   IVelocityChange,
   TimingModeType,
+  IPersetSoundfont,
 } from "../../types/synth.type";
 import { GlobalEqualizer } from "../equalizer/global-equalizer";
+
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
   public synth: Spessasynth | undefined;
@@ -45,6 +46,13 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public globalEqualizer: GlobalEqualizer | undefined = undefined;
 
   public systemConfig?: Partial<ConfigSystem> = undefined;
+
+  public isRecording: boolean = false;
+  private mediaRecorder: MediaRecorder | null = null;
+  private recordedChunks: Blob[] = [];
+  private micSource: MediaStreamAudioSourceNode | null = null;
+  private micStream: MediaStream | null = null;
+  private recorderDestination: MediaStreamAudioDestinationNode | null = null;
 
   private sendMessage?: (info: RemoteSendMessage) => void;
 
@@ -105,6 +113,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       this.globalEqualizer = new GlobalEqualizer(synth.context);
       synth.worklet.connect(this.globalEqualizer.input);
       this.globalEqualizer.output.connect(synth.context.destination);
+    } else {
+      synth.worklet.connect(synth.context.destination);
     }
 
     synth?.connectIndividualOutputs(analysers);
@@ -347,7 +357,114 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     });
   }
 
+  async startRecording(options: { includeMicrophone: boolean }): Promise<void> {
+    if (this.isRecording) {
+      console.warn("Already recording.");
+      return;
+    }
+    if (!this.audio || !this.synth) {
+      throw new Error("AudioContext or Synthesizer not initialized.");
+    }
+
+    await this.audio.resume();
+
+    this.recorderDestination = this.audio.createMediaStreamDestination();
+
+    const synthOutputNode = this.globalEqualizer
+      ? this.globalEqualizer.output
+      : this.synth.worklet;
+    synthOutputNode.connect(this.recorderDestination);
+
+    if (options.includeMicrophone) {
+      try {
+        this.micStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+        });
+
+        this.micSource = this.audio.createMediaStreamSource(this.micStream);
+        this.micSource.connect(this.recorderDestination);
+      } catch (err) {
+        console.error("Error accessing microphone:", err);
+        synthOutputNode.disconnect(this.recorderDestination);
+        this.recorderDestination = null;
+        throw new Error("Could not access microphone.");
+      }
+    }
+
+    this.recordedChunks = [];
+    const mimeType = "audio/webm; codecs=opus";
+    this.mediaRecorder = new MediaRecorder(this.recorderDestination.stream, {
+      mimeType: mimeType,
+      audioBitsPerSecond: 128000,
+    });
+
+    this.mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        this.recordedChunks.push(event.data);
+      }
+    };
+
+    this.mediaRecorder.start();
+    this.isRecording = true;
+    console.log("🔴 Recording started.", {
+      includeMicrophone: options.includeMicrophone,
+    });
+  }
+
+  async stopRecording(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      if (!this.mediaRecorder || !this.isRecording) {
+        console.log("Not currently recording.");
+        return reject("Not currently recording.");
+      }
+
+      this.mediaRecorder.onstop = () => {
+        const blob = new Blob(this.recordedChunks, { type: "audio/webm" });
+        const audioUrl = URL.createObjectURL(blob);
+
+        console.log(audioUrl);
+        this.cleanupRecording();
+        resolve(audioUrl);
+      };
+
+      this.mediaRecorder.stop();
+    });
+  }
+
+  private cleanupRecording() {
+    if (!this.audio || !this.synth) return;
+
+    const synthOutputNode = this.globalEqualizer
+      ? this.globalEqualizer.output
+      : this.synth.worklet;
+    if (this.recorderDestination) {
+      synthOutputNode.disconnect(this.recorderDestination);
+    }
+
+    if (this.micSource && this.recorderDestination) {
+      this.micSource.disconnect(this.recorderDestination);
+    }
+    this.micStream?.getTracks().forEach((track) => track.stop());
+
+    this.isRecording = false;
+    this.mediaRecorder = null;
+    this.recordedChunks = [];
+    this.micSource = null;
+    this.micStream = null;
+    this.recorderDestination = null;
+    console.log("🎧 Recording stopped and resources cleaned up.");
+  }
+
   async unintsall() {
+    if (this.isRecording) {
+      console.log("Stopping recording before uninstalling...");
+      await this.stopRecording();
+    }
     await this.audio?.suspend();
+    console.log("Synth engine uninstalled.");
   }
 }

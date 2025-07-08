@@ -8,6 +8,7 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { BiDownload, BiFolder } from "react-icons/bi";
 import { SoundSystemMode } from "@/features/config/types/config.type";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
+import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 
 interface SoundfontManagerProps {
   height?: number;
@@ -18,12 +19,12 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
     (state) => state.soundfontBaseManager
   );
   const engine = useSynthesizerEngine((state) => state.engine);
-  const [soundFontStorage, setSoundFontStorage] = useState<ListItem<File>[]>(
-    []
-  );
-  const [soundFontExtreme, setSoundFontExtreme] = useState<ListItem<File>[]>(
-    []
-  );
+  const [soundFontStorage, setSoundFontStorage] = useState<
+    ListItem<ISoundfontPlayer>[]
+  >([]);
+  const [soundFontExtreme, setSoundFontExtreme] = useState<
+    ListItem<ISoundfontPlayer>[]
+  >([]);
   const [selected, setSelected] = useState<string | undefined>(
     DEFAULT_SOUND_FONT
   );
@@ -35,11 +36,11 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
     const list = await soundfontBaseManager?.getSoundfonts();
     if (!list) return [];
     const extreme = list?.manager.map((data) => ({
-      label: data.name,
+      label: data.file.name,
       value: data,
     }));
     const local = list?.local.map((data) => ({
-      label: data.name,
+      label: data.file.name,
       value: data,
     }));
 
@@ -51,8 +52,8 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
     return extreme;
   };
 
-  const removeSF2Local = async (id: File) => {
-    soundfontBaseManager?.removeSoundfont(id.name);
+  const removeSF2Local = async (id: ISoundfontPlayer) => {
+    soundfontBaseManager?.removeSoundfont(id.file.name);
   };
 
   const updateSoundFont = async (
@@ -61,7 +62,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
   ) => {
     soundfontBaseManager?.setSoundfont(idOrFilename, from);
     setFrom(from);
-    setSelected(idOrFilename);
+    setSelected(engine?.soundfontName);
   };
 
   useEffect(() => {

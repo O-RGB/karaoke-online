@@ -1,6 +1,7 @@
 import FileSystemManager from "@/utils/file/file-system";
 import { SoundSystemMode } from "../../config/types/config.type";
 import { BaseSynthEngine } from "../../engine/types/synth.type";
+import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 
 export abstract class SoundfontBase {
   protected system: SoundSystemMode | undefined;
@@ -17,5 +18,5 @@ export abstract class SoundfontBase {
   }
   abstract getSoundfont(id: string): Promise<File | undefined>;
   abstract deleteSoundfont(id: string): boolean | Promise<boolean>;
-  abstract soundfonts(): Promise<File[]>;
+  abstract soundfonts(): Promise<ISoundfontPlayer[]>;
 }

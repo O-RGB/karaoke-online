@@ -61,6 +61,9 @@ export interface BaseSynthEngine {
 
   bassConfig?: BassConfig;
   setBassLock(program: number): void;
+
+  startRecording?(options: { includeMicrophone: boolean }): Promise<void>;
+  stopRecording?(): Promise<string>;
 }
 export interface BaseSynthEvent {
   controllerChangeCallback?: (event: IControllerChange) => void;
