@@ -1,81 +1,75 @@
-import { EMK_FILE_TYPE } from "@/config/value";
+import {
+  CUR_FILE_TYPE,
+  EMK_FILE_TYPE,
+  LYR_FILE_TYPE,
+  MID_FILE_TYPE,
+} from "@/config/value";
 import { parseEMKFile } from "./emk";
-import { readCursorFile, readLyricsFile, validateSongFileTypes } from "./ncn";
+import { readCursorFile, readLyricsFile } from "./ncn";
+import { KaraokeDecoded } from "@/features/songs/types/songs.type";
 
-export const onSelectTestMusic = async (
-  _: File | undefined,
-  FileList: FileList
-) => {
-  if (FileList.length === 1) {
-    const file = FileList.item(0);
-    if (!file?.name.toLowerCase().endsWith(EMK_FILE_TYPE)) {
-      return;
-    }
-    const decode = await parseEMKFile(file);
-    if (decode.cur && decode.lyr && decode.mid) {
-      var song: SongFilesDecode = {
-        mid: decode.mid,
-        cur: (await readCursorFile(decode.cur)) ?? [],
-        lyr: await readLyricsFile(decode.lyr),
-      };
-      return song;
-    }
-  } else if (FileList.length === 3) {
-    const valid = validateSongFileTypes(FileList);
-    if (!valid) {
-      return;
-    }
-    var song: SongFilesDecode = {
-      mid: valid.mid,
-      cur: (await readCursorFile(valid.cur)) ?? [],
-      lyr: await readLyricsFile(valid.lyr),
-    };
-    return song;
-  }
-};
-
-export const readSong = async (
+export const loadKaraokeTracks = async (
   file: FileList
-): Promise<SongFiltsEncodeAndDecode[]> => {
-  let song: SongFiltsEncodeAndDecode[] = [];
+): Promise<KaraokeDecoded[]> => {
+  const song: KaraokeDecoded[] = [];
   const groups = groupFileTrackList(file);
 
   await Promise.all(
     Object.values(groups).map(async (group) => {
       if (group.emk) {
         let lyr: string[] = [];
+
         try {
           const decode = await parseEMKFile(group.emk);
-          lyr = decode.lyr ? await readLyricsFile(decode.lyr) : [];
-          if (decode.cur && decode.lyr && decode.mid) {
-            const read: SongFiltsEncodeAndDecode = {
-              mid: decode.mid,
-              cur: (await readCursorFile(decode.cur)) ?? [],
+
+          if (decode.lyr) {
+            lyr = await readLyricsFile(decode.lyr);
+          }
+
+          if (decode.mid && decode.cur && decode.lyr) {
+            const cur = await readCursorFile(decode.cur);
+            song.push({
+              midi: decode.mid,
+              cur: cur ?? [],
               lyr: lyr,
               emk: group.emk,
-            };
-            song.push(read);
+              raw: {
+                emk: group.emk,
+                midi: decode.mid,
+                cur: decode.cur,
+                lyr: decode.lyr,
+              },
+              fileName: group.emk.name.replace(".emk", ""),
+            });
+            return;
           }
-        } catch (error) {
+        } catch {
           song.push({
+            midi: new File([], group.emk.name),
             cur: [],
             lyr: lyr,
-            mid: new File([], group.emk.name),
             error: true,
+            fileName: group.emk.name.replace(".emk", ""),
           });
+          return;
         }
-      } else if (group.mid && group.cur && group.lyr) {
-        const read: SongFiltsEncodeAndDecode = {
-          mid: group.mid,
-          cur: (await readCursorFile(group.cur)) ?? [],
-          lyr: await readLyricsFile(group.lyr),
-          encode: {
+      }
+
+      if (group.mid && group.cur && group.lyr) {
+        const cur = await readCursorFile(group.cur);
+        const lyr = await readLyricsFile(group.lyr);
+
+        song.push({
+          midi: group.mid,
+          cur: cur ?? [],
+          lyr: lyr,
+          fileName: group.mid.name.replace(".mid", ""),
+          raw: {
+            midi: group.mid,
             cur: group.cur,
             lyr: group.lyr,
-            mid: group.mid,
           },
-        };
-        song.push(read);
+        });
       }
     })
   );
@@ -83,38 +77,21 @@ export const readSong = async (
   return song;
 };
 
-export const groupFileTrackList = (fileList: FileList): FileGroup[] => {
-  const files: File[] = Array.from(fileList);
+const groupFileTrackList = (fileList: FileList): FileGroup[] => {
   const groups: FileGroup[] = [];
-  const fileMap: { [key: string]: FileGroup } = {};
+  const fileMap: Record<string, FileGroup> = {};
 
-  files.map((file) => {
-    const fileNameParts = file.name.split(".");
-    const fileExtension = fileNameParts.pop()?.toLowerCase();
-    const fileName = fileNameParts.join(".");
-
-    if (fileExtension === "emk") {
+  Array.from(fileList).forEach((file) => {
+    const [name, ext] = file.name.toLowerCase().split(/\.(?=[^.]+$)/);
+    if (ext === EMK_FILE_TYPE) {
       groups.push({ emk: file });
     } else {
-      if (!fileMap[fileName]) {
-        fileMap[fileName] = {};
-      }
-
-      if (fileExtension === "mid") {
-        fileMap[fileName].mid = file;
-      } else if (fileExtension === "lyr") {
-        fileMap[fileName].lyr = file;
-      } else if (fileExtension === "cur") {
-        fileMap[fileName].cur = file;
-      }
+      const group = (fileMap[name] ||= {});
+      if (ext === MID_FILE_TYPE) group.mid = file;
+      else if (ext === LYR_FILE_TYPE) group.lyr = file;
+      else if (ext === CUR_FILE_TYPE) group.cur = file;
     }
   });
 
-  Object.values(fileMap).map((group) => {
-    groups.push(group);
-  });
-
-  return groups;
+  return groups.concat(Object.values(fileMap));
 };
-
-export const getTracklistFile = (file: File) => {};

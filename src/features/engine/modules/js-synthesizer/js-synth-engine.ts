@@ -15,7 +15,10 @@ import { ChannelGainMonitor } from "./lib/channel-gain-monitor";
 import { InstrumentalNode } from "../instrumentals/instrumental";
 import { SynthChannel } from "../instrumentals/channel";
 import { BassConfig } from "../instrumentals/config";
-import { ConfigSystem, SoundSetting } from "@/features/config/types/config.type";
+import {
+  ConfigSystem,
+  SoundSetting,
+} from "@/features/config/types/config.type";
 import {
   CHORUSDEPTH,
   EXPRESSION,
@@ -82,16 +85,22 @@ export class JsSynthEngine implements BaseSynthEngine {
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
       this.nodes.push(
-        new SynthChannel(ch, this.instrumental, audioContext, undefined, systemConfig)
+        new SynthChannel(
+          ch,
+          this.instrumental,
+          audioContext,
+          undefined,
+          systemConfig
+        )
       );
-      this.nodes[ch].setVelocityRender(true)
+      this.nodes[ch].setVelocityRender(true);
       analysers.push(analyser);
     }
 
     this.controllerChange();
     this.programChange();
-    this.noteOffChange()
-    this.noteOnChange()
+    this.noteOffChange();
+    this.noteOnChange();
 
     return { synth: synth, audio: this.audio };
   }
@@ -161,7 +170,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   }
 
   noteOffChange(callback?: (event: INoteChange) => void): void {
-    const notes = this.nodes
+    const notes = this.nodes;
     if (this.player?.addEvent) {
       this.player.addEvent({
         onNoteOffChangeCallback: (e) => {
@@ -183,7 +192,7 @@ export class JsSynthEngine implements BaseSynthEngine {
       });
     }
   }
-  persetChange(): void { }
+  persetChange(): void {}
   programChange(callback?: (event: IProgramChange) => void): void {
     if (this.player?.addEvent) {
       this.player.addEvent({
@@ -217,9 +226,9 @@ export class JsSynthEngine implements BaseSynthEngine {
       controllerValue: event.controllerValue,
     });
   }
-  setVelocity(event: IVelocityChange): void { }
+  setVelocity(event: IVelocityChange): void {}
 
-  setMidiOutput(): void { }
+  setMidiOutput(): void {}
 
   setController(event: IControllerChange): void {
     const node = this.nodes[event.channel];
@@ -273,10 +282,10 @@ export class JsSynthEngine implements BaseSynthEngine {
       controllerValue: event.controllerValue,
     });
   }
-  updatePitch(channel: number, semitones?: number): void { }
-  updatePreset(channel: number, value: number): void { }
+  updatePitch(channel: number, semitones?: number): void {}
+  updatePreset(channel: number, value: number): void {}
 
-  updateSpeed(value: number) { }
+  updateSpeed(value: number) {}
   setBassLock(program: number): void {
     this.bassConfig?.setLockBass(program);
     const bass = this.instrumental.group.get("bass");
@@ -285,5 +294,8 @@ export class JsSynthEngine implements BaseSynthEngine {
         this.setProgram({ channel: node.channel, program });
       }
     });
+  }
+  async unintsall() {
+    this.audio?.suspend();
   }
 }

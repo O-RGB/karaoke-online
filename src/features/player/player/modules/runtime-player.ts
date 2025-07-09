@@ -46,7 +46,6 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
 
   paused: () => {
     const nodes = useSynthesizerEngine.getState().engine?.nodes;
-    console.log("nodes", nodes);
     nodes?.map((c) => c.note?.reset());
     const player = useSynthesizerEngine.getState().engine?.player;
     player?.pause();
@@ -149,6 +148,24 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
         set({ intervalId: undefined });
       }
     }
+  },
+  uninstall() {
+    get().stop();
+    set({
+      isPaused: false,
+      isFinished: true,
+      hasTransitioned: true,
+      countDown: 10,
+      currentTime: 0,
+      currentTick: 0,
+      intervalId: undefined,
+      lyrics: [],
+      cursors: [],
+      currentTempo: 0,
+      timeDivision: 0,
+      midi: undefined,
+      musicInfo: undefined,
+    });
   },
 }));
 

@@ -4,24 +4,24 @@ import React, { useEffect, useState } from "react";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song/search-song";
-import HostRemote from "../remote/host";
-import SuperHostRemote from "../remote/super/super-host";
 
-import SoundfontManager from "../modal/soundfont/sound-font-manager";
+import ClientHostRemote from "../remote/client/client-host";
+
+import SoundfontManager from "../modal/soundfont";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
-import AppendSongModal from "../modal/append-song";
+// import AppendSongModal from "../modal/append-song/index-none";
 import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status/status-panel";
-import OptionsPanel from "../tools/options-panel";
+// import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper-modal";
-import { getTracklist } from "@/lib/storage/tracklist";
+// import { getTracklist } from "@/lib/storage/tracklist";
 import DriveSetting from "../modal/drive-setting-modal";
 import DisplaySettingModal from "../modal/display";
 
-import { DragDrop } from "../tools/drag-drop/drag-drop";
-import DataStoresModal from "../modal/datastores";
-import useTracklistStore from "@/features/tracklist/tracklist-store";
+// import { DragDrop } from "../tools/drag-drop/drag-drop";
+// import DataStoresModal from "../modal/datastores";
+// import useTracklistStore from "@/features/tracklist/tracklist-store";
 import useNotificationStore from "@/features/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/features/config/config-store";
@@ -37,13 +37,21 @@ import NotificationAlert from "../tools/noti-alert";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
-import Processing2Modal from "../common/processing/processing-update";
-interface KaraokePageProps { }
+import Processing2Modal from "../common/alert/processing/processing-update";
+import { DatabaseService } from "@/utils/indexedDB/service";
+import AppendSongModal from "../modal/append-song";
+import { SongsSystem } from "@/features/songs";
+import useSongsStore from "@/features/songs/store/songs.store";
+import { SoundfontSystemManager } from "@/features/soundfont";
+import DataStoresModal from "../modal/datastores";
+import RemoteRouteHost from "@/features/remote/routes";
+interface KaraokePageProps {}
 
-const KaraokePage: React.FC<KaraokePageProps> = ({ }) => {
+const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const setup = useSynthesizerEngine((state) => state.setup);
 
-  const addTracklist = useTracklistStore((state) => state.addTracklist);
+  const setSongsManager = useSongsStore((state) => state.setSongsManager);
+  const setSoundfontManaer = useSongsStore((state) => state.setSoundfontManaer);
   const initializeKeyboardListeners = useKeyboardStore(
     (state) => state.initializeKeyboardListeners
   );
@@ -54,16 +62,20 @@ const KaraokePage: React.FC<KaraokePageProps> = ({ }) => {
   const [onPrepare, setPrepare] = useState<boolean>(false);
 
   const startup = async () => {
+    const db = new DatabaseService();
+    await db.initialize();
     setPrepare(true);
-    setup(config.system?.engine);
+    const engine = await setup(config.system?.engine);
     initializeKeyboardListeners();
-    let tl: SearchResult[] = [];
-    if (config.system?.drive) {
-      tl = await getTracklist(["DRIVE", "DRIVE_EXTHEME"]);
-    } else {
-      tl = await getTracklist(["CUSTOM", "EXTHEME"]);
-    }
-    addTracklist(tl);
+
+    const soundSystem = new SongsSystem(config.system);
+    setSongsManager(soundSystem);
+    soundSystem.init(config.system?.soundMode ?? "PYTHON_API_SYSTEM");
+
+    const soundfontSystem = new SoundfontSystemManager(engine);
+
+    setSoundfontManaer(soundfontSystem);
+
     setTimeout(() => {
       setPrepare(false);
     }, 1000);
@@ -75,8 +87,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({ }) => {
 
   const modalMap: ModalComponents = {
     SOUNDFONT_MODEL: <SoundfontManager></SoundfontManager>,
-    JOIN: <HostRemote></HostRemote>,
-    SUPER_JOIN: <SuperHostRemote></SuperHostRemote>,
+    // JOIN: <HostRemote></HostRemote>,
+    SUPER_JOIN: <ClientHostRemote></ClientHostRemote>,
     MUSIC_STORE: <DataStoresModal></DataStoresModal>,
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
@@ -89,12 +101,13 @@ const KaraokePage: React.FC<KaraokePageProps> = ({ }) => {
   return (
     <FullScreen handle={handle}>
       {/* Process */}
+      <RemoteRouteHost></RemoteRouteHost>
       <Processing2Modal></Processing2Modal>
       <WallpaperRender
         wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>
       <RemoteEvent></RemoteEvent>
-      <AutoModal auto title={""}></AutoModal>
+      <AutoModal auto title={""}></AutoModal>​
       <NotificationAlert></NotificationAlert>
       {/* Contact */}
       <div id="modal-container">

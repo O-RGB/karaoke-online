@@ -98,7 +98,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
           <div
             className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px]  left-0 p-2 py-[26px]`}
           >
-            {nodes.map((data, ch) => {
+            {nodes.map((_, ch) => {
               return (
                 <div key={`gain-render-${ch}`} className="relative w-full">
                   <ChannelVolumeRender

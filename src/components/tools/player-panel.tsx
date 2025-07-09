@@ -1,30 +1,20 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
   TbPlayerSkipForwardFilled,
-  TbPlayerStop,
-  TbPlayerStopFilled,
 } from "react-icons/tb";
 import Button from "../common/button/button";
 import ContextModal from "../modal/context-modal";
-import { FiSettings } from "react-icons/fi";
-import Marquee from "react-fast-marquee";
-import { FaSearch } from "react-icons/fa";
-
-import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import useConfigStore from "@/features/config/config-store";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import SliderCommon from "../common/input-data/slider";
-import { usePeerStore } from "@/features/remote/modules/peer-js-store";
 import useKeyboardStore from "@/features/keyboard-state";
+import { FiSettings } from "react-icons/fi";
+import { FaSearch } from "react-icons/fa";
+import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 interface PlayerRemote {
   onPause?: () => void;
   onPlay?: () => void;
@@ -59,27 +49,63 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   const currentTime = useRuntimePlayer((state) => state.currentTime);
   const currentTick = useRuntimePlayer((state) => state.currentTick);
   const midi = useRuntimePlayer((state) => state.midi);
-  const { setOpenSearchBox } = useKeyboardStore()
+  const { setOpenSearchBox } = useKeyboardStore();
 
   const nextMusic = useQueuePlayer((state) => state.nextMusic);
-
-  const superUserConnections = usePeerStore.getState().superUserConnections;
-  const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
 
   const gain =
     useSynthesizerEngine.getState().engine?.instrumental?.getGain() ?? [];
 
-  useEffect(() => {
-    if (superUserConnections.length > 0) {
-      sendSuperUserMessage({
-        message: gain,
-        user: "SUPER",
-        type: {
-          type: "GAIN",
-          event: "CHANGE",
-        },
-      });
+  // --- 🎙️ ส่วนที่เพิ่มเข้ามาสำหรับจัดการการอัดเสียง ---
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedAudioURL, setRecordedAudioURL] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  // ฟังก์ชันเริ่มการอัดเสียง
+  const handleStartRecording = async (includeMicrophone: boolean) => {
+    if (!engine) return;
+    try {
+      setRecordedAudioURL(null); // เคลียร์ไฟล์เสียงเก่าก่อนเริ่มอัดใหม่
+      await engine.startRecording?.({ includeMicrophone });
+      setIsRecording(true);
+    } catch (error) {
+      console.error("ไม่สามารถเริ่มการบันทึกได้:", error);
+      alert("ไม่สามารถเข้าถึงไมโครโฟนได้ กรุณาตรวจสอบการอนุญาต");
     }
+  };
+
+  // ฟังก์ชันหยุดการอัดเสียง
+  const handleStopRecording = async () => {
+    if (!engine) return;
+    try {
+      const audioUrl = await engine.stopRecording?.();
+      if (!audioUrl) return;
+      setRecordedAudioURL(audioUrl);
+      console.log("ไฟล์เสียงที่บันทึก:", audioUrl);
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการหยุดบันทึก:", error);
+    } finally {
+      setIsRecording(false);
+    }
+  };
+
+  useEffect(() => {
+    if (recordedAudioURL && audioRef.current) {
+      audioRef.current.play();
+    }
+  }, [recordedAudioURL]);
+
+  useEffect(() => {
+    // if (superUserConnections.length > 0) {
+    //   sendSuperUserMessage({
+    //     message: gain,
+    //     user: "SUPER",
+    //     type: {
+    //       type: "GAIN",
+    //       event: "CHANGE",
+    //     },
+    //   });
+    // }
 
     if (midi) {
       if (timingMode === "Tick") {
@@ -100,6 +126,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
     <>
       <div className="fixed bottom-0 gap-2 w-full left-0 blur-overlay bg-black/10 border-t blur-border flex justify-between p-2 lg:p-0">
         <div className="flex w-full">
+          <div className="flex items-center border-r border-white/20 mr-2"></div>
           <div className="flex w-fit ">
             {!isPaused ? (
               <Button
@@ -214,7 +241,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               // if (inputRef.current) {
               //   inputRef.current.focus();
               // }
-              setOpenSearchBox?.(true)
+              setOpenSearchBox?.(true);
             }}
             blur={false}
             border=""

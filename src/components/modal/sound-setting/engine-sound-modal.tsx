@@ -25,7 +25,7 @@ const EngineSoundModal: React.FC<EngineSoundModalProps> = ({}) => {
   return (
     <>
       <Label>ตัวเล่นเพลง</Label>
-      <Select
+      <Select<EngineType>
         defaultValue={config.system?.engine}
         onChange={onEngineChange}
         options={[
@@ -64,9 +64,7 @@ const EngineSoundModal: React.FC<EngineSoundModalProps> = ({}) => {
           <p className="text-xs text-gray-500 mt-2">
             *ยังไม่เหมาะสำหรับการใช้งานบนอุปกรณ์มือถือ
           </p>
-          <p className="text-xs text-blue-600 mt-2">
-            สถานะ: กำลังพัฒนา
-          </p>
+          <p className="text-xs text-blue-600 mt-2">สถานะ: กำลังพัฒนา</p>
         </div>
 
         {/* js-synthesizer Engine */}
@@ -93,12 +91,8 @@ const EngineSoundModal: React.FC<EngineSoundModalProps> = ({}) => {
           <p className="text-xs text-gray-500 mt-2">
             *ไม่ทราบว่ายังพัฒนาต่อหรือไม่ เนื่องจากไม่มีการอัปเดตใน GitHub
           </p>
-          <p className="text-xs text-green-500 mt-2">
-            *ใช้ในมือถือได้ดี
-          </p>
-          <p className="text-xs text-red-600 mt-2">
-            สถานะ: ไม่ชัดเจน
-          </p>
+          <p className="text-xs text-green-500 mt-2">*ใช้ในมือถือได้ดี</p>
+          <p className="text-xs text-red-600 mt-2">สถานะ: ไม่ชัดเจน</p>
         </div>
       </div>
     </>

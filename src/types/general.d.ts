@@ -28,7 +28,7 @@ type ModalType =
   | "DRIVE_SETTING"
   | "DISPLAY"
   | "DONATE"
-  | "MIXER"
+  | "MIXER";
 
 type InputBarLayout = "vertical" | "horizontal";
 type SystemMode = "SYSTEM" | "DRIVE";
@@ -48,6 +48,7 @@ type ModalProps = {
   title?: string;
   icons?: React.ReactNode;
   width?: number;
+  maxWidth?: number;
   height?: number;
   footer?: React.ReactNode;
   cancelText?: string;
@@ -58,13 +59,15 @@ type ModalProps = {
   containerId?: string;
   modalClassName?: string;
   fitHeight?: boolean;
-  index?: number
+  index?: number;
 
-  noMin?: boolean
-  noMove?: boolean
-  noResize?: boolean
-  noFull?: boolean
-  noMax?: boolean
+  noMin?: boolean;
+  noMove?: boolean;
+  noResize?: boolean;
+  noFull?: boolean;
+  noMax?: boolean;
+
+  onFocus?: boolean;
 };
 
 interface CommonStyle {
@@ -75,10 +78,12 @@ interface CommonStyle {
   border?: boolean | string;
 }
 
-interface ListItem<T = any> {
-  row: any;
+interface ListItem<TValue> {
+  value: TValue;
+  label?: string;
+  key?: string;
   className?: string;
-  value: T;
+  render?: () => React.ReactNode;
 }
 
 interface IconsProps {
@@ -95,13 +100,13 @@ interface IOptions<T = any> {
 
 interface IProgressBar {
   title?: string;
-  discription?: string,
+  discription?: string;
   progress?: number;
   processing?: string;
   error?: string;
   show?: boolean;
   loading?: boolean;
-  cancel?: boolean
+  cancel?: boolean;
 }
 
 interface MapContextMenu {

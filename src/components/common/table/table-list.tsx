@@ -3,41 +3,39 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import Button from "../button/button";
 import { RiDeleteBin5Line } from "react-icons/ri";
 
-interface TableListProps {
-  label?: string;
-  list?: ListItem[];
-  onClickItem?: (value: any, index: number) => void;
-  onDeleteItem?: (value: any, index: number) => void;
-  height?: number | string;
+interface TableListProps<TValue = any> {
+  list?: ListItem<TValue>[];
+  onClickItem?: (value: TValue, index: number) => void;
+  onDeleteItem?: (value: TValue, index: number) => void;
   loading?: boolean;
   listKey: string;
-  renderKey?: string;
-  scrollToItem?: string;
+  scrollToItem?: TValue;
   deleteItem?: boolean;
-  itemAction?: (value: any, index: number, name: string) => ReactNode;
+  itemAction?: (
+    value: TValue,
+    index: number,
+    option: ListItem<TValue>
+  ) => ReactNode;
   className?: string;
   hoverFocus?: boolean;
 }
 
-const TableList: React.FC<TableListProps> = ({
-  label,
+const TableList = <TValue,>({
   list,
   onClickItem,
   onDeleteItem,
-  height,
   loading,
   listKey,
-  renderKey,
   scrollToItem,
   itemAction,
   deleteItem = true,
-  className,
+  className = "",
   hoverFocus = true,
-}) => {
+}: TableListProps<TValue>) => {
   const [onFocus, setFocus] = useState<number>(-1);
   const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
 
-  const handleClick = (data: any, index: number) => {
+  const handleClick = (data: TValue, index: number) => {
     setFocus(index);
     onClickItem?.(data, index);
   };
@@ -60,47 +58,56 @@ const TableList: React.FC<TableListProps> = ({
   }, [scrollToItem, list]);
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div
-        className={`${className} flex-1 flex flex-col divide-y w-full border p-2 rounded-md`}
-      >
+    <div
+      className={`${className} flex flex-col h-full w-full border rounded-md overflow-hidden`}
+    >
+      <div className="flex-1 overflow-auto p-2">
         {loading ? (
-          <div className="flex items-center justify-center w-full h-full">
+          <div className="flex items-center justify-center h-full">
             <AiOutlineLoading3Quarters className="animate-spin text-gray-400" />
           </div>
         ) : list && list.length > 0 ? (
-          list.map((data, i) => (
-            <div
-              ref={(el: any) => (itemRefs.current[i] = el)}
-              onClick={() => handleClick?.(data.value, i)}
-              className={`${hoverFocus
-                ? `${onFocus === i ? "bg-gray-300" : ""
-                } hover:bg-gray-200 duration-300 cursor-pointer`
-                : ""
-                } p-1 w-full text-sm flex items-center justify-between ${data.className
+          <div className="divide-y">
+            {list.map((data, i) => (
+              <div
+                ref={(el: any) => (itemRefs.current[i] = el)}
+                onClick={() => handleClick?.(data.value, i)}
+                className={`${
+                  hoverFocus
+                    ? `${
+                        onFocus === i ? "bg-gray-300" : ""
+                      } hover:bg-gray-200 duration-300 cursor-pointer`
+                    : ""
+                } p-1 w-full text-sm flex items-center justify-between ${
+                  data.className || ""
                 }`}
-              key={`${listKey}-${i}`}
-            >
-              {data.row}
-              <div className="flex gap-2">
-                {itemAction?.(data.value, i, data.row)}
-                {deleteItem && (
-                  <Button
-                    shadow={false}
-                    border={""}
-                    onClick={() => onDeleteItem?.(data.value, i)}
-                    padding=""
-                    className="w-7 h-7"
-                    color="red"
-                    blur={false}
-                    icon={<RiDeleteBin5Line className="text-white" />}
-                  />
-                )}
+                key={`${listKey}-${i}`}
+              >
+                {data.render
+                  ? data.render()
+                  : data.label && (
+                      <span className="line-clamp-1">{data.label}</span>
+                    )}
+                <div className="flex gap-2">
+                  {itemAction?.(data.value, i, data)}
+                  {deleteItem && (
+                    <Button
+                      shadow={false}
+                      border={""}
+                      onClick={() => onDeleteItem?.(data.value, i)}
+                      padding=""
+                      className="w-7 h-7"
+                      color="red"
+                      blur={false}
+                      icon={<RiDeleteBin5Line className="text-white" />}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         ) : (
-          <div className="flex items-center justify-center w-full min-h-full text-gray-300 text-xs">
+          <div className="flex flex-col items-center justify-center h-full text-gray-300 text-xs">
             ไม่มีข้อมูล
           </div>
         )}

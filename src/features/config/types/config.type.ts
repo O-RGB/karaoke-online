@@ -32,6 +32,12 @@ export type SystemFont =
   | "thasadith"
   | "k2d"
   | "libreBaskerville";
+  
+export type SoundSystemMode =
+  | "PYTHON_FILE_ENCODE"
+  | "EXTREME_FILE_SYSTEM"
+  | "DATABASE_FILE_SYSTEM"
+  | "PYTHON_API_SYSTEM";
 
 export interface ConfigSystem {
   refreshRate: Partial<RefreshRateConfig>;
@@ -51,7 +57,7 @@ export interface SoundSetting {
   soundFont: string;
   lockBase: number;
   mixer: MixerConfig[];
-  equalizer: boolean
+  equalizer: boolean;
 }
 
 export interface SystemConfig {
@@ -61,14 +67,18 @@ export interface SystemConfig {
   urlTested: boolean;
   tracklistUrl: string;
   tracklistUrlTested: boolean;
+  soundMode: SoundSystemMode;
   uploadToDrive: boolean;
   engine: EngineType;
   timingModeType: TimingModeType;
+  systemFont: string;
 }
 
 export interface ThemesConfig {
   backgroundBlur: boolean;
   backgroundColor: ThemesSettingConfig;
+  wallpaperId: number;
+  wallpaperCamera: boolean;
 }
 export interface ThemesSettingConfig {
   active: boolean;
@@ -96,7 +106,7 @@ export interface LyricsConfig {
   font?: string;
   fontSize?: number;
   fontAuto?: boolean;
-  fontName?: SystemFont;
+  fontName?: string;
   lyricsMode?: LyricsOptions;
 }
 

@@ -1,35 +1,31 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import Label from "../../display/label";
 
-type AllowValueType = string | number | readonly string[] | undefined;
-interface SelectOptionsProps {
-  label?: string;
-  value: AllowValueType;
+interface SelectProps<T extends string>
+  extends Omit<
+    React.SelectHTMLAttributes<HTMLSelectElement>,
+    "onChange" | "options" | "defaultValue"
+  > {
+  options?: ListItem<T>[];
+  onChange?: (value: T) => void;
+  defaultValue?: T;
 }
 
-interface SelectProps
-  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "onChange"> {
-  options?: SelectOptionsProps[];
-  onChange?: (value: any) => void;
-  defaultValue?: AllowValueType;
-}
-
-const Select = <T,>({
+const Select = <T extends string>({
   options,
   onChange,
   defaultValue,
   ...props
-}: SelectProps) => {
+}: SelectProps<T>) => {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedValue = event.target.value;
+    const selectedValue = event.target.value as T;
     onChange?.(selectedValue);
   };
 
   return (
     <div className="relative">
       <div className="absolute top-2.5 right-2 text-gray-500">
-        <IoMdArrowDropdown></IoMdArrowDropdown>
+        <IoMdArrowDropdown />
       </div>
       <select
         {...props}
@@ -39,7 +35,7 @@ const Select = <T,>({
       >
         {options?.map((option, index) => (
           <option key={index} value={option.value}>
-            {option.label}
+            {option.label ?? option.value}
           </option>
         ))}
       </select>

@@ -60,7 +60,7 @@ const LockSoundModal: React.FC<LockSoundModalProps> = ({}) => {
           onChange={onBaseChange}
           options={instrument?.map((data) => ({
             label: `${data.program} - ${data.presetName}`,
-            value: data.program,
+            value: String(data.program),
           }))}
         ></Select>
       </div>

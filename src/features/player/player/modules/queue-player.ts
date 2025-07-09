@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { QueuePlayerProps } from "../types/player.type";
-
-import { getSong } from "@/lib/storage/song";
-import useConfigStore from "@/features/config/config-store";
 import { convertCursorToTicks } from "@/lib/app-control";
-import useRuntimePlayer from "./runtime-player";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { ITrackData } from "@/features/songs/types/songs.type";
+import { readCursorFile, readLyricsFile } from "@/lib/karaoke/ncn";
+import useRuntimePlayer from "./runtime-player";
+import useSongsStore from "@/features/songs/store/songs.store";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import useLyricsStore from "@/features/lyrics/store/lyrics.store";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
@@ -38,7 +39,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   nextMusic: () => {
     const queue = get().queue;
 
-    let nextSong: SearchResult | undefined = undefined;
+    let nextSong: ITrackData | undefined = undefined;
     if (queue.length > 0) {
       nextSong = queue[0];
     }
@@ -73,23 +74,8 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
       return;
     }
 
-    let url = useConfigStore.getState().config.system?.url;
-    const api = useConfigStore.getState().config.system?.api;
-    if (api) {
-      music.from = "DRIVE_EXTHEME";
-      url =
-        "https://script.google.com/macros/s/AKfycbz5M8AFoT-VWqfzfQ4GC_LRx-I-PCjxu23_EP3-eYdOI7lm6XpWSLIo2waFwqKbSUw/exec";
-    }
-    if (music.from === "DRIVE_EXTHEME" || music.from === "DRIVE" || api) {
-      runtime.paused();
-      set({ driveLoading: true });
-    }
-    let song = undefined;
-    if (api) {
-      song = await getSong(music, url);
-    } else {
-      song = await getSong(music, url);
-    }
+    let songsManager = useSongsStore.getState().songsManager;
+    const song = await songsManager?.getSong(music);
     set({ driveLoading: false });
 
     if (!song) {
@@ -98,21 +84,32 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
 
     runtime.stop();
 
-    const parsedMidi = await player.player?.loadMidi(song.mid);
+    const parseCur = (await readCursorFile(song.cur)) ?? [];
+    const parseLyr = await readLyricsFile(song.lyr);
+
+    const parsedMidi = await player.player?.loadMidi(song.midi);
 
     if (parsedMidi) {
       const timeDivision = parsedMidi.timeDivision;
-      const cursors = convertCursorToTicks(timeDivision, song.cur);
+      const cursors = convertCursorToTicks(timeDivision, parseCur);
 
       runtime.setMidiInfo(
         cursors,
-
         timeDivision,
-        song.lyr,
+        parseLyr,
         parsedMidi,
         song,
         music
       );
+
+      if (music._selectBy) {
+        const selectBy = music._selectBy;
+        const lyrics = useLyricsStore.getState();
+        lyrics.setClientId?.(selectBy.clientId);
+      } else {
+        const lyrics = useLyricsStore.getState();
+        lyrics.setClientId?.(undefined);
+      }
 
       setTimeout(() => {
         runtime.play();

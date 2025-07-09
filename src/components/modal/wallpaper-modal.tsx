@@ -1,46 +1,52 @@
 import React, { useEffect, useState } from "react";
-import Upload from "../common/input-data/upload";
-import { FaCheck, FaImage } from "react-icons/fa";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { useWallpaperStore } from "@/features/wallpaper-store";
 import Tabs from "../common/tabs";
+import Upload from "../common/input-data/upload";
+import useConfigStore from "@/features/config/config-store";
+import { FaCamera, FaCheck, FaImage } from "react-icons/fa";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { IWallpaperDisplay } from "@/utils/indexedDB/db/display/types";
+import { WallpaperDisplayManager } from "@/utils/indexedDB/db/display/table";
+import Button from "../common/button/button";
+import { WALLPAPER } from "@/config/value";
 
 interface WallpaperModalProps {}
 
 const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
-  const {
-    addWallpaper,
-    getAllWallpaper,
-    changeWallpaper,
-    deleteWallpaper,
-    wallpaper,
-    wallpaperName,
-  } = useWallpaperStore();
-  const [wallpaperList, setWallpaperList] = useState<File[]>([]);
+  const wallpaperDisplayManager = new WallpaperDisplayManager();
+  const setConfig = useConfigStore((state) => state.setConfig);
+  const wId = useConfigStore((state) => state.config.themes?.wallpaperId);
+  const wCam = useConfigStore((state) => state.config.themes?.wallpaperCamera);
 
-  const setAllWallaper = async () => {
-    const res = await getAllWallpaper();
-    setWallpaperList(res ?? []);
+  const [wallpaperList, setWallpaperList] = useState<IWallpaperDisplay[]>([]);
+
+  const getWallpapers = async () => {
+    const wallpapers = await wallpaperDisplayManager.getAll();
+    setWallpaperList(wallpapers);
   };
 
-  const onChangeWallaper = (filename: string) => {
-    changeWallpaper(filename);
+  const onChangeWallaper = (id: number) => {
+    setConfig({ themes: { wallpaperId: id } });
   };
 
-  const onDeleteWallaper = (filename: string) => {
-    deleteWallpaper(filename);
-    setAllWallaper();
+  const onDeleteWallaper = async (id: number) => {
+    if (wId === id) setConfig({ themes: { wallpaperId: undefined } });
+    await wallpaperDisplayManager.delete(id);
+    await getWallpapers();
   };
 
-  const onAddWallpaper = (file: File, filelist: FileList) => {
-    addWallpaper(file);
-    setAllWallaper();
+  const onAddWallpaper = async (file: File, filelist: FileList) => {
+    const wid = await wallpaperDisplayManager.add({ file });
+    setConfig({ themes: { wallpaperId: wid as number } });
+    await getWallpapers();
+  };
+
+  const openCamera = () => {
+    setConfig({ themes: { wallpaperCamera: !wCam } });
   };
 
   useEffect(() => {
-    setAllWallaper();
-  }, []);
-  useEffect(() => {}, [wallpaper]);
+    getWallpapers();
+  }, [wId]);
 
   return (
     <>
@@ -52,7 +58,7 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
                 <Upload
                   accept="image/jpeg,image/png,video/mp4"
                   onSelectFile={onAddWallpaper}
-                  className="border p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
+                  className="border border-blue-500 p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"
                 >
                   <span className="w-full text-sm flex items-center gap-2">
                     <FaImage></FaImage>
@@ -60,17 +66,35 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
                   </span>
                 </Upload>
                 <div className="grid grid-cols-4 lg:grid-cols-3 gap-3 pt-4 max-h-[500px] overflow-auto">
+                  <div onClick={openCamera} className="w-full h-36 flex">
+                    <Button
+                      color={wCam ? "blue" : "white"}
+                      className="w-full"
+                      icon={<FaCamera></FaCamera>}
+                    >
+                      camera
+                    </Button>
+                  </div>
+                  <div
+                    onClick={() =>
+                      setConfig({ themes: { wallpaperId: undefined } })
+                    }
+                    className={`w-full h-36 rounded-md overflow-hidden ${
+                      wId ? "" : "border-4 border-green-500"
+                    }`}
+                  >
+                    <img src={WALLPAPER} className="w-full h-full" alt="" />
+                  </div>
                   {wallpaperList.map((data, i) => {
-                    data = (data as any).value;
-                    const src = URL.createObjectURL(data);
-                    const isSet = data.name === wallpaperName;
+                    const src = URL.createObjectURL(data.file);
+                    const isSet = data.id === wId;
                     let classBox =
                       "relative cursor-pointer hover:opacity-80 duration-300";
                     let imageBox =
                       "w-full h-36 rounded-md overflow-hidden object-cover border-4";
                     return (
                       <div
-                        onClick={() => onChangeWallaper(data.name)}
+                        onClick={() => onChangeWallaper(data.id)}
                         key={`wallpaper-list-${i}`}
                         className={classBox}
                       >
@@ -80,12 +104,12 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
                           </div>
                         )}
                         <div
-                          onClick={() => onDeleteWallaper(data.name)}
+                          onClick={() => onDeleteWallaper(data.id)}
                           className="z-20 absolute bottom-3 right-3 w-5 h-5 rounded-full shadow-md bg-red-500/70 hover:bg-red-500 duration-300 blur-overlay flex items-center justify-center"
                         >
                           <RiDeleteBin6Line className="text-white text-xs"></RiDeleteBin6Line>
                         </div>
-                        {data.type === "video/mp4" ? (
+                        {data.file.type === "video/mp4" ? (
                           <video
                             autoPlay
                             loop

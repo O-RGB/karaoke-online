@@ -1,6 +1,5 @@
 import SearchSelect from "../../common/input-data/select/search-select";
 import SearchDropdown from "./search-dropdown";
-import useTracklistStore from "@/features/tracklist/tracklist-store";
 import useKeyboardStore from "@/features/keyboard-state";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import SwitchButton from "@/components/common/input-data/switch/switch-button";
@@ -9,12 +8,17 @@ import React, { useState } from "react";
 import { toOptions } from "@/lib/general";
 import { FaList } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
-import { usePeerStore } from "@/features/remote/modules/peer-js-store";
+import { ITrackData } from "@/features/songs/types/songs.type";
+import useSongsStore from "@/features/songs/store/songs.store";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 interface SearchSongProps {}
 
 const SearchSong: React.FC<SearchSongProps> = ({}) => {
-  const searchTracklist = useTracklistStore((state) => state.searchTracklist);
+  const sendMessageWithResponse = usePeerHostStore(
+    (state) => state.sendMessageWithResponse
+  );
+  const songsManager = useSongsStore((state) => state.songsManager);
   const { orientation } = useOrientation();
 
   const addQueue = useQueuePlayer((state) => state.addQueue);
@@ -23,12 +27,22 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
     (state) => state.resetQueueingTimeout
   );
 
-  const superUserConnections = usePeerStore(
-    (state) => state.superUserConnections
-  );
-  const sendSuperUserMessage = usePeerStore(
-    (state) => state.sendSuperUserMessage
-  );
+  const handleAskClientForData = async (clientId: string) => {
+    try {
+      const response = await sendMessageWithResponse(
+        clientId,
+        { command: "GET_CLIENT_TIME" },
+        5000
+      );
+      console.log(`Received response from ${clientId}:`, response);
+      alert(`Client ${clientId}'s time is: ${response.clientTime}`);
+    } catch (error) {
+      console.error(`Failed to get data from client ${clientId}:`, error);
+      alert(`Error: ${error}`);
+    }
+  };
+
+  const normalClients = usePeerHostStore((s) => s.connections.NORMAL);
 
   const queueing = useKeyboardStore((state) => state.queueing);
   const searching = useKeyboardStore((state) => state.searching);
@@ -36,8 +50,8 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const [fullUi, setFullUi] = useState<boolean>(false);
 
   async function onSearch<T = any>(value: string) {
-    const se = (await searchTracklist(value)) ?? [];
-    const op = toOptions<SearchResult>({
+    const se = (await songsManager?.onSearch(value)) ?? [];
+    const op = toOptions<ITrackData>({
       render: (value) => <SearchDropdown value={value}></SearchDropdown>,
       list: se,
     });
@@ -52,7 +66,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
     setFullUi(false);
   };
 
-  const setSongPlayer = async (value: SearchResult) => {
+  const setSongPlayer = async (value: ITrackData) => {
     addQueue(value);
   };
 
@@ -62,14 +76,11 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
 
   return (
     <div>
-      {/* // Default UI */}
-
       <KaraokeSearchInput
         onSearch={onSearch}
         onSelectSong={setSongPlayer}
       ></KaraokeSearchInput>
 
-      {/* // Mobile UI */}
       <div
         className={`fixed z-50 px-5 block lg:hidden ${
           orientation === "landscape"
@@ -86,7 +97,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
               className={
                 "!placeholder-white appearance-none !bg-transparent w-full"
               }
-              onSelectItem={(value: IOptions<SearchResult>) => {
+              onSelectItem={(value: IOptions<ITrackData>) => {
                 if (value.option) {
                   setSongPlayer(value.option);
                 }

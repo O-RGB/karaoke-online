@@ -85,8 +85,7 @@ export type InstrumentDrum =
   | "thai_classical";
 
 export type INodeKey = "MAX_VOLUME" | "VOLUME" | "PAN" | "CHORUS" | "REVERB";
-export type INodeChange = "CHANGE";
-export type INodeOption = INodeChange | "MUTE" | "LOCK" | "ACTIVE";
+export type INodeOption = "CHANGE" | "MUTE" | "LOCK" | "ACTIVE";
 export type INodeState =
   | "EXPRESSION"
   | "VELOCITY"
@@ -116,8 +115,6 @@ export interface InstValueSetting {
   velocity: number;
   expression: number;
 }
-
-
 
 export interface IMidiOutput {
   port: MIDIOutput | null;

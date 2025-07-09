@@ -87,9 +87,9 @@ const DrumPanel: React.FC<DrumPanelProps> = ({}) => {
   const drum = nodes[9].note;
   if (!drum) return <></>;
 
-  const handleOutputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    midiService.setOutputById(e.target.value);
-    setSelectedId(e.target.value);
+  const handleOutputChange = (value: string) => {
+    midiService.setOutputById(value);
+    setSelectedId(value);
   };
 
   const handleNoteEvent = (v: TEventType<INoteState, INoteChange>) => {

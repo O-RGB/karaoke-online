@@ -5,7 +5,6 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
   lyr,
   clip,
   fontSize = 20,
-  font,
   color,
   activeColor,
 }) => {
@@ -27,7 +26,7 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
     lineHeight: "1.5",
   };
 
-  useEffect(() => {}, [font, color, activeColor]);
+  useEffect(() => {}, [color, activeColor]);
 
   return (
     <div
@@ -38,7 +37,6 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
         left: 0,
         top: 0,
         fontWeight: "bold",
-        ...font?.style,
       }}
     >
       <div

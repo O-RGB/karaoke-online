@@ -8,57 +8,17 @@ import Tags from "../../display/tags";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import useKeyboardStore from "@/features/keyboard-state";
 import { useKeyboardEvents } from "@/hooks/keyboard-hook";
+import {
+  ITrackData,
+  SoundSubType,
+  SoundType,
+} from "@/features/songs/types/songs.type";
+import { SourceTag } from "@/components/tools/search-song/source-tag";
 
 interface KaraokeSearchInputProps {
   onSearch?: (value: string) => Promise<IOptions[]>;
-  onSelectSong?: (song: SearchResult) => void;
+  onSelectSong?: (song: ITrackData) => void;
 }
-
-const SourceTag = ({ from }: { from?: TracklistFrom }) => {
-  if (!from) return null;
-
-  if (from === "EXTHEME") {
-    return (
-      <Tags color="white" className="!border-none w-[37px] h-[37px]">
-        <img src="/icon/ke.ico" alt="" className="w-full h-full" />
-      </Tags>
-    );
-  } else if (from === "DRIVE") {
-    return (
-      <span className="relative">
-        <Tags
-          color="white"
-          className="!border-none w-[37px] h-[37px] flex items-center justify-center relative"
-        >
-          <span className="absolute -bottom-1 -left-1 p-1 bg-white rounded-full flex items-center justify-center">
-            <FaUser className="text-green-500" />
-          </span>
-          <img src="/icon/gd.ico" alt="" className="w-full h-full" />
-        </Tags>
-      </span>
-    );
-  } else if (from === "DRIVE_EXTHEME") {
-    return (
-      <Tags
-        color="white"
-        className="!border-none w-[37px] h-[37px] flex items-center justify-center"
-      >
-        <img src="/icon/gd.ico" alt="" className="w-full h-full" />
-      </Tags>
-    );
-  } else if (from === "CUSTOM") {
-    return (
-      <Tags
-        color="white"
-        className="!border-none w-[37px] h-[37px] flex items-center justify-center"
-      >
-        <FaUser className="text-green-500 text-2xl" />
-      </Tags>
-    );
-  }
-
-  return null;
-};
 
 const ArtistTag = ({ artist = "" }: { artist?: string }) => {
   if (!artist) return null;
@@ -73,14 +33,14 @@ const ArtistTag = ({ artist = "" }: { artist?: string }) => {
   );
 };
 
-const SongTypeTag = ({ type }: { type?: number }) => {
-  if (type === 0)
+const SongTypeTag = ({ type }: { type?: SoundSubType }) => {
+  if (type === "EMK")
     return (
       <Tags color="red" className="!text-lg">
         EMK
       </Tags>
     );
-  if (type === 1)
+  if (type === "NCN")
     return (
       <Tags color="green" className="!text-lg">
         NCN
@@ -94,9 +54,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
   onSelectSong,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [searchResult, setSearchResult] = useState<IOptions<SearchResult>[]>(
-    []
-  );
+  const [searchResult, setSearchResult] = useState<IOptions<ITrackData>[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
@@ -239,7 +197,12 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
       <div className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2">
         {/* Search query display */}
         <div className="p-2 bg-white/20 w-64 overflow-hidden rounded-md flex-none relative">
-          <input type="text" value={searching} autoFocus className="text-2xl appearance-none focus:!outline-none !bg-transparent" />
+          <input
+            type="text"
+            value={searching}
+            autoFocus
+            className="text-2xl appearance-none focus:!outline-none !bg-transparent"
+          />
         </div>
 
         {/* Loading indicator */}
@@ -252,11 +215,13 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
         {/* Selected result display */}
         {hasResults && selectedSong && (
           <div className="flex flex-wrap gap-3 items-center text-2xl animate-fadeIn">
-            <SongTypeTag type={selectedSong.type} />
-            <SourceTag from={selectedSong.from} />
-            <span className="uppercase">{selectedSong.id}</span>
-            <span>{selectedSong.name}</span>
-            <ArtistTag artist={selectedSong.artist} />
+            <SongTypeTag type={selectedSong.SUB_TYPE} />
+            <SourceTag from={selectedSong._system}></SourceTag>
+            {selectedSong.CODE && (
+              <span className="uppercase">{selectedSong.CODE}</span>
+            )}
+            <span>{selectedSong.TITLE}</span>
+            <ArtistTag artist={selectedSong.ARTIST} />
           </div>
         )}
       </div>

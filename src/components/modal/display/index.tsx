@@ -1,7 +1,7 @@
 import Tabs from "@/components/common/tabs";
 import React from "react";
 import { MdOutlineWidgets, MdTextFields } from "react-icons/md";
-import LyricsModal from "../lyrics-modal";
+import LyricsModal from "./tabs/lyrics-modal";
 import EfficiencyDisplay from "./tabs/efficiency-display";
 import { LuCpu } from "react-icons/lu";
 import WidgetsDisplay from "./tabs/widgets-display";
