@@ -1,10 +1,8 @@
-// src/features/engine/modules/spessasynth/player/spessa-synth-player.ts
 import { MIDI, Sequencer } from "spessasynth_lib";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { calculateTicks, convertTicksToTime } from "@/lib/app-control";
 import { BaseSynthPlayerEngine } from "@/features/engine/types/synth.type";
 import { SoundSetting } from "@/features/config/types/config.type";
-import { SynthChannel } from "../../instrumentals/channel";
 export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   private player: Sequencer;
   public paused: boolean = false;

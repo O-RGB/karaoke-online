@@ -3,6 +3,10 @@ import { SoundSystemMode } from "@/features/config/types/config.type";
 export type SoundType = "MIDI" | "VIDEO" | "MUSIC";
 export type SoundSubType = "NCN" | "EMK";
 
+export interface ITrackDataSelectBy {
+  nickname: string;
+  clientId: string;
+}
 export interface ITrackFlags {
   _originalIndex: number;
   _superIndex?: number;
@@ -11,6 +15,7 @@ export interface ITrackFlags {
   _isModified?: boolean;
   _matchedTerms?: string[];
   _priority?: number;
+  _selectBy?: ITrackDataSelectBy;
 }
 
 export interface ITrackData extends ITrackFlags {

@@ -1,16 +1,13 @@
 import { create } from "zustand";
 import { QueuePlayerProps } from "../types/player.type";
-
-// import { getSong } from "@/lib/storage/song";
-import useConfigStore from "@/features/config/config-store";
 import { convertCursorToTicks } from "@/lib/app-control";
-import useRuntimePlayer from "./runtime-player";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import useLyricsStore from "@/features/lyrics/store/lyrics.store";
-import { ITrackData, SearchResult } from "@/features/songs/types/songs.type";
-import useSongsStore from "@/features/songs/store/songs.store";
+import { ITrackData } from "@/features/songs/types/songs.type";
 import { readCursorFile, readLyricsFile } from "@/lib/karaoke/ncn";
-import { file } from "jszip";
+import useRuntimePlayer from "./runtime-player";
+import useSongsStore from "@/features/songs/store/songs.store";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
+import useLyricsStore from "@/features/lyrics/store/lyrics.store";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   driveLoading: false,
@@ -77,35 +74,8 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
       return;
     }
 
-    let url = useConfigStore.getState().config.system?.url;
-    const api = useConfigStore.getState().config.system?.api;
-    // if (api) {
-    //   music.from = "DRIVE_EXTHEME";
-    //   url =
-    //     "https://script.google.com/macros/s/AKfycbxyjT972t0EKoIdYcx9nwFfTWssHm_aSFSufR4LLC4dGciAkVYm5kCUYfy2jRI3CC6tzQ/exec";
-    // }
-    // if (music.from === "DRIVE_EXTHEME" || music.from === "DRIVE" || api) {
-    //   runtime.paused();
-    //   set({ driveLoading: true });
-    // }
-    // let song = undefined;
     let songsManager = useSongsStore.getState().songsManager;
-
-    if (!songsManager) {
-      console.log("Erro Song manager not init");
-      throw "Erro Song manager not init";
-    } else {
-      console.log("not error");
-    }
-    console.log("music", music, songsManager);
-    const song = await songsManager.getSong(music);
-    console.log(song);
-
-    // if (api) {
-    //   song = await getSong(music, url);
-    // } else {
-    //   song = await getSong(music, url);
-    // }
+    const song = await songsManager?.getSong(music);
     set({ driveLoading: false });
 
     if (!song) {
@@ -131,6 +101,15 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
         song,
         music
       );
+
+      if (music._selectBy) {
+        const selectBy = music._selectBy;
+        const lyrics = useLyricsStore.getState();
+        lyrics.setClientId?.(selectBy.clientId);
+      } else {
+        const lyrics = useLyricsStore.getState();
+        lyrics.setClientId?.(undefined);
+      }
 
       setTimeout(() => {
         runtime.play();

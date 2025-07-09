@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
 import LyricsList from "./components/lyrics-list";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import useLyricsStore from "@/features/lyrics/store/lyrics.store";
 import useConfigStore from "@/features/config/config-store";
-import { LyricsCharacterStyle } from "./types/lyrics-character.type";
 import useMixerStoreNew from "../player/event-player/modules/event-mixer-store";
+import React, { useState, useEffect, useMemo } from "react";
+import { LyricsCharacterStyle } from "./types/lyrics-character.type";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { FontDisplayManager } from "@/utils/indexedDB/db/display/table";
 
@@ -13,77 +13,118 @@ interface LyricsPlayerProps {}
 const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
   const { orientation } = useOrientation();
   const [windowsWidth, setWindowsWidth] = useState<number>(window.innerWidth);
+
   const currentTick = useRuntimePlayer((state) => state.currentTick);
   const lyricsProcessed = useLyricsStore((state) => state.lyricsProcessed);
-  const hideMixer = useMixerStoreNew((state) => state.hideMixer);
-  const fontSize = useConfigStore((state) => state.config.lyrics?.fontSize);
-  const fontAuto = useConfigStore((state) => state.config.lyrics?.fontAuto);
-  const colorActive = useConfigStore((state) => state.config.lyrics?.active);
-  const color = useConfigStore((state) => state.config.lyrics?.color);
+  const sendToClient = useLyricsStore((state) => state.sendToClient);
 
-  const fontDisplayManager = new FontDisplayManager();
-  const config = useConfigStore((state) => state.config);
+  const hideMixer = useMixerStoreNew((state) => state.hideMixer);
+
+  const {
+    fontSize,
+    fontAuto,
+    active: colorActive,
+    color,
+  } = useConfigStore((state) => state.config.lyrics || {});
+  const fontSetting = useConfigStore((state) => state.config.lyrics?.fontName);
   const [fontUrl, setFontUrl] = useState<string>();
 
-  const fontSetting = config.lyrics?.fontName;
+  const active = useMemo(() => {
+    if (!lyricsProcessed) return null;
+    return lyricsProcessed.search(currentTick);
+  }, [lyricsProcessed, currentTick]);
 
-  const handleResize = () => {
-    setWindowsWidth(window.innerWidth);
-  };
+  const next = useMemo(() => {
+    if (!lyricsProcessed || !active) return null;
+    return lyricsProcessed.getByIndex(active.index + 1);
+  }, [lyricsProcessed, active]);
+
+  const topText = useMemo(() => {
+    if (!active) return undefined;
+    return active.lyrics.tag === "top"
+      ? active.lyrics.value.text
+      : next?.tag === "top" && active.lyrics.tag === "bottom"
+      ? next.value.text
+      : undefined;
+  }, [active, next]);
+
+  const bottomText = useMemo(() => {
+    if (!active) return undefined;
+    return active.lyrics.tag === "bottom"
+      ? active.lyrics.value.text
+      : next?.tag === "bottom" && active.lyrics.tag === "top"
+      ? next.value.text
+      : undefined;
+  }, [active, next]);
 
   useEffect(() => {
-    setWindowsWidth(window.innerWidth);
+    sendToClient?.(topText, bottomText);
+  }, [topText, bottomText, sendToClient]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowsWidth(window.innerWidth);
+    };
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
 
-  const initFont = async () => {
-    if (Number(fontSetting)) {
-      const response = await fontDisplayManager.get(Number(fontSetting));
-      console.log("response", response);
-      const file = response?.file;
-
-      if (!file) return;
-      const url = URL.createObjectURL(file);
-      setFontUrl(url);
-    } else {
-      setFontUrl(undefined);
-    }
-  };
-
   useEffect(() => {
-    setTimeout(() => {
-      initFont();
-    }, 100);
+    const fontDisplayManager = new FontDisplayManager();
+    const initFont = async () => {
+      if (Number(fontSetting)) {
+        const response = await fontDisplayManager.get(Number(fontSetting));
+        const file = response?.file;
+
+        if (file) {
+          const url = URL.createObjectURL(file);
+          setFontUrl(url);
+        } else {
+          setFontUrl(undefined);
+        }
+      } else {
+        setFontUrl(undefined);
+      }
+    };
+
+    initFont();
+
+    return () => {
+      if (fontUrl) {
+        URL.revokeObjectURL(fontUrl);
+      }
+    };
   }, [fontSetting]);
 
-  if (!lyricsProcessed) return null;
-  const active = lyricsProcessed.search(currentTick);
-  if (!active) return <></>;
-  const next = lyricsProcessed.getByIndex(active.index + 1);
+  const textStyle: LyricsCharacterStyle = useMemo(
+    () => ({
+      activeColor: colorActive,
+      fontSize: fontAuto
+        ? "text-2xl md:text-3xl lg:text-6xl"
+        : Number(fontSize),
+      color: color,
+    }),
+    [colorActive, fontAuto, fontSize, color]
+  );
 
-  const textStyle: LyricsCharacterStyle = {
-    activeColor: colorActive,
-    fontSize: fontAuto ? "text-2xl md:text-3xl lg:text-6xl" : Number(fontSize),
-    color: color,
-  };
+  if (!active) {
+    return null;
+  }
 
-  const className = `h-screen lg:h-[500px]  flex items-center justify-center relative w-full rounded-lg text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`;
+  const className = `h-screen lg:h-[500px] flex items-center justify-center relative w-full rounded-lg text-center overflow-auto [&::-webkit-scrollbar]:hidden duration-300`;
+
   return (
     <div
-      className={`w-full px-5 -z-40  ${
+      className={`w-full px-5 -z-40 ${
         !hideMixer
           ? orientation === "portrait"
             ? "pt-40 bottom-auto lg:bottom-0"
             : "pt-40 bottom-auto lg:bottom-0"
           : "bottom-0"
       } duration-300`}
-      style={{
-        position: "fixed",
-        left: 0,
-      }}
+      style={{ position: "fixed", left: 0 }}
     >
       {fontUrl && (
         <style>
@@ -105,28 +146,16 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
             tick={active.lyrics.tag === "top" ? currentTick : 0}
             containerWidth={windowsWidth}
             sentence={active.lyrics.value}
-            text={
-              active.lyrics.tag === "top"
-                ? active.lyrics.value.text
-                : next?.tag === "top" && active.lyrics.tag === "bottom"
-                ? next.value.text
-                : undefined
-            }
+            text={topText}
             textStyle={textStyle}
-          ></LyricsList>
+          />
           <LyricsList
             tick={active.lyrics.tag === "bottom" ? currentTick : 0}
             containerWidth={windowsWidth}
             sentence={active.lyrics.value}
-            text={
-              active.lyrics.tag === "bottom"
-                ? active.lyrics.value.text
-                : next?.tag === "bottom" && active.lyrics.tag === "top"
-                ? next.value.text
-                : undefined
-            }
+            text={bottomText}
             textStyle={textStyle}
-          ></LyricsList>
+          />
         </div>
       </div>
     </div>

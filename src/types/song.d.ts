@@ -1,15 +1,3 @@
-// interface SearchResult extends SongDetail {
-//   type: number;
-//   fileId: string;
-//   from: TracklistFrom;
-// }
-
-// interface SongDetail {
-//   artist: string;
-//   id: string;
-//   name: string;
-// }
-
 interface FileGroup extends Partial<SongFiles> {
   emk?: File;
 }

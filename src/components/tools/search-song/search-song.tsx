@@ -8,15 +8,17 @@ import React, { useState } from "react";
 import { toOptions } from "@/lib/general";
 import { FaList } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
-import { usePeerStore } from "@/features/remote/modules/peer-js-store";
 import { ITrackData } from "@/features/songs/types/songs.type";
 import useSongsStore from "@/features/songs/store/songs.store";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 interface SearchSongProps {}
 
 const SearchSong: React.FC<SearchSongProps> = ({}) => {
+  const sendMessageWithResponse = usePeerHostStore(
+    (state) => state.sendMessageWithResponse
+  );
   const songsManager = useSongsStore((state) => state.songsManager);
-  // const searchTracklist = useTracklistStore((state) => state.searchTracklist);
   const { orientation } = useOrientation();
 
   const addQueue = useQueuePlayer((state) => state.addQueue);
@@ -25,12 +27,22 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
     (state) => state.resetQueueingTimeout
   );
 
-  const superUserConnections = usePeerStore(
-    (state) => state.superUserConnections
-  );
-  const sendSuperUserMessage = usePeerStore(
-    (state) => state.sendSuperUserMessage
-  );
+  const handleAskClientForData = async (clientId: string) => {
+    try {
+      const response = await sendMessageWithResponse(
+        clientId,
+        { command: "GET_CLIENT_TIME" },
+        5000
+      );
+      console.log(`Received response from ${clientId}:`, response);
+      alert(`Client ${clientId}'s time is: ${response.clientTime}`);
+    } catch (error) {
+      console.error(`Failed to get data from client ${clientId}:`, error);
+      alert(`Error: ${error}`);
+    }
+  };
+
+  const normalClients = usePeerHostStore((s) => s.connections.NORMAL);
 
   const queueing = useKeyboardStore((state) => state.queueing);
   const searching = useKeyboardStore((state) => state.searching);

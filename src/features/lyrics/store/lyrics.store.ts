@@ -1,12 +1,19 @@
 import { create } from "zustand";
 import { ISentence } from "@/features/lyrics/types/lyrics-player.type";
-import { LyricsRangeArray } from "@/features/lyrics/lib/lyrics-range-array";
+import {
+  LyricsRangeArray,
+  LyricsRangeValueProps,
+} from "@/features/lyrics/lib/lyrics-range-array";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 interface LyricsStore {
   lyricsProcessed: LyricsRangeArray<ISentence> | undefined;
   cursors: number[];
   lyricsInit: (lyrics: string[], cursors: number[]) => void;
   reset: () => void;
+  setClientId?: (clientId?: string) => void;
+  clientId?: string;
+  sendToClient?: (top?: string, bottom?: string) => void;
 }
 
 const useLyricsStore = create<LyricsStore>((set, get) => ({
@@ -24,6 +31,15 @@ const useLyricsStore = create<LyricsStore>((set, get) => ({
   },
   reset: () => {
     set({ cursors: [], lyricsProcessed: undefined });
+  },
+  setClientId: (clientId?: string) => set({ clientId }),
+  clientId: undefined,
+  sendToClient(top, bottom) {
+    const clientId = get().clientId;
+    if (clientId) {
+      const clinet = usePeerHostStore.getState();
+      clinet.requestToClient(clientId, "user/lyrics", { top, bottom });
+    }
   },
 }));
 

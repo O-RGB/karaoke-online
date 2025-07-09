@@ -1,5 +1,7 @@
 import { ConfigSystem } from "@/features/config/types/config.type";
-import { DrumNotesType } from "@/features/engine/modules/instrumentals/types/node.type";
+
+// ENV
+export const remoteHost = process.env.NEXT_PUBLIC_REMOTE_HOST;
 
 export const DRUM_CHANNEL = 9;
 export const WALLPAPER = "wallpaper-3.png";

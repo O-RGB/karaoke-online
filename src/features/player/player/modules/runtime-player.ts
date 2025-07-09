@@ -46,7 +46,6 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
 
   paused: () => {
     const nodes = useSynthesizerEngine.getState().engine?.nodes;
-    console.log("nodes", nodes);
     nodes?.map((c) => c.note?.reset());
     const player = useSynthesizerEngine.getState().engine?.player;
     player?.pause();

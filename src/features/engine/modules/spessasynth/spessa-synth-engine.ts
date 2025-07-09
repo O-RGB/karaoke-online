@@ -58,13 +58,13 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
   constructor(
     setInstrument?: (instrument: IPersetSoundfont[]) => void,
-    sendMessage?: (info: RemoteSendMessage) => void,
+    // sendMessage?: (info: RemoteSendMessage) => void,
     config?: Partial<SoundSetting>,
     systemConfig?: Partial<ConfigSystem>
   ) {
     this.startup(setInstrument, systemConfig);
     this.bassConfig = config ? new BassConfig(config) : undefined;
-    this.sendMessage = sendMessage;
+    // this.sendMessage = sendMessage;
     this.systemConfig = systemConfig;
   }
 
@@ -166,21 +166,21 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     });
   }
 
-  private sendMessageData(value?: IControllerChange) {
-    if (!this.sendMessage || !value) {
-      return;
-    }
+  // private sendMessageData(value?: IControllerChange) {
+  //   if (!this.sendMessage || !value) {
+  //     return;
+  //   }
 
-    if (value)
-      this.sendMessage({
-        user: "SUPER",
-        message: value,
-        type: {
-          event: "CHANGE",
-          type: "CONTROLLER",
-        },
-      });
-  }
+  //   if (value)
+  //     this.sendMessage({
+  //       user: "SUPER",
+  //       message: value,
+  //       type: {
+  //         event: "CHANGE",
+  //         type: "CONTROLLER",
+  //       },
+  //     });
+  // }
 
   async setSoundFont(file: File) {
     const bf = await file.arrayBuffer();
@@ -226,7 +226,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "",
       (e: IControllerChange) => {
         this.nodes[e.channel].controllerChange(e);
-        this.sendMessageData(e);
+        // this.sendMessageData(e);
       }
     );
   }

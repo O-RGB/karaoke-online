@@ -21,16 +21,13 @@ import { MdLockOutline } from "react-icons/md";
 import useKeyboardStore from "@/features/keyboard-state";
 import Button from "@/components/common/button/button";
 import { RiDeleteBin5Line } from "react-icons/ri";
-import Tags from "@/components/common/display/tags";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
+import { ITrackData } from "@/features/songs/types/songs.type";
+import { BiMusic } from "react-icons/bi";
 
-interface SongItem {
-  id: string;
-  number: number;
-  details: string;
-  type: string;
-}
+const createTracklistId = (item: ITrackData) =>
+  `${item.TITLE}${item.ARTIST}${item._superIndex}${item._originalIndex}`;
 
 const SortableTableRow = ({
   item,
@@ -42,7 +39,7 @@ const SortableTableRow = ({
   onKeySelected,
   onDelete,
 }: {
-  item: SongItem;
+  item: ITrackData;
   index: number;
   isFirst: boolean;
   isLast: boolean;
@@ -59,7 +56,7 @@ const SortableTableRow = ({
     transition,
     isDragging,
   } = useSortable({
-    id: item.id,
+    id: createTracklistId(item),
     transition: {
       duration: 150,
       easing: "cubic-bezier(0.25, 1, 0.5, 1)",
@@ -106,19 +103,28 @@ const SortableTableRow = ({
         </div>
       </td>
       <td valign="top" className="p-2 ">
-        {item.number}
+        {index + 1}
       </td>
       <td valign="top" className="p-2">
-        {item.details}
+        <div className="flex items-start gap-3 -mt-0.5">
+          <div className="flex-1">
+            <h3 className="text-lg font-medium truncate flex gap-2 items-center">
+              <BiMusic></BiMusic>
+              {item.TITLE}
+            </h3>
+            <p className="text-sm truncate text-white/80">{item.ARTIST}</p>
+          </div>
+        </div>
       </td>
-      <td valign="top" className="p-2">
-        {item.type === "0" ? (
-          <Tags color="red">EMK</Tags>
-        ) : (
-          <Tags color="green">NCN</Tags>
-        )}
+
+      <td className="text-sm">
+        {item._selectBy?.nickname ? item._selectBy?.nickname : "ระบบ"}
       </td>
-      <td valign="top" className="p-2">
+
+      <td
+        valign="middle"
+        className="p-2 flex items-center justify-center w-full h-full"
+      >
         <Button
           shadow={false}
           border={false}
@@ -186,8 +192,16 @@ const QueueSong: React.FC<QueueSongProps> = ({
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      const oldIndex = queue.findIndex((item) => item.CODE === active.CODE);
-      const newIndex = queue.findIndex((item) => item.CODE === over.CODE);
+      const oldIndex = queue.findIndex(
+        (item) => createTracklistId(item) === active.id
+      );
+      const newIndex = queue.findIndex(
+        (item) => createTracklistId(item) === over.id
+      );
+
+      if (oldIndex === -1 || newIndex === -1) {
+        return;
+      }
 
       if (lockFirstIndex && newIndex === 0) {
         return;
@@ -198,12 +212,7 @@ const QueueSong: React.FC<QueueSongProps> = ({
       }
 
       const newItems = arrayMove(queue, oldIndex, newIndex);
-      const updated = newItems.map((item, index) => ({
-        ...item,
-        number: index + 1,
-      }));
-
-      moveQueue(updated);
+      moveQueue(newItems);
 
       if (window.navigator.vibrate) {
         window.navigator.vibrate(30);
@@ -298,23 +307,19 @@ const QueueSong: React.FC<QueueSongProps> = ({
                 <th className="text-start w-[10%] p-2"></th>
                 <th className="text-start w-[1%] p-2">ที่</th>
                 <th className="text-start w-full p-2">รายละเอียด</th>
+                <th className="text-start w-[10%] p-2">โดย</th>
                 <th className="text-start w-[10%] p-2">ประเภท</th>
               </tr>
             </thead>
             <tbody className="relative">
               <SortableContext
-                items={queue.map((item) => item.CODE)}
+                items={queue.map((item) => createTracklistId(item))}
                 strategy={verticalListSortingStrategy}
               >
                 {queue.map((item, index) => (
                   <SortableTableRow
-                    key={`queue-${item.CODE}-${index}`}
-                    item={{
-                      details: `${item.CODE} ${item.TITLE} - ${item.ARTIST}`,
-                      id: item.CODE,
-                      number: index,
-                      type: item.SUB_TYPE ?? "",
-                    }}
+                    key={`queue-${createTracklistId(item)}-${index}`}
+                    item={item}
                     index={index}
                     isFirst={index == 0}
                     isLast={index === queue.length - 1}

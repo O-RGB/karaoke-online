@@ -12,11 +12,9 @@ import useConfigStore from "@/features/config/config-store";
 import SliderCommon from "../common/input-data/slider";
 import useKeyboardStore from "@/features/keyboard-state";
 import { FiSettings } from "react-icons/fi";
-import { FaRecordVinyl, FaSearch, FaStop } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import { usePeerStore } from "@/features/remote/modules/peer-js-store";
-import { LuMic } from "react-icons/lu";
 interface PlayerRemote {
   onPause?: () => void;
   onPlay?: () => void;
@@ -54,9 +52,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   const { setOpenSearchBox } = useKeyboardStore();
 
   const nextMusic = useQueuePlayer((state) => state.nextMusic);
-
-  const superUserConnections = usePeerStore.getState().superUserConnections;
-  const sendSuperUserMessage = usePeerStore.getState().sendSuperUserMessage;
 
   const gain =
     useSynthesizerEngine.getState().engine?.instrumental?.getGain() ?? [];
@@ -101,16 +96,16 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   }, [recordedAudioURL]);
 
   useEffect(() => {
-    if (superUserConnections.length > 0) {
-      sendSuperUserMessage({
-        message: gain,
-        user: "SUPER",
-        type: {
-          type: "GAIN",
-          event: "CHANGE",
-        },
-      });
-    }
+    // if (superUserConnections.length > 0) {
+    //   sendSuperUserMessage({
+    //     message: gain,
+    //     user: "SUPER",
+    //     type: {
+    //       type: "GAIN",
+    //       event: "CHANGE",
+    //     },
+    //   });
+    // }
 
     if (midi) {
       if (timingMode === "Tick") {
@@ -131,48 +126,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
     <>
       <div className="fixed bottom-0 gap-2 w-full left-0 blur-overlay bg-black/10 border-t blur-border flex justify-between p-2 lg:p-0">
         <div className="flex w-full">
-          <div className="flex items-center border-r border-white/20 mr-2">
-            {!isRecording ? (
-              <>
-                <Button
-                  title="อัดเสียงดนตรีเท่านั้น"
-                  className="hover:bg-white/20"
-                  padding="p-4"
-                  onClick={() => handleStartRecording(false)}
-                  icon={<FaRecordVinyl className="text-white" />}
-                />
-                <Button
-                  title="อัดเสียงดนตรีพร้อมไมค์"
-                  className="hover:bg-white/20"
-                  padding="p-4"
-                  onClick={() => handleStartRecording(true)}
-                  icon={<LuMic className="text-white" />}
-                />
-              </>
-            ) : (
-              <Button
-                title="หยุดการบันทึก"
-                className="hover:bg-red-500/50 bg-red-500 animate-pulse"
-                padding="p-4"
-                onClick={handleStopRecording}
-                icon={<FaStop className="text-white" />}
-              />
-            )}
-            {recordedAudioURL && (
-              <div className="absolute right-4 bottom-8 bg-gray-800 p-2 rounded-lg shadow-lg w-64">
-                <p className="text-white text-sm mb-1">บันทึกเสียงเสร็จสิ้น!</p>
-                {/* --- ⏯️ เพิ่ม ref ให้กับ element audio --- */}
-                <audio
-                  ref={audioRef}
-                  controls
-                  src={recordedAudioURL}
-                  className="w-full"
-                >
-                  Your browser does not support the audio element.
-                </audio>
-              </div>
-            )}
-          </div>
+          <div className="flex items-center border-r border-white/20 mr-2"></div>
           <div className="flex w-fit ">
             {!isPaused ? (
               <Button

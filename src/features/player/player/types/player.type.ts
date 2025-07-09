@@ -1,4 +1,7 @@
-import { ITrackData, KaraokeExtension } from "@/features/songs/types/songs.type";
+import {
+  ITrackData,
+  KaraokeExtension,
+} from "@/features/songs/types/songs.type";
 import { MIDI } from "spessasynth_lib";
 
 export interface PlayerProps {
@@ -57,7 +60,6 @@ export type RuntimeProps = RuntimePlayer &
 export interface MidiPlayerProps {
   lyrics: string[];
   cursors: number[];
-  // ticksIndices: Map<number, number[]> | undefined;
   timeDivision: number;
   midi?: MIDI;
   midiDecoded?: KaraokeExtension;

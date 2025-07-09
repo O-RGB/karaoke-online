@@ -3,6 +3,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { WallpaperDisplayManager } from "@/utils/indexedDB/db/display/table";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { WALLPAPER } from "@/config/value";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 const getRandomColor = () => {
   const letters = "0123456789ABCDEF";
@@ -20,6 +21,13 @@ interface WallpaperRenderProps {
 const WallpaperRender: React.FC<WallpaperRenderProps> = ({
   wallpaperLoadingTitle,
 }) => {
+  const {
+    toggleClientVisibility,
+    endCall,
+    setAllowCalls,
+    visibleClientIds,
+    remoteStreams,
+  } = usePeerHostStore();
   const wallpaperDisplayManager = new WallpaperDisplayManager();
   const wId = useConfigStore((state) => state.config.themes?.wallpaperId);
   const enableCamera = useConfigStore(
@@ -215,7 +223,37 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
       </div>
 
       {/* แสดงกล้องเป็น wallpaper */}
-      {enableCamera && isCameraActive ? (
+
+      {visibleClientIds.length > 0 ? (
+        visibleClientIds.map((peerId) => {
+          const stream = remoteStreams[peerId];
+          if (!stream)
+            return <div key={peerId}>Loading stream for {peerId}...</div>;
+
+          return (
+            <video
+              key={peerId}
+              ref={(video) => {
+                if (video) video.srcObject = stream;
+              }}
+              autoPlay
+              playsInline
+              muted
+              style={{
+                position: "fixed",
+                width: "100%",
+                height: "100%",
+                top: 0,
+                left: 0,
+                objectFit: "cover",
+                zIndex: -20,
+                opacity: 0.8,
+                transform: "scaleX(-1)",
+              }}
+            />
+          );
+        })
+      ) : enableCamera && isCameraActive ? (
         <>
           <video
             ref={cameraVideoRef}

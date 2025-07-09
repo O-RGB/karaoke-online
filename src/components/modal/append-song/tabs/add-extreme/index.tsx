@@ -35,6 +35,7 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
   setAlert,
   closeAlert,
   setProcessing,
+  closeProcessing,
 }) => {
   const engine = useSynthesizerEngine((state) => state.engine);
   const songsManager = useSongsStore((state) => state.songsManager);
@@ -102,6 +103,16 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
   };
 
   const handleZipFile = async (file: File) => {
+    setProcessing?.({
+      variant: "processing",
+      title: "กำลังอ่านไฟล์",
+      status: {
+        progress: 0,
+        text: "กำลัง Extract File",
+        working: `${file.name}.${file.type}`,
+      },
+    });
+
     const filesDb = new FilesLocalSongsManager();
     const unzip = await extractFile(file);
 
@@ -111,6 +122,8 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
       const id = Number(file.name.split(".")[0]);
       await filesDb.add({ id, file: file });
     }
+
+    closeProcessing?.();
 
     setAlert?.({
       description: `อ่านข้อมูลจากไฟล์ ${file.name} สำเร็จ`,
@@ -126,6 +139,7 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
       setStatusMessage("กำลังอ่านไฟล์ master index...");
       try {
         await pythonIndexReader.importIndexFromZip(file);
+        await pythonIndexReader.loadIndex();
         setStatusMessage("✅ บันทึก Master Index สำเร็จ!");
         await fetchStoredData();
       } catch (error) {
