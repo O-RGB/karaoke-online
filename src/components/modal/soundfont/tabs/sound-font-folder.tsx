@@ -2,26 +2,23 @@ import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
 import UpdateFile from "@/components/common/input-data/upload";
 import TableList from "@/components/common/table/table-list";
-import React, { FC, ReactNode, useEffect } from "react";
+import React, { FC, ReactNode } from "react";
 import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 import { SoundSystemMode } from "@/features/config/types/config.type";
-import { BaseSynthEngine } from "@/features/engine/types/synth.type";
 import { SoundfontPlayerManager } from "@/utils/indexedDB/db/player/table";
-import { AiOutlineLoading3Quarters, AiOutlineRollback } from "react-icons/ai";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FaFolder } from "react-icons/fa";
 import { FaCircleCheck } from "react-icons/fa6";
 import { ImFilePlay } from "react-icons/im";
 import { IoMdAddCircle } from "react-icons/io";
 import { TbMusicPlus } from "react-icons/tb";
-import useSongsStore from "@/features/songs/store/songs.store";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
-import useConfigStore from "@/features/config/config-store";
 import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
+import useConfigStore from "@/features/config/config-store";
 
 interface SoundfontFolderProps extends IAlertCommon {
   loading: boolean;
-  engine: BaseSynthEngine | undefined;
   soundFontStorage: ListItem<ISoundfontPlayer>[];
   soundFontExtreme: ListItem<ISoundfontPlayer>[];
   selected?: string;
@@ -36,22 +33,19 @@ interface SoundfontFolderProps extends IAlertCommon {
 const soundfontDb = new SoundfontPlayerManager();
 
 const SoundfontUpload: FC<{
-  engine: BaseSynthEngine | undefined;
   setLoading: (isLoad: boolean) => void;
   onUploadComplete: () => Promise<void>;
-}> = ({ engine, setLoading, onUploadComplete }) => (
+}> = ({ setLoading, onUploadComplete }) => (
   <div className="space-y-1">
     <Label>เพิ่ม Soundfont</Label>
     <UpdateFile
       accept=".sf2"
       className="border border-blue-500 p-3 rounded-md hover:bg-gray-50 duration-300"
       onSelectFile={async (file) => {
-        if (engine) {
-          setLoading(true);
-          await soundfontDb.add({ file, createdAt: new Date() });
-          await onUploadComplete();
-          setLoading(false);
-        }
+        setLoading(true);
+        await soundfontDb.add({ file, createdAt: new Date() });
+        await onUploadComplete();
+        setLoading(false);
       }}
     >
       <span className="w-full text-sm flex items-center gap-2">
@@ -171,7 +165,7 @@ const SoundfontListView: FC<SoundfontListViewProps> = ({
         <FaFolder className="inline-block mb-1" /> <span>{title}</span>
       </Label>
       <TableList<ISoundfontPlayer>
-        listKey="id"
+        listKey={`id-${from}`}
         hoverFocus={false}
         list={list}
         deleteItem={!!onItemDelete}
@@ -196,7 +190,6 @@ const SoundfontListView: FC<SoundfontListViewProps> = ({
 
 const SoundfontFolder: FC<SoundfontFolderProps> = ({
   loading,
-  engine,
   selected,
   from,
   soundFontStorage,
@@ -213,7 +206,6 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
     <div className="flex flex-col lg:flex-row gap-4 w-full h-full relative">
       <div className="w-full lg:w-1/4 flex flex-col gap-4 h-full ">
         <SoundfontUpload
-          engine={engine}
           setLoading={setLoading}
           onUploadComplete={async () => {
             getSoundFontList();
@@ -245,8 +237,8 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
             }
           }}
           onItemDelete={removeSF2Local}
-          isSelected={(fileName) =>
-            selected === fileName && from === "DATABASE_FILE_SYSTEM"
+          isSelected={(id) =>
+            selected === id && from === "DATABASE_FILE_SYSTEM"
           }
         />
 

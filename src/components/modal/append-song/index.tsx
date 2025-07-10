@@ -9,6 +9,8 @@ import AddExtremeAndManage from "./tabs/add-extreme";
 import { PiMusicNotesPlusBold, PiMusicNotesPlusDuotone } from "react-icons/pi";
 import { GoFileZip } from "react-icons/go";
 import { FaComputer } from "react-icons/fa6";
+import AddApiSong from "./tabs/add-api";
+import { FaServer } from "react-icons/fa";
 
 interface AppendSongModalProps {
   height?: number;
@@ -24,6 +26,11 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({ height }) => {
           icon: <PiMusicNotesPlusDuotone></PiMusicNotesPlusDuotone>,
           label: "เพิ่มเพลง",
           content: <AddUserSong />,
+        },
+        {
+          icon: <FaServer></FaServer>,
+          label: "เพลง API",
+          content: <AddApiSong></AddApiSong>,
         },
         {
           icon: <FaComputer></FaComputer>,

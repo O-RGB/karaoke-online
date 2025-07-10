@@ -5,7 +5,6 @@ import { BsMusicNoteBeamed, BsLaptop } from "react-icons/bs";
 import { TbDeviceRemote } from "react-icons/tb";
 import { MdOutlineCloudUpload } from "react-icons/md";
 import LoadConfig from "../ui/load-conifg/load-config";
-import { initDatabase } from "@/utils/database/db";
 import Button from "../common/button/button";
 import ToggleCheckBox from "../common/input-data/checkbox";
 import useConfigStore from "@/features/config/config-store";
@@ -19,8 +18,8 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
   const [pressed, setPressed] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioLoopRef = useRef<HTMLAudioElement>(null);
-  const setConfig = useConfigStore((state) => state.setConfig)
-  const config = useConfigStore((state) => state.config)
+  const setConfig = useConfigStore((state) => state.setConfig);
+  const config = useConfigStore((state) => state.config);
 
   const requestMIDIAccess = async () => {
     if (navigator.requestMIDIAccess) {
@@ -38,21 +37,19 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
   };
 
   const handleClick = () => {
-    initDatabase().then(() => {
-      if (audioRef.current && audioLoopRef.current) {
-        const audio = audioRef.current;
-        const audioLoop = audioLoopRef.current;
+    if (audioRef.current && audioLoopRef.current) {
+      const audio = audioRef.current;
+      const audioLoop = audioLoopRef.current;
 
-        setPressed(true);
-        audio.volume = 0.5;
-        audioLoop.volume = 0.2;
-        audio.play();
-        audioLoop.play();
-        audio.addEventListener("ended", () => {
-          setEnded(true);
-        });
-      }
-    });
+      setPressed(true);
+      audio.volume = 0.5;
+      audioLoop.volume = 0.2;
+      audio.play();
+      audioLoop.play();
+      audio.addEventListener("ended", () => {
+        setEnded(true);
+      });
+    }
   };
 
   useLayoutEffect(() => {
@@ -110,9 +107,15 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                     </Button>
                   </div>
                   <div>
-                    <ToggleCheckBox defaultChecked={config.sound?.equalizer ?? false} onChange={(checked) => {
-                      setConfig({ sound: { ...config.sound, equalizer: checked } })
-                    }} label="เปิดใช้งาน Equalizer (ใช้ CPU)" ></ToggleCheckBox>
+                    <ToggleCheckBox
+                      defaultChecked={config.sound?.equalizer ?? false}
+                      onChange={(checked) => {
+                        setConfig({
+                          sound: { ...config.sound, equalizer: checked },
+                        });
+                      }}
+                      label="เปิดใช้งาน Equalizer (ใช้ CPU)"
+                    ></ToggleCheckBox>
                   </div>
                 </div>
               )}

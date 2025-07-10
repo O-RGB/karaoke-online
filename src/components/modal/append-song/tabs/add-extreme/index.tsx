@@ -2,7 +2,6 @@ import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
 import Upload from "@/components/common/input-data/upload";
 import { PythonIndexReader } from "@/features/songs/modules/extreme/extreme-import";
-import { ITrackData, MasterIndex } from "@/features/songs/types/songs.type";
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   BsCheckCircleFill,
@@ -11,18 +10,12 @@ import {
   BsXCircleFill,
 } from "react-icons/bs";
 import { MdDeleteForever } from "react-icons/md";
-import { AlertDialogProps } from "@/components/common/alert/notification";
-import JSZip from "jszip";
-import { FaDownload, FaFileArchive } from "react-icons/fa";
-import { FaFileZipper } from "react-icons/fa6";
+import { FaDownload } from "react-icons/fa";
 import { extractFile } from "@/lib/zip";
 import { FilesLocalSongsManager } from "@/utils/indexedDB/db/local-songs/table";
-import { SoundfontFileSystemManager } from "@/features/soundfont/modules/soundfont-file-system";
-import FileSystemManager from "@/utils/file/file-system";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
-import { setConfig } from "next/config";
 import useConfigStore from "@/features/config/config-store";
 import useSongsStore from "@/features/songs/store/songs.store";
 import Link from "next/link";

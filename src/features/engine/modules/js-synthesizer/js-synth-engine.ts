@@ -11,13 +11,12 @@ import {
   TimingModeType,
 } from "../../types/synth.type";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
-import { ChannelGainMonitor } from "./lib/channel-gain-monitor";
 import { InstrumentalNode } from "../instrumentals/instrumental";
 import { SynthChannel } from "../instrumentals/channel";
 import { BassConfig } from "../instrumentals/config";
 import {
   ConfigSystem,
-  SoundSetting,
+  SoundSystemMode,
 } from "@/features/config/types/config.type";
 import {
   CHORUSDEPTH,
@@ -37,6 +36,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   public analysers: AnalyserNode[] = [];
   public soundfontName: string | undefined;
   public soundfontFile: File | undefined;
+  public soundfontFrom: SoundSystemMode = "DATABASE_FILE_SYSTEM";
   public globalEqualizer: GlobalEqualizer | undefined;
 
   public nodes: SynthChannel[] = [];
@@ -144,13 +144,15 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.soundfontName = "Default Soundfont sf2";
 
     this.loadPresetSoundFont(sfId);
+
   }
 
-  async setSoundFont(file: File) {
+  async setSoundFont(file: File, from: SoundSystemMode) {
     const bf = await file.arrayBuffer();
     try {
       const sfId = await this.synth?.loadSFont(bf);
       this.soundfontName = file.name;
+      this.soundfontFrom = from;
       this.loadPresetSoundFont(sfId);
       return true;
     } catch (error) {

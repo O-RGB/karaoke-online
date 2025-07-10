@@ -22,10 +22,7 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
     super();
     this.dbfFilePath = "Data/SONG.DBF";
     this.system = "EXTREME_FILE_SYSTEM";
-  }
-
-  public setFileSystem(fileSystemManager: FileSystemManager) {
-    this.fileSystemManager = fileSystemManager;
+    this.fileSystemManager = FileSystemManager.getInstance();
   }
 
   public buildIndex(

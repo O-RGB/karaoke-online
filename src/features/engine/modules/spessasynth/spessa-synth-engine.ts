@@ -6,6 +6,7 @@ import { RemoteSendMessage } from "@/features/remote/types/remote.type";
 import {
   ConfigSystem,
   SoundSetting,
+  SoundSystemMode,
 } from "@/features/config/types/config.type";
 import { SynthChannel } from "../instrumentals/channel";
 import { InstrumentalNode } from "../instrumentals/instrumental";
@@ -38,6 +39,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public analysers: AnalyserNode[] = [];
   public soundfontName: string = "Default Soundfont sf2";
   public soundfontFile: File | undefined;
+  public soundfontFrom: SoundSystemMode = "DATABASE_FILE_SYSTEM";
 
   public nodes: SynthChannel[] = [];
   public instrumental = new InstrumentalNode();
@@ -54,17 +56,13 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   private micStream: MediaStream | null = null;
   private recorderDestination: MediaStreamAudioDestinationNode | null = null;
 
-  private sendMessage?: (info: RemoteSendMessage) => void;
-
   constructor(
     setInstrument?: (instrument: IPersetSoundfont[]) => void,
-    // sendMessage?: (info: RemoteSendMessage) => void,
     config?: Partial<SoundSetting>,
     systemConfig?: Partial<ConfigSystem>
   ) {
     this.startup(setInstrument, systemConfig);
     this.bassConfig = config ? new BassConfig(config) : undefined;
-    // this.sendMessage = sendMessage;
     this.systemConfig = systemConfig;
   }
 
@@ -156,6 +154,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
     await this.synth?.soundfontManager.reloadManager(arraybuffer);
     this.soundfontName = "Default Soundfont sf2";
+    this.soundfontFrom = "DATABASE_FILE_SYSTEM";
   }
 
   getAnalyserNode(auto: AudioContext) {
@@ -182,11 +181,12 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   //     });
   // }
 
-  async setSoundFont(file: File) {
+  async setSoundFont(file: File, from: SoundSystemMode) {
     const bf = await file.arrayBuffer();
     try {
       this.synth?.soundfontManager.reloadManager(bf);
       this.soundfontName = file.name;
+      this.soundfontFrom = from;
       return true;
     } catch (error) {
       return false;

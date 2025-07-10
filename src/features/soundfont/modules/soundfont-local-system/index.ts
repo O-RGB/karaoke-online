@@ -1,6 +1,5 @@
 import { SoundSystemMode } from "@/features/config/types/config.type";
 import { SoundfontBase } from "../../base";
-import FileSystemManager from "@/utils/file/file-system";
 import { BaseSynthEngine } from "@/features/engine/types/synth.type";
 import { SoundfontPlayerManager } from "@/utils/indexedDB/db/player/table";
 import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
@@ -33,5 +32,22 @@ export class SoundfontLocalSystemManager extends SoundfontBase {
   }
   async soundfonts(): Promise<ISoundfontPlayer[]> {
     return this.soundfontDatabase.getAll();
+  }
+
+  getSoundfontSelected(): string | undefined {
+    return this.engine.soundfontName;
+  }
+
+  public async loadSoundfont(
+    idOrFilename: string
+  ): Promise<string | undefined> {
+    const test = Number(idOrFilename);
+    if (typeof test === "number") {
+      const file = await this.soundfontDatabase.get(test);
+
+      if (!file?.file) return;
+      this.engine.setSoundFont(file.file, this.system);
+      return file.file.name;
+    }
   }
 }

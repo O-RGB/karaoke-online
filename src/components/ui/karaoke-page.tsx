@@ -16,7 +16,7 @@ import StatusPanel from "../tools/status/status-panel";
 // import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper-modal";
 // import { getTracklist } from "@/lib/storage/tracklist";
-import DriveSetting from "../modal/drive-setting-modal";
+// import DriveSetting from "../modal/drive-setting-modal";
 import DisplaySettingModal from "../modal/display";
 
 // import { DragDrop } from "../tools/drag-drop/drag-drop";
@@ -62,17 +62,19 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const [onPrepare, setPrepare] = useState<boolean>(false);
 
   const startup = async () => {
+    setPrepare(true);
     const db = new DatabaseService();
     await db.initialize();
-    setPrepare(true);
+
+    const soundMode = config.system?.soundMode ?? "PYTHON_API_SYSTEM";
     const engine = await setup(config.system?.engine);
     initializeKeyboardListeners();
 
     const soundSystem = new SongsSystem(config.system);
     setSongsManager(soundSystem);
-    soundSystem.init(config.system?.soundMode ?? "PYTHON_API_SYSTEM");
+    soundSystem.init(soundMode);
 
-    const soundfontSystem = new SoundfontSystemManager(engine);
+    const soundfontSystem = new SoundfontSystemManager(engine, soundMode);
 
     setSoundfontManaer(soundfontSystem);
 
@@ -94,7 +96,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
     SOUND_SETTING: <SoundSettingModal></SoundSettingModal>,
-    DRIVE_SETTING: <DriveSetting></DriveSetting>,
+    // DRIVE_SETTING: <DriveSetting></DriveSetting>,
     DONATE: <DonateModal></DonateModal>,
   };
 

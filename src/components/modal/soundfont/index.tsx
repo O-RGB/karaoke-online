@@ -4,11 +4,10 @@ import SoundfontFolder from "./tabs/sound-font-folder";
 import SoundfontFree from "./tabs/sound-font-free";
 import useSongsStore from "@/features/songs/store/songs.store";
 import React, { useEffect, useState } from "react";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { BiDownload, BiFolder } from "react-icons/bi";
 import { SoundSystemMode } from "@/features/config/types/config.type";
-import { DEFAULT_SOUND_FONT } from "@/config/value";
 import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
+import { DEFAULT_SOUND_FONT } from "@/config/value";
 
 interface SoundfontManagerProps {
   height?: number;
@@ -18,18 +17,17 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
   const soundfontBaseManager = useSongsStore(
     (state) => state.soundfontBaseManager
   );
-  const engine = useSynthesizerEngine((state) => state.engine);
+  const [selected, setSelected] = useState<{
+    name: string;
+    from: SoundSystemMode;
+  }>({ name: DEFAULT_SOUND_FONT, from: "DATABASE_FILE_SYSTEM" });
+
   const [soundFontStorage, setSoundFontStorage] = useState<
     ListItem<ISoundfontPlayer>[]
   >([]);
   const [soundFontExtreme, setSoundFontExtreme] = useState<
     ListItem<ISoundfontPlayer>[]
   >([]);
-  const [selected, setSelected] = useState<string | undefined>(
-    DEFAULT_SOUND_FONT
-  );
-  const [from, setFrom] = useState<SoundSystemMode>("PYTHON_API_SYSTEM");
-
   const [loading, setLoading] = useState<boolean>(false);
 
   const getSoundFontList = async () => {
@@ -39,6 +37,7 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
       label: data.file.name,
       value: data,
     }));
+
     const local = list?.local.map((data) => ({
       label: data.file.name,
       value: data,
@@ -60,62 +59,65 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
     idOrFilename: string,
     from: SoundSystemMode
   ) => {
-    soundfontBaseManager?.setSoundfont(idOrFilename, from);
-    setFrom(from);
-    setSelected(engine?.soundfontName);
+    const selected = await soundfontBaseManager?.setSoundfont(
+      idOrFilename,
+      from
+    );
+
+    if (selected) {
+      setSelected({
+        from,
+        name: selected,
+      });
+    }
   };
 
   useEffect(() => {
-    console.log("useeffect");
     getSoundFontList();
-    setSelected(soundfontBaseManager?.selected);
-    setFrom(soundfontBaseManager?.selectedFrom ?? "PYTHON_API_SYSTEM");
-  }, [
-    engine?.soundfontName,
-    soundfontBaseManager?.selected,
-    soundfontBaseManager?.selectedFrom,
-  ]);
+  }, [selected]);
 
   return (
-    <Tabs
-      height={height}
-      tabs={[
-        {
-          content: (
-            <SoundfontFolder
-              engine={engine}
-              from={from}
-              onClickDefault={async () => {
-                await engine?.loadDefaultSoundFont();
-                soundfontBaseManager?.reset();
-                setSelected(DEFAULT_SOUND_FONT);
-                setFrom("DATABASE_FILE_SYSTEM");
-              }}
-              selected={selected}
-              getSoundFontList={getSoundFontList}
-              loading={loading}
-              removeSF2Local={removeSF2Local}
-              setLoading={setLoading}
-              soundFontStorage={soundFontStorage}
-              soundFontExtreme={soundFontExtreme}
-              updateSoundFont={updateSoundFont}
-            ></SoundfontFolder>
-          ),
-          label: "โฟลเดอร์",
-          icon: <BiFolder></BiFolder>,
-        },
-        {
-          content: (
-            <SoundfontFree
-              getSoundFontList={getSoundFontList}
-              soundFontStorage={soundFontStorage}
-            ></SoundfontFree>
-          ),
-          label: "แจกฟรี",
-          icon: <BiDownload></BiDownload>,
-        },
-      ]}
-    ></Tabs>
+    <>
+      <Tabs
+        height={height}
+        tabs={[
+          {
+            content: (
+              <SoundfontFolder
+                from={selected.from}
+                onClickDefault={async () => {
+                  soundfontBaseManager?.reset();
+                  setSelected({
+                    name: DEFAULT_SOUND_FONT,
+                    from: "DATABASE_FILE_SYSTEM",
+                  });
+                }}
+                selected={selected.name}
+                getSoundFontList={getSoundFontList}
+                loading={loading}
+                removeSF2Local={removeSF2Local}
+                setLoading={setLoading}
+                soundFontStorage={soundFontStorage}
+                soundFontExtreme={soundFontExtreme}
+                updateSoundFont={updateSoundFont}
+              ></SoundfontFolder>
+            ),
+            label: "โฟลเดอร์",
+            icon: <BiFolder></BiFolder>,
+          },
+          {
+            content: (
+              <SoundfontFree
+                getSoundFontList={getSoundFontList}
+                soundFontStorage={soundFontStorage}
+              ></SoundfontFree>
+            ),
+            label: "แจกฟรี",
+            icon: <BiDownload></BiDownload>,
+          },
+        ]}
+      ></Tabs>
+    </>
   );
 };
 

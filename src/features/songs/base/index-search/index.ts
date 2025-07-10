@@ -28,8 +28,6 @@ export abstract class BaseSongsSystemReader {
   protected readonly FIELD_PRIORITY = { TITLE: 1, ARTIST: 2, LYR_TITLE: 3 };
   protected readonly DEFAULT_MAX_RESULTS = 50;
 
-  public setFileSystem?(fileSystemManager: FileSystemManager): void;
-
   abstract initializeDataSource(): Promise<void>;
   abstract getTotalRecords(): Promise<number>;
   abstract getRecordsBatch(

@@ -1,4 +1,9 @@
-import { MID_FILE_TYPE, CUR_FILE_TYPE, LYR_FILE_TYPE } from "@/config/value";
+import {
+  MID_FILE_TYPE,
+  CUR_FILE_TYPE,
+  LYR_FILE_TYPE,
+  baseUrl,
+} from "@/config/value";
 import { BaseSongsSystemReader } from "@/features/songs/base/index-search";
 import {
   MasterIndex,
@@ -11,7 +16,7 @@ import { parseEMKFile } from "@/lib/karaoke/emk";
 import { extractFile } from "@/lib/zip";
 
 export class ApiSongsSystemReader extends BaseSongsSystemReader {
-  private baseUrl: string = "http://127.0.0.1:5005";
+  // private baseUrl: string = "http://127.0.0.1:5005";
 
   constructor() {
     super();
@@ -39,7 +44,7 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
     }
 
     try {
-      const url = `${this.baseUrl}/get_song?superIndex=${trackData._superIndex}&originalIndex=${trackData._originalIndex}`;
+      const url = `${baseUrl}/get_song?superIndex=${trackData._superIndex}&originalIndex=${trackData._originalIndex}`;
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -89,7 +94,7 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
 
   async search(query: string, options?: SearchOptions): Promise<ITrackData[]> {
     try {
-      const url = `${this.baseUrl}/search?q=${query}`;
+      const url = `${baseUrl}/search?q=${query}`;
       const response = await fetch(url);
 
       if (!response.ok) {

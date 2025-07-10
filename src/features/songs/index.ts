@@ -86,12 +86,12 @@ export class SongsSystem {
         const newManager = await ReaderFactory.create(soundMode);
         this.manager = newManager;
 
-        if (soundMode === "EXTREME_FILE_SYSTEM") {
-          const handle = await this.dircetoryLocalSongsManager?.get(1);
-          if (handle?.handle) {
-            this.manager.setFileSystem?.(FileSystemManager.getInstance());
-          }
-        }
+        // if (soundMode === "EXTREME_FILE_SYSTEM") {
+        //   const handle = await this.dircetoryLocalSongsManager?.get(1);
+        //   if (handle?.handle) {
+        //     this.manager.setFileSystem?.(FileSystemManager.getInstance());
+        //   }
+        // }
 
         if (this.manager && typeof this.manager.loadIndex === "function") {
           await this.manager.loadIndex();

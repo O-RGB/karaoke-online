@@ -2,6 +2,7 @@ import { ConfigSystem } from "@/features/config/types/config.type";
 
 // ENV
 export const remoteHost = process.env.NEXT_PUBLIC_REMOTE_HOST;
+export const baseUrl = process.env.NEXT_PUBLIC_PYTHON_API_SERVER;
 
 export const DRUM_CHANNEL = 9;
 export const WALLPAPER = "wallpaper-3.png";

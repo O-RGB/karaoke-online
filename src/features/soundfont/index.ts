@@ -1,10 +1,9 @@
-import { DircetoryLocalSongsManager } from "@/utils/indexedDB/db/local-songs/table";
-import { SoundSystemMode, SystemConfig } from "../config/types/config.type";
+import { DEFAULT_SOUND_FONT } from "@/config/value";
+import { SoundSystemMode } from "../config/types/config.type";
 import { BaseSynthEngine } from "../engine/types/synth.type";
 import { SoundfontBase } from "./base";
 import { SoundfontFileSystemManager } from "./modules/soundfont-file-system";
 import { SoundfontLocalSystemManager } from "./modules/soundfont-local-system";
-import FileSystemManager from "@/utils/file/file-system";
 
 export class SoundfontSystemManager {
   private manager: SoundfontBase | undefined = undefined;
@@ -13,12 +12,10 @@ export class SoundfontSystemManager {
   public currentMode: SoundSystemMode | undefined = undefined;
   public selected?: string | undefined = undefined;
   public selectedFrom?: SoundSystemMode | undefined = undefined;
-  private dircetoryLocalSongsManager: DircetoryLocalSongsManager | undefined =
-    new DircetoryLocalSongsManager();
 
-  constructor(engine: BaseSynthEngine, config?: Partial<SystemConfig>) {
+  constructor(engine: BaseSynthEngine, config?: SoundSystemMode) {
     this.engine = engine;
-    const soundMode = config?.soundMode;
+    const soundMode = config;
     this.currentMode = soundMode;
     this.init(engine, soundMode ?? "DATABASE_FILE_SYSTEM");
   }
@@ -34,10 +31,6 @@ export class SoundfontSystemManager {
       case "EXTREME_FILE_SYSTEM":
         this.manager = new SoundfontFileSystemManager(engine);
 
-        const handle = await this.dircetoryLocalSongsManager?.get(1);
-        if (handle?.handle) {
-          this.manager.setFileSystem?.(FileSystemManager.getInstance());
-        }
         if (this.selected) {
           this.manager?.loadSoundfont(this.selected);
         }
@@ -70,7 +63,6 @@ export class SoundfontSystemManager {
   }
 
   async removeSoundfont(id: string) {
-    // ควรเรียกใช้ได้เฉพาะในโหมดที่รองรับ
     if (this.currentMode === "EXTREME_FILE_SYSTEM") {
       this.manager?.deleteSoundfont(id);
     } else {
@@ -84,30 +76,40 @@ export class SoundfontSystemManager {
   reset() {
     this.selected = undefined;
     this.selectedFrom = "DATABASE_FILE_SYSTEM";
+    this.engine?.loadDefaultSoundFont();
+    return DEFAULT_SOUND_FONT
   }
 
-  setSoundfont(idOrFilename: string, form?: SoundSystemMode) {
+  async setSoundfont(idOrFilename: string, form?: SoundSystemMode) {
     const targetMode = form ?? "DATABASE_FILE_SYSTEM";
 
+    let selected: string | undefined = undefined;
     if (
       targetMode === "EXTREME_FILE_SYSTEM" &&
       this.currentMode === "EXTREME_FILE_SYSTEM"
     ) {
-      this.manager?.loadSoundfont(idOrFilename);
+      selected = await this.manager?.loadSoundfont(idOrFilename);
     } else if (targetMode === "DATABASE_FILE_SYSTEM") {
-      this.local?.loadSoundfont(idOrFilename);
+      selected = await this.local?.loadSoundfont(idOrFilename);
     } else {
       console.error(
         `Cannot set soundfont from ${targetMode} while in ${this.currentMode} mode.`
       );
       return;
     }
-    this.selected = idOrFilename;
+
+    this.selected = selected;
     this.selectedFrom = targetMode;
+
+    return selected;
   }
 
+  public loadDefaultSoundfont = () => {
+    this.engine?.loadDefaultSoundFont();
+    return DEFAULT_SOUND_FONT;
+  };
+
   uninstall() {
-    this.dircetoryLocalSongsManager = undefined;
     this.local = undefined;
     this.engine = undefined;
   }

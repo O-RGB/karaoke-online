@@ -1,4 +1,3 @@
-import FileSystemManager from "@/utils/file/file-system";
 import { SoundSystemMode } from "../../config/types/config.type";
 import { BaseSynthEngine } from "../../engine/types/synth.type";
 import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
@@ -10,13 +9,10 @@ export abstract class SoundfontBase {
   constructor(engine: BaseSynthEngine) {
     this.engine = engine;
   }
-  public setFileSystem?(fileSystemManager: FileSystemManager): void;
-  public async loadSoundfont(idOrFilename: string) {
-    const soundfont = await this.getSoundfont(idOrFilename);
-    if (!soundfont) return;
-    this.engine.setSoundFont(soundfont);
-  }
+
+  abstract loadSoundfont(idOrFilename: string): Promise<string | undefined>;
   abstract getSoundfont(id: string): Promise<File | undefined>;
   abstract deleteSoundfont(id: string): boolean | Promise<boolean>;
   abstract soundfonts(): Promise<ISoundfontPlayer[]>;
+  abstract getSoundfontSelected(): string | undefined;
 }

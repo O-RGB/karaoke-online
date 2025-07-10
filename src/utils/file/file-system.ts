@@ -19,8 +19,8 @@ class FileSystemManager {
     }
   }
 
-  static getInstance(autoInstance: boolean = true): FileSystemManager {
-    if (!FileSystemManager.instance && autoInstance) {
+  static getInstance(): FileSystemManager {
+    if (!FileSystemManager.instance) {
       FileSystemManager.instance = new FileSystemManager();
     }
     return FileSystemManager.instance;
@@ -124,7 +124,7 @@ class FileSystemManager {
    */
   async listFiles(path: string = ""): Promise<File[]> {
     // 1. ใช้ฟังก์ชันที่มีอยู่แล้วเพื่อหา handle ของโฟลเดอร์เป้าหมาย
-    const directoryHandle = await this.getDirectoryByPath(path);
+    const directoryHandle = await this.getDirectoryByPath(path, "listFiles");
 
     const files: File[] = [];
 
@@ -219,7 +219,7 @@ class FileSystemManager {
 
     // หาโฟลเดอร์
     const directoryHandle = dirPath
-      ? await this.getDirectoryByPath(dirPath)
+      ? await this.getDirectoryByPath(dirPath, "updateFile")
       : await this.getRootHandle();
 
     // หาไฟล์
@@ -243,8 +243,10 @@ class FileSystemManager {
 
   // ฟังก์ชันสำหรับหาโฟลเดอร์ตาม path
   private async getDirectoryByPath(
-    path: string
+    path: string,
+    by: string
   ): Promise<FileSystemDirectoryHandle> {
+    console.log("Call form: ", by, path);
     const rootHandle = await this.getRootHandle();
     const pathParts = path.split("/").filter((part) => part.length > 0);
 
@@ -269,7 +271,7 @@ class FileSystemManager {
     const dirPath = pathParts.join("/");
 
     const directoryHandle = dirPath
-      ? await this.getDirectoryByPath(dirPath)
+      ? await this.getDirectoryByPath(dirPath, "deleteFile")
       : await this.getRootHandle();
 
     await directoryHandle.removeEntry(fileName);
@@ -287,7 +289,7 @@ class FileSystemManager {
     const parentPath = pathParts.join("/");
 
     const parentHandle = parentPath
-      ? await this.getDirectoryByPath(parentPath)
+      ? await this.getDirectoryByPath(parentPath, "deleteDirectory")
       : await this.getRootHandle();
 
     await parentHandle.removeEntry(dirName, { recursive: true });
@@ -306,7 +308,7 @@ class FileSystemManager {
   // ฟังก์ชันสำหรับตรวจสอบว่าโฟลเดอร์มีอยู่หรือไม่
   async directoryExists(path: string): Promise<boolean> {
     try {
-      await this.getDirectoryByPath(path);
+      await this.getDirectoryByPath(path, "directoryExists");
       return true;
     } catch {
       return false;
@@ -400,48 +402,3 @@ class FileSystemManager {
 }
 
 export default FileSystemManager;
-
-// ผลลัพธ์จากการตรวจสอบ จะมีสถานะและ handle (ถ้ามี)
-export type DirectoryStatusResult = {
-  status: DirectoryStatus;
-  handle?: FileSystemDirectoryHandle;
-};
-
-/**
- * ฟังก์ชันสำหรับตรวจสอบสถานะของ Directory ที่บันทึกไว้ใน IndexedDB
- * โดยจะรับ dependency เข้ามา และไม่ยุ่งเกี่ยวกับ state ของคลาสอื่นโดยตรง
- *
- * @param fileSystemStore - instance ของ DircetoryLocalSongsManager เพื่อใช้เข้าถึง DB
- * @param pathId - id ของ handle ที่จะตรวจสอบ
- * @returns Promise<DirectoryStatusResult> - อ็อบเจกต์ที่ประกอบด้วย status และ handle (ถ้ามีสิทธิ์)
- */
-export async function checkDirectoryStatus(
-  fileSystemStore: DircetoryLocalSongsManager,
-  pathId: number = 1
-): Promise<DirectoryStatusResult> {
-  const savedHandleInfo = await fileSystemStore.get(pathId);
-
-  if (!savedHandleInfo) {
-    console.log("No saved handle. Needs selection.");
-    return { status: "SELECTION_NEEDED" };
-  }
-
-  const permissionStatus = await savedHandleInfo.handle.queryPermission({
-    mode: "readwrite",
-  });
-
-  if (permissionStatus === "granted") {
-    console.log("Permission is already granted.");
-    // คืนค่าทั้งสถานะและ handle ที่พร้อมใช้งาน
-    return { status: "GRANTED", handle: savedHandleInfo.handle };
-  }
-
-  if (permissionStatus === "prompt") {
-    console.log("Permission needs to be requested again.");
-    return { status: "PROMPT_REQUIRED" }; // ไม่คืน handle เพราะยังใช้ไม่ได้
-  }
-
-  // กรณี permissionStatus === 'denied' หรืออื่นๆ
-  console.log("Permission was denied or is in an unknown state.");
-  return { status: "SELECTION_NEEDED" };
-}

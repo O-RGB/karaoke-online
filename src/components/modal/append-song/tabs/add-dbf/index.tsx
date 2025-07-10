@@ -1,16 +1,13 @@
 import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
-import FileSystemManager, {
-  checkDirectoryStatus,
-} from "@/utils/file/file-system";
+import FileSystemManager from "@/utils/file/file-system";
 import useSongsStore from "@/features/songs/store/songs.store";
+import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
+import useConfigStore from "@/features/config/config-store";
 import React, { useEffect, useState } from "react";
 import { BsFolder, BsFolderCheck } from "react-icons/bs";
 import { MdBuild, MdDeleteForever } from "react-icons/md";
 import { IAlertCommon } from "@/components/common/alert/types/alert.type";
-import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
-import useConfigStore from "@/features/config/config-store";
-import { SoundSystemMode } from "@/features/config/types/config.type";
 import { DircetoryLocalSongsManager } from "@/utils/indexedDB/db/local-songs/table";
 
 interface AddDBFSongProps extends IAlertCommon {}
@@ -36,19 +33,22 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
   };
 
   const onSelectFileSystem = async () => {
-    songsManager?.manager?.setFileSystem?.(FileSystemManager.getInstance());
+    const fsManager = FileSystemManager.getInstance();
+
+    if (!songsManager?.manager) return;
+    const extreme = songsManager?.manager;
+
     const onLoadIndex = songsManager?.isReady();
     if (!onLoadIndex) {
-      await songsManager?.manager?.buildIndex(setProcessing);
+      await extreme.buildIndex(setProcessing);
     } else {
-      const fsManager = FileSystemManager.getInstance();
       await fsManager.getRootHandle();
       await songsManager?.reloadInit();
       const isLastReady = songsManager?.isReady();
       if (isLastReady) {
-        const indexLoaded = await songsManager?.manager?.loadIndex();
+        const indexLoaded = await extreme.loadIndex();
         if (!indexLoaded) {
-          await songsManager?.manager?.buildIndex(setProcessing);
+          await extreme.buildIndex(setProcessing);
         }
       }
     }

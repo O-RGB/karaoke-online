@@ -28,6 +28,7 @@ const nextConfig = {
   swcMinify: true,
   env: {
     NEXT_PUBLIC_REMOTE_HOST: process.env.NEXT_PUBLIC_REMOTE_HOST,
+    NEXT_PUBLIC_PYTHON_API_SERVER: process.env.NEXT_PUBLIC_PYTHON_API_SERVER,
   },
 };
 

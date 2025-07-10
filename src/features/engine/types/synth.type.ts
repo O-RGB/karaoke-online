@@ -6,6 +6,7 @@ import { SynthChannel } from "../modules/instrumentals/channel";
 import { InstrumentalNode } from "../modules/instrumentals/instrumental";
 import { BassConfig } from "../modules/instrumentals/config";
 import { GlobalEqualizer } from "../modules/equalizer/global-equalizer";
+import { SoundSystemMode } from "@/features/config/types/config.type";
 export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
   time: TimingModeType;
@@ -20,7 +21,7 @@ export interface BaseSynthEngine {
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;
   unintsall(): Promise<void>;
-  setSoundFont(file: File): void;
+  setSoundFont(file: File, from: SoundSystemMode): void;
 
   toggleChannelEqualizer?(channelIndex: number, enabled: boolean): void;
   toggleAllEqualizers?(enabled: boolean): void;
@@ -48,6 +49,7 @@ export interface BaseSynthEngine {
 
   soundfontName: string | undefined;
   soundfontFile: File | undefined;
+  soundfontFrom: SoundSystemMode;
 
   setController(event: IControllerChange, from?: string): void;
   lockController(event: IControllerChange<boolean>): void;
