@@ -1,9 +1,5 @@
-import {
-  MID_FILE_TYPE,
-  CUR_FILE_TYPE,
-  LYR_FILE_TYPE,
-  baseUrl,
-} from "@/config/value";
+// File: (Updated) features/songs/readers/ApiSongsSystemReader.ts
+import { MID_FILE_TYPE, CUR_FILE_TYPE, LYR_FILE_TYPE } from "@/config/value";
 import { BaseSongsSystemReader } from "@/features/songs/base/index-search";
 import {
   MasterIndex,
@@ -15,9 +11,10 @@ import {
 import { parseEMKFile } from "@/lib/karaoke/emk";
 import { extractFile } from "@/lib/zip";
 
-export class ApiSongsSystemReader extends BaseSongsSystemReader {
-  // private baseUrl: string = "http://127.0.0.1:5005";
+// ไม่จำเป็นต้องใช้ baseUrl จาก config แล้ว เพราะเราจะเรียกไปยัง API ภายในของเราเอง
+// const baseUrl = "/api"; // หรือจะกำหนดแบบนี้ก็ได้
 
+export class ApiSongsSystemReader extends BaseSongsSystemReader {
   constructor() {
     super();
   }
@@ -44,7 +41,9 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
     }
 
     try {
-      const url = `${baseUrl}/get_song?superIndex=${trackData._superIndex}&originalIndex=${trackData._originalIndex}`;
+      // *** CHANGED HERE ***
+      // เปลี่ยน URL ให้ชี้ไปยัง API route ของเรา
+      const url = `/api/get_song?superIndex=${trackData._superIndex}&originalIndex=${trackData._originalIndex}`;
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -52,20 +51,15 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
       }
 
       const blob = await response.blob();
-
       const contentType = response.headers.get("Content-Type");
-      let extension: "zip" | "emk" = "emk";
-      let filename = `song_${trackData._originalIndex}.emk`;
-      const file = new File([blob], filename, { type: blob.type });
+      let filename = `song_${trackData._originalIndex}`;
+      let file: File;
 
       if (contentType === "application/zip") {
-        extension = "zip";
         filename = `${trackData._originalIndex}.zip`;
-
+        file = new File([blob], filename, { type: "application/zip" });
         const innerFiles = await extractFile(file);
-        let mid: File | undefined;
-        let cur: File | undefined;
-        let lyr: File | undefined;
+        let mid: File | undefined, cur: File | undefined, lyr: File | undefined;
 
         for (const innerFile of innerFiles) {
           if (innerFile.name.endsWith(MID_FILE_TYPE)) mid = innerFile;
@@ -77,6 +71,9 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
           return { cur, lyr, midi: mid };
         }
       } else {
+        // Assume EMK
+        filename = `${trackData._originalIndex}.emk`;
+        file = new File([blob], filename, { type: "application/octet-stream" });
         const emkDecoded = await parseEMKFile(file);
         if (emkDecoded.mid && emkDecoded.cur && emkDecoded.lyr) {
           return {
@@ -94,11 +91,21 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
 
   async search(query: string, options?: SearchOptions): Promise<ITrackData[]> {
     try {
-      const url = `${baseUrl}/search?q=${query}`;
+      // *** CHANGED HERE ***
+      // เปลี่ยน URL ให้ชี้ไปยัง API route ของเรา
+      const url = `/api/search?q=${encodeURIComponent(query)}`;
       const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error(`Failed to get song: ${response.statusText}`);
+        // ลองอ่าน body ของ error เพื่อ debug ได้ง่ายขึ้น
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Failed to parse error response" }));
+        throw new Error(
+          `Failed to search: ${response.statusText} - ${JSON.stringify(
+            errorData
+          )}`
+        );
       }
 
       const tracklist: ITrackData[] = await response.json();
@@ -117,10 +124,9 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
 
       return finalRecords;
     } catch (error) {
-      console.error("Error getting song file:", error);
+      console.error("Error searching songs:", error);
       return [];
     }
-    return [];
   }
 
   async getTotalRecords(): Promise<number> {

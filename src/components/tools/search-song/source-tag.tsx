@@ -31,7 +31,7 @@ export function SourceTag({
   } else if (from === "PYTHON_FILE_ENCODE") {
     tagContent = <RiUserSettingsFill className="text-sky-500 w-full h-full" />;
   } else if (from === "PYTHON_API_SYSTEM") {
-    tagContent = <RiServerFill className="text-yellow-700 w-full h-full" />;
+    tagContent = <RiServerFill className="text-blue-500 w-full h-full" />;
   } else if (from === "DATABASE_FILE_SYSTEM") {
     tagContent = <FaUser className="text-green-500 w-full h-full" />;
   }

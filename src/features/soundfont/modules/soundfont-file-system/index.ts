@@ -39,7 +39,9 @@ export class SoundfontFileSystemManager extends SoundfontBase {
     return this.engine.soundfontName;
   }
 
-  public async loadSoundfont(idOrFilename: string): Promise<string | undefined> {
+  public async loadSoundfont(
+    idOrFilename: string
+  ): Promise<string | undefined> {
     if (!this.fileSystemManager) {
       new Promise((resolve) => resolve(undefined));
       console.log("File system Manager Is Null");
