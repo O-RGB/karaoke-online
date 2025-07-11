@@ -1,4 +1,3 @@
-import FileSystemManager from "@/utils/file/file-system";
 import { SoundSystemMode, SystemConfig } from "../config/types/config.type";
 import { DBFSongsSystemReader } from "./modules/extreme/extreme-file-system";
 import { BaseSongsSystemReader } from "./base/index-search";
@@ -85,13 +84,6 @@ export class SongsSystem {
 
         const newManager = await ReaderFactory.create(soundMode);
         this.manager = newManager;
-
-        // if (soundMode === "EXTREME_FILE_SYSTEM") {
-        //   const handle = await this.dircetoryLocalSongsManager?.get(1);
-        //   if (handle?.handle) {
-        //     this.manager.setFileSystem?.(FileSystemManager.getInstance());
-        //   }
-        // }
 
         if (this.manager && typeof this.manager.loadIndex === "function") {
           await this.manager.loadIndex();

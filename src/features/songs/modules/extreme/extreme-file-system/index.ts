@@ -5,6 +5,7 @@ import {
   MasterIndex,
   PreviewChunk,
   KaraokeExtension,
+  ISearchRecordPreview,
 } from "@/features/songs/types/songs.type";
 import { DBFParser } from "@/lib/karaoke/dbf";
 import { DBFHeader } from "@/lib/karaoke/dbf/types/dbf-type";
@@ -17,6 +18,9 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
   private fileBuffer: ArrayBuffer | undefined = undefined;
   private dbfFilePath: string;
   private header: DBFHeader | null = null;
+  protected sortedWords: string[] = [];
+  protected wordToPreviewsMap: Map<string, ISearchRecordPreview[]> = new Map();
+  protected wordToChunkMap: Record<string, number> = {};
 
   constructor() {
     super();
@@ -25,11 +29,117 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
     this.fileSystemManager = FileSystemManager.getInstance();
   }
 
-  public buildIndex(
-    setProgress?: (value: ProcessingDialogProps) => void
-  ): Promise<boolean> {
-    return super.buildIndex(setProgress);
+  // Step 1
+  public async readDBF(setProgress?: (value: ProcessingDialogProps) => void) {
+    await this.initializeDataSource();
+    const totalRecords = await this.getTotalRecords();
+
+    setProgress?.({
+      status: {
+        text: "Building Optimized Index (V6)",
+        working: `Loading ${totalRecords.toLocaleString()} records into memory...`,
+        progress: 5,
+      },
+    });
+    const allRecords = await this.getRecordsBatch(0, totalRecords);
+    const wordToPreviewsMap = new Map<string, ISearchRecordPreview[]>();
+
+    setProgress?.({
+      status: {
+        working: `Analyzing records...`,
+        text: "Building Optimized Index (V6)",
+        progress: 20,
+      },
+    });
+
+    allRecords.forEach((record) => {
+      const preview: ISearchRecordPreview = {
+        t: record.TITLE,
+        a: record.ARTIST,
+        i: record._originalIndex,
+        s: record._superIndex ? record._superIndex : 0,
+      };
+      const words = this.extractWords(this.getSearchableText(record));
+      words.forEach((word) => {
+        if (!wordToPreviewsMap.has(word)) wordToPreviewsMap.set(word, []);
+        wordToPreviewsMap.get(word)!.push(preview);
+      });
+    });
+
+    this.wordToPreviewsMap = wordToPreviewsMap;
+
+    setProgress?.({
+      status: {
+        text: "Building Optimized Index (V6)",
+        working: `Sorting words and creating chunks...`,
+        progress: 70,
+      },
+    });
+
+    const sortedWords = Array.from(wordToPreviewsMap.keys()).sort((a, b) =>
+      a.localeCompare(b, "th-TH-u-co-trad")
+    );
+
+    this.sortedWords = sortedWords;
   }
+
+  // Step 2
+  public async saveData(setProgress?: (value: ProcessingDialogProps) => void) {
+    let currentChunk: PreviewChunk = {};
+    let currentChunkSize = 0;
+    let chunkId = 0;
+    const MAX_CHUNK_SIZE_BYTES = 5 * 1024 * 1024;
+
+    for (const word of this.sortedWords) {
+      const previews = this.wordToPreviewsMap.get(word)!;
+      currentChunk[word] = previews;
+      this.wordToChunkMap[word] = chunkId;
+
+      currentChunkSize += JSON.stringify(previews).length + word.length * 2;
+
+      if (currentChunkSize > MAX_CHUNK_SIZE_BYTES) {
+        await this.savePreviewChunk(chunkId, currentChunk);
+        chunkId++;
+        currentChunk = {};
+        currentChunkSize = 0;
+      }
+    }
+    if (Object.keys(currentChunk).length > 0) {
+      await this.savePreviewChunk(chunkId, currentChunk);
+    }
+  }
+
+  // Step 3
+  public async saveMasterData(
+    setProgress?: (value: ProcessingDialogProps) => void
+  ) {
+    const totalRecords = await this.getTotalRecords();
+
+    const masterIndexToSave: MasterIndex = {
+      totalRecords,
+      words: this.sortedWords,
+      wordToChunkMap: this.wordToChunkMap,
+      buildTime: Date.now(),
+      lastBuilt: new Date().toISOString(),
+      initialToChunkMap: {},
+    };
+    await this.saveMasterIndex(masterIndexToSave);
+
+    setProgress?.({
+      variant: "success",
+      status: {
+        text: "Building Optimized Index (V6)",
+        // working: `Optimized Index (V6) built in ${masterIndexToSave.buildTime}ms.`,
+        progress: 100,
+      },
+    });
+  }
+
+  // public buildIndex(
+  //   setProgress?: (value: ProcessingDialogProps) => void
+  // ): Promise<boolean> {
+  //   return super.buildIndex(setProgress);
+  // }
 
   async initializeDataSource(): Promise<void> {
     try {

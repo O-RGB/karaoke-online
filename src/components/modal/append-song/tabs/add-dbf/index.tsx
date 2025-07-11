@@ -4,11 +4,12 @@ import FileSystemManager from "@/utils/file/file-system";
 import useSongsStore from "@/features/songs/store/songs.store";
 import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
 import useConfigStore from "@/features/config/config-store";
-import React, { useEffect, useState } from "react";
-import { BsFolder, BsFolderCheck } from "react-icons/bs";
+import React, { useEffect, useState, useRef } from "react";
+import { BsFolderCheck } from "react-icons/bs";
 import { MdBuild, MdDeleteForever } from "react-icons/md";
 import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 import { DircetoryLocalSongsManager } from "@/utils/indexedDB/db/local-songs/table";
+import { DBFSongsSystemReader } from "@/features/songs/modules/extreme/extreme-file-system";
 
 interface AddDBFSongProps extends IAlertCommon {}
 
@@ -16,8 +17,10 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
   setAlert,
   closeAlert,
   setProcessing,
+  closeProcessing,
 }) => {
   const [name, setName] = useState<string>();
+  const readerRef = useRef<DBFSongsSystemReader | null>(null);
 
   const songsManager = useSongsStore((state) => state.songsManager);
   const soundfontBaseManager = useSongsStore(
@@ -25,45 +28,125 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
   );
   const setConfig = useConfigStore((state) => state.setConfig);
 
-  const rebuildIndex = async () => {
-    closeAlert?.();
-    if (songsManager) {
-      await songsManager?.manager?.buildIndex(setProcessing);
+  // --- ฟังก์ชันที่ถูกแยกส่วนสำหรับแต่ละขั้นตอน ---
+
+  const runStep3_SaveMaster = async () => {
+    const reader = readerRef.current;
+    if (!reader) return;
+    try {
+      setProcessing?.({
+        status: {
+          progress: 95,
+          working: "Saving master index file...",
+          text: "Step 3: Saving Master File",
+        },
+      });
+      await reader.saveMasterData(setProcessing);
+      await songsManager?.reloadInit();
+      closeProcessing?.();
+      setAlert?.({
+        variant: "success",
+        title: "สร้าง Index สำเร็จ!",
+        description: "ข้อมูลเพลงทั้งหมดพร้อมใช้งานแล้ว",
+        onOk: closeAlert,
+      });
+    } catch (error: any) {
+      handleError(error);
     }
   };
 
-  const onSelectFileSystem = async () => {
-    const fsManager = FileSystemManager.getInstance();
-
-    if (!songsManager?.manager) return;
-    const extreme = songsManager?.manager;
-
-    const onLoadIndex = songsManager?.isReady();
-    if (!onLoadIndex) {
-      await extreme.buildIndex(setProcessing);
-    } else {
-      await fsManager.getRootHandle();
-      await songsManager?.reloadInit();
-      const isLastReady = songsManager?.isReady();
-      if (isLastReady) {
-        const indexLoaded = await extreme.loadIndex();
-        if (!indexLoaded) {
-          await extreme.buildIndex(setProcessing);
-        }
-      }
+  const runStep2_SaveChunks = async () => {
+    const reader = readerRef.current;
+    if (!reader) return;
+    try {
+      setProcessing?.({
+        status: {
+          progress: 75,
+          working: "Saving song data chunks...",
+          text: "Step 2: Saving Chunks",
+        },
+      });
+      await reader.saveData(setProcessing);
+      closeProcessing?.();
+      setAlert?.({
+        variant: "info",
+        title: "ขั้นตอนที่ 3: บันทึก Master File",
+        description: "ขั้นตอนสุดท้ายคือการบันทึกไฟล์ Index หลัก",
+        okLabel: "ดำเนินการต่อ",
+        onOk: runStep3_SaveMaster,
+      });
+      closeAlert?.();
+    } catch (error: any) {
+      handleError(error);
     }
-    await detectPath();
+  };
+
+  const runStep1_PrimeAndRead = async () => {
+    // สร้าง instance ใหม่ทุกครั้งที่เริ่ม
+    if (songsManager?.manager instanceof DBFSongsSystemReader) {
+      readerRef.current = songsManager.manager;
+    } else {
+      console.error("Manager is not a DBF Reader");
+      handleError(new Error("Song manager is not configured correctly."));
+      return;
+    }
+    const reader = readerRef.current;
+
+    try {
+      setProcessing?.({
+        status: {
+          progress: 0,
+          working: "Preparing file system...",
+          text: "Step 1: Initializing",
+        },
+      });
+      const fsManager = FileSystemManager.getInstance();
+      await fsManager.createFile("Data/preview_chunk_v6/.placeholder", "");
+      await fsManager.deleteFile("Data/preview_chunk_v6/.placeholder");
+      await detectPath();
+      await reader.readDBF(setProcessing);
+      closeProcessing?.();
+      setAlert?.({
+        variant: "info",
+        title: "ขั้นตอนที่ 2: บันทึกข้อมูล Chunks",
+        description:
+          "ข้อมูลเพลงถูกประมวลผลเรียบร้อยแล้ว ขั้นตอนต่อไปคือการบันทึกข้อมูลลงในไฟล์ย่อย (Chunks)",
+        okLabel: "ดำเนินการต่อ",
+        onOk: runStep2_SaveChunks,
+      });
+      closeAlert?.();
+    } catch (error: any) {
+      handleError(error);
+    }
+  };
+
+  const startBuildProcess = () => {
+    setAlert?.({
+      variant: "info",
+      title: "เริ่มต้นสร้าง Index ใหม่?",
+      description:
+        "กระบวนการนี้จะสร้าง Index สำหรับค้นหาเพลงใหม่ทั้งหมด คุณต้องการเริ่มต้นหรือไม่?",
+      okLabel: "เริ่มต้น",
+      onOk: runStep1_PrimeAndRead,
+    });
+  };
+
+  const handleError = (error: Error) => {
+    console.error("Build process failed:", error);
+    setAlert?.({
+      variant: "error",
+      title: "เกิดข้อผิดพลาด",
+      description: error.message,
+      onOk: closeAlert,
+    });
+    closeProcessing?.();
   };
 
   const detectPath = async () => {
     const database = new DircetoryLocalSongsManager();
     const isSelected = await database.get(1);
-    if (isSelected?.handle) {
-      if (isSelected.handle) {
-        setName(isSelected.handle.name);
-      } else {
-        setName(undefined);
-      }
+    if (isSelected?.handle?.name) {
+      setName(isSelected.handle.name);
     } else {
       setName(undefined);
     }
@@ -71,8 +154,9 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
 
   const handleDelete = async () => {
     const fsManager = FileSystemManager.getInstance();
-    fsManager.clearDirectory();
+    await fsManager.clearDirectory();
     setName(undefined);
+    readerRef.current = null;
     closeAlert?.();
   };
 
@@ -135,54 +219,35 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
           />
 
           <div className="p-4 rounded-lg border w-full">
-            <div className="flex flex-col sm:flex-row lg:items-center gap-4">
-              <Button
-                disabled={!!name}
-                iconPosition="left"
-                icon={<BsFolder />}
-                color="white"
-                onClick={onSelectFileSystem}
-                className="text-nowrap flex-shrink-0"
-              >
-                เลือก
-              </Button>
-
-              <div className="w-full flex-grow bg-white border rounded-md p-2 min-h-[40px] flex items-center">
-                {name ? (
-                  <div className="flex items-center gap-2 text-blue-500 ">
-                    <BsFolderCheck size={18} />
-                    <span className="text-sm">{name}</span>
-                  </div>
-                ) : (
-                  <span className="text-gray-400 text-sm italic">
-                    ยังไม่ได้เลือกโฟลเดอร์...
-                  </span>
-                )}
-              </div>
+            <div className="w-full flex-grow bg-white border rounded-md p-2 min-h-[40px] flex items-center mb-4">
+              {name ? (
+                <div className="flex items-center gap-2 text-blue-500 ">
+                  <BsFolderCheck size={18} />
+                  <span className="text-sm font-semibold">{name}</span>
+                </div>
+              ) : (
+                <span className="text-gray-400 text-sm italic">
+                  ยังไม่ได้เลือกโฟลเดอร์...
+                </span>
+              )}
             </div>
 
-            {name && (
-              <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row lg:items-center lg:justify-end gap-3">
-                <p className="text-sm text-gray-600 mr-auto mb-2 sm:mb-0 ">
-                  จัดการโฟลเดอร์:
-                </p>
+            <div className="pt-4 border-t flex flex-col sm:flex-row lg:items-center lg:justify-end gap-3">
+              <p className="text-sm text-gray-600 mr-auto mb-2 sm:mb-0 ">
+                จัดการโฟลเดอร์:
+              </p>
 
-                <Button
-                  className="h-9"
-                  color="white"
-                  iconPosition="left"
-                  icon={<MdBuild />}
-                  onClick={() =>
-                    setAlert?.({
-                      variant: "info",
-                      title: "ยืนยันการสร้าง Index ใหม่",
-                      description: "หากเริ่มต้นไฟล์เก่าจะโดนลบทันที",
-                      onOk: rebuildIndex,
-                    })
-                  }
-                >
-                  สร้าง Index ใหม่
-                </Button>
+              <Button
+                className="h-9"
+                color="white"
+                iconPosition="left"
+                icon={<MdBuild />}
+                onClick={startBuildProcess}
+              >
+                สร้าง Index ใหม่
+              </Button>
+
+              {name && (
                 <Button
                   color="red"
                   className="h-9"
@@ -200,8 +265,8 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
                 >
                   ลบการเชื่อมต่อ
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -11,7 +11,9 @@ export type AlertVariant = "success" | "error" | "warning" | "info";
 export interface AlertDialogProps {
   open?: boolean;
   onOk?: () => void;
+  okLabel?: string;
   onCancel?: () => void;
+  canelLabel?: string;
   title?: string;
   description?: React.ReactNode;
   variant?: AlertVariant;
@@ -43,6 +45,8 @@ const variantConfig = {
 const AlertDialog: React.FC<AlertDialogProps> = ({
   onCancel,
   onOk,
+  okLabel,
+  canelLabel,
   open = false,
   title,
   description,
@@ -84,7 +88,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
             icon={<MdClose className="text-lg" />}
             onClick={onCancel}
           >
-            ยกเลิก
+            {canelLabel ? canelLabel : "ยกเลิก"}
           </Button>
           <Button
             className="h-9"
@@ -93,7 +97,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
             icon={<BiCheck className="text-lg" />}
             onClick={onOk}
           >
-            ตกลง
+            {okLabel ? okLabel : "ตกลง"}
           </Button>
         </div>
       </div>
