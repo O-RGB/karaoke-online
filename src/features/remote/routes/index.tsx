@@ -1,27 +1,17 @@
-import React, { useEffect } from "react";
-import { PeerHostState, usePeerHostStore } from "../store/peer-js-store";
+import { usePeerHostStore } from "../store/peer-js-store";
 import useSongsStore from "@/features/songs/store/songs.store";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import { ITrackData } from "@/features/songs/types/songs.type";
-
-interface RemoteRouteHostProps {}
-
-const RemoteRouteHost: React.FC<RemoteRouteHostProps> = ({}) => {
-  const hostStore = usePeerHostStore();
-
-  useEffect(() => {
-    hostStore.addRoute("auth/login", async (payload) => {
-      return {};
-    });
-  }, []);
-
-  return <></>;
-};
-
-export default RemoteRouteHost;
+import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 
 export const remoteRoutes = () => {
   const client = usePeerHostStore.getState();
+
+  client.addRoute("system/init", async (payload) => {
+    const musicInfo = useRuntimePlayer.getState().musicInfo;
+    console.log("system/init, musicInfo", musicInfo);
+    return { musicInfo };
+  });
 
   client.addRoute("songs/search", async (payload) => {
     const { search } = payload;
@@ -34,6 +24,7 @@ export const remoteRoutes = () => {
     const queue = useQueuePlayer.getState().queue;
     return queue;
   });
+
   client.addRoute(
     "songs/select",
     async (payload: { tracklist: ITrackData }, clientId) => {

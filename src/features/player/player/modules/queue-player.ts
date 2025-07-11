@@ -111,6 +111,11 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
         lyrics.setClientId?.(undefined);
       }
 
+      const client = usePeerHostStore();
+      await client.requestToClient(null, "system/init", {
+        musicInfo: music,
+      });
+
       setTimeout(() => {
         runtime.play();
         runtime.tickRun(true);

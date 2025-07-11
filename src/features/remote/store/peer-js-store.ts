@@ -216,7 +216,7 @@ export interface PeerHostState {
   removeRoute: (route: string) => void;
   getRoutes: () => string[];
   requestToClient: <T = any>(
-    clientId: string,
+    clientId: string | null,
     route: string,
     payload?: any,
     timeout?: number
@@ -425,13 +425,85 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
   },
 
   requestToClient: <T = any>(
-    clientId: string,
+    clientId: string | null,
     route: string,
     payload: any = {},
     timeout = 10000
   ): Promise<T> => {
-    return new Promise((resolve, reject) => {
-      const { connections, pendingRequests } = get();
+    const { connections, pendingRequests } = get();
+
+    // กรณีไม่ได้ระบุ clientId: ส่งหาทุกคน และรอการตอบกลับครั้งแรก
+    if (!clientId) {
+      return new Promise<T>((resolve, reject) => {
+        const allConnections = Object.values(connections).flat();
+        if (allConnections.length === 0) {
+          return reject(new Error("No clients available to send the request."));
+        }
+
+        let hasSettled = false;
+        const requestIds: string[] = [];
+        let timeoutCount = 0;
+
+        // ฟังก์ชันสำหรับเคลียร์ pending requests และ timeouts ทั้งหมด
+        const cleanup = () => {
+          requestIds.forEach((id) => {
+            const pending = pendingRequests.get(id);
+            if (pending) {
+              clearTimeout(pending.timeoutId);
+              pendingRequests.delete(id);
+            }
+          });
+        };
+
+        allConnections.forEach((conn) => {
+          const requestId = crypto.randomUUID();
+          requestIds.push(requestId);
+
+          const timeoutId = setTimeout(() => {
+            timeoutCount++;
+            pendingRequests.delete(requestId);
+            // ถ้า client ทุกคน timeout และยังไม่มีการตอบกลับ
+            if (!hasSettled && timeoutCount === allConnections.length) {
+              hasSettled = true;
+              reject(
+                new Error(
+                  `Request (route: ${route}) timed out for all clients after ${timeout}ms.`
+                )
+              );
+            }
+          }, timeout);
+
+          pendingRequests.set(requestId, {
+            resolve: (value: any) => {
+              // ถ้ายังไม่มีการตอบกลับ ให้ resolve ด้วยค่าแรกที่ได้รับ
+              if (!hasSettled) {
+                hasSettled = true;
+                cleanup(); // เคลียร์ request ที่เหลือทั้งหมด
+                resolve(value);
+              }
+            },
+            reject: (reason?: any) => {
+              // เราจะเมินการ reject ของ client แต่ละคนไปก่อน
+              // และจะรอจนกว่าจะมีคนตอบกลับสำเร็จ หรือ timeout ทั้งหมด
+              console.error(
+                `Request to client ${conn.peer} was rejected:`,
+                reason
+              );
+            },
+            timeoutId,
+          });
+
+          conn.send({
+            type: "REQUEST",
+            requestId,
+            payload: { route, payload },
+          });
+        });
+      });
+    }
+
+    // กรณีระบุ clientId: โค้ดเดิมสำหรับส่งหา client คนเดียว
+    return new Promise<T>((resolve, reject) => {
       const conn = Object.values(connections)
         .flat()
         .find((c) => c.peer === clientId);
@@ -450,7 +522,19 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
         );
       }, timeout);
 
-      pendingRequests.set(requestId, { resolve, reject, timeoutId });
+      pendingRequests.set(requestId, {
+        resolve: (value: any) => {
+          clearTimeout(timeoutId);
+          pendingRequests.delete(requestId);
+          resolve(value);
+        },
+        reject: (reason?: any) => {
+          clearTimeout(timeoutId);
+          pendingRequests.delete(requestId);
+          reject(reason);
+        },
+        timeoutId,
+      });
 
       conn.send({
         type: "REQUEST",
