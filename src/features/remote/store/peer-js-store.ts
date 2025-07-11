@@ -435,9 +435,6 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
     if (!clientId) {
       return new Promise<T>((resolve, reject) => {
         const allConnections = Object.values(connections).flat();
-        if (allConnections.length === 0) {
-          return reject();
-        }
 
         let hasSettled = false;
         const requestIds: string[] = [];
