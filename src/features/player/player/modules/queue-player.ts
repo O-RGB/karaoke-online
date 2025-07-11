@@ -111,7 +111,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
         lyrics.setClientId?.(undefined);
       }
 
-      const client = usePeerHostStore();
+      const client = usePeerHostStore.getState();
       await client.requestToClient(null, "system/init", {
         musicInfo: music,
       });
