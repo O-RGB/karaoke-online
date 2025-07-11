@@ -432,12 +432,11 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
   ): Promise<T> => {
     const { connections, pendingRequests } = get();
 
-    // กรณีไม่ได้ระบุ clientId: ส่งหาทุกคน และรอการตอบกลับครั้งแรก
     if (!clientId) {
       return new Promise<T>((resolve, reject) => {
         const allConnections = Object.values(connections).flat();
         if (allConnections.length === 0) {
-          return reject(new Error("No clients available to send the request."));
+          return reject();
         }
 
         let hasSettled = false;

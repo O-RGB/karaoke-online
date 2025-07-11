@@ -4,6 +4,9 @@ import { WallpaperDisplayManager } from "@/utils/indexedDB/db/display/table";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { WALLPAPER } from "@/config/value";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
+import Button from "@/components/common/button/button";
+import { FaCamera } from "react-icons/fa";
+import { BsFillCameraVideoFill } from "react-icons/bs";
 
 const getRandomColor = () => {
   const letters = "0123456789ABCDEF";
@@ -43,6 +46,9 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
+
+  const [selectLive, setSelectLive] = useState<number>(0);
+  const [selectClientId, setSelectClientId] = useState<string>();
   const [currentFacingMode, setCurrentFacingMode] = useState<
     "user" | "environment"
   >("environment");
@@ -224,35 +230,52 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
 
       {/* แสดงกล้องเป็น wallpaper */}
 
-      {visibleClientIds.length > 0 ? (
-        visibleClientIds.map((peerId) => {
-          const stream = remoteStreams[peerId];
-          if (!stream)
-            return <div key={peerId}>Loading stream for {peerId}...</div>;
+      {visibleClientIds.length > 0 && (
+        <div className="fixed bottom-20 left-2 space-y-2">
+          {visibleClientIds.map((data, i) => {
+            return (
+              <React.Fragment key={`button-sw-camera-${i}`}>
+                <Button
+                  onClick={() => {
+                    setSelectLive(i);
+                    setSelectClientId(data);
+                  }}
+                  blur
+                  color={i === selectLive ? "blue" : undefined}
+                  className="h-7 w-10"
+                >
+                  <div className="flex gap-1 text-white !text-xs">
+                    <BsFillCameraVideoFill className="mt-0.5" />
+                    <span>{i + 1}</span>
+                  </div>
+                </Button>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      )}
 
-          return (
-            <video
-              key={peerId}
-              ref={(video) => {
-                if (video) video.srcObject = stream;
-              }}
-              autoPlay
-              playsInline
-              muted
-              style={{
-                position: "fixed",
-                width: "100%",
-                height: "100%",
-                top: 0,
-                left: 0,
-                objectFit: "cover",
-                zIndex: -20,
-                opacity: 0.8,
-                transform: "scaleX(-1)",
-              }}
-            />
-          );
-        })
+      {selectClientId ? (
+        <video
+          key={`peer-live-${selectClientId}-${selectLive}`}
+          ref={(video) => {
+            if (video) video.srcObject = remoteStreams[selectClientId];
+          }}
+          autoPlay
+          playsInline
+          muted
+          style={{
+            position: "fixed",
+            width: "100%",
+            height: "100%",
+            top: 0,
+            left: 0,
+            objectFit: "cover",
+            zIndex: -20,
+            opacity: 0.8,
+            transform: "scaleX(-1)",
+          }}
+        />
       ) : enableCamera && isCameraActive ? (
         <>
           <video

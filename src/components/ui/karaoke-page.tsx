@@ -107,7 +107,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
       ></WallpaperRender>
       <RemoteEvent></RemoteEvent>
-      <AutoModal auto title={""}></AutoModal>​
+      <AutoModal auto title={""}></AutoModal>
       <NotificationAlert></NotificationAlert>
       {/* Contact */}
       <div id="modal-container">
