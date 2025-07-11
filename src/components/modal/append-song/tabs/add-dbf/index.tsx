@@ -75,7 +75,6 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
         okLabel: "ดำเนินการต่อ",
         onOk: runStep3_SaveMaster,
       });
-      closeAlert?.();
     } catch (error: any) {
       handleError(error);
     }
@@ -114,7 +113,6 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
         okLabel: "ดำเนินการต่อ",
         onOk: runStep2_SaveChunks,
       });
-      closeAlert?.();
     } catch (error: any) {
       handleError(error);
     }

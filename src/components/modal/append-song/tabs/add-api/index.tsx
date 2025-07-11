@@ -24,7 +24,7 @@ const AddApiSong: React.FC<AddApiSongProps> = ({ setAlert }) => {
             headClass="bg-blue-500"
             description="เล่นเพลงทั้งหมดจาก Server กลาง"
           >
-            เล่นเพลงจาก API
+            เล่นเพลงจาก API (อัพเดทล่าสุด กรกฎาคม 2568)
           </Label>
           <div>
             <SwitchRadio<boolean>

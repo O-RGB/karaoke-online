@@ -5,10 +5,10 @@ interface DonateModalProps {}
 
 const DonateModal: React.FC<DonateModalProps> = () => {
   const donors: { name: string; amount: number; date?: string }[] = [
-    { name: "Pook Kittipan Khanteemok", amount: 200, date: "11 เม.ย. 2568" },
-    { name: "Werpan Suttwoang", amount: 100, date: "11 เม.ย. 2568" },
-    { name: "Wittaya Tongyoo", amount: 100, date: "10 เม.ย. 2568" },
-    { name: "ไม่ระบุชื่อ", amount: 500, date: "รวมทั้งหมด" },
+    // { name: "Pook Kittipan Khanteemok", amount: 200, date: "11 เม.ย. 2568" },
+    // { name: "Werpan Suttwoang", amount: 100, date: "11 เม.ย. 2568" },
+    // { name: "Wittaya Tongyoo", amount: 100, date: "10 เม.ย. 2568" },
+    // { name: "ไม่ระบุชื่อ", amount: 500, date: "รวมทั้งหมด" },
   ];
 
   const totalDonations = donors.reduce((sum, donor) => sum + donor.amount, 0);
@@ -49,7 +49,7 @@ const DonateModal: React.FC<DonateModalProps> = () => {
                 ผู้สนับสนุน
               </h3>
             </div>
-            <div className="text-xs text-gray-500 mb-1">เมษายน 2568</div>
+            <div className="text-xs text-gray-500 mb-1">กรกฎาคม 2568</div>
             <div className="text-sm font-semibold text-blue-600 mb-2">
               ยอดรวม {totalDonations.toLocaleString()} บาท
             </div>
