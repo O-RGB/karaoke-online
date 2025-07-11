@@ -33,7 +33,6 @@ import SongInfo from "../tools/song-info";
 import SoundSettingModal from "../modal/sound-setting";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import RemoteEvent from "./remote-event";
-import NotificationAlert from "../tools/noti-alert";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
@@ -108,7 +107,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <WallpaperRender></WallpaperRender>
       <RemoteEvent></RemoteEvent>
       <AutoModal auto title={""}></AutoModal>
-      <NotificationAlert></NotificationAlert>
       {/* Contact */}
       <div id="modal-container">
         <ContextModal modal={modalMap}>
