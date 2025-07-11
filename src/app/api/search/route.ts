@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_PYTHON_API_SERVER;
+const BACKEND_URL = "http://119.59.103.56:5000";
 
 export async function GET(request: Request) {
   if (!BACKEND_URL) {
