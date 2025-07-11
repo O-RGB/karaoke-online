@@ -6,7 +6,7 @@ import { WALLPAPER } from "@/config/value";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import Button from "@/components/common/button/button";
 import { FaCamera } from "react-icons/fa";
-import { BsFillCameraVideoFill } from "react-icons/bs";
+import { BsFillCameraVideoFill, BsRecordCircle } from "react-icons/bs";
 
 const getRandomColor = () => {
   const letters = "0123456789ABCDEF";
@@ -47,7 +47,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
 
-  const [selectLive, setSelectLive] = useState<number>(0);
+  const [selectLive, setSelectLive] = useState<number>();
   const [selectClientId, setSelectClientId] = useState<string>();
   const [currentFacingMode, setCurrentFacingMode] = useState<
     "user" | "environment"
@@ -231,21 +231,32 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
       {/* แสดงกล้องเป็น wallpaper */}
 
       {visibleClientIds.length > 0 && (
-        <div className="fixed bottom-20 left-2 space-y-2">
+        <div className="fixed z-50 bottom-20 left-2 space-y-2">
           {visibleClientIds.map((data, i) => {
             return (
               <React.Fragment key={`button-sw-camera-${i}`}>
                 <Button
                   onClick={() => {
-                    setSelectLive(i);
-                    setSelectClientId(data);
+                    if (i === selectLive) {
+                      setSelectLive(undefined);
+                      setSelectClientId(undefined);
+                    } else {
+                      setSelectLive(i);
+                      setSelectClientId(data);
+                    }
                   }}
-                  blur
+                  blur={i === selectLive ? false : true}
                   color={i === selectLive ? "blue" : undefined}
-                  className="h-7 w-10"
+                  className={`h-7 w-10`}
                 >
                   <div className="flex gap-1 text-white !text-xs">
-                    <BsFillCameraVideoFill className="mt-0.5" />
+                    <span
+                      className={`${
+                        i === selectLive ? "" : "animate-ping text-red-500"
+                      } `}
+                    >
+                      <BsRecordCircle className="mt-0.5" />
+                    </span>
                     <span>{i + 1}</span>
                   </div>
                 </Button>

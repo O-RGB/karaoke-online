@@ -10,7 +10,7 @@ export interface PlayerProps {
 }
 
 export interface QueuePlayerProps {
-  driveLoading: boolean;
+  loading: boolean;
   queue: ITrackData[];
   addQueue: (value: ITrackData) => void;
   removeQueue: (index: number) => void;

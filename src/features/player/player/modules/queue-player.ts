@@ -3,14 +3,14 @@ import { QueuePlayerProps } from "../types/player.type";
 import { convertCursorToTicks } from "@/lib/app-control";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { ITrackData } from "@/features/songs/types/songs.type";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import { readCursorFile, readLyricsFile } from "@/lib/karaoke/ncn";
 import useRuntimePlayer from "./runtime-player";
 import useSongsStore from "@/features/songs/store/songs.store";
-import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import useLyricsStore from "@/features/lyrics/store/lyrics.store";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
-  driveLoading: false,
+  loading: false,
   queue: [],
   addQueue: async (value) => {
     const runtime = useRuntimePlayer.getState();
@@ -54,12 +54,6 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   },
 
   playMusic: async (index) => {
-    const isLoad = get().driveLoading;
-
-    if (isLoad) {
-      return;
-    }
-
     const player = useSynthesizerEngine.getState().engine;
     const runtime = useRuntimePlayer.getState();
 
@@ -73,10 +67,10 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     if (!music) {
       return;
     }
-
+    set({ loading: true });
     let songsManager = useSongsStore.getState().songsManager;
     const song = await songsManager?.getSong(music);
-    set({ driveLoading: false });
+    set({ loading: false });
 
     if (!song) {
       return;

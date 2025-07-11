@@ -44,6 +44,7 @@ import { SongsSystem } from "@/features/songs";
 import useSongsStore from "@/features/songs/store/songs.store";
 import { SoundfontSystemManager } from "@/features/soundfont";
 import DataStoresModal from "../modal/datastores";
+import Loading from "../tools/loading";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
@@ -102,10 +103,9 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   return (
     <FullScreen handle={handle}>
       {/* Process */}
+      <Loading isLoad={onPrepare}></Loading>
       <Processing2Modal></Processing2Modal>
-      <WallpaperRender
-        wallpaperLoadingTitle={onPrepare ? "กำลังโหลดเพลง" : undefined}
-      ></WallpaperRender>
+      <WallpaperRender></WallpaperRender>
       <RemoteEvent></RemoteEvent>
       <AutoModal auto title={""}></AutoModal>
       <NotificationAlert></NotificationAlert>
