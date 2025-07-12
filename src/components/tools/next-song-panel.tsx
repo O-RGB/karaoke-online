@@ -14,13 +14,13 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
   const queue = useQueuePlayer((state) => state.queue);
   const [saveInfo, setInfo] = useState<ITrackData>();
 
-  useEffect(() => {
-    if (queue.length > 0 && countDown <= 3) {
-      setInfo(queue[0]);
-    } else if (queue.length === 1) {
-      setInfo(undefined);
-    }
-  }, [countDown]);
+  // useEffect(() => {
+  //   if (queue.length > 0 && countDown <= 3) {
+  //     setInfo(queue[0]);
+  //   } else if (queue.length === 1) {
+  //     setInfo(undefined);
+  //   }
+  // }, [countDown]);
 
   if (countDown > 3 || queue.length < 1 || !saveInfo) {
     return <></>;

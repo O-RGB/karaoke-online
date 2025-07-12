@@ -11,9 +11,7 @@ interface EfficiencyDisplayProps {}
 const EfficiencyDisplay: React.FC<EfficiencyDisplayProps> = ({}) => {
   const setConfig = useConfigStore((state) => state.setConfig);
   const config = useConfigStore((state) => state.config);
-  const play = useRuntimePlayer((state) => state.play);
   const isPaused = useRuntimePlayer((state) => state.isPaused);
-  const paused = useRuntimePlayer((state) => state.paused);
 
   const [refreshRateValue, setRefreshRateValue] = useState<number>(100);
 
@@ -51,14 +49,14 @@ const EfficiencyDisplay: React.FC<EfficiencyDisplayProps> = ({}) => {
               color={refreshRateValue < 50 ? "red" : undefined}
               value={refreshRateValue}
               onChange={onRangeChange}
-              onPressEnd={() => {
-                if (!isPaused) {
-                  paused();
-                  setTimeout(() => {
-                    play();
-                  }, 100);
-                }
-              }}
+              // onPressEnd={() => {
+              //   if (!isPaused) {
+              //     paused();
+              //     setTimeout(() => {
+              //       play();
+              //     }, 100);
+              //   }
+              // }}
             ></SliderCommon>
           </div>
         </div>

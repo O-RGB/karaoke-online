@@ -10,7 +10,10 @@ import {
   IVelocityChange,
   TimingModeType,
 } from "../../types/synth.type";
-import { Synthesizer as JsSynthesizer } from "js-synthesizer";
+import {
+  AudioWorkletNodeSynthesizer,
+  Synthesizer as JsSynthesizer,
+} from "js-synthesizer";
 import { InstrumentalNode } from "../instrumentals/instrumental";
 import { SynthChannel } from "../instrumentals/channel";
 import { BassConfig } from "../instrumentals/config";
@@ -49,7 +52,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     setInstrument?: (instrument: IPersetSoundfont[]) => void,
     systemConfig?: Partial<ConfigSystem>
   ) {
-    // this.bassConfig = config ? new BassConfig(config) : undefined;
     this.setInstrument = setInstrument;
     this.startup(systemConfig);
   }
@@ -110,9 +112,10 @@ export class JsSynthEngine implements BaseSynthEngine {
       return [];
     }
 
-    const preset = this.synth?.getSFontObject(sfId)?.getPresetIterable();
+    const preset = await this.synth?.getSFontObject(sfId);
     if (preset) {
-      const presetList = Array.from(preset);
+      const list = await preset.getPresetIterable();
+      const presetList = Array.from(list);
 
       const instrument: IPersetSoundfont[] = presetList.map((data) => ({
         bank: data.bankNum,
@@ -144,7 +147,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.soundfontName = "Default Soundfont sf2";
 
     this.loadPresetSoundFont(sfId);
-
   }
 
   async setSoundFont(file: File, from: SoundSystemMode) {
@@ -202,11 +204,9 @@ export class JsSynthEngine implements BaseSynthEngine {
           callback?.(e);
           const { channel, program } = e;
           const has = this.bassConfig?.onProgramChange(e);
-
           if (has?.isBass) {
             const nodeProgram = this.nodes[channel].program?.value;
             if (nodeProgram === program) return;
-
             this.setProgram(has.event);
             this.nodes[channel].programChange(has.event);
           } else {

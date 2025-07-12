@@ -9,7 +9,7 @@ export const remoteRoutes = () => {
 
   client.addRoute("system/init", async (payload) => {
     const musicInfo = useRuntimePlayer.getState().musicInfo;
-    console.log("system/init, musicInfo", musicInfo);
+    console.log("system/init, musicInfo",musicInfo);
     return { musicInfo };
   });
 

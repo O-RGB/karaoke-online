@@ -189,7 +189,7 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <div className="flex justify-between items-center gap-4">
+      <div className="flex justify-between items-center gap-2">
         <Label
           textSize={15}
           textColor="text-gray-800"
@@ -294,24 +294,7 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
                 เลือก Index File (.zip)
               </Button>
             </Upload>
-            {/* <Upload
-              onSelectFile={handleChunkFiles}
-              inputProps={{
-                multiple: true,
-                accept: ".json",
-                disabled: isProcessing,
-              }}
-            >
-              <Button
-                disabled={isProcessing}
-                iconPosition="left"
-                icon={<BsCloudArrowUp />}
-                color="white"
-                className="text-nowrap flex-shrink-0"
-              >
-                2. เลือก Chunk Files
-              </Button>
-            </Upload> */}
+
             <div className="w-full flex-grow bg-white border rounded-md p-2 min-h-[40px] flex items-center">
               {isDataReadyForLoad ? (
                 <div className="flex items-center gap-2 text-green-600 font-medium">
@@ -347,7 +330,7 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
         </div>
 
         <div className="p-4 rounded-lg border w-full">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col lg:flex-row lg:justify-between gap-2 lg:items-center mb-4">
             <h3 className="font-semibold text-lg text-gray-800">
               ข้อมูล Index ในเครื่อง
             </h3>

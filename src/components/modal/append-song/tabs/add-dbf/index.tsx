@@ -167,7 +167,7 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
   return (
     <>
       <div className="flex flex-col h-full space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center gap-2">
           <Label
             textSize={15}
             textColor="text-gray-800"

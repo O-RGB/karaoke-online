@@ -17,14 +17,14 @@ const AddApiSong: React.FC<AddApiSongProps> = ({ setAlert }) => {
   return (
     <>
       <div className="flex flex-col h-full space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center gap-2">
           <Label
             textSize={15}
             textColor="text-gray-800"
             headClass="bg-blue-500"
-            description="เล่นเพลงทั้งหมดจาก Server กลาง"
+            description="เล่นเพลงทั้งหมดจาก Server กลาง  (การอัปเดตเพลงจะแล้วแต่อารมณ์ของ Admin)"
           >
-            เล่นเพลงจาก API (อัพเดทล่าสุด กรกฎาคม 2568)
+            เล่นเพลงจาก API (อัพเดทล่าสุด กรกฎาคม 2568) <br />
           </Label>
           <div>
             <SwitchRadio<boolean>

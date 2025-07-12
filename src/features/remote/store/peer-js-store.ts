@@ -111,6 +111,12 @@ const setupHostConnectionHandlers = (
   });
 
   conn.on("close", () => {
+    // ✨ FIX: สั่งปิด Call ที่เกี่ยวข้องกับ client คนนี้ทันที
+    // การทำแบบนี้จะไป trigger 'call.on("close")' ให้ทำงาน
+    // เพื่อลบข้อมูลใน calls, remoteStreams, และ visibleClientIds
+    get().endCall(conn.peer);
+
+    // จัดการลบข้อมูลในส่วนของ DataConnection ตามเดิม
     set((state) => {
       const newConnections = { ...state.connections };
       newConnections[userType] = newConnections[userType].filter(
@@ -223,8 +229,8 @@ export interface PeerHostState {
   ) => Promise<T>;
 }
 
-const HEARTBEAT_INTERVAL = 5000;
-const CLIENT_TIMEOUT = 30000;
+const HEARTBEAT_INTERVAL = 3000;
+const CLIENT_TIMEOUT = 6000;
 
 export const usePeerHostStore = create<PeerHostState>((set, get) => ({
   peers: {},

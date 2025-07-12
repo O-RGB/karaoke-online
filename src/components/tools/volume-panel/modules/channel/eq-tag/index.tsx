@@ -1,5 +1,5 @@
 import Tags from "@/components/common/display/tags";
-import instrumental from "@/components/modal/sound-setting/instrumental";
+import instrumental from "@/components/modal/sound-setting/tabs/instrumental";
 import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
 import React, { useEffect, useId, useState } from "react";
 

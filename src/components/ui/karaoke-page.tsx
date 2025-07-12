@@ -4,46 +4,36 @@ import React, { useEffect, useState } from "react";
 import VolumePanel from "../tools/volume-panel";
 import PlayerPanel from "../tools/player-panel";
 import SearchSong from "../tools/search-song/search-song";
-
 import ClientHostRemote from "../remote/client/client-host";
-
 import SoundfontManager from "../modal/soundfont";
 import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
-// import AppendSongModal from "../modal/append-song/index-none";
 import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status/status-panel";
-// import OptionsPanel from "../tools/options-panel";
 import WallpaperModal from "../modal/wallpaper-modal";
-// import { getTracklist } from "@/lib/storage/tracklist";
-// import DriveSetting from "../modal/drive-setting-modal";
 import DisplaySettingModal from "../modal/display";
-
-// import { DragDrop } from "../tools/drag-drop/drag-drop";
-// import DataStoresModal from "../modal/datastores";
-// import useTracklistStore from "@/features/tracklist/tracklist-store";
 import useNotificationStore from "@/features/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/features/config/config-store";
 import QueueSong from "../tools/queue-song/queue-song";
 import useKeyboardStore from "@/features/keyboard-state";
 import NextSongPanel from "../tools/next-song-panel";
-import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import SongInfo from "../tools/song-info";
 import SoundSettingModal from "../modal/sound-setting";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import RemoteEvent from "./remote-event";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
 import Processing2Modal from "../common/alert/processing/processing-update";
-import { DatabaseService } from "@/utils/indexedDB/service";
 import AppendSongModal from "../modal/append-song";
-import { SongsSystem } from "@/features/songs";
 import useSongsStore from "@/features/songs/store/songs.store";
-import { SoundfontSystemManager } from "@/features/soundfont";
 import DataStoresModal from "../modal/datastores";
 import Loading from "../tools/loading";
+import { FullScreen, useFullScreenHandle } from "react-full-screen";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { DatabaseService } from "@/utils/indexedDB/service";
+import { SongsSystem } from "@/features/songs";
+import { SoundfontSystemManager } from "@/features/soundfont";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
@@ -72,9 +62,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     const soundSystem = new SongsSystem(config.system);
     setSongsManager(soundSystem);
     soundSystem.init(soundMode);
-
     const soundfontSystem = new SoundfontSystemManager(engine, soundMode);
-
     setSoundfontManaer(soundfontSystem);
 
     setTimeout(() => {
@@ -88,31 +76,25 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
   const modalMap: ModalComponents = {
     SOUNDFONT_MODEL: <SoundfontManager></SoundfontManager>,
-    // JOIN: <HostRemote></HostRemote>,
     SUPER_JOIN: <ClientHostRemote></ClientHostRemote>,
     MUSIC_STORE: <DataStoresModal></DataStoresModal>,
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
     WALLPAPER: <WallpaperModal></WallpaperModal>,
     DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
     SOUND_SETTING: <SoundSettingModal></SoundSettingModal>,
-    // DRIVE_SETTING: <DriveSetting></DriveSetting>,
     DONATE: <DonateModal></DonateModal>,
   };
 
   return (
     <FullScreen handle={handle}>
-      {/* Process */}
       <Loading isLoad={onPrepare}></Loading>
       <Processing2Modal></Processing2Modal>
       <WallpaperRender></WallpaperRender>
       <RemoteEvent></RemoteEvent>
       <AutoModal auto title={""}></AutoModal>
-      {/* Contact */}
       <div id="modal-container">
         <ContextModal modal={modalMap}>
-          {/* <OptionsPanel className="hidden flex-col gap-2 lg:flex fixed top-[40%] right-5"></OptionsPanel> */}
           <StatusPanel notification={notification}></StatusPanel>
-          {/* <KeyboardRender></KeyboardRender> */}
           <VolumePanel></VolumePanel>
           <TempoPanel></TempoPanel>
           <ClockPanel></ClockPanel>

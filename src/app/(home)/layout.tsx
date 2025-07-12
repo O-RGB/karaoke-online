@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <script src="/js-synthesizer/libfluidsynth-2.3.0.js"></script>
+        <script src="/js-synthesizer/libfluidsynth-2.4.6.js"></script>
         <link
           rel="icon"
           type="image/png"
@@ -37,7 +37,7 @@ export default function RootLayout({
           href="/apple-touch-icon.png"
         />
         <meta name="apple-mobile-web-app-title" content="Karaoke" />
-        
+
         <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta

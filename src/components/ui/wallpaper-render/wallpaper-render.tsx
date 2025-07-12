@@ -5,8 +5,8 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { WALLPAPER } from "@/config/value";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import Button from "@/components/common/button/button";
-import { FaCamera } from "react-icons/fa";
-import { BsFillCameraVideoFill, BsRecordCircle } from "react-icons/bs";
+import { BsRecordCircle } from "react-icons/bs";
+import { MdOutlineCameraswitch } from "react-icons/md";
 
 const getRandomColor = () => {
   const letters = "0123456789ABCDEF";
@@ -24,13 +24,8 @@ interface WallpaperRenderProps {
 const WallpaperRender: React.FC<WallpaperRenderProps> = ({
   wallpaperLoadingTitle,
 }) => {
-  const {
-    toggleClientVisibility,
-    endCall,
-    setAllowCalls,
-    visibleClientIds,
-    remoteStreams,
-  } = usePeerHostStore();
+  const { visibleClientIds, remoteStreams } = usePeerHostStore();
+
   const wallpaperDisplayManager = new WallpaperDisplayManager();
   const wId = useConfigStore((state) => state.config.themes?.wallpaperId);
   const enableCamera = useConfigStore(
@@ -39,6 +34,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null); // Ref สำหรับวิดีโอจาก Peer
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [isVideo, setIsVideo] = useState<boolean>(false);
@@ -49,9 +45,6 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
 
   const [selectLive, setSelectLive] = useState<number>();
   const [selectClientId, setSelectClientId] = useState<string>();
-  const [currentFacingMode, setCurrentFacingMode] = useState<
-    "user" | "environment"
-  >("environment");
 
   const fileIdVideo = (file: File) => file.type.startsWith("video/");
 
@@ -164,27 +157,21 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
   }, [wId, enableCamera]);
 
   useEffect(() => {
-    console.log("Camera effect triggered:", { enableCamera, isCameraActive });
-
     if (enableCamera && !isCameraActive) {
-      console.log("Starting camera...");
       startCamera();
     } else if (!enableCamera && isCameraActive) {
-      console.log("Stopping camera...");
       stopCamera();
     }
 
     return () => {
       if (cameraStream) {
-        console.log("Cleaning up camera stream...");
         cameraStream.getTracks().forEach((track) => track.stop());
       }
     };
   }, [enableCamera]);
+
   useLayoutEffect(() => {
     if (cameraVideoRef.current && cameraStream && isCameraActive) {
-      console.log("Attaching stream and playing camera video...");
-
       cameraVideoRef.current.srcObject = cameraStream;
       cameraVideoRef.current
         .play()
@@ -192,14 +179,23 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
     }
   }, [cameraStream, isCameraActive]);
 
-  useLayoutEffect(() => {
-    if (cameraVideoRef.current && cameraStream && isCameraActive) {
-      console.log("Playing camera video...");
-      cameraVideoRef.current
-        .play()
-        .catch((error) => console.error("Camera video play failed:", error));
+  useEffect(() => {
+    if (visibleClientIds.length === 0) {
+      setSelectClientId(undefined);
+      setSelectLive(undefined);
     }
-  }, [cameraStream, isCameraActive]);
+  }, [visibleClientIds]);
+
+  // ✨ FIX: ใช้ useEffect จัดการการเปลี่ยนแปลงของ remote stream
+  useEffect(() => {
+    if (
+      remoteVideoRef.current &&
+      selectClientId &&
+      remoteStreams[selectClientId]
+    ) {
+      remoteVideoRef.current.srcObject = remoteStreams[selectClientId];
+    }
+  }, [selectClientId, remoteStreams]);
 
   return (
     <>
@@ -228,7 +224,17 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
         NEXT KARAOKE v.1.0.29
       </div>
 
-      {/* แสดงกล้องเป็น wallpaper */}
+      {isCameraActive && (
+        <div className="fixed z-50 bottom-24 right-2 space-y-2">
+          <Button
+            onClick={switchCamera}
+            blur={true}
+            icon={
+              <MdOutlineCameraswitch className="text-white"></MdOutlineCameraswitch>
+            }
+          ></Button>
+        </div>
+      )}
 
       {visibleClientIds.length > 0 && (
         <div className="fixed z-50 bottom-20 left-2 space-y-2">
@@ -268,10 +274,8 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
 
       {selectClientId ? (
         <video
-          key={`peer-live-${selectClientId}-${selectLive}`}
-          ref={(video) => {
-            if (video) video.srcObject = remoteStreams[selectClientId];
-          }}
+          ref={remoteVideoRef}
+          key={`peer-live-${selectClientId}`}
           autoPlay
           playsInline
           muted
@@ -319,7 +323,6 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
           />
         </>
       ) : enableCamera && !isCameraActive ? (
-        /* แสดงข้อความเมื่อไม่สามารถเปิดกล้องได้ */
         <div
           style={{
             position: "fixed",
@@ -343,7 +346,6 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
           </div>
         </div>
       ) : isVideo ? (
-        /* แสดงวิดีโอ wallpaper ปกติ */
         <>
           <video
             ref={videoRef}
@@ -376,7 +378,6 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
           />
         </>
       ) : (
-        /* แสดงภาพ wallpaper ปกติ */
         <div
           style={{
             backgroundImage: `url(${fileUrl ? fileUrl : WALLPAPER})`,

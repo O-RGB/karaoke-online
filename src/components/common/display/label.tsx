@@ -18,21 +18,23 @@ const Label: React.FC<LabelProps> = ({
   description,
 }) => {
   return (
-    <span>
-      <span
+    <div>
+      <div
         style={{
           fontSize: textSize,
         }}
-        className={`${textColor} flex gap-1.5 items-center`}
+        className={`${textColor} flex gap-2 `}
       >
         {headClass && (
-          <span
-            className={`inline-block w-[7px] h-[7px] rounded-full ${headClass} `}
-          ></span>
+          <div>
+            <div
+              className={`inline-block w-[7px] h-[7px] rounded-full mt-2 ${headClass} `}
+            ></div>
+          </div>
         )}
 
         <span className={`${className}`}>{children}</span>
-      </span>
+      </div>
       {description && (
         <span
           className={`flex text-xs -mt-1.5 text-gray-400 py-2 ${
@@ -42,7 +44,7 @@ const Label: React.FC<LabelProps> = ({
           {description}
         </span>
       )}
-    </span>
+    </div>
   );
 };
 

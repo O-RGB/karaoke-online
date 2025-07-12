@@ -1,6 +1,5 @@
-import { MIDI, midiControllers } from "spessasynth_lib";
+import { MIDI } from "spessasynth_lib";
 import {
-  BaseSynthEngine,
   BaseSynthEvent,
   BaseSynthPlayerEngine,
 } from "../../../types/synth.type";
@@ -36,7 +35,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.paused = false;
   }
   stop(): void {
-    this.player?.resetPlayer();
+    this.player?.stopPlayer();
     this.paused = true;
   }
   pause(): void {
@@ -73,32 +72,36 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     }
     this.midiData = parsedMidi;
     this.duration = parsedMidi.duration;
+    await this.player?.resetPlayer();
     await this.player?.addSMFDataToPlayer(midiFileArrayBuffer);
 
     return parsedMidi;
   }
 
-  setMidiOutput(): void { }
-  resetMidiOutput(): void { }
+  setMidiOutput(): void {}
+  resetMidiOutput(): void {}
   eventChange(): void {
     this.player?.hookPlayerMIDIEvents((s, type, event) => {
       const eventType = event.getType();
       const velocity = event.getVelocity();
       const midiNote = event.getKey();
-      const channel = event.getChannel()
+      const channel = event.getChannel();
 
       if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
         this.eventInit?.onNoteOnChangeCallback({
           channel,
           midiNote,
-          velocity
-        })
-      } else if (eventType === 0x80 && this.eventInit?.onNoteOffChangeCallback) {
+          velocity,
+        });
+      } else if (
+        eventType === 0x80 &&
+        this.eventInit?.onNoteOffChangeCallback
+      ) {
         this.eventInit?.onNoteOffChangeCallback({
           channel,
           midiNote,
-          velocity
-        })
+          velocity,
+        });
       }
 
       switch (type) {
@@ -129,7 +132,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
           break;
 
         case 192: // Program Change
-
           if (this.eventInit?.programChangeCallback) {
             this.eventInit?.programChangeCallback({
               program: event.getProgram(),

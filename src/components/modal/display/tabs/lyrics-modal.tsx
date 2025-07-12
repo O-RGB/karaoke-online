@@ -119,7 +119,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ setAlert }) => {
   };
 
   return (
-    <div className="flex flex-col-reverse md:flex-row gap-4 w-full h-full">
+    <div className="flex flex-col-reverse md:flex-row gap-4">
       {fontUrl && (
         <style>
           {`
@@ -141,7 +141,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ setAlert }) => {
                     <Label className="pb-1">ฟอนต์</Label>
                     <Upload onSelectFile={onUploadFont}>
                       <Button
-                        color="white"
+                        color="blue"
                         icon={<FaUpload></FaUpload>}
                         iconPosition="left"
                         shadow=""
@@ -185,17 +185,18 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ setAlert }) => {
                       options={fontList}
                     ></Select>
                   </div>
-                  <div>
-                    <Button
-                      disabled={lyrics.fontName === ""}
-                      color="red"
-                      icon={<AiFillDelete></AiFillDelete>}
-                      iconPosition="left"
-                      className="h-[34px] text-nowrap"
-                    >
-                      ลบ
-                    </Button>
-                  </div>
+                  {lyrics.fontName !== undefined && (
+                    <div>
+                      <Button
+                        color="red"
+                        icon={<AiFillDelete></AiFillDelete>}
+                        iconPosition="left"
+                        className="h-[34px] text-nowrap"
+                      >
+                        ลบ
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

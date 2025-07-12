@@ -1,12 +1,12 @@
 import Tabs from "@/components/common/tabs";
 import React from "react";
-import MidiSettingModal from "./midi-setting-modal";
+import MidiSettingModal from "./tabs/midi-output";
 import { SiMidi } from "react-icons/si";
-import LockSoundModal from "./lock-sound-modal";
+import LockSoundModal from "./tabs/lock-sound";
 import { FaLock } from "react-icons/fa";
-import EngineSoundModal from "./engine-sound-modal";
+import EngineSoundModal from "./tabs/engine-setting";
 import { PiEngineFill } from "react-icons/pi";
-import InstrumentalModal from "./instrumental";
+import InstrumentalModal from "./tabs/instrumental";
 import { GiGuitar } from "react-icons/gi";
 
 interface SoundSettingModalProps {

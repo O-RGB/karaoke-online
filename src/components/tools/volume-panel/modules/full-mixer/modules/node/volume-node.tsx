@@ -18,7 +18,8 @@ function connectToMIDIOutput(instrumental: InstrumentalNode) {
     return;
   }
 
-  navigator.requestMIDIAccess()
+  navigator
+    .requestMIDIAccess()
     .then((midiAccess) => {
       // แสดงรายการ MIDI output ports ที่มีให้เลือก
       const outputs = Array.from(midiAccess.outputs.values());
@@ -35,7 +36,6 @@ function connectToMIDIOutput(instrumental: InstrumentalNode) {
     });
 }
 
-
 interface InstrumentalVolumeNodeProps {
   indexKey: number;
   type: InstrumentType;
@@ -48,10 +48,10 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
   instrumental,
 }) => {
   const componentId = useId();
-  const [groupCh, setGroupCh] = useState<SynthChannel[]>([])
+  const [groupCh, setGroupCh] = useState<SynthChannel[]>([]);
   const [expression, setExpression] = useState<number>(100);
   const text = lowercaseToReadable(type);
-  const config = useConfigStore((state) => state.config)
+  const config = useConfigStore((state) => state.config);
   const [eqConfig, setQeConfig] = useState<EQConfig>({
     enabled: false,
     gains: [0, 0, 0],
@@ -59,8 +59,8 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
     inputVolume: 1,
     outputVolume: 1,
     volumeCompensation: 1,
-  })
-  const [isOutput, setOutput] = useState<boolean>(false)
+  });
+  const [isOutput, setOutput] = useState<boolean>(false);
 
   const [eqOpen, setEqOpen] = useState<boolean>(false);
 
@@ -78,28 +78,39 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
     connectToMIDIOutput(instrumental);
   };
 
-
   useEffect(() => {
     instrumental.expression[indexKey].linkEvent(
       ["EXPRESSION", "CHANGE"],
       (v) => setExpression(v.value),
       componentId
     );
-    instrumental.equalizer[indexKey].linkEvent(["EQUALIZER", "CHANGE"], (v) => {
-      console.log("setQeConfig(v.value)",v)
-      setEqOpen(v.value.enabledEq)
-      setQeConfig(v.value)
-    }, componentId)
-    instrumental.linkEvent([type, "CHANGE"], indexKey, ((v: Map<number, SynthChannel>) => {
-      setGroupCh(Array.from(v.values()))
-    }), componentId)
+    instrumental.equalizer[indexKey].linkEvent(
+      ["EQUALIZER", "CHANGE"],
+      (v) => {
+        console.log("setQeConfig(v.value)", v);
+        setEqOpen(v.value.enabledEq);
+        setQeConfig(v.value);
+      },
+      componentId
+    );
+    instrumental.linkEvent(
+      [type, "CHANGE"],
+      indexKey,
+      (v: Map<number, SynthChannel>) => {
+        setGroupCh(Array.from(v.values()));
+      },
+      componentId
+    );
     return () => {
       instrumental.expression[indexKey].unlinkEvent(
         ["EXPRESSION", "CHANGE"],
         componentId
       );
-      instrumental.equalizer[indexKey].unlinkEvent(["EQUALIZER", "CHANGE"], componentId)
-      instrumental.unlinkEvent([type, "CHANGE"], indexKey, componentId)
+      instrumental.equalizer[indexKey].unlinkEvent(
+        ["EQUALIZER", "CHANGE"],
+        componentId
+      );
+      instrumental.unlinkEvent([type, "CHANGE"], indexKey, componentId);
     };
   }, [indexKey, instrumental]);
   return (
@@ -120,26 +131,22 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
           node={groupCh}
         ></EQNode>
       </WinboxModal>
-      <div className="relative flex flex-col gap-2 min-w-10 w-10 max-w-10">
-        {config.sound?.equalizer && <Button
-          onClick={openEq}
-          padding={"p-1 px-2"}
-          className={`${eqConfig.enabled ? "!bg-blue-500 !text-white" : ""}`}
-        >
-          EQ
-        </Button>}
-        {/* <div onClick={() => {
-          instrumental.setMidiOutput((isOutput) => {
-            setOutput(!isOutput)
-            if (!isOutput) {
-              // เมื่อเปิดใช้งาน MIDI output ให้ลองเชื่อมต่อ
-              connectMIDI();
-            }
-            return { isOutput: !isOutput, type }
-          })
-        }}>{isOutput ?
-          "O" : "I"
-          }</div> */}
+
+      <div className="relative flex flex-col gap-2 min-w-12 w-12 max-w-12 overflow-hidden">
+        {config.sound?.equalizer && (
+          <Button
+            onClick={openEq}
+            padding={"p-1 px-2"}
+            className={`${eqConfig.enabled ? "!bg-blue-500 !text-white" : ""}`}
+          >
+            EQ
+          </Button>
+        )}
+        <div className="px-0.5">
+          <div className="text-[10px] text-center break-all text-nowrap">
+            {text}
+          </div>
+        </div>
         <div className="relative bg-black">
           <ChannelVolumeRender
             max={127}
@@ -157,9 +164,13 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
             ></SliderCommon>
           </div>
         </div>
-        <span className="text-xs text-center break-all line-clamp-2 px-1">
-          {text}
-        </span>
+        <div className="p-0.5">
+          <img
+            src={`/icon/instrument/${type}.png`}
+            className="w-[50px] h-[30px] object-contain"
+            alt=""
+          />
+        </div>
       </div>
     </>
   );

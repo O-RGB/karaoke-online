@@ -46,8 +46,8 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
 
   paused: () => {
     const nodes = useSynthesizerEngine.getState().engine?.nodes;
-    nodes?.map((c) => c.note?.reset());
     const player = useSynthesizerEngine.getState().engine?.player;
+    nodes?.map((c) => c.note?.reset());
     player?.pause();
     set({ isPaused: true });
     get().tickRun(false);
@@ -91,6 +91,8 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
   },
   tickRun: (isPlay: boolean) => {
     const { intervalId } = get();
+    const time = useSynthesizerEngine.getState().engine?.time;
+    // time =  "Tick" | "Time"
     const player = useSynthesizerEngine.getState().engine?.player;
     const render = useConfigStore.getState().config.refreshRate?.render;
 
