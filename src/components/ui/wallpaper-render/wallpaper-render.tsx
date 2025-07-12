@@ -147,7 +147,9 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
   useEffect(() => {
     renderLogo();
     if (!enableCamera) {
-      loadWallpaper();
+      setTimeout(() => {
+        loadWallpaper();
+      }, 100);
     }
 
     const metaThemeColor = document.querySelector("meta[name='theme-color']");

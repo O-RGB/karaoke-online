@@ -10,10 +10,7 @@ import {
   IVelocityChange,
   TimingModeType,
 } from "../../types/synth.type";
-import {
-  AudioWorkletNodeSynthesizer,
-  Synthesizer as JsSynthesizer,
-} from "js-synthesizer";
+import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { InstrumentalNode } from "../instrumentals/instrumental";
 import { SynthChannel } from "../instrumentals/channel";
 import { BassConfig } from "../instrumentals/config";
@@ -71,7 +68,7 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.synth = synth;
     this.audio = audioContext;
 
-    this.player = new JsSynthPlayerEngine(synth);
+    this.player = new JsSynthPlayerEngine(synth, this);
     this.instrumental.setEngine(this);
 
     const analysers: AnalyserNode[] = [];
@@ -227,6 +224,11 @@ export class JsSynthEngine implements BaseSynthEngine {
       controllerNumber: event.controllerNumber,
       controllerValue: event.controllerValue,
     });
+    this.setController({
+      ...event,
+      controllerValue: !event.controllerValue ? 100 : 0,
+    });
+    this.lockController(event);
   }
   setVelocity(event: IVelocityChange): void {}
 
@@ -234,7 +236,6 @@ export class JsSynthEngine implements BaseSynthEngine {
 
   setController(event: IControllerChange): void {
     const node = this.nodes[event.channel];
-
     let isLocked = false;
 
     switch (event.controllerNumber) {
@@ -261,33 +262,41 @@ export class JsSynthEngine implements BaseSynthEngine {
     if (isLocked === true || event.force) {
       this.lockController({ ...event, controllerValue: false });
     }
+
     this.synth?.midiControl(
       event.channel,
       event.controllerNumber,
       event.controllerValue
     );
+    node.volume?.setValue(event.controllerValue);
+
     if (isLocked === true || event.force) {
       this.lockController({ ...event, controllerValue: true });
     }
   }
 
   lockController(event: IControllerChange<boolean>): void {
-    // this.synth?.lockController(
-    //   event.channel,
-    //   event.controllerNumber,
-    //   event.controllerValue
-    // );
-
     this.nodes[event.channel].lockChange({
       channel: event.channel,
       controllerNumber: event.controllerNumber,
       controllerValue: event.controllerValue,
     });
   }
-  updatePitch(channel: number, semitones?: number): void {}
-  updatePreset(channel: number, value: number): void {}
+  updatePitch(channel: number, semitones: number = 0): void {
+    const PITCH_BEND_CENTER = 8192;
+    const pitchBendValue =
+      PITCH_BEND_CENTER + (semitones * PITCH_BEND_CENTER) / 24;
+    this.synth?.midiPitchWheelSensitivity(channel, Math.round(pitchBendValue));
+  }
 
-  updateSpeed(value: number) {}
+  updatePreset(channel: number, value: number): void {
+    this.setProgram({ channel: channel, program: value });
+  }
+
+  updateSpeed(value: number) {
+    this.player?.setPlayBackRate?.(value);
+  }
+
   setBassLock(program: number): void {
     this.bassConfig?.setLockBass(program);
     const bass = this.instrumental.group.get("bass");

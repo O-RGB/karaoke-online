@@ -122,7 +122,18 @@ const useRuntimePlayer = create<RuntimeProps>((set, get) => ({
           );
 
           const lastTime = Math.floor(duration);
-          const updateCountDown = lastTime - Math.floor(currentTime ?? 0);
+          let updateCountDown = 0;
+          if (time === "Time") {
+            updateCountDown = lastTime - Math.floor(currentTime ?? 0);
+          } else {
+            const lastTick = midi.lastVoiceEventTick;
+            const remainingTicks = lastTick - tick;
+
+            const secondsPerTick =
+              tempo > 0 && timeDivision > 0 ? 60 / (tempo * timeDivision) : 0;
+
+            updateCountDown = Math.floor(remainingTicks * secondsPerTick);
+          }
 
           if (get().countDown === 0) {
             get().stop();

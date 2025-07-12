@@ -100,12 +100,6 @@ const ContextModal: React.FC<ContextModalProps> = ({
           type: "DISPLAY",
         },
         {
-          icon: <FaRegImage />,
-          text: "ภาพพื้นหลัง",
-          onClick: handleSelectContext,
-          type: "WALLPAPER",
-        },
-        {
           icon: <BiSupport></BiSupport>,
           text: "สนับสนุนเรา",
           onClick: handleSelectContext,

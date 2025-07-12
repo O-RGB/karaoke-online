@@ -11,9 +11,11 @@ import {
   PAN,
   REVERB,
 } from "@/features/engine/types/node.type";
+import { JsSynthEngine } from "../js-synth-engine";
 
 export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   private player: JsSynthesizer | undefined = undefined;
+  private engine: JsSynthEngine;
   public paused: boolean = false;
   public isFinished: boolean = false;
   public currentTiming: number = 0;
@@ -26,8 +28,9 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.eventInit = { ...this.eventInit, ...input };
   }
 
-  constructor(player: JsSynthesizer) {
+  constructor(player: JsSynthesizer, engine: JsSynthEngine) {
     this.player = player;
+    this.engine = engine;
   }
 
   play(): void {
@@ -87,6 +90,8 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const midiNote = event.getKey();
       const channel = event.getChannel();
 
+      console.log(eventType);
+
       if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
         this.eventInit?.onNoteOnChangeCallback({
           channel,
@@ -109,24 +114,36 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
           if (this.eventInit?.controllerChangeCallback) {
             let controller = event.getControl();
             let controllerNumber = 0;
+            let controllerValue = event.getValue();
+            const node = this.engine.nodes[channel];
+            let isLocked = false;
             switch (controller) {
               case MAIN_VOLUME:
                 controllerNumber = MAIN_VOLUME;
+                isLocked = node.volume?.isLocked ?? false;
+                if (node.volume?.value) controllerValue = node.volume?.value;
                 break;
               case PAN:
                 controllerNumber = PAN;
+                isLocked = node.pan?.isLocked ?? false;
+                if (node.pan?.value) controllerValue = node.pan?.value;
               case REVERB:
                 controllerNumber = REVERB;
+                isLocked = node.reverb?.isLocked ?? false;
+                if (node.reverb?.value) controllerValue = node.reverb?.value;
               case CHORUSDEPTH:
                 controllerNumber = CHORUSDEPTH;
+                isLocked = node.chorus?.isLocked ?? false;
+                if (node.chorus?.value) controllerValue = node.chorus?.value;
               default:
                 controllerNumber = controller;
                 break;
             }
+
             this.eventInit.controllerChangeCallback({
-              controllerNumber: controllerNumber,
-              controllerValue: event.getValue(),
-              channel: event.getChannel(),
+              controllerNumber,
+              controllerValue,
+              channel,
             });
           }
           break;

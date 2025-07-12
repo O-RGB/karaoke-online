@@ -226,7 +226,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "",
       (e: IControllerChange) => {
         this.nodes[e.channel].controllerChange(e);
-        // this.sendMessageData(e);
       }
     );
   }

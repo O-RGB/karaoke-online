@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import Tabs from "../common/tabs";
-import Upload from "../common/input-data/upload";
+import Tabs from "../../../common/tabs";
+import Upload from "../../../common/input-data/upload";
 import useConfigStore from "@/features/config/config-store";
 import { FaCamera, FaCheck, FaImage } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IWallpaperDisplay } from "@/utils/indexedDB/db/display/types";
 import { WallpaperDisplayManager } from "@/utils/indexedDB/db/display/table";
-import Button from "../common/button/button";
+import Button from "../../../common/button/button";
 import { WALLPAPER } from "@/config/value";
 
 interface WallpaperModalProps {}

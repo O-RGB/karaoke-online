@@ -10,7 +10,7 @@ import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
 import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status/status-panel";
-import WallpaperModal from "../modal/wallpaper-modal";
+import WallpaperModal from "../modal/display/tabs/wallpaper-modal";
 import DisplaySettingModal from "../modal/display";
 import useNotificationStore from "@/features/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
@@ -79,7 +79,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     SUPER_JOIN: <ClientHostRemote></ClientHostRemote>,
     MUSIC_STORE: <DataStoresModal></DataStoresModal>,
     ADD_MUSIC: <AppendSongModal></AppendSongModal>,
-    WALLPAPER: <WallpaperModal></WallpaperModal>,
+    // WALLPAPER: <WallpaperModal></WallpaperModal>,
     DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
     SOUND_SETTING: <SoundSettingModal></SoundSettingModal>,
     DONATE: <DonateModal></DonateModal>,

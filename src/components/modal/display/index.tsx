@@ -5,6 +5,7 @@ import LyricsModal from "./tabs/lyrics-modal";
 import EfficiencyDisplay from "./tabs/efficiency-display";
 import { LuCpu } from "react-icons/lu";
 import WidgetsDisplay from "./tabs/widgets-display";
+import WallpaperModal from "./tabs/wallpaper-modal";
 
 interface DisplaySettingModalProps {
   height?: number;
@@ -21,6 +22,11 @@ const DisplaySettingModal: React.FC<DisplaySettingModalProps> = ({
           content: <LyricsModal></LyricsModal>,
           label: "เนื้อเพลง",
           icon: <MdTextFields></MdTextFields>,
+        },
+        {
+          content: <WallpaperModal></WallpaperModal>,
+          label: "พื้นหลัง",
+          icon: <MdOutlineWidgets></MdOutlineWidgets>,
         },
         {
           content: <WidgetsDisplay></WidgetsDisplay>,

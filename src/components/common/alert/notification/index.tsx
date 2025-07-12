@@ -56,7 +56,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
 
   return (
     <Modal
-      width={400}
+      maxWidth={400}
       height={180}
       isOpen={open}
       onClose={onCancel}

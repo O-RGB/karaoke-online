@@ -46,7 +46,7 @@ const Loading: React.FC<LoadingProps> = ({ isLoad }) => {
       </style>
 
       <div
-        className="fixed inset-0 flex flex-col gap-2 items-center justify-center bg-black bg-opacity-25 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
+        className="fixed inset-0 z-10 flex flex-col gap-2 items-center justify-center bg-black bg-opacity-25 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
         style={{
           opacity: load ? 1 : 0,
         }}

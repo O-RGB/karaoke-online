@@ -119,7 +119,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ setAlert }) => {
   };
 
   return (
-    <div className="flex flex-col-reverse md:flex-row gap-4">
+    <div className="flex flex-col-reverse md:flex-row gap-4 h-full">
       {fontUrl && (
         <style>
           {`
