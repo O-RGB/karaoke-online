@@ -55,6 +55,7 @@ export interface BaseSynthEngine {
   lockController(event: IControllerChange<boolean>): void;
   updatePreset(channel: number, value: number): void;
   updatePitch(channel: number | null, semitones?: number): void;
+  updateSpeed(value: number): void;
   setProgram(event: IProgramChange): void;
   setVelocity(event: IVelocityChange): void;
 

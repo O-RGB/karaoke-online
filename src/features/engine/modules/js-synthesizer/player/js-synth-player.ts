@@ -12,6 +12,7 @@ import {
   REVERB,
 } from "@/features/engine/types/node.type";
 import { JsSynthEngine } from "../js-synth-engine";
+import { DRUM_CHANNEL } from "@/config/value";
 
 export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   private player: JsSynthesizer | undefined = undefined;
@@ -94,11 +95,14 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const program = event.getProgram();
       const node = this.engine.nodes[channel];
       if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
+        const transpose = node.transpose?.value;
+        console.log("transpose", transpose);
         this.eventInit?.onNoteOnChangeCallback({
           channel,
           midiNote,
           velocity,
         });
+        if (channel !== DRUM_CHANNEL) event.setKey(midiNote + (transpose ?? 0));
       } else if (
         eventType === 0x80 &&
         this.eventInit?.onNoteOffChangeCallback
@@ -113,21 +117,57 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       switch (type) {
         case 176: // Controller Change
           if (this.eventInit?.controllerChangeCallback) {
-            let controller = control;
             let controllerNumber = 0;
             let controllerValue = value;
+            let isLocked = false;
             switch (control) {
               case MAIN_VOLUME:
+                let volume = node.volume;
                 controllerNumber = MAIN_VOLUME;
+                if (volume?.isLocked) {
+                  isLocked = true;
+                  controllerValue = volume.value ?? value;
+                  event.setValue(controllerValue);
+                } else if (volume?.isMute) {
+                  event.setValue(0);
+                  controllerValue = 0;
+                }
                 break;
               case PAN:
                 controllerNumber = PAN;
+                let pan = node.pan;
+                if (pan?.isLocked) {
+                  isLocked = true;
+                  controllerValue = pan.value ?? value;
+                  event.setValue(controllerValue);
+                } else if (pan?.isMute) {
+                  event.setValue(0);
+                  controllerValue = 0;
+                }
+                break;
               case REVERB:
                 controllerNumber = REVERB;
+                let reverb = node.reverb;
+                if (reverb?.isLocked) {
+                  isLocked = true;
+                  controllerValue = reverb.value ?? value;
+                  event.setValue(controllerValue);
+                } else if (reverb?.isMute) {
+                  event.setValue(0);
+                  controllerValue = 0;
+                }
+                break;
               case CHORUSDEPTH:
                 controllerNumber = CHORUSDEPTH;
-              default:
-                controllerNumber = controller;
+                let chorus = node.chorus;
+                if (chorus?.isLocked) {
+                  isLocked = true;
+                  controllerValue = chorus?.value ?? value;
+                  event.setValue(controllerValue);
+                } else if (chorus?.isMute) {
+                  event.setValue(0);
+                  controllerValue = 0;
+                }
                 break;
             }
 

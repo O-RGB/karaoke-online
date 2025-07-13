@@ -46,18 +46,16 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   return (
     <>
       <div className="flex gap-2 w-full overflow-auto">
-        {engineMode === "spessa" && (
-          <NumberButton
-            onChange={(value) => {
-              onPitchChange(value);
-              setNotification({ text: `Pitch ${value}` });
-            }}
-            value={0}
-            icon={
-              <PiMicrophoneStageFill className="text-[15px]"></PiMicrophoneStageFill>
-            }
-          ></NumberButton>
-        )}
+        <NumberButton
+          onChange={(value) => {
+            onPitchChange(value);
+            setNotification({ text: `Pitch ${value}` });
+          }}
+          value={0}
+          icon={
+            <PiMicrophoneStageFill className="text-[15px]"></PiMicrophoneStageFill>
+          }
+        ></NumberButton>
         {engineMode === "spessa" && (
           <NumberButton
             onChange={(value) => {

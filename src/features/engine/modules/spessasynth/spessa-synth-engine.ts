@@ -337,6 +337,10 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     }
   }
 
+  updateSpeed(value: number): void {
+    this.player?.setPlayBackRate?.(value / 100);
+  }
+
   setMute(event: IControllerChange<boolean>): void {
     this.synth?.muteChannel(event.channel, event.controllerValue);
     this.nodes[event.channel].muteChange({

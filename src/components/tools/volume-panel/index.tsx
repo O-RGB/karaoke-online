@@ -48,7 +48,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   };
 
   const onSpeedChange = (value: number) => {
-    engine?.player?.setPlayBackRate?.(value / 100);
+    engine?.updateSpeed?.(value);
   };
 
   const onLockChange = (event: IControllerChange<boolean>) => {

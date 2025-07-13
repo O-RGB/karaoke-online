@@ -26,6 +26,7 @@ import {
   REVERB,
 } from "../../types/node.type";
 import { GlobalEqualizer } from "../equalizer/global-equalizer";
+import { PlayerSetTempoType } from "js-synthesizer/dist/lib/Constants";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -224,17 +225,13 @@ export class JsSynthEngine implements BaseSynthEngine {
       controllerNumber: event.controllerNumber,
       controllerValue: event.controllerValue,
     });
-
     this.setController({
-      channel: event.channel,
-      controllerNumber: EXPRESSION,
-      controllerValue: !event.controllerValue ? 100 : 0,
+      ...event,
+      controllerValue: event.controllerValue ? 0 : 100,
     });
   }
   setVelocity(event: IVelocityChange): void {}
-
   setMidiOutput(): void {}
-
   setController(event: IControllerChange): void {
     const node = this.nodes[event.channel];
     let isLocked = false;
@@ -259,21 +256,13 @@ export class JsSynthEngine implements BaseSynthEngine {
       default:
         break;
     }
-
-    if (isLocked === true || event.force) {
-      this.lockController({ ...event, controllerValue: false });
-    }
-
     this.synth?.midiControl(
       event.channel,
       event.controllerNumber,
       event.controllerValue
     );
-    node.volume?.setValue(event.controllerValue);
 
-    if (isLocked === true || event.force) {
-      this.lockController({ ...event, controllerValue: true });
-    }
+    node.volume?.setValue(event.controllerValue);
   }
 
   lockController(event: IControllerChange<boolean>): void {
@@ -284,10 +273,10 @@ export class JsSynthEngine implements BaseSynthEngine {
     });
   }
   updatePitch(channel: number, semitones: number = 0): void {
-    const PITCH_BEND_CENTER = 8192;
-    const pitchBendValue =
-      PITCH_BEND_CENTER + (semitones * PITCH_BEND_CENTER) / 24;
-    this.synth?.midiPitchBend(channel, semitones);
+    for (let index = 0; index < CHANNEL_DEFAULT.length; index++) {
+      console.log(index, semitones);
+      this.nodes[index].transpose?.setValue(semitones);
+    }
   }
 
   updatePreset(channel: number, value: number): void {
@@ -295,7 +284,10 @@ export class JsSynthEngine implements BaseSynthEngine {
   }
 
   updateSpeed(value: number) {
-    this.player?.setPlayBackRate?.(value);
+    this.synth?.retrievePlayerBpm().then((bpm) => {
+      const newBpm = bpm + value;
+      this.synth?.setPlayerTempo(PlayerSetTempoType.ExternalBpm, newBpm);
+    });
   }
 
   setBassLock(program: number): void {

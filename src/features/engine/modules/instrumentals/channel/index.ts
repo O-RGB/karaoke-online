@@ -40,7 +40,7 @@ export class SynthChannel {
   // Effect
   public chorus: SynthNode<INodeKey, number> | undefined = undefined;
   public reverb: SynthNode<INodeKey, number> | undefined = undefined;
-  public transpose: SynthNode<INodeKey, number> | undefined = undefined;
+  public transpose: SynthNode<null, number> | undefined = undefined;
   public pan: SynthNode<INodeKey, number> | undefined = undefined;
 
   // State
@@ -52,19 +52,18 @@ export class SynthChannel {
 
   // Render
   public analyserNode?: AnalyserNode | undefined = undefined;
-  public velocityMode?: boolean = false
+  public velocityMode?: boolean = false;
   private simulatedVelocityGain: number = 0;
 
   // Event
   public globalNoteOnEvent = new EventManager<INoteState, INoteChange>();
-
 
   // Group
   public instrumental: InstrumentalNode | undefined = undefined;
 
   public equalizer: ChannelEqualizer | undefined = undefined;
   public audioContext: AudioContext | undefined = undefined;
-  public systemConfig?: Partial<ConfigSystem>
+  public systemConfig?: Partial<ConfigSystem>;
 
   constructor(
     channel: number,
@@ -92,12 +91,12 @@ export class SynthChannel {
     this.program = new SynthNode(undefined, "PROGARM", channel);
     this.velocity = new SynthNode(undefined, "VELOCITY", channel);
     this.expression = new SynthNode(undefined, "EXPRESSION", channel);
+    this.transpose = new SynthNode(undefined, null, channel, 0);
     this.expression.setLock(true);
 
     if (keyModifierManager) {
       this.note = new KeyboardNode(channel, keyModifierManager);
     }
-
 
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
@@ -110,13 +109,11 @@ export class SynthChannel {
 
     this.analyserNode = analyser;
     console.log("Audio routing complete for channel", channel);
-
   }
 
   public setVelocityRender(bool: boolean) {
-    this.velocityMode = bool
+    this.velocityMode = bool;
   }
-
 
   public getGain(getDrum: boolean = false) {
     if (this.velocityMode) {
@@ -127,13 +124,15 @@ export class SynthChannel {
       return 0;
     }
 
-
     if (this.systemConfig?.sound?.equalizer) {
       if (!this.equalizer) {
         console.error("equalizer is not initialized");
         return 0;
       }
-      if (this.equalizer && (this.equalizer.isEQEnabled() || this.equalizer.getBoostLevel() > 0)) {
+      if (
+        this.equalizer &&
+        (this.equalizer.isEQEnabled() || this.equalizer.getBoostLevel() > 0)
+      ) {
         return this.equalizer.getVolumeLevel();
       }
     } else {
@@ -187,7 +186,7 @@ export class SynthChannel {
 
   public noteOnChange(event: INoteChange) {
     // this.note?.setOn(event);
-    this.globalNoteOnEvent.trigger(["NOTE_ON", "CHANGE"], 0, event)
+    this.globalNoteOnEvent.trigger(["NOTE_ON", "CHANGE"], 0, event);
     if (this.velocityMode) {
       this.simulatedVelocityGain = event.velocity;
     }
@@ -195,7 +194,7 @@ export class SynthChannel {
 
   public noteOffChange(event: INoteChange) {
     // this.note?.setOff(event);
-    this.globalNoteOnEvent.trigger(["NOTE_OFF", "CHANGE"], 0, event)
+    this.globalNoteOnEvent.trigger(["NOTE_OFF", "CHANGE"], 0, event);
   }
 
   public controllerChange(event: IControllerChange<any>) {
