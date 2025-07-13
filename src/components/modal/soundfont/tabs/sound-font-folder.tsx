@@ -204,7 +204,7 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 w-full h-full relative">
-      <div className="w-full lg:w-1/4 flex flex-col gap-4 h-full ">
+      <div className="w-full lg:w-1/4 flex flex-col gap-4">
         <SoundfontUpload
           setLoading={setLoading}
           onUploadComplete={async () => {

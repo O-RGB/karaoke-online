@@ -8,6 +8,9 @@ import LoadConfig from "../ui/load-conifg/load-config";
 import Button from "../common/button/button";
 import ToggleCheckBox from "../common/input-data/checkbox";
 import useConfigStore from "@/features/config/config-store";
+import SwitchRadio from "../common/input-data/switch/switch-radio";
+import { EngineType } from "@/features/engine/synth-store";
+import Label from "../common/display/label";
 
 interface AllowSoundProps {
   children?: React.ReactNode;
@@ -106,16 +109,54 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                       <div className="px-2 text-white">เปิดใช้งานโปรแกรม</div>
                     </Button>
                   </div>
-                  <div>
-                    <ToggleCheckBox
-                      defaultChecked={config.sound?.equalizer ?? false}
-                      onChange={(checked) => {
-                        setConfig({
-                          sound: { ...config.sound, equalizer: checked },
-                        });
-                      }}
-                      label="เปิดใช้งาน Equalizer (ใช้ CPU)"
-                    ></ToggleCheckBox>
+                  <div className="p-4 rounded-md bg-white shadow-sm">
+                    <div className="flex flex-col gap-2">
+                      <div>
+                        <Label className="text-black mb-2">Equalizer</Label>
+                        <ToggleCheckBox
+                          defaultChecked={config.sound?.equalizer ?? false}
+                          onChange={(checked) => {
+                            setConfig({
+                              sound: { ...config.sound, equalizer: checked },
+                            });
+                          }}
+                          label="เปิดใช้งาน (ใช้ CPU)"
+                        ></ToggleCheckBox>
+                      </div>
+
+                      <div>
+                        <Label className="text-black mb-2">Engine</Label>
+                        <SwitchRadio<EngineType>
+                          value={config.system?.engine ?? "spessa"}
+                          onChange={async (value) => {
+                            setConfig({
+                              system: {
+                                engine: value,
+                              },
+                              widgets: {
+                                inst: {
+                                  show: value === "jsSynth" ? true : false,
+                                },
+                                mix: {
+                                  show: value === "spessa" ? true : false,
+                                },
+                              },
+                            });
+                          }}
+                          options={[
+                            {
+                              value: "jsSynth",
+                              label: "JS-Synthesizer",
+                            },
+                            {
+                              value: "spessa",
+                              label: "Spessasynth",
+                              children: "gwae",
+                            },
+                          ]}
+                        ></SwitchRadio>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

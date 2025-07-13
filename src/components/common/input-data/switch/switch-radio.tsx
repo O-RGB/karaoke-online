@@ -4,7 +4,7 @@ import { FaCheck } from "react-icons/fa";
 interface SwitchRadioOption<T> {
   label?: string | React.ReactNode;
   value: T;
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 interface SwitchRadioProps<T> {
