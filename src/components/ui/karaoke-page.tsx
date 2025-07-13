@@ -34,6 +34,7 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { DatabaseService } from "@/utils/indexedDB/service";
 import { SongsSystem } from "@/features/songs";
 import { SoundfontSystemManager } from "@/features/soundfont";
+import InstrumentalPanel from "../tools/instrumental-panel";
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {

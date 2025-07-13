@@ -89,9 +89,10 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const velocity = event.getVelocity();
       const midiNote = event.getKey();
       const channel = event.getChannel();
-
-      console.log(eventType);
-
+      const control = event.getControl();
+      const value = event.getValue();
+      const program = event.getProgram();
+      const node = this.engine.nodes[channel];
       if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
         this.eventInit?.onNoteOnChangeCallback({
           channel,
@@ -112,29 +113,19 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       switch (type) {
         case 176: // Controller Change
           if (this.eventInit?.controllerChangeCallback) {
-            let controller = event.getControl();
+            let controller = control;
             let controllerNumber = 0;
-            let controllerValue = event.getValue();
-            const node = this.engine.nodes[channel];
-            let isLocked = false;
-            switch (controller) {
+            let controllerValue = value;
+            switch (control) {
               case MAIN_VOLUME:
                 controllerNumber = MAIN_VOLUME;
-                isLocked = node.volume?.isLocked ?? false;
-                if (node.volume?.value) controllerValue = node.volume?.value;
                 break;
               case PAN:
                 controllerNumber = PAN;
-                isLocked = node.pan?.isLocked ?? false;
-                if (node.pan?.value) controllerValue = node.pan?.value;
               case REVERB:
                 controllerNumber = REVERB;
-                isLocked = node.reverb?.isLocked ?? false;
-                if (node.reverb?.value) controllerValue = node.reverb?.value;
               case CHORUSDEPTH:
                 controllerNumber = CHORUSDEPTH;
-                isLocked = node.chorus?.isLocked ?? false;
-                if (node.chorus?.value) controllerValue = node.chorus?.value;
               default:
                 controllerNumber = controller;
                 break;
@@ -151,8 +142,8 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
         case 192: // Program Change
           if (this.eventInit?.programChangeCallback) {
             this.eventInit?.programChangeCallback({
-              program: event.getProgram(),
-              channel: event.getChannel(),
+              program,
+              channel,
             });
           }
           break;

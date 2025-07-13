@@ -3,9 +3,8 @@ import {
   INSTRUMENT_TYPE_BY_INDEX,
   InstrumentalNode,
 } from "@/features/engine/modules/instrumentals/instrumental";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import InstrumentalVolumeNode from "./volume-node";
-import WinboxModal from "@/components/common/modal";
 
 interface MixerNodesProps {
   instrumental: InstrumentalNode;

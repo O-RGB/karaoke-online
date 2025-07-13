@@ -18,9 +18,10 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
     clock: defaultConfig,
     mix: defaultConfig,
     tempo: defaultConfig,
+    inst: defaultConfig,
   });
 
-  const onSetWidgets = (widget: 0 | 1 | 2, show: boolean) => {
+  const onSetWidgets = (widget: 0 | 1 | 2 | 3, show: boolean) => {
     if (widget === 0) {
       setConfig({
         widgets: {
@@ -43,6 +44,14 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
       });
 
       setWidgets((e) => ({ ...e, clock: { show } }));
+    } else if (widget === 3) {
+      setConfig({
+        widgets: {
+          inst: { show },
+        },
+      });
+
+      setWidgets((e) => ({ ...e, inst: { show } }));
     }
   };
 
@@ -104,6 +113,27 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
               <SwitchRadio<boolean>
                 onChange={(value) => onSetWidgets(2, value)}
                 value={widgets.clock?.show}
+                options={[
+                  {
+                    value: true,
+                    children: "เปิด",
+                  },
+                  {
+                    value: false,
+                    children: "ปิด",
+                  },
+                ]}
+              ></SwitchRadio>
+            </div>
+          </div>
+        </div>
+        <div>
+          <Label>เครื่องดนตรี</Label>
+          <div className="flex justify-between gap-3 items-center">
+            <div>
+              <SwitchRadio<boolean>
+                onChange={(value) => onSetWidgets(3, value)}
+                value={widgets.inst?.show}
                 options={[
                   {
                     value: true,

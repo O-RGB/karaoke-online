@@ -2,7 +2,7 @@ import Slider, { SliderProps } from "rc-slider";
 import React, { useState } from "react";
 import "rc-slider/assets/index.css";
 
-interface SliderCommonProps extends Omit<SliderProps, "onChange"> {
+export interface SliderCommonProps extends Omit<SliderProps, "onChange"> {
   onChange?: (value: number) => void;
   onPressStart?: () => void;
   onPressEnd?: () => void;

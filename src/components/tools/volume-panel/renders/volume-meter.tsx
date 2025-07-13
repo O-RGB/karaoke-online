@@ -77,7 +77,7 @@ const ChannelVolumeRender: React.FC<ChannelVolumeRenderProps> = ({
     <div className="absolute w-full h-full">
       <canvas ref={canvasRef} className={className}></canvas>
       <div
-        className="absolute left-0 w-full h-0.5 bg-white/20"
+        className="absolute left-0 w-full h-0.5 bg-white/20 "
         style={{
           bottom: `${peakLevel}%`,
           transition: peakLevel > currentLevel ? "bottom 0.1s linear" : "none",

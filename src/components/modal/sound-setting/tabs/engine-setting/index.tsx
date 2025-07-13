@@ -17,6 +17,10 @@ const EngineSoundModal: React.FC<EngineSoundModalProps> = ({}) => {
         engine: value,
         timingModeType: value === "jsSynth" ? "Tick" : "Time",
       },
+      widgets: {
+        inst: { show: value === "jsSynth" ? true : false },
+        mix: { show: value === "spessa" ? true : false },
+      },
     });
 
     window.location.reload();

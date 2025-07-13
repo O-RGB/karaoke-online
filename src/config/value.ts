@@ -164,6 +164,9 @@ export const DEFAULT_CONFIG: ConfigSystem = {
     mix: {
       show: true,
     },
+    inst: {
+      show: false,
+    },
     tempo: {
       show: true,
     },

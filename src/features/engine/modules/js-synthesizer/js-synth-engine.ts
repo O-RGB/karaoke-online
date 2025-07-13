@@ -224,11 +224,12 @@ export class JsSynthEngine implements BaseSynthEngine {
       controllerNumber: event.controllerNumber,
       controllerValue: event.controllerValue,
     });
+
     this.setController({
-      ...event,
+      channel: event.channel,
+      controllerNumber: EXPRESSION,
       controllerValue: !event.controllerValue ? 100 : 0,
     });
-    this.lockController(event);
   }
   setVelocity(event: IVelocityChange): void {}
 
@@ -286,7 +287,7 @@ export class JsSynthEngine implements BaseSynthEngine {
     const PITCH_BEND_CENTER = 8192;
     const pitchBendValue =
       PITCH_BEND_CENTER + (semitones * PITCH_BEND_CENTER) / 24;
-    this.synth?.midiPitchWheelSensitivity(channel, Math.round(pitchBendValue));
+    this.synth?.midiPitchBend(channel, semitones);
   }
 
   updatePreset(channel: number, value: number): void {

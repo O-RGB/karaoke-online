@@ -1,4 +1,6 @@
-import SliderCommon from "@/components/common/input-data/slider";
+import SliderCommon, {
+  SliderCommonProps,
+} from "@/components/common/input-data/slider";
 import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
 import { enumToReadable, lowercaseToReadable } from "@/lib/general";
 import React, { useEffect, useId, useState } from "react";
@@ -14,6 +16,7 @@ interface InstrumentalSettingProps {
   selectedIndex: number;
   valueKey: INodeState;
   color: string;
+  sliderProps?: SliderCommonProps;
 }
 
 const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
@@ -22,6 +25,7 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
   selectedIndex,
   valueKey,
   color,
+  sliderProps,
 }) => {
   const componentId = useId();
 
@@ -41,11 +45,11 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
   useEffect(() => {
     if (!instrumental) return;
 
-    let synthNode: SynthNode<INodeState, number> | undefined = undefined
+    let synthNode: SynthNode<INodeState, number> | undefined = undefined;
     if (valueKey === "EXPRESSION") {
-      synthNode = instrumental.expression[selectedIndex]
+      synthNode = instrumental.expression[selectedIndex];
     } else {
-      synthNode = instrumental.velocity[selectedIndex]
+      synthNode = instrumental.velocity[selectedIndex];
     }
 
     synthNode.linkEvent(
@@ -57,10 +61,7 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
     );
 
     return () => {
-      synthNode.unlinkEvent(
-        [valueKey, "CHANGE"],
-        componentId
-      );
+      synthNode.unlinkEvent([valueKey, "CHANGE"], componentId);
     };
   }, [instrumental, selectedIndex, selectedType]);
 
@@ -75,6 +76,7 @@ const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
           <span style={{ color }}>{value}</span>
         </span>
         <SliderCommon
+          {...sliderProps}
           color={color}
           onChange={onValueChange}
           value={value}

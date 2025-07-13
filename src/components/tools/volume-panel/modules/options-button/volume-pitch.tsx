@@ -20,6 +20,7 @@ import { Menu, MenuButton } from "@szhsin/react-menu";
 import Button from "@/components/common/button/button";
 import { CgOptions } from "react-icons/cg";
 import EqualizerPanel from "../equalizer-mixer";
+import useConfigStore from "@/features/config/config-store";
 
 interface VolumeOptionsProps {
   onPitchChange: (value: number) => void;
@@ -40,30 +41,35 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   vocal,
   nodes,
 }) => {
+  const engineMode = useConfigStore((state) => state.config.system?.engine);
   useEffect(() => {}, [nodes]);
   return (
     <>
       <div className="flex gap-2 w-full overflow-auto">
-        <NumberButton
-          onChange={(value) => {
-            onPitchChange(value);
-            setNotification({ text: `Pitch ${value}` });
-          }}
-          value={0}
-          icon={
-            <PiMicrophoneStageFill className="text-[15px]"></PiMicrophoneStageFill>
-          }
-        ></NumberButton>
-        <NumberButton
-          onChange={(value) => {
-            onSpeedChange(value);
-            setNotification({ text: `Speed ${value}` });
-          }}
-          value={100}
-          icon={
-            <IoSpeedometerSharp className="text-[15px]"></IoSpeedometerSharp>
-          }
-        ></NumberButton>
+        {engineMode === "spessa" && (
+          <NumberButton
+            onChange={(value) => {
+              onPitchChange(value);
+              setNotification({ text: `Pitch ${value}` });
+            }}
+            value={0}
+            icon={
+              <PiMicrophoneStageFill className="text-[15px]"></PiMicrophoneStageFill>
+            }
+          ></NumberButton>
+        )}
+        {engineMode === "spessa" && (
+          <NumberButton
+            onChange={(value) => {
+              onSpeedChange(value);
+              setNotification({ text: `Speed ${value}` });
+            }}
+            value={100}
+            icon={
+              <IoSpeedometerSharp className="text-[15px]"></IoSpeedometerSharp>
+            }
+          ></NumberButton>
+        )}
 
         <SwitchButton
           onChange={(muted) => {

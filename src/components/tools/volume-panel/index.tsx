@@ -17,6 +17,7 @@ import { useOrientation } from "@/hooks/orientation-hook";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
+import InstrumentalPanel from "../instrumental-panel";
 
 interface VolumePanelProps {}
 
@@ -26,6 +27,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   const engine = useSynthesizerEngine((state) => state.engine);
 
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
+  const showInst = useConfigStore((state) => state.config.widgets?.inst);
+
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
   const resetQueueingTimeout = useKeyboardStore(
     (state) => state.resetQueueingTimeout
@@ -137,7 +140,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
           </div>
         </div>
       )}
-
+      {showInst?.show && <InstrumentalPanel></InstrumentalPanel>}
       {engine && (
         <VolumeOptions
           onPitchChange={onPitchChange}
@@ -152,7 +155,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
           nodes={engine.nodes}
         ></VolumeOptions>
       )}
-
       {isShow?.show === true && (
         <div className="relative flex w-full lg:w-[620px] justify-center items-center h-0 z-10">
           <div className="absolute bottom-[33px] right-4 z-10">

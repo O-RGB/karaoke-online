@@ -32,7 +32,7 @@ export type SystemFont =
   | "thasadith"
   | "k2d"
   | "libreBaskerville";
-  
+
 export type SoundSystemMode =
   | "PYTHON_FILE_ENCODE"
   | "EXTREME_FILE_SYSTEM"
@@ -86,6 +86,7 @@ export interface ThemesSettingConfig {
 }
 
 export interface WidgetsConfig {
+  inst?: WidgetsSettingConfig;
   mix?: WidgetsSettingConfig;
   tempo?: WidgetsSettingConfig;
   clock?: WidgetsSettingConfig;
