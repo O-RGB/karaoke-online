@@ -93,11 +93,11 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
         <div className="flex min-h-screen w-full bg-gray-50">
           <div className="container mx-auto px-6 py-12 flex flex-col md:flex-row gap-6 items-center justify-between">
             {/* Left side - Text and Button */}
-            <div className="w-full md:w-1/2 mb-8 md:mb-0">
+            <div className="w-full md:w-[60%] mb-8 md:mb-0">
               <div className="mb-2">
                 <span className="inline-flex items-center px-3 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded-full border border-blue-200">
                   <span className="w-2 h-2 bg-blue-500 rounded-full mr-1.5"></span>
-                  เวอร์ชั่น 1.0.29
+                  เวอร์ชั่น 1.0.30
                 </span>
               </div>
 
@@ -180,7 +180,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                 </div>
               )}
 
-              <div className="space-y-5">
+              <div className="grid lg:grid-cols-2 space-y-5">
                 <div className="flex items-start">
                   <div className="bg-blue-50 p-3 rounded-lg mr-4 text-blue-500 border border-blue-100">
                     <BsMusicNoteBeamed className="text-lg" />
@@ -242,7 +242,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
             </div>
 
             {/* Right side - Preview Image */}
-            <div className="w-full md:w-1/2 flex justify-center md:justify-start">
+            <div className="w-full md:w-[40%] flex justify-center md:justify-start">
               <div className="rounded-lg overflow-hidden shadow-md border border-gray-200 bg-white">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4">
                   <div className="flex items-center justify-between">
@@ -253,7 +253,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                       </p>
                     </div>
                     <span className="bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded">
-                      v1.0.29
+                      v1.0.30
                     </span>
                   </div>
                 </div>
@@ -261,14 +261,16 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                   <img
                     src="/update_drums.png"
                     alt="หน้าจอโปรแกรม Next Karaoke"
-                    className="w-full h-auto"
+                    className="w-full "
                   />
                 </div>
                 <div className="py-3 px-4 border-t border-gray-100">
                   <div className="flex items-center text-sm text-gray-500">
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                      <span>อัพเดทล่าสุด: เปลี่ยน Preset กลองได้แล้ว</span>
+                      <span>
+                        อัพเดทล่าสุด: JS-Synthesizer Engine ใช้งานได้ปกติแล้ว
+                      </span>
                     </div>
                   </div>
                 </div>

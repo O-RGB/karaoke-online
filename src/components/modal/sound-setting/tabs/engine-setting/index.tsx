@@ -81,7 +81,7 @@ const EngineSoundModal: React.FC<EngineSoundModalProps> = ({}) => {
         >
           <h3 className="flex items-center text-base font-semibold">
             <FaCogs className="mr-2 text-green-500" />
-            js-synthesizer Engine (Demo เท่านั้น)
+            js-synthesizer Engine
           </h3>
           <p className="text-sm">
             js-synthesizer เป็นไลบรารีที่สร้างข้อมูลเสียงโดยใช้ WebAssembly
@@ -96,7 +96,7 @@ const EngineSoundModal: React.FC<EngineSoundModalProps> = ({}) => {
             *ไม่ทราบว่ายังพัฒนาต่อหรือไม่ เนื่องจากไม่มีการอัปเดตใน GitHub
           </p>
           <p className="text-xs text-green-500 mt-2">*ใช้ในมือถือได้ดี</p>
-          <p className="text-xs text-red-600 mt-2">สถานะ: ไม่ชัดเจน</p>
+          <p className="text-xs text-green-600 mt-2">สถานะ: กำลังพัฒนา</p>
         </div>
       </div>
     </>

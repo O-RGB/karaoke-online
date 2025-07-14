@@ -211,7 +211,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
         }}
         className="hidden lg:block w-fit h-fit text-white font-bold text-2xl drop-shadow-md"
       >
-        NEXT KARAOKE v.1.0.29
+        NEXT KARAOKE v.1.0.30
       </div>
       <div
         style={{
@@ -223,7 +223,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
         }}
         className="block lg:hidden w-fit h-fit text-white font-bold text-lg drop-shadow-md"
       >
-        NEXT KARAOKE v.1.0.29
+        NEXT KARAOKE v.1.0.30
       </div>
 
       {isCameraActive && (
