@@ -6,6 +6,7 @@ import {
 } from "../types/remote.type";
 
 export type UserType = "NORMAL" | "SUPER";
+
 export type ConnectionStatus =
   | "IDLE"
   | "INITIALIZING"
@@ -26,13 +27,6 @@ interface RouteHandler {
 
 interface RouteRegistry {
   [route: string]: RouteHandler;
-}
-
-interface RequestContext {
-  clientId: string;
-  userType: UserType;
-  route: string;
-  payload: any;
 }
 
 interface FileTransfer {
@@ -57,6 +51,7 @@ const setupHostConnectionHandlers = (
   conn.on("data", async (data: any) => {
     if (data?.type === "FILE_TRANSFER_START") {
       const { transferId, fileName, fileSize } = data.payload;
+      console.log(`Receiving file: ${fileName} (${fileSize} bytes)`);
       set((state) => ({
         fileTransfers: {
           ...state.fileTransfers,
@@ -70,7 +65,6 @@ const setupHostConnectionHandlers = (
           },
         },
       }));
-
       get().onFileProgress?.(transferId, 0, fileName);
       return;
     }
@@ -84,14 +78,21 @@ const setupHostConnectionHandlers = (
         const progress = Math.round(
           (transfer.receivedSize / transfer.fileSize) * 100
         );
+
         if (progress !== transfer.progress) {
           transfer.progress = progress;
           set((state) => ({
             fileTransfers: { ...state.fileTransfers, [transferId]: transfer },
           }));
-
           get().onFileProgress?.(transferId, progress, transfer.fileName);
         }
+
+        conn.send({
+          type: "FILE_CHUNK_RECEIVED",
+          payload: { transferId },
+        });
+      } else {
+        console.warn(`Received chunk for unknown transferId: ${transferId}`);
       }
       return;
     }
@@ -103,7 +104,9 @@ const setupHostConnectionHandlers = (
         const fileBlob = new Blob(transfer.chunks, {
           type: "application/octet-stream",
         });
-        console.log(`File ${transfer.fileName} received successfully!`);
+        console.log(
+          `File ${transfer.fileName} received successfully! Size: ${fileBlob.size} bytes.`
+        );
 
         get().onFileProgress?.(transferId, 100, transfer.fileName, fileBlob);
 
@@ -192,10 +195,6 @@ const setupHostConnectionHandlers = (
       const newClientNicknames = { ...state.clientNicknames };
       delete newClientNicknames[conn.peer];
 
-      const newFileTransfers = { ...state.fileTransfers };
-      let changed = false;
-      Object.values(newFileTransfers).forEach((transfer) => {});
-
       if (
         Object.values(newConnections).flat().length === 0 &&
         Object.keys(state.calls).length === 0
@@ -206,7 +205,6 @@ const setupHostConnectionHandlers = (
         connections: newConnections,
         lastSeen: newLastSeen,
         clientNicknames: newClientNicknames,
-        fileTransfers: newFileTransfers,
       };
     });
   });
@@ -384,6 +382,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
             },
             lastSeen: { ...state.lastSeen, [conn.peer]: Date.now() },
           }));
+
           setupHostConnectionHandlers(conn, userType, set, get);
           if (!get().heartbeatIntervalId) get().startHeartbeatChecks();
         });
