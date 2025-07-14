@@ -632,34 +632,35 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
         throw new Error("ไม่พบ ID ของชิ้นส่วนไฟล์ในข้อมูลที่รอการรวม");
       }
 
-      const fileDataParts: BlobPart[] = [];
-      console.log(
-        `[Host] Assembling ${transfer.fileName} from ${chunkIds.length} chunks by ID.`
-      );
+      // 🧠 ใช้ ReadableStream เพื่อ stream ข้อมูล chunk ทีละอัน
+      const stream = new ReadableStream({
+        async start(controller) {
+          for (const id of chunkIds) {
+            const chunkRecord = await chunkManager.get(id);
+            if (chunkRecord?.file?.data) {
+              controller.enqueue(chunkRecord.file.data);
+              await chunkManager.delete(id); // ลบ chunk เพื่อประหยัด storage
+            } else {
+              controller.error(`ไม่พบข้อมูลชิ้นส่วนไฟล์ ID: ${id}`);
+              return;
+            }
+          }
+          controller.close();
+        },
+      });
 
-      for (const id of chunkIds) {
-        const chunkRecord = await chunkManager.get(id);
-        if (chunkRecord?.file?.data) {
-          fileDataParts.push(chunkRecord.file.data);
-
-          await chunkManager.delete(id);
-        } else {
-          console.error(
-            `[Host] Critical error: Chunk ID ${id} not found in DB.`
-          );
-          throw new Error(`ไม่พบข้อมูลชิ้นส่วนไฟล์ ID: ${id}`);
-        }
-      }
-
-      const fileBlob = new Blob(fileDataParts, {
+      // ✅ ใช้ Response เพื่อรวมเป็น blob โดยไม่โหลดทั้งหมดเข้า memory
+      const response = new Response(stream);
+      const fileBlob = await response.blob();
+      const finalFile = new File([fileBlob], transfer.fileName, {
         type: "application/octet-stream",
       });
-      const finalFile = new File([fileBlob], transfer.fileName);
 
       console.log(
         `[Host] File ${transfer.fileName} assembled. Size: ${fileBlob.size} bytes. Saving to DB...`
       );
       await soundfontDb.add({ file: finalFile });
+
       console.log(
         `[Host] File ${transfer.fileName} saved to main DB successfully! Cleanup complete.`
       );
