@@ -36,6 +36,11 @@ interface FileDownload {
   progress: number;
 }
 
+interface FileToAssemble {
+  id: string;
+  fileName: string;
+}
+
 const SoundfontFolder: FC<SoundfontFolderProps> = ({
   loading,
   selected,
@@ -50,8 +55,9 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
   setAlert,
   setProcessing,
   closeProcessing,
+  closeAlert,
 }) => {
-  const { initializePeer, peers, disconnect, setOnFileProgress } =
+  const { initializePeer, peers, disconnect, setOnFileProgress, assembleFile } =
     usePeerHostStore();
 
   const [fileTransfersLoading, setFileTransfersLoading] =
@@ -65,6 +71,7 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
     hostUrl && hostId ? `${hostUrl}/fileTransfers/${hostId}` : "";
 
   const [downloads, setDownloads] = useState<Record<string, FileDownload>>({});
+  const [pendingAssembly, setPendingAssembly] = useState<FileToAssemble[]>([]);
 
   const onOpenPeer = async () => {
     setFileTransfersLoading(true);
@@ -124,6 +131,31 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
           });
         }
 
+        if (value.status === "READY_FOR_ASSEMBLY") {
+          closeProcessing?.();
+
+          setPendingAssembly((prev) => [
+            ...prev,
+            { id: value.transferId, fileName: value.fileName },
+          ]);
+
+          setDownloads((prev) => {
+            const newDownloads = { ...prev };
+            delete newDownloads[value.transferId];
+            return newDownloads;
+          });
+
+          setAlert?.({
+            title: "ดาวน์โหลดสำเร็จ",
+            variant: "info",
+            description: `ไฟล์ '${value.fileName}' พร้อมที่จะรวมแล้ว กดปุ่ม 'รวมไฟล์' เพื่อใช้งาน`,
+            onOk() {
+              closeAlert?.();
+              handleAssembleFile(value.transferId, value.fileName);
+            },
+          });
+        }
+
         if (value.status === "ASSEMBLING") {
           setProcessing?.({
             title: "กำลังประมวลผล",
@@ -161,6 +193,29 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
     closeProcessing,
     setAlert,
   ]);
+
+  const handleAssembleFile = async (transferId: string, fileName: string) => {
+    setProcessing?.({
+      title: "กำลังรวมไฟล์",
+      variant: "processing",
+      status: {
+        progress: undefined,
+        text: `กำลังรวมชิ้นส่วนไฟล์: ${fileName}...`,
+      },
+    });
+
+    try {
+      await assembleFile(transferId);
+      setPendingAssembly((prev) => prev.filter((f) => f.id !== transferId));
+    } catch (error: any) {
+      closeProcessing?.();
+      setAlert?.({
+        title: "เกิดข้อผิดพลาดในการรวมไฟล์",
+        variant: "error",
+        description: error.message || "ไม่สามารถรวมไฟล์ได้ กรุณาลองใหม่",
+      });
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -230,6 +285,28 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
             </div>
           </div>
         )}
+
+        {/* {pendingAssembly.length > 0 && (
+          <div className="p-4 border rounded-lg bg-yellow-50 space-y-3">
+            <Label>ไฟล์ที่พร้อมใช้งาน (รอรวมไฟล์)</Label>
+            {pendingAssembly.map((file) => (
+              <div
+                key={file.id}
+                className="flex items-center justify-between gap-2 p-2 bg-white rounded-md border"
+              >
+                <span className="text-sm truncate" title={file.fileName}>
+                  {file.fileName}
+                </span>
+                <Button
+                  color="green"
+                  onClick={() => handleAssembleFile(file.id, file.fileName)}
+                >
+                  รวมไฟล์
+                </Button>
+              </div>
+            ))}
+          </div>
+        )} */}
       </div>
 
       <div
