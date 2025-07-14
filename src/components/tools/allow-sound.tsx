@@ -23,6 +23,9 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
   const audioLoopRef = useRef<HTMLAudioElement>(null);
   const setConfig = useConfigStore((state) => state.setConfig);
   const config = useConfigStore((state) => state.config);
+  const engine = useConfigStore(
+    (state) => state.config.system?.engine || "jsSynth"
+  );
 
   const requestMIDIAccess = async () => {
     if (navigator.requestMIDIAccess) {
@@ -53,6 +56,23 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
         setEnded(true);
       });
     }
+  };
+
+  const setEngine = (value: EngineType) => {
+    setConfig({
+      system: {
+        engine: value,
+        timingModeType: value === "jsSynth" ? "Tick" : "Time",
+      },
+      widgets: {
+        inst: {
+          show: value === "jsSynth" ? true : false,
+        },
+        mix: {
+          show: value === "spessa" ? true : false,
+        },
+      },
+    });
   };
 
   useLayoutEffect(() => {
@@ -111,8 +131,8 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                   </div>
                   <div className="p-4 rounded-md bg-white shadow-sm">
                     <div className="flex flex-col gap-2">
-                      <div>
-                        <Label className="text-black mb-2">Equalizer</Label>
+                      <div className="space-y-2">
+                        <Label className="text-black">Equalizer</Label>
                         <ToggleCheckBox
                           defaultChecked={config.sound?.equalizer ?? false}
                           onChange={(checked) => {
@@ -124,37 +144,22 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                         ></ToggleCheckBox>
                       </div>
 
-                      <div>
-                        <Label className="text-black mb-2">Engine</Label>
-                        <SwitchRadio<EngineType>
-                          value={config.system?.engine ?? "spessa"}
-                          onChange={async (value) => {
-                            setConfig({
-                              system: {
-                                engine: value,
-                              },
-                              widgets: {
-                                inst: {
-                                  show: value === "jsSynth" ? true : false,
-                                },
-                                mix: {
-                                  show: value === "spessa" ? true : false,
-                                },
-                              },
-                            });
+                      <div className="space-y-2">
+                        <Label className="text-black">Engine</Label>
+                        <ToggleCheckBox
+                          defaultChecked={engine === "jsSynth"}
+                          onChange={(checked) => {
+                            setEngine("jsSynth");
                           }}
-                          options={[
-                            {
-                              value: "jsSynth",
-                              label: "JS-Synthesizer",
-                            },
-                            {
-                              value: "spessa",
-                              label: "Spessasynth",
-                              children: "gwae",
-                            },
-                          ]}
-                        ></SwitchRadio>
+                          label="JS-Synthesizer"
+                        ></ToggleCheckBox>
+                        <ToggleCheckBox
+                          defaultChecked={engine === "spessa"}
+                          onChange={(checked) => {
+                            setEngine("spessa");
+                          }}
+                          label="Spessasynth"
+                        ></ToggleCheckBox>
                       </div>
                     </div>
                   </div>
