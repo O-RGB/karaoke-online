@@ -12,7 +12,7 @@ export abstract class SoundfontBase {
 
   abstract loadSoundfont(idOrFilename: string): Promise<string | undefined>;
   abstract getSoundfont(id: string): Promise<File | undefined>;
-  abstract deleteSoundfont(id: string): boolean | Promise<boolean>;
+  abstract deleteSoundfont(id: ISoundfontPlayer): boolean | Promise<boolean>;
   abstract soundfonts(): Promise<ISoundfontPlayer[]>;
   abstract getSoundfontSelected(): string | undefined;
 }

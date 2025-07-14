@@ -1,6 +1,6 @@
 "use client";
 import Tabs from "../../common/tabs";
-import SoundfontFolder from "./tabs/sound-font-folder";
+import SoundfontFolder from "./tabs/soundfout-folder";
 import SoundfontFree from "./tabs/sound-font-free";
 import useSongsStore from "@/features/songs/store/songs.store";
 import React, { useEffect, useState } from "react";
@@ -51,8 +51,9 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
     return extreme;
   };
 
-  const removeSF2Local = async (id: ISoundfontPlayer) => {
-    soundfontBaseManager?.removeSoundfont(id.file.name);
+  const removeSF2Local = async (file: ISoundfontPlayer) => {
+    await soundfontBaseManager?.removeSoundfont(file);
+    getSoundFontList();
   };
 
   const updateSoundFont = async (

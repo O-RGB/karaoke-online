@@ -5,6 +5,9 @@ import { BaseSynthEngine } from "@/features/engine/types/synth.type";
 import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 
 export class SoundfontFileSystemManager extends SoundfontBase {
+  deleteSoundfont(id: ISoundfontPlayer): boolean | Promise<boolean> {
+    throw new Error("Method not implemented.");
+  }
   private fileSystemManager: FileSystemManager | undefined = undefined;
   protected system: SoundSystemMode = "EXTREME_FILE_SYSTEM";
   constructor(engine: BaseSynthEngine) {
@@ -19,9 +22,7 @@ export class SoundfontFileSystemManager extends SoundfontBase {
     }
     return this.fileSystemManager.getFileByPath(`SoundFont/${filename}`);
   }
-  deleteSoundfont(id: string): boolean {
-    throw new Error("Method not implemented.");
-  }
+
   async soundfonts(): Promise<ISoundfontPlayer[]> {
     if (!this.fileSystemManager) {
       new Promise((resolve) => resolve(undefined));

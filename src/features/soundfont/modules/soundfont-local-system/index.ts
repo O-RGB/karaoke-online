@@ -17,18 +17,10 @@ export class SoundfontLocalSystemManager extends SoundfontBase {
     const file = response?.file;
     return file;
   }
-  async deleteSoundfont(filename: string): Promise<boolean> {
-    const fined = await this.soundfontDatabase.find(
-      (item) => item.file.name === filename
-    );
-
-    if (fined.length === 1) {
-      const item = fined[0];
-      await this.soundfontDatabase.delete(item.id);
-      return true;
-    }
-
-    return false;
+  async deleteSoundfont(file: ISoundfontPlayer): Promise<boolean> {
+    console.log(file,'loack');
+    await this.soundfontDatabase.delete(file.id);
+    return true;
   }
   async soundfonts(): Promise<ISoundfontPlayer[]> {
     return this.soundfontDatabase.getAll();

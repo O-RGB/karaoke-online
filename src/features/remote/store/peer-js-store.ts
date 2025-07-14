@@ -4,7 +4,10 @@ import {
   RemoteReceivedMessages,
   RemoteSendMessage,
 } from "../types/remote.type";
-import { SoundfontPlayerChunkManager } from "@/utils/indexedDB/db/player/table";
+import {
+  SoundfontPlayerChunkManager,
+  SoundfontPlayerManager, // ✅ เพิ่ม import นี้
+} from "@/utils/indexedDB/db/player/table";
 import { ISoundfontChunk } from "@/utils/indexedDB/db/player/types";
 
 export type UserType = "NORMAL" | "SUPER";
@@ -106,6 +109,7 @@ const setupHostConnectionHandlers = (
               transferId,
               progress: newProgress,
               fileName: transfer.fileName,
+              status: "PROCESSING",
             });
 
             set((state) => ({
@@ -136,11 +140,11 @@ const setupHostConnectionHandlers = (
             `[Host] Failed to save chunk ${transfer.chunkCount} for ${transferId} to IndexedDB`,
             error
           );
-          // ✅ CHANGED: ส่งข้อผิดพลาดกลับไปผ่าน Callback
           get().onFileProgress?.({
             transferId: transfer.id,
             fileName: transfer.fileName,
             progress: transfer.progress,
+            status: "ERROR",
             error: `ไม่สามารถประมวลผลไฟล์ส่วนเล็กๆ ได้ กรุณาลองใหม่อีกครั้ง`,
           });
         }
@@ -156,10 +160,17 @@ const setupHostConnectionHandlers = (
       const { transferId } = data.payload;
       const transfer = get().fileTransfers[transferId];
       const chunkManager = new SoundfontPlayerChunkManager();
+      const soundfontDb = new SoundfontPlayerManager();
 
       if (transfer) {
         try {
           console.log(`[Host] Assembling file for transferId: ${transferId}`);
+          get().onFileProgress?.({
+            transferId,
+            progress: 100,
+            fileName: transfer.fileName,
+            status: "ASSEMBLING",
+          });
 
           const allChunksInDB = await chunkManager.find(
             (item) => item.transferId === transferId
@@ -175,21 +186,17 @@ const setupHostConnectionHandlers = (
             type: "application/octet-stream",
           });
 
-          console.log(
-            `[Host] File ${transfer.fileName} received successfully! Size: ${fileBlob.size} bytes.`
-          );
-          get().onFileProgress?.({
-            transferId,
-            progress: 100,
-            fileName: transfer.fileName,
-            fileBlob,
-          });
+          const finalFile = new File([fileBlob], transfer.fileName);
 
-          set((state) => {
-            const newFileTransfers = { ...state.fileTransfers };
-            delete newFileTransfers[transferId];
-            return { fileTransfers: newFileTransfers };
-          });
+          console.log(
+            `[Host] File ${transfer.fileName} assembled. Size: ${fileBlob.size} bytes. Saving to DB...`
+          );
+
+          await soundfontDb.add({ file: finalFile });
+
+          console.log(
+            `[Host] File ${transfer.fileName} saved to main DB successfully!`
+          );
 
           console.log(
             `[Host] Cleaning up chunks for transferId: ${transferId} from IndexedDB...`
@@ -201,17 +208,30 @@ const setupHostConnectionHandlers = (
             }
           }
           console.log(`[Host] Cleanup complete for ${transferId}.`);
-        } catch (error) {
-          console.error(
-            `[Host] Failed to assemble or clean up file for ${transferId}`,
-            error
-          );
-          // ✅ CHANGED: ส่งข้อผิดพลาดกลับไปผ่าน Callback
+
+          set((state) => {
+            const newFileTransfers = { ...state.fileTransfers };
+            delete newFileTransfers[transferId];
+            return { fileTransfers: newFileTransfers };
+          });
+
           get().onFileProgress?.({
             transferId,
             progress: 100,
             fileName: transfer.fileName,
-            error: `ไม่สามารถรวมไฟล์ '${transfer.fileName}' ได้ ไฟล์อาจเสียหาย`,
+            status: "COMPLETE",
+          });
+        } catch (error) {
+          console.error(
+            `[Host] Failed to assemble or save file for ${transferId}`,
+            error
+          );
+          get().onFileProgress?.({
+            transferId,
+            progress: 100,
+            fileName: transfer.fileName,
+            status: "ERROR",
+            error: `ไม่สามารถรวมหรือบันทึกไฟล์ '${transfer.fileName}' ได้`,
           });
         }
       }
@@ -373,12 +393,11 @@ export interface PeerHostState {
   allowCalls?: boolean;
 
   fileTransfers: { [transferId: string]: FileTransfer };
-  // ✅ CHANGED: ปรับปรุง Signature ของ onFileProgress
   onFileProgress?: (payload: {
     transferId: string;
     progress: number;
     fileName: string;
-    fileBlob?: Blob;
+    status?: "PROCESSING" | "ASSEMBLING" | "COMPLETE" | "ERROR";
     error?: string;
   }) => void;
 
@@ -406,13 +425,12 @@ export interface PeerHostState {
     timeout?: number
   ) => Promise<T>;
 
-  // ✅ CHANGED: ปรับปรุง Signature ของ setOnFileProgress
   setOnFileProgress: (
     callback: (payload: {
       transferId: string;
       progress: number;
       fileName: string;
-      fileBlob?: Blob;
+      status?: "PROCESSING" | "ASSEMBLING" | "COMPLETE" | "ERROR";
       error?: string;
     }) => void
   ) => void;

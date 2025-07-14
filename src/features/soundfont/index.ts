@@ -4,6 +4,7 @@ import { BaseSynthEngine } from "../engine/types/synth.type";
 import { SoundfontBase } from "./base";
 import { SoundfontFileSystemManager } from "./modules/soundfont-file-system";
 import { SoundfontLocalSystemManager } from "./modules/soundfont-local-system";
+import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 
 export class SoundfontSystemManager {
   private manager: SoundfontBase | undefined = undefined;
@@ -62,15 +63,8 @@ export class SoundfontSystemManager {
     };
   }
 
-  async removeSoundfont(id: string) {
-    if (this.currentMode === "EXTREME_FILE_SYSTEM") {
-      this.manager?.deleteSoundfont(id);
-    } else {
-      console.warn(
-        "Cannot remove soundfont in the current mode:",
-        this.currentMode
-      );
-    }
+  async removeSoundfont(file: ISoundfontPlayer) {
+    await this.local?.deleteSoundfont(file);
   }
 
   reset() {
