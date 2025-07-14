@@ -5,26 +5,21 @@ import TableList from "@/components/common/table/table-list";
 import React, { FC, ReactNode, useEffect, useState } from "react";
 import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 import { SoundSystemMode } from "@/features/config/types/config.type";
-import { SoundfontPlayerManager } from "@/utils/indexedDB/db/player/table";
+import {
+  SoundfontPlayerChunkManager,
+  SoundfontPlayerManager,
+} from "@/utils/indexedDB/db/player/table";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FaFolder } from "react-icons/fa";
 import { FaCircleCheck } from "react-icons/fa6";
-import { ImFilePlay } from "react-icons/im";
 import { IoMdAddCircle, IoMdWifi } from "react-icons/io";
 import { TbMusicPlus } from "react-icons/tb";
-import {
-  MdNetworkCell,
-  MdNetworkLocked,
-  MdNetworkWifi,
-  MdOutlineNetworkWifi,
-  MdOutlineSettingsBackupRestore,
-} from "react-icons/md";
+import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 import { DEFAULT_SOUND_FONT, remoteHost } from "@/config/value";
 import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 import useConfigStore from "@/features/config/config-store";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import { useQRCode } from "next-qrcode";
-import { BiUpload } from "react-icons/bi";
 import { GrDocumentSound } from "react-icons/gr";
 
 interface SoundfontFolderProps extends IAlertCommon {
@@ -41,6 +36,7 @@ interface SoundfontFolderProps extends IAlertCommon {
 }
 
 const soundfontDb = new SoundfontPlayerManager();
+const soundfontChunk = new SoundfontPlayerChunkManager();
 
 const SoundfontUpload: FC<{
   setLoading: (isLoad: boolean) => void;
@@ -223,14 +219,10 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
   removeSF2Local,
   updateSoundFont,
   onClickDefault,
+  setAlert,
 }) => {
-  const {
-    initializePeer,
-    peers,
-    disconnect,
-    setOnFileProgress,
-    onFileProgress,
-  } = usePeerHostStore();
+  const { initializePeer, peers, disconnect, setOnFileProgress } =
+    usePeerHostStore();
 
   const [fileTransfersLoading, setFileTransfersLoading] =
     useState<boolean>(false);
@@ -264,28 +256,53 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
       setHostUrl(remoteHost);
     }
   }, [peers.SUPER]);
+
   useEffect(() => {
     if (setOnFileProgress) {
-      // อัปเดต Callback ให้รับ fileBlob (เป็น optional)
-      setOnFileProgress((transferId, progress, fileName, fileBlob) => {
+      setOnFileProgress((value) => {
         setDownloads((prevDownloads) => ({
           ...prevDownloads,
-          [transferId]: {
-            id: transferId,
-            fileName: fileName,
-            progress: progress,
+          [value.transferId]: {
+            id: value.transferId,
+            fileName: value.fileName,
+            progress: value.progress,
           },
         }));
 
-        if (progress === 100 && fileBlob) {
-          console.log(`File ${fileName} received. Saving to DB...`);
+        if (value.error) {
+          setAlert?.({
+            title: "ไม่สำเร็จ",
+            variant: "error",
+            description: `${value.error}`,
+          });
+        }
+        if (value.progress === 100 && value.fileBlob) {
+          console.log(`File ${value.fileName} received. Saving to DB...`);
 
           soundfontDb
             .add({
-              file: new File([fileBlob], fileName),
+              file: new File([value.fileBlob], value.fileName),
             })
-            .then((data) => {
+            .then(() => {
+              console.log(`File ${value.fileName} saved to DB successfully.`);
               getSoundFontList();
+
+              setTimeout(() => {
+                setDownloads((prev) => {
+                  const newDownloads = { ...prev };
+                  delete newDownloads[value.transferId];
+                  return newDownloads;
+                });
+
+                setAlert?.({
+                  title: "ส่งไฟล์สำเร็จ",
+                  variant: "success",
+                  description: `${value.fileName}`,
+                });
+              }, 5000);
+            })
+            .catch((err) => {
+              console.error(`Failed to save ${value.fileName} to DB.`, err);
             });
         }
       });
@@ -322,9 +339,9 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
                   className="w-full h-8 lg:h-10"
                   icon={
                     fileTransfersLoading ? (
-                      <AiOutlineLoading3Quarters className="animate-spin"></AiOutlineLoading3Quarters>
+                      <AiOutlineLoading3Quarters className="animate-spin" />
                     ) : (
-                      <IoMdWifi></IoMdWifi>
+                      <IoMdWifi />
                     )
                   }
                   iconPosition="right"

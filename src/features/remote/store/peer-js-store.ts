@@ -67,7 +67,7 @@ const setupHostConnectionHandlers = (
           },
         },
       }));
-      get().onFileProgress?.(transferId, 0, fileName);
+      get().onFileProgress?.({ transferId, progress: 0, fileName });
       return;
     }
 
@@ -90,27 +90,42 @@ const setupHostConnectionHandlers = (
 
           const newReceivedSize = transfer.receivedSize + chunk.byteLength;
           const newChunkCount = transfer.chunkCount + 1;
-          const progress = Math.round(
+          const newProgress = Math.round(
             (newReceivedSize / transfer.fileSize) * 100
           );
 
-          const updatedTransfer = {
-            ...transfer,
-            receivedSize: newReceivedSize,
-            chunkCount: newChunkCount,
-          };
+          if (newProgress !== transfer.progress) {
+            const updatedTransfer = {
+              ...transfer,
+              receivedSize: newReceivedSize,
+              chunkCount: newChunkCount,
+              progress: newProgress,
+            };
 
-          if (progress !== transfer.progress) {
-            updatedTransfer.progress = progress;
-            get().onFileProgress?.(transferId, progress, transfer.fileName);
+            get().onFileProgress?.({
+              transferId,
+              progress: newProgress,
+              fileName: transfer.fileName,
+            });
+
+            set((state) => ({
+              fileTransfers: {
+                ...state.fileTransfers,
+                [transferId]: updatedTransfer,
+              },
+            }));
+          } else {
+            set((state) => ({
+              fileTransfers: {
+                ...state.fileTransfers,
+                [transferId]: {
+                  ...state.fileTransfers[transferId],
+                  receivedSize: newReceivedSize,
+                  chunkCount: newChunkCount,
+                },
+              },
+            }));
           }
-
-          set((state) => ({
-            fileTransfers: {
-              ...state.fileTransfers,
-              [transferId]: updatedTransfer,
-            },
-          }));
 
           conn.send({
             type: "FILE_CHUNK_RECEIVED",
@@ -121,6 +136,13 @@ const setupHostConnectionHandlers = (
             `[Host] Failed to save chunk ${transfer.chunkCount} for ${transferId} to IndexedDB`,
             error
           );
+          // ✅ CHANGED: ส่งข้อผิดพลาดกลับไปผ่าน Callback
+          get().onFileProgress?.({
+            transferId: transfer.id,
+            fileName: transfer.fileName,
+            progress: transfer.progress,
+            error: `ไม่สามารถประมวลผลไฟล์ส่วนเล็กๆ ได้ กรุณาลองใหม่อีกครั้ง`,
+          });
         }
       } else {
         console.warn(
@@ -148,6 +170,7 @@ const setupHostConnectionHandlers = (
           );
 
           const fileDataParts = sortedChunks.map((chunk) => chunk.file.data);
+
           const fileBlob = new Blob(fileDataParts, {
             type: "application/octet-stream",
           });
@@ -155,7 +178,12 @@ const setupHostConnectionHandlers = (
           console.log(
             `[Host] File ${transfer.fileName} received successfully! Size: ${fileBlob.size} bytes.`
           );
-          get().onFileProgress?.(transferId, 100, transfer.fileName, fileBlob);
+          get().onFileProgress?.({
+            transferId,
+            progress: 100,
+            fileName: transfer.fileName,
+            fileBlob,
+          });
 
           set((state) => {
             const newFileTransfers = { ...state.fileTransfers };
@@ -178,6 +206,13 @@ const setupHostConnectionHandlers = (
             `[Host] Failed to assemble or clean up file for ${transferId}`,
             error
           );
+          // ✅ CHANGED: ส่งข้อผิดพลาดกลับไปผ่าน Callback
+          get().onFileProgress?.({
+            transferId,
+            progress: 100,
+            fileName: transfer.fileName,
+            error: `ไม่สามารถรวมไฟล์ '${transfer.fileName}' ได้ ไฟล์อาจเสียหาย`,
+          });
         }
       }
       return;
@@ -338,12 +373,14 @@ export interface PeerHostState {
   allowCalls?: boolean;
 
   fileTransfers: { [transferId: string]: FileTransfer };
-  onFileProgress?: (
-    transferId: string,
-    progress: number,
-    fileName: string,
-    fileBlob?: Blob
-  ) => void;
+  // ✅ CHANGED: ปรับปรุง Signature ของ onFileProgress
+  onFileProgress?: (payload: {
+    transferId: string;
+    progress: number;
+    fileName: string;
+    fileBlob?: Blob;
+    error?: string;
+  }) => void;
 
   setAllowCalls?: (isAllow: boolean) => void;
   initializePeer: (userType: UserType) => Promise<string>;
@@ -369,13 +406,15 @@ export interface PeerHostState {
     timeout?: number
   ) => Promise<T>;
 
+  // ✅ CHANGED: ปรับปรุง Signature ของ setOnFileProgress
   setOnFileProgress: (
-    callback: (
-      transferId: string,
-      progress: number,
-      fileName: string,
-      fileBlob?: Blob
-    ) => void
+    callback: (payload: {
+      transferId: string;
+      progress: number;
+      fileName: string;
+      fileBlob?: Blob;
+      error?: string;
+    }) => void
   ) => void;
 }
 
