@@ -26,6 +26,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
   const engine = useConfigStore(
     (state) => state.config.system?.engine || "jsSynth"
   );
+  const [soundTick, setSoundTick] = useState<boolean>(true);
 
   const requestMIDIAccess = async () => {
     if (navigator.requestMIDIAccess) {
@@ -48,13 +49,17 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
       const audioLoop = audioLoopRef.current;
 
       setPressed(true);
-      // audio.volume = 0.5;
-      // audioLoop.volume = 0.2;
-      // audio.play();
-      // audioLoop.play();
-      // audio.addEventListener("ended", () => {
+      if (soundTick) {
+        audio.volume = 0.5;
+        audioLoop.volume = 0.2;
+        audio.play();
+        audioLoop.play();
+        audio.addEventListener("ended", () => {
+          setEnded(true);
+        });
+      } else {
         setEnded(true);
-      // });
+      }
     }
   };
 
@@ -131,6 +136,15 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                   </div>
                   <div className="p-4 rounded-md bg-white shadow-sm">
                     <div className="flex flex-col gap-2">
+                      <div className="space-y-2">
+                        <Label className="text-black">Allow Sound</Label>
+                        <ToggleCheckBox
+                          defaultChecked={soundTick}
+                          onChange={setSoundTick}
+                          label="เปิดเสียง (กรณีไม่มีเสียงออก)"
+                        ></ToggleCheckBox>
+                      </div>
+
                       <div className="space-y-2">
                         <Label className="text-black">Equalizer</Label>
                         <ToggleCheckBox

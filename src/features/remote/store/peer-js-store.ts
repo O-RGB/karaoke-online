@@ -35,6 +35,15 @@ interface RequestContext {
   payload: any;
 }
 
+interface FileTransfer {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  receivedSize: number;
+  chunks: any[];
+  progress: number;
+}
+
 const setupHostConnectionHandlers = (
   conn: DataConnection,
   userType: UserType,
@@ -46,6 +55,67 @@ const setupHostConnectionHandlers = (
   get: () => PeerHostState
 ) => {
   conn.on("data", async (data: any) => {
+    if (data?.type === "FILE_TRANSFER_START") {
+      const { transferId, fileName, fileSize } = data.payload;
+      set((state) => ({
+        fileTransfers: {
+          ...state.fileTransfers,
+          [transferId]: {
+            id: transferId,
+            fileName,
+            fileSize,
+            receivedSize: 0,
+            chunks: [],
+            progress: 0,
+          },
+        },
+      }));
+
+      get().onFileProgress?.(transferId, 0, fileName);
+      return;
+    }
+
+    if (data?.type === "FILE_TRANSFER_CHUNK") {
+      const { transferId, chunk } = data.payload;
+      const transfer = get().fileTransfers[transferId];
+      if (transfer) {
+        transfer.chunks.push(chunk);
+        transfer.receivedSize += chunk.byteLength;
+        const progress = Math.round(
+          (transfer.receivedSize / transfer.fileSize) * 100
+        );
+        if (progress !== transfer.progress) {
+          transfer.progress = progress;
+          set((state) => ({
+            fileTransfers: { ...state.fileTransfers, [transferId]: transfer },
+          }));
+
+          get().onFileProgress?.(transferId, progress, transfer.fileName);
+        }
+      }
+      return;
+    }
+
+    if (data?.type === "FILE_TRANSFER_END") {
+      const { transferId } = data.payload;
+      const transfer = get().fileTransfers[transferId];
+      if (transfer) {
+        const fileBlob = new Blob(transfer.chunks, {
+          type: "application/octet-stream",
+        });
+        console.log(`File ${transfer.fileName} received successfully!`);
+
+        get().onFileProgress?.(transferId, 100, transfer.fileName, fileBlob);
+
+        set((state) => {
+          const newFileTransfers = { ...state.fileTransfers };
+          delete newFileTransfers[transferId];
+          return { fileTransfers: newFileTransfers };
+        });
+      }
+      return;
+    }
+
     if (data?.type === "RESPONSE" && data.requestId) {
       const pending = get().pendingRequests.get(data.requestId);
       if (pending) {
@@ -111,12 +181,7 @@ const setupHostConnectionHandlers = (
   });
 
   conn.on("close", () => {
-    // ✨ FIX: สั่งปิด Call ที่เกี่ยวข้องกับ client คนนี้ทันที
-    // การทำแบบนี้จะไป trigger 'call.on("close")' ให้ทำงาน
-    // เพื่อลบข้อมูลใน calls, remoteStreams, และ visibleClientIds
     get().endCall(conn.peer);
-
-    // จัดการลบข้อมูลในส่วนของ DataConnection ตามเดิม
     set((state) => {
       const newConnections = { ...state.connections };
       newConnections[userType] = newConnections[userType].filter(
@@ -126,6 +191,11 @@ const setupHostConnectionHandlers = (
       delete newLastSeen[conn.peer];
       const newClientNicknames = { ...state.clientNicknames };
       delete newClientNicknames[conn.peer];
+
+      const newFileTransfers = { ...state.fileTransfers };
+      let changed = false;
+      Object.values(newFileTransfers).forEach((transfer) => {});
+
       if (
         Object.values(newConnections).flat().length === 0 &&
         Object.keys(state.calls).length === 0
@@ -136,6 +206,7 @@ const setupHostConnectionHandlers = (
         connections: newConnections,
         lastSeen: newLastSeen,
         clientNicknames: newClientNicknames,
+        fileTransfers: newFileTransfers,
       };
     });
   });
@@ -204,6 +275,14 @@ export interface PeerHostState {
 
   allowCalls?: boolean;
 
+  fileTransfers: { [transferId: string]: FileTransfer };
+  onFileProgress?: (
+    transferId: string,
+    progress: number,
+    fileName: string,
+    fileBlob?: Blob
+  ) => void;
+
   setAllowCalls?: (isAllow: boolean) => void;
   initializePeer: (userType: UserType) => Promise<string>;
   sendMessage: (info: RemoteSendMessage) => Promise<void>;
@@ -227,6 +306,15 @@ export interface PeerHostState {
     payload?: any,
     timeout?: number
   ) => Promise<T>;
+
+  setOnFileProgress: (
+    callback: (
+      transferId: string,
+      progress: number,
+      fileName: string,
+      fileBlob?: Blob
+    ) => void
+  ) => void;
 }
 
 const HEARTBEAT_INTERVAL = 3000;
@@ -244,6 +332,9 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
   visibleClientIds: [],
   pendingRequests: new Map(),
   routes: {},
+  fileTransfers: {},
+
+  setOnFileProgress: (callback) => set({ onFileProgress: callback }),
 
   setAllowCalls: (isAllow: boolean) => set({ allowCalls: isAllow }),
   startHeartbeatChecks: () => {
@@ -281,7 +372,8 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
       if (existingPeer && !existingPeer.destroyed) {
         return resolve(existingPeer.id);
       }
-      const newPeer = new Peer();
+
+      const newPeer = new Peer({});
       newPeer.on("open", (id) => {
         set((state) => ({ peers: { ...state.peers, [userType]: newPeer } }));
         newPeer.on("connection", (conn) => {
@@ -392,6 +484,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
         calls: {},
         visibleClientIds: [],
         pendingRequests: new Map(),
+        fileTransfers: {},
       });
       resolve();
     });
@@ -442,11 +535,14 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
       return new Promise<T>((resolve, reject) => {
         const allConnections = Object.values(connections).flat();
 
+        if (allConnections.length === 0) {
+          return reject(new Error("No clients connected."));
+        }
+
         let hasSettled = false;
         const requestIds: string[] = [];
         let timeoutCount = 0;
 
-        // ฟังก์ชันสำหรับเคลียร์ pending requests และ timeouts ทั้งหมด
         const cleanup = () => {
           requestIds.forEach((id) => {
             const pending = pendingRequests.get(id);
@@ -464,7 +560,6 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
           const timeoutId = setTimeout(() => {
             timeoutCount++;
             pendingRequests.delete(requestId);
-            // ถ้า client ทุกคน timeout และยังไม่มีการตอบกลับ
             if (!hasSettled && timeoutCount === allConnections.length) {
               hasSettled = true;
               reject(
@@ -477,16 +572,13 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
 
           pendingRequests.set(requestId, {
             resolve: (value: any) => {
-              // ถ้ายังไม่มีการตอบกลับ ให้ resolve ด้วยค่าแรกที่ได้รับ
               if (!hasSettled) {
                 hasSettled = true;
-                cleanup(); // เคลียร์ request ที่เหลือทั้งหมด
+                cleanup();
                 resolve(value);
               }
             },
             reject: (reason?: any) => {
-              // เราจะเมินการ reject ของ client แต่ละคนไปก่อน
-              // และจะรอจนกว่าจะมีคนตอบกลับสำเร็จ หรือ timeout ทั้งหมด
               console.error(
                 `Request to client ${conn.peer} was rejected:`,
                 reason
@@ -504,7 +596,6 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
       });
     }
 
-    // กรณีระบุ clientId: โค้ดเดิมสำหรับส่งหา client คนเดียว
     return new Promise<T>((resolve, reject) => {
       const conn = Object.values(connections)
         .flat()
