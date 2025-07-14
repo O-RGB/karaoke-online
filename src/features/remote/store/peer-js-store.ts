@@ -4,6 +4,8 @@ import {
   RemoteReceivedMessages,
   RemoteSendMessage,
 } from "../types/remote.type";
+import { SoundfontPlayerChunkManager } from "@/utils/indexedDB/db/player/table";
+import { ISoundfontChunk } from "@/utils/indexedDB/db/player/types";
 
 export type UserType = "NORMAL" | "SUPER";
 
@@ -34,8 +36,8 @@ interface FileTransfer {
   fileName: string;
   fileSize: number;
   receivedSize: number;
-  chunks: any[];
   progress: number;
+  chunkCount: number;
 }
 
 const setupHostConnectionHandlers = (
@@ -51,7 +53,7 @@ const setupHostConnectionHandlers = (
   conn.on("data", async (data: any) => {
     if (data?.type === "FILE_TRANSFER_START") {
       const { transferId, fileName, fileSize } = data.payload;
-      console.log(`Receiving file: ${fileName} (${fileSize} bytes)`);
+      console.log(`[Host] Receiving file: ${fileName} (${fileSize} bytes)`);
       set((state) => ({
         fileTransfers: {
           ...state.fileTransfers,
@@ -60,8 +62,8 @@ const setupHostConnectionHandlers = (
             fileName,
             fileSize,
             receivedSize: 0,
-            chunks: [],
             progress: 0,
+            chunkCount: 0,
           },
         },
       }));
@@ -72,27 +74,58 @@ const setupHostConnectionHandlers = (
     if (data?.type === "FILE_TRANSFER_CHUNK") {
       const { transferId, chunk } = data.payload;
       const transfer = get().fileTransfers[transferId];
+      const chunkManager = new SoundfontPlayerChunkManager();
+
       if (transfer) {
-        transfer.chunks.push(chunk);
-        transfer.receivedSize += chunk.byteLength;
-        const progress = Math.round(
-          (transfer.receivedSize / transfer.fileSize) * 100
-        );
+        try {
+          const chunkData: Partial<ISoundfontChunk> = {
+            transferId: transferId,
+            file: {
+              chunkIndex: transfer.chunkCount,
+              data: chunk,
+            },
+          };
 
-        if (progress !== transfer.progress) {
-          transfer.progress = progress;
+          await chunkManager.add(chunkData as Partial<ISoundfontChunk>);
+
+          const newReceivedSize = transfer.receivedSize + chunk.byteLength;
+          const newChunkCount = transfer.chunkCount + 1;
+          const progress = Math.round(
+            (newReceivedSize / transfer.fileSize) * 100
+          );
+
+          const updatedTransfer = {
+            ...transfer,
+            receivedSize: newReceivedSize,
+            chunkCount: newChunkCount,
+          };
+
+          if (progress !== transfer.progress) {
+            updatedTransfer.progress = progress;
+            get().onFileProgress?.(transferId, progress, transfer.fileName);
+          }
+
           set((state) => ({
-            fileTransfers: { ...state.fileTransfers, [transferId]: transfer },
+            fileTransfers: {
+              ...state.fileTransfers,
+              [transferId]: updatedTransfer,
+            },
           }));
-          get().onFileProgress?.(transferId, progress, transfer.fileName);
-        }
 
-        conn.send({
-          type: "FILE_CHUNK_RECEIVED",
-          payload: { transferId },
-        });
+          conn.send({
+            type: "FILE_CHUNK_RECEIVED",
+            payload: { transferId },
+          });
+        } catch (error) {
+          console.error(
+            `[Host] Failed to save chunk ${transfer.chunkCount} for ${transferId} to IndexedDB`,
+            error
+          );
+        }
       } else {
-        console.warn(`Received chunk for unknown transferId: ${transferId}`);
+        console.warn(
+          `[Host] Received chunk for unknown transferId: ${transferId}`
+        );
       }
       return;
     }
@@ -100,21 +133,52 @@ const setupHostConnectionHandlers = (
     if (data?.type === "FILE_TRANSFER_END") {
       const { transferId } = data.payload;
       const transfer = get().fileTransfers[transferId];
+      const chunkManager = new SoundfontPlayerChunkManager();
+
       if (transfer) {
-        const fileBlob = new Blob(transfer.chunks, {
-          type: "application/octet-stream",
-        });
-        console.log(
-          `File ${transfer.fileName} received successfully! Size: ${fileBlob.size} bytes.`
-        );
+        try {
+          console.log(`[Host] Assembling file for transferId: ${transferId}`);
 
-        get().onFileProgress?.(transferId, 100, transfer.fileName, fileBlob);
+          const allChunksInDB = await chunkManager.find(
+            (item) => item.transferId === transferId
+          );
 
-        set((state) => {
-          const newFileTransfers = { ...state.fileTransfers };
-          delete newFileTransfers[transferId];
-          return { fileTransfers: newFileTransfers };
-        });
+          const sortedChunks = allChunksInDB.sort(
+            (a, b) => a.file.chunkIndex - b.file.chunkIndex
+          );
+
+          const fileDataParts = sortedChunks.map((chunk) => chunk.file.data);
+          const fileBlob = new Blob(fileDataParts, {
+            type: "application/octet-stream",
+          });
+
+          console.log(
+            `[Host] File ${transfer.fileName} received successfully! Size: ${fileBlob.size} bytes.`
+          );
+          get().onFileProgress?.(transferId, 100, transfer.fileName, fileBlob);
+
+          set((state) => {
+            const newFileTransfers = { ...state.fileTransfers };
+            delete newFileTransfers[transferId];
+            return { fileTransfers: newFileTransfers };
+          });
+
+          console.log(
+            `[Host] Cleaning up chunks for transferId: ${transferId} from IndexedDB...`
+          );
+
+          for (const chunk of sortedChunks) {
+            if (chunk.id) {
+              await chunkManager.delete(chunk.id);
+            }
+          }
+          console.log(`[Host] Cleanup complete for ${transferId}.`);
+        } catch (error) {
+          console.error(
+            `[Host] Failed to assemble or clean up file for ${transferId}`,
+            error
+          );
+        }
       }
       return;
     }

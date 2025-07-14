@@ -77,7 +77,7 @@ export class SoundfontSystemManager {
     this.selected = undefined;
     this.selectedFrom = "DATABASE_FILE_SYSTEM";
     this.engine?.loadDefaultSoundFont();
-    return DEFAULT_SOUND_FONT
+    return DEFAULT_SOUND_FONT;
   }
 
   async setSoundfont(idOrFilename: string, form?: SoundSystemMode) {
@@ -89,7 +89,11 @@ export class SoundfontSystemManager {
       this.currentMode === "EXTREME_FILE_SYSTEM"
     ) {
       selected = await this.manager?.loadSoundfont(idOrFilename);
-    } else if (targetMode === "DATABASE_FILE_SYSTEM") {
+    } else if (
+      targetMode === "DATABASE_FILE_SYSTEM" ||
+      "PYTHON_FILE_ENCODE" ||
+      "PYTHON_API_SYSTEM"
+    ) {
       selected = await this.local?.loadSoundfont(idOrFilename);
     } else {
       console.error(
