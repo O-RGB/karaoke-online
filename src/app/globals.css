@@ -49,3 +49,15 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
 }
+
+/* --- เพิ่มเข้ามา --- */
+@layer components {
+  .karaoke-layout {
+    display: grid;
+    grid-template-rows: auto 1fr auto; /* แถวบน: สูงตามเนื้อหา, กลาง: ยืดเต็มที่, ล่าง: สูงตามเนื้อหา */
+    grid-template-columns: 1fr;
+    height: 100vh; /* สูงเต็มหน้าจอ */
+    width: 100vw;
+    overflow: hidden; /* ป้องกันการเลื่อนหน้าจอหลัก */
+  }
+}

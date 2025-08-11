@@ -90,6 +90,7 @@ export interface WidgetsConfig {
   mix?: WidgetsSettingConfig;
   tempo?: WidgetsSettingConfig;
   clock?: WidgetsSettingConfig;
+  player?: WidgetsSettingConfig;
 }
 
 export interface WidgetsSettingConfig {

@@ -8,11 +8,7 @@ import Tags from "../../display/tags";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import useKeyboardStore from "@/features/keyboard-state";
 import { useKeyboardEvents } from "@/hooks/keyboard-hook";
-import {
-  ITrackData,
-  SoundSubType,
-  SoundType,
-} from "@/features/songs/types/songs.type";
+import { ITrackData, SoundSubType } from "@/features/songs/types/songs.type";
 import { SourceTag } from "@/components/tools/search-song/source-tag";
 
 interface KaraokeSearchInputProps {
@@ -59,7 +55,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
 
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
 
-  const { arrowLeft, arrowRight, onEnter, queueing, searching, openSearchBox } =
+  const { searching, onEnter, arrowLeft, arrowRight, openSearchBox } =
     useKeyboardEvents();
   const resetSearchingTimeout = useKeyboardStore(
     (state) => state.resetSearchingTimeout
@@ -150,14 +146,10 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
     handlePrevSong();
   }, [arrowLeft]);
 
-  const positionClass = hideMixer ? "top-32" : "top-64";
-
-  if (searching.length === 0 && !openSearchBox) return;
+  if (searching.length === 0 && !openSearchBox) return null;
 
   return (
-    <div
-      className={`fixed hidden lg:block text-white w-full px-5 duration-300 ${positionClass}`}
-    >
+    <div className="hidden lg:block text-white w-full duration-300">
       {/* Navigation controls */}
       <div className="pb-2 flex gap-2">
         <Button
@@ -183,7 +175,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
         </Button>
 
         <Button
-          disabled={!hasResults || queueing}
+          disabled={!hasResults}
           onClick={handlePlaySong}
           icon={<MdPlayCircleFilled className="text-lg" />}
           iconPosition="right"

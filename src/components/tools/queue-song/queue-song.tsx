@@ -286,53 +286,55 @@ const QueueSong: React.FC<QueueSongProps> = ({
       onClick={() => {
         resetQueueingTimeout(0);
       }}
-      className={`z-[99] pt-[58px] h-screen bg-black/30 fixed text-white w-full px-5 duration-300`}
+      className={`fixed top-0 h-screen z-[99] bg-black/30  text-white w-full px-4 duration-300`}
     >
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          resetQueueingTimeout(5000);
-        }}
-        className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2 overflow-x-auto"
-      >
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
+      <div className="pt-4 lg:pt-[14vw]">
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            resetQueueingTimeout(5000);
+          }}
+          className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2 overflow-x-auto"
         >
-          <table className="w-full min-w-[300px]">
-            <thead>
-              <tr>
-                <th className="text-start w-[10%] p-2"></th>
-                <th className="text-start w-[1%] p-2">ที่</th>
-                <th className="text-start w-full p-2">รายละเอียด</th>
-                <th className="text-start w-[10%] p-2">โดย</th>
-                <th className="text-start w-[10%] p-2">ประเภท</th>
-              </tr>
-            </thead>
-            <tbody className="relative">
-              <SortableContext
-                items={queue.map((item) => createTracklistId(item))}
-                strategy={verticalListSortingStrategy}
-              >
-                {queue.map((item, index) => (
-                  <SortableTableRow
-                    key={`queue-${createTracklistId(item)}-${index}`}
-                    item={item}
-                    index={index}
-                    isFirst={index == 0}
-                    isLast={index === queue.length - 1}
-                    lockFirst={countDown < stopTouchMusicPlaying}
-                    countDown={countDown}
-                    onKeySelected={selected === index}
-                    onDelete={onDelete}
-                  />
-                ))}
-              </SortableContext>
-            </tbody>
-          </table>
-        </DndContext>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <table className="w-full min-w-[300px]">
+              <thead>
+                <tr>
+                  <th className="text-start w-[10%] p-2"></th>
+                  <th className="text-start w-[1%] p-2">ที่</th>
+                  <th className="text-start w-full p-2">รายละเอียด</th>
+                  <th className="text-start w-[10%] p-2">โดย</th>
+                  <th className="text-start w-[10%] p-2">ประเภท</th>
+                </tr>
+              </thead>
+              <tbody className="relative">
+                <SortableContext
+                  items={queue.map((item) => createTracklistId(item))}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {queue.map((item, index) => (
+                    <SortableTableRow
+                      key={`queue-${createTracklistId(item)}-${index}`}
+                      item={item}
+                      index={index}
+                      isFirst={index == 0}
+                      isLast={index === queue.length - 1}
+                      lockFirst={countDown < stopTouchMusicPlaying}
+                      countDown={countDown}
+                      onKeySelected={selected === index}
+                      onDelete={onDelete}
+                    />
+                  ))}
+                </SortableContext>
+              </tbody>
+            </table>
+          </DndContext>
+        </div>
       </div>
     </div>
   );

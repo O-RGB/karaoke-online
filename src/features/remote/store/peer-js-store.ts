@@ -706,7 +706,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
         const allConnections = Object.values(connections).flat();
 
         if (allConnections.length === 0) {
-          return reject(new Error("No clients connected."));
+          return reject();
         }
 
         let hasSettled = false;

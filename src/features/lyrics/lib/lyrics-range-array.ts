@@ -13,77 +13,90 @@ export interface LyricsRangeProps<T> {
 
 export class LyricsRangeArray<T> {
   ranges: LyricsRangeProps<T>[] = [];
-  private cache = new Map<number, LyricsRangeValueProps<T> | undefined>();
 
   push(key: LyricsKeyProps, value: T) {
     const tag = this.calculateTag();
-    this.ranges.push({ key, value: { value, tag } });
-    this.ranges.sort((a, b) => a.key[0] - b.key[0]);
-    this.cache.clear();
+    const newRange = { key, value: { value, tag } };
+
+    let low = 0;
+    let high = this.ranges.length;
+    while (low < high) {
+      const mid = Math.floor((low + high) / 2);
+      if (this.ranges[mid].key[0] < key[0]) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+
+    this.ranges.splice(low, 0, newRange);
   }
 
   remove(key: LyricsKeyProps) {
     this.ranges = this.ranges.filter(
       (range) => !(range.key[0] === key[0] && range.key[1] === key[1])
     );
-    this.cache.clear();
   }
 
   private calculateTag(): LyricsPosition {
-    return this.ranges.length % 2 === 0 ? "top" : "bottom";
+    if (this.ranges.length === 0) return "top";
+    const lastTag = this.ranges[this.ranges.length - 1].value.tag;
+    return lastTag === "top" ? "bottom" : "top";
   }
+
   search(
-    value: number
+    tick: number
   ): { lyrics: LyricsRangeValueProps<T>; index: number } | undefined {
-    if (this.cache.has(value)) {
-      const cachedValue = this.cache.get(value);
-      if (cachedValue) {
-        const index = this.ranges.findIndex((r) => r.value === cachedValue);
-        return index !== -1 ? { lyrics: cachedValue, index } : undefined;
-      }
+    if (this.ranges.length === 0) {
       return undefined;
     }
 
-    let left = 0,
-      right = this.ranges.length - 1;
-    let lastValid: LyricsRangeValueProps<T> | undefined = undefined;
-    let lastIndex: number | undefined = undefined;
+    let left = 0;
+    let right = this.ranges.length - 1;
+    let bestMatchIndex = -1;
 
     while (left <= right) {
-      const mid = Math.floor((left + right) / 2);
+      const mid = Math.floor(left + (right - left) / 2);
       const [min, max] = this.ranges[mid].key;
 
-      if (value >= min && value <= max) {
-        this.cache.set(value, this.ranges[mid].value);
+      if (tick >= min && tick <= max) {
         return { lyrics: this.ranges[mid].value, index: mid };
       }
-      if (value < min) right = mid - 1;
-      else {
-        lastValid = this.ranges[mid].value;
-        lastIndex = mid;
+
+      if (min > tick) {
+        right = mid - 1;
+      } else {
+        bestMatchIndex = mid;
         left = mid + 1;
       }
     }
 
-    this.cache.set(value, lastValid);
-    return lastValid !== undefined && lastIndex !== undefined
-      ? { lyrics: lastValid, index: lastIndex }
-      : undefined;
-  }
-
-  getNext(value: number): LyricsRangeValueProps<T> | undefined {
-    let index = this.ranges.findIndex(
-      ({ key }) => value >= key[0] && value <= key[1]
-    );
-
-    if (index === -1) {
-      index = this.ranges.findIndex(({ key }) => value < key[0]);
-      if (index === -1) return undefined;
+    if (bestMatchIndex !== -1) {
+      return {
+        lyrics: this.ranges[bestMatchIndex].value,
+        index: bestMatchIndex,
+      };
     }
 
-    const range = this.ranges[index + 1];
-    if (!range) return undefined;
-    return this.ranges[index + 1]?.value;
+    return undefined;
+  }
+
+  getNext(tick: number): LyricsRangeValueProps<T> | undefined {
+    const result = this.search(tick);
+
+    if (!result) {
+      if (this.ranges.length > 0 && tick < this.ranges[0].key[0]) {
+        return this.ranges[0].value;
+      }
+      return undefined;
+    }
+
+    const nextIndex = result.index + 1;
+    if (nextIndex < this.ranges.length) {
+      return this.ranges[nextIndex].value;
+    }
+
+    return undefined;
   }
 
   getByIndex(index: number): LyricsRangeValueProps<T> | undefined {

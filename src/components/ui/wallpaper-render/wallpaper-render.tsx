@@ -28,13 +28,14 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
 
   const wallpaperDisplayManager = new WallpaperDisplayManager();
   const wId = useConfigStore((state) => state.config.themes?.wallpaperId);
+  const player = useConfigStore((state) => state.config.widgets?.player);
   const enableCamera = useConfigStore(
     (state) => state.config.themes?.wallpaperCamera
   );
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const cameraVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null); // Ref สำหรับวิดีโอจาก Peer
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [isVideo, setIsVideo] = useState<boolean>(false);
@@ -204,7 +205,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
       <div
         style={{
           position: "fixed",
-          bottom: 50,
+          bottom: player?.show ? 50 : 10,
           right: 10,
           zIndex: -10,
           opacity: 0.7,
@@ -216,7 +217,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
       <div
         style={{
           position: "fixed",
-          bottom: 65,
+          bottom: player?.show ? 50 : 10,
           right: 10,
           zIndex: -10,
           opacity: 0.7,

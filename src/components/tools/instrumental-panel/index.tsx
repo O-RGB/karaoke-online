@@ -11,19 +11,24 @@ import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
 import InstrumentalSetting from "@/components/modal/sound-setting/tabs/instrumental/instrumental-setting";
 
-interface InstrumentalPanelProps {}
+interface InstrumentalPanelProps {
+  className?: string;
+}
 
-const InstrumentalPanel: React.FC<InstrumentalPanelProps> = ({}) => {
+const InstrumentalPanel: React.FC<InstrumentalPanelProps> = ({ className }) => {
   const instrumental = useSynthesizerEngine(
     (state) => state.engine?.instrumental
   );
 
   if (!instrumental) return;
   return (
-    <div className="grid grid-cols-10 w-full gap-1.5 lg:w-[620px]">
+    <div className={`${className}`}>
       {INSTRUMENT_TYPE_BY_INDEX.map((data, key) => {
         return (
-          <div key={`instrumental-item-${key}-${data}`} className="relative">
+          <div
+            key={`instrumental-item-${key}-${data}`}
+            className="relative w-full h-full"
+          >
             <Menu
               transition
               boundingBoxPadding="10 10 10 10"
@@ -31,7 +36,9 @@ const InstrumentalPanel: React.FC<InstrumentalPanelProps> = ({}) => {
                 return (
                   <MenuButton>
                     <Button
-                      padding="p-1 lg:p-3"
+                      className="w-full h-full"
+                      // className="!w-10 !h-10"
+                      padding="p-1"
                       blur
                       icon={
                         <img

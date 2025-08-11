@@ -421,19 +421,42 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   async stopRecording(): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!this.mediaRecorder || !this.isRecording) {
-        console.log("Not currently recording.");
-        return reject("Not currently recording.");
+        console.warn("stopRecording called but not in a recording state.");
+        return reject(new Error("Recording is not active."));
       }
 
+      // Event listener for when recording stops successfully
       this.mediaRecorder.onstop = () => {
+        // Check if any data was actually recorded
+        if (this.recordedChunks.length === 0) {
+          console.warn(
+            "Recording stopped, but no audio data was captured. The audio stream might be silent."
+          );
+          this.cleanupRecording();
+          return reject(new Error("No audio data was recorded."));
+        }
+
         const blob = new Blob(this.recordedChunks, { type: "audio/webm" });
         const audioUrl = URL.createObjectURL(blob);
 
-        console.log(audioUrl);
+        console.log(`Recording finished. URL: ${audioUrl}, Size: ${blob.size}`);
         this.cleanupRecording();
         resolve(audioUrl);
       };
 
+      // Event listener for any errors that occur during the recording process
+      this.mediaRecorder.onerror = (event) => {
+        console.error("MediaRecorder error:", event);
+        this.cleanupRecording();
+        reject(
+          new Error(
+            `An error occurred during recording: ${(event as any).error.name}`
+          )
+        );
+      };
+
+      // Stop the recorder
+      console.log("Calling mediaRecorder.stop()...");
       this.mediaRecorder.stop();
     });
   }

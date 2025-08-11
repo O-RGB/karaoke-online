@@ -80,9 +80,9 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   const nodes = engine.nodes;
   return (
     <div
-      className={`fixed left-0 px-5 flex flex-col gap-1.5 ${
+      className={`flex flex-col gap-1.5 ${
         orientation === "landscape"
-          ? " top-[18px] w-70"
+          ? " top-[18px] w-[70%]"
           : " top-[58px] lg:top-6 w-full"
       }`}
     >
@@ -140,7 +140,13 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
           </div>
         </div>
       )}
-      {showInst?.show && <InstrumentalPanel></InstrumentalPanel>}
+      {showInst?.show && (
+        <InstrumentalPanel
+          className={` ${
+            orientation === "landscape" ? "flex" : "w-full grid grid-cols-10"
+          } gap-1.5 lg:w-[620px]`}
+        ></InstrumentalPanel>
+      )}
       {engine && (
         <VolumeOptions
           onPitchChange={onPitchChange}

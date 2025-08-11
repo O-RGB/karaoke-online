@@ -9,43 +9,71 @@ interface OrientationState {
   windowsWidth?: number;
   setOrientation: (newOrientation: Orientation) => void;
   setIsMobile: (isMobile: boolean) => void;
-  checkIsMobile: () => void;
-  handleResize: () => void;
-  initializeOrientationListeners: () => void;
+  detectDeviceType: () => void;
+  detectOrientation: () => void;
+  initializeOrientationListeners: () => () => void;
 }
 
 const useOrientationStore = create<OrientationState>((set, get) => ({
   orientation: null,
   isMobile: false,
   windowsWidth: 0,
+
   setOrientation: (newOrientation) => set({ orientation: newOrientation }),
   setIsMobile: (isMobile) => set({ isMobile }),
-  checkIsMobile: () => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const mobileDevices =
-      /iphone|ipad|ipod|android|blackberry|iemobile|opera mini|mobile/;
-    set({ isMobile: mobileDevices.test(userAgent) });
+
+  detectDeviceType: () => {
+    const mobileUA =
+      /iphone|ipad|ipod|android|blackberry|iemobile|opera mini|mobile/i;
+    const isMobileUA = mobileUA.test(navigator.userAgent);
+
+    // เพิ่มเงื่อนไข max-width เผื่อ userAgent หลอก
+    const isSmallScreen = window.matchMedia("(max-width: 1024px)").matches;
+
+    set({ isMobile: isMobileUA || isSmallScreen });
   },
-  handleResize: () => {
-    const { isMobile } = get();
-    if (isMobile) {
-      const newOrientation =
-        window.innerWidth > window.innerHeight ? "landscape" : "portrait";
-      set({ orientation: newOrientation, windowsWidth: window.innerWidth });
-      if (newOrientation === "landscape") {
-        useMixerStoreNew.getState().setHideMixer(true);
-      }
+
+  detectOrientation: () => {
+    let newOrientation: Orientation;
+
+    if (window.matchMedia?.("(orientation: portrait)").matches) {
+      newOrientation = "portrait";
+    } else if (window.matchMedia?.("(orientation: landscape)").matches) {
+      newOrientation = "landscape";
     } else {
-      set({ orientation: null });
+      // fallback
+      newOrientation =
+        window.innerWidth > window.innerHeight ? "landscape" : "portrait";
+    }
+
+    set({
+      orientation: newOrientation,
+      windowsWidth: window.innerWidth,
+    });
+
+    // ถ้าเป็น mobile + landscape ให้ซ่อน mixer
+    if (get().isMobile && newOrientation === "landscape") {
+      useMixerStoreNew.getState().setHideMixer(true);
     }
   },
+
   initializeOrientationListeners: () => {
-    const { checkIsMobile, handleResize } = get();
-    checkIsMobile();
-    handleResize();
-    window.addEventListener("resize", handleResize);
+    const { detectDeviceType, detectOrientation } = get();
+
+    detectDeviceType();
+    detectOrientation();
+
+    const handleChange = () => {
+      detectDeviceType();
+      detectOrientation();
+    };
+
+    window.addEventListener("resize", handleChange);
+    window.addEventListener("orientationchange", handleChange);
+
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleChange);
+      window.removeEventListener("orientationchange", handleChange);
     };
   },
 }));

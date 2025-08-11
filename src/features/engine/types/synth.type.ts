@@ -7,6 +7,7 @@ import { InstrumentalNode } from "../modules/instrumentals/instrumental";
 import { BassConfig } from "../modules/instrumentals/config";
 import { GlobalEqualizer } from "../modules/equalizer/global-equalizer";
 import { SoundSystemMode } from "@/features/config/types/config.type";
+
 export type TimingModeType = "Tick" | "Time";
 export interface BaseSynthEngine {
   time: TimingModeType;

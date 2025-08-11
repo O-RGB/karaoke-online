@@ -27,26 +27,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
     (state) => state.resetQueueingTimeout
   );
 
-  const handleAskClientForData = async (clientId: string) => {
-    try {
-      const response = await sendMessageWithResponse(
-        clientId,
-        { command: "GET_CLIENT_TIME" },
-        5000
-      );
-      console.log(`Received response from ${clientId}:`, response);
-      alert(`Client ${clientId}'s time is: ${response.clientTime}`);
-    } catch (error) {
-      console.error(`Failed to get data from client ${clientId}:`, error);
-      alert(`Error: ${error}`);
-    }
-  };
-
-  const normalClients = usePeerHostStore((s) => s.connections.NORMAL);
-
   const queueing = useKeyboardStore((state) => state.queueing);
-  const searching = useKeyboardStore((state) => state.searching);
-
   const [fullUi, setFullUi] = useState<boolean>(false);
 
   async function onSearch<T = any>(value: string) {
@@ -82,7 +63,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
       ></KaraokeSearchInput>
 
       <div
-        className={`fixed z-50 px-5 block lg:hidden ${
+        className={`fixed z-50 px-4 block lg:hidden ${
           orientation === "landscape"
             ? `right-0 top-4 lg:top-4 ${fullUi ? "w-full" : "w-56"}`
             : "left-0 top-4 lg:top-4 w-full"

@@ -45,6 +45,15 @@ export class JsSynthEngine implements BaseSynthEngine {
 
   public bassConfig: BassConfig | undefined = undefined;
 
+  // --- 🎤 Properties สำหรับการบันทึกเสียง ---
+  public isRecording: boolean = false;
+  private mediaRecorder: MediaRecorder | null = null;
+  private recordedChunks: Blob[] = [];
+  private micSource: MediaStreamAudioSourceNode | null = null;
+  private micStream: MediaStream | null = null;
+  private recorderDestination: MediaStreamAudioDestinationNode | null = null;
+  private synthAudioNode: AudioNode | null = null; // เก็บ AudioNode ของ synth
+
   private setInstrument: ((instrument: IPersetSoundfont[]) => void) | undefined;
   constructor(
     setInstrument?: (instrument: IPersetSoundfont[]) => void,
@@ -75,10 +84,11 @@ export class JsSynthEngine implements BaseSynthEngine {
     const analysers: AnalyserNode[] = [];
     this.nodes = [];
 
-    const finalOutputNode = synth.createAudioNode(audioContext, 8192);
+    // สร้าง AudioNode จาก synth และเก็บไว้ใน property
+    this.synthAudioNode = synth.createAudioNode(audioContext, 8192);
 
-    this.globalEqualizer = new GlobalEqualizer(finalOutputNode.context);
-    finalOutputNode.connect(this.globalEqualizer.input);
+    this.globalEqualizer = new GlobalEqualizer(this.synthAudioNode.context);
+    this.synthAudioNode.connect(this.globalEqualizer.input);
     this.globalEqualizer.output.connect(audioContext.destination);
 
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
@@ -159,6 +169,112 @@ export class JsSynthEngine implements BaseSynthEngine {
       return false;
     }
   }
+
+  // --- 🎤 การจัดการการบันทึกเสียง ---
+
+  async startRecording(options: { includeMicrophone: boolean }): Promise<void> {
+    if (this.isRecording) {
+      console.warn("Already recording.");
+      return;
+    }
+    if (!this.audio || !this.synthAudioNode) {
+      throw new Error("AudioContext or Synthesizer Node not initialized.");
+    }
+
+    await this.audio.resume();
+
+    // สร้าง Destination Node สำหรับรวบรวมเสียงที่จะบันทึก
+    this.recorderDestination = this.audio.createMediaStreamDestination();
+
+    // เชื่อมต่อเสียงจาก Synth ไปยัง Destination
+    this.synthAudioNode.connect(this.recorderDestination);
+
+    // หากต้องการบันทึกเสียงจากไมโครโฟนด้วย
+    if (options.includeMicrophone) {
+      try {
+        this.micStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        this.micSource = this.audio.createMediaStreamSource(this.micStream);
+        this.micSource.connect(this.recorderDestination); // เชื่อมเสียงไมโครโฟนไปยัง Destination
+      } catch (err) {
+        console.error("Error accessing microphone:", err);
+        // หากเกิดข้อผิดพลาด ให้ยกเลิกการเชื่อมต่อและหยุดการทำงาน
+        this.synthAudioNode.disconnect(this.recorderDestination);
+        this.recorderDestination = null;
+        throw new Error("Could not access microphone.");
+      }
+    }
+
+    this.recordedChunks = [];
+    const mimeType = "audio/webm; codecs=opus";
+    this.mediaRecorder = new MediaRecorder(this.recorderDestination.stream, {
+      mimeType: mimeType,
+    });
+
+    this.mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        this.recordedChunks.push(event.data);
+      }
+    };
+
+    this.mediaRecorder.start();
+    this.isRecording = true;
+    console.log("🔴 JS-Synth Recording started.");
+  }
+
+  async stopRecording(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      if (!this.mediaRecorder || !this.isRecording) {
+        return reject(new Error("Recording is not active."));
+      }
+
+      this.mediaRecorder.onstop = () => {
+        if (this.recordedChunks.length === 0) {
+          this.cleanupRecording();
+          return reject(new Error("No audio data was recorded."));
+        }
+
+        const blob = new Blob(this.recordedChunks, { type: "audio/webm" });
+        const audioUrl = URL.createObjectURL(blob);
+
+        this.cleanupRecording();
+        resolve(audioUrl);
+      };
+
+      this.mediaRecorder.onerror = (event) => {
+        this.cleanupRecording();
+        reject(
+          new Error(
+            `An error occurred during recording: ${(event as any).error.name}`
+          )
+        );
+      };
+
+      this.mediaRecorder.stop();
+    });
+  }
+
+  private cleanupRecording(): void {
+    if (this.synthAudioNode && this.recorderDestination) {
+      this.synthAudioNode.disconnect(this.recorderDestination);
+    }
+
+    if (this.micSource && this.recorderDestination) {
+      this.micSource.disconnect(this.recorderDestination);
+    }
+    this.micStream?.getTracks().forEach((track) => track.stop());
+
+    this.isRecording = false;
+    this.mediaRecorder = null;
+    this.recordedChunks = [];
+    this.micSource = null;
+    this.micStream = null;
+    this.recorderDestination = null;
+    console.log("🎧 JS-Synth Recording stopped and resources cleaned up.");
+  }
+
+  // --- ส่วนที่เหลือของคลาส ---
 
   controllerChange(callback?: (event: IControllerChange) => void): void {
     if (this.player?.addEvent) {

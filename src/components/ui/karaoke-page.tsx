@@ -10,7 +10,6 @@ import ClockPanel from "../tools/clock-panel";
 import ContextModal from "../modal/context-modal";
 import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status/status-panel";
-import WallpaperModal from "../modal/display/tabs/wallpaper-modal";
 import DisplaySettingModal from "../modal/display";
 import useNotificationStore from "@/features/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
@@ -34,11 +33,13 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { DatabaseService } from "@/utils/indexedDB/service";
 import { SongsSystem } from "@/features/songs";
 import { SoundfontSystemManager } from "@/features/soundfont";
-import InstrumentalPanel from "../tools/instrumental-panel";
+import { useOrientation } from "@/hooks/orientation-hook";
+
 interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const setup = useSynthesizerEngine((state) => state.setup);
+  const { orientation } = useOrientation();
 
   const setSongsManager = useSongsStore((state) => state.setSongsManager);
   const setSoundfontManaer = useSongsStore((state) => state.setSoundfontManaer);
@@ -76,45 +77,65 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   }, []);
 
   const modalMap: ModalComponents = {
-    SOUNDFONT_MODEL: <SoundfontManager></SoundfontManager>,
-    SUPER_JOIN: <ClientHostRemote></ClientHostRemote>,
-    MUSIC_STORE: <DataStoresModal></DataStoresModal>,
-    ADD_MUSIC: <AppendSongModal></AppendSongModal>,
-    // WALLPAPER: <WallpaperModal></WallpaperModal>,
-    DISPLAY: <DisplaySettingModal></DisplaySettingModal>,
-    SOUND_SETTING: <SoundSettingModal></SoundSettingModal>,
-    DONATE: <DonateModal></DonateModal>,
+    SOUNDFONT_MODEL: <SoundfontManager />,
+    SUPER_JOIN: <ClientHostRemote />,
+    MUSIC_STORE: <DataStoresModal />,
+    ADD_MUSIC: <AppendSongModal />,
+    DISPLAY: <DisplaySettingModal />,
+    SOUND_SETTING: <SoundSettingModal />,
+    DONATE: <DonateModal />,
   };
 
   return (
     <FullScreen handle={handle}>
-      <Loading isLoad={onPrepare}></Loading>
-      <Processing2Modal></Processing2Modal>
-      <WallpaperRender></WallpaperRender>
-      <RemoteEvent></RemoteEvent>
-      <AutoModal auto title={""}></AutoModal>
+      <Loading isLoad={onPrepare} />
+      <Processing2Modal />
+      <WallpaperRender />
+      <RemoteEvent />
+      <AutoModal auto title={""} />
       <div id="modal-container">
         <ContextModal modal={modalMap}>
-          <StatusPanel notification={notification}></StatusPanel>
-          <VolumePanel></VolumePanel>
-          <TempoPanel></TempoPanel>
-          <ClockPanel></ClockPanel>
-          <SongInfo></SongInfo>
-          <QueueSong></QueueSong>
-          <NextSongPanel></NextSongPanel>
-          <SearchSong></SearchSong>
-          <LyricsPlayer></LyricsPlayer>
-          <PlayerPanel
-            isFullScreen={handle.active}
-            modalMap={modalMap}
-            onFullScreen={() => {
-              if (!handle.active) {
-                handle.enter();
-              } else {
-                handle.exit();
-              }
-            }}
-          ></PlayerPanel>
+          <div
+            className={`karaoke-layout text-white ${
+              orientation === "landscape" ? "" : "pt-11 lg:pt-0"
+            }`}
+          >
+            <header className="relative z-30 flex flex-col items-start gap-4 p-4 pointer-events-none">
+              <div className="flex w-full items-start justify-between pointer-events-auto">
+                <VolumePanel />
+                <div className="flex gap-2">
+                  <TempoPanel />
+                  <ClockPanel />
+                </div>
+              </div>
+              <div className="w-full pointer-events-auto">
+                <SearchSong />
+              </div>
+            </header>
+
+            <main className="relative flex flex-grow items-center justify-center overflow-hidden">
+              <SongInfo />
+              <LyricsPlayer />
+              <NextSongPanel />
+              <QueueSong />
+            </main>
+
+            <footer className="relative z-40">
+              <PlayerPanel
+                isFullScreen={handle.active}
+                modalMap={modalMap}
+                onFullScreen={() => {
+                  if (!handle.active) {
+                    handle.enter();
+                  } else {
+                    handle.exit();
+                  }
+                }}
+              />
+            </footer>
+          </div>
+
+          <StatusPanel notification={notification} />
         </ContextModal>
       </div>
     </FullScreen>
