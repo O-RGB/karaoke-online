@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import useMixerStoreNew from "./player/event-player/modules/event-mixer-store";
 
 type Orientation = "landscape" | "portrait" | null;
 
@@ -27,7 +26,6 @@ const useOrientationStore = create<OrientationState>((set, get) => ({
       /iphone|ipad|ipod|android|blackberry|iemobile|opera mini|mobile/i;
     const isMobileUA = mobileUA.test(navigator.userAgent);
 
-    // เพิ่มเงื่อนไข max-width เผื่อ userAgent หลอก
     const isSmallScreen = window.matchMedia("(max-width: 1024px)").matches;
 
     set({ isMobile: isMobileUA || isSmallScreen });
@@ -41,7 +39,6 @@ const useOrientationStore = create<OrientationState>((set, get) => ({
     } else if (window.matchMedia?.("(orientation: landscape)").matches) {
       newOrientation = "landscape";
     } else {
-      // fallback
       newOrientation =
         window.innerWidth > window.innerHeight ? "landscape" : "portrait";
     }
@@ -50,11 +47,6 @@ const useOrientationStore = create<OrientationState>((set, get) => ({
       orientation: newOrientation,
       windowsWidth: window.innerWidth,
     });
-
-    // ถ้าเป็น mobile + landscape ให้ซ่อน mixer
-    if (get().isMobile && newOrientation === "landscape") {
-      useMixerStoreNew.getState().setHideMixer(true);
-    }
   },
 
   initializeOrientationListeners: () => {
