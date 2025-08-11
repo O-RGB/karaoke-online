@@ -19,6 +19,12 @@ export async function GET(request: Request) {
       { status: 400 }
     );
   }
+  if (query.length < 2) {
+    return NextResponse.json(
+      { error: "Query must be at least 2 characters long." },
+      { status: 200 }
+    );
+  }
 
   try {
     const apiResponse = await fetch(`${BACKEND_URL}/search?q=${query}`, {

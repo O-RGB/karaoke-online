@@ -12,6 +12,8 @@ body {
   -ms-user-select: none; /* Internet Explorer/Edge */
   user-select: none; /* Standard syntax */
   @apply min-h-dvh;
+  /* เพิ่ม padding ให้เท่ากับ safe area ของอุปกรณ์ */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 :root {

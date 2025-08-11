@@ -8,3 +8,8 @@ export interface IWallpaperDisplay {
   file: File;
   createdAt: Date;
 }
+export interface IRecordingsDisplay {
+  id: number;
+  file: File;
+  createdAt: Date;
+}

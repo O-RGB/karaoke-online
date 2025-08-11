@@ -7,6 +7,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  // เพิ่ม viewport-fit=cover เข้าไป
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {

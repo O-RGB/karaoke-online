@@ -6,20 +6,23 @@ import {
 } from "react-icons/tb";
 import { BsMicFill, BsMicMuteFill } from "react-icons/bs";
 import { IoMdArrowDropup, IoMdArrowDropdown } from "react-icons/io";
+import { MdRadioButtonChecked } from "react-icons/md";
 import Button from "../common/button/button";
-import ContextModal from "../modal/context-modal";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import useConfigStore from "@/features/config/config-store";
 import SliderCommon from "../common/input-data/slider";
 import useKeyboardStore from "@/features/keyboard-state";
-import { FiDownload, FiSettings } from "react-icons/fi";
-import { FaMicrophone, FaMusic, FaSearch } from "react-icons/fa";
+import { FaFolder, FaMicrophone, FaMusic, FaSearch } from "react-icons/fa";
 import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { Menu, MenuItem, MenuButton } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
+import RecordingsModal from "../modal/recordings-modal";
+import Modal from "../common/modal";
+import { FiSettings } from "react-icons/fi";
+import ContextModal from "../modal/context-modal";
 
 interface PlayerRemote {
   onPause?: () => void;
@@ -45,6 +48,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   const [maxTimer, setMaxTimer] = useState<number>(0);
   const [value, setValue] = useState<number>(0);
   const [isPlayerVisible, setIsPlayerVisible] = useState<boolean>(true);
+  const [openRecordlist, setRacordlist] = useState<boolean>(false);
 
   const inputRef = useRef<any>(null);
 
@@ -65,15 +69,10 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
     useSynthesizerEngine.getState().engine?.instrumental?.getGain() ?? [];
 
   const [isRecording, setIsRecording] = useState(false);
-  const [recordedAudioURL, setRecordedAudioURL] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  const [isRecordedAudioPlaying, setIsRecordedAudioPlaying] = useState(false);
 
   const handleStartRecording = async (includeMicrophone: boolean) => {
     if (!engine) return;
     try {
-      setRecordedAudioURL(null);
       await engine.startRecording?.({ includeMicrophone });
       setIsRecording(true);
     } catch (error) {
@@ -89,12 +88,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   const handleStopRecording = async () => {
     if (!engine) return;
     try {
-      const audioUrl = await engine.stopRecording?.();
-      if (!audioUrl) {
-        throw new Error("The recording process returned an empty audio URL.");
-      }
-      setRecordedAudioURL(audioUrl);
-      console.log("ไฟล์เสียงที่บันทึก:", audioUrl);
+      await engine.stopRecording?.();
     } catch (error) {
       console.error("เกิดข้อผิดพลาดในการหยุดบันทึก:", error);
       const errorMessage =
@@ -103,6 +97,14 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
     } finally {
       setIsRecording(false);
     }
+  };
+
+  const handleRecordButtonClick = () => {
+    if (isRecording) {
+      // หยุดการบันทึก
+      handleStopRecording();
+    }
+    // หากไม่ได้บันทึกอยู่ จะไม่ทำอะไร เพราะให้ Menu จัดการแทน
   };
 
   useEffect(() => {
@@ -128,8 +130,18 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
 
   return (
     <>
+      <Modal
+        isOpen={openRecordlist}
+        onClose={() => setRacordlist(false)}
+        title="บันทึก"
+      >
+        <RecordingsModal></RecordingsModal>
+      </Modal>
       {!isPlayerVisible && (
-        <div className="fixed bottom-4 left-4 z-50">
+        <div
+          className="fixed bottom-4 left-4 z-50"
+          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        >
           <Button
             border="border blur-border focus:outline-none "
             onClick={() => onPlayerShowChange(true)}
@@ -142,9 +154,11 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           />
         </div>
       )}
-
       {isPlayerVisible && (
-        <div className="fixed left-2 bottom-[42px] z-50">
+        <div
+          className="fixed left-2 z-50"
+          style={{ bottom: "calc(42px + env(safe-area-inset-bottom))" }}
+        >
           <Button
             tabIndex={-1}
             shadow={""}
@@ -156,103 +170,65 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           ></Button>
         </div>
       )}
-
       <div
-        className={`w-full blur-overlay bg-black/10 border-t blur-border flex justify-between transition-all duration-300 ${
-          !isPlayerVisible ? "mt-10 opacity-0" : "mt-0 opacity-100"
-        }`}
+        className={`w-full blur-overlay bg-black/10 border-t blur-border flex justify-between transition-all duration-300`}
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          transform: !isPlayerVisible ? "translateY(100%)" : "translateY(0)",
+          opacity: !isPlayerVisible ? 0 : 1,
+        }}
       >
         <div className="flex w-full">
           <div className="flex items-center">
-            <Menu
-              transition
-              boundingBoxPadding="10 10 10 10"
-              menuButton={
-                <MenuButton>
-                  <Button
-                    className={`hover:bg-white/20 ${
-                      isRecording ? "bg-red-500/50" : ""
-                    }`}
-                    blur={false}
-                    border=""
-                    shadow=""
-                    padding="p-4"
-                    onClick={isRecording ? handleStopRecording : undefined}
-                    shape={false}
-                    icon={
-                      isRecording ? (
-                        <BsMicMuteFill className="text-red-400 animate-pulse" />
-                      ) : (
-                        <BsMicFill className="text-white" />
-                      )
-                    }
-                  />
-                </MenuButton>
-              }
-            >
-              <MenuItem onClick={() => handleStartRecording(true)}>
-                <FaMicrophone className="mr-2" /> บันทึกเสียงร้อง + ดนตรี
-              </MenuItem>
-              <MenuItem onClick={() => handleStartRecording(false)}>
-                <FaMusic className="mr-2" /> บันทึกเฉพาะดนตรี
-              </MenuItem>
-            </Menu>
-          </div>
-
-          {recordedAudioURL && (
-            <>
+            {/* Recording Button - แยกการทำงานออกจาก Menu */}
+            {isRecording ? (
+              // เมื่อกำลังบันทึกอยู่ - แสดงปุ่มหยุด
               <Button
-                className="hover:bg-white/20"
+                className="hover:bg-white/20 bg-red-500/50 animate-pulse relative overflow-hidden"
                 blur={false}
                 border=""
                 shadow=""
                 padding="p-4"
-                onClick={() => {
-                  if (audioRef.current) {
-                    if (isRecordedAudioPlaying) {
-                      audioRef.current.pause();
-                    } else {
-                      audioRef.current.play();
-                    }
-                  }
-                }}
+                onClick={handleRecordButtonClick}
                 shape={false}
                 icon={
-                  isRecordedAudioPlaying ? (
-                    <TbPlayerPauseFilled className="text-white" />
-                  ) : (
-                    <TbPlayerPlayFilled className="text-white" />
-                  )
+                  <MdRadioButtonChecked className="text-red-400 animate-pulse" />
                 }
-              />
-              <audio
-                ref={audioRef}
-                src={recordedAudioURL}
-                onPlay={() => setIsRecordedAudioPlaying(true)}
-                onPause={() => setIsRecordedAudioPlaying(false)}
-                onEnded={() => setIsRecordedAudioPlaying(false)}
-                className="hidden"
-              />
-              <Button
-                className="hover:bg-white/20"
-                blur={false}
-                border=""
-                shadow=""
-                padding="p-4"
-                onClick={() => {
-                  if (!recordedAudioURL) return;
-                  const link = document.createElement("a");
-                  link.href = recordedAudioURL;
-                  link.download = `recording-${Date.now()}.webm`;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-                shape={false}
-                icon={<FiDownload className="text-white" />}
-              />
-            </>
-          )}
+              >
+                {/* Pulsing recording indicator */}
+                <div className="absolute inset-0 bg-red-500/20 animate-ping rounded-full"></div>
+              </Button>
+            ) : (
+              // เมื่อไม่ได้บันทึก - แสดง Menu
+              <Menu
+                transition
+                boundingBoxPadding="10 10 10 10"
+                menuButton={
+                  <MenuButton>
+                    <Button
+                      className="hover:bg-white/20"
+                      blur={false}
+                      border=""
+                      shadow=""
+                      padding="p-4"
+                      shape={false}
+                      icon={<BsMicFill className="text-white" />}
+                    />
+                  </MenuButton>
+                }
+              >
+                <MenuItem onClick={() => handleStartRecording(true)}>
+                  <FaMicrophone className="mr-2" /> บันทึกเสียงร้อง + ดนตรี
+                </MenuItem>
+                <MenuItem onClick={() => handleStartRecording(false)}>
+                  <FaMusic className="mr-2" /> บันทึกเฉพาะดนตรี
+                </MenuItem>
+                <MenuItem onClick={() => setRacordlist(true)}>
+                  <FaFolder className="mr-2" /> บันทึกแล้ว
+                </MenuItem>
+              </Menu>
+            )}
+          </div>
 
           <div className="flex w-fit ">
             {!isPaused ? (

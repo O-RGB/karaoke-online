@@ -9,6 +9,7 @@ import {
   IProgramChange,
   IVelocityChange,
   TimingModeType,
+  IPersetSoundfont,
 } from "../../types/synth.type";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { InstrumentalNode } from "../instrumentals/instrumental";
@@ -27,6 +28,7 @@ import {
 } from "../../types/node.type";
 import { GlobalEqualizer } from "../equalizer/global-equalizer";
 import { PlayerSetTempoType } from "js-synthesizer/dist/lib/Constants";
+import { RecordingsManager } from "@/utils/indexedDB/db/display/table";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -45,14 +47,13 @@ export class JsSynthEngine implements BaseSynthEngine {
 
   public bassConfig: BassConfig | undefined = undefined;
 
-  // --- 🎤 Properties สำหรับการบันทึกเสียง ---
   public isRecording: boolean = false;
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
   private micSource: MediaStreamAudioSourceNode | null = null;
   private micStream: MediaStream | null = null;
   private recorderDestination: MediaStreamAudioDestinationNode | null = null;
-  private synthAudioNode: AudioNode | null = null; // เก็บ AudioNode ของ synth
+  private synthAudioNode: AudioNode | null = null;
 
   private setInstrument: ((instrument: IPersetSoundfont[]) => void) | undefined;
   constructor(
@@ -70,9 +71,7 @@ export class JsSynthEngine implements BaseSynthEngine {
     const synth = new Synthesizer();
 
     synth.init(audioContext.sampleRate);
-
     synth.setGain(0.3);
-
     this.loadDefaultSoundFont();
 
     this.synth = synth;
@@ -84,12 +83,13 @@ export class JsSynthEngine implements BaseSynthEngine {
     const analysers: AnalyserNode[] = [];
     this.nodes = [];
 
-    // สร้าง AudioNode จาก synth และเก็บไว้ใน property
     this.synthAudioNode = synth.createAudioNode(audioContext, 8192);
 
-    this.globalEqualizer = new GlobalEqualizer(this.synthAudioNode.context);
-    this.synthAudioNode.connect(this.globalEqualizer.input);
-    this.globalEqualizer.output.connect(audioContext.destination);
+    if (this.synthAudioNode) {
+      this.globalEqualizer = new GlobalEqualizer(this.synthAudioNode.context);
+      this.synthAudioNode.connect(this.globalEqualizer.input);
+      this.globalEqualizer.output.connect(audioContext.destination);
+    }
 
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
       const analyser = audioContext.createAnalyser();
@@ -111,18 +111,19 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.programChange();
     this.noteOffChange();
     this.noteOnChange();
+    this.player.eventChange?.();
 
     return { synth: synth, audio: this.audio };
   }
 
   async loadPresetSoundFont(sfId?: number) {
-    if (!sfId) {
-      return [];
+    if (!sfId || !this.synth) {
+      return;
     }
 
-    const preset = await this.synth?.getSFontObject(sfId);
+    const preset = this.synth.getSFontObject(sfId);
     if (preset) {
-      const list = await preset.getPresetIterable();
+      const list = preset.getPresetIterable();
       const presetList = Array.from(list);
 
       const instrument: IPersetSoundfont[] = presetList.map((data) => ({
@@ -151,26 +152,28 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.soundfontFile = fileBlob;
     }
 
-    const sfId = await this.synth?.loadSFont(arraybuffer);
-    this.soundfontName = "Default Soundfont sf2";
-
-    this.loadPresetSoundFont(sfId);
+    if (this.synth) {
+      const sfId = await this.synth.loadSFont(arraybuffer);
+      this.soundfontName = "Default Soundfont sf2";
+      this.loadPresetSoundFont(sfId);
+    }
   }
 
   async setSoundFont(file: File, from: SoundSystemMode) {
     const bf = await file.arrayBuffer();
     try {
-      const sfId = await this.synth?.loadSFont(bf);
-      this.soundfontName = file.name;
-      this.soundfontFrom = from;
-      this.loadPresetSoundFont(sfId);
-      return true;
+      if (this.synth) {
+        const sfId = await this.synth.loadSFont(bf);
+        this.soundfontName = file.name;
+        this.soundfontFrom = from;
+        this.loadPresetSoundFont(sfId);
+        return true;
+      }
+      return false;
     } catch (error) {
       return false;
     }
   }
-
-  // --- 🎤 การจัดการการบันทึกเสียง ---
 
   async startRecording(options: { includeMicrophone: boolean }): Promise<void> {
     if (this.isRecording) {
@@ -183,23 +186,18 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     await this.audio.resume();
 
-    // สร้าง Destination Node สำหรับรวบรวมเสียงที่จะบันทึก
     this.recorderDestination = this.audio.createMediaStreamDestination();
-
-    // เชื่อมต่อเสียงจาก Synth ไปยัง Destination
     this.synthAudioNode.connect(this.recorderDestination);
 
-    // หากต้องการบันทึกเสียงจากไมโครโฟนด้วย
     if (options.includeMicrophone) {
       try {
         this.micStream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
         this.micSource = this.audio.createMediaStreamSource(this.micStream);
-        this.micSource.connect(this.recorderDestination); // เชื่อมเสียงไมโครโฟนไปยัง Destination
+        this.micSource.connect(this.recorderDestination);
       } catch (err) {
         console.error("Error accessing microphone:", err);
-        // หากเกิดข้อผิดพลาด ให้ยกเลิกการเชื่อมต่อและหยุดการทำงาน
         this.synthAudioNode.disconnect(this.recorderDestination);
         this.recorderDestination = null;
         throw new Error("Could not access microphone.");
@@ -229,13 +227,26 @@ export class JsSynthEngine implements BaseSynthEngine {
         return reject(new Error("Recording is not active."));
       }
 
-      this.mediaRecorder.onstop = () => {
+      this.mediaRecorder.onstop = async () => {
         if (this.recordedChunks.length === 0) {
           this.cleanupRecording();
           return reject(new Error("No audio data was recorded."));
         }
 
         const blob = new Blob(this.recordedChunks, { type: "audio/webm" });
+        const recordingName = `recording-${new Date().toISOString()}.webm`;
+
+        try {
+          const recordingsManager = new RecordingsManager();
+          await recordingsManager.add({
+            file: new File([blob], recordingName),
+            createdAt: new Date(),
+          });
+          console.log("Recording saved to database.");
+        } catch (dbError) {
+          console.error("Failed to save recording to database:", dbError);
+        }
+
         const audioUrl = URL.createObjectURL(blob);
 
         this.cleanupRecording();
@@ -273,8 +284,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.recorderDestination = null;
     console.log("🎧 JS-Synth Recording stopped and resources cleaned up.");
   }
-
-  // --- ส่วนที่เหลือของคลาส ---
 
   controllerChange(callback?: (event: IControllerChange) => void): void {
     if (this.player?.addEvent) {
@@ -347,7 +356,7 @@ export class JsSynthEngine implements BaseSynthEngine {
     });
   }
   setVelocity(event: IVelocityChange): void {}
-  setMidiOutput(): void {}
+
   setController(event: IControllerChange): void {
     const node = this.nodes[event.channel];
     let isLocked = false;
@@ -388,10 +397,25 @@ export class JsSynthEngine implements BaseSynthEngine {
       controllerValue: event.controllerValue,
     });
   }
-  updatePitch(channel: number, semitones: number = 0): void {
-    for (let index = 0; index < CHANNEL_DEFAULT.length; index++) {
-      console.log(index, semitones);
-      this.nodes[index].transpose?.setValue(semitones);
+
+  /**
+   * REVERT: แก้ไขการทำงานของ updatePitch กลับไปเป็นแบบเดิม
+   *
+   * เปลี่ยนกลับไปใช้วิธี set ค่า transpose ใน node ของแต่ละ channel
+   * เพื่อให้ player นำค่านี้ไปบวกกับ midiNote โดยตรง
+   * ซึ่งจะช่วยแก้ปัญหา conflict กับ pitch bend ของกีตาร์
+   */
+  updatePitch(channel: number | null, semitones: number = 0): void {
+    if (channel !== null) {
+      // หากต้องการปรับเฉพาะ Channel (ยังไม่ implement ใน UI แต่โครงไว้)
+      if (this.nodes[channel]) {
+        this.nodes[channel].transpose?.setValue(semitones);
+      }
+    } else {
+      // ปรับทุก Channel (Global Transpose)
+      for (let index = 0; index < this.nodes.length; index++) {
+        this.nodes[index].transpose?.setValue(semitones);
+      }
     }
   }
 
@@ -401,7 +425,7 @@ export class JsSynthEngine implements BaseSynthEngine {
 
   updateSpeed(value: number) {
     this.synth?.retrievePlayerBpm().then((bpm) => {
-      const newBpm = bpm + value;
+      const newBpm = (bpm * value) / 100;
       this.synth?.setPlayerTempo(PlayerSetTempoType.ExternalBpm, newBpm);
     });
   }
@@ -416,6 +440,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     });
   }
   async unintsall() {
-    this.audio?.suspend();
+    await this.audio?.close();
   }
 }

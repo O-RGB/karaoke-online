@@ -12,7 +12,7 @@ import {
   REVERB,
 } from "@/features/engine/types/node.type";
 import { JsSynthEngine } from "../js-synth-engine";
-import { DRUM_CHANNEL } from "@/config/value"; 
+import { DRUM_CHANNEL } from "@/config/value";
 
 export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   private player: JsSynthesizer | undefined = undefined;
@@ -69,19 +69,19 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
     try {
       parsedMidi = new MIDI(midiFileArrayBuffer, midi.name);
-      // this.parseResult = MidiEditer.parse(midiFileArrayBuffer);
     } catch (e) {
       console.error(e);
       const fix = await fixMidiHeader(midi);
       midiFileArrayBuffer = await fix.arrayBuffer();
       parsedMidi = new MIDI(midiFileArrayBuffer, fix.name);
-      // this.parseResult = MidiEditer.parse(midiFileArrayBuffer);
     }
 
     this.midiData = parsedMidi;
     this.duration = parsedMidi.duration;
     await this.player?.resetPlayer();
-    await this.player?.addSMFDataToPlayer(midiFileArrayBuffer);
+    if (midiFileArrayBuffer) {
+      await this.player?.addSMFDataToPlayer(midiFileArrayBuffer);
+    }
 
     return parsedMidi;
   }
@@ -98,15 +98,21 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const value = event.getValue();
       const program = event.getProgram();
       const node = this.engine.nodes[channel];
+
       if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
+        // REVERT: นำ Logic การ Transpose กลับมาที่นี่
         const transpose = node.transpose?.value;
-        console.log("transpose", transpose);
+
         this.eventInit?.onNoteOnChangeCallback({
           channel,
           midiNote,
           velocity,
         });
-        if (channel !== DRUM_CHANNEL) event.setKey(midiNote + (transpose ?? 0));
+
+        // ใช้ setKey เพื่อเปลี่ยนคีย์ของโน้ตโดยตรง
+        if (channel !== DRUM_CHANNEL) {
+          event.setKey(midiNote + (transpose ?? 0));
+        }
       } else if (
         eventType === 0x80 &&
         this.eventInit?.onNoteOffChangeCallback

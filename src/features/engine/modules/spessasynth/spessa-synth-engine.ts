@@ -29,6 +29,7 @@ import {
   IPersetSoundfont,
 } from "../../types/synth.type";
 import { GlobalEqualizer } from "../equalizer/global-equalizer";
+import { RecordingsManager } from "@/utils/indexedDB/db/display/table";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -425,9 +426,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
         return reject(new Error("Recording is not active."));
       }
 
-      // Event listener for when recording stops successfully
-      this.mediaRecorder.onstop = () => {
-        // Check if any data was actually recorded
+      this.mediaRecorder.onstop = async () => {
         if (this.recordedChunks.length === 0) {
           console.warn(
             "Recording stopped, but no audio data was captured. The audio stream might be silent."
@@ -437,6 +436,19 @@ export class SpessaSynthEngine implements BaseSynthEngine {
         }
 
         const blob = new Blob(this.recordedChunks, { type: "audio/webm" });
+        const recordingName = `recording-${new Date().toISOString()}.webm`;
+
+        try {
+          const recordingsManager = new RecordingsManager();
+          await recordingsManager.add({
+            file: new File([blob], recordingName),
+            createdAt: new Date(),
+          });
+          console.log("Recording saved to database.");
+        } catch (dbError) {
+          console.error("Failed to save recording to database:", dbError);
+        }
+
         const audioUrl = URL.createObjectURL(blob);
 
         console.log(`Recording finished. URL: ${audioUrl}, Size: ${blob.size}`);
@@ -444,7 +456,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
         resolve(audioUrl);
       };
 
-      // Event listener for any errors that occur during the recording process
       this.mediaRecorder.onerror = (event) => {
         console.error("MediaRecorder error:", event);
         this.cleanupRecording();
@@ -455,7 +466,6 @@ export class SpessaSynthEngine implements BaseSynthEngine {
         );
       };
 
-      // Stop the recorder
       console.log("Calling mediaRecorder.stop()...");
       this.mediaRecorder.stop();
     });
