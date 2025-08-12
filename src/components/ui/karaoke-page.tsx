@@ -39,7 +39,6 @@ interface KaraokePageProps {}
 
 const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const setup = useSynthesizerEngine((state) => state.setup);
-  const { orientation } = useOrientation();
 
   const setSongsManager = useSongsStore((state) => state.setSongsManager);
   const setSoundfontManaer = useSongsStore((state) => state.setSoundfontManaer);
@@ -52,7 +51,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const config = useConfigStore((state) => state.config);
   const [onPrepare, setPrepare] = useState<boolean>(false);
 
-  // useEffect สำหรับอัปเดต CSS Variable เมื่อค่า zoom เปลี่ยน
   useEffect(() => {
     const zoomLevel = config.system?.zoom || 1;
     document.documentElement.style.setProperty(
@@ -97,7 +95,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
   return (
     <FullScreen handle={handle}>
-      {/* --- เพิ่ม Container ID เข้ามาครอบเนื้อหา --- */}
       <div>
         <Loading isLoad={onPrepare} />
         <Processing2Modal />
@@ -114,7 +111,14 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
               className={`relative karaoke-layout text-white`}
             >
               <QueueSong />
-              <header className="relative z-30 flex flex-col md:flex-col-reverse gap-0.5 md:gap-6 items-start  px-4 pt-4 pointer-events-none">
+              <header
+                style={{
+                  paddingTop: "max(1rem, env(safe-area-inset-top))",
+                  paddingLeft: "max(1rem, env(safe-area-inset-left))",
+                  paddingRight: "max(1rem, env(safe-area-inset-right))",
+                }}
+                className="relative z-30 flex flex-col md:flex-col-reverse gap-2 md:gap-6 items-start pointer-events-none"
+              >
                 <div className="w-full pointer-events-auto">
                   <SearchSong />
                 </div>

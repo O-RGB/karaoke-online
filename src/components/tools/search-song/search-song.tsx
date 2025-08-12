@@ -51,6 +51,8 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
     return <></>;
   }
 
+  const isLandscape = orientation === "landscape";
+
   return (
     <div>
       <KaraokeSearchInput
@@ -59,16 +61,28 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
       ></KaraokeSearchInput>
 
       <div
-        className={`z-50 block lg:hidden ${
-          orientation === "landscape"
-            ? `fixed right-2 top-4 ${
-                fullUi ? "w-[calc(100%-1.5rem)]" : "w-56"
-              }`
-            : "w-full"
-        } duration-300`}
+        style={{
+          ...(isLandscape &&
+            !fullUi && {
+              right: "max(1rem, env(safe-area-inset-right))",
+              width: "14rem",
+            }),
+          ...(isLandscape &&
+            fullUi && {
+              left: "max(1rem, env(safe-area-inset-left))",
+              right: "max(1rem, env(safe-area-inset-right))",
+              width: "auto",
+            }),
+          top: isLandscape ? "max(1rem, env(safe-area-inset-top))" : undefined,
+        }}
+        className={`z-50 block lg:hidden ${isLandscape ? `fixed` : "w-full"}`}
       >
         <div className="flex gap-1.5 w-full">
-          <div className="w-full blur-overlay flex flex-col rounded-md overflow-hidden">
+          <div
+            className={`w-full blur-overlay flex flex-col rounded-md overflow-hidden transition-all duration-300 ${
+              isLandscape && fullUi ? "transform scale-x-100" : ""
+            }`}
+          >
             <SearchSelect
               border="blur-border border"
               onBlur={handleSearchBlur}
@@ -84,7 +98,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
               onSearch={onSearch}
             ></SearchSelect>
           </div>
-          <div>
+          <div className="flex-shrink-0">
             <SwitchButton
               className="!w-12 !h-9 block lg:hidden"
               onChange={(muted) => {
