@@ -2,24 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  user-select: none;
-  overscroll-behavior: none;
-  -webkit-text-size-adjust: none;
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-  user-select: none; /* Standard syntax */
-  @apply min-h-dvh;
-  /* เพิ่ม padding ให้เท่ากับ safe area ของอุปกรณ์ */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+/* ป้องกัน scroll และตั้งค่าพื้นฐาน */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height สำหรับมือถือ */
+  overflow: hidden; /* ป้องกัน scroll ที่ html level */
+  position: fixed; /* ล็อกไม่ให้ scroll */
+  width: 100%;
+  top: 0;
+  left: 0;
 }
 
 :root {
   --blur-amount: 8px;
   --border-opacity: 0.5;
   --background-color: transparent;
+  
+  /* Safe area variables สำหรับใช้ใน component อื่น */
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-right: env(safe-area-inset-right);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+
+  /* CSS Variable สำหรับการซูม */
+  --ui-zoom-scale: 1;
+}
+
+body {
+  /* ป้องกัน user selection และ scroll */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  
+  /* ป้องกัน overscroll และ bounce effect */
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  -webkit-overscroll-behavior: none;
+  
+  /* ป้องกัน text size adjustment */
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  
+  /* ป้องกัน scroll */
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  
+  /* กำหนดพื้นหลังเป็นสีดำเพื่อไม่ให้เป็นสีขาว */
+  background-color: #000;
+  
+  /* ป้องกัน touch behaviors ที่ไม่ต้องการ */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* --- ส่วนที่เพิ่มเข้ามา: ย้าย transform มาที่นี่ --- */
+#zoom-container {
+  transform: scale(var(--ui-zoom-scale));
+  transform-origin: top left;
+  width: calc(100vw / var(--ui-zoom-scale));
+  height: calc(100vh / var(--ui-zoom-scale));
+  overflow: hidden; /* ป้องกัน scrollbar ภายใน container */
+}
+/* --- สิ้นสุดส่วนที่เพิ่มมา --- */
+
+
+/* Alternative approach สำหรับ safe area ที่รองรับทุกอุปกรณ์ */
+@supports (padding: max(0px)) {
+  body {
+    /* ใช้ max() เพื่อให้แน่ใจว่าไม่เป็นค่าติดลบ และมี minimum padding */
+    padding-top: max(env(safe-area-inset-top), 20px);
+    padding-right: max(env(safe-area-inset-right), 0px);  
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+    padding-left: max(env(safe-area-inset-left), 0px);
+  }
+}
+
+/* ป้องกัน scroll ใน iOS Safari */
+body.no-scroll {
+  position: fixed;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
 }
 
 .blur-overlay {
@@ -52,14 +127,61 @@ body {
   backdrop-filter: blur(10px);
 }
 
-/* --- เพิ่มเข้ามา --- */
 @layer components {
   .karaoke-layout {
     display: grid;
-    grid-template-rows: auto 1fr auto; /* แถวบน: สูงตามเนื้อหา, กลาง: ยืดเต็มที่, ล่าง: สูงตามเนื้อหา */
+    grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr;
-    height: 100vh; /* สูงเต็มหน้าจอ */
-    width: 100vw;
-    overflow: hidden; /* ป้องกันการเลื่อนหน้าจอหลัก */
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  /* Safe area aware containers */
+  .safe-area-container {
+    padding-top: var(--safe-area-inset-top);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+  }
+  
+  /* สำหรับ header ที่ต้องหลีกเลี่ยงติ่งกล้อง */
+  .safe-area-top {
+    padding-top: var(--safe-area-inset-top);
+  }
+  
+  /* สำหรับ footer ที่ต้องหลีกเลี่ยง home indicator */
+  .safe-area-bottom {
+    padding-bottom: var(--safe-area-inset-bottom);
+  }
+}
+
+/* Universal fallback สำหรับอุปกรณ์ที่ไม่รองรับ env() */
+@supports not (padding: env(safe-area-inset-top)) {
+  /* ตรวจสอบว่ามี notch หรือไม่จาก viewport */
+  @media screen and (min-height: 812px) and (-webkit-min-device-pixel-ratio: 2) {
+    body {
+      padding-top: 44px; /* Safe fallback สำหรับ notch */
+      padding-bottom: 34px; /* Safe fallback สำหรับ home indicator */
+    }
+  }
+  
+  /* สำหรับหน้าจอที่ไม่มี notch */
+  @media screen and (max-height: 811px) {
+    body {
+      padding-top: 20px; /* Status bar height */
+      padding-bottom: 0px;
+    }
+  }
+}
+
+/* สำหรับ landscape mode ทุกอุปกรณ์ */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: env(safe-area-inset-left, 44px);
+    padding-right: env(safe-area-inset-right, 44px);
+    padding-bottom: env(safe-area-inset-bottom, 21px);
   }
 }

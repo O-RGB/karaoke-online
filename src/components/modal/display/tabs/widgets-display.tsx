@@ -6,6 +6,10 @@ import {
   WidgetsConfig,
   WidgetsSettingConfig,
 } from "@/features/config/types/config.type";
+import NumberButton from "@/components/common/input-data/number-button"; // <-- Import ที่เพิ่มเข้ามา
+import { FaSearchPlus, FaSearchMinus } from "react-icons/fa"; // <-- Import ที่เพิ่มเข้ามา
+import Button from "@/components/common/button/button";
+import { BsZoomIn } from "react-icons/bs";
 
 interface WidgetsDisplayProps {}
 
@@ -20,6 +24,9 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
     tempo: defaultConfig,
     inst: defaultConfig,
   });
+
+  // State สำหรับการซูม
+  const [zoomLevel, setZoomLevel] = useState(config.system?.zoom || 1);
 
   const onSetWidgets = (widget: 0 | 1 | 2 | 3, show: boolean) => {
     if (widget === 0) {
@@ -55,15 +62,52 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
     }
   };
 
+  // --- ส่วนที่เพิ่มเข้ามา ---
+  // ฟังก์ชันสำหรับจัดการการเปลี่ยนแปลงค่าซูม
+  const handleZoomChange = (newZoomValue: number) => {
+    // จำกัดค่าซูมให้อยู่ระหว่าง 0.5 (50%) และ 2 (200%)
+    const clampedZoom = Math.max(0.5, Math.min(2, newZoomValue / 100));
+    const finalZoom = parseFloat(clampedZoom.toFixed(2));
+
+    setZoomLevel(finalZoom);
+    setConfig({ system: { ...config.system, zoom: finalZoom } });
+  };
+  // --- สิ้นสุดส่วนที่เพิ่มมา ---
+
   useEffect(() => {
     if (config.widgets) {
       setWidgets(config.widgets);
     }
+    // อัปเดต state ของ zoom level เมื่อ config เปลี่ยน
+    setZoomLevel(config.system?.zoom || 1);
   }, [config]);
 
   return (
     <>
       <div className="flex flex-col gap-3">
+        <div>
+          <Label>การซูมหน้าจอ</Label>
+          <div className="flex justify-between gap-3 items-center">
+            <div className="flex items-center gap-2 text-black">
+              <NumberButton
+                value={Math.round(zoomLevel * 100)}
+                onChange={handleZoomChange}
+                className="!text-black"
+                suffix="%"
+                color="text-black"
+                icon={<BsZoomIn />}
+              />
+            </div>
+            <Button
+              color="gray"
+              onClick={() => handleZoomChange(100)}
+              className="h-9"
+            >
+              รีเซ็ต
+            </Button>
+          </div>
+        </div>
+
         <div>
           <Label>มิกเซอร์</Label>
           <div className="flex justify-between gap-3 items-center">

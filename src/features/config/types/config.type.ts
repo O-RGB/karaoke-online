@@ -72,6 +72,7 @@ export interface SystemConfig {
   engine: EngineType;
   timingModeType: TimingModeType;
   systemFont: string;
+  zoom?: number; // <-- เพิ่มบรรทัดนี้
 }
 
 export interface ThemesConfig {
