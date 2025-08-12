@@ -64,7 +64,7 @@ body {
     display: grid;
     grid-template-rows: auto 1fr auto; /* แถวบน: สูงตามเนื้อหา, กลาง: ยืดเต็มที่, ล่าง: สูงตามเนื้อหา */
     grid-template-columns: 1fr;
-    height: 100vh; /* สูงเต็มหน้าจอ */
+    height: 100dvh; /* เปลี่ยนจาก vh เป็น dvh */
     width: 100vw;
     overflow: hidden; /* ป้องกันการเลื่อนหน้าจอหลัก */
   }
