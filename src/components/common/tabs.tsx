@@ -43,7 +43,10 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onTabChange, height }) => {
     : { height: "100%" };
 
   return (
-    <div className="flex flex-col w-full" style={containerStyle}>
+    <div
+      className="flex flex-col w-full"
+      style={containerStyle}
+    >
       <div className="flex-shrink-0 flex border-b border-gray-300 w-full h-12 bg-white overflow-x-auto">
         {tabs.map((tab, index) => (
           <button

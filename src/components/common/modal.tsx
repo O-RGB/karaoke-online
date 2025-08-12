@@ -20,15 +20,13 @@ export default function WinboxModal({
   height,
   maxWidth,
   modalClassName = "",
-  containerId = "modal-container",
+  containerId = "modal-root",
   closable = true,
-  index = 0,
   noMin,
   noMove,
   noResize,
   noFull = true,
   noMax,
-  onFocus,
 }: ModalProps) {
   const { isMobile, orientation } = useOrientation();
   const [showModal, setShowModal] = useState(isOpen);
@@ -79,7 +77,7 @@ export default function WinboxModal({
     const updateDimensions = () => {
       const dimensions = calculateDimensions();
       setModalDimensions(dimensions);
-      // คำนวณ content height (ลบ title bar height ประมาณ 38px)
+
       setContentHeight(dimensions.height - 38);
     };
 
@@ -133,26 +131,24 @@ export default function WinboxModal({
   };
 
   const handleResize = (_: number, height: number) => {
-    // อัปเดต content height เมื่อ modal ถูก resize
     const newContentHeight = height - 38;
     setContentHeight(newContentHeight);
   };
 
   if (!showModal) return null;
 
-  let modalRoot = document.getElementById(containerId);
+  let modalRoot = document.getElementById("modal-root");
   if (!modalRoot) {
     modalRoot = document.createElement("div");
-    modalRoot.id = containerId;
+    modalRoot.id = "modal-root";
     document.body.appendChild(modalRoot);
   }
 
-  // ส่ง height ไปให้ children เพื่อให้ component ปรับขนาดตัวเอง
   const childrenWithHeight = isValidElement(children)
     ? cloneElement(children, { height: contentHeight } as any)
     : children;
 
-  return (
+  return createPortal(
     <WinBox
       width={modalDimensions.width}
       height={modalDimensions.height}
@@ -175,6 +171,7 @@ export default function WinboxModal({
       <div style={{ height: contentHeight, overflow: "hidden" }}>
         {childrenWithHeight}
       </div>
-    </WinBox>
+    </WinBox>,
+    modalRoot
   );
 }

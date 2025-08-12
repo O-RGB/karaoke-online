@@ -220,13 +220,13 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
                   </MenuButton>
                 }
               >
-                <MenuItem onClick={() => handleStartRecording(true)}>
+                <MenuItem  className={"text-sm"} onClick={() => handleStartRecording(true)}>
                   <FaMicrophone className="mr-2" /> บันทึกเสียงร้อง + ดนตรี
                 </MenuItem>
-                <MenuItem onClick={() => handleStartRecording(false)}>
+                <MenuItem className={"text-sm"} onClick={() => handleStartRecording(false)}>
                   <FaMusic className="mr-2" /> บันทึกเฉพาะดนตรี
                 </MenuItem>
-                <MenuItem onClick={() => setRacordlist(true)}>
+                <MenuItem className={"text-sm"} onClick={() => setRacordlist(true)}>
                   <FaFolder className="mr-2" /> บันทึกแล้ว
                 </MenuItem>
               </Menu>

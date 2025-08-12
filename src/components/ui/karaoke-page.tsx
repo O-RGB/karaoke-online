@@ -95,68 +95,68 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
   return (
     <FullScreen handle={handle}>
-      <div>
+      <div id="screen-panel">
+        <div id="modal-root"></div>
         <Loading isLoad={onPrepare} />
         <Processing2Modal />
         <WallpaperRender />
         <RemoteEvent />
         <AutoModal auto title={""} />
-        <div id="modal-container">
-          <ContextModal
-            modal={modalMap}
-            className="fixed z-0 left-0 top-0 w-full h-full"
+
+        <ContextModal
+          modal={modalMap}
+          className="fixed z-0 left-0 top-0 w-full h-full"
+        >
+          <div
+            id="zoom-container"
+            className={`relative karaoke-layout text-white`}
           >
-            <div
-              id="zoom-container"
-              className={`relative karaoke-layout text-white`}
+            <QueueSong />
+            <header
+              style={{
+                paddingTop: "max(1rem, env(safe-area-inset-top))",
+                paddingLeft: "max(1rem, env(safe-area-inset-left))",
+                paddingRight: "max(1rem, env(safe-area-inset-right))",
+              }}
+              className="relative z-30 flex flex-col lg:flex-col-reverse gap-2 lg:gap-6 items-start"
             >
-              <QueueSong />
-              <header
-                style={{
-                  paddingTop: "max(1rem, env(safe-area-inset-top))",
-                  paddingLeft: "max(1rem, env(safe-area-inset-left))",
-                  paddingRight: "max(1rem, env(safe-area-inset-right))",
-                }}
-                className="relative z-30 flex flex-col md:flex-col-reverse gap-2 md:gap-6 items-start pointer-events-none"
-              >
-                <div className="w-full pointer-events-auto">
-                  <SearchSong />
-                </div>
-                <div className="flex w-full gap-2 items-start justify-between pointer-events-auto">
-                  <VolumePanel />
-                  <div className="hidden lg:block">
-                    <div className="flex gap-2">
-                      <ClockPanel />
-                      <TempoPanel />
-                    </div>
+              <div className="w-full">
+                <SearchSong />
+              </div>
+              <div className="flex w-full gap-2 items-start justify-between">
+                <VolumePanel />
+                <div className="hidden lg:block">
+                  <div className="flex gap-2">
+                    <ClockPanel />
+                    <TempoPanel />
                   </div>
                 </div>
-              </header>
+              </div>
+            </header>
 
-              <main className="relative flex flex-grow justify-center">
-                <LyricsPlayer className="absolute w-full h-full flex items-center justify-center" />
-                <NextSongPanel className="absolute w-full h-full flex justify-center" />
-                <SongInfo />
-              </main>
+            <main className="relative flex flex-grow justify-center">
+              <LyricsPlayer className="absolute w-full h-full flex items-center justify-center" />
+              <NextSongPanel className="absolute w-full h-full flex justify-center" />
+              <SongInfo />
+            </main>
 
-              <footer className="relative z-40">
-                <PlayerPanel
-                  isFullScreen={handle.active}
-                  modalMap={modalMap}
-                  onFullScreen={() => {
-                    if (!handle.active) {
-                      handle.enter();
-                    } else {
-                      handle.exit();
-                    }
-                  }}
-                />
-              </footer>
-            </div>
+            <footer className="fixed bottom-0 w-full z-40">
+              <PlayerPanel
+                isFullScreen={handle.active}
+                modalMap={modalMap}
+                onFullScreen={() => {
+                  if (!handle.active) {
+                    handle.enter();
+                  } else {
+                    handle.exit();
+                  }
+                }}
+              />
+            </footer>
+          </div>
 
-            <StatusPanel notification={notification} />
-          </ContextModal>
-        </div>
+          <StatusPanel notification={notification} />
+        </ContextModal>
       </div>
     </FullScreen>
   );

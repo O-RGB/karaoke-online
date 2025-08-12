@@ -84,7 +84,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
             }`}
           >
             <SearchSelect
-              border="blur-border border"
+              // border="blur-border border"
               onBlur={handleSearchBlur}
               onFocus={handleSearchFocus}
               className={
