@@ -38,7 +38,7 @@ const InstrumentalPanel: React.FC<InstrumentalPanelProps> = ({ className }) => {
                     <Button
                       className="w-full h-full"
                       // className="!w-10 !h-10"
-                      padding="p-1"
+                      padding="p-0.5"
                       blur
                       icon={
                         <img

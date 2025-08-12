@@ -95,29 +95,27 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <AutoModal auto title={""} />
       <div id="modal-container">
         <ContextModal modal={modalMap}>
-          <div
-            className={`karaoke-layout text-white ${
-              orientation === "landscape" ? "" : "pt-11 lg:pt-0"
-            }`}
-          >
-            <header className="relative z-30 flex flex-col items-start gap-4 p-4 pointer-events-none">
-              <div className="flex w-full items-start justify-between pointer-events-auto">
-                <VolumePanel />
-                <div className="flex gap-2">
-                  <TempoPanel />
-                  <ClockPanel />
-                </div>
-              </div>
+          <div className={`relative karaoke-layout text-white`}>
+            <QueueSong />
+            <header className="relative z-30 flex flex-col md:flex-col-reverse gap-0.5 md:gap-6 items-start  px-4 pt-4 pointer-events-none">
               <div className="w-full pointer-events-auto">
                 <SearchSong />
               </div>
+              <div className="flex w-full gap-2 items-start justify-between pointer-events-auto">
+                <VolumePanel />
+                <div className="hidden lg:block">
+                  <div className="flex gap-2">
+                    <ClockPanel />
+                    <TempoPanel />
+                  </div>
+                </div>
+              </div>
             </header>
 
-            <main className="relative flex flex-grow items-center justify-center overflow-hidden">
+            <main className="relative flex flex-grow justify-center">
+              <LyricsPlayer className="absolute w-full h-full flex items-center justify-center" />
+              <NextSongPanel className="absolute w-full h-full flex justify-center" />
               <SongInfo />
-              <LyricsPlayer />
-              <NextSongPanel />
-              <QueueSong />
             </main>
 
             <footer className="relative z-40">

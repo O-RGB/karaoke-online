@@ -1,15 +1,13 @@
-import { useOrientation } from "@/hooks/orientation-hook";
-import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import React, { useEffect, useState } from "react";
 import { ITrackData } from "@/features/songs/types/songs.type";
 
-interface NextSongPanelProps {}
+interface NextSongPanelProps {
+  className?: string;
+}
 
-const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
-  const { orientation } = useOrientation();
-  const hideMixer = useMixerStoreNew((state) => state.hideMixer);
+const NextSongPanel: React.FC<NextSongPanelProps> = ({ className }) => {
   const countDown = useRuntimePlayer((state) => state.countDown);
   const queue = useQueuePlayer((state) => state.queue);
   const [saveInfo, setInfo] = useState<ITrackData>();
@@ -27,15 +25,9 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
   }
 
   return (
-    <>
+    <div className={`${className}`}>
       <div
-        className={`fixed ${
-          orientation === "landscape"
-            ? "top-[60px] lg:top-[90px]"
-            : hideMixer
-            ? "top-[140px] lg:top-[100px]"
-            : "top-[400px] lg:top-[250px]"
-        } w-full h-20 px-6 lg:px-20 flex flex-col lg:justify-center items-end lg:items-center gap-2`}
+        className={`w-full h-20 px-6 lg:px-20 flex flex-col justify-center items-center gap-2`}
       >
         <div className=" flex justify-center gap-3 lg:gap-10">
           <div
@@ -60,13 +52,13 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({}) => {
             1
           </div>
         </div>
-        <div className="lg:text-xl text-white text-end lg:text-center leading-none lg:leading-normal">
+        <div className="lg:text-xl text-white text-center leading-none lg:leading-normal">
           <span>{saveInfo?.TITLE}</span>
           <br />
           <span className="text-xs lg:text-base">{saveInfo?.ARTIST}</span>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

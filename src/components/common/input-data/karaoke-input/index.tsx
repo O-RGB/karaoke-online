@@ -53,8 +53,6 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
   const [searchResult, setSearchResult] = useState<IOptions<ITrackData>[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const hideMixer = useMixerStoreNew((state) => state.hideMixer);
-
   const { searching, onEnter, arrowLeft, arrowRight, openSearchBox } =
     useKeyboardEvents();
   const resetSearchingTimeout = useKeyboardStore(
@@ -150,7 +148,6 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
 
   return (
     <div className="hidden lg:block text-white w-full duration-300">
-      {/* Navigation controls */}
       <div className="pb-2 flex gap-2">
         <Button
           disabled={selectedIndex === 0 || !hasResults}
@@ -185,9 +182,8 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
           เล่น
         </Button>
       </div>
-      {/* Search box and results */}
+
       <div className="w-full blur-overlay flex gap-2 blur-border border rounded-md p-2">
-        {/* Search query display */}
         <div className="p-2 bg-white/20 w-64 overflow-hidden rounded-md flex-none relative">
           <input
             type="text"
@@ -197,14 +193,12 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
           />
         </div>
 
-        {/* Loading indicator */}
         {loading && (
           <div className="h-full flex items-center justify-center mt-3">
             <AiOutlineLoading className="text-2xl text-white animate-spin" />
           </div>
         )}
 
-        {/* Selected result display */}
         {hasResults && selectedSong && (
           <div className="flex flex-wrap gap-3 items-center text-2xl animate-fadeIn">
             <SongTypeTag type={selectedSong.SUB_TYPE} />

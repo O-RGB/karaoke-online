@@ -145,7 +145,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <Button
             border="border blur-border focus:outline-none "
             onClick={() => onPlayerShowChange(true)}
-            blur={false}
+            blur={true}
             shadow=""
             className="rounded-md"
             padding="p-2"
@@ -170,9 +170,12 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           ></Button>
         </div>
       )}
+
       <div
         className={`w-full blur-overlay bg-black/10 border-t blur-border flex justify-between transition-all duration-300`}
         style={{
+          paddingLeft: "env(safe-area-inset-left)",
+          paddingRight: "env(safe-area-inset-right)",
           paddingBottom: "env(safe-area-inset-bottom)",
           transform: !isPlayerVisible ? "translateY(100%)" : "translateY(0)",
           opacity: !isPlayerVisible ? 0 : 1,

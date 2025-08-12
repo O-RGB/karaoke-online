@@ -10,14 +10,10 @@ import { FaList } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { ITrackData } from "@/features/songs/types/songs.type";
 import useSongsStore from "@/features/songs/store/songs.store";
-import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 interface SearchSongProps {}
 
 const SearchSong: React.FC<SearchSongProps> = ({}) => {
-  const sendMessageWithResponse = usePeerHostStore(
-    (state) => state.sendMessageWithResponse
-  );
   const songsManager = useSongsStore((state) => state.songsManager);
   const { orientation } = useOrientation();
 
@@ -63,10 +59,12 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
       ></KaraokeSearchInput>
 
       <div
-        className={`fixed z-50 px-4 block lg:hidden ${
+        className={`z-50 block lg:hidden ${
           orientation === "landscape"
-            ? `right-0 top-4 lg:top-4 ${fullUi ? "w-full" : "w-56"}`
-            : "left-0 top-4 lg:top-4 w-full"
+            ? `fixed right-2 top-4 ${
+                fullUi ? "w-[calc(100%-1.5rem)]" : "w-56"
+              }`
+            : "w-full"
         } duration-300`}
       >
         <div className="flex gap-1.5 w-full">

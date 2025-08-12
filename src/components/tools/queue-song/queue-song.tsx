@@ -286,7 +286,7 @@ const QueueSong: React.FC<QueueSongProps> = ({
       onClick={() => {
         resetQueueingTimeout(0);
       }}
-      className={`fixed top-0 h-screen z-[99] bg-black/30  text-white w-full px-4 duration-300`}
+      className={`absolute top-0 h-screen z-[99] bg-black/30  text-white w-full px-4 duration-300`}
     >
       <div className="pt-4 lg:pt-[14vw]">
         <div

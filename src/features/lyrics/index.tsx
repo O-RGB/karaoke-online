@@ -6,9 +6,11 @@ import React, { useState, useEffect, useMemo } from "react";
 import { LyricsCharacterStyle } from "./types/lyrics-character.type";
 import { FontDisplayManager } from "@/utils/indexedDB/db/display/table";
 
-interface LyricsPlayerProps {}
+interface LyricsPlayerProps {
+  className?: string;
+}
 
-const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
+const LyricsPlayer: React.FC<LyricsPlayerProps> = ({ className }) => {
   const [windowsWidth, setWindowsWidth] = useState<number>(0);
   const currentTick = useRuntimePlayer((state) => state.currentTick);
   const lyricsProcessed = useLyricsStore((state) => state.lyricsProcessed);
@@ -100,7 +102,9 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = () => {
   }
 
   return (
-    <div className="w-full h-full flex items-center justify-center -z-10 p-5">
+    <div
+      className={`w-full h-full flex items-center justify-center -z-10 p-5 ${className}`}
+    >
       {fontUrl && (
         <style>
           {`
