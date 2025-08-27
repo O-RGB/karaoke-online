@@ -21,7 +21,7 @@ import SongInfo from "../tools/song-info";
 import SoundSettingModal from "../modal/sound-setting";
 import RemoteEvent from "./remote-event";
 import DonateModal from "../modal/donate-modal";
-import AutoModal from "../modal/auto-modal";
+import AutoModal from "../modal/auto/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
 import Processing2Modal from "../common/alert/processing/processing-update";
 import AppendSongModal from "../modal/append-song";
