@@ -5,7 +5,6 @@ import React, { ReactNode, useState } from "react";
 import { MdOutlinePiano, MdOutlineSpeaker } from "react-icons/md";
 import { TbMusicPlus } from "react-icons/tb";
 import { VscSettings } from "react-icons/vsc";
-import { FaRegImage } from "react-icons/fa";
 import { LuDatabase } from "react-icons/lu";
 import { ControlledMenu, Menu, MenuButton } from "@szhsin/react-menu";
 import { CgScreen } from "react-icons/cg";

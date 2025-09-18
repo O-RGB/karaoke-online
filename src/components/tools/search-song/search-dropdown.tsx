@@ -1,4 +1,3 @@
-import Tags from "@/components/common/display/tags";
 import { ITrackData } from "@/features/songs/types/songs.type";
 import React from "react";
 import { FaUser } from "react-icons/fa";

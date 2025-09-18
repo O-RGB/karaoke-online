@@ -1,26 +1,47 @@
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
-import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import { ITrackData } from "@/features/songs/types/songs.type";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 
 interface NextSongPanelProps {
   className?: string;
 }
 
 const NextSongPanel: React.FC<NextSongPanelProps> = ({ className }) => {
-  const countDown = useRuntimePlayer((state) => state.countDown);
+  const componnetId = useId();
+  const engine = useSynthesizerEngine((state) => state.engine);
+  const [countdown, setCountDown] = useState<number>(0);
+
+  const onCountDownUpdated = (tempo: number) => {
+    setCountDown(tempo);
+  };
+
+  useEffect(() => {
+    if (engine) {
+      engine?.countdownUpdated.add(
+        ["COUNTDOWN", "CHANGE"],
+        0,
+        onCountDownUpdated,
+        componnetId
+      );
+    }
+    return () => {
+      engine?.countdownUpdated.remove(["COUNTDOWN", "CHANGE"], 0, componnetId);
+    };
+  }, [engine]);
+
   const queue = useQueuePlayer((state) => state.queue);
   const [saveInfo, setInfo] = useState<ITrackData>();
 
   useEffect(() => {
-    if (queue.length > 0 && countDown <= 3) {
+    if (queue.length > 0 && countdown <= 3) {
       setInfo(queue[0]);
     } else if (queue.length === 1) {
       setInfo(undefined);
     }
-  }, [countDown]);
+  }, [countdown]);
 
-  if (countDown > 3 || queue.length < 1 || !saveInfo) {
+  if (countdown > 3 || queue.length < 1 || !saveInfo) {
     return <></>;
   }
 
@@ -32,21 +53,21 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({ className }) => {
         <div className=" flex justify-center gap-3 lg:gap-10">
           <div
             className={`${
-              countDown <= 3 ? "bg-white/70" : "bg-white/20"
+              countdown <= 3 ? "bg-white/70" : "bg-white/20"
             } w-5 lg:w-10 h-5 lg:h-10 rounded-full border flex items-center justify-center text-xs lg:text-xl font-bold text-white`}
           >
             3
           </div>
           <div
             className={`${
-              countDown <= 2 ? "bg-white/70" : "bg-white/20"
+              countdown <= 2 ? "bg-white/70" : "bg-white/20"
             } w-5 lg:w-10 h-5 lg:h-10 rounded-full border flex items-center justify-center text-xs lg:text-xl font-bold text-white`}
           >
             2
           </div>
           <div
             className={`${
-              countDown <= 1 ? "bg-white/70" : "bg-white/20"
+              countdown <= 1 ? "bg-white/70" : "bg-white/20"
             } w-5 lg:w-10 h-5 lg:h-10 rounded-full border flex items-center justify-center text-xs lg:text-xl font-bold text-white`}
           >
             1

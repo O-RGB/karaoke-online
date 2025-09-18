@@ -6,7 +6,6 @@ import useConfigStore from "@/features/config/config-store";
 import Upload from "../../../common/input-data/upload";
 import InputNumber from "../../../common/input-data/input-number";
 import ToggleCheckBox from "../../../common/input-data/checkbox";
-import LyricsCharacter from "../../../../features/lyrics/components/lyrics-character";
 import React, { useEffect, useState } from "react";
 import { TbRestore } from "react-icons/tb";
 import { lyricsConfig } from "@/features/lyrics/lib/lyrics.features";
@@ -16,6 +15,7 @@ import { FaUpload } from "react-icons/fa";
 import { FontDisplayManager } from "@/utils/indexedDB/db/display/table";
 import { AiFillDelete } from "react-icons/ai";
 import { IAlertCommon } from "../../../common/alert/types/alert.type";
+import LyricsCharacter from "@/features/lyrics/character";
 
 interface LyricsModalProps extends IAlertCommon {}
 
@@ -266,7 +266,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ setAlert }) => {
         >
           <LyricsCharacter
             clip={50}
-            lyr={"ตัวอย่าง"}
+            text="ตัวอย่าง"
             activeColor={lyrics.active!}
             color={lyrics.color!}
             fontSize={

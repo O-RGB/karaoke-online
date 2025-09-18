@@ -1,5 +1,6 @@
 interface FileGroup extends Partial<SongFiles> {
   emk?: File;
+  mp3?: File;
 }
 
 interface SongFiltsEncodeAndDecode extends SongFilesDecode {
@@ -61,3 +62,29 @@ interface MidiPlayingInfo {
 interface PlayingInfo {
   duration: number;
 }
+
+// interface LyricWordData {
+//   name: string;
+//   start: number | null;
+//   end: number | null;
+//   length: number;
+//   index: number;
+//   lineIndex: number;
+// }
+
+// type MusicMode = "mp3" | "midi" | "mp4" | "youtube";
+
+// interface IMidiInfo {
+//   fileName: string;
+//   durationTicks: number;
+//   ppq: number;
+//   bpm: number;
+//   raw: ParseResult;
+// }
+
+// interface ParseResult {
+//   info: SongInfo;
+//   lyrics: LyricEvent[][];
+//   chords: ChordEvent[];
+//   firstNoteOnTick: number | null;
+// }

@@ -7,9 +7,9 @@ import {
   KaraokeExtension,
   ISearchRecordPreview,
 } from "@/features/songs/types/songs.type";
-import { DBFParser } from "@/lib/karaoke/dbf";
-import { DBFHeader } from "@/lib/karaoke/dbf/types/dbf-type";
-import { parseEMKFile } from "@/lib/karaoke/emk";
+import { DBFParser } from "@/lib/karaoke/data/dbf";
+import { DBFHeader } from "@/lib/karaoke/data/dbf/types/dbf-type";
+import { parseEMKFile } from "@/lib/karaoke/songs/emk";
 import FileSystemManager from "@/utils/file/file-system";
 
 export class DBFSongsSystemReader extends BaseSongsSystemReader {
@@ -254,9 +254,9 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
     const foldername = CODE.length > 0 ? CODE[0] : undefined;
     if (!foldername) return undefined;
 
-    const primaryPath = `Songs/${TYPE}/${SUB_TYPE}`;
+    const primaryPath = `Songs/${TYPE.toUpperCase()}/${SUB_TYPE.toUpperCase()}`;
 
-    if (SUB_TYPE === "EMK") {
+    if (SUB_TYPE === "emk") {
       const emk = await this.getFile(
         `${primaryPath}/${foldername}/${CODE}.emk`,
         `${primaryPath}/${CODE}.emk`
@@ -271,7 +271,7 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
           };
         }
       }
-    } else if (SUB_TYPE === "NCN") {
+    } else if (SUB_TYPE === "ncn") {
       const midi = await this.getFile(
         `${primaryPath}/Song/${foldername}/${CODE}.mid`,
         `${primaryPath}/Song/${CODE}.mid`

@@ -1,28 +1,28 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
+import Button from "../../common/button/button";
+import useQueuePlayer from "@/features/player/player/modules/queue-player";
+import useConfigStore from "@/features/config/config-store";
+import useKeyboardStore from "@/features/keyboard-state";
+import RecordingsModal from "../../modal/recordings-modal";
+import Modal from "../../common/modal";
+import ContextModal from "../../modal/context-modal";
+import TimerBar from "./timer-range";
+import { BsMicFill } from "react-icons/bs";
+import { IoMdArrowDropup, IoMdArrowDropdown } from "react-icons/io";
+import { MdRadioButtonChecked } from "react-icons/md";
+import { FaFolder, FaMicrophone, FaMusic, FaSearch } from "react-icons/fa";
+import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { Menu, MenuItem, MenuButton } from "@szhsin/react-menu";
+import { FiSettings } from "react-icons/fi";
+import { PlayerStatusType } from "@/features/engine/types/synth.type";
 import {
   TbPlayerPauseFilled,
   TbPlayerPlayFilled,
   TbPlayerSkipForwardFilled,
 } from "react-icons/tb";
-import { BsMicFill, BsMicMuteFill } from "react-icons/bs";
-import { IoMdArrowDropup, IoMdArrowDropdown } from "react-icons/io";
-import { MdRadioButtonChecked } from "react-icons/md";
-import Button from "../common/button/button";
-import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
-import useQueuePlayer from "@/features/player/player/modules/queue-player";
-import useConfigStore from "@/features/config/config-store";
-import SliderCommon from "../common/input-data/slider";
-import useKeyboardStore from "@/features/keyboard-state";
-import { FaFolder, FaMicrophone, FaMusic, FaSearch } from "react-icons/fa";
-import { BsFullscreen, BsFullscreenExit } from "react-icons/bs";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import { Menu, MenuItem, MenuButton } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
-import RecordingsModal from "../modal/recordings-modal";
-import Modal from "../common/modal";
-import { FiSettings } from "react-icons/fi";
-import ContextModal from "../modal/context-modal";
 
 interface PlayerRemote {
   onPause?: () => void;
@@ -43,31 +43,34 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   onFullScreen,
   show,
 }) => {
-  const timingMode =
-    useConfigStore((state) => state.config.system?.timingModeType) ?? "Time";
-  const [maxTimer, setMaxTimer] = useState<number>(0);
-  const [value, setValue] = useState<number>(0);
+  const componnetId = useId();
   const [isPlayerVisible, setIsPlayerVisible] = useState<boolean>(true);
   const [openRecordlist, setRacordlist] = useState<boolean>(false);
 
   const inputRef = useRef<any>(null);
 
   const engine = useSynthesizerEngine((state) => state.engine);
-  const isPaused = useRuntimePlayer((state) => state.isPaused);
-  const paused = useRuntimePlayer((state) => state.paused);
-  const play = useRuntimePlayer((state) => state.play);
-  const setCurrentTime = useRuntimePlayer((state) => state.setCurrentTime);
-  const currentTime = useRuntimePlayer((state) => state.currentTime);
-  const currentTick = useRuntimePlayer((state) => state.currentTick);
-  const midi = useRuntimePlayer((state) => state.midi);
+  const player = useSynthesizerEngine((state) => state.engine?.player);
+  const [playerStatus, setPlayerStatus] = useState<PlayerStatusType>("STOP");
+
+  const onPlayerUpdated = (on: PlayerStatusType) => {
+    setPlayerStatus(on);
+  };
+
+  useEffect(() => {
+    if (engine) {
+      engine?.playerUpdated.add(
+        ["PLAYER", "CHANGE"],
+        0,
+        onPlayerUpdated,
+        componnetId
+      );
+    }
+  }, [engine]);
+
   const { setOpenSearchBox } = useKeyboardStore();
   const setConfig = useConfigStore((state) => state.setConfig);
-
   const nextMusic = useQueuePlayer((state) => state.nextMusic);
-
-  const gain =
-    useSynthesizerEngine.getState().engine?.instrumental?.getGain() ?? [];
-
   const [isRecording, setIsRecording] = useState(false);
 
   const handleStartRecording = async (includeMicrophone: boolean) => {
@@ -101,27 +104,15 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
 
   const handleRecordButtonClick = () => {
     if (isRecording) {
-      // หยุดการบันทึก
       handleStopRecording();
     }
-    // หากไม่ได้บันทึกอยู่ จะไม่ทำอะไร เพราะให้ Menu จัดการแทน
   };
 
   useEffect(() => {
-    if (midi) {
-      if (timingMode === "Tick") {
-        setMaxTimer(midi.loop.end);
-        setValue(currentTick);
-      } else if (timingMode === "Time") {
-        setMaxTimer(midi.duration);
-        setValue(currentTime);
-      }
+    if (playerStatus === "PLAY") {
+      engine?.player?.eventChange?.();
     }
-  }, [midi, timingMode, currentTime, currentTick]);
-
-  useEffect(() => {
-    engine?.player?.eventChange?.();
-  }, [isPaused]);
+  }, [playerStatus]);
 
   const onPlayerShowChange = (isShow: boolean) => {
     setConfig?.({ widgets: { player: { show: isShow } } });
@@ -185,7 +176,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <div className="flex items-center">
             {/* Recording Button - แยกการทำงานออกจาก Menu */}
             {isRecording ? (
-              // เมื่อกำลังบันทึกอยู่ - แสดงปุ่มหยุด
               <Button
                 className="hover:bg-white/20 bg-red-500/50 animate-pulse relative overflow-hidden"
                 blur={false}
@@ -202,7 +192,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
                 <div className="absolute inset-0 bg-red-500/20 animate-ping rounded-full"></div>
               </Button>
             ) : (
-              // เมื่อไม่ได้บันทึก - แสดง Menu
               <Menu
                 transition
                 boundingBoxPadding="10 10 10 10"
@@ -220,13 +209,22 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
                   </MenuButton>
                 }
               >
-                <MenuItem  className={"text-sm"} onClick={() => handleStartRecording(true)}>
+                <MenuItem
+                  className={"text-sm"}
+                  onClick={() => handleStartRecording(true)}
+                >
                   <FaMicrophone className="mr-2" /> บันทึกเสียงร้อง + ดนตรี
                 </MenuItem>
-                <MenuItem className={"text-sm"} onClick={() => handleStartRecording(false)}>
+                <MenuItem
+                  className={"text-sm"}
+                  onClick={() => handleStartRecording(false)}
+                >
                   <FaMusic className="mr-2" /> บันทึกเฉพาะดนตรี
                 </MenuItem>
-                <MenuItem className={"text-sm"} onClick={() => setRacordlist(true)}>
+                <MenuItem
+                  className={"text-sm"}
+                  onClick={() => setRacordlist(true)}
+                >
                   <FaFolder className="mr-2" /> บันทึกแล้ว
                 </MenuItem>
               </Menu>
@@ -234,7 +232,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           </div>
 
           <div className="flex w-fit ">
-            {!isPaused ? (
+            {playerStatus === "PLAY" ? (
               <Button
                 className="hover:bg-white/20"
                 blur={false}
@@ -242,7 +240,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
                 shadow=""
                 padding="p-4"
                 onClick={() => {
-                  paused();
+                  player?.pause();
                 }}
                 shape={false}
                 icon={<TbPlayerPauseFilled className="text-white" />}
@@ -255,7 +253,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
                 shadow=""
                 padding="p-4"
                 onClick={() => {
-                  play();
+                  player?.play();
                 }}
                 shape={false}
                 icon={<TbPlayerPlayFilled className="text-white" />}
@@ -272,18 +270,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
               icon={<TbPlayerSkipForwardFilled className="text-white" />}
             ></Button>
           </div>
-          <div className="w-full flex items-center relative pl-3 px-2">
-            <SliderCommon
-              tabIndex={-1}
-              value={value}
-              min={0}
-              max={maxTimer}
-              style={{
-                width: "100%",
-              }}
-              onChange={setCurrentTime}
-            ></SliderCommon>
-          </div>
+          <TimerBar></TimerBar>
         </div>
 
         <div className="flex">

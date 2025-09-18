@@ -1,5 +1,3 @@
-import Tags from "@/components/common/display/tags";
-import instrumental from "@/components/modal/sound-setting/tabs/instrumental";
 import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
 import React, { useEffect, useId, useState } from "react";
 
@@ -32,14 +30,7 @@ const EqTag: React.FC<EqTagProps> = ({ instrumental, category, channel }) => {
 
   if (eqEnabled)
     return (
-      <div className="absolute top-3.5 left-0.5 text-[8px] text-white">
-        EQ
-        {/* <Tags
-          children={"EQ"}
-          color="yellow"
-          className="!p-[1px] !rounded-sm !text-[8px]"
-        ></Tags> */}
-      </div>
+      <div className="absolute top-3.5 left-0.5 text-[8px] text-white">EQ</div>
     );
 };
 

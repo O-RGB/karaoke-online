@@ -3,32 +3,54 @@ import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { calculateTicks, convertTicksToTime } from "@/lib/app-control";
 import { BaseSynthPlayerEngine } from "@/features/engine/types/synth.type";
 import { SoundSetting } from "@/features/config/types/config.type";
+import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
+import { SpessaSynthEngine } from "../spessa-synth-engine";
+import { parseMidi } from "@/lib/karaoke/songs/midi/reader";
+import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   private player: Sequencer;
   public paused: boolean = false;
+  private engine: SpessaSynthEngine;
   public isFinished: boolean = false;
-  public currentTiming: number = 0;
-  public midiData: MIDI | undefined = undefined;
-  public duration: number = 0;
-  public durationTiming: number = 0;
+  public midiData: IMidiParseResult | undefined = undefined;
   public config?: Partial<SoundSetting>;
+  public musicQuere: MusicLoadAllData | undefined = undefined;
+  public mp3SourceNode: AudioBufferSourceNode | undefined;
 
-  constructor(player: Sequencer) {
+  constructor(player: Sequencer, engine: SpessaSynthEngine) {
     this.player = player;
+    this.engine = engine;
   }
 
-  play(): void {
-    this.player.play();
+  async play(): Promise<void> {
+    if (!this.musicQuere) return;
+    if (this.musicQuere?.musicType === "mp3") {
+      if (this.engine.audio?.state === "suspended") {
+        await this.engine.audio.resume();
+      }
+      this.mp3SourceNode?.start(0);
+    } else {
+      this.player.play();
+    }
+
+    this.engine.timer?.startTimer();
     this.paused = false;
+    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
   }
   stop(): void {
+    if (!this.musicQuere) return;
+    this.mp3SourceNode?.stop();
     this.player.stop();
-    this.player.pause();
+    this.engine.timer?.stopTimer();
     this.paused = true;
+    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "STOP");
   }
   pause(): void {
+    if (!this.musicQuere) return;
     this.player.pause();
+    this.engine.timer?.stopTimer();
     this.paused = true;
+    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PAUSE");
   }
 
   async getCurrentTiming() {
@@ -36,10 +58,42 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   }
 
   setCurrentTiming(timing: number): void {
-    if (!this.player) {
-      return;
+    if (this.musicQuere?.musicType === "mp3") {
+      if (!this.engine.audio || !this.mp3SourceNode?.buffer) return;
+
+      try {
+        this.mp3SourceNode.stop();
+      } catch (_) {}
+
+      const newNode = this.engine.audio.createBufferSource();
+      newNode.buffer = this.mp3SourceNode.buffer;
+
+      const outputNode = this.engine.globalEqualizer
+        ? this.engine.globalEqualizer.input
+        : this.engine.audio.destination;
+
+      newNode.connect(outputNode);
+
+      this.mp3SourceNode = newNode;
+
+      this.mp3SourceNode.start(0, timing);
+    } else {
+      if (!this.player) return;
+      this.player.currentTime = timing;
     }
-    this.player.currentTime = timing;
+    this.engine.timer?.seekTimer(timing);
+  }
+
+  tempoUpdate(tempo: number): void {
+    this.engine.tempoUpdated.trigger(["TEMPO", "CHANGE"], 0, tempo);
+  }
+
+  timingUpdate(tickOrTime: number): void {
+    this.engine.timerUpdated.trigger(["TIMING", "CHANGE"], 0, tickOrTime);
+  }
+
+  countDownUpdate(time: number): void {
+    this.engine.countdownUpdated.trigger(["COUNTDOWN", "CHANGE"], 0, time);
   }
 
   async getCurrentTickAndTempo(
@@ -51,24 +105,77 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
     return calculateTicks(timeDivision, currentTime, tempoTimeChange);
   }
 
-  async loadMidi(midi: File) {
+  async prepareMidi(midi: File) {
+    this.engine.timer?.seekTimer(0);
     let midiFileArrayBuffer = await midi.arrayBuffer();
     let parsedMidi: MIDI | null = null;
+    let midiData: IMidiParseResult;
     try {
       parsedMidi = new MIDI(midiFileArrayBuffer, midi.name);
+      midiData = await parseMidi(midi);
     } catch (e) {
       console.error(e);
       const fix = await fixMidiHeader(midi);
       const fixArrayBuffer = await fix.arrayBuffer();
       parsedMidi = new MIDI(fixArrayBuffer, fix.name);
+      midiData = await parseMidi(fix);
     }
-    this.midiData = parsedMidi;
-    this.duration = parsedMidi.duration;
+
+    this.midiData = midiData;
     this.player.loadNewSongList([parsedMidi], false);
 
-    this.durationTiming = parsedMidi.duration;
+    return true;
+  }
 
-    return parsedMidi;
+  async loadMp3(file: File): Promise<boolean> {
+    if (!this.engine.audio) {
+      console.error("AudioContext is not initialized.");
+      return false;
+    }
+
+    try {
+      this.engine.timer?.seekTimer(0);
+      const arrayBuffer = await file.arrayBuffer();
+      const audioBuffer = await this.engine.audio.decodeAudioData(arrayBuffer);
+      this.mp3SourceNode = this.engine.audio.createBufferSource();
+      this.mp3SourceNode.buffer = audioBuffer;
+
+      const outputNode = this.engine.globalEqualizer
+        ? this.engine.globalEqualizer.input
+        : this.engine.audio.destination;
+
+      this.mp3SourceNode.connect(outputNode);
+
+      console.log("🎵 MP3 loaded and ready to play.");
+      return true;
+    } catch (error) {
+      console.error("Error loading MP3:", error);
+      this.mp3SourceNode = undefined;
+      return false;
+    }
+  }
+
+  async loadMidi(data?: MusicLoadAllData): Promise<boolean> {
+    if (!data) return false;
+    const mid = data.files.midi;
+    if (mid !== undefined) {
+      this.mp3SourceNode = undefined;
+      this.engine.timer?.updateMusic(data);
+      this.engine.timer?.updateTempoMap(data.tempoRange);
+      this.engine.timer?.updatePpq((data.metadata as any).ticksPerBeat);
+      this.musicQuere = data;
+      this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+      return !!this.prepareMidi(mid);
+    }
+
+    const mp3 = data.files.mp3;
+    if (mp3 != undefined) {
+      this.engine.timer?.updateMusic(data);
+      this.musicQuere = data;
+      this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+      return this.loadMp3(mp3);
+    }
+    return false;
   }
 
   setPlayBackRate(rate: number) {

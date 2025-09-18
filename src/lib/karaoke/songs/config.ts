@@ -1,0 +1,3 @@
+export const DEFAULT_PRE_ROLL_OFFSET_MIDI = 0;
+export const DEFAULT_PRE_ROLL_OFFSET_MP3 = 0.3;
+export const DEFAULT_CHORD_DURATION = 1;

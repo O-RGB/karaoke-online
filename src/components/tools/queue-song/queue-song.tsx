@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -22,9 +22,9 @@ import useKeyboardStore from "@/features/keyboard-state";
 import Button from "@/components/common/button/button";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
-import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import { ITrackData } from "@/features/songs/types/songs.type";
 import { BiMusic } from "react-icons/bi";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 
 const createTracklistId = (item: ITrackData) =>
   `${item.TITLE}${item.ARTIST}${item._superIndex}${item._originalIndex}`;
@@ -148,6 +148,10 @@ interface QueueSongProps {
 const QueueSong: React.FC<QueueSongProps> = ({
   stopTouchMusicPlaying = 10,
 }) => {
+  const componnetId = useId();
+  const engine = useSynthesizerEngine((state) => state.engine);
+  const [countdown, setCountDown] = useState<number>(0);
+
   const queueing = useKeyboardStore((state) => state.queueing);
   const searching = useKeyboardStore((state) => state.searching);
   const arrowDown = useKeyboardStore((state) => state.arrowDown);
@@ -161,7 +165,8 @@ const QueueSong: React.FC<QueueSongProps> = ({
   const queue = useQueuePlayer((state) => state.queue);
   const moveQueue = useQueuePlayer((state) => state.moveQueue);
   const playMusic = useQueuePlayer((state) => state.playMusic);
-  const countDown = useRuntimePlayer((state) => state.countDown);
+  const nextMusic = useQueuePlayer((state) => state.nextMusic);
+
   const [selected, setSelected] = useState<number>(0);
 
   const sensors = useSensors(
@@ -220,20 +225,28 @@ const QueueSong: React.FC<QueueSongProps> = ({
       }
     }
   };
+  const onCountDownUpdated = (count: number) => {
+    console.log(count);
+    setCountDown(count);
+
+    if (count < stopTouchMusicPlaying) {
+      setLockFirstIndex(true);
+    } else {
+      setLockFirstIndex(false);
+    }
+
+    if (count === 0) {
+      setTimeout(() => {
+        nextMusic();
+      }, 500);
+    }
+  };
 
   const onDelete = (index: number) => {
     let clone = [...queue];
     clone = clone.filter((_, i) => i !== index);
     moveQueue(clone);
   };
-
-  useEffect(() => {
-    if (countDown < stopTouchMusicPlaying) {
-      setLockFirstIndex(true);
-    } else {
-      setLockFirstIndex(false);
-    }
-  }, [countDown]);
 
   useEffect(() => {
     setSelected((value) => {
@@ -272,6 +285,20 @@ const QueueSong: React.FC<QueueSongProps> = ({
   }, [onEnter]);
 
   useEffect(() => {}, [queue]);
+
+  useEffect(() => {
+    if (engine) {
+      engine?.countdownUpdated.add(
+        ["COUNTDOWN", "CHANGE"],
+        0,
+        onCountDownUpdated,
+        componnetId
+      );
+    }
+    return () => {
+      engine?.countdownUpdated.remove(["COUNTDOWN", "CHANGE"], 0, componnetId);
+    };
+  }, [engine]);
 
   if (!queueing) {
     return <></>;
@@ -324,8 +351,8 @@ const QueueSong: React.FC<QueueSongProps> = ({
                       index={index}
                       isFirst={index == 0}
                       isLast={index === queue.length - 1}
-                      lockFirst={countDown < stopTouchMusicPlaying}
-                      countDown={countDown}
+                      lockFirst={countdown < stopTouchMusicPlaying}
+                      countDown={countdown}
                       onKeySelected={selected === index}
                       onDelete={onDelete}
                     />

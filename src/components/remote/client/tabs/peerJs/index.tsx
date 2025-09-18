@@ -1,14 +1,12 @@
 import { IAlertCommon } from "@/components/common/alert/types/alert.type";
+import React, { useEffect, useState } from "react";
 import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
-import Modal from "@/components/common/modal";
 import { remoteHost } from "@/config/value";
 import { remoteRoutes } from "@/features/remote/routes";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import { useQRCode } from "next-qrcode";
-import React, { useEffect, useState } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { BsTools } from "react-icons/bs";
 import { FaUserCircle } from "react-icons/fa";
 import { FiCheck, FiCopy } from "react-icons/fi";
 import { RiRemoteControlFill } from "react-icons/ri";

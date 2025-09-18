@@ -1,7 +1,6 @@
 import Button from "@/components/common/button/button";
 import WinboxModal from "@/components/common/modal";
-import React, { useId, useState } from "react";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import React, { useState } from "react";
 import { FaDrum } from "react-icons/fa";
 import DrumPanel from "./drum-panel";
 

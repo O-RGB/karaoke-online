@@ -12,7 +12,7 @@ import {
   KaraokeExtension,
 } from "@/features/songs/types/songs.type";
 
-import { parseEMKFile } from "@/lib/karaoke/emk";
+import { parseEMKFile } from "@/lib/karaoke/songs/emk";
 import { extractFile } from "@/lib/zip";
 import {
   MasterIndexLocalSongsManager,
@@ -146,7 +146,7 @@ export class PythonIndexReader extends BaseSongsSystemReader {
 
   public override async getSong(
     trackData: ITrackData
-  ): Promise<KaraokeExtension<File> | undefined> {
+  ): Promise<KaraokeExtension | undefined> {
     if (
       trackData._superIndex === undefined ||
       trackData._originalIndex === undefined

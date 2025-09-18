@@ -1,11 +1,27 @@
 import { SoundSystemMode, SystemConfig } from "../config/types/config.type";
 import { DBFSongsSystemReader } from "./modules/extreme/extreme-file-system";
 import { BaseSongsSystemReader } from "./base/index-search";
-import { ITrackData } from "./types/songs.type";
+import {
+  ITrackData,
+  KaraokeExtension,
+  MusicLoadAllData,
+} from "./types/songs.type";
 import { BaseUserSongsSystemReader } from "./base/tride-search";
 import { PythonIndexReader } from "./modules/extreme/extreme-import";
 import { ApiSongsSystemReader } from "./modules/extreme/extreme-api-system";
 import { DircetoryLocalSongsManager } from "@/utils/indexedDB/db/local-songs/table";
+import { cursorToTicks } from "@/lib/karaoke/cursors";
+import {
+  curToArrayRange,
+  convertLyricsMapping,
+  xmlToArrayRange,
+} from "@/lib/karaoke/lyrics";
+import { readLyricsFile, readCursorFile } from "@/lib/karaoke/ncn";
+import { parseEMKFile } from "@/lib/karaoke/songs/emk";
+import { parseMidi } from "@/lib/karaoke/songs/midi/reader";
+import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
+import { readMp3 } from "@/lib/karaoke/songs/mp3/read";
+import { musicProcessGroup } from "@/lib/karaoke/read";
 
 type ReaderCreator = () =>
   | BaseSongsSystemReader
@@ -154,7 +170,9 @@ export class SongsSystem {
     return userSongsPromise;
   }
 
-  public async getSong(trackData: ITrackData): Promise<any | undefined> {
+  public async getSong(
+    trackData: ITrackData
+  ): Promise<MusicLoadAllData | undefined> {
     if (!this.isReady()) {
       console.warn("System is not ready to get a song.");
       return undefined;
@@ -163,7 +181,7 @@ export class SongsSystem {
     try {
       const userSong = await this.userSong.getSong(trackData);
       if (userSong) {
-        return userSong;
+        return musicProcessGroup(userSong);
       }
     } catch (error) {
       console.error(
@@ -172,7 +190,12 @@ export class SongsSystem {
       );
     }
 
-    return this.manager?.getSong(trackData);
+    const userSong = await this.manager?.getSong(trackData);
+    if (userSong) {
+      return musicProcessGroup(userSong);
+    }
+
+    return undefined;
   }
 
   uninstall() {

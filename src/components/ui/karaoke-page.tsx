@@ -19,7 +19,7 @@ import useKeyboardStore from "@/features/keyboard-state";
 import NextSongPanel from "../tools/next-song-panel";
 import SongInfo from "../tools/song-info";
 import SoundSettingModal from "../modal/sound-setting";
-import RemoteEvent from "./remote-event";
+// import RemoteEvent from "./remote-event";
 import DonateModal from "../modal/donate-modal";
 import AutoModal from "../modal/auto/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
@@ -33,7 +33,6 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { DatabaseService } from "@/utils/indexedDB/service";
 import { SongsSystem } from "@/features/songs";
 import { SoundfontSystemManager } from "@/features/soundfont";
-import { useOrientation } from "@/hooks/orientation-hook";
 
 interface KaraokePageProps {}
 
@@ -100,7 +99,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         <Loading isLoad={onPrepare} />
         <Processing2Modal />
         <WallpaperRender />
-        <RemoteEvent />
+        {/* <RemoteEvent /> */}
         <AutoModal auto title={""} />
 
         <ContextModal

@@ -6,8 +6,7 @@ import {
   WidgetsConfig,
   WidgetsSettingConfig,
 } from "@/features/config/types/config.type";
-import NumberButton from "@/components/common/input-data/number-button"; // <-- Import ที่เพิ่มเข้ามา
-import { FaSearchPlus, FaSearchMinus } from "react-icons/fa"; // <-- Import ที่เพิ่มเข้ามา
+import NumberButton from "@/components/common/input-data/number-button";
 import Button from "@/components/common/button/button";
 import { BsZoomIn } from "react-icons/bs";
 
@@ -25,7 +24,6 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
     inst: defaultConfig,
   });
 
-  // State สำหรับการซูม
   const [zoomLevel, setZoomLevel] = useState(config.system?.zoom || 1);
 
   const onSetWidgets = (widget: 0 | 1 | 2 | 3, show: boolean) => {
@@ -62,23 +60,19 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
     }
   };
 
-  // --- ส่วนที่เพิ่มเข้ามา ---
-  // ฟังก์ชันสำหรับจัดการการเปลี่ยนแปลงค่าซูม
   const handleZoomChange = (newZoomValue: number) => {
-    // จำกัดค่าซูมให้อยู่ระหว่าง 0.5 (50%) และ 2 (200%)
     const clampedZoom = Math.max(0.5, Math.min(2, newZoomValue / 100));
     const finalZoom = parseFloat(clampedZoom.toFixed(2));
 
     setZoomLevel(finalZoom);
     setConfig({ system: { ...config.system, zoom: finalZoom } });
   };
-  // --- สิ้นสุดส่วนที่เพิ่มมา ---
 
   useEffect(() => {
     if (config.widgets) {
       setWidgets(config.widgets);
     }
-    // อัปเดต state ของ zoom level เมื่อ config เปลี่ยน
+
     setZoomLevel(config.system?.zoom || 1);
   }, [config]);
 

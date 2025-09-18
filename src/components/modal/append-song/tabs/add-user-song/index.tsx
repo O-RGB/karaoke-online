@@ -1,23 +1,21 @@
 import Label from "@/components/common/display/label";
-import Upload from "@/components/common/input-data/upload";
-import ProcessingModal from "@/components/common/alert/processing/processing";
-import React, { useState } from "react";
-import { loadKaraokeTracks } from "@/lib/karaoke/read";
-import { FaPlus, FaRegFileAudio, FaSearch } from "react-icons/fa";
-import TableList from "@/components/common/table/table-list";
 import {
   KaraokeDecoded,
-  TrackDataAndFile,
+  MusicLoadAllData,
 } from "@/features/songs/types/songs.type";
-import Tags from "@/components/common/display/tags";
-import Button from "@/components/common/button/button";
-import { RiDeleteBin5Line } from "react-icons/ri";
 import {
   BaseUserSongsSystemReader,
   DuplicateMatch,
 } from "@/features/songs/base/tride-search";
+import Upload from "@/components/common/input-data/upload";
+import TableList from "@/components/common/table/table-list";
+import Tags from "@/components/common/display/tags";
+import Button from "@/components/common/button/button";
+import React, { useState } from "react";
+import { groupFilesByBaseName, musicProcessGroup } from "@/lib/karaoke/read";
+import { FaPlus, FaRegFileAudio } from "react-icons/fa";
+import { RiDeleteBin5Line } from "react-icons/ri";
 import { AlertDialogProps } from "@/components/common/alert/notification";
-import Modal from "@/components/common/modal";
 
 interface AddSongCount {
   length: number;
@@ -36,27 +34,26 @@ interface DuplicateModalData {
 }
 
 const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
-  const [progress, setProgress] = useState<IProgressBar>();
-  const [decoded, setDecoded] = useState<ListItem<KaraokeDecoded>[]>([]);
-  const [duplicateModal, setDuplicateModal] =
-    useState<DuplicateModalData | null>(null);
+  const [decoded, setDecoded] = useState<ListItem<MusicLoadAllData>[]>([]);
+  // const [duplicateModal, setDuplicateModal] =
+  //   useState<DuplicateModalData | null>(null);
   const [soundCount, setSoundCount] = useState<AddSongCount>({
     length: 0,
     error: 0,
     duplicate: 0,
   });
 
-  const checkDuplicate = (trackData: KaraokeDecoded): boolean => {
+  const checkDuplicate = (trackData: MusicLoadAllData): boolean => {
     const test = new BaseUserSongsSystemReader();
     return test.checkDuplicate(trackData);
   };
 
-  const checkDuplicateWithDetails = (
-    trackData: KaraokeDecoded
-  ): DuplicateMatch[] => {
-    const test = new BaseUserSongsSystemReader();
-    return test.checkDuplicateWithDetails(trackData);
-  };
+  // const checkDuplicateWithDetails = (
+  //   trackData: KaraokeDecoded
+  // ): DuplicateMatch[] => {
+  //   const test = new BaseUserSongsSystemReader();
+  //   return test.checkDuplicateWithDetails(trackData);
+  // };
 
   const updateSoundCount = (decodedList: ListItem<KaraokeDecoded>[]) => {
     const errorCount = decodedList.filter((item) => item.value.error).length;
@@ -75,22 +72,31 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
     if (filelist.length === 0) return;
 
     if (decoded.length + filelist.length > 200) {
-      alert(
-        `ไม่สามารถเพิ่มได้ เนื่องจากจะเกิน 200 เพลง (ปัจจุบัน: ${decoded.length}, ต้องการเพิ่ม: ${filelist.length})`
-      );
+      setAlert?.({
+        variant: "warning",
+        title: "ไม่สามารถเพิ่มเกิน 200 เพลงต่อครั้ง",
+        description: `กรณีลบแยกเพลงออกเป็นส่วน ๆ แล้วนำเพลงเข้าทีละชุด (ครั้งละ 200 เพลง)`,
+      });
       return;
     }
 
-    const newDecoded = await loadKaraokeTracks(filelist);
+    const preprocess = groupFilesByBaseName(filelist);
 
-    const errors: typeof newDecoded = [];
-    const valids: typeof newDecoded = [];
-    const duplicates: typeof newDecoded = [];
+    let decode: MusicLoadAllData[] = [];
+    for (let i = 0; i < preprocess.length; i++) {
+      const item = preprocess[i];
+      let data = await musicProcessGroup(item, false);
+      decode.push(data);
+    }
 
-    for (const item of newDecoded) {
-      if (item.error) {
+    const errors: MusicLoadAllData[] = [];
+    const valids: MusicLoadAllData[] = [];
+    const duplicates: MusicLoadAllData[] = [];
+
+    for (const item of decode) {
+      if (item.isError) {
         errors.push(item);
-      } else {
+      } else if (item) {
         const isDuplicate = checkDuplicate(item);
         if (isDuplicate) {
           item.isDuplicate = true;
@@ -103,40 +109,33 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
 
     const sortedNewDecoded = [...errors, ...duplicates, ...valids];
 
-    let newListItems: ListItem<KaraokeDecoded>[] = sortedNewDecoded.map(
-      (item) => {
-        let name: string | string[] = item.lyr as string[];
-        if (name.length > 0) name = name[0];
-        if (item.error) name = "ไม่สามารถอ่านไฟล์";
-        if (item.isDuplicate) name = `${name} (ซ้ำ)`;
+    let newListItems = sortedNewDecoded.map((item) => {
+      let name = item.metadata?.info.TITLE;
+      if (item.isError) name = "ไม่สามารถอ่านไฟล์";
+      if (item.isDuplicate) name = `${name} (ซ้ำ)`;
 
-        let tagColor: ColorType = "green";
-        if (item.error) tagColor = "red";
-        else if (item.isDuplicate) tagColor = "yellow";
+      let tagColor: ColorType = "green";
+      if (item.isError) tagColor = "red";
+      else if (item.isDuplicate) tagColor = "yellow";
 
-        return {
-          render: () => (
-            <div className="w-fit flex gap-2">
-              {item.fileName && (
-                <Tags
-                  color={tagColor}
-                  className="text-[10px] min-w-10 text-center"
-                >
-                  {item.fileName}
-                </Tags>
-              )}
-              <div className="m-auto">{name}</div>
-            </div>
-          ),
-          value: item,
-          className: item.error
-            ? "text-red-500"
-            : item.isDuplicate
-            ? "text-yellow-600"
-            : "",
-        } as ListItem<KaraokeDecoded>;
-      }
-    );
+      return {
+        render: () => (
+          <div className="w-fit flex gap-2">
+            <Tags color={tagColor} className="text-[10px] min-w-10 text-center">
+              {item.baseName}
+            </Tags>
+
+            <div className="m-auto">{name}</div>
+          </div>
+        ),
+        value: item,
+        className: item.isError
+          ? "text-red-500"
+          : item.isDuplicate
+          ? "text-yellow-600"
+          : "",
+      };
+    });
 
     const combinedDecoded = [...decoded, ...newListItems];
     setDecoded(combinedDecoded);
@@ -161,78 +160,78 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
     });
   };
 
-  const handleShowDuplicateDetails = (item: KaraokeDecoded) => {
-    const duplicates = checkDuplicateWithDetails(item);
-    console.log(duplicates);
-    setDuplicateModal({
-      currentSong: item,
-      duplicates: duplicates,
-    });
-  };
+  // const handleShowDuplicateDetails = (item: KaraokeDecoded) => {
+  //   const duplicates = checkDuplicateWithDetails(item);
+  //   console.log(duplicates);
+  //   setDuplicateModal({
+  //     currentSong: item,
+  //     duplicates: duplicates,
+  //   });
+  // };
 
-  const handleCloseDuplicateModal = () => {
-    setDuplicateModal(null);
-  };
+  // const handleCloseDuplicateModal = () => {
+  //   setDuplicateModal(null);
+  // };
 
-  const handleDeleteFromDuplicateModal = () => {
-    if (!duplicateModal) return;
+  // const handleDeleteFromDuplicateModal = () => {
+  //   if (!duplicateModal) return;
 
-    removeItem(duplicateModal.currentSong);
-    handleCloseDuplicateModal();
-  };
+  //   removeItem(duplicateModal.currentSong);
+  //   handleCloseDuplicateModal();
+  // };
 
-  const handleAddIgnoreDuplicate = () => {
-    if (!duplicateModal) return;
+  // const handleAddIgnoreDuplicate = () => {
+  //   if (!duplicateModal) return;
 
-    const updatedDecoded = decoded.map((item) => {
-      if (item.value === duplicateModal.currentSong) {
-        item.value.isDuplicate = false;
+  //   const updatedDecoded = decoded.map((item) => {
+  //     if (item.value === duplicateModal.currentSong) {
+  //       item.value.isDuplicate = false;
 
-        let name: string | string[] = item.value.lyr as string[];
-        if (name.length > 0) name = name[0];
-        if (item.value.error) name = "ไม่สามารถอ่านไฟล์";
+  //       let name: string | string[] = item.value.lyr as string[];
+  //       if (name.length > 0) name = name[0];
+  //       if (item.value.error) name = "ไม่สามารถอ่านไฟล์";
 
-        const tagColor: ColorType = item.value.error ? "red" : "green";
+  //       const tagColor: ColorType = item.value.error ? "red" : "green";
 
-        return {
-          ...item,
-          render: () => (
-            <div className="w-fit flex gap-2">
-              {item.value.fileName && (
-                <Tags
-                  color={tagColor}
-                  className="text-[10px] min-w-10 text-center"
-                >
-                  {item.value.fileName}
-                </Tags>
-              )}
-              <div className="m-auto">{name}</div>
-            </div>
-          ),
-          className: item.value.error ? "text-red-500" : "",
-        } as ListItem<KaraokeDecoded>;
-      }
-      return item;
-    });
+  //       return {
+  //         ...item,
+  //         render: () => (
+  //           <div className="w-fit flex gap-2">
+  //             {item.value.fileName && (
+  //               <Tags
+  //                 color={tagColor}
+  //                 className="text-[10px] min-w-10 text-center"
+  //               >
+  //                 {item.value.fileName}
+  //               </Tags>
+  //             )}
+  //             <div className="m-auto">{name}</div>
+  //           </div>
+  //         ),
+  //         className: item.value.error ? "text-red-500" : "",
+  //       };
+  //     }
+  //     return item;
+  //   });
 
-    setDecoded(updatedDecoded);
-    updateSoundCount(updatedDecoded);
-    handleCloseDuplicateModal();
-  };
+  //   setDecoded(updatedDecoded);
+  //   updateSoundCount(updatedDecoded);
+  //   handleCloseDuplicateModal();
+  // };
 
   const handleAddSong = async () => {
     try {
       const test = new BaseUserSongsSystemReader();
-      const group: TrackDataAndFile[] = [];
+      const group: MusicLoadAllData[] = [];
 
       const validSongs = decoded.filter(
-        (data) => !data.value.error && !data.value.isDuplicate
+        (data) => !data.value.isError && !data.value.isDuplicate
       );
 
-      validSongs.map((data) => {
-        const records = test.convertToTrackData(data.value, "MIDI");
-        if (data.value.raw) group.push({ records, raw: data.value.raw });
-      });
+      // validSongs.map((data) => {
+      //   const records = test.convertToTrackData(data.value);
+      //   if (records) group.push(data.value);
+      // });
 
       if (group.length === 0) {
         alert("ไม่มีเพลงที่สามารถเพิ่มได้ (ทั้งหมดเป็นไฟล์ผิดพลาดหรือซ้ำ)");
@@ -264,7 +263,7 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
   };
 
   const hasProblematicItems = decoded.some(
-    (item) => item.value.error || item.value.isDuplicate
+    (item) => item.value.isError || item.value.isDuplicate
   );
 
   const formatDuplicatesForTable = (
@@ -303,7 +302,7 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
 
   return (
     <>
-      <Modal
+      {/* <Modal
         maxWidth={800}
         height={470}
         isOpen={!!duplicateModal}
@@ -370,9 +369,6 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
               </div>
 
               <div className="col-span-1 lg:col-span-2">
-                {/* <h3 className="font-semibold mb-2 text-red-600">
-                  เพลงที่ซ้ำในระบบ
-                </h3> */}
                 <div className="max-h-80 overflow-y-auto border rounded-lg">
                   <TableList
                     listKey="duplicate-song-modal-list"
@@ -384,7 +380,7 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
             </div>
           </div>
         )}
-      </Modal>
+      </Modal> */}
 
       <div className="flex flex-col gap-2 h-full">
         <div className="h-fit space-y-1.5">
@@ -427,7 +423,7 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
           deleteItem={false}
           itemAction={(value: KaraokeDecoded) => (
             <div className="flex gap-1">
-              {value.isDuplicate && (
+              {/* {value.isDuplicate && (
                 <Button
                   shadow={false}
                   border=""
@@ -438,7 +434,7 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
                   blur={false}
                   icon={<FaSearch className="text-white" />}
                 />
-              )}
+              )} */}
 
               <Button
                 shadow={false}

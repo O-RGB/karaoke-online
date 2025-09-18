@@ -11,6 +11,7 @@ export const MID_FILE_TYPE = "mid";
 export const CUR_FILE_TYPE = "cur";
 export const LYR_FILE_TYPE = "lyr";
 export const EMK_FILE_TYPE = "emk";
+export const MP3_FILE_TYPE = "mp3";
 
 export const STORAGE_SOUNDFONT = "soundfont";
 export const STORAGE_WALLPAPER = "wallpaper";

@@ -1,18 +1,16 @@
 import { DRUM_NOTES_LIST } from "@/config/value";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { midiService } from "./node/output";
+import { INoteChange } from "@/features/engine/types/synth.type";
+import React, { useEffect, useState } from "react";
+import DrumNode from "./node";
+import Label from "@/components/common/display/label";
+import Select from "@/components/common/input-data/select/select";
 import {
   DrumNotesType,
   INoteState,
   TEventType,
 } from "@/features/engine/modules/instrumentals/types/node.type";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import React, { useEffect, useState } from "react";
-import DrumNode from "./node";
-import { lowercaseToReadable } from "@/lib/general";
-import { midiService } from "./node/output";
-import { INoteChange } from "@/features/engine/types/synth.type";
-import { channel } from "diagnostics_channel";
-import Label from "@/components/common/display/label";
-import Select from "@/components/common/input-data/select/select";
 
 export const DrumNoteMap: DrumNotesType[] = [
   "acoustic_bass_drum",

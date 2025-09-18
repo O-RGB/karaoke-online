@@ -1,5 +1,3 @@
-//src/features/engine/types/synth.type.ts
-import { MIDI } from "spessasynth_lib/@types/midi_parser/midi_loader";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
 import { SynthChannel } from "../modules/instrumentals/channel";
@@ -7,8 +5,13 @@ import { InstrumentalNode } from "../modules/instrumentals/instrumental";
 import { BassConfig } from "../modules/instrumentals/config";
 import { GlobalEqualizer } from "../modules/equalizer/global-equalizer";
 import { SoundSystemMode } from "@/features/config/types/config.type";
+import { TimerWorker } from "../modules/timer";
+import { EventManager } from "../modules/instrumentals/events";
+import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
+import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 
 export type TimingModeType = "Tick" | "Time";
+export type PlayerStatusType = "PLAY" | "STOP" | "PAUSE";
 export interface BaseSynthEngine {
   time: TimingModeType;
   audio: AudioContext | undefined;
@@ -18,6 +21,13 @@ export interface BaseSynthEngine {
   nodes?: SynthChannel[] | undefined;
   globalEqualizer: GlobalEqualizer | undefined;
   instrumental: InstrumentalNode | undefined;
+
+  timer?: TimerWorker | undefined;
+  timerUpdated: EventManager<"TIMING", number>;
+  tempoUpdated: EventManager<"TEMPO", number>;
+  playerUpdated: EventManager<"PLAYER", PlayerStatusType>;
+  countdownUpdated: EventManager<"COUNTDOWN", number>;
+  musicUpdated: EventManager<"MUSIC", MusicLoadAllData>;
 
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;
@@ -43,6 +53,8 @@ export interface BaseSynthEngine {
   preset: number[];
   programChange(event: (event: IProgramChange) => void): void;
   controllerChange(event: (event: IControllerChange) => void): void;
+  onPlay(event: () => void): void;
+  onStop(event: () => void): void;
   noteOnChange(event?: (event: INoteChange) => void): void;
   noteOffChange(event?: (event: INoteChange) => void): void;
   persetChange(event: (event: IPersetSoundfont[]) => void): void;
@@ -74,31 +86,36 @@ export interface BaseSynthEvent {
   programChangeCallback?: (event: IProgramChange) => void;
   onNoteOnChangeCallback?: (event: INoteChange) => void;
   onNoteOffChangeCallback?: (event: INoteChange) => void;
+  onPlay?: () => void;
+  onStop?: () => void;
 }
 
 export interface BaseSynthPlayerEngine {
   paused: boolean;
   isFinished: boolean;
-  currentTiming: number;
-  midiData: MIDI | undefined;
-  duration: number;
-  play(): void;
+  midiData: IMidiParseResult | undefined;
+  play(): Promise<void>;
   stop(): void;
   pause(): void;
   getCurrentTiming(): Promise<number>;
   setCurrentTiming(timeOrTick: number): void;
+  timingUpdate(tick: number): void;
+  tempoUpdate(tempo: number): void;
+  countDownUpdate(time: number): void;
   getCurrentTickAndTempo(
     timeDivision?: number,
     currentTime?: number,
     tempos?: ITempoChange[]
   ): Promise<{ tick: number; tempo: number }>;
-  loadMidi(midi: File): Promise<MIDI>;
+  // loadMidi(midi: File): Promise<MIDI>;
+  loadMidi(data?: MusicLoadAllData): Promise<boolean>;
   setMidiOutput(output: MIDIOutput): void;
   resetMidiOutput(): void;
   eventChange?(): void;
   addEvent?(input: Partial<BaseSynthEvent>): void;
   setPlayBackRate?(rate: number): void;
   eventInit?: BaseSynthEvent;
+  musicQuere?: MusicLoadAllData;
 }
 
 export interface IEventChange {

@@ -81,7 +81,7 @@ export class ChannelGainMonitor {
     const analyser = this.analysers[channel];
     const dataArray = this.dataArrays[channel];
 
-    analyser.getFloatTimeDomainData(dataArray);
+    analyser.getFloatTimeDomainData(dataArray as any);
 
     // Calculate RMS value
     let sum = 0;

@@ -1,24 +1,16 @@
 import { extractFile, zipFiles } from "@/lib/zip";
 import { TrieSearchService } from "@/lib/trie-search";
-import { parseEMKFile } from "@/lib/karaoke/emk";
 import {
   ITrackData,
-  KaraokeDecoded,
   KaraokeExtension,
-  SoundType,
-  TrackDataAndFile,
+  MusicLoadAllData,
 } from "../../types/songs.type";
-import {
-  CUR_FILE_TYPE,
-  EMK_FILE_TYPE,
-  LYR_FILE_TYPE,
-  MID_FILE_TYPE,
-} from "@/config/value";
 import {
   FilesUserSongsManager,
   TracklistUserSongsManager,
 } from "@/utils/indexedDB/db/user-songs/table";
 import { SoundSystemMode } from "@/features/config/types/config.type";
+import { groupFilesByBaseName } from "@/lib/karaoke/read";
 
 export interface DuplicateMatch {
   track: ITrackData;
@@ -43,45 +35,30 @@ export class BaseUserSongsSystemReader {
     this.trieSearchService.addAll(tracklist);
   }
 
-  convertToTrackData(decoded: KaraokeDecoded, type: SoundType): ITrackData {
-    const [
-      title,
-      artist,
-      key,
-      space,
-      lyr1,
-      lyr2,
-      lyr3,
-      lyr4,
-      lyr5,
-      lyr6,
-      lyr7,
-    ] = decoded.lyr ?? [];
-
-    return {
-      CODE: decoded.fileName ?? "",
-      TITLE: title,
-      TYPE: type,
-      ARTIST: artist,
-      _originalIndex: 0,
-      KEY: key,
-      LYR_TITLE: `${lyr1} ${lyr2} ${lyr3} ${lyr4} ${lyr5} ${lyr6} ${lyr7}`,
-      _system: this.system,
-    };
-  }
-
-  async addSong(add: TrackDataAndFile[]) {
+  async addSong(add: MusicLoadAllData[]) {
     const zipeds: File[] = [];
 
     for (let index = 0; index < add.length; index++) {
       const data = add[index];
       let zipped = undefined;
-      const isEmk = data.raw.emk;
-      if (isEmk) {
-        zipped = await zipFiles([isEmk], `zip-${index}`);
-      } else {
-        const raw = data.raw as KaraokeExtension<File>;
-        zipped = await zipFiles([raw.cur, raw.lyr, raw.midi], `zip-${index}`);
+
+      const fileType = data.fileType;
+      const emk = data.files.emk;
+      const midi = data.files.midi;
+      const lyr = data.files.lyr;
+      const cur = data.files.cur;
+      const mp3 = data.files.mp3;
+
+      if (fileType === "emk" && emk) {
+        zipped = await zipFiles([emk], `zip-${index}`);
+      } else if (fileType === "midi") {
+        if (midi && lyr && cur) {
+          zipped = await zipFiles([midi, lyr, cur], `zip-${index}`);
+        } else if (midi && !lyr && !cur) {
+          zipped = await zipFiles([midi], `zip-${index}`);
+        }
+      } else if (fileType === "mp3" && mp3) {
+        zipped = await zipFiles([mp3], `zip-${index}`);
       }
 
       if (zipped) {
@@ -95,18 +72,14 @@ export class BaseUserSongsSystemReader {
 
     for (let index = 0; index < add.length; index++) {
       const data = add[index];
-      data.records._superIndex = Number(id);
-      data.records._originalIndex = index;
-
-      await this.tracklistUserSongsManager.add({ data: data.records });
-
-      this.trieSearchService.add(data.records);
+      data.trackData._superIndex = Number(id);
+      data.trackData._originalIndex = index;
+      await this.tracklistUserSongsManager.add({ data: data.trackData });
+      this.trieSearchService.add(data.trackData);
     }
   }
 
-  async getSong(
-    trackData: ITrackData
-  ): Promise<KaraokeExtension<File> | undefined> {
+  async getSong(trackData: ITrackData): Promise<KaraokeExtension | undefined> {
     const { _originalIndex, _superIndex } = trackData;
 
     if (_superIndex === undefined) {
@@ -132,61 +105,22 @@ export class BaseUserSongsSystemReader {
 
     const files = await extractFile(zipped);
 
-    if (files.length > 0) {
-      const [file] = files;
+    const preprocess = groupFilesByBaseName(files);
 
-      if (file.name.endsWith(EMK_FILE_TYPE)) {
-        const { mid, cur, lyr } = await parseEMKFile(file);
-
-        if (mid && cur && lyr) {
-          return {
-            cur,
-            lyr,
-            midi: mid,
-          } as KaraokeExtension;
-        } else {
-          console.warn("❌ EMK file missing one or more required parts");
-        }
-      } else if (files.length === 3) {
-        let mid = undefined;
-        let cur = undefined;
-        let lyr = undefined;
-
-        for (let index = 0; index < files.length; index++) {
-          const file = files[index];
-          if (file.name.endsWith(MID_FILE_TYPE)) {
-            mid = file;
-          } else if (file.name.endsWith(CUR_FILE_TYPE)) {
-            cur = file;
-          } else if (file.name.endsWith(LYR_FILE_TYPE)) {
-            lyr = file;
-          }
-        }
-
-        if (mid && cur && lyr) {
-          return { cur, lyr, midi: mid };
-        } else {
-          console.warn(
-            "❌ One or more required files (MID, CUR, LYR) are missing"
-          );
-        }
-      } else {
-        console.warn("⚠️ Unknown file structure or unsupported file count");
-      }
-    } else {
-      console.warn("❌ No files found after extracting zipped file");
+    if (preprocess.length === 1) {
+      return preprocess[0];
     }
+    return;
   }
 
-  public checkDuplicate(trackData: KaraokeDecoded): boolean {
+  public checkDuplicate(trackData: MusicLoadAllData): boolean {
     const duplicates = this.checkDuplicateWithDetails(trackData);
     return duplicates.length > 0;
   }
   public checkDuplicateWithDetails(
-    trackData: KaraokeDecoded
+    trackData: MusicLoadAllData
   ): DuplicateMatch[] {
-    const convertedData = this.convertToTrackData(trackData, "MIDI");
-    const { CODE, TITLE, ARTIST, LYR_TITLE } = convertedData;
+    const { CODE, TITLE, ARTIST, LYRIC_TITLE } = trackData.trackData;
 
     const allPotentialMatches: DuplicateMatch[] = [];
 
@@ -237,13 +171,13 @@ export class BaseUserSongsSystemReader {
       }
     }
 
-    if (LYR_TITLE && LYR_TITLE.trim().length > 10) {
-      const lyrResults = this.search(LYR_TITLE.substring(0, 50));
+    if (LYRIC_TITLE && LYRIC_TITLE.trim().length > 10) {
+      const lyrResults = this.search(LYRIC_TITLE.substring(0, 50));
       for (const result of lyrResults) {
-        if (!result.LYR_TITLE) continue;
+        if (!result.LYRIC_TITLE) continue;
         const similarity = this.calculateSimilarity(
-          LYR_TITLE.toLowerCase().trim().substring(0, 100),
-          result.LYR_TITLE.toLowerCase().trim().substring(0, 100)
+          LYRIC_TITLE.toLowerCase().trim().substring(0, 100),
+          result.LYRIC_TITLE.toLowerCase().trim().substring(0, 100)
         );
         if (similarity >= 0.8) {
           allPotentialMatches.push({

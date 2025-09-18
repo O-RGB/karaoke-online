@@ -108,7 +108,7 @@ export class SynthChannel {
     }
 
     this.analyserNode = analyser;
-    console.log("Audio routing complete for channel", channel);
+    // console.log("Audio routing complete for channel", channel);
   }
 
   public setVelocityRender(bool: boolean) {

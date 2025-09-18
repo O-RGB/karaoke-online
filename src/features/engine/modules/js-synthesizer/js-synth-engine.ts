@@ -1,6 +1,3 @@
-import { CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
-import { JsSynthPlayerEngine } from "./player/js-synth-player";
-
 import {
   BaseSynthEngine,
   BaseSynthPlayerEngine,
@@ -10,11 +7,8 @@ import {
   IVelocityChange,
   TimingModeType,
   IPersetSoundfont,
+  PlayerStatusType,
 } from "../../types/synth.type";
-import { Synthesizer as JsSynthesizer } from "js-synthesizer";
-import { InstrumentalNode } from "../instrumentals/instrumental";
-import { SynthChannel } from "../instrumentals/channel";
-import { BassConfig } from "../instrumentals/config";
 import {
   ConfigSystem,
   SoundSystemMode,
@@ -26,9 +20,18 @@ import {
   PAN,
   REVERB,
 } from "../../types/node.type";
+import { CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
+import { JsSynthPlayerEngine } from "./player/js-synth-player";
 import { GlobalEqualizer } from "../equalizer/global-equalizer";
 import { PlayerSetTempoType } from "js-synthesizer/dist/lib/Constants";
 import { RecordingsManager } from "@/utils/indexedDB/db/display/table";
+import { Synthesizer as JsSynthesizer } from "js-synthesizer";
+import { InstrumentalNode } from "../instrumentals/instrumental";
+import { SynthChannel } from "../instrumentals/channel";
+import { BassConfig } from "../instrumentals/config";
+import { TimerWorker } from "../timer";
+import { EventManager } from "../instrumentals/events";
+import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -44,6 +47,12 @@ export class JsSynthEngine implements BaseSynthEngine {
 
   public nodes: SynthChannel[] = [];
   public instrumental = new InstrumentalNode();
+  public timer: TimerWorker | undefined = undefined;
+  public timerUpdated = new EventManager<"TIMING", number>();
+  public tempoUpdated = new EventManager<"TEMPO", number>();
+  public playerUpdated = new EventManager<"PLAYER", PlayerStatusType>();
+  public countdownUpdated = new EventManager<"COUNTDOWN", number>();
+  public musicUpdated = new EventManager<"MUSIC", MusicLoadAllData>();
 
   public bassConfig: BassConfig | undefined = undefined;
 
@@ -71,13 +80,13 @@ export class JsSynthEngine implements BaseSynthEngine {
     const synth = new Synthesizer();
 
     synth.init(audioContext.sampleRate);
-    synth.setGain(0.3);
     this.loadDefaultSoundFont();
 
     this.synth = synth;
     this.audio = audioContext;
 
     this.player = new JsSynthPlayerEngine(synth, this);
+    this.timer = new TimerWorker(this.player);
     this.instrumental.setEngine(this);
 
     const analysers: AnalyserNode[] = [];
@@ -107,11 +116,13 @@ export class JsSynthEngine implements BaseSynthEngine {
       analysers.push(analyser);
     }
 
+    this.timer.initWorker();
     this.controllerChange();
     this.programChange();
     this.noteOffChange();
     this.noteOnChange();
-    this.player.eventChange?.();
+    this.onPlay();
+    this.onStop();
 
     return { synth: synth, audio: this.audio };
   }
@@ -285,6 +296,26 @@ export class JsSynthEngine implements BaseSynthEngine {
     console.log("🎧 JS-Synth Recording stopped and resources cleaned up.");
   }
 
+  onPlay(callback?: () => void): void {
+    if (this.player?.addEvent) {
+      this.player.addEvent({
+        onPlay: () => {
+          callback?.();
+        },
+      });
+    }
+  }
+
+  onStop(callback?: () => void): void {
+    if (this.player?.addEvent) {
+      this.player.addEvent({
+        onStop: () => {
+          callback?.();
+        },
+      });
+    }
+  }
+
   controllerChange(callback?: (event: IControllerChange) => void): void {
     if (this.player?.addEvent) {
       this.player.addEvent({
@@ -397,25 +428,20 @@ export class JsSynthEngine implements BaseSynthEngine {
       controllerValue: event.controllerValue,
     });
   }
-
-  /**
-   * REVERT: แก้ไขการทำงานของ updatePitch กลับไปเป็นแบบเดิม
-   *
-   * เปลี่ยนกลับไปใช้วิธี set ค่า transpose ใน node ของแต่ละ channel
-   * เพื่อให้ player นำค่านี้ไปบวกกับ midiNote โดยตรง
-   * ซึ่งจะช่วยแก้ปัญหา conflict กับ pitch bend ของกีตาร์
-   */
   updatePitch(channel: number | null, semitones: number = 0): void {
     if (channel !== null) {
-      // หากต้องการปรับเฉพาะ Channel (ยังไม่ implement ใน UI แต่โครงไว้)
+      this.player?.pause();
       if (this.nodes[channel]) {
         this.nodes[channel].transpose?.setValue(semitones);
       }
+      this.player?.play();
     } else {
-      // ปรับทุก Channel (Global Transpose)
+      this.player?.pause();
+
       for (let index = 0; index < this.nodes.length; index++) {
         this.nodes[index].transpose?.setValue(semitones);
       }
+      this.player?.play();
     }
   }
 

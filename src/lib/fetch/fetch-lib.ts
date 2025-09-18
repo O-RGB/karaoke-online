@@ -14,36 +14,42 @@ export const testUrl = async (url: string): Promise<any> => {
   }
 };
 
-
-
-
-export const FetchDownloadFile = async (url: string, progress: (value: number) => void, fileName: string) => {
+export const FetchDownloadFile = async (
+  url: string,
+  progress: (value: number) => void,
+  fileName: string
+) => {
   try {
     const response = await axios({
       url,
-      method: 'GET',
-      responseType: 'blob',
+      method: "GET",
+      responseType: "blob",
       onDownloadProgress: (progressEvent) => {
         if (progressEvent.total) {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          progress?.(percentCompleted)
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          progress?.(percentCompleted);
         }
       },
       timeout: 3600000,
     });
-    const file = new File([response.data], fileName, { type: 'application/octet-stream' });
-    return file
+    const file = new File([response.data], fileName, {
+      type: "application/octet-stream",
+    });
+    return file;
   } catch (error) {
     console.error("Download error:", error);
-    return undefined
+    return undefined;
   }
-}
+};
 
-
-
-export const useDownloadWithProgress = async (url: string, fileName: string) => {
-  const setProgress = useProgressStore.getState().setProgress
-  const setAbortController = useProgressStore.getState().setAbortController
+export const useDownloadWithProgress = async (
+  url: string,
+  fileName: string
+) => {
+  const setProgress = useProgressStore.getState().setProgress;
+  const setAbortController = useProgressStore.getState().setAbortController;
 
   const controller = new AbortController();
 
@@ -54,31 +60,35 @@ export const useDownloadWithProgress = async (url: string, fileName: string) => 
     title: `กำลังดาวน์โหลด ${fileName}`,
     show: true,
     loading: true,
-    cancel: true
+    cancel: true,
   });
 
   try {
     const response = await axios({
       url,
-      method: 'GET',
-      responseType: 'blob',
+      method: "GET",
+      responseType: "blob",
       signal: controller.signal,
       onDownloadProgress: (progressEvent) => {
         if (progressEvent.total) {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
           setProgress({
             progress: percentCompleted,
             title: `กำลังดาวน์โหลด ${fileName} (${percentCompleted}%)`,
             show: true,
             loading: true,
-            cancel: true
+            cancel: true,
           });
         }
       },
       timeout: 3600000,
     });
 
-    const file = new File([response.data], fileName, { type: 'application/octet-stream' });
+    const file = new File([response.data], fileName, {
+      type: "application/octet-stream",
+    });
 
     setProgress({
       progress: 100,
@@ -89,16 +99,16 @@ export const useDownloadWithProgress = async (url: string, fileName: string) => 
 
     setAbortController(undefined);
 
-    return file
+    return file;
   } catch (error: any) {
-    if (error.name === 'CanceledError' || axios.isCancel(error)) {
-      console.log('Download canceled');
+    if (error.name === "CanceledError" || axios.isCancel(error)) {
+      console.log("Download canceled");
       setProgress({
         progress: 0,
         title: "ดาวน์โหลดไม่สำเร็จ",
         show: true,
         loading: false,
-        error: "ยกเลิกการดาวน์โหลดแล้ว"
+        error: "ยกเลิกการดาวน์โหลดแล้ว",
       });
     } else {
       console.error("Download error:", error);
@@ -107,7 +117,10 @@ export const useDownloadWithProgress = async (url: string, fileName: string) => 
         title: "ดาวน์โหลดไม่สำเร็จ",
         show: true,
         loading: false,
-        error: error instanceof Error ? error.message : 'เกิดข้อผิดพลาดระหว่างการดาวน์โหลด',
+        error:
+          error instanceof Error
+            ? error.message
+            : "เกิดข้อผิดพลาดระหว่างการดาวน์โหลด",
       });
     }
     setAbortController(undefined);

@@ -44,7 +44,7 @@ export abstract class BaseSongsSystemReader {
   abstract getRecordByOriginalIndex(index: number): Promise<ITrackData | null>;
   abstract getSong(
     trackData: ITrackData
-  ): Promise<KaraokeExtension<File> | undefined>;
+  ): Promise<KaraokeExtension | undefined>;
 
   protected extractWords(text: string): string[] {
     if (!text) return [];
@@ -297,9 +297,6 @@ export abstract class BaseSongsSystemReader {
           _system: this.system,
         } as ITrackData)
     );
-
-    const searchTime = Date.now() - startTime;
-
     return finalRecords;
   }
 

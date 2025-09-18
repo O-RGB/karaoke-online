@@ -6,7 +6,7 @@ import { MIDI } from "spessasynth_lib";
 
 export interface PlayerProps {
   queue: QueuePlayerProps;
-  runtime: RuntimeProps;
+  // runtime: RuntimeProps;
 }
 
 export interface QueuePlayerProps {
@@ -19,24 +19,27 @@ export interface QueuePlayerProps {
   nextMusic: () => void;
 }
 
-export interface RuntimePlayer {
-  setIsFinished: (value: boolean) => void;
-  setCountDown: (value: number) => void;
-  setCurrentTime: (value: number) => void;
-  setMidiInfo: (
-    cursors: number[],
-    timeDivision: number,
-    lyrics: string[],
-    midi: MIDI,
-    midiDecoded: KaraokeExtension,
-    musicInfo: ITrackData
-  ) => void;
-  play: () => void;
-  paused: () => void;
-  stop: () => void;
-  reset: () => void;
-  uninstall: () => void;
-}
+// export interface RuntimePlayer {
+//   setIsFinished: (value: boolean) => void;
+//   setCountDown: (value: number) => void;
+//   setCurrentTime: (value: number) => void;
+//   setMidiInfo: (
+//     // cursors: number[],
+//     // timeDivision: number,
+//     // lyrics: string[],
+//     // midi: MIDI,
+//     // midiDecoded: KaraokeExtension,
+//     // musicInfo: ITrackData,
+//     lyricsData: LyricWordData[],
+//     mode: MusicMode,
+//     midiInfo: IMidiInfo
+//   ) => void;
+//   play: () => void;
+//   paused: () => void;
+//   stop: () => void;
+//   reset: () => void;
+//   uninstall: () => void;
+// }
 
 export interface RuntimeTick {
   tickRun: (isPlay: boolean) => void;
@@ -52,10 +55,10 @@ export interface RuntimeValue {
   currentTick: number;
 }
 
-export type RuntimeProps = RuntimePlayer &
-  RuntimeValue &
-  RuntimeTick &
-  MidiPlayerProps;
+// export type RuntimeProps = RuntimePlayer &
+//   RuntimeValue &
+//   RuntimeTick &
+//   MidiPlayerProps;
 
 export interface MidiPlayerProps {
   lyrics: string[];

@@ -27,9 +27,13 @@ import {
   IVelocityChange,
   TimingModeType,
   IPersetSoundfont,
+  PlayerStatusType,
 } from "../../types/synth.type";
 import { GlobalEqualizer } from "../equalizer/global-equalizer";
 import { RecordingsManager } from "@/utils/indexedDB/db/display/table";
+import { TimerWorker } from "../timer";
+import { EventManager } from "../instrumentals/events";
+import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -49,6 +53,13 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public globalEqualizer: GlobalEqualizer | undefined = undefined;
 
   public systemConfig?: Partial<ConfigSystem> = undefined;
+  public timer: TimerWorker | undefined = undefined;
+  public timerUpdated = new EventManager<"TIMING", number>();
+  public tempoUpdated = new EventManager<"TEMPO", number>();
+  public playerUpdated = new EventManager<"PLAYER", PlayerStatusType>();
+  public countdownUpdated = new EventManager<"COUNTDOWN", number>();
+  public musicUpdated = new EventManager<"MUSIC", MusicLoadAllData>();
+  public musicQuere: MusicLoadAllData | undefined = undefined;
 
   public isRecording: boolean = false;
   private mediaRecorder: MediaRecorder | null = null;
@@ -87,7 +98,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
     this.persetChange((e) => setInstrument?.(e));
     this.synth?.setDrums(9, true);
-    this.player = new SpessaPlayerEngine(player);
+    this.player = new SpessaPlayerEngine(player, this);
+    this.timer = new TimerWorker(this.player);
     this.instrumental.setEngine(this);
 
     const analysers: AnalyserNode[] = [];
@@ -118,6 +130,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
     synth?.connectIndividualOutputs(analysers);
 
+    this.timer.initWorker();
     this.controllerChange();
     this.programChange();
     this.noteOnChange();
@@ -341,6 +354,10 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   updateSpeed(value: number): void {
     this.player?.setPlayBackRate?.(value / 100);
   }
+
+  onPlay(event: () => void): void {}
+
+  onStop(event: () => void): void {}
 
   setMute(event: IControllerChange<boolean>): void {
     this.synth?.muteChannel(event.channel, event.controllerValue);

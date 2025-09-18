@@ -1,7 +1,7 @@
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
-import { useEffect, useRef, useState } from "react";
+import { PlayerStatusType } from "@/features/engine/types/synth.type";
+import { useEffect, useId, useRef, useState } from "react";
 
 interface ChannelVolumeRenderProps {
   channel?: number;
@@ -18,15 +18,42 @@ const ChannelVolumeRender: React.FC<ChannelVolumeRenderProps> = ({
   node,
   decreaseRate = 2,
 }) => {
+  const componnetId = useId();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const currentTick = useRuntimePlayer((state) => state.currentTick);
-  const isPaused = useRuntimePlayer((state) => state.isPaused);
-  const engine = useSynthesizerEngine((state) => state.engine);
   const [peakLevel, setPeakLevel] = useState(0);
   const [currentLevel, setCurrentLevel] = useState(0);
+  const engine = useSynthesizerEngine((state) => state.engine);
+
+  const [playerStatus, setPlayerStatus] = useState<PlayerStatusType>("STOP");
+  const [timing, setTiming] = useState<number>(0);
+
+  const onPlayerUpdate = (on: PlayerStatusType) => {
+    setPlayerStatus(on);
+  };
+
+  const onTimingUpdated = (tick: number) => {
+    setTiming(tick);
+  };
 
   useEffect(() => {
-    if (isPaused) return;
+    if (engine) {
+      engine?.playerUpdated.add(
+        ["PLAYER", "CHANGE"],
+        0,
+        onPlayerUpdate,
+        componnetId
+      );
+      engine?.timerUpdated.add(
+        ["TIMING", "CHANGE"],
+        0,
+        onTimingUpdated,
+        componnetId
+      );
+    }
+  }, [engine]);
+
+  useEffect(() => {
+    if (playerStatus === "PAUSE") return;
     if (!engine?.nodes) return;
 
     let level = 0;
@@ -61,7 +88,7 @@ const ChannelVolumeRender: React.FC<ChannelVolumeRenderProps> = ({
     ctx.fillRect(0, 0, canvas.width, canvas.height * 0.66);
     ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
     ctx.fillRect(0, canvas.height * 0.66, canvas.width, canvas.height * 0.33);
-  }, [max, currentTick, engine?.nodes, isPaused]);
+  }, [max, timing, engine?.nodes, playerStatus]);
 
   useEffect(() => {
     if (peakLevel > currentLevel) {

@@ -1,47 +1,12 @@
 import { SoundSystemMode } from "@/features/config/types/config.type";
+import { SongInfo } from "@/lib/karaoke/songs/midi/types";
+import {
+  MusicFileType,
+  MusicParsedData,
+  MusicSubType,
+} from "@/lib/karaoke/songs/types";
 
-export type SoundType = "MIDI" | "VIDEO" | "MUSIC";
-export type SoundSubType = "NCN" | "EMK";
-
-export interface ITrackDataSelectBy {
-  nickname: string;
-  clientId: string;
-}
-export interface ITrackFlags {
-  _originalIndex: number;
-  _superIndex?: number;
-  _system: SoundSystemMode;
-  _isNew?: boolean;
-  _isModified?: boolean;
-  _matchedTerms?: string[];
-  _priority?: number;
-  _selectBy?: ITrackDataSelectBy;
-}
-
-export interface ITrackData extends ITrackFlags {
-  CODE: string;
-  TITLE: string;
-  TYPE: SoundType;
-  ARTIST: string;
-  FILE_NAME?: string;
-  SUB_TYPE?: SoundSubType;
-  ALBUM?: string;
-  KEY?: string;
-  TEMPO?: number;
-  LENGTH?: number;
-  ART_TYPE?: string;
-  AUTHOR?: string;
-  RHYTHM?: string;
-  CREATOR?: string;
-  COMPANY?: string;
-  LANGUAGE?: string;
-  YEAR?: number;
-  VOCAL_CHN?: number;
-  LYR_TITLE?: string;
-  START_TIME?: number;
-  STOP_TIME?: number;
-  AUDIO_VOL?: number;
-}
+// [Database Index For Searcing]----------------
 
 export interface ISearchRecordPreview {
   t: string;
@@ -61,6 +26,50 @@ export interface MasterIndex {
 
 export type PreviewChunk = Record<string, ISearchRecordPreview[]>;
 
+// [Client Remote]----------------
+
+export interface ITrackDataSelectBy {
+  nickname: string;
+  clientId: string;
+}
+
+// [Music Processing]----------------
+export interface ITrackFlags {
+  _originalIndex: number;
+  _superIndex?: number;
+  _system: SoundSystemMode;
+  _isNew?: boolean;
+  _isModified?: boolean;
+  _matchedTerms?: string[];
+  _priority?: number;
+  _selectBy?: ITrackDataSelectBy;
+}
+
+export interface ITrackData extends ITrackFlags, SongInfo {
+  CODE: string;
+  TYPE: MusicFileType;
+  SUB_TYPE: MusicSubType;
+}
+
+export interface KaraokeExtension {
+  emk?: File;
+  midi?: File;
+  lyr?: File;
+  cur?: File;
+  mp3?: File;
+  mp4?: File;
+}
+
+export interface MusicLoadAllData extends MusicParsedData {
+  files: KaraokeExtension;
+  selectBy?: string;
+  fileType: string;
+  trackData: ITrackData;
+  isError?: boolean;
+  isDuplicate?: boolean;
+}
+
+// [Music Searcing]----------------
 export interface SearchResult {
   records: ITrackData[];
   searchTime: number;
@@ -72,24 +81,15 @@ export interface SearchOptions {
   maxResults?: number;
 }
 
-type LyrData = string[];
-type CurData = number[];
-
-export interface KaraokeExtension<T = any> {
-  emk?: File;
-  midi: File;
-  lyr: T extends File ? File : LyrData;
-  cur: T extends File ? File : CurData;
-}
-
-export interface KaraokeDecoded extends KaraokeExtension<string> {
+// [Not use]----------------
+export interface KaraokeDecoded extends KaraokeExtension {
   error?: boolean;
   isDuplicate?: boolean;
   fileName?: string;
-  raw?: KaraokeExtension<File>;
+  raw?: KaraokeExtension;
 }
 
 export interface TrackDataAndFile {
   records: ITrackData;
-  raw: KaraokeExtension<File>;
+  raw: KaraokeExtension;
 }

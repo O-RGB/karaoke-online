@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal";
-import DonateModal from "../donate-modal";
-import Tabs from "../../common/tabs";
 import DonateAutoModal from "./donate-auto-modal";
 
 interface AutoModalProps {

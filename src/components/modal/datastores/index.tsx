@@ -1,8 +1,6 @@
 import Tabs from "@/components/common/tabs";
 import React from "react";
-import { TbMicrophone2 } from "react-icons/tb";
-import { FaDatabase, FaGoogleDrive, FaUser } from "react-icons/fa";
-import { LuDatabase, LuDelete } from "react-icons/lu";
+import { LuDatabase } from "react-icons/lu";
 import UserDatabase from "./tabs/user-database";
 import ResetDatabase from "./tabs/reset-database";
 import { GrPowerReset } from "react-icons/gr";

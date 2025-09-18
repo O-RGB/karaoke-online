@@ -2,8 +2,10 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { DRUM_CHANNEL } from "@/config/value";
 import { KeyboardNode } from "@/features/engine/modules/instrumentals/keyboard-node";
-import { midiService } from "./output";
-import { INoteState, TEventType } from "@/features/engine/modules/instrumentals/types/node.type";
+import {
+  INoteState,
+  TEventType,
+} from "@/features/engine/modules/instrumentals/types/node.type";
 import { INoteChange } from "@/features/engine/types/synth.type";
 
 interface DrumNodeProps {
@@ -94,11 +96,7 @@ const DrumNode: React.FC<DrumNodeProps> = ({ note, keyNote, onNoteChange }) => {
     const noteByIndex = note.notes[keyNote];
     if (!noteByIndex) return;
 
-    noteByIndex.linkEvent(
-      ["NOTE_ON", "CHANGE"],
-      handleNoteEvent,
-      componentId
-    );
+    noteByIndex.linkEvent(["NOTE_ON", "CHANGE"], handleNoteEvent, componentId);
 
     return () => {
       noteByIndex.unlinkEvent(["NOTE_ON", "CHANGE"], componentId);

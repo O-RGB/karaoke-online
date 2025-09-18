@@ -1,29 +1,70 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import useConfigStore from "../../features/config/config-store";
-import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { MusicLoadAllData } from "@/features/songs/types/songs.type";
+import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
 
 interface TempoPanelProps {}
 
 const TempoPanel: React.FC<TempoPanelProps> = ({}) => {
-  const timeDivision = useRuntimePlayer((state) => state.timeDivision);
+  const componnetId = useId();
+  const engine = useSynthesizerEngine((state) => state.engine);
+
+  const [tick, setTick] = useState<number>(0);
+  const [tempo, setTempo] = useState<number>(0);
+  const [musicInfo, setMusicInfo] = useState<MusicLoadAllData>();
+
+  const onTickUpdated = (tick: number) => {
+    setTick(tick);
+  };
+
+  const onTempoUpdated = (tempo: number) => {
+    setTempo(tempo);
+  };
+
+  const onMusicUpdated = (music: MusicLoadAllData) => {
+    setMusicInfo(music);
+  };
+
+  useEffect(() => {
+    if (engine) {
+      engine?.timerUpdated.add(
+        ["TIMING", "CHANGE"],
+        0,
+        onTickUpdated,
+        componnetId
+      );
+      engine?.tempoUpdated.add(
+        ["TEMPO", "CHANGE"],
+        0,
+        onTempoUpdated,
+        componnetId
+      );
+      engine?.musicUpdated.add(
+        ["MUSIC", "CHANGE"],
+        0,
+        onMusicUpdated,
+        componnetId
+      );
+    }
+  }, [engine]);
+
   const config = useConfigStore((state) => state.config);
   const widgetConfig = config.widgets;
   let isShow = widgetConfig?.tempo?.show;
 
-  const tick = useRuntimePlayer((state) => state.currentTick);
-  const tempo = useRuntimePlayer((state) => state.currentTempo);
-
   const [currentBeatInBar, setCurrentBeatInBar] = useState(1);
 
   useEffect(() => {
-    if (isShow) {
-      if (tick > 0 && timeDivision > 0) {
-        const currentTickInBar = tick % (timeDivision * 4);
-        const beatInBar = Math.floor(currentTickInBar / timeDivision) + 1;
+    if (isShow && musicInfo?.musicType === "midi") {
+      const ppq = (musicInfo.metadata as IMidiParseResult).ticksPerBeat;
+      if (tick > 0 && ppq > 0) {
+        const currentTickInBar = tick % (ppq * 4);
+        const beatInBar = Math.floor(currentTickInBar / ppq) + 1;
         setCurrentBeatInBar(beatInBar);
       }
     }
-  }, [timeDivision, isShow ? tick : undefined]);
+  }, [musicInfo, isShow ? tick : undefined]);
 
   if (isShow === false) {
     return null;

@@ -8,7 +8,7 @@ import {
   KaraokeExtension,
   SearchOptions,
 } from "@/features/songs/types/songs.type";
-import { parseEMKFile } from "@/lib/karaoke/emk";
+import { parseEMKFile } from "@/lib/karaoke/songs/emk";
 import { extractFile } from "@/lib/zip";
 
 // ไม่จำเป็นต้องใช้ baseUrl จาก config แล้ว เพราะเราจะเรียกไปยัง API ภายในของเราเอง
@@ -29,9 +29,7 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
     return null;
   }
 
-  async getSong(
-    trackData: ITrackData
-  ): Promise<KaraokeExtension<File> | undefined> {
+  async getSong(trackData: ITrackData): Promise<KaraokeExtension | undefined> {
     if (
       trackData._superIndex === undefined ||
       trackData._originalIndex === undefined

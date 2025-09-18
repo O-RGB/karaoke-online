@@ -1,28 +1,24 @@
-import { IAlertCommon } from "@/components/common/alert/types/alert.type";
-import Button from "@/components/common/button/button";
-import Label from "@/components/common/display/label";
-import Tags from "@/components/common/display/tags";
-import SearchSelect from "@/components/common/input-data/select/search-select";
-import Select from "@/components/common/input-data/select/select";
-import Pagination from "@/components/common/table/pagination";
-import TableList from "@/components/common/table/table-list";
-import SearchDropdown from "@/components/tools/search-song/search-dropdown";
-import useSongsStore from "@/features/songs/store/songs.store";
-import { ITrackData } from "@/features/songs/types/songs.type";
-import { toOptions } from "@/lib/general";
-import { extractFile } from "@/lib/zip";
-import { GetAllOptions } from "@/utils/indexedDB/core/base";
-import {
-  FilesUserSongsManager,
-  TracklistUserSongsManager,
-} from "@/utils/indexedDB/db/user-songs/table";
-import { ITracklistUserSongs } from "@/utils/indexedDB/db/user-songs/types";
-import moment from "moment";
 import React, { useEffect, useState } from "react";
+import { IAlertCommon } from "@/components/common/alert/types/alert.type";
+import { KaraokeExtension } from "@/features/songs/types/songs.type";
+import { zipFiles } from "@/lib/zip";
+import { GetAllOptions } from "@/utils/indexedDB/core/base";
+import { ITracklistUserSongs } from "@/utils/indexedDB/db/user-songs/types";
 import { AiFillDelete } from "react-icons/ai";
 import { BiDownload } from "react-icons/bi";
 import { CgClose } from "react-icons/cg";
 import { FaSearch } from "react-icons/fa";
+import Button from "@/components/common/button/button";
+import Label from "@/components/common/display/label";
+import Tags from "@/components/common/display/tags";
+import Pagination from "@/components/common/table/pagination";
+import TableList from "@/components/common/table/table-list";
+import useSongsStore from "@/features/songs/store/songs.store";
+import moment from "moment";
+import {
+  FilesUserSongsManager,
+  TracklistUserSongsManager,
+} from "@/utils/indexedDB/db/user-songs/table";
 
 interface UserDatabaseProps extends IAlertCommon {}
 
@@ -79,24 +75,53 @@ const UserDatabase: React.FC<UserDatabaseProps> = ({ setAlert }) => {
     loadData({ limit, offset: (page - 1) * limit });
   };
 
-  //   async function onSearch<T = any>(value: string) {
-  //     const se = songsManager?.userSong.search(value) ?? [];
+  const onDeleteSound = async (tracklist: ITracklistUserSongs) => {
+    const _superIndex = tracklist.data._superIndex;
+    if (!_superIndex) {
+      return setAlert?.({
+        title: "เกิดข้อผิดพลาด?",
+        description: "ไม่พบข้อมูล Super Index ของข้อมูลนี้",
+        variant: "warning",
+      });
+    }
+    try {
+      await tracklistUserSongsManager.delete(tracklist.id);
+      await filesUserSongsManager.delete(_superIndex);
+      return setAlert?.({
+        title: "ลบไฟล์สำเร็จ",
+        variant: "success",
+      });
+    } catch (error) {
+      return setAlert?.({
+        title: "เกิดข้อผิดพลาด",
+        description: `Error: ${JSON.stringify(error)}`,
+        variant: "error",
+      });
+    }
+  };
 
-  //     const op = toOptions<ITrackData>({
-  //       render: (value) => (
-  //         <SearchDropdown
-  //           size="sm"
-  //           className="!text-base "
-  //           value={value}
-  //         ></SearchDropdown>
-  //       ),
-  //       list: se,
-  //     });
-  //     return op as T;
-  //   }
+  const onDownloadSong = async (tracklist: ITracklistUserSongs) => {
+    const song = await songsManager?.getSong(tracklist.data);
+    const filesObj: KaraokeExtension | undefined = song?.files;
 
-  const onDeleteSound = (tracklist: ITracklistUserSongs) => {
-    tracklistUserSongsManager.delete(tracklist.id);
+    if (!filesObj) return;
+
+    const filesArray: File[] = Object.values(filesObj).filter(
+      (file): file is File => file !== undefined
+    );
+
+    if (filesArray.length === 0) return;
+
+    const zipFile = await zipFiles(filesArray, song?.baseName || "song");
+
+    if (!zipFile) return;
+
+    const url = URL.createObjectURL(zipFile);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = zipFile.name;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   useEffect(() => {
@@ -104,23 +129,6 @@ const UserDatabase: React.FC<UserDatabaseProps> = ({ setAlert }) => {
   }, []);
   return (
     <div className="flex flex-col gap-2 w-full h-full">
-      {/* <div className="h-fit">
-        <SearchSelect
-          className="w-full !text-black"
-          placeholder="ค้นหาเพลง"
-          optionsStyle={{
-            className: "bg-white",
-            itemHoverColor: "bg-white hover:!bg-gray-400",
-            textColor: "!text-black",
-          }}
-          onSelectItem={(value: IOptions<ITrackData>) => {
-            if (value.option) {
-              setSelect(value.option);
-            }
-          }}
-          onSearch={onSearch}
-        ></SearchSelect>
-      </div> */}
       <div className="flex flex-col lg:flex-row gap-2 h-full w-full overflow-auto">
         <div
           className={`flex flex-col w-full ${
@@ -167,6 +175,7 @@ const UserDatabase: React.FC<UserDatabaseProps> = ({ setAlert }) => {
                   className="w-full h-8"
                   icon={<BiDownload></BiDownload>}
                   iconPosition="left"
+                  onClick={() => onDownloadSong(onSelect)}
                 >
                   ดาวน์โหลด
                 </Button>
@@ -180,7 +189,9 @@ const UserDatabase: React.FC<UserDatabaseProps> = ({ setAlert }) => {
                       title: "ยืนยันการลบเพลง?",
                       description: "หากกดตกลงจะไม่สามารถกู้คืนได",
                       variant: "warning",
-                      onOk: () => {},
+                      onOk: () => {
+                        onDeleteSound(onSelect);
+                      },
                     });
                   }}
                 >
@@ -236,13 +247,13 @@ const UserDatabase: React.FC<UserDatabaseProps> = ({ setAlert }) => {
                   </div>
                 )}
 
-                {onSelect.data.LYR_TITLE && (
+                {onSelect.data.LYRIC_TITLE && (
                   <div className="flex flex-col gap-2">
                     <span className="w-32 font-bold text-nowrap">
                       เนื้อร้องบางส่วน
                     </span>
                     <span className="text-gray-800">
-                      {onSelect.data.LYR_TITLE}...
+                      {onSelect.data.LYRIC_TITLE}...
                     </span>
                   </div>
                 )}

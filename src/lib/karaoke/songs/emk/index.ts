@@ -108,7 +108,7 @@ export async function parseEMKFile(
       readTag(); // unk8
 
       const compressedData = data.slice(dataBegin, dataEnd);
-      const rawData = zlib.inflateSync(Buffer.from(compressedData));
+      const rawData = zlib.inflateSync(Buffer.from(compressedData) as any);
 
       if (rawData.length !== uncompressedSize) {
         throw new Error("Invalid uncompressed size");
@@ -116,13 +116,17 @@ export async function parseEMKFile(
 
       switch (tag) {
         case "MIDI_DATA":
-          mid = new File([rawData], `${file.name}.mid`, { type: "audio/midi" });
+          mid = new File([rawData as BlobPart], `${file.name}.mid`, {
+            type: "audio/midi",
+          });
           break;
         case "LYRIC_DATA":
-          lyr = new File([rawData], `${file.name}.lyr`, { type: "text/plain" });
+          lyr = new File([rawData as BlobPart], `${file.name}.lyr`, {
+            type: "text/plain",
+          });
           break;
         case "CURSOR_DATA":
-          cur = new File([rawData], `${file.name}.cur`, {
+          cur = new File([rawData as BlobPart], `${file.name}.cur`, {
             type: "application/octet-stream",
           });
           break;

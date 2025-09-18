@@ -1,26 +1,22 @@
 import { create } from "zustand";
 import { QueuePlayerProps } from "../types/player.type";
-import { convertCursorToTicks } from "@/lib/app-control";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { ITrackData } from "@/features/songs/types/songs.type";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
-import { readCursorFile, readLyricsFile } from "@/lib/karaoke/ncn";
-import useRuntimePlayer from "./runtime-player";
 import useSongsStore from "@/features/songs/store/songs.store";
-import useLyricsStore from "@/features/lyrics/store/lyrics.store";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   loading: false,
   queue: [],
   addQueue: async (value) => {
-    const runtime = useRuntimePlayer.getState();
+    const player = useSynthesizerEngine.getState().engine?.player;
     let queue = [...get().queue];
     set({ queue: [] });
 
     queue.push(value);
     set({ queue });
 
-    if (runtime.isFinished) {
+    if (!player?.musicQuere) {
       get().playMusic(0);
       get().removeQueue(0);
     }
@@ -44,18 +40,12 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
       nextSong = queue[0];
     }
 
-    if (!nextSong) {
-      useRuntimePlayer.getState().stop();
-      return;
-    }
-
     get().playMusic(0);
     get().removeQueue(0);
   },
 
   playMusic: async (index) => {
-    const player = useSynthesizerEngine.getState().engine;
-    const runtime = useRuntimePlayer.getState();
+    const player = useSynthesizerEngine.getState().engine?.player;
 
     if (!player) {
       return;
@@ -76,45 +66,19 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
       return;
     }
 
-    runtime.stop();
+    player.stop();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const isOk = await player.loadMidi(song);
+    if (!isOk) return;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const parseCur = (await readCursorFile(song.cur)) ?? [];
-    const parseLyr = await readLyricsFile(song.lyr);
-
-    const parsedMidi = await player.player?.loadMidi(song.midi);
-
-    if (parsedMidi) {
-      const timeDivision = parsedMidi.timeDivision;
-      const cursors = convertCursorToTicks(timeDivision, parseCur);
-
-      runtime.setMidiInfo(
-        cursors,
-        timeDivision,
-        parseLyr,
-        parsedMidi,
-        song,
-        music
-      );
-
-      if (music._selectBy) {
-        const selectBy = music._selectBy;
-        const lyrics = useLyricsStore.getState();
-        lyrics.setClientId?.(selectBy.clientId);
-      } else {
-        const lyrics = useLyricsStore.getState();
-        lyrics.setClientId?.(undefined);
-      }
-
-      setTimeout(async () => {
-        runtime.play();
-        runtime.tickRun(true);
-
-        const requestToClient = usePeerHostStore.getState().requestToClient;
-        await requestToClient(null, "system/init", {
-          musicInfo: music,
-        });
-      }, 500);
-    }
+    setTimeout(async () => {
+      player.play();
+      const requestToClient = usePeerHostStore.getState().requestToClient;
+      await requestToClient(null, "system/init", {
+        musicInfo: music,
+      });
+    }, 500);
   },
 }));
 

@@ -1,5 +1,3 @@
-import { MID_FILE_TYPE, CUR_FILE_TYPE, LYR_FILE_TYPE } from "@/config/value";
-
 export const readLyricsFile = async (file: File) => {
   const arrayBuffer = await file.arrayBuffer();
   const decoder = new TextDecoder("windows-874");
@@ -7,6 +5,7 @@ export const readLyricsFile = async (file: File) => {
   var lines = contentUtf8.split("\r\n");
   return lines;
 };
+
 export const readCursorFile = async (file: File) => {
   try {
     const data = await file.arrayBuffer();
@@ -32,43 +31,45 @@ export const readCursorFile = async (file: File) => {
     return cursorData;
   } catch (error) {
     console.error("Error loading cursor:", error);
+    return [];
   }
 };
 
-export const validateSongFileTypes = (
-  FileList: FileList
-): SongFiles | undefined => {
-  if (FileList.length !== 3) {
-    return undefined;
-  }
+// export const validateSongFileTypes = (
+//   FileList: FileList
+// ): SongFiles | undefined => {
+//   if (FileList.length !== 3) {
+//     return undefined;
+//   }
 
-  const anyType1: File | null = FileList.item(0);
-  const anyType2: File | null = FileList.item(1);
-  const anyType3: File | null = FileList.item(2);
+//   const anyType1: File | null = FileList.item(0);
+//   const anyType2: File | null = FileList.item(1);
+//   const anyType3: File | null = FileList.item(2);
 
-  if (anyType1 && anyType2 && anyType3) {
-    const filelist = [anyType1, anyType2, anyType3];
-    const song: Partial<SongFiles> = {};
-    filelist.map((data) => {
-      const name = data.name.toLowerCase();
-      if (name.endsWith(MID_FILE_TYPE)) {
-        song.mid = data;
-      } else if (name.endsWith(CUR_FILE_TYPE)) {
-        song.cur = data;
-      } else if (name.endsWith(LYR_FILE_TYPE)) {
-        song.lyr = data;
-      }
-    });
+//   if (anyType1 && anyType2 && anyType3) {
+//     const filelist = [anyType1, anyType2, anyType3];
+//     const song: Partial<SongFiles> = {};
+//     filelist.map((data) => {
+//       const name = data.name.toLowerCase();
+//       if (name.endsWith(MID_FILE_TYPE)) {
+//         song.mid = data;
+//       } else if (name.endsWith(CUR_FILE_TYPE)) {
+//         song.cur = data;
+//       } else if (name.endsWith(LYR_FILE_TYPE)) {
+//         song.lyr = data;
+//       }
+//     });
 
-    if (song.cur && song.lyr && song.mid) {
-      return song as SongFiles;
-    } else {
-      return undefined;
-    }
-  } else {
-    return undefined;
-  }
-};
+//     if (song.cur && song.lyr && song.mid) {
+//       return song as SongFiles;
+//     } else {
+//       return undefined;
+//     }
+//   } else {
+//     return undefined;
+//   }
+// };
+
 export function fixMidiHeader(file: File): Promise<File> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

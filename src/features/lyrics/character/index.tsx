@@ -1,15 +1,16 @@
-import React, { useEffect } from "react";
-import { LyricsCharacterProps } from "../types/lyrics-character.type";
+import React from "react";
+import { LyricsCharacterStyle } from "../types";
+
+interface LyricsCharacterProps extends LyricsCharacterStyle {
+  clip: number;
+  text: string;
+}
 
 const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
-  lyr,
   clip,
-  fontSize = 20,
-  color,
-  activeColor,
+  text,
+  ...props
 }) => {
-  const fontType = typeof fontSize;
-
   const clipStyle = {
     transition: clip === 0 ? "" : "clip-path 0.2s ease-out",
     clipPath: `inset(-100% -100% -100% ${clip}%)`,
@@ -26,13 +27,15 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
     lineHeight: "1.5",
   };
 
-  useEffect(() => {}, [color, activeColor]);
-
   return (
     <div
-      className={`${fontType === "string" ? fontSize : ""}`}
+      className={`${typeof props.fontSize === "string" ? props.fontSize : ""}`}
       style={{
-        fontSize: fontType === "number" ? `${fontSize}px` : undefined,
+        fontSize:
+          typeof props.fontSize === "number"
+            ? `${props.fontSize}px`
+            : undefined,
+
         position: "relative",
         left: 0,
         top: 0,
@@ -44,10 +47,10 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
         style={{
           ...clipStyle,
           ...textOver,
-          color: color?.color,
+          color: props.color?.color,
         }}
       >
-        {lyr}
+        {text}
       </div>
 
       <div
@@ -55,31 +58,31 @@ const LyricsCharacter: React.FC<LyricsCharacterProps> = ({
         style={{
           ...clipStyle,
           ...textOver,
-          color: activeColor?.color,
+          color: props.activeColor?.color,
         }}
       >
-        {lyr}
+        {text}
       </div>
 
       <div className="relative">
         <div
           style={{
             ...textOver,
-            color: activeColor?.colorBorder,
+            color: props.activeColor?.colorBorder,
           }}
           className="z-10 font-outline-2 md:font-outline-4 absolute top-0 left-0"
         >
-          {lyr}
+          {text}
         </div>
 
         <div
           style={{
             ...textOver,
-            color: color?.colorBorder,
+            color: props.color?.colorBorder,
           }}
           className="z-20 relative"
         >
-          {lyr}
+          {text}
         </div>
       </div>
     </div>

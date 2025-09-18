@@ -1,5 +1,4 @@
 import React from "react";
-import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 import useSongsStore from "@/features/songs/store/songs.store";
 import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
@@ -11,8 +10,8 @@ const ResetDatabase: React.FC<ResetDatabaseProps> = ({
   setProcessing,
   setAlert,
 }) => {
-  const engine = useSynthesizerEngine((state) => state.uninsatll);
-  const uninstall = useRuntimePlayer((state) => state.uninstall);
+  const uninsatll = useSynthesizerEngine((state) => state.uninsatll);
+  const timer = useSynthesizerEngine((state) => state.timer);
   const songsManager = useSongsStore((state) => state.songsManager);
   const soundfontBaseManager = useSongsStore(
     (state) => state.soundfontBaseManager
@@ -20,7 +19,7 @@ const ResetDatabase: React.FC<ResetDatabaseProps> = ({
 
   const deleteAllSetting = async () => {
     try {
-      uninstall();
+      timer?.terminateWorker();
       setProcessing?.({
         title: "Reset System",
         status: {
@@ -31,7 +30,7 @@ const ResetDatabase: React.FC<ResetDatabaseProps> = ({
         variant: "processing",
       });
       setTimeout(() => {
-        engine();
+        uninsatll();
         setProcessing?.({
           title: "Reset System",
           status: {

@@ -4,14 +4,14 @@ import React, { useEffect, useState } from "react";
 import { ConfigSystem } from "@/features/config/types/config.type";
 import SliderCommon from "@/components/common/input-data/slider";
 import { CgPerformance } from "react-icons/cg";
-import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
+// import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 
 interface EfficiencyDisplayProps {}
 
 const EfficiencyDisplay: React.FC<EfficiencyDisplayProps> = ({}) => {
   const setConfig = useConfigStore((state) => state.setConfig);
   const config = useConfigStore((state) => state.config);
-  const isPaused = useRuntimePlayer((state) => state.isPaused);
+  // const isPaused = useRuntimePlayer((state) => state.isPaused);
 
   const [refreshRateValue, setRefreshRateValue] = useState<number>(100);
 

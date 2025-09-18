@@ -1,15 +1,15 @@
 import SearchSelect from "../../common/input-data/select/search-select";
 import SearchDropdown from "./search-dropdown";
 import useKeyboardStore from "@/features/keyboard-state";
-import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import SwitchButton from "@/components/common/input-data/switch/switch-button";
 import KaraokeSearchInput from "@/components/common/input-data/karaoke-input";
 import React, { useState } from "react";
+import useSongsStore from "@/features/songs/store/songs.store";
+import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import { toOptions } from "@/lib/general";
 import { FaList } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { ITrackData } from "@/features/songs/types/songs.type";
-import useSongsStore from "@/features/songs/store/songs.store";
 
 interface SearchSongProps {}
 
@@ -84,7 +84,6 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
             }`}
           >
             <SearchSelect
-              // border="blur-border border"
               onBlur={handleSearchBlur}
               onFocus={handleSearchFocus}
               className={

@@ -1,15 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
+import Button from "../../button/button";
+import Tags from "../../display/tags";
+import useKeyboardStore from "@/features/keyboard-state";
 import { AiOutlineLoading } from "react-icons/ai";
 import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
 import { MdPlayCircleFilled } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
-import Button from "../../button/button";
-import Tags from "../../display/tags";
-import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
-import useKeyboardStore from "@/features/keyboard-state";
 import { useKeyboardEvents } from "@/hooks/keyboard-hook";
-import { ITrackData, SoundSubType } from "@/features/songs/types/songs.type";
+import { ITrackData } from "@/features/songs/types/songs.type";
 import { SourceTag } from "@/components/tools/search-song/source-tag";
+import { MusicFileType, MusicSubType } from "@/lib/karaoke/songs/types";
 
 interface KaraokeSearchInputProps {
   onSearch?: (value: string) => Promise<IOptions[]>;
@@ -29,17 +29,29 @@ const ArtistTag = ({ artist = "" }: { artist?: string }) => {
   );
 };
 
-const SongTypeTag = ({ type }: { type?: SoundSubType }) => {
-  if (type === "EMK")
+const SongTypeTag = ({ type }: { type?: MusicSubType }) => {
+  if (type === "emk")
     return (
       <Tags color="red" className="!text-lg">
         EMK
       </Tags>
     );
-  if (type === "NCN")
+  if (type === "ncn")
     return (
       <Tags color="green" className="!text-lg">
         NCN
+      </Tags>
+    );
+  if (type === "mid")
+    return (
+      <Tags color="amber" className="!text-lg">
+        MIDX
+      </Tags>
+    );
+  if (type === "mp3")
+    return (
+      <Tags color="yellow" className="!text-lg">
+        MP3
       </Tags>
     );
   return null;

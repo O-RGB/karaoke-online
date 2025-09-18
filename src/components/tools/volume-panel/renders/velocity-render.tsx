@@ -1,6 +1,8 @@
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
-import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
-import { useEffect, useRef } from "react";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { PlayerStatusType } from "@/features/engine/types/synth.type";
+// import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
+import { useEffect, useId, useRef, useState } from "react";
 
 interface ChannelVolumeBgProps {
   node: SynthChannel[];
@@ -15,7 +17,25 @@ const ChannelVolumeBg: React.FC<ChannelVolumeBgProps> = ({
   maxGain = 10,
   decreaseAmount = 0.05,
 }) => {
-  const isPaused = useRuntimePlayer((state) => state.isPaused);
+  const componnetId = useId();
+  const engine = useSynthesizerEngine((state) => state.engine);
+
+  const [playerStatus, setPlayerStatus] = useState<PlayerStatusType>("STOP");
+
+  const onPlayerUpdate = (on: PlayerStatusType) => {
+    setPlayerStatus(on);
+  };
+
+  useEffect(() => {
+    if (engine) {
+      engine?.playerUpdated.add(
+        ["PLAYER", "CHANGE"],
+        0,
+        onPlayerUpdate,
+        componnetId
+      );
+    }
+  }, [engine]);
 
   const elementRef = useRef<HTMLDivElement | null>(null);
 
@@ -25,7 +45,7 @@ const ChannelVolumeBg: React.FC<ChannelVolumeBgProps> = ({
     const element = elementRef.current;
     if (!element) return;
 
-    if (isPaused || !node || node.length === 0) {
+    if (playerStatus === "PAUSE" || !node || node.length === 0) {
       cancelAnimationFrame(animationFrameIdRef.current);
       element.style.opacity = "0";
       return;
@@ -59,7 +79,7 @@ const ChannelVolumeBg: React.FC<ChannelVolumeBgProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameIdRef.current);
     };
-  }, [node, isPaused, maxGain, decreaseAmount]);
+  }, [node, playerStatus, maxGain, decreaseAmount]);
 
   return (
     <div
