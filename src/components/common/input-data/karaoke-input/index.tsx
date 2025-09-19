@@ -30,25 +30,25 @@ const ArtistTag = ({ artist = "" }: { artist?: string }) => {
 };
 
 const SongTypeTag = ({ type }: { type?: MusicSubType }) => {
-  if (type === "emk")
+  if (type === "EMK")
     return (
       <Tags color="red" className="!text-lg">
         EMK
       </Tags>
     );
-  if (type === "ncn")
+  if (type === "NCN")
     return (
       <Tags color="green" className="!text-lg">
         NCN
       </Tags>
     );
-  if (type === "mid")
+  if (type === "MID")
     return (
       <Tags color="amber" className="!text-lg">
         MIDX
       </Tags>
     );
-  if (type === "mp3")
+  if (type === "MP3")
     return (
       <Tags color="yellow" className="!text-lg">
         MP3
@@ -212,14 +212,26 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
         )}
 
         {hasResults && selectedSong && (
-          <div className="flex flex-wrap gap-3 items-center text-2xl animate-fadeIn">
-            <SongTypeTag type={selectedSong.SUB_TYPE} />
-            <SourceTag from={selectedSong._system}></SourceTag>
-            {selectedSong.CODE && (
-              <span className="uppercase">{selectedSong.CODE}</span>
+          <div
+            className={`flex flex-col justify-center  ${
+              selectedSong.LYRIC_TITLE ? "gap-2" : ""
+            }`}
+          >
+            <div className="flex flex-wrap gap-3 items-center text-2xl animate-fadeIn">
+              <SongTypeTag type={selectedSong.SUB_TYPE} />
+              <SourceTag from={selectedSong._system}></SourceTag>
+              {selectedSong.CODE && (
+                <span className="uppercase">{selectedSong.CODE}</span>
+              )}
+              <span>{selectedSong.TITLE}</span>
+              <ArtistTag artist={selectedSong.ARTIST} />
+            </div>
+
+            {selectedSong.LYRIC_TITLE && (
+              <div className=" w-full h-full text-xs line-clamp-1 text-opacity-80">
+                {selectedSong.LYRIC_TITLE}
+              </div>
             )}
-            <span>{selectedSong.TITLE}</span>
-            <ArtistTag artist={selectedSong.ARTIST} />
           </div>
         )}
       </div>

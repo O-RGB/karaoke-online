@@ -44,7 +44,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   async play(): Promise<void> {
     if (!this.musicQuere) return;
 
-    if (this.musicQuere.musicType === "mp3" && this.mp3SourceNode?.buffer) {
+    if (this.musicQuere.musicType === "MP3" && this.mp3SourceNode?.buffer) {
       const buffer = this.mp3SourceNode.buffer;
       const ctx = this.engine.audio!;
       const source = ctx.createBufferSource();
@@ -78,7 +78,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   pause(): void {
     if (!this.musicQuere) return;
 
-    if (this.musicQuere.musicType === "mp3" && this.mp3SourceNode) {
+    if (this.musicQuere.musicType === "MP3" && this.mp3SourceNode) {
       const ctx = this.engine.audio!;
       const elapsed = ctx.currentTime - this.mp3StartTime;
       this.mp3PausedOffset += elapsed;
@@ -105,7 +105,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
     this.pause();
 
-    if (this.musicQuere?.musicType === "mp3" && this.mp3SourceNode) {
+    if (this.musicQuere?.musicType === "MP3" && this.mp3SourceNode) {
       this.mp3PausedOffset = seconds;
       const buffer = this.mp3SourceNode.buffer;
       if (!buffer || !this.engine.audio) return;

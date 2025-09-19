@@ -28,8 +28,6 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
   );
   const setConfig = useConfigStore((state) => state.setConfig);
 
-  // --- ฟังก์ชันที่ถูกแยกส่วนสำหรับแต่ละขั้นตอน ---
-
   const runStep3_SaveMaster = async () => {
     const reader = readerRef.current;
     if (!reader) return;

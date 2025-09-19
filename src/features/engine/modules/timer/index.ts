@@ -11,7 +11,7 @@ export class TimerWorker {
   }
 
   updateMusic(musicInfo: MusicLoadAllData) {
-    if (musicInfo.musicType === "midi") {
+    if (musicInfo.musicType === "MIDI") {
       this.timingMode = "Tick";
       this.updateTempoMap(musicInfo.tempoRange);
       this.updateDuration((musicInfo.metadata as any).duration);

@@ -178,21 +178,25 @@ export class SongsSystem {
       return undefined;
     }
 
-    try {
-      const userSong = await this.userSong.getSong(trackData);
+    if (trackData._system === "DATABASE_FILE_SYSTEM") {
+      console.log("on database file system")
+      try {
+        const userSong = await this.userSong.getSong(trackData);
+        if (userSong) {
+          return musicProcessGroup(userSong);
+        }
+      } catch (error) {
+        console.error(
+          "Could not get song from user source. Trying main source...",
+          error
+        );
+      }
+    } else {
+      console.log("on manager file system");
+      const userSong = await this.manager?.getSong(trackData);
       if (userSong) {
         return musicProcessGroup(userSong);
       }
-    } catch (error) {
-      console.error(
-        "Could not get song from user source. Trying main source...",
-        error
-      );
-    }
-
-    const userSong = await this.manager?.getSong(trackData);
-    if (userSong) {
-      return musicProcessGroup(userSong);
     }
 
     return undefined;

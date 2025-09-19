@@ -86,6 +86,7 @@ class FileSystemManager {
   }
 
   async getFileByPath(path: string): Promise<File | undefined> {
+    console.log(path);
     const rootHandle = await this.getRootHandle();
     const pathParts = path.split("/").filter((part) => part.length > 0);
 

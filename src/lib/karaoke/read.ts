@@ -83,13 +83,13 @@ export const musicProcessGroup = async (
   let group: MusicLoadAllData = {
     baseName: "",
     files,
-    musicType: "midi",
+    musicType: "MIDI",
     fileType: "",
     trackData: {
       ...DEFAULT_SONG_INFO,
       CODE: "",
-      TYPE: "ncn",
-      SUB_TYPE: "mid",
+      TYPE: "NCN",
+      SUB_TYPE: "MID",
       _originalIndex: 0,
       _system: "DATABASE_FILE_SYSTEM",
     },
@@ -104,7 +104,7 @@ export const musicProcessGroup = async (
 
   // 🔹 LYR + CUR + MID
   if (files.lyr && files.cur && files.midi) {
-    group.musicType = "midi";
+    group.musicType = "MIDI";
     group.fileType = "midi";
     group.baseName = files.midi.name;
 
@@ -122,13 +122,13 @@ export const musicProcessGroup = async (
         group.tempoRange = tempos;
       }
 
-      group.musicType = "midi";
+      group.musicType = "MIDI";
       group.fileType = "midi";
       group.metadata.lyricsRaw = lyrStr;
       group.trackData = convertToTrackData(
         group.baseName,
-        "ncn",
-        "mid",
+        "NCN",
+        "MID",
         group.metadata
       );
     } catch (error) {
@@ -141,7 +141,7 @@ export const musicProcessGroup = async (
 
   // 🔹 MIDI only
   else if (files.midi) {
-    group.musicType = "midi";
+    group.musicType = "MIDI";
     group.fileType = "midi";
     group.baseName = files.midi.name;
     group.metadata = await parseMidi(files.midi);
@@ -156,27 +156,27 @@ export const musicProcessGroup = async (
       let ppq = (group.metadata as IMidiParseResult).ticksPerBeat;
       const { convertedChords, finalWords } = convertLyricsMapping(
         group.metadata,
-        "midi",
+        "MIDI",
         ppq,
         tempos
       );
       group.tempoRange = tempos;
-      group.lyricsRange = xmlToArrayRange(finalWords, ppq, "midi");
+      group.lyricsRange = xmlToArrayRange(finalWords, ppq, "MIDI");
     }
 
     group.trackData = convertToTrackData(
       group.baseName,
-      "ncn",
-      "mid",
+      "NCN",
+      "MID",
       group.metadata
     );
-    group.musicType = "midi";
+    group.musicType = "MIDI";
     group.fileType = "midi";
   }
 
   // 🔹 EMK
   else if (files.emk) {
-    group.musicType = "midi";
+    group.musicType = "MIDI";
     group.fileType = "emk";
     group.baseName = files.emk.name;
     const decoded = await parseEMKFile(files.emk);
@@ -186,10 +186,11 @@ export const musicProcessGroup = async (
       const lyr = decoded.lyr;
 
       group.metadata = await parseMidi(mid);
-      if (!hasLyrics(group)) {
-        group.isError = true;
-        return group;
-      }
+
+      // if (!hasLyrics(group)) {
+      //   group.isError = true;
+      //   return group;
+      // }
       const lyrStr = await readLyricsFile(lyr);
 
       if (full) {
@@ -202,19 +203,20 @@ export const musicProcessGroup = async (
         group.lyricsRange = curToArrayRange(lyrStr.slice(3), realCur);
         group.tempoRange = tempos;
       }
+      group.metadata.lyricsRaw = lyrStr;
       group.trackData = convertToTrackData(
         group.baseName,
-        "emk",
-        "emk",
+        "EMK",
+        "EMK",
         group.metadata
       );
-      group.metadata.lyricsRaw = lyrStr;
+      console.log(group);
     }
   }
 
   // 🔹 MP3
   else if (files.mp3) {
-    group.musicType = "mp3";
+    group.musicType = "MP3";
     group.fileType = "mp3";
     group.baseName = files.mp3.name;
     let parsedDataMp3 = await readMp3(files.mp3);
@@ -229,17 +231,17 @@ export const musicProcessGroup = async (
     if (full) {
       const { convertedChords, finalWords } = convertLyricsMapping(
         parsedDataMp3.parsedData,
-        "mp3",
+        "MP3",
         0
       );
-      group.trackData = convertToTrackData(
-        group.baseName,
-        "mp3",
-        "mp3",
-        group.metadata
-      );
-      group.lyricsRange = xmlToArrayRange(finalWords, 0, "mp3");
+      group.lyricsRange = xmlToArrayRange(finalWords, 0, "MP3");
     }
+    group.trackData = convertToTrackData(
+      group.baseName,
+      "MP3",
+      "MP3",
+      group.metadata
+    );
   }
 
   // 🔹 MP4

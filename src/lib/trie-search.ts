@@ -42,15 +42,9 @@ export class TrieSearchService<T extends { [key: string]: any }> {
     this.trie.addAll(list);
   }
 
-  // ===== 👇 เพิ่มฟังก์ชันนี้เข้ามาใหม่ =====
-  /**
-   * Adds a single item to the trie index.
-   * @param item The item to add.
-   */
   public add(item: T): void {
     this.trie.add(item);
   }
-  // ===== 👆 สิ้นสุดส่วนที่เพิ่มใหม่ =====
 
   public search(value: string, limit: number = 20): T[] {
     if (!this.trie || !value) {

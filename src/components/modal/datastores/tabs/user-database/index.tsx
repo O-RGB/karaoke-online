@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 import { KaraokeExtension } from "@/features/songs/types/songs.type";
-import { zipFiles } from "@/lib/zip";
+import { extractFile, removeFilesInZip, zipFiles } from "@/lib/zip";
 import { GetAllOptions } from "@/utils/indexedDB/core/base";
 import { ITracklistUserSongs } from "@/utils/indexedDB/db/user-songs/types";
 import { AiFillDelete } from "react-icons/ai";
@@ -22,7 +22,10 @@ import {
 
 interface UserDatabaseProps extends IAlertCommon {}
 
-const UserDatabase: React.FC<UserDatabaseProps> = ({ setAlert }) => {
+const UserDatabase: React.FC<UserDatabaseProps> = ({
+  setAlert,
+  closeAlert,
+}) => {
   const limit = 20;
   const filesUserSongsManager = new FilesUserSongsManager();
   const tracklistUserSongsManager = new TracklistUserSongsManager();
@@ -76,21 +79,58 @@ const UserDatabase: React.FC<UserDatabaseProps> = ({ setAlert }) => {
   };
 
   const onDeleteSound = async (tracklist: ITracklistUserSongs) => {
-    const _superIndex = tracklist.data._superIndex;
-    if (!_superIndex) {
-      return setAlert?.({
-        title: "เกิดข้อผิดพลาด?",
-        description: "ไม่พบข้อมูล Super Index ของข้อมูลนี้",
-        variant: "warning",
-      });
-    }
+    // const _superIndex = tracklist.data._superIndex;
+    // if (!_superIndex) {
+    //   return setAlert?.({
+    //     title: "เกิดข้อผิดพลาด?",
+    //     description: "ไม่พบข้อมูล Index ของข้อมูลนี้",
+    //     variant: "warning",
+    //   });
+    // }
     try {
       await tracklistUserSongsManager.delete(tracklist.id);
-      await filesUserSongsManager.delete(_superIndex);
-      return setAlert?.({
-        title: "ลบไฟล์สำเร็จ",
-        variant: "success",
-      });
+      setListData([]);
+      setSelect(undefined);
+      onPageChange(page);
+      closeAlert?.();
+      // const zip = await filesUserSongsManager.get(_superIndex);
+      // if (zip?.file) {
+      //   const files = await extractFile(zip.file);
+      //   try {
+      //     const originalFile = files.find(())
+      //     console.log("Extracted: ", files);
+      //     console.log("Getby originalFile: ", originalFile);
+      //     if (originalFile) {
+      //       const filePath = originalFile.name;
+      //       const removed = await removeFilesInZip(zip.file, [filePath]);
+      //       if (!removed) throw "ไม่สามารถลบไฟล์ใน Zip [removeFilesInZip]";
+      //       const files = await extractFile(removed);
+      //       if (files.length == 0) {
+      //         await filesUserSongsManager.delete(_superIndex);
+      //       } else {
+      //         await filesUserSongsManager.update(_superIndex, {
+      //           file: removed,
+      //         });
+      //       }
+      //       await tracklistUserSongsManager.delete(tracklist.id);
+      //       setListData([]);
+      //       setSelect(undefined);
+      //       onPageChange(page);
+      //     } else {
+      //       setAlert?.({
+      //         title: "ตรวจไม่พบไฟล์เพลง",
+      //         description: `ไม่พบไฟล์เพลงในตำแนห่ง originalIndex: ${_originalIndex}`,
+      //         variant: "warning",
+      //       });
+      //     }
+      //   } catch (error) {
+      //     return setAlert?.({
+      //       title: "เกิดข้อผิดพลาด",
+      //       description: `Error: ${JSON.stringify(error)}`,
+      //       variant: "error",
+      //     });
+      //   }
+      // }
     } catch (error) {
       return setAlert?.({
         title: "เกิดข้อผิดพลาด",

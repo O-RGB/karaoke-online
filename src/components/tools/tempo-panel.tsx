@@ -56,7 +56,7 @@ const TempoPanel: React.FC<TempoPanelProps> = ({}) => {
   const [currentBeatInBar, setCurrentBeatInBar] = useState(1);
 
   useEffect(() => {
-    if (isShow && musicInfo?.musicType === "midi") {
+    if (isShow && musicInfo?.musicType === "MIDI") {
       const ppq = (musicInfo.metadata as IMidiParseResult).ticksPerBeat;
       if (tick > 0 && ppq > 0) {
         const currentTickInBar = tick % (ppq * 4);

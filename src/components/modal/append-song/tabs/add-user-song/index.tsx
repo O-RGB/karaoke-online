@@ -16,6 +16,7 @@ import { groupFilesByBaseName, musicProcessGroup } from "@/lib/karaoke/read";
 import { FaPlus, FaRegFileAudio } from "react-icons/fa";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { AlertDialogProps } from "@/components/common/alert/notification";
+import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 
 interface AddSongCount {
   length: number;
@@ -23,17 +24,18 @@ interface AddSongCount {
   duplicate: number;
 }
 
-interface AddUserSongProps {
-  setAlert?: (props?: AlertDialogProps) => void;
-  closeAlert?: () => void;
-}
+interface AddUserSongProps extends IAlertCommon {}
 
 interface DuplicateModalData {
   currentSong: KaraokeDecoded;
   duplicates: DuplicateMatch[];
 }
 
-const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
+const AddUserSong: React.FC<AddUserSongProps> = ({
+  setAlert,
+  closeAlert,
+  setProcessing,
+}) => {
   const [decoded, setDecoded] = useState<ListItem<MusicLoadAllData>[]>([]);
   // const [duplicateModal, setDuplicateModal] =
   //   useState<DuplicateModalData | null>(null);
@@ -110,7 +112,7 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
     const sortedNewDecoded = [...errors, ...duplicates, ...valids];
 
     let newListItems = sortedNewDecoded.map((item) => {
-      let name = item.metadata?.info.TITLE;
+      let name = item.trackData.TITLE;
       if (item.isError) name = "ไม่สามารถอ่านไฟล์";
       if (item.isDuplicate) name = `${name} (ซ้ำ)`;
 
@@ -122,9 +124,11 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
         render: () => (
           <div className="w-fit flex gap-2">
             <Tags color={tagColor} className="text-[10px] min-w-10 text-center">
-              {item.baseName}
+              {item.trackData.CODE}
             </Tags>
-
+            <Tags color={"gray"} className="text-[10px] min-w-10 text-center">
+              {item.trackData.SUB_TYPE}
+            </Tags>
             <div className="m-auto">{name}</div>
           </div>
         ),
@@ -220,6 +224,14 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
   // };
 
   const handleAddSong = async () => {
+    setProcessing?.({
+      title: "กำลังเพิ่มเพลง",
+      variant: "processing",
+      status: {
+        progress: 0,
+        text: "กำลังเริ่มต้น",
+      },
+    });
     try {
       const test = new BaseUserSongsSystemReader();
       const group: MusicLoadAllData[] = [];
@@ -228,10 +240,7 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
         (data) => !data.value.isError && !data.value.isDuplicate
       );
 
-      // validSongs.map((data) => {
-      //   const records = test.convertToTrackData(data.value);
-      //   if (records) group.push(data.value);
-      // });
+      validSongs.map((data) => group.push(data.value));
 
       if (group.length === 0) {
         alert("ไม่มีเพลงที่สามารถเพิ่มได้ (ทั้งหมดเป็นไฟล์ผิดพลาดหรือซ้ำ)");
@@ -240,8 +249,24 @@ const AddUserSong: React.FC<AddUserSongProps> = ({ setAlert, closeAlert }) => {
 
       await test.addSong(group);
       clearAllItems();
+      setProcessing?.({
+        title: "เพิ่มเพลงสำเร็จ",
+        variant: "success",
+        status: {
+          progress: 100,
+          text: "สำเร็จ",
+        },
+      });
     } catch (error) {
-      console.error("Error adding songs:", error);
+      console.error();
+      setProcessing?.({
+        title: "เกิดข้อผิดพลาด",
+        variant: "error",
+        status: {
+          progress: 100,
+          text: JSON.stringify(error),
+        },
+      });
     }
   };
 

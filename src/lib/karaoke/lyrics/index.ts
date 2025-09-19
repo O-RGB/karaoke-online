@@ -50,7 +50,7 @@ export const convertLyricsMapping = (
   songPpq: number,
   tempos?: ArrayRange<TempoEvent>
 ) => {
-  const isMidi = mode === "midi";
+  const isMidi = mode === "MIDI";
   if (!data.lyrics || data.lyrics.length === 0) {
     return {
       finalWords: [],
@@ -133,7 +133,7 @@ export const xmlToArrayRange = (
   if (timedWords.length === 0) return undefined;
 
   let timestamps: number[] = [];
-  if (mode === "midi") {
+  if (mode === "MIDI") {
     const generator = new TickLyricSegmentGenerator(ppq);
     timestamps = generator.generateSegment(timedWords);
   } else {

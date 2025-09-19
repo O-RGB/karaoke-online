@@ -61,3 +61,28 @@ export const addFilesInZip = async (zipFile: File, files: File[]) => {
     console.error("Error while adding files to ZIP:", error);
   }
 };
+
+export const removeFilesInZip = async (
+  zipFile: File,
+  filesToRemove: string[]
+): Promise<File | undefined> => {
+  const zip = new JSZip();
+  try {
+    const zipContent = await zip.loadAsync(zipFile);
+
+    filesToRemove.forEach((fileName) => {
+      zipContent.remove(fileName);
+    });
+
+    const updatedZipBlob = await zipContent.generateAsync({ type: "blob" });
+
+    const updatedZipFile = new File([updatedZipBlob], zipFile.name, {
+      type: "application/zip",
+    });
+
+    return updatedZipFile;
+  } catch (error) {
+    console.error("Error while removing files from ZIP:", error);
+    return undefined;
+  }
+};

@@ -241,6 +241,8 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
       trackData._originalIndex
     );
 
+    console.log("fullTrackData", fullTrackData);
+
     if (!fullTrackData) return;
     const { CODE, TYPE, SUB_TYPE } = fullTrackData;
     if (!CODE || !TYPE || !SUB_TYPE) {
@@ -256,11 +258,15 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
 
     const primaryPath = `Songs/${TYPE.toUpperCase()}/${SUB_TYPE.toUpperCase()}`;
 
-    if (SUB_TYPE === "emk") {
+    console.log("primaryPath", primaryPath);
+    console.log("SUB_TYPE", SUB_TYPE);
+
+    if (SUB_TYPE === "EMK") {
       const emk = await this.getFile(
         `${primaryPath}/${foldername}/${CODE}.emk`,
         `${primaryPath}/${CODE}.emk`
       );
+      console.log("on emk");
       if (emk) {
         const emkDecoded = await parseEMKFile(emk);
         if (emkDecoded.mid && emkDecoded.cur && emkDecoded.lyr) {
@@ -271,7 +277,7 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
           };
         }
       }
-    } else if (SUB_TYPE === "ncn") {
+    } else if (SUB_TYPE === "NCN") {
       const midi = await this.getFile(
         `${primaryPath}/Song/${foldername}/${CODE}.mid`,
         `${primaryPath}/Song/${CODE}.mid`
@@ -284,6 +290,7 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
         `${primaryPath}/Cursor/${foldername}/${CODE}.cur`,
         `${primaryPath}/Cursor/${CODE}.cur`
       );
+      console.log("on ncn");
       if (midi && lyr && cur) {
         return { midi, lyr, cur };
       }
@@ -295,6 +302,7 @@ export class DBFSongsSystemReader extends BaseSongsSystemReader {
     path: string,
     secondaryPath: string
   ): Promise<File | undefined> {
+    console.log("file system get file", path);
     const primaryFile = await this.fileSystemManager?.getFileByPath(path);
     if (primaryFile) {
       return primaryFile;

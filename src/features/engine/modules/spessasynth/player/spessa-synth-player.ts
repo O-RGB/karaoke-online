@@ -24,7 +24,7 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
 
   async play(): Promise<void> {
     if (!this.musicQuere) return;
-    if (this.musicQuere?.musicType === "mp3") {
+    if (this.musicQuere?.musicType === "MP3") {
       if (this.engine.audio?.state === "suspended") {
         await this.engine.audio.resume();
       }
@@ -58,7 +58,7 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   }
 
   setCurrentTiming(timing: number): void {
-    if (this.musicQuere?.musicType === "mp3") {
+    if (this.musicQuere?.musicType === "MP3") {
       if (!this.engine.audio || !this.mp3SourceNode?.buffer) return;
 
       try {
