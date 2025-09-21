@@ -117,7 +117,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
                 paddingLeft: "max(1rem, env(safe-area-inset-left))",
                 paddingRight: "max(1rem, env(safe-area-inset-right))",
               }}
-              className="relative z-30 flex flex-col lg:flex-col-reverse gap-2 lg:gap-6 items-start"
+              className="relative z-30 flex flex-col lg:flex-col-reverse gap-2 landscape:gap-0 lg:gap-6 items-start"
             >
               <div className="w-full">
                 <SearchSong />
@@ -133,13 +133,16 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
               </div>
             </header>
 
-            <main className="relative flex flex-grow justify-center">
+            <main
+             
+              className="relative flex flex-grow justify-center"
+            >
               <LyricsPlayer className="absolute w-full h-full flex items-center justify-center" />
               <NextSongPanel className="absolute w-full h-full flex justify-center" />
               <SongInfo />
             </main>
 
-            <footer className="fixed bottom-0 w-full z-40">
+            <footer className="sticky bottom-0 w-full z-40">
               <PlayerPanel
                 isFullScreen={handle.active}
                 modalMap={modalMap}

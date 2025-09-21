@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import Input from "../input";
 import { AiOutlineLoading } from "react-icons/ai";
 import { Dropdown } from "../dropdown/dropdown";
+import InputCommon from "../../data-input/input";
 
 interface SearchSelectProps extends InputProps {
   options?: IOptions[];
@@ -78,7 +78,6 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
   };
 
   const handleItemClick = (data: IOptions) => {
-    console.log("data", data);
     onSelectItem?.(data);
     setValue("");
     setOptionsSearch([]);
@@ -106,7 +105,7 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
               </div>
             </div>
           )}
-          <Input
+          <InputCommon
             {...props}
             value={value}
             placeholder="ค้นหาเพลง"

@@ -1,8 +1,3 @@
-import {
-  IControllerChange,
-  IProgramChange,
-} from "@/features/engine/types/synth.type";
-import React, { useEffect } from "react";
 import Button from "../../common/button/button";
 import ChannelVolumeRender from "./renders/volume-meter";
 import MainVolumeRender from "./renders/volume-main-render";
@@ -12,12 +7,17 @@ import useKeyboardStore from "@/features/keyboard-state";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import VolumeOptions from "./modules/options-button/volume-pitch";
 import ChannelRender from "./modules/channel";
+import InstrumentalPanel from "../instrumental-panel";
+import React, { useEffect } from "react";
 import { MdArrowDropUp } from "react-icons/md";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import {
+  IControllerChange,
+  IProgramChange,
+} from "@/features/engine/types/synth.type";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
-import InstrumentalPanel from "../instrumental-panel";
 
 interface VolumePanelProps {}
 
@@ -145,20 +145,21 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
             <div className="absolute -bottom-[10px] right-4 z-10">
               <Button
                 tabIndex={-1}
-                blur
-                shadow={""}
+                size="xs"
+                className="!p-0 !w-10"
+                blur={{
+                  border: true,
+                  backgroundColor: "primary",
+                }}
                 onClick={() => setHideMixer(!hideMixer)}
                 onKeyDown={(event) =>
                   event.key === "Enter" && event.preventDefault()
                 }
-                border="border blur-border focus:outline-none"
-                padding=""
-                className="px-3 h-4"
                 icon={
                   <MdArrowDropUp
                     className={`${
                       hideMixer ? "rotate-180" : "rotate-0"
-                    } text-white duration-300 text-lg`}
+                    } duration-300 text-lg`}
                   ></MdArrowDropUp>
                 }
               ></Button>

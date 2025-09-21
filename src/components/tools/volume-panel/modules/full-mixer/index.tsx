@@ -37,10 +37,7 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
     );
 
     return () => {
-      drumNode.program?.unlinkEvent?.(
-        ["PROGARM", "CHANGE"],
-        componentId
-      );
+      drumNode.program?.unlinkEvent?.(["PROGARM", "CHANGE"], componentId);
     };
   }, [nodes]);
 
@@ -61,13 +58,10 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
       </WinboxModal>
 
       <Button
-        className="w-full text-white"
-        shadow=""
+        size="xs"
+        blur={{ border: true }}
         onClick={openMixer}
         icon={<RxMixerVertical></RxMixerVertical>}
-        border="border blur-border"
-        padding="p-1 px-2"
-        iconPosition="left"
       >
         เครื่องดนตรี
       </Button>

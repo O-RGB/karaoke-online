@@ -187,10 +187,10 @@ export const musicProcessGroup = async (
 
       group.metadata = await parseMidi(mid);
 
-      // if (!hasLyrics(group)) {
-      //   group.isError = true;
-      //   return group;
-      // }
+      group.files.midi = mid;
+      group.files.cur = cur;
+      group.files.lyr = lyr;
+
       const lyrStr = await readLyricsFile(lyr);
 
       if (full) {
@@ -210,6 +210,7 @@ export const musicProcessGroup = async (
         "EMK",
         group.metadata
       );
+
       console.log(group);
     }
   }

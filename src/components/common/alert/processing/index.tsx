@@ -1,6 +1,6 @@
 import React from "react";
 import Modal from "@/components/common/modal";
-import Button from "@/components/common/button/button";
+import Button, { ButtonColor } from "@/components/common/button/button";
 import ProgressBar from "@/components/common/progress-bar";
 import { AiOutlineLoading } from "react-icons/ai";
 import { FaCheckCircle } from "react-icons/fa";
@@ -28,12 +28,12 @@ const variantConfig = {
   processing: {
     Icon: AiOutlineLoading,
     iconClass: "text-gray-500 animate-spin",
-    color: "default",
+    color: "white" as ButtonColor,
   },
   success: {
     Icon: FaCheckCircle,
     iconClass: "text-green-500",
-    color: "green",
+    color: "success" as ButtonColor,
   },
   error: { Icon: MdError, iconClass: "text-red-500", color: "red" },
 };
@@ -78,6 +78,7 @@ const ProcessingDialog: React.FC<ProcessingDialogProps> = ({
       title={title ?? "กำลังประมวลผล"}
       fitHeight
       index={999}
+      isAlert
     >
       <div className="p-4 flex flex-col gap-2 h-full">
         <div className="flex-1 text-sm">{renderStatusContent()}</div>
@@ -97,7 +98,7 @@ const ProcessingDialog: React.FC<ProcessingDialogProps> = ({
 
           <Button
             className="h-9"
-            color={variant === "success" ? "blue" : "gray"}
+            color={variant === "success" ? "primary" : "gray"}
             onClick={onClose}
             disabled={variant === "processing"}
             icon={<BiExit />}

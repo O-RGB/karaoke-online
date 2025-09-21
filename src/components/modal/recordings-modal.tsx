@@ -249,16 +249,11 @@ const RecordingsModal: React.FC<RecordingsModalProps> = ({ setAlert }) => {
                         <div className="flex items-center gap-2">
                           <Button
                             onClick={() => handlePlayPause(rec)}
-                            className={`w-9 h-9 rounded-full transition-all ${
-                              playingId === rec.id
-                                ? "bg-blue-500 hover:bg-blue-600 text-white"
-                                : "bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600"
-                            }`}
-                            padding=""
-                            border=""
-                            shadow=""
-                            blur={false}
-                            shape={false}
+                            // className={` ${
+                            //   playingId === rec.id
+                            //     ? "bg-blue-500 hover:bg-blue-600 text-white"
+                            //     : "bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600"
+                            // }`}
                             icon={
                               playingId === rec.id ? (
                                 <FaPause className="text-xs" />
@@ -270,23 +265,13 @@ const RecordingsModal: React.FC<RecordingsModalProps> = ({ setAlert }) => {
 
                           <Button
                             onClick={() => handleDownload(rec)}
-                            className="w-9 h-9 rounded-full bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-600 transition-all"
-                            padding=""
-                            border=""
-                            shadow=""
-                            blur={false}
-                            shape={false}
+                            color="success"
                             icon={<FaDownload className="text-xs" />}
                           />
 
                           <Button
                             onClick={() => handleDelete(rec.id, rec.file.name)}
-                            className="w-9 h-9 rounded-full bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-600 transition-all"
-                            padding=""
-                            border=""
-                            shadow=""
-                            blur={false}
-                            shape={false}
+                            color="danger"
                             icon={<FaTrash className="text-xs" />}
                           />
                         </div>

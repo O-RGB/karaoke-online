@@ -241,24 +241,20 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
             selected={selected}
             from={from}
             addButton={
-              <>
-                <Button
-                  disabled={!!fullRemoteUrl || fileTransfersLoading}
-                  className="w-full h-8 lg:h-10"
-                  icon={
-                    fileTransfersLoading ? (
-                      <AiOutlineLoading3Quarters className="animate-spin" />
-                    ) : (
-                      <IoMdWifi />
-                    )
-                  }
-                  iconPosition="right"
-                  onClick={onOpenPeer}
-                  color="blue"
-                >
-                  รับไฟล์
-                </Button>
-              </>
+              <Button
+                className="w-full"
+                disabled={!!fullRemoteUrl || fileTransfersLoading}
+                icon={
+                  fileTransfersLoading ? (
+                    <AiOutlineLoading3Quarters className="animate-spin" />
+                  ) : (
+                    <IoMdWifi />
+                  )
+                }
+                onClick={onOpenPeer}
+              >
+                รับไฟล์
+              </Button>
             }
           />
         </div>

@@ -87,9 +87,6 @@ const ProcessingModal: React.FC<ProcessingModalProps> = ({
             <Button
               disabled={process?.error ? false : process?.progress !== 100}
               onClick={onCloseModal}
-              padding={"p-1 w-16"}
-              blur={false}
-              color="blue"
               className="text-white "
             >
               ปิด

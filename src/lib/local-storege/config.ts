@@ -42,6 +42,7 @@ export const appendLocalConfig = (config: Partial<ConfigSystem>) => {
     widgets: { ...system_config.widgets, ...config.widgets },
     themes: { ...system_config.themes, ...config.themes },
     system: { ...system_config.system, ...config.system },
+    token: config.token,
   };
   setLocalConfig(system_config);
 };

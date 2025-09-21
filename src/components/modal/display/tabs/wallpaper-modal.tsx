@@ -68,7 +68,7 @@ const WallpaperModal: React.FC<WallpaperModalProps> = ({}) => {
                 <div className="grid grid-cols-4 lg:grid-cols-3 gap-3 pt-4 max-h-[500px] overflow-auto">
                   <div onClick={openCamera} className="w-full h-36 flex">
                     <Button
-                      color={wCam ? "blue" : "white"}
+                      color={wCam ? "primary" : "white"}
                       className="w-full"
                       icon={<FaCamera></FaCamera>}
                     >

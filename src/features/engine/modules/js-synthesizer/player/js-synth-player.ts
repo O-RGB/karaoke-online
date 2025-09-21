@@ -208,6 +208,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   }
 
   async loadMidi(data?: MusicLoadAllData): Promise<boolean> {
+    console.log(data);
     if (!data) return false;
     this.stop();
     this.engine.timer?.stopTimer();

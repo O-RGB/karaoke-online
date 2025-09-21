@@ -69,7 +69,6 @@ export const CurrentlyPlaying: React.FC<CurrentlyPlayingProps> = ({
           <Button
             disabled={DEFAULT_SOUND_FONT === selected}
             className="w-full h-8 lg:h-10"
-            iconPosition="right"
             onClick={onClickDefault}
             color="gray"
             icon={

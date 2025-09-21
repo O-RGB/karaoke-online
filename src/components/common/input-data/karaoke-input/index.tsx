@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import Button from "../../button/button";
 import Tags from "../../display/tags";
 import useKeyboardStore from "@/features/keyboard-state";
-import { AiOutlineLoading } from "react-icons/ai";
+import { AiFillLike, AiOutlineLoading } from "react-icons/ai";
 import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
 import { MdPlayCircleFilled } from "react-icons/md";
-import { FaUser } from "react-icons/fa";
+import { FaPlay, FaPlayCircle, FaUser } from "react-icons/fa";
 import { useKeyboardEvents } from "@/hooks/keyboard-hook";
 import { ITrackData } from "@/features/songs/types/songs.type";
 import { SourceTag } from "@/components/tools/search-song/source-tag";
@@ -165,9 +165,11 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
           disabled={selectedIndex === 0 || !hasResults}
           onClick={handlePrevSong}
           icon={<IoMdArrowDropleft className="text-lg" />}
-          iconPosition="left"
-          className="h-7"
-          padding="px-2"
+          size="xs"
+          blur={{
+            border: true,
+            backgroundColor: "white",
+          }}
         >
           ย้อนกลับ
         </Button>
@@ -176,9 +178,11 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
           disabled={!hasResults || selectedIndex >= searchResult.length - 1}
           onClick={handleNextSong}
           icon={<IoMdArrowDropright className="text-lg" />}
-          iconPosition="right"
-          className="h-7"
-          padding="px-2"
+          size="xs"
+          blur={{
+            border: true,
+            backgroundColor: "white",
+          }}
         >
           ต่อไป
         </Button>
@@ -187,9 +191,11 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
           disabled={!hasResults}
           onClick={handlePlaySong}
           icon={<MdPlayCircleFilled className="text-lg" />}
-          iconPosition="right"
-          className="h-7"
-          padding="px-2"
+          size="xs"
+          blur={{
+            border: true,
+            backgroundColor: "white",
+          }}
         >
           เล่น
         </Button>
@@ -213,7 +219,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
 
         {hasResults && selectedSong && (
           <div
-            className={`flex flex-col justify-center  ${
+            className={`flex flex-col justify-center w-full ${
               selectedSong.LYRIC_TITLE ? "gap-2" : ""
             }`}
           >
@@ -230,6 +236,42 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
             {selectedSong.LYRIC_TITLE && (
               <div className=" w-full h-full text-xs line-clamp-1 text-opacity-80">
                 {selectedSong.LYRIC_TITLE}
+              </div>
+            )}
+            {(selectedSong._musicPlayCount !== undefined ||
+              selectedSong._musicLike !== undefined ||
+              selectedSong._musicUploader !== undefined) && (
+              <div className="flex justify-between">
+                <div className="flex gap-2 mt-1">
+                  {selectedSong._musicPlayCount !== undefined && (
+                    <div className="text-xs flex gap-1 items-center opacity-80">
+                      <FaPlayCircle className="text-white text-[9px] mt-0.5"></FaPlayCircle>{" "}
+                      <span>{selectedSong._musicPlayCount}</span>
+                    </div>
+                  )}
+                  {selectedSong._musicLike !== undefined && (
+                    <div className="text-xs flex gap-1 items-center  opacity-80">
+                      <AiFillLike className="text-white text-[10px] mt-0.5"></AiFillLike>{" "}
+                      <span>{selectedSong._musicLike}</span>
+                    </div>
+                  )}
+                  {selectedSong._musicLike !== undefined && (
+                    <div className="text-xs flex gap-1 items-center  opacity-80">
+                      <FaUser className="text-white text-[10px] mt-0.5"></FaUser>{" "}
+                      <span>
+                        โดย{" "}
+                        {selectedSong._musicUploader
+                          ? selectedSong._musicUploader
+                          : "Error"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {selectedSong._system === "PYTHON_API_SYSTEM" && (
+                  <div className="hover:underline duration-300 text-xs opacity-80">
+                    แจ้งลบ
+                  </div>
+                )}
               </div>
             )}
           </div>

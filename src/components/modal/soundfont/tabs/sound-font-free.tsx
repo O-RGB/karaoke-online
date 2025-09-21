@@ -81,16 +81,13 @@ const SoundfontFree: React.FC<SoundfontFreeProps> = ({
             return (
               <>
                 <Button
-                  padding=""
                   disabled={!!isDownloaded}
-                  className="w-7 h-7"
                   onClick={() =>
                     !isDownloaded
                       ? handleDownload(value, option.label as string)
                       : undefined
                   }
-                  color="default"
-                  blur={false}
+                  color="white"
                   icon={
                     isDownloaded ? (
                       <FaCircleCheck className="text-green-500"></FaCircleCheck>
@@ -98,7 +95,6 @@ const SoundfontFree: React.FC<SoundfontFreeProps> = ({
                       <BiDownload />
                     )
                   }
-                  iconPosition="left"
                 />
               </>
             );

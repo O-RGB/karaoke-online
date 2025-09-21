@@ -4,7 +4,6 @@ import SliderCommon from "@/components/common/input-data/slider";
 import { IControllerChange } from "@/features/engine/types/synth.type";
 import React, { useEffect, useId, useState } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
-import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import { INodeKey } from "@/features/engine/modules/instrumentals/types/node.type";
 import { SynthNode } from "@/features/engine/modules/instrumentals/node";
 interface VolumeNodePresetProps {
@@ -99,6 +98,7 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
             <LabelTag name={label}></LabelTag>
             <div className="pr-0.5">
               <Button
+                color="white"
                 onClick={() =>
                   onLock?.({
                     channel,

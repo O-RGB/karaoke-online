@@ -183,16 +183,12 @@ const UserDatabase: React.FC<UserDatabaseProps> = ({
             itemAction={(value, index, option) => {
               return (
                 <Button
-                  shadow={false}
-                  border=""
+                  size="xs"
                   onClick={() => {
                     console.log(value, index, option);
                     onSelectTracklist(value);
                   }}
-                  padding=""
-                  className="w-7 h-7"
-                  color="yellow"
-                  blur={false}
+                  color="warning"
                   icon={<FaSearch className="text-white" />}
                 />
               );
@@ -211,19 +207,16 @@ const UserDatabase: React.FC<UserDatabaseProps> = ({
             <div className=" flex flex-col h-full overflow-auto rounded-lg border border-gray-200 bg-white p-2 gap-2 relative">
               <div className="sticky top-0 w-full flex gap-2 bg-white">
                 <Button
-                  color="blue"
-                  className="w-full h-8"
+                  size="xs"
                   icon={<BiDownload></BiDownload>}
-                  iconPosition="left"
                   onClick={() => onDownloadSong(onSelect)}
                 >
                   ดาวน์โหลด
                 </Button>
                 <Button
-                  color="red"
-                  className="h-8"
+                  size="xs"
+                  color="danger"
                   icon={<AiFillDelete></AiFillDelete>}
-                  iconPosition="left"
                   onClick={() => {
                     setAlert?.({
                       title: "ยืนยันการลบเพลง?",
@@ -238,10 +231,10 @@ const UserDatabase: React.FC<UserDatabaseProps> = ({
                   ลบ
                 </Button>
                 <Button
+                  size="xs"
                   className="h-8"
                   color="gray"
                   icon={<CgClose></CgClose>}
-                  iconPosition="left"
                   onClick={() => setSelect(undefined)}
                 >
                   ปิด

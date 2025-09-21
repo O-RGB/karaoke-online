@@ -245,9 +245,7 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
 
               {name && (
                 <Button
-                  color="red"
                   className="h-9"
-                  iconPosition="left"
                   icon={<MdDeleteForever />}
                   onClick={() =>
                     setAlert?.({

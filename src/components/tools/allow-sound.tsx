@@ -8,7 +8,6 @@ import LoadConfig from "../ui/load-conifg/load-config";
 import Button from "../common/button/button";
 import ToggleCheckBox from "../common/input-data/checkbox";
 import useConfigStore from "@/features/config/config-store";
-import SwitchRadio from "../common/input-data/switch/switch-radio";
 import { EngineType } from "@/features/engine/synth-store";
 import Label from "../common/display/label";
 

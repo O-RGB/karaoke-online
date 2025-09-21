@@ -134,14 +134,14 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
           <Button
-            border="border blur-border focus:outline-none "
             onClick={() => onPlayerShowChange(true)}
-            blur={true}
-            shadow=""
+            blur={{
+              border: true,
+              backgroundColor: "primary",
+            }}
+            size="xs"
             className="rounded-md"
-            padding="p-2"
-            shape={false}
-            icon={<IoMdArrowDropup className="text-white text-xl" />}
+            icon={<IoMdArrowDropup className="text-lg" />}
           />
         </div>
       )}
@@ -151,13 +151,15 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           style={{ bottom: "calc(42px + env(safe-area-inset-bottom))" }}
         >
           <Button
+            blur={{
+              border: true,
+              backgroundColor: "primary",
+            }}
+            size="xs"
+            className="rounded-md !h-5 !w-10"
             tabIndex={-1}
-            shadow={""}
             onClick={() => onPlayerShowChange(false)}
-            border="border blur-border bg-white focus:outline-none"
-            padding=""
-            className="px-2 h-3"
-            icon={<IoMdArrowDropdown className="text-black" />}
+            icon={<IoMdArrowDropdown />}
           ></Button>
         </div>
       )}
@@ -173,38 +175,35 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
         }}
       >
         <div className="flex w-full">
-          <div className="flex items-center">
-            {/* Recording Button - แยกการทำงานออกจาก Menu */}
+          <div className="flex items-center h-full">
             {isRecording ? (
               <Button
-                className="hover:bg-white/20 bg-red-500/50 animate-pulse relative overflow-hidden"
-                blur={false}
-                border=""
-                shadow=""
-                padding="p-4"
+                blur={{
+                  border: false,
+                  backgroundColor: "primary",
+                }}
+                className="!rounded-none"
                 onClick={handleRecordButtonClick}
-                shape={false}
                 icon={
                   <MdRadioButtonChecked className="text-red-400 animate-pulse" />
                 }
               >
-                {/* Pulsing recording indicator */}
                 <div className="absolute inset-0 bg-red-500/20 animate-ping rounded-full"></div>
               </Button>
             ) : (
               <Menu
                 transition
+                className={"h-full"}
                 boundingBoxPadding="10 10 10 10"
                 menuButton={
                   <MenuButton>
                     <Button
-                      className="hover:bg-white/20"
-                      blur={false}
-                      border=""
-                      shadow=""
-                      padding="p-4"
-                      shape={false}
-                      icon={<BsMicFill className="text-white" />}
+                      blur={{
+                        border: false,
+                        backgroundColor: "primary",
+                      }}
+                      className="!rounded-none h-full"
+                      icon={<BsMicFill className="" />}
                     />
                   </MenuButton>
                 }
@@ -234,40 +233,37 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
           <div className="flex w-fit ">
             {playerStatus === "PLAY" ? (
               <Button
-                className="hover:bg-white/20"
-                blur={false}
-                border=""
-                shadow=""
-                padding="p-4"
+                blur={{
+                  border: false,
+                  backgroundColor: "primary",
+                }}
+                className="!rounded-none"
                 onClick={() => {
                   player?.pause();
                 }}
-                shape={false}
-                icon={<TbPlayerPauseFilled className="text-white" />}
+                icon={<TbPlayerPauseFilled className="" />}
               ></Button>
             ) : (
               <Button
-                className="hover:bg-white/20"
-                blur={false}
-                border=""
-                shadow=""
-                padding="p-4"
+                blur={{
+                  border: false,
+                  backgroundColor: "primary",
+                }}
+                className="!rounded-none"
                 onClick={() => {
                   player?.play();
                 }}
-                shape={false}
-                icon={<TbPlayerPlayFilled className="text-white" />}
+                icon={<TbPlayerPlayFilled className="" />}
               ></Button>
             )}
             <Button
-              className="hover:bg-white/20"
-              blur={false}
-              border=""
-              shadow=""
-              padding="p-4"
+              blur={{
+                border: false,
+                backgroundColor: "primary",
+              }}
+              className="!rounded-none"
               onClick={nextMusic}
-              shape={false}
-              icon={<TbPlayerSkipForwardFilled className="text-white" />}
+              icon={<TbPlayerSkipForwardFilled className="" />}
             ></Button>
           </div>
           <TimerBar></TimerBar>
@@ -288,40 +284,38 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
 
           {document.fullscreenEnabled && (
             <Button
-              className="hover:bg-white/20"
+              blur={{
+                border: false,
+                backgroundColor: "primary",
+              }}
+              className="!rounded-none"
               onClick={onFullScreen}
-              blur={false}
-              border=""
-              shadow=""
-              padding="p-4"
-              shape={false}
               icon={
                 isFullScreen ? (
-                  <BsFullscreenExit className="text-white" />
+                  <BsFullscreenExit className="" />
                 ) : (
-                  <BsFullscreen className="text-white" />
+                  <BsFullscreen className="" />
                 )
               }
             ></Button>
           )}
 
           <Button
-            className="hidden lg:block hover:bg-white/20"
+            className="hidden lg:block !rounded-none"
             onClick={() => {
               setOpenSearchBox?.(true);
             }}
-            blur={false}
-            border=""
-            shadow=""
-            padding="p-4"
-            shape={false}
-            icon={<FaSearch className="text-white" />}
+            blur={{
+              border: false,
+              backgroundColor: "primary",
+            }}
+            icon={<FaSearch className="" />}
           ></Button>
           {modalMap && (
             <ContextModal
               buttonMenu={
                 <div className="p-4 flex items-center justify-center hover:bg-white/20 duration-300">
-                  <FiSettings className="text-white" />
+                  <FiSettings className="" />
                 </div>
               }
               modal={modalMap}

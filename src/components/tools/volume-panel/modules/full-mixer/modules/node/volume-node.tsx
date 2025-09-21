@@ -135,9 +135,9 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
       <div className="relative flex flex-col gap-2 min-w-12 w-12 max-w-12 overflow-hidden">
         {config.sound?.equalizer && (
           <Button
+            size="xs"
             onClick={openEq}
-            padding={"p-1 px-2"}
-            className={`${eqConfig.enabled ? "!bg-blue-500 !text-white" : ""}`}
+            color={eqConfig.enabled ? "primary" : "white"}
           >
             EQ
           </Button>

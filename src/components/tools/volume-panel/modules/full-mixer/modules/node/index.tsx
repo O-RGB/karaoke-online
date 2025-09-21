@@ -1,4 +1,3 @@
-import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import {
   INSTRUMENT_TYPE_BY_INDEX,
   InstrumentalNode,

@@ -4,10 +4,19 @@ import SwitchRadio from "@/components/common/input-data/switch/switch-radio";
 import useConfigStore from "@/features/config/config-store";
 import useSongsStore from "@/features/songs/store/songs.store";
 import React from "react";
+import ApiLoginRegister from "./karaoke-api-system/login";
+import Dashboard from "./karaoke-api-system/dashboard";
+import { NotificationProvider } from "./karaoke-api-system/common/notification-provider";
 
 interface AddApiSongProps extends IAlertCommon {}
 
-const AddApiSong: React.FC<AddApiSongProps> = ({ setAlert }) => {
+const AddApiSong: React.FC<AddApiSongProps> = ({
+  setAlert,
+  closeAlert,
+  closeProcessing,
+  setProcessing,
+}) => {
+  const token = useConfigStore((state) => state.config.token);
   const songsManager = useSongsStore((state) => state.songsManager);
   const soundfontBaseManager = useSongsStore(
     (state) => state.soundfontBaseManager
@@ -16,7 +25,7 @@ const AddApiSong: React.FC<AddApiSongProps> = ({ setAlert }) => {
   const mode = songsManager?.currentMode;
   return (
     <>
-      <div className="flex flex-col h-full space-y-4">
+      <div className="relative flex flex-col w-full h-full">
         <div className="flex justify-between items-center gap-2">
           <Label
             textSize={15}
@@ -52,6 +61,19 @@ const AddApiSong: React.FC<AddApiSongProps> = ({ setAlert }) => {
             ></SwitchRadio>
           </div>
         </div>
+
+        <NotificationProvider>
+          {!token ? (
+            <ApiLoginRegister></ApiLoginRegister>
+          ) : (
+            <Dashboard
+              setAlert={setAlert}
+              closeAlert={closeAlert}
+              closeProcessing={closeProcessing}
+              setProcessing={setProcessing}
+            ></Dashboard>
+          )}
+        </NotificationProvider>
       </div>
     </>
   );

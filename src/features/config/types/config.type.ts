@@ -46,6 +46,7 @@ export interface ConfigSystem {
   themes: Partial<ThemesConfig>;
   system: Partial<SystemConfig>;
   sound: Partial<SoundSetting>;
+  token?: string;
 }
 
 export interface MixerConfig {
@@ -72,7 +73,7 @@ export interface SystemConfig {
   engine: EngineType;
   timingModeType: TimingModeType;
   systemFont: string;
-  zoom?: number; // <-- เพิ่มบรรทัดนี้
+  zoom?: number;
 }
 
 export interface ThemesConfig {
@@ -99,7 +100,6 @@ export interface WidgetsSettingConfig {
 }
 
 export interface RefreshRateConfig {
-  // type: RefreshRate;
   render: number;
 }
 

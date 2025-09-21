@@ -92,12 +92,8 @@ const TableList = <TValue,>({
                   {itemAction?.(data.value, i, data)}
                   {deleteItem && (
                     <Button
-                      shadow={false}
-                      border={""}
                       onClick={() => onDeleteItem?.(data.value, i)}
-                      padding=""
-                      className="w-7 h-7"
-                      color="red"
+                      color="danger"
                       blur={false}
                       icon={<RiDeleteBin5Line className="text-white" />}
                     />

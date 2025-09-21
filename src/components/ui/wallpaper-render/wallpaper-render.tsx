@@ -205,26 +205,21 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
       <div
         style={{
           position: "fixed",
-          bottom: player?.show ? 50 : 10,
-          right: 10,
+          bottom: player?.show
+            ? 30
+            : "calc(-10px + env(safe-area-inset-bottom))",
+          right: 8,
           zIndex: -10,
           opacity: 0.7,
         }}
-        className="hidden lg:block w-fit h-fit text-white font-bold text-2xl drop-shadow-md"
+        className="w-fit h-fit text-white font-light text-base drop-shadow-md text-right"
       >
-        NEXT KARAOKE v.1.0.30
-      </div>
-      <div
-        style={{
-          position: "fixed",
-          bottom: player?.show ? 50 : 10,
-          right: 10,
-          zIndex: -10,
-          opacity: 0.7,
-        }}
-        className="block lg:hidden w-fit h-fit text-white font-bold text-lg drop-shadow-md"
-      >
-        NEXT KARAOKE v.1.0.30
+        <div className="text-xs opacity-80">v.1.0.30</div>
+        <div className="-mt-1 flex items-center justify-center gap-1">
+          <img className="h-5 w-5" src="/favicon-96x96.png" />
+          Next Karaoke
+        </div>
+        <br />
       </div>
 
       {isCameraActive && (
@@ -232,10 +227,8 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
           <Button
             onClick={switchCamera}
             blur={true}
-            icon={
-              <MdOutlineCameraswitch className="text-white"></MdOutlineCameraswitch>
-            }
-          ></Button>
+            icon={<MdOutlineCameraswitch className="text-white" />}
+          />
         </div>
       )}
 
@@ -255,8 +248,8 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
                     }
                   }}
                   blur={i === selectLive ? false : true}
-                  color={i === selectLive ? "blue" : undefined}
-                  className={`h-7 w-10`}
+                  color={i === selectLive ? "primary" : "white"}
+                  className="h-7 w-10"
                 >
                   <div className="flex gap-1 text-white !text-xs">
                     <span
@@ -289,6 +282,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
             top: 0,
             left: 0,
             objectFit: "cover",
+            objectPosition: "center", // ✅ ครอปจัดกึ่งกลาง
             zIndex: -20,
             opacity: 0.8,
             transform: "scaleX(-1)",
@@ -308,6 +302,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
               top: 0,
               left: 0,
               objectFit: "cover",
+              objectPosition: "center", // ✅ ครอปจัดกึ่งกลาง
               zIndex: -20,
               opacity: 0.8,
               transform: "scaleX(-1)",
@@ -364,6 +359,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
               top: 0,
               left: 0,
               objectFit: "cover",
+              objectPosition: "center", // ✅ ครอปจัดกึ่งกลาง
               zIndex: -20,
               opacity: 0.7,
             }}
@@ -390,7 +386,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
             top: 0,
             left: 0,
             backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundPosition: "center center", // ✅ ครอปจัดกึ่งกลาง
             zIndex: -20,
           }}
         />

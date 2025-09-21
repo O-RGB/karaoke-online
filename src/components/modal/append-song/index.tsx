@@ -21,24 +21,24 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({ height }) => {
       tabs={[
         {
           icon: <PiMusicNotesPlusDuotone></PiMusicNotesPlusDuotone>,
-          label: "เพิ่มเพลง",
+          label: "เพิ่มเพลงส่วนตัว",
           content: <AddUserSong />,
         },
         {
           icon: <FaServer></FaServer>,
-          label: "เพลง API",
+          label: "เล่นด้วย Server",
           content: <AddApiSong></AddApiSong>,
         },
         {
           icon: <FaComputer></FaComputer>,
-          label: "เล่นจากเครื่องคุณ",
+          label: "เล่นด้วย Extreme",
           content: <AddDBFSong></AddDBFSong>,
         },
-        {
-          icon: <GoFileZip></GoFileZip>,
-          label: "เพิ่มจาก Extreme",
-          content: <AddExtremeAndManage></AddExtremeAndManage>,
-        },
+        // {
+        //   icon: <GoFileZip></GoFileZip>,
+        //   label: "เพิ่มจาก Extreme",
+        //   content: <AddExtremeAndManage></AddExtremeAndManage>,
+        // },
       ]}
     ></Tabs>
   );

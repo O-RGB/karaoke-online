@@ -14,7 +14,7 @@ interface EQNodeProps {
   indexKey: number;
   node: SynthChannel[];
   name: string;
-  eqConfig: EQConfig
+  eqConfig: EQConfig;
   onEnabled?: () => void;
   onDisabled?: () => void;
 }
@@ -224,9 +224,7 @@ const EQNode: React.FC<EQNodeProps> = ({
                     <Button
                       disabled={!eqConfig.enabled}
                       onClick={handleResetEQ}
-                      padding={"p-1 px-2"}
                       icon={<BiReset></BiReset>}
-                      iconPosition="right"
                     >
                       Reset
                     </Button>

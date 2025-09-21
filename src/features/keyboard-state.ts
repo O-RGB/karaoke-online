@@ -10,6 +10,8 @@ type KeyboardState = {
   arrowUp: number;
   arrowLeft: number;
   arrowRight: number;
+  paused: boolean;
+  setPaused: (value: boolean) => void;
   setLastKey: (key: string | null) => void;
   setSearching: (value: string) => void;
   setEnter: (value: number) => void;
@@ -21,7 +23,7 @@ type KeyboardState = {
   initializeKeyboardListeners: () => void;
   clearSearchingTimeout: () => void;
   setQueueOpen?: () => void;
-  setOpenSearchBox?: (open: boolean) => void
+  setOpenSearchBox?: (open: boolean) => void;
   resetQueueingTimeout: (time?: number) => void;
   resetSearchingTimeout: (time?: number) => void;
 };
@@ -64,6 +66,8 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
   };
 
   const handleKeyUp = (event: KeyboardEvent) => {
+    if (get().paused) return;
+
     const { key } = event;
 
     set((state) => {
@@ -109,13 +113,13 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
   };
 
   const setOpenSearchBox = (open: boolean) => {
-    set({ openSearchBox: open })
+    set({ openSearchBox: open });
     if (open) {
       resetSearchingTimeout();
     } else {
       clearSearchingTimeout();
     }
-  }
+  };
 
   const initializeKeyboardListeners = () => {
     if (!isListenerInitialized) {
@@ -134,6 +138,8 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
     arrowUp: 0,
     arrowLeft: 0,
     arrowRight: 0,
+    paused: false,
+    setPaused: (value) => set({ paused: value }),
     setLastKey: (key) => set({ lastKey: key }),
     setSearching: (value) => {
       set({ searching: value, queueing: false });
@@ -150,7 +156,7 @@ const useKeyboardStore = create<KeyboardState>((set, get) => {
     resetQueueingTimeout,
     resetSearchingTimeout,
     setQueueOpen,
-    setOpenSearchBox
+    setOpenSearchBox,
   };
 });
 

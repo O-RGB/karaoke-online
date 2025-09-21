@@ -8,18 +8,18 @@ import { AiOutlineLoading } from "react-icons/ai";
 import { FaCheck } from "react-icons/fa";
 import { ImWarning } from "react-icons/im";
 
-interface ProcessingModalProps {
-}
+interface ProcessingModalProps {}
 
-const Processing2Modal: React.FC<ProcessingModalProps> = ({ }) => {
-  const process = useProgressStore((state) => state.progress)
-  const show = useProgressStore((state) => state.progress?.show) ?? false
-  const setProgress = useProgressStore((state) => state.setProgress)
-  const close = useProgressStore((state) => state.close)
+const Processing2Modal: React.FC<ProcessingModalProps> = ({}) => {
+  const process = useProgressStore((state) => state.progress);
+  const show = useProgressStore((state) => state.progress?.show) ?? false;
+  const setProgress = useProgressStore((state) => state.setProgress);
+  const close = useProgressStore((state) => state.close);
 
-  useEffect(() => { }, [process, show]);
+  useEffect(() => {}, [process, show]);
 
-  const { error, loading, processing, progress, title, discription, cancel } = process ?? {}
+  const { error, loading, processing, progress, title, discription, cancel } =
+    process ?? {};
 
   return (
     <Modal
@@ -34,79 +34,86 @@ const Processing2Modal: React.FC<ProcessingModalProps> = ({ }) => {
       noResize
       noMax
     >
-      {process && show && <div className="p-4 h-full flex flex-col justify-between">
-        <div className="flex flex-col w-full pb-2">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center justify-between gap-1">
-              {progress === 100 ? (
-                <>
-                  <Label>
-                    <FaCheck className="pb-0.5"></FaCheck>
-                  </Label>
-                  <Label className="pb-0.5">
-                    {title ? title : "เรียบร้อย"}
-                  </Label>
-                </>
-              ) : (
-                <>
-                  <Label>
-                    {error ? (
-                      <ImWarning></ImWarning>
-                    ) : (
-                      <>
-                        {loading ? (
-                          <AiOutlineLoading className="animate-spin"></AiOutlineLoading>
-                        ) : (
-                          <FaCheck></FaCheck>
-                        )}
-                      </>
-                    )}
-                  </Label>
-                  <Label className="pb-0.5">{title}</Label>
-                </>
-              )}
-            </span>
-          </div>
-          <ProgressBar
-            progress={progress ?? 0}
-            title={processing}
-          ></ProgressBar>
-
-          {process?.error ? (
-            <div className="pt-2">
-              <Label className="flex items-center gap-1">
-                ข้อความ: {process?.error}
-              </Label>
+      {process && show && (
+        <div className="p-4 h-full flex flex-col justify-between">
+          <div className="flex flex-col w-full pb-2">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center justify-between gap-1">
+                {progress === 100 ? (
+                  <>
+                    <Label>
+                      <FaCheck className="pb-0.5"></FaCheck>
+                    </Label>
+                    <Label className="pb-0.5">
+                      {title ? title : "เรียบร้อย"}
+                    </Label>
+                  </>
+                ) : (
+                  <>
+                    <Label>
+                      {error ? (
+                        <ImWarning></ImWarning>
+                      ) : (
+                        <>
+                          {loading ? (
+                            <AiOutlineLoading className="animate-spin"></AiOutlineLoading>
+                          ) : (
+                            <FaCheck></FaCheck>
+                          )}
+                        </>
+                      )}
+                    </Label>
+                    <Label className="pb-0.5">{title}</Label>
+                  </>
+                )}
+              </span>
             </div>
-          ) : discription && <div className="pt-2">
-            <Label className="flex items-center gap-1">
-              รายละเอียด: {discription}
-            </Label>
-          </div>}
+            <ProgressBar
+              progress={progress ?? 0}
+              title={processing}
+            ></ProgressBar>
+
+            {process?.error ? (
+              <div className="pt-2">
+                <Label className="flex items-center gap-1">
+                  ข้อความ: {process?.error}
+                </Label>
+              </div>
+            ) : (
+              discription && (
+                <div className="pt-2">
+                  <Label className="flex items-center gap-1">
+                    รายละเอียด: {discription}
+                  </Label>
+                </div>
+              )
+            )}
+          </div>
+          <div className="flex justify-end pt-1 gap-2">
+            <Button
+              disabled={error ? false : progress !== 100}
+              onClick={() => setProgress(undefined)}
+              blur={false}
+              size="sm"
+              color="primary"
+              className="text-white "
+            >
+              ปิด
+            </Button>
+            {cancel && (
+              <Button
+                onClick={() => setTimeout(() => close(), 100)}
+                color="primary"
+                size="sm"
+                className="text-white"
+              >
+                ยกเลิก
+              </Button>
+            )}
+          </div>
         </div>
-        <div className="flex justify-end pt-1 gap-2">
-          <Button
-            disabled={error ? false : progress !== 100}
-            onClick={() => setProgress(undefined)}
-            padding={"p-1 w-16"}
-            blur={false}
-            color="blue"
-            className="text-white "
-          >
-            ปิด
-          </Button>
-          {cancel && <Button
-            onClick={() => setTimeout(() => close(), 100)}
-            padding={"p-1 w-16"}
-            blur={false}
-            color="red"
-            className="text-white"
-          >
-            ยกเลิก
-          </Button>}
-        </div>
-      </div>}
-    </Modal >
+      )}
+    </Modal>
   );
 };
 

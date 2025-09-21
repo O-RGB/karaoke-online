@@ -36,6 +36,10 @@ export interface ITrackDataSelectBy {
 // [Music Processing]----------------
 export interface ITrackFlags {
   _originalIndex: number;
+  _musicId?: string;
+  _musicLike?: number;
+  _musicUploader?: string;
+  _musicPlayCount?: number;
   _superIndex?: number;
   _system: SoundSystemMode;
   _isNew?: boolean;

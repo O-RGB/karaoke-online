@@ -87,7 +87,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
               onBlur={handleSearchBlur}
               onFocus={handleSearchFocus}
               className={
-                "!placeholder-white appearance-none !bg-transparent w-full"
+                "!placeholder-white !bg-transparent w-full !text-white font-light"
               }
               onSelectItem={(value: IOptions<ITrackData>) => {
                 if (value.option) {

@@ -1,9 +1,9 @@
 import React, { useEffect, useId, useMemo, useState } from "react";
-import { useSynthesizerEngine } from "../engine/synth-store";
 import useConfigStore from "../config/config-store";
+import LyricsList from "./line";
+import { useSynthesizerEngine } from "../engine/synth-store";
 import { FontDisplayManager } from "@/utils/indexedDB/db/display/table";
 import { LyricsCharacterStyle } from "./types";
-import LyricsList from "./line";
 
 interface LyricsPlayerProps {
   className?: string;
@@ -115,7 +115,7 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = ({ className }) => {
         </style>
       )}
       <div
-        style={{ fontFamily: fontUrl ? "customFont" : "sans-serif" }}
+        style={{ fontFamily: fontUrl ? "customFont" : undefined }}
         className="flex flex-col gap-0 lg:gap-10 items-center justify-center text-white drop-shadow-lg w-fit"
       >
         <LyricsList

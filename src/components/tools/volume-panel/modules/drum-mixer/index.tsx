@@ -26,13 +26,10 @@ const DrumMixer: React.FC<DrumMixerProps> = ({}) => {
       </WinboxModal>
 
       <Button
-        className="text-white"
-        shadow=""
+        size="xs"
+        blur={{ border: true }}
         onClick={openMixer}
         icon={<FaDrum></FaDrum>}
-        border="border blur-border"
-        padding="p-1 px-2"
-        iconPosition="left"
       >
         กลอง
       </Button>

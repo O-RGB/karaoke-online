@@ -141,11 +141,7 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ setAlert }) => {
                     <Label className="pb-1">ฟอนต์</Label>
                     <Upload onSelectFile={onUploadFont}>
                       <Button
-                        color="blue"
                         icon={<FaUpload></FaUpload>}
-                        iconPosition="left"
-                        shadow=""
-                        border=""
                         className="h-[34px] text-nowrap"
                       >
                         อัปโหลดฟอนต์
@@ -188,10 +184,8 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ setAlert }) => {
                   {lyrics.fontName !== undefined && (
                     <div>
                       <Button
-                        color="red"
+                        color="danger"
                         icon={<AiFillDelete></AiFillDelete>}
-                        iconPosition="left"
-                        className="h-[34px] text-nowrap"
                       >
                         ลบ
                       </Button>
@@ -246,13 +240,8 @@ const LyricsModal: React.FC<LyricsModalProps> = ({ setAlert }) => {
         <div className="pt-4">
           <Button
             onClick={lyricsConfigf.reset}
-            blur={false}
-            shadow={""}
-            color="default"
-            padding={"p-1 px-2"}
-            className="text-xs gap-[3px] "
+            color="white"
             icon={<TbRestore></TbRestore>}
-            iconPosition="left"
           >
             คืนค่าเริ่มต้น
           </Button>

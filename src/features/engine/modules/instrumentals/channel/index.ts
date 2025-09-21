@@ -157,6 +157,7 @@ export class SynthChannel {
     event: IControllerChange<T>,
     action: (control: any, value: T) => void
   ) {
+    console.log("on main value updated", event);
     switch (event.controllerNumber) {
       case MAIN_VOLUME:
         this.volume && action(this.volume, event.controllerValue);

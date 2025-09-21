@@ -69,6 +69,7 @@ type ModalProps = {
   noMax?: boolean;
 
   onFocus?: boolean;
+  isAlert?: boolean;
 };
 
 interface CommonStyle {

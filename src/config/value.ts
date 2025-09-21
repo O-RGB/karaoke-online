@@ -194,4 +194,5 @@ export const DEFAULT_CONFIG: ConfigSystem = {
   sound: {
     equalizer: true,
   },
+  token: "",
 };

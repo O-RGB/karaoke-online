@@ -54,14 +54,12 @@ const LyricsList: React.FC<LyricsListProps> = ({
     setClipPercent(calculateClipPercent());
   }, [tick, sentence]);
 
-  // ฟังก์ชันคำนวณ scaleX ให้พอดีกับหน้าจอ
   const updateScale = () => {
     if (!lyricsRef.current) return;
 
     const textWidth = lyricsRef.current.scrollWidth;
 
-    // padding container
-    const padding = 32; // px-8 → 8*4=32px
+    const padding = 32;
     const availableWidth = window.innerWidth - padding * 2;
 
     if (textWidth > availableWidth) {
@@ -71,13 +69,10 @@ const LyricsList: React.FC<LyricsListProps> = ({
     }
   };
 
-
-  // เรียกตอนโหลดเนื้อร้องหรือ tick เปลี่ยน
   useEffect(() => {
     updateScale();
   }, [text]);
 
-  // เรียกตอน resize หน้าจอ
   useEffect(() => {
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
@@ -87,13 +82,12 @@ const LyricsList: React.FC<LyricsListProps> = ({
 
   return (
     <div className="w-screen overflow-hidden px-8 flex justify-center">
-      {/* wrapper scale */}
       <div
         ref={lyricsRef}
         style={{
           transform: `scaleX(${scaleX})`,
           transformOrigin: "center",
-          display: "inline-block", // สำคัญเพื่อให้ scale ไม่กระทบ flex
+          display: "inline-block",
         }}
       >
         <LyricsCharacter {...textStyle} clip={clipPercent} text={text} />

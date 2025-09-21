@@ -462,12 +462,8 @@ const AddUserSong: React.FC<AddUserSongProps> = ({
               )} */}
 
               <Button
-                shadow={false}
-                border=""
                 onClick={() => removeItem(value)}
-                padding=""
-                className="w-7 h-7"
-                color="red"
+                color="danger"
                 blur={false}
                 icon={<RiDeleteBin5Line className="text-white" />}
               />
@@ -476,7 +472,6 @@ const AddUserSong: React.FC<AddUserSongProps> = ({
         />
 
         <Button
-          color="blue"
           iconPosition="left"
           className="w-full"
           icon={<FaPlus />}

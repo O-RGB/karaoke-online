@@ -84,6 +84,7 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
           <div className="flex justify-between gap-3 items-center">
             <div className="flex items-center gap-2 text-black">
               <NumberButton
+                blur={false}
                 value={Math.round(zoomLevel * 100)}
                 onChange={handleZoomChange}
                 className="!text-black"

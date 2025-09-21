@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-
-import Button from "../../button/button";
+import Button, { ButtonColor } from "../../button/button";
 
 interface SwitchButtonProps {
   iconOpen?: React.ReactNode;
   iconClose?: React.ReactNode;
   labelOpen?: string;
   labelClose?: string;
-  colorClose?: ColorType;
+  colorClose?: ButtonColor;
   onChange?: (open: boolean) => void;
   className?: string;
 }
@@ -30,26 +29,17 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({
   };
   return (
     <Button
-      shadow=""
-      border="border blur-border"
-      blur={!open ? false : "blur-overlay bg-white/10 hover:bg-white/20"}
+      blur={{
+        border: true,
+        backgroundColor: !open ? colorClose : "primary",
+      }}
       onClick={handleOnClick}
-      color={colorClose}
-      className={[open ? " hover:bg-white/30" : "", className].join(" ")}
-      padding="p-1 px-2"
+      className={className}
+      icon={iconClose && <span>{open ? iconOpen : iconClose}</span>}
     >
-      <div
-        className={["flex gap-1 items-center justify-center text-white"].join(
-          " "
-        )}
-      >
-        {iconClose && <span>{open ? iconOpen : iconClose}</span>}
-        {labelClose && (
-          <span className="text-sm -mt-0.5">
-            {open ? labelOpen : labelClose}
-          </span>
-        )}
-      </div>
+      {labelClose && (
+        <span className="text-sm -mt-0.5">{open ? labelOpen : labelClose}</span>
+      )}
     </Button>
   );
 };

@@ -33,11 +33,11 @@ const DisplaySettingModal: React.FC<DisplaySettingModalProps> = ({
           label: "วิดเจ็ต",
           icon: <MdOutlineWidgets></MdOutlineWidgets>,
         },
-        {
-          content: <EfficiencyDisplay></EfficiencyDisplay>,
-          label: "ประสิทธิภาพ",
-          icon: <LuCpu></LuCpu>,
-        },
+        // {
+        //   content: <EfficiencyDisplay></EfficiencyDisplay>,
+        //   label: "ประสิทธิภาพ",
+        //   icon: <LuCpu></LuCpu>,
+        // },
       ]}
     ></Tabs>
   );

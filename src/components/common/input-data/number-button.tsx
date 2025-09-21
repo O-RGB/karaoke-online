@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Button from "../button/button";
+import Button, { ButtonBlur } from "../button/button";
 import { FaPlus, FaMinus } from "react-icons/fa";
 
 interface NumberButtonProps {
@@ -9,6 +9,7 @@ interface NumberButtonProps {
   className?: string;
   color?: string;
   suffix?: string;
+  blur?: ButtonBlur | boolean;
 }
 
 const NumberButton: React.FC<NumberButtonProps> = ({
@@ -18,6 +19,10 @@ const NumberButton: React.FC<NumberButtonProps> = ({
   className,
   color = "text-white",
   suffix,
+  blur = {
+    border: false,
+    backgroundColor: "primary",
+  },
 }) => {
   const [int, setInt] = useState<number>(0);
 
@@ -37,16 +42,17 @@ const NumberButton: React.FC<NumberButtonProps> = ({
   }, [value]);
   return (
     <div
-      className={`blur-overlay border blur-border rounded-md px-2 py-1 h-fit w-fit ${className}`}
+      className={`blur-overlay border blur-border rounded-md pl-2 pr-1 py-1 h-fit w-fit ${className}`}
     >
       <div className={`flex justify-center items-center gap-2 ${color}`}>
         {icon}{" "}
         <div className="flex gap-2 items-center">
           <Button
-            className="hover:bg-white/30 h-5"
+            blur={blur}
             onClick={() => handleOnChnage("-")}
-            padding="p-1"
-            icon={<FaMinus className={`text-[9px] ${color}`}></FaMinus>}
+            size="xs"
+            className="!w-6 !rounded-[3px]"
+            icon={<FaMinus className="font-light"></FaMinus>}
           ></Button>
           <div className={`flex items-center justify-center gap-1 ${color}`}>
             <span className="-mt-0.5">
@@ -54,10 +60,11 @@ const NumberButton: React.FC<NumberButtonProps> = ({
             </span>
           </div>
           <Button
-            className="hover:bg-white/30 h-5"
+            blur={blur}
             onClick={() => handleOnChnage("+")}
-            padding="p-1"
-            icon={<FaPlus className={`text-[9px] ${color}`}></FaPlus>}
+            size="xs"
+            className="!w-6 !rounded-[3px]"
+            icon={<FaPlus className="font-light"></FaPlus>}
           ></Button>
         </div>
       </div>

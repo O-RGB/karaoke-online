@@ -1,6 +1,6 @@
 import React, { cloneElement } from "react";
 import Modal from "../../modal";
-import Button from "../../button/button";
+import Button, { ButtonColor } from "../../button/button";
 import { BiCheck } from "react-icons/bi";
 import { MdClose, MdError } from "react-icons/md";
 import { IoWarning } from "react-icons/io5";
@@ -23,22 +23,22 @@ const variantConfig = {
   success: {
     Icon: FaCheckCircle,
     iconClass: "text-green-500",
-    buttonColor: "green",
+    buttonColor: "success" as ButtonColor,
   },
   error: {
     Icon: MdError,
     iconClass: "text-red-500",
-    buttonColor: "red",
+    buttonColor: "denger" as ButtonColor,
   },
   warning: {
     Icon: IoWarning,
     iconClass: "text-yellow-500",
-    buttonColor: "blue",
+    buttonColor: "warning" as ButtonColor,
   },
   info: {
     Icon: FaInfoCircle,
     iconClass: "text-blue-500",
-    buttonColor: "blue",
+    buttonColor: "primary" as ButtonColor,
   },
 };
 
@@ -69,6 +69,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
       title={title}
       fitHeight
       index={99}
+      isAlert
     >
       <div className="p-4 flex flex-col gap-2 h-full">
         <div className="flex gap-3  h-full">
@@ -92,7 +93,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
           </Button>
           <Button
             className="h-9"
-            color={buttonColor as ColorType}
+            color={buttonColor}
             iconPosition="left"
             icon={<BiCheck className="text-lg" />}
             onClick={onOk}

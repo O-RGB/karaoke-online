@@ -8,6 +8,7 @@ export const crendentialKeys: { [key: string]: string } = {
   system_drive_mode: "system_drive_mode",
   config: "config",
   lastUpdated: "lastUpdated",
+  token: "token",
 };
 
 // SET

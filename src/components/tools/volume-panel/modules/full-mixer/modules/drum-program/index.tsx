@@ -19,16 +19,15 @@ const DrumProgramChange: React.FC<DrumChangeProps> = ({ program }) => {
           return (
             <React.Fragment key={`card-inst-${data}`}>
               <Button
-                padding="p-2"
+                size="xs"
+                color={program === 100 + i ? "primary" : "white"}
                 onClick={() => {
                   engine?.setProgram?.({
                     channel: 9,
                     program: 100 + i,
                   });
                 }}
-                className={`text-xs ${
-                  program === 100 + i ? "!bg-blue-500 text-white" : ""
-                }`}
+                className={`text-xs !rounded-md`}
               >
                 <span className="text-nowrap">
                   {i + 1}. {data}

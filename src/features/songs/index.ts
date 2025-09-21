@@ -1,26 +1,11 @@
 import { SoundSystemMode, SystemConfig } from "../config/types/config.type";
 import { DBFSongsSystemReader } from "./modules/extreme/extreme-file-system";
 import { BaseSongsSystemReader } from "./base/index-search";
-import {
-  ITrackData,
-  KaraokeExtension,
-  MusicLoadAllData,
-} from "./types/songs.type";
+import { ITrackData, MusicLoadAllData } from "./types/songs.type";
 import { BaseUserSongsSystemReader } from "./base/tride-search";
 import { PythonIndexReader } from "./modules/extreme/extreme-import";
 import { ApiSongsSystemReader } from "./modules/extreme/extreme-api-system";
 import { DircetoryLocalSongsManager } from "@/utils/indexedDB/db/local-songs/table";
-import { cursorToTicks } from "@/lib/karaoke/cursors";
-import {
-  curToArrayRange,
-  convertLyricsMapping,
-  xmlToArrayRange,
-} from "@/lib/karaoke/lyrics";
-import { readLyricsFile, readCursorFile } from "@/lib/karaoke/ncn";
-import { parseEMKFile } from "@/lib/karaoke/songs/emk";
-import { parseMidi } from "@/lib/karaoke/songs/midi/reader";
-import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
-import { readMp3 } from "@/lib/karaoke/songs/mp3/read";
 import { musicProcessGroup } from "@/lib/karaoke/read";
 
 type ReaderCreator = () =>
@@ -179,7 +164,6 @@ export class SongsSystem {
     }
 
     if (trackData._system === "DATABASE_FILE_SYSTEM") {
-      console.log("on database file system")
       try {
         const userSong = await this.userSong.getSong(trackData);
         if (userSong) {
@@ -192,7 +176,6 @@ export class SongsSystem {
         );
       }
     } else {
-      console.log("on manager file system");
       const userSong = await this.manager?.getSong(trackData);
       if (userSong) {
         return musicProcessGroup(userSong);

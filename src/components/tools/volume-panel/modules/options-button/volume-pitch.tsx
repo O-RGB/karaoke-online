@@ -1,26 +1,24 @@
 import NumberButton from "@/components/common/input-data/number-button";
 import SwitchButton from "@/components/common/input-data/switch/switch-button";
-import { MAIN_VOLUME } from "@/features/engine/types/node.type";
+import FullMixer from "../full-mixer";
+import DrumMixer from "../drum-mixer";
+import Button from "@/components/common/button/button";
+import EqualizerPanel from "../equalizer-mixer";
+import useConfigStore from "@/features/config/config-store";
+import ButtonCommon from "@/components/common/button/button";
 import React, { useEffect } from "react";
-import { FaList } from "react-icons/fa";
 import { IoSpeedometerSharp } from "react-icons/io5";
+import { MAIN_VOLUME } from "@/features/engine/types/node.type";
+import { FaList } from "react-icons/fa";
+import { IControllerChange } from "@/features/engine/types/synth.type";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
+import { Menu, MenuButton } from "@szhsin/react-menu";
+import { CgOptions } from "react-icons/cg";
 import {
   PiMicrophoneStageFill,
   PiUserSoundFill,
   PiUserMinusFill,
 } from "react-icons/pi";
-import FullMixer from "../full-mixer";
-import {
-  BaseSynthEngine,
-  IControllerChange,
-} from "@/features/engine/types/synth.type";
-import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
-import DrumMixer from "../drum-mixer";
-import { Menu, MenuButton } from "@szhsin/react-menu";
-import Button from "@/components/common/button/button";
-import { CgOptions } from "react-icons/cg";
-import EqualizerPanel from "../equalizer-mixer";
-import useConfigStore from "@/features/config/config-store";
 
 interface VolumeOptionsProps {
   onPitchChange: (value: number) => void;
@@ -70,6 +68,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
         )}
 
         <SwitchButton
+          className="!rounded-[4px] !p-2"
           onChange={(muted) => {
             onMutedVolume({
               channel: vocal,
@@ -77,26 +76,24 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
               controllerValue: !muted,
             });
           }}
-          iconOpen={<PiUserSoundFill className="text-lg"></PiUserSoundFill>}
-          iconClose={<PiUserMinusFill className="text-lg"></PiUserMinusFill>}
-          colorClose="red"
+          iconOpen={<PiUserSoundFill></PiUserSoundFill>}
+          iconClose={<PiUserMinusFill></PiUserMinusFill>}
+          colorClose="danger"
         ></SwitchButton>
 
         <Menu
           transition
           boundingBoxPadding="10 10 10 10"
-          className={"szh-menu-custom"}
-          menuButton={(open) => {
+          className={"szh-menu-custom !bg-black/20"}
+          menuButton={() => {
             return (
               <MenuButton>
-                <Button
-                  className="text-white"
-                  shadow=""
-                  border="border blur-border"
-                  padding="p-2 px-2"
+                <ButtonCommon
+                  className="!rounded-[4px] !p-2"
+                  blur={{ border: true, backgroundColor: "primary" }}
                 >
                   <CgOptions></CgOptions>
-                </Button>
+                </ButtonCommon>
               </MenuButton>
             );
           }}
@@ -104,13 +101,10 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
           <div className="px-2 ">
             <div className="flex flex-col gap-2">
               <Button
-                className="text-white"
-                shadow=""
+                size="xs"
                 onClick={openQueue}
                 icon={<FaList></FaList>}
-                border="border blur-border"
-                padding="p-1 px-2"
-                iconPosition="left"
+                blur={{ border: true }}
               >
                 คิวเพลง
               </Button>

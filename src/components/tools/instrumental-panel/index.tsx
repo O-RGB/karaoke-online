@@ -1,15 +1,12 @@
-import Button from "@/components/common/button/button";
-import { INSTRUMENT_TYPE_BY_INDEX } from "@/features/engine/modules/instrumentals/instrumental";
-import { useOrientation } from "@/hooks/orientation-hook";
 import React from "react";
-import VolumeOptions from "../volume-panel/modules/options-button/volume-pitch";
-import { IControllerChange } from "@/features/engine/types/synth.type";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import Button from "@/components/common/button/button";
 import InstrumentalButtonRender from "./node";
+import InstrumentalSetting from "@/components/modal/sound-setting/tabs/instrumental/instrumental-setting";
+import { INSTRUMENT_TYPE_BY_INDEX } from "@/features/engine/modules/instrumentals/instrumental";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { Menu, MenuButton } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
-import InstrumentalSetting from "@/components/modal/sound-setting/tabs/instrumental/instrumental-setting";
 
 interface InstrumentalPanelProps {
   className?: string;
@@ -36,14 +33,16 @@ const InstrumentalPanel: React.FC<InstrumentalPanelProps> = ({ className }) => {
                 return (
                   <MenuButton>
                     <Button
-                      className="w-full h-full"
-                      // className="!w-10 !h-10"
-                      padding="p-0.5"
-                      blur
+                      className="flex items-center justify-center !p-1.5 !rounded-[3px]"
+                      size="xs"
+                      blur={{
+                        border: true,
+                        backgroundColor: "primary",
+                      }}
                       icon={
                         <img
                           src={`/icon/instrument/${data}.png`}
-                          className="object-contain"
+                          className="object-contain filter brightness-0 invert"
                         ></img>
                       }
                     >

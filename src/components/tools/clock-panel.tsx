@@ -31,9 +31,9 @@ const ClockPanel: React.FC<ClockPanelProps> = ({}) => {
 
   return (
     <div className="blur-overlay blur-border border rounded-md p-4 w-44 hidden lg:block">
-      <span className="text-white text-3xl tracking-widest text-center">
+      <div className="text-white text-3xl tracking-widest text-center flex items-center justify-center">
         {formatTime(time)}
-      </span>
+      </div>
     </div>
   );
 };

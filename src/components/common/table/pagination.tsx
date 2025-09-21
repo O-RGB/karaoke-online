@@ -32,9 +32,7 @@ const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className={`flex items-center justify-end gap-2 ${className}`}>
       <Button
-        border=""
-        shadow=""
-        className="h-8 text-xs"
+        size="xs"
         color="white"
         onClick={handlePrevious}
         disabled={currentPage === 1}
@@ -53,8 +51,7 @@ const Pagination: React.FC<PaginationProps> = ({
       </div>
 
       <Button
-        border=""
-        shadow=""
+        size="xs"
         className="h-8 text-xs"
         color="white"
         onClick={handleNext}

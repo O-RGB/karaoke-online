@@ -8,6 +8,7 @@ import {
 import { createPortal } from "react-dom";
 import WinBox from "react-winbox";
 import { useOrientation } from "@/hooks/orientation-hook";
+import useKeyboardStore from "@/features/keyboard-state";
 import "winbox/dist/css/winbox.min.css";
 import "winbox/dist/css/themes/white.min.css";
 
@@ -27,8 +28,10 @@ export default function WinboxModal({
   noResize,
   noFull = true,
   noMax,
+  isAlert = false,
 }: ModalProps) {
   const { isMobile, orientation } = useOrientation();
+  const setPaused = useKeyboardStore((state) => state.setPaused);
   const [showModal, setShowModal] = useState(isOpen);
   const [modalDimensions, setModalDimensions] = useState({
     width: 0,
@@ -107,7 +110,6 @@ export default function WinboxModal({
         z-index: -1;
       }
       
-      /* ป้องกัน scroll bar ใน modal content */
       .winbox .wb-body {
         overflow: hidden !important;
       }
@@ -123,10 +125,15 @@ export default function WinboxModal({
 
   useEffect(() => {
     setShowModal(isOpen);
+    if (isOpen) {
+      console.log("is modal opended");
+      if (!isAlert) setPaused(true);
+    }
   }, [isOpen]);
 
   const handleClose = () => {
     setShowModal(false);
+    if (!isAlert) setPaused(false);
     if (onClose) onClose();
   };
 

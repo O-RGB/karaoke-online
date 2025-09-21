@@ -60,6 +60,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     set({ loading: true });
     let songsManager = useSongsStore.getState().songsManager;
     const song = await songsManager?.getSong(music);
+
     set({ loading: false });
 
     if (!song) {

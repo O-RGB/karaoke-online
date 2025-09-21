@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "../globals.css";
+import { Noto_Sans_Thai_Looped, Noto_Sans_Lao_Looped } from "next/font/google";
 import AllowSound from "@/components/tools/allow-sound";
+
+const notoSansThai = Noto_Sans_Thai_Looped({
+  subsets: ["thai", "latin"],
+  weight: ["400", "700"],
+  variable: "--font-noto-sans-thai",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -49,7 +56,7 @@ export default function RootLayout({
         <meta name="google" content="notranslate" />
       </head>
 
-      <body className={`relative`}>
+      <body className={`${notoSansThai.className} antialiased relative`}>
         <AllowSound>{children}</AllowSound>
       </body>
     </html>

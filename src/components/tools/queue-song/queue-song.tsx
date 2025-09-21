@@ -126,14 +126,8 @@ const SortableTableRow = ({
         className="p-2 flex items-center justify-center w-full h-full"
       >
         <Button
-          shadow={false}
-          border={false}
           onClick={() => onDelete?.(index)}
-          padding=""
-          className="w-7 h-7"
-          blur=""
-          color="red"
-          iconPosition="left"
+          color="danger"
           icon={<RiDeleteBin5Line className="text-white"></RiDeleteBin5Line>}
         ></Button>
       </td>

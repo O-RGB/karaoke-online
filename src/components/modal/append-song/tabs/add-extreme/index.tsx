@@ -240,9 +240,7 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
             >
               <Button
                 disabled={isProcessing}
-                iconPosition="left"
                 icon={<FaDownload />}
-                color="blue"
                 className="w-fit text-base py-2.5 text-nowrap"
               >
                 โปรแกรม
@@ -335,7 +333,7 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
               ข้อมูล Index ในเครื่อง
             </h3>
             <Button
-              color="red"
+              color="danger"
               iconPosition="left"
               icon={<MdDeleteForever />}
               disabled={!isDataReadyForLoad || isProcessing}

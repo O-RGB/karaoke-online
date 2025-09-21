@@ -106,8 +106,9 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
         return (
           <MenuButton disabled={disabled}>
             <div
-              className={`${disabled ? "cursor-auto" : "cursor-pointer"
-                } w-full lg:w-9 border-b border-x border-white/20  hover:bg-white/20 duration-300`}
+              className={`${
+                disabled ? "cursor-auto" : "cursor-pointer"
+              } w-full lg:w-9 border-b border-x border-white/20  hover:bg-white/20 duration-300`}
             >
               <div className="w-full blur-overlay text-center text-white font-bold text-[10px] p-1 flex gap-0.5 justify-center items-center h-5">
                 <span className="w-2.5">{channelIcon}</span>
@@ -141,6 +142,7 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
           <LabelTag name="เสียง"></LabelTag>
           <div className="pr-0.5">
             <Button
+              color="white"
               icon={<FaUnlock className="text-[8px] text-gray-500"></FaUnlock>}
               className="!p-1.5 shadow-none border-none"
             ></Button>
@@ -158,8 +160,9 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
             options={programOption}
           >
             <div
-              className={`${false ? "bg-yellow-400 text-red-600" : ""
-                } w-full rounded-md overflow-hidden border border-black/10 cursor-pointer group-hover:bg-gray-200 duration-300`}
+              className={`${
+                false ? "bg-yellow-400 text-red-600" : ""
+              } w-full rounded-md overflow-hidden border border-black/10 cursor-pointer group-hover:bg-gray-200 duration-300`}
             >
               <div className="w-full font-bold text-[10px] p-2 flex gap-0.5 justify-between items-center h-6">
                 <div className="flex gap-2 items-center">
@@ -173,6 +176,7 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
             </div>
           </ButtonDropdown>
         </div>
+
         <VolumeNodePreset
           synthNode={node.pan}
           onLock={onLockChange}

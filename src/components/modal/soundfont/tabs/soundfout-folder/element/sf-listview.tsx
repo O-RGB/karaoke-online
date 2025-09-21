@@ -37,7 +37,7 @@ export const SoundfontListView: React.FC<SoundfontListViewProps> = ({
       return <AiOutlineLoading3Quarters className="animate-spin" />;
     }
     if (isSelected(fileName)) {
-      return <FaCircleCheck className="text-green-500" />;
+      return <FaCircleCheck className="!text-green-500" />;
     }
     return <IoMdAddCircle />;
   };
@@ -55,12 +55,9 @@ export const SoundfontListView: React.FC<SoundfontListViewProps> = ({
         onDeleteItem={onItemDelete}
         itemAction={(item: ISoundfontPlayer, index: number, option) => (
           <Button
-            padding=""
-            className="w-7 h-7"
             disabled={loading}
             onClick={() => onItemSelect(item.file.name, index, option)}
-            color="default"
-            blur={false}
+            color="white"
             icon={renderActionButtonIcon(
               from === "EXTREME_FILE_SYSTEM" ? item.file.name : `${item.id}`
             )}
