@@ -27,17 +27,17 @@ export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
     const config = useConfigStore.getState().config.sound;
     const configs = useConfigStore.getState().config;
     const setInstrument = useMixerStoreNew.getState().setInstrument;
-    if (type === "spessa") {
-      const spessaSynth = new SpessaSynthEngine(setInstrument, config, configs);
-      set({ engine: spessaSynth, timer: spessaSynth.timer, type });
-      console.info("[Spessa] Synth engine started...");
-      return spessaSynth;
-    } else {
+    // if (type === "spessa") {
+    //   const spessaSynth = new SpessaSynthEngine(setInstrument, config, configs);
+    //   set({ engine: spessaSynth, timer: spessaSynth.timer, type });
+    //   console.info("[Spessa] Synth engine started...");
+    //   return spessaSynth;
+    // } else {
       const jsSynth = new JsSynthEngine(setInstrument);
       set({ engine: jsSynth, timer: jsSynth.timer, type });
       console.info("[jsSynth] Synth engine started...");
       return jsSynth;
-    }
+    // }
   },
 
   uninsatll: async () => {

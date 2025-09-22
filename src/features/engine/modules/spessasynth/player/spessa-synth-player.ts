@@ -17,18 +17,32 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   public musicQuere: MusicLoadAllData | undefined = undefined;
   public mp3SourceNode: AudioBufferSourceNode | undefined;
 
+  private mp3PausedOffset = 0;
+  private mp3StartTime = 0;
+
   constructor(player: Sequencer, engine: SpessaSynthEngine) {
     this.player = player;
     this.engine = engine;
   }
-
   async play(): Promise<void> {
     if (!this.musicQuere) return;
-    if (this.musicQuere?.musicType === "MP3") {
-      if (this.engine.audio?.state === "suspended") {
-        await this.engine.audio.resume();
+
+    if (this.musicQuere.musicType === "MP3" && this.mp3SourceNode?.buffer) {
+      const buffer = this.mp3SourceNode.buffer;
+      const ctx = this.engine.audio!;
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+
+      if (this.engine.globalEqualizer) {
+        source.connect(this.engine.globalEqualizer.input);
+      } else {
+        source.connect(ctx.destination);
       }
-      this.mp3SourceNode?.start(0);
+
+      source.start(0, this.mp3PausedOffset);
+
+      this.mp3StartTime = ctx.currentTime;
+      this.mp3SourceNode = source;
     } else {
       this.player.play();
     }
@@ -37,17 +51,34 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
     this.paused = false;
     this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
   }
+
   stop(): void {
     if (!this.musicQuere) return;
+
     this.mp3SourceNode?.stop();
     this.player.stop();
     this.engine.timer?.stopTimer();
     this.paused = true;
     this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "STOP");
   }
+
   pause(): void {
     if (!this.musicQuere) return;
-    this.player.pause();
+
+    if (this.musicQuere.musicType === "MP3" && this.mp3SourceNode) {
+      const ctx = this.engine.audio!;
+      const elapsed = ctx.currentTime - this.mp3StartTime;
+
+      this.mp3PausedOffset += elapsed;
+
+      try {
+        this.mp3SourceNode.stop();
+      } catch {}
+      this.mp3SourceNode.disconnect();
+    } else {
+      this.player.pause();
+    }
+
     this.engine.timer?.stopTimer();
     this.paused = true;
     this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PAUSE");
@@ -56,14 +87,18 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   async getCurrentTiming() {
     return this.player.currentTime ?? 0;
   }
+  async setCurrentTiming(timing: number): Promise<void> {
+    const wasPlaying = !this.paused;
+    this.pause();
 
-  setCurrentTiming(timing: number): void {
     if (this.musicQuere?.musicType === "MP3") {
       if (!this.engine.audio || !this.mp3SourceNode?.buffer) return;
 
       try {
         this.mp3SourceNode.stop();
       } catch (_) {}
+
+      this.mp3SourceNode.disconnect();
 
       const newNode = this.engine.audio.createBufferSource();
       newNode.buffer = this.mp3SourceNode.buffer;
@@ -74,14 +109,26 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
 
       newNode.connect(outputNode);
 
-      this.mp3SourceNode = newNode;
+      this.engine.timer?.seekTimer(timing);
 
-      this.mp3SourceNode.start(0, timing);
+      if (wasPlaying) {
+        newNode.start(0, timing);
+        this.paused = false;
+        this.engine.timer?.startTimer();
+        this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
+      } else {
+        this.paused = true;
+      }
+
+      this.mp3SourceNode = newNode;
     } else {
       if (!this.player) return;
       this.player.currentTime = timing;
+      setTimeout(() => {
+        this.engine.timer?.seekTimer(timing);
+        if (wasPlaying) this.play();
+      }, 500);
     }
-    this.engine.timer?.seekTimer(timing);
   }
 
   tempoUpdate(tempo: number): void {
@@ -139,14 +186,10 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
       const audioBuffer = await this.engine.audio.decodeAudioData(arrayBuffer);
       this.mp3SourceNode = this.engine.audio.createBufferSource();
       this.mp3SourceNode.buffer = audioBuffer;
+      if (this.engine.globalEqualizer) {
+        this.mp3SourceNode.connect(this.engine.globalEqualizer.input);
+      }
 
-      const outputNode = this.engine.globalEqualizer
-        ? this.engine.globalEqualizer.input
-        : this.engine.audio.destination;
-
-      this.mp3SourceNode.connect(outputNode);
-
-      console.log("🎵 MP3 loaded and ready to play.");
       return true;
     } catch (error) {
       console.error("Error loading MP3:", error);
@@ -157,6 +200,8 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
 
   async loadMidi(data?: MusicLoadAllData): Promise<boolean> {
     if (!data) return false;
+    this.stop();
+    this.engine.timer?.stopTimer();
     const mid = data.files.midi;
     if (mid !== undefined) {
       this.mp3SourceNode = undefined;

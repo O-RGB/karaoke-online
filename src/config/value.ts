@@ -187,7 +187,7 @@ export const DEFAULT_CONFIG: ConfigSystem = {
     urlTested: false,
     tracklistUrlTested: false,
     uploadToDrive: false,
-    engine: "spessa",
+    engine: "jsSynth",
     timingModeType: "Time",
     zoom: 1, // <-- เพิ่มบรรทัดนี้
   },

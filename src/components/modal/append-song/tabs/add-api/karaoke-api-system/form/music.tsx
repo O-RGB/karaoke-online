@@ -14,6 +14,7 @@ import { FaSave } from "react-icons/fa";
 import { MusicCreate } from "../types";
 import { BiUpload } from "react-icons/bi";
 import InputCommon from "@/components/common/data-input/input";
+import { generateMidiSignature } from "@/lib/karaoke/songs/midi/midi-signature";
 
 interface MusicFormProps {
   value?: MusicCreate;
@@ -29,6 +30,7 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
   const [artist, setArtist] = useState("");
   const [album, setAlbum] = useState("");
   const [musicCode, setMusicCode] = useState("");
+  const [signature, setSignature] = useState("");
 
   const [urlIsCorrect, setUrlIsCorrect] = useState<boolean>(false);
   const [directLink, setDirectLink] = useState("");
@@ -55,18 +57,9 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
       album,
       music_code: musicCode,
       direct_link: directLink,
+      signature,
     });
     setLoading(false);
-  };
-
-  const getTrackData = async (files: FileList | File[]) => {
-    const gorups = groupFilesByBaseName(files);
-    if (gorups.length === 1) {
-      const gorup = gorups[0];
-      const process = await musicProcessGroup(gorup);
-      const trackData = process.trackData;
-      return trackData;
-    }
   };
 
   const onUploadImage = async (files: FileList) => {
@@ -118,9 +111,14 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
         const gorup = gorups[0];
         const process = await musicProcessGroup(gorup);
         const trackData = process.trackData;
+        const midi = process.files.midi;
 
-        if (isEqual(trackData, correctData)) {
-          setUrlIsCorrect(true);
+        if (isEqual(trackData, correctData) && midi) {
+          const signature = await generateMidiSignature(midi);
+          if (signature) {
+            setSignature(signature);
+            setUrlIsCorrect(true);
+          }
         } else {
           notify({ type: "error", text: "ข้อมูลที่ได้ไม่ตรงกัน" });
         }
@@ -252,7 +250,9 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
             required
           />
           {imageUrl && (
-            <span className="text-green-500 text-xs">ลิงก์ถูกต้อง</span>
+            <span className="text-green-500 text-xs">
+              ลิงก์ถูกต้อง {signature}
+            </span>
           )}
           <span className="text-red-500 text-xs">{directLinkMessage}</span>
           {imageUrl && (
@@ -273,7 +273,7 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
           isLoading={loading}
           icon={<FaSave></FaSave>}
           iconPosition="right"
-        //   color={!onUpload || !urlIsCorrect ? "white" : "primary"}
+          //   color={!onUpload || !urlIsCorrect ? "white" : "primary"}
           type="submit"
           disabled={!onUpload || !urlIsCorrect}
         >

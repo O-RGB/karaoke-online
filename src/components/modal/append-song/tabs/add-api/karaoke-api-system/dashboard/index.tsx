@@ -123,8 +123,27 @@ const Dashboard: React.FC<DashboardProps> = ({
       } else {
         notify({ type: "warning", text: "สร้างเพลงไม่สำเร็จ" });
       }
-    } catch (error) {
-      notify({ type: "error", text: `ผิดพลาด ${JSON.stringify(error)}` });
+    } catch (err: any) {
+      const message =
+        err?.error?.detail?.message !== undefined
+          ? err.error.detail.message
+          : err;
+      notify({
+        type: "error",
+        text: `ผิดพลาด ${JSON.stringify(message)}`,
+      });
+
+      if (message === "Duplicate song found") {
+        let existing_music: any = {};
+        if (err?.error?.detail?.existing_music) {
+          existing_music = err.error.existing_music;
+        }
+        setAlert?.({
+          title: "เพลงซ้ำจาก Server",
+          description: `ไฟล์ midi นี้มีในระบบแล้วคุณไม่จำเป็นต้องอัปโหลดซ้ำ เพลงที่มีอยู่แล้ว Music Code: ${existing_music.music_code}`,
+          variant: "warning",
+        });
+      }
     }
   };
 

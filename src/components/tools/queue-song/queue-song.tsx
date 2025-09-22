@@ -220,7 +220,6 @@ const QueueSong: React.FC<QueueSongProps> = ({
     }
   };
   const onCountDownUpdated = (count: number) => {
-    console.log(count);
     setCountDown(count);
 
     if (count < stopTouchMusicPlaying) {

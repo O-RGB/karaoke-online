@@ -31,9 +31,9 @@ const AddApiSong: React.FC<AddApiSongProps> = ({
             textSize={15}
             textColor="text-gray-800"
             headClass="bg-blue-500"
-            description="เล่นเพลงทั้งหมดจาก Server กลาง  (การอัปเดตเพลงจะแล้วแต่อารมณ์ของ Admin)"
+            description="ทุกคนสามารถลงเพลงเองและแชร์ต่อได้"
           >
-            เล่นเพลงจาก API (อัพเดทล่าสุด กรกฎาคม 2568) <br />
+            เล่นเพลงจาก API
           </Label>
           <div>
             <SwitchRadio<boolean>

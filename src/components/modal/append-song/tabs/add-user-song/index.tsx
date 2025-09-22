@@ -99,13 +99,14 @@ const AddUserSong: React.FC<AddUserSongProps> = ({
       if (item.isError) {
         errors.push(item);
       } else if (item) {
-        const isDuplicate = checkDuplicate(item);
-        if (isDuplicate) {
-          item.isDuplicate = true;
-          duplicates.push(item);
-        } else {
-          valids.push(item);
-        }
+        // const isDuplicate = checkDuplicate(item);
+        // if (isDuplicate) {
+        //   item.isDuplicate = true;
+        //   duplicates.push(item);
+        // } else {
+        //   valids.push(item);
+        // }
+        valids.push(item);
       }
     }
 

@@ -34,11 +34,11 @@ const SoundSettingModal: React.FC<SoundSettingModalProps> = ({ height }) => {
             label: "อุปกรณ์เสียง",
             icon: <GiGuitar></GiGuitar>,
           },
-          {
-            content: <EngineSoundModal></EngineSoundModal>,
-            label: "Engine",
-            icon: <PiEngineFill></PiEngineFill>,
-          },
+          // {
+          //   content: <EngineSoundModal></EngineSoundModal>,
+          //   label: "Engine",
+          //   icon: <PiEngineFill></PiEngineFill>,
+          // },
         ]}
       ></Tabs>
     </>

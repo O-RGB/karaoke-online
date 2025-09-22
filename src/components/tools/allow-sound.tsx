@@ -157,7 +157,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                         ></ToggleCheckBox>
                       </div>
 
-                      <div className="space-y-2">
+                      {/* <div className="space-y-2">
                         <Label className="text-black">Engine</Label>
                         <ToggleCheckBox
                           defaultChecked={engine === "jsSynth"}
@@ -173,7 +173,7 @@ const AllowSound: React.FC<AllowSoundProps> = ({ children }) => {
                           }}
                           label="Spessasynth"
                         ></ToggleCheckBox>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

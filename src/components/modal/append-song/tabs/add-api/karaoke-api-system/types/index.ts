@@ -27,6 +27,8 @@ export interface IMusicDetails {
   play_count: number;
   like_count: number;
   bookmark_count: number;
+  dislike_count?: number;
+  signature?: string;
   created_at: string;
   updated_at: string;
 }
@@ -34,7 +36,7 @@ export interface IMusicDetails {
 export interface MusicCreate
   extends Pick<
     IMusicDetails,
-    "title" | "artist" | "album" | "music_code" | "direct_link"
+    "title" | "artist" | "album" | "music_code" | "direct_link" | "signature"
   > {}
 
 export interface MusicSearch
