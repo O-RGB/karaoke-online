@@ -1,12 +1,6 @@
 import { SynthNode } from "../node";
 import { EventManager } from "../events";
-import {
-  EventKey,
-  INodeKey,
-  INodeState,
-  INoteState,
-  TEventType,
-} from "../types/node.type";
+import { INodeKey, INodeState, INoteState } from "../types/node.type";
 import {
   IControllerChange,
   INoteChange,
@@ -27,38 +21,35 @@ import { ChannelEqualizer } from "../../equalizer/channel-equalizer";
 import { ConfigSystem } from "@/features/config/types/config.type";
 
 export class SynthChannel {
-  // Index
   public channel: number | undefined;
 
-  // Note
   public note: KeyboardNode | undefined = undefined;
 
-  // Value
   public volume: SynthNode<INodeKey, number> | undefined = undefined;
   public maxVolume: SynthNode<INodeKey, number> | undefined = undefined;
 
-  // Effect
   public chorus: SynthNode<INodeKey, number> | undefined = undefined;
   public reverb: SynthNode<INodeKey, number> | undefined = undefined;
   public transpose: SynthNode<null, number> | undefined = undefined;
   public pan: SynthNode<INodeKey, number> | undefined = undefined;
 
-  // State
   public velocity: SynthNode<INodeState, number> | undefined = undefined;
   public expression: SynthNode<INodeState, number> | undefined = undefined;
   public program: SynthNode<INodeState, number> | undefined = undefined;
   public isDrum: SynthNode<INodeState, boolean> | undefined = undefined;
   public isActive: SynthNode<INodeState, boolean> | undefined = undefined;
 
-  // Render
   public analyserNode?: AnalyserNode | undefined = undefined;
   public velocityMode?: boolean = false;
-  private simulatedVelocityGain: number = 0;
 
-  // Event
+  private simulatedVelocityGain: number = 0;
+  private smoothedGain: number = 0;
+  private smoothingSpeedUp = 0.2;
+  private smoothingSpeedDown = 0.05;
+  private animationId?: number;
+
   public globalNoteOnEvent = new EventManager<INoteState, INoteChange>();
 
-  // Group
   public instrumental: InstrumentalNode | undefined = undefined;
 
   public equalizer: ChannelEqualizer | undefined = undefined;
@@ -108,16 +99,41 @@ export class SynthChannel {
     }
 
     this.analyserNode = analyser;
-    // console.log("Audio routing complete for channel", channel);
+    this.systemConfig = systemConfig;
+  }
+
+  private startSmoothing() {
+    if (this.animationId) return;
+    const animate = () => {
+      const target = this.simulatedVelocityGain;
+      const diff = target - this.smoothedGain;
+      const speed = diff > 0 ? this.smoothingSpeedUp : this.smoothingSpeedDown;
+      this.smoothedGain += diff * speed;
+
+      this.animationId = requestAnimationFrame(animate);
+    };
+    this.animationId = requestAnimationFrame(animate);
+  }
+
+  private stopSmoothing() {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = undefined;
+    }
   }
 
   public setVelocityRender(bool: boolean) {
     this.velocityMode = bool;
+    if (bool) {
+      this.startSmoothing();
+    } else {
+      this.stopSmoothing();
+    }
   }
 
   public getGain(getDrum: boolean = false) {
     if (this.velocityMode) {
-      return this.simulatedVelocityGain;
+      return this.smoothedGain;
     }
 
     if (this.isDrum?.value === true && getDrum === false) {
@@ -157,7 +173,6 @@ export class SynthChannel {
     event: IControllerChange<T>,
     action: (control: any, value: T) => void
   ) {
-    console.log("on main value updated", event);
     switch (event.controllerNumber) {
       case MAIN_VOLUME:
         this.volume && action(this.volume, event.controllerValue);
@@ -186,7 +201,6 @@ export class SynthChannel {
   }
 
   public noteOnChange(event: INoteChange) {
-    // this.note?.setOn(event);
     this.globalNoteOnEvent.trigger(["NOTE_ON", "CHANGE"], 0, event);
     if (this.velocityMode) {
       this.simulatedVelocityGain = event.velocity;
@@ -194,7 +208,6 @@ export class SynthChannel {
   }
 
   public noteOffChange(event: INoteChange) {
-    // this.note?.setOff(event);
     this.globalNoteOnEvent.trigger(["NOTE_OFF", "CHANGE"], 0, event);
   }
 

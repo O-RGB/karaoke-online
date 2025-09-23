@@ -57,7 +57,8 @@ export default function RootLayout({
       </head>
 
       <body className={`${notoSansThai.className} antialiased relative`}>
-        <AllowSound>{children}</AllowSound>
+        {/* <AllowSound></AllowSound> */}
+        {children}
       </body>
     </html>
   );

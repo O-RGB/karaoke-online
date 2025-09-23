@@ -54,7 +54,8 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
             <PiMicrophoneStageFill className="text-[15px]"></PiMicrophoneStageFill>
           }
         ></NumberButton>
-        {engineMode === "spessa" && (
+
+        {/* {engineMode === "spessa" && (
           <NumberButton
             onChange={(value) => {
               onSpeedChange(value);
@@ -65,7 +66,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
               <IoSpeedometerSharp className="text-[15px]"></IoSpeedometerSharp>
             }
           ></NumberButton>
-        )}
+        )} */}
 
         <SwitchButton
           className="!rounded-[4px] !p-2"
