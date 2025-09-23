@@ -25,7 +25,10 @@ import { JsSynthPlayerEngine } from "./player/js-synth-player";
 import { GlobalEqualizer } from "../equalizer/global-equalizer";
 import { PlayerSetTempoType } from "js-synthesizer/dist/lib/Constants";
 import { RecordingsManager } from "@/utils/indexedDB/db/display/table";
-import { Synthesizer as JsSynthesizer } from "js-synthesizer";
+import {
+  AudioWorkletNodeSynthesizer,
+  Synthesizer as JsSynthesizer,
+} from "js-synthesizer";
 import { InstrumentalNode } from "../instrumentals/instrumental";
 import { SynthChannel } from "../instrumentals/channel";
 import { BassConfig } from "../instrumentals/config";
@@ -35,7 +38,7 @@ import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
-  public synth: JsSynthesizer | undefined;
+  public synth: AudioWorkletNodeSynthesizer | undefined;
   public audio: AudioContext | undefined;
   public player: BaseSynthPlayerEngine | undefined;
   public preset: number[] = [];
@@ -74,31 +77,62 @@ export class JsSynthEngine implements BaseSynthEngine {
   }
 
   async startup(systemConfig?: Partial<ConfigSystem>) {
+    // ✅ 1. สร้าง AudioContext
     const audioContext = new AudioContext();
 
-    const { Synthesizer } = await import("js-synthesizer");
-    const synth = new Synthesizer();
+    // ✅ 2. Safari/Chrome ต้องให้ผู้ใช้กดปุ่มก่อนแล้วค่อย resume
+    await audioContext.resume();
 
+    await audioContext.audioWorklet.addModule(
+      new URL(
+        "js-synthesizer/libfluidsynth-2.4.6.js",
+        window.location.origin
+      ).toString()
+    );
+    await audioContext.audioWorklet.addModule(
+      new URL(
+        "js-synthesizer/js-synthesizer.worklet.js",
+        window.location.origin
+      ).toString()
+    );
+    await audioContext.audioWorklet.addModule(
+      new URL("js-synthesizer/worklet.js", window.location.origin).toString()
+    );
+    // ✅ 4. สร้าง synthesizer แบบ AudioWorklet
+    const synth = new AudioWorkletNodeSynthesizer();
     synth.init(audioContext.sampleRate);
-    this.loadDefaultSoundFont();
+
+    // ✅ 5. ต้อง createAudioNode ก่อนใช้ method อื่น
+    const audioNode = synth.createAudioNode(audioContext);
+
+    // ✅ 6. ต่อสายเสียง
+    audioNode.connect(audioContext.destination);
+
+    // ✅ 7. โหลด SoundFont
+    // const res = await fetch("/default-sound-font.sf2");
+    // const sfontBuffer = await res.arrayBuffer();
+    // await synth.loadSFont(sfontBuffer);
+
+    synth.node;
 
     this.synth = synth;
     this.audio = audioContext;
+    this.synthAudioNode = audioNode;
 
     this.player = new JsSynthPlayerEngine(synth, this);
     this.timer = new TimerWorker(this.player);
     this.instrumental.setEngine(this);
+    this.timer.initWorker();
 
     const analysers: AnalyserNode[] = [];
     this.nodes = [];
+    this.globalEqualizer = new GlobalEqualizer(this.synthAudioNode.context);
 
-    this.synthAudioNode = synth.createAudioNode(audioContext, 8192);
+    this.synthAudioNode.connect(this.globalEqualizer.input);
+    this.globalEqualizer.output.connect(audioContext.destination);
 
-    if (this.synthAudioNode) {
-      this.globalEqualizer = new GlobalEqualizer(this.synthAudioNode.context);
-      this.synthAudioNode.connect(this.globalEqualizer.input);
-      this.globalEqualizer.output.connect(audioContext.destination);
-    }
+    synth.midiNoteOn(0, 60, 100);
+    setTimeout(() => synth.midiNoteOff(0, 60), 1000);
 
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
       const analyser = audioContext.createAnalyser();
@@ -116,7 +150,6 @@ export class JsSynthEngine implements BaseSynthEngine {
       analysers.push(analyser);
     }
 
-    this.timer.initWorker();
     this.controllerChange();
     this.programChange();
     this.noteOffChange();
@@ -124,7 +157,9 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.onPlay();
     this.onStop();
 
-    return { synth: synth, audio: this.audio };
+    console.log("✅ JsSynthEngine ready, sound should output.");
+
+    return { synth, audio: this.audio };
   }
 
   async loadPresetSoundFont(sfId?: number) {
@@ -134,7 +169,7 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     const preset = this.synth.getSFontObject(sfId);
     if (preset) {
-      const list = preset.getPresetIterable();
+      const list = await (await preset).getPresetIterable();
       const presetList = Array.from(list);
 
       const instrument: IPersetSoundfont[] = presetList.map((data) => ({
@@ -168,6 +203,8 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.soundfontName = "Default Soundfont sf2";
       this.loadPresetSoundFont(sfId);
     }
+
+    return arraybuffer;
   }
 
   async setSoundFont(file: File, from: SoundSystemMode) {

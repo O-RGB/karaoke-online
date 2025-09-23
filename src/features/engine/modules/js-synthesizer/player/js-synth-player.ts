@@ -9,7 +9,10 @@ import {
   REVERB,
 } from "@/features/engine/types/node.type";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
-import { Synthesizer as JsSynthesizer } from "js-synthesizer";
+import {
+  AudioWorkletNodeSynthesizer,
+  Synthesizer as JsSynthesizer,
+} from "js-synthesizer";
 import { JsSynthEngine } from "../js-synth-engine";
 import { DRUM_CHANNEL } from "@/config/value";
 import { EventManager } from "../../instrumentals/events";
@@ -18,7 +21,7 @@ import { parseMidi } from "@/lib/karaoke/songs/midi/reader";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 
 export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
-  private player: JsSynthesizer | undefined = undefined;
+  private player: AudioWorkletNodeSynthesizer | undefined = undefined;
   private engine: JsSynthEngine;
   public paused: boolean = false;
   public isFinished: boolean = false;
@@ -36,7 +39,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.eventInit = { ...this.eventInit, ...input };
   }
 
-  constructor(player: JsSynthesizer, engine: JsSynthEngine) {
+  constructor(player: AudioWorkletNodeSynthesizer, engine: JsSynthEngine) {
     this.player = player;
     this.engine = engine;
   }
@@ -236,115 +239,108 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   resetMidiOutput(): void {}
 
   eventChange(): void {
-    this.player?.hookPlayerMIDIEvents((s, type, event) => {
-      const eventType = event.getType();
-      const velocity = event.getVelocity();
-      const midiNote = event.getKey();
-      const channel = event.getChannel();
-      const control = event.getControl();
-      const value = event.getValue();
-      const program = event.getProgram();
-      const node = this.engine.nodes[channel];
-
-      if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
-        const transpose = node.transpose?.value;
-
-        this.eventInit?.onNoteOnChangeCallback({
-          channel,
-          midiNote,
-          velocity,
-        });
-
-        if (channel !== DRUM_CHANNEL) {
-          event.setKey(midiNote + (transpose ?? 0));
-        }
-      } else if (
-        eventType === 0x80 &&
-        this.eventInit?.onNoteOffChangeCallback
-      ) {
-        this.eventInit?.onNoteOffChangeCallback({
-          channel,
-          midiNote,
-          velocity,
-        });
-      }
-
-      switch (type) {
-        case 176:
-          if (this.eventInit?.controllerChangeCallback) {
-            let controllerNumber = 0;
-            let controllerValue = value;
-            let isLocked = false;
-            switch (control) {
-              case MAIN_VOLUME:
-                let volume = node.volume;
-                controllerNumber = MAIN_VOLUME;
-                if (volume?.isLocked) {
-                  isLocked = true;
-                  controllerValue = volume.value ?? value;
-                  event.setValue(controllerValue);
-                } else if (volume?.isMute) {
-                  event.setValue(0);
-                  controllerValue = 0;
-                }
-                break;
-              case PAN:
-                controllerNumber = PAN;
-                let pan = node.pan;
-                if (pan?.isLocked) {
-                  isLocked = true;
-                  controllerValue = pan.value ?? value;
-                  event.setValue(controllerValue);
-                } else if (pan?.isMute) {
-                  event.setValue(0);
-                  controllerValue = 0;
-                }
-                break;
-              case REVERB:
-                controllerNumber = REVERB;
-                let reverb = node.reverb;
-                if (reverb?.isLocked) {
-                  isLocked = true;
-                  controllerValue = reverb.value ?? value;
-                  event.setValue(controllerValue);
-                } else if (reverb?.isMute) {
-                  event.setValue(0);
-                  controllerValue = 0;
-                }
-                break;
-              case CHORUSDEPTH:
-                controllerNumber = CHORUSDEPTH;
-                let chorus = node.chorus;
-                if (chorus?.isLocked) {
-                  isLocked = true;
-                  controllerValue = chorus?.value ?? value;
-                  event.setValue(controllerValue);
-                } else if (chorus?.isMute) {
-                  event.setValue(0);
-                  controllerValue = 0;
-                }
-                break;
-            }
-
-            this.eventInit.controllerChangeCallback({
-              controllerNumber,
-              controllerValue,
-              channel,
-            });
-          }
-          break;
-
-        case 192:
-          if (this.eventInit?.programChangeCallback) {
-            this.eventInit?.programChangeCallback({
-              program,
-              channel,
-            });
-          }
-          break;
-      }
-
-      return false;
-    });
+    // this.player?.hookPlayerMIDIEvents((s, type, event) => {
+    //   const eventType = event.getType();
+    //   const velocity = event.getVelocity();
+    //   const midiNote = event.getKey();
+    //   const channel = event.getChannel();
+    //   const control = event.getControl();
+    //   const value = event.getValue();
+    //   const program = event.getProgram();
+    //   const node = this.engine.nodes[channel];
+    //   if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
+    //     const transpose = node.transpose?.value;
+    //     this.eventInit?.onNoteOnChangeCallback({
+    //       channel,
+    //       midiNote,
+    //       velocity,
+    //     });
+    //     if (channel !== DRUM_CHANNEL) {
+    //       event.setKey(midiNote + (transpose ?? 0));
+    //     }
+    //   } else if (
+    //     eventType === 0x80 &&
+    //     this.eventInit?.onNoteOffChangeCallback
+    //   ) {
+    //     this.eventInit?.onNoteOffChangeCallback({
+    //       channel,
+    //       midiNote,
+    //       velocity,
+    //     });
+    //   }
+    //   switch (type) {
+    //     case 176:
+    //       if (this.eventInit?.controllerChangeCallback) {
+    //         let controllerNumber = 0;
+    //         let controllerValue = value;
+    //         let isLocked = false;
+    //         switch (control) {
+    //           case MAIN_VOLUME:
+    //             let volume = node.volume;
+    //             controllerNumber = MAIN_VOLUME;
+    //             if (volume?.isLocked) {
+    //               isLocked = true;
+    //               controllerValue = volume.value ?? value;
+    //               event.setValue(controllerValue);
+    //             } else if (volume?.isMute) {
+    //               event.setValue(0);
+    //               controllerValue = 0;
+    //             }
+    //             break;
+    //           case PAN:
+    //             controllerNumber = PAN;
+    //             let pan = node.pan;
+    //             if (pan?.isLocked) {
+    //               isLocked = true;
+    //               controllerValue = pan.value ?? value;
+    //               event.setValue(controllerValue);
+    //             } else if (pan?.isMute) {
+    //               event.setValue(0);
+    //               controllerValue = 0;
+    //             }
+    //             break;
+    //           case REVERB:
+    //             controllerNumber = REVERB;
+    //             let reverb = node.reverb;
+    //             if (reverb?.isLocked) {
+    //               isLocked = true;
+    //               controllerValue = reverb.value ?? value;
+    //               event.setValue(controllerValue);
+    //             } else if (reverb?.isMute) {
+    //               event.setValue(0);
+    //               controllerValue = 0;
+    //             }
+    //             break;
+    //           case CHORUSDEPTH:
+    //             controllerNumber = CHORUSDEPTH;
+    //             let chorus = node.chorus;
+    //             if (chorus?.isLocked) {
+    //               isLocked = true;
+    //               controllerValue = chorus?.value ?? value;
+    //               event.setValue(controllerValue);
+    //             } else if (chorus?.isMute) {
+    //               event.setValue(0);
+    //               controllerValue = 0;
+    //             }
+    //             break;
+    //         }
+    //         this.eventInit.controllerChangeCallback({
+    //           controllerNumber,
+    //           controllerValue,
+    //           channel,
+    //         });
+    //       }
+    //       break;
+    //     case 192:
+    //       if (this.eventInit?.programChangeCallback) {
+    //         this.eventInit?.programChangeCallback({
+    //           program,
+    //           channel,
+    //         });
+    //       }
+    //       break;
+    //   }
+    //   return false;
+    // });
   }
 }

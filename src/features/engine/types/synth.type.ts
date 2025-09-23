@@ -1,4 +1,4 @@
-import { Synthesizer as JsSynthesizer } from "js-synthesizer";
+import { AudioWorkletNodeSynthesizer } from "js-synthesizer";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
 import { SynthChannel } from "../modules/instrumentals/channel";
 import { InstrumentalNode } from "../modules/instrumentals/instrumental";
@@ -17,7 +17,7 @@ export interface BaseSynthEngine {
   audio: AudioContext | undefined;
   player: BaseSynthPlayerEngine | undefined;
   analysers: AnalyserNode[];
-  synth: Spessasynth | JsSynthesizer | undefined;
+  synth: Spessasynth | AudioWorkletNodeSynthesizer | undefined;
   nodes?: SynthChannel[] | undefined;
   globalEqualizer: GlobalEqualizer | undefined;
   instrumental: InstrumentalNode | undefined;
@@ -107,7 +107,6 @@ export interface BaseSynthPlayerEngine {
     currentTime?: number,
     tempos?: ITempoChange[]
   ): Promise<{ tick: number; tempo: number }>;
-  // loadMidi(midi: File): Promise<MIDI>;
   loadMidi(data?: MusicLoadAllData): Promise<boolean>;
   setMidiOutput(output: MIDIOutput): void;
   resetMidiOutput(): void;

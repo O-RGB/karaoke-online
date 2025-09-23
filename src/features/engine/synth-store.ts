@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
-import { Synthesizer as JsSynthesizer } from "js-synthesizer";
+import { AudioWorkletNodeSynthesizer as JsSynthesizer } from "js-synthesizer";
 import { JsSynthEngine } from "./modules/js-synthesizer/js-synth-engine";
 import { SpessaSynthEngine } from "./modules/spessasynth/spessa-synth-engine";
 import { BaseSynthEngine } from "./types/synth.type";
@@ -33,10 +33,10 @@ export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
     //   console.info("[Spessa] Synth engine started...");
     //   return spessaSynth;
     // } else {
-      const jsSynth = new JsSynthEngine(setInstrument);
-      set({ engine: jsSynth, timer: jsSynth.timer, type });
-      console.info("[jsSynth] Synth engine started...");
-      return jsSynth;
+    const jsSynth = new JsSynthEngine(setInstrument);
+    set({ engine: jsSynth, timer: jsSynth.timer, type });
+    console.info("[jsSynth] Synth engine started...");
+    return jsSynth;
     // }
   },
 
