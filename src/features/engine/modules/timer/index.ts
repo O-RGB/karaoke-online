@@ -33,7 +33,6 @@ export class TimerWorker {
       switch (type) {
         case "Tick":
         case "Time":
-          console.log(value);
           this.player?.timingUpdate(value);
 
           if (bpm !== undefined) {

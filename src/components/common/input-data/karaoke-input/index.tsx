@@ -168,7 +168,6 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
           size="xs"
           blur={{
             border: true,
-            backgroundColor: "white",
           }}
         >
           ย้อนกลับ
@@ -181,7 +180,6 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
           size="xs"
           blur={{
             border: true,
-            backgroundColor: "white",
           }}
         >
           ต่อไป
@@ -194,7 +192,6 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
           size="xs"
           blur={{
             border: true,
-            backgroundColor: "white",
           }}
         >
           เล่น
@@ -207,7 +204,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
             type="text"
             value={searching}
             autoFocus
-            className="text-2xl appearance-none focus:!outline-none !bg-transparent"
+            className="text-2xl appearance-none focus:!outline-none !bg-transparent px-2"
           />
         </div>
 

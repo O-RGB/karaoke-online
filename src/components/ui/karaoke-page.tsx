@@ -1,16 +1,44 @@
 "use client";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 
-import React, { useEffect, useState } from "react";
-import VolumePanel from "../tools/volume-panel";
-import PlayerPanel from "../tools/player-panel";
+const SoundfontManager = dynamic(() => import("../modal/soundfont"), {
+  ssr: false,
+});
+const ClientHostRemote = dynamic(() => import("../remote/client/client-host"), {
+  ssr: false,
+});
+const DataStoresModal = dynamic(() => import("../modal/datastores"), {
+  ssr: false,
+});
+const AppendSongModal = dynamic(() => import("../modal/append-song"), {
+  ssr: false,
+});
+const DisplaySettingModal = dynamic(() => import("../modal/display"), {
+  ssr: false,
+});
+const SoundSettingModal = dynamic(() => import("../modal/sound-setting"), {
+  ssr: false,
+});
+const DonateModal = dynamic(() => import("../modal/donate-modal"), {
+  ssr: false,
+});
+const ContextModal = dynamic(() => import("../modal/context-modal"), {
+  ssr: false,
+});
+const VolumePanel = dynamic(() => import("../tools/volume-panel"), {
+  ssr: false,
+});
+const PlayerPanel = dynamic(() => import("../tools/player-panel"), {
+  ssr: false,
+});
+const AutoModal = dynamic(() => import("../modal/auto/auto-modal"), {
+  ssr: false,
+});
+
 import SearchSong from "../tools/search-song/search-song";
-import ClientHostRemote from "../remote/client/client-host";
-import SoundfontManager from "../modal/soundfont";
 import ClockPanel from "../tools/clock-panel";
-import ContextModal from "../modal/context-modal";
 import TempoPanel from "../tools/tempo-panel";
 import StatusPanel from "../tools/status/status-panel";
-import DisplaySettingModal from "../modal/display";
 import useNotificationStore from "@/features/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/features/config/config-store";
@@ -18,21 +46,16 @@ import QueueSong from "../tools/queue-song/queue-song";
 import useKeyboardStore from "@/features/keyboard-state";
 import NextSongPanel from "../tools/next-song-panel";
 import SongInfo from "../tools/song-info";
-import SoundSettingModal from "../modal/sound-setting";
-// import RemoteEvent from "./remote-event";
-import DonateModal from "../modal/donate-modal";
-import AutoModal from "../modal/auto/auto-modal";
 import LyricsPlayer from "../../features/lyrics";
 import Processing2Modal from "../common/alert/processing/processing-update";
-import AppendSongModal from "../modal/append-song";
 import useSongsStore from "@/features/songs/store/songs.store";
-import DataStoresModal from "../modal/datastores";
 import Loading from "../tools/loading";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { DatabaseService } from "@/utils/indexedDB/service";
 import { SongsSystem } from "@/features/songs";
 import { SoundfontSystemManager } from "@/features/soundfont";
+import dynamic from "next/dynamic";
 
 interface KaraokePageProps {}
 
@@ -50,7 +73,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const config = useConfigStore((state) => state.config);
   const [onPrepare, setPrepare] = useState<boolean>(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const zoomLevel = config.system?.zoom || 1;
     document.documentElement.style.setProperty(
       "--ui-zoom-scale",
@@ -97,9 +120,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
       <div id="screen-panel">
         <div id="modal-root"></div>
         <Loading isLoad={onPrepare} />
-        <Processing2Modal />
         <WallpaperRender />
-        {/* <RemoteEvent /> */}
         <AutoModal auto title={""} />
 
         <ContextModal
@@ -119,7 +140,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
               }}
               className="relative z-30 flex flex-col lg:flex-col-reverse gap-2 landscape:gap-0 lg:gap-6 items-start"
             >
-              <div className="w-full">
+              <div className="w-full lg:pt-2">
                 <SearchSong />
               </div>
               <div className="flex w-full gap-2 items-start justify-between">
@@ -133,10 +154,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
               </div>
             </header>
 
-            <main
-             
-              className="relative flex flex-grow justify-center"
-            >
+            <main className="relative flex flex-grow justify-center">
               <LyricsPlayer className="absolute w-full h-full flex items-center justify-center" />
               <NextSongPanel className="absolute w-full h-full flex justify-center" />
               <SongInfo />
@@ -157,7 +175,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
             </footer>
           </div>
 
-          <StatusPanel notification={notification} />
+          {/* <StatusPanel notification={notification} /> */}
         </ContextModal>
       </div>
     </FullScreen>
