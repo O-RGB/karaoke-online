@@ -11,7 +11,7 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  @apply min-h-dvh;
+  /* @apply min-h-dvh; */
 }
 
 :root {
@@ -63,8 +63,8 @@ body {
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr;
-    height: 100dvh;
-    width: 100vw;
-    overflow: hidden;
+    /* height: 100dvh;
+    width: 100vw; */
+    /* overflow: hidden; */
   }
 }

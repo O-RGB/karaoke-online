@@ -27,10 +27,11 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   public eventInit?: BaseSynthEvent | undefined;
   public controller = new EventManager<string, number>();
   public musicQuere: MusicLoadAllData | undefined = undefined;
-  public mp3SourceNode: AudioBufferSourceNode | undefined;
+
+  // ✅ ใช้ HTMLAudioElement แทน AudioBufferSourceNode
+  public mp3Element?: HTMLAudioElement;
 
   private mp3PausedOffset = 0;
-  private mp3StartTime = 0;
 
   addEvent(input: Partial<BaseSynthEvent>): void {
     this.eventInit = { ...this.eventInit, ...input };
@@ -44,17 +45,9 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   async play(): Promise<void> {
     if (!this.musicQuere) return;
 
-    if (this.musicQuere.musicType === "MP3" && this.mp3SourceNode?.buffer) {
-      const buffer = this.mp3SourceNode.buffer;
-      const ctx = this.engine.audio!;
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      if (this.engine.globalEqualizer) {
-        source.connect(this.engine.globalEqualizer.input);
-      }
-      source.start(0, this.mp3PausedOffset);
-      this.mp3StartTime = ctx.currentTime;
-      this.mp3SourceNode = source;
+    if (this.musicQuere.musicType === "MP3" && this.mp3Element) {
+      await this.mp3Element.play(); // ✅ เล่น mp3 ผ่าน <audio>
+      this.mp3Element.currentTime = this.mp3PausedOffset;
     } else {
       await this.player?.playPlayer();
     }
@@ -67,9 +60,15 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
   stop(): void {
     if (!this.musicQuere) return;
-    this.mp3SourceNode?.stop();
-    this.player?.stopPlayer();
-    this.eventInit?.onStop?.();
+
+    if (this.musicQuere.musicType === "MP3" && this.mp3Element) {
+      this.mp3Element.pause();
+      this.mp3Element.currentTime = 0;
+      this.mp3PausedOffset = 0;
+    } else {
+      this.player?.stopPlayer();
+    }
+
     this.engine.timer?.stopTimer();
     this.paused = true;
     this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "STOP");
@@ -78,14 +77,9 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   pause(): void {
     if (!this.musicQuere) return;
 
-    if (this.musicQuere.musicType === "MP3" && this.mp3SourceNode) {
-      const ctx = this.engine.audio!;
-      const elapsed = ctx.currentTime - this.mp3StartTime;
-      this.mp3PausedOffset += elapsed;
-      try {
-        this.mp3SourceNode.stop();
-      } catch {}
-      this.mp3SourceNode.disconnect();
+    if (this.musicQuere.musicType === "MP3" && this.mp3Element) {
+      this.mp3PausedOffset = this.mp3Element.currentTime;
+      this.mp3Element.pause();
     } else {
       this.player?.stopPlayer();
     }
@@ -102,39 +96,20 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
   async setCurrentTiming(seconds: number): Promise<void> {
     const wasPlaying = !this.paused;
-
     this.pause();
 
-    if (this.musicQuere?.musicType === "MP3" && this.mp3SourceNode) {
+    if (this.musicQuere?.musicType === "MP3" && this.mp3Element) {
       this.mp3PausedOffset = seconds;
-      const buffer = this.mp3SourceNode.buffer;
-      if (!buffer || !this.engine.audio) return;
-
-      try {
-        this.mp3SourceNode.stop();
-      } catch {}
-      this.mp3SourceNode.disconnect();
-
-      const newSource = this.engine.audio.createBufferSource();
-      newSource.buffer = buffer;
-
-      if (this.engine.globalEqualizer) {
-        newSource.connect(this.engine.globalEqualizer.input);
-      }
-
+      this.mp3Element.currentTime = seconds;
       this.engine.timer?.seekTimer(seconds);
 
       if (wasPlaying) {
-        newSource.start(0, seconds);
+        await this.mp3Element.play();
         this.paused = false;
         this.engine.timer?.startTimer();
         this.eventInit?.onPlay?.();
         this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
-      } else {
-        this.paused = true;
       }
-
-      this.mp3SourceNode = newSource;
     } else {
       this.player?.seekPlayer(seconds);
       setTimeout(() => {
@@ -156,6 +131,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.engine.countdownUpdated.trigger(["COUNTDOWN", "CHANGE"], 0, time);
   }
 
+  // ✅ แก้ไข loadMp3
   async loadMp3(file: File): Promise<boolean> {
     if (!this.engine.audio) {
       console.error("AudioContext is not initialized.");
@@ -164,18 +140,23 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
     try {
       this.engine.timer?.seekTimer(0);
-      const arrayBuffer = await file.arrayBuffer();
-      const audioBuffer = await this.engine.audio.decodeAudioData(arrayBuffer);
-      this.mp3SourceNode = this.engine.audio.createBufferSource();
-      this.mp3SourceNode.buffer = audioBuffer;
+
+      const audioEl = new Audio(URL.createObjectURL(file));
+      audioEl.crossOrigin = "anonymous";
+      audioEl.preload = "auto";
+
+      const track = this.engine.audio.createMediaElementSource(audioEl);
       if (this.engine.globalEqualizer) {
-        this.mp3SourceNode.connect(this.engine.globalEqualizer.input);
+        track.connect(this.engine.globalEqualizer.input);
       }
+
+      this.mp3Element = audioEl;
+      this.mp3PausedOffset = 0;
 
       return true;
     } catch (error) {
       console.error("Error loading MP3:", error);
-      this.mp3SourceNode = undefined;
+      this.mp3Element = undefined;
       return false;
     }
   }
@@ -208,7 +189,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   }
 
   async loadMidi(data?: MusicLoadAllData): Promise<boolean> {
-    console.log(data);
     if (!data) return false;
     this.stop();
     this.engine.timer?.stopTimer();
@@ -248,13 +228,11 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
       if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
         const transpose = node.transpose?.value;
-
         this.eventInit?.onNoteOnChangeCallback({
           channel,
           midiNote,
           velocity,
         });
-
         if (channel !== DRUM_CHANNEL) {
           event.setKey(midiNote + (transpose ?? 0));
         }

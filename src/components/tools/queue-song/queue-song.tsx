@@ -303,12 +303,19 @@ const QueueSong: React.FC<QueueSongProps> = ({
 
   return (
     <div
+      style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
       onClick={() => {
         resetQueueingTimeout(0);
       }}
-      className={`absolute top-0 h-screen z-[99] bg-black/30  text-white w-full px-4 duration-300`}
+      className={`fixed inset-0 z-50 top-0 bg-black/40  text-white w-full duration-300`}
     >
-      <div className="pt-4 lg:pt-[14vw]">
+      <div
+        className=""
+        style={{
+          paddingLeft: "max(1rem, env(safe-area-inset-left))",
+          paddingRight: "max(1rem, env(safe-area-inset-right))",
+        }}
+      >
         <div
           onClick={(e) => {
             e.stopPropagation();

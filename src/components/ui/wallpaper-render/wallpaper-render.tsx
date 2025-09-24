@@ -202,7 +202,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
 
   return (
     <>
-      <div
+      {/* <div
         style={{
           position: "fixed",
           bottom: player?.show
@@ -220,7 +220,7 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
           Next Karaoke
         </div>
         <br />
-      </div>
+      </div> */}
 
       {isCameraActive && (
         <div className="fixed z-50 bottom-24 right-2 space-y-2">

@@ -85,6 +85,7 @@ export const musicProcessGroup = async (
     files,
     musicType: "MIDI",
     fileType: "",
+    duration: 0,
     trackData: {
       ...DEFAULT_SONG_INFO,
       CODE: "",
@@ -116,10 +117,12 @@ export const musicProcessGroup = async (
         const curTick = await readCursorFile(files.cur);
         let tempos = (group.metadata as IMidiParseResult).tempos;
         let ppq = (group.metadata as IMidiParseResult).ticksPerBeat;
+        let duration = (group.metadata as IMidiParseResult).duration;
         let realCur = cursorToTicks(curTick, ppq);
 
         group.lyricsRange = curToArrayRange(lyrStr.slice(3), realCur);
         group.tempoRange = tempos;
+        group.duration = duration;
       }
 
       group.musicType = "MIDI";
@@ -154,6 +157,7 @@ export const musicProcessGroup = async (
     if (full) {
       let tempos = (group.metadata as IMidiParseResult).tempos;
       let ppq = (group.metadata as IMidiParseResult).ticksPerBeat;
+      let duration = (group.metadata as IMidiParseResult).duration;
       const { convertedChords, finalWords } = convertLyricsMapping(
         group.metadata,
         "MIDI",
@@ -161,6 +165,7 @@ export const musicProcessGroup = async (
         tempos
       );
       group.tempoRange = tempos;
+      group.duration = duration;
       group.lyricsRange = xmlToArrayRange(finalWords, ppq, "MIDI");
     }
 
@@ -198,10 +203,12 @@ export const musicProcessGroup = async (
 
         let tempos = (group.metadata as IMidiParseResult).tempos;
         let ppq = (group.metadata as IMidiParseResult).ticksPerBeat;
+        let duration = (group.metadata as IMidiParseResult).duration;
         let realCur = cursorToTicks(curTick, ppq);
 
         group.lyricsRange = curToArrayRange(lyrStr.slice(3), realCur);
         group.tempoRange = tempos;
+        group.duration = duration;
       }
       group.metadata.lyricsRaw = lyrStr;
       group.trackData = convertToTrackData(
@@ -222,6 +229,7 @@ export const musicProcessGroup = async (
     group.baseName = files.mp3.name;
     let parsedDataMp3 = await readMp3(files.mp3);
     group.metadata = parsedDataMp3.parsedData;
+    group.duration = parsedDataMp3.parsedData.duration ?? 0;
 
     if (!hasLyrics(group)) {
       group.isError = true;

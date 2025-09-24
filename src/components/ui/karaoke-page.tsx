@@ -38,7 +38,6 @@ const AutoModal = dynamic(() => import("../modal/auto/auto-modal"), {
 import SearchSong from "../tools/search-song/search-song";
 import ClockPanel from "../tools/clock-panel";
 import TempoPanel from "../tools/tempo-panel";
-import StatusPanel from "../tools/status/status-panel";
 import useNotificationStore from "@/features/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/features/config/config-store";
@@ -47,7 +46,6 @@ import useKeyboardStore from "@/features/keyboard-state";
 import NextSongPanel from "../tools/next-song-panel";
 import SongInfo from "../tools/song-info";
 import LyricsPlayer from "../../features/lyrics";
-import Processing2Modal from "../common/alert/processing/processing-update";
 import useSongsStore from "@/features/songs/store/songs.store";
 import Loading from "../tools/loading";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
@@ -116,67 +114,69 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   };
 
   return (
-    <FullScreen handle={handle}>
-      <div id="screen-panel">
+    <FullScreen handle={handle} className="w-full h-screen">
+      <div id="screen-panel" className="w-full">
         <div id="modal-root"></div>
         <Loading isLoad={onPrepare} />
         <WallpaperRender />
         <AutoModal auto title={""} />
 
-        <ContextModal
-          modal={modalMap}
-          className="fixed z-0 left-0 top-0 w-full h-full"
-        >
-          <div
-            id="zoom-container"
-            className={`relative karaoke-layout text-white`}
-          >
-            <QueueSong />
-            <header
+        <div id="zoom-container" className="w-full z-10">
+          <ContextModal modal={modalMap} className="karaoke-layout w-full">
+            <div
               style={{
                 paddingTop: "max(1rem, env(safe-area-inset-top))",
                 paddingLeft: "max(1rem, env(safe-area-inset-left))",
                 paddingRight: "max(1rem, env(safe-area-inset-right))",
               }}
-              className="relative z-30 flex flex-col lg:flex-col-reverse gap-2 landscape:gap-0 lg:gap-6 items-start"
+              className={`relative text-white flex flex-col gap-10 w-full`}
             >
-              <div className="w-full lg:pt-2">
-                <SearchSong />
-              </div>
-              <div className="flex w-full gap-2 items-start justify-between">
-                <VolumePanel />
-                <div className="hidden lg:block">
-                  <div className="flex gap-2">
-                    <ClockPanel />
-                    <TempoPanel />
+              <header className="relative z-30 flex flex-col lg:flex-col-reverse gap-2 landscape:gap-0 lg:gap-2 items-start">
+                <div className="w-full lg:pt-2">
+                  <SearchSong />
+                </div>
+                <div className="flex w-full gap-2 items-start justify-between">
+                  <VolumePanel />
+                  <div className="hidden lg:block">
+                    <div className="flex gap-2">
+                      <ClockPanel />
+                      <TempoPanel />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </header>
+              </header>
 
-            <main className="relative flex flex-grow justify-center">
-              <LyricsPlayer className="absolute w-full h-full flex items-center justify-center" />
-              <NextSongPanel className="absolute w-full h-full flex justify-center" />
-              <SongInfo />
-            </main>
+              <main className="relative flex items-center justify-center ">
+                <NextSongPanel className="absolute w-full flex justify-center" />
+                <SongInfo />
+              </main>
+            </div>
 
-            <footer className="sticky bottom-0 w-full z-40">
-              <PlayerPanel
-                isFullScreen={handle.active}
-                modalMap={modalMap}
-                onFullScreen={() => {
-                  if (!handle.active) {
-                    handle.enter();
-                  } else {
-                    handle.exit();
-                  }
-                }}
-              />
-            </footer>
+            {/* <StatusPanel notification={notification} /> */}
+          </ContextModal>
+        </div>
+        <QueueSong />
+        <div className="fixed bottom-[20dvh] landscape:bottom-[30dvh] left-0 right-0 -z-10">
+          <div
+            style={{
+              paddingTop: "max(1rem, env(safe-area-inset-top))",
+              paddingLeft: "max(1rem, env(safe-area-inset-left))",
+              paddingRight: "max(1rem, env(safe-area-inset-right))",
+            }}
+          >
+            <LyricsPlayer />
           </div>
-
-          {/* <StatusPanel notification={notification} /> */}
-        </ContextModal>
+        </div>
+        <footer className="fixed left-0 right-0 bottom-0 w-full -z-1">
+          <PlayerPanel
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+            isFullScreen={handle.active}
+            modalMap={modalMap}
+            onFullScreen={() => {
+              handle.active ? handle.exit() : handle.enter();
+            }}
+          />
+        </footer>
       </div>
     </FullScreen>
   );

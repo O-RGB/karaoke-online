@@ -47,18 +47,16 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
     addQueue(value);
   };
 
-  if (queueing) {
-    return <></>;
-  }
-
   const isLandscape = orientation === "landscape";
 
   return (
     <div>
-      <KaraokeSearchInput
-        onSearch={onSearch}
-        onSelectSong={setSongPlayer}
-      ></KaraokeSearchInput>
+      {!queueing && (
+        <KaraokeSearchInput
+          onSearch={onSearch}
+          onSelectSong={setSongPlayer}
+        ></KaraokeSearchInput>
+      )}
 
       <div
         style={{
@@ -87,7 +85,7 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
               onBlur={handleSearchBlur}
               onFocus={handleSearchFocus}
               className={
-                "!placeholder-white !bg-transparent w-full !text-white font-light"
+                "!placeholder-white !bg-transparent w-full !text-white font-light !h-[36px] border-white/50 hover:!border-white/50 focus:!outline-none focus:!ring-0"
               }
               onSelectItem={(value: IOptions<ITrackData>) => {
                 if (value.option) {

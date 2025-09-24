@@ -2,6 +2,26 @@ import { DEFAULT_SONG_INFO } from "../midi/types";
 import { decodeLyricsBase64, decodeTIS620Text, parseKLyrXML } from "./lib";
 import { IReadMp3Result, IParsedMp3Data, DEFAULT_MISC } from "./type";
 
+async function getMp3Duration(file: File): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const audio = document.createElement("audio");
+    audio.preload = "metadata";
+
+    audio.src = URL.createObjectURL(file);
+
+    audio.onloadedmetadata = () => {
+      const duration = audio.duration;
+      URL.revokeObjectURL(audio.src);
+      resolve(duration);
+    };
+
+    audio.onerror = (err) => {
+      URL.revokeObjectURL(audio.src);
+      reject(err);
+    };
+  });
+}
+
 function readID3Tags(buffer: ArrayBuffer): {
   tags: { [key: string]: string };
   audioData: ArrayBuffer;
@@ -97,7 +117,6 @@ export async function readMp3(file: File): Promise<IReadMp3Result> {
   const { tags, audioData } = readID3Tags(buffer);
 
   const miscTags = { ...tags };
-  console.log(miscTags);
   const result: IParsedMp3Data = {
     title: "",
     artist: "",
@@ -186,13 +205,9 @@ export async function readMp3(file: File): Promise<IReadMp3Result> {
   });
 
   try {
-    const audioCtx = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
-    const decodedBuffer = await audioCtx.decodeAudioData(audioData.slice(0));
-    result.duration = decodedBuffer.duration;
-    audioCtx.close();
+    result.duration = await getMp3Duration(file);
   } catch (err) {
-    console.error("Failed to decode mp3 duration:", err);
+    console.error("Failed to get mp3 duration:", err);
   }
 
   console.log("Mp3 Reader: ", result);

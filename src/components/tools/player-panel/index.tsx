@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useId, useRef, useState } from "react";
 import Button from "../../common/button/button";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
@@ -35,6 +36,8 @@ interface PlayerPanelProps extends PlayerRemote {
   modalMap?: ModalComponents;
   onFullScreen?: () => void;
   show?: boolean;
+  className?: string;
+  style?: React.CSSProperties | undefined;
 }
 
 const PlayerPanel: React.FC<PlayerPanelProps> = ({
@@ -42,6 +45,8 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   isFullScreen,
   onFullScreen,
   show,
+  className,
+  style,
 }) => {
   const componnetId = useId();
   const [isPlayerVisible, setIsPlayerVisible] = useState<boolean>(true);
@@ -119,6 +124,15 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
     setIsPlayerVisible(isShow);
   };
 
+  const buttonStyle: any = {
+    className: "!rounded-none aspect-square",
+    size: "lg",
+    blur: {
+      border: false,
+      backgroundColor: "primary",
+    },
+  };
+
   return (
     <>
       <Modal
@@ -128,200 +142,193 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
       >
         <RecordingsModal></RecordingsModal>
       </Modal>
-      {!isPlayerVisible && (
-        <div
-          className="fixed bottom-4 left-4 z-50"
-          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-        >
-          <Button
-            onClick={() => onPlayerShowChange(true)}
-            blur={{
-              border: true,
-              backgroundColor: "primary",
-            }}
-            size="xs"
-            className="rounded-md"
-            icon={<IoMdArrowDropup className="text-lg" />}
-          />
-        </div>
-      )}
-      {isPlayerVisible && (
-        <div
-          className="fixed left-2 z-50"
-          style={{ bottom: "calc(42px + env(safe-area-inset-bottom))" }}
-        >
-          <Button
-            blur={{
-              border: true,
-              backgroundColor: "primary",
-            }}
-            size="xs"
-            className="rounded-md !h-5 !w-10"
-            tabIndex={-1}
-            onClick={() => onPlayerShowChange(false)}
-            icon={<IoMdArrowDropdown />}
-          ></Button>
-        </div>
-      )}
 
       <div
-        className={`w-full blur-overlay bg-black/10 border-t blur-border flex justify-between transition-all duration-300`}
         style={{
-          paddingLeft: "env(safe-area-inset-left)",
-          paddingRight: "env(safe-area-inset-right)",
-          paddingBottom: "env(safe-area-inset-bottom)",
-          transform: !isPlayerVisible ? "translateY(100%)" : "translateY(0)",
-          opacity: !isPlayerVisible ? 0 : 1,
+          transform: isPlayerVisible ? "translateY(0%)" : "translateY(68%)",
         }}
+        className="relative transition-all duration-300"
       >
-        <div className="flex w-full">
-          <div className="flex items-center h-full">
-            {isRecording ? (
-              <Button
-                blur={{
-                  border: false,
-                  backgroundColor: "primary",
-                }}
-                className="!rounded-none"
-                onClick={handleRecordButtonClick}
-                icon={
-                  <MdRadioButtonChecked className="text-red-400 animate-pulse" />
-                }
-              >
-                <div className="absolute inset-0 bg-red-500/20 animate-ping rounded-full"></div>
-              </Button>
-            ) : (
-              <Menu
-                transition
-                className={"h-full"}
-                boundingBoxPadding="10 10 10 10"
-                menuButton={
-                  <MenuButton>
-                    <Button
-                      blur={{
-                        border: false,
-                        backgroundColor: "primary",
-                      }}
-                      className="!rounded-none h-full"
-                      icon={<BsMicFill className="" />}
-                    />
-                  </MenuButton>
-                }
-              >
-                <MenuItem
-                  className={"text-sm"}
-                  onClick={() => handleStartRecording(true)}
-                >
-                  <FaMicrophone className="mr-2" /> บันทึกเสียงร้อง + ดนตรี
-                </MenuItem>
-                <MenuItem
-                  className={"text-sm"}
-                  onClick={() => handleStartRecording(false)}
-                >
-                  <FaMusic className="mr-2" /> บันทึกเฉพาะดนตรี
-                </MenuItem>
-                <MenuItem
-                  className={"text-sm"}
-                  onClick={() => setRacordlist(true)}
-                >
-                  <FaFolder className="mr-2" /> บันทึกแล้ว
-                </MenuItem>
-              </Menu>
-            )}
-          </div>
-
-          <div className="flex w-fit ">
-            {playerStatus === "PLAY" ? (
-              <Button
-                blur={{
-                  border: false,
-                  backgroundColor: "primary",
-                }}
-                className="!rounded-none"
-                onClick={() => {
-                  player?.pause();
-                }}
-                icon={<TbPlayerPauseFilled className="" />}
-              ></Button>
-            ) : (
-              <Button
-                blur={{
-                  border: false,
-                  backgroundColor: "primary",
-                }}
-                className="!rounded-none"
-                onClick={() => {
-                  player?.play();
-                }}
-                icon={<TbPlayerPlayFilled className="" />}
-              ></Button>
-            )}
-            <Button
-              blur={{
-                border: false,
-                backgroundColor: "primary",
+        <div
+          className={`flex flex-row-reverse items-end justify-between ${
+            !isPlayerVisible ? "pb-16 px-3.5" : ""
+          }`}
+        >
+          <div className={`${isPlayerVisible ? "mr-4" : "mr-1"} mb-1`}>
+            <div
+              style={{
+                opacity: 0.7,
               }}
-              className="!rounded-none"
-              onClick={nextMusic}
-              icon={<TbPlayerSkipForwardFilled className="" />}
-            ></Button>
+              className="text-white font-light text-base drop-shadow-md text-right"
+            >
+              <div className="text-xs opacity-80">v.1.0.30</div>
+              <div className="-mt-1 flex items-center justify-center gap-1">
+                <img className="h-5 w-5" src="/favicon-96x96.png" />
+                Next Karaoke
+              </div>
+            </div>
           </div>
-          <TimerBar></TimerBar>
+          <div>
+            {!isPlayerVisible && (
+              <div className={isPlayerVisible ? `pl-4 -mb-1.5` : ""}>
+                <Button
+                  {...buttonStyle}
+                  className={`${!isPlayerVisible ? "" : "h-5 pb-2"} `}
+                  size="xs"
+                  blur={{
+                    border: true,
+                    backgroundColor: "primary",
+                  }}
+                  onClick={() => onPlayerShowChange(true)}
+                  icon={<IoMdArrowDropup />}
+                />
+              </div>
+            )}
+            {isPlayerVisible && (
+              <div className="pl-4 -mb-1.5">
+                <Button
+                  {...buttonStyle}
+                  className="h-5 pb-2"
+                  size="xs"
+                  blur={{
+                    border: true,
+                    backgroundColor: "primary",
+                  }}
+                  onClick={() => onPlayerShowChange(false)}
+                  icon={<IoMdArrowDropdown />}
+                  tabIndex={-1}
+                ></Button>
+              </div>
+            )}
+          </div>
         </div>
+        <div
+          style={style}
+          className={`${className} w-full blur-overlay bg-black/10 border-t blur-border flex justify-between z-10`}
+        >
+          <div className="flex w-full">
+            <div className="flex items-center h-full">
+              {isRecording ? (
+                <Button
+                  {...buttonStyle}
+                  onClick={handleRecordButtonClick}
+                  icon={
+                    <MdRadioButtonChecked className="text-red-400 animate-pulse" />
+                  }
+                >
+                  <div className="absolute inset-0 bg-red-500/20 animate-ping rounded-full"></div>
+                </Button>
+              ) : (
+                <Menu
+                  transition
+                  className={"h-full"}
+                  boundingBoxPadding="10 10 10 10"
+                  menuButton={
+                    <MenuButton>
+                      <Button
+                        {...buttonStyle}
+                        icon={<BsMicFill className="" />}
+                      />
+                    </MenuButton>
+                  }
+                >
+                  <MenuItem
+                    className={"text-sm"}
+                    onClick={() => handleStartRecording(true)}
+                  >
+                    <FaMicrophone className="mr-2" /> บันทึกเสียงร้อง + ดนตรี
+                  </MenuItem>
+                  <MenuItem
+                    className={"text-sm"}
+                    onClick={() => handleStartRecording(false)}
+                  >
+                    <FaMusic className="mr-2" /> บันทึกเฉพาะดนตรี
+                  </MenuItem>
+                  <MenuItem
+                    className={"text-sm"}
+                    onClick={() => setRacordlist(true)}
+                  >
+                    <FaFolder className="mr-2" /> บันทึกแล้ว
+                  </MenuItem>
+                </Menu>
+              )}
+            </div>
 
-        <div className="flex">
-          <div className="absolute -z-50 opacity-0 pointer-events-none">
-            <input
-              type="text"
-              ref={inputRef}
-              onBlur={() => {
-                if (inputRef.current) {
-                  inputRef.current.value = "";
-                }
-              }}
-            />
+            <div className="flex w-fit ">
+              {playerStatus === "PLAY" ? (
+                <Button
+                  {...buttonStyle}
+                  onClick={() => {
+                    player?.pause();
+                  }}
+                  icon={<TbPlayerPauseFilled className="" />}
+                ></Button>
+              ) : (
+                <Button
+                  {...buttonStyle}
+                  onClick={() => {
+                    player?.play();
+                  }}
+                  icon={<TbPlayerPlayFilled className="" />}
+                ></Button>
+              )}
+              <Button
+                {...buttonStyle}
+                onClick={nextMusic}
+                icon={<TbPlayerSkipForwardFilled className="" />}
+              ></Button>
+            </div>
+            <TimerBar></TimerBar>
           </div>
 
-          {document.fullscreenEnabled && (
-            <Button
-              blur={{
-                border: false,
-                backgroundColor: "primary",
-              }}
-              className="!rounded-none"
-              onClick={onFullScreen}
-              icon={
-                isFullScreen ? (
-                  <BsFullscreenExit className="" />
-                ) : (
-                  <BsFullscreen className="" />
-                )
-              }
-            ></Button>
-          )}
+          <div className="flex">
+            <div className="absolute -z-50 opacity-0 pointer-events-none">
+              <input
+                type="text"
+                ref={inputRef}
+                onBlur={() => {
+                  if (inputRef.current) {
+                    inputRef.current.value = "";
+                  }
+                }}
+              />
+            </div>
 
-          <Button
-            className="hidden lg:block !rounded-none"
-            onClick={() => {
-              setOpenSearchBox?.(true);
-            }}
-            blur={{
-              border: false,
-              backgroundColor: "primary",
-            }}
-            icon={<FaSearch className="" />}
-          ></Button>
-          {modalMap && (
-            <ContextModal
-              buttonMenu={
-                <div className="p-4 flex items-center justify-center hover:bg-white/20 duration-300">
-                  <FiSettings className="" />
-                </div>
-              }
-              modal={modalMap}
-              className=""
-            ></ContextModal>
-          )}
+            {document.fullscreenEnabled && (
+              <Button
+                {...buttonStyle}
+                onClick={onFullScreen}
+                icon={
+                  isFullScreen ? (
+                    <BsFullscreenExit className="" />
+                  ) : (
+                    <BsFullscreen className="" />
+                  )
+                }
+              ></Button>
+            )}
+
+            <Button
+              {...buttonStyle}
+              className="hidden lg:block !rounded-none"
+              onClick={() => {
+                setOpenSearchBox?.(true);
+              }}
+              icon={<FaSearch className="" />}
+            ></Button>
+            {modalMap && (
+              <ContextModal
+                buttonMenu={
+                  <Button
+                    {...buttonStyle}
+                    icon={<FiSettings className="" />}
+                  ></Button>
+                }
+                modal={modalMap}
+                className=""
+              ></ContextModal>
+            )}
+          </div>
         </div>
       </div>
     </>

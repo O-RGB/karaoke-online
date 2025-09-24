@@ -56,7 +56,7 @@ const TimerBar: React.FC<TimerBarProps> = ({}) => {
         tabIndex={-1}
         value={dragging ? tempTiming : timing}
         min={0}
-        max={(musicQuere?.metadata as any)?.duration ?? 1}
+        max={musicQuere?.duration}
         style={{ width: "100%" }}
         onPressStart={onPressStart}
         onPressEnd={onPressEnd}

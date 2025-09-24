@@ -22,4 +22,5 @@ export interface MusicParsedData {
   lyricsRange?: ArrayRange<ISentence>;
   tempoRange?: ArrayRange<TempoEvent>;
   musicType: MusicMode;
+  duration: number;
 }
