@@ -1,35 +1,58 @@
-import React, { useEffect, useRef } from "react";
-import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
+import React, { useEffect, useId, useRef } from "react";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 
 interface MainVolumeRenderProps {
   hide: boolean;
 }
 
 const MainVolumeRender: React.FC<MainVolumeRenderProps> = ({ hide }) => {
-  const gain = useMixerStoreNew((state) => state.gainMain);
+  const componentId = useId();
+  const engine = useSynthesizerEngine((state) => state.engine);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  useEffect(() => {
+  const onTimingUpdated = () => {
+    if (!engine) return;
     const canvas = canvasRef.current;
-    if (canvas) {
-      const context = canvas.getContext("2d");
-      if (context) {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.fillStyle = `rgba(255, 255, 255, ${hide ? 0.4 : 0})`;
-        context.fillRect(0, 0, (gain / 100) * canvas.width, canvas.height);
-      }
-    }
-  }, [gain, hide]);
+    if (!canvas) return;
 
-  if (hide) return <></>;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    // ✅ ปรับ resolution ให้ตรง device pixel
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    context.scale(dpr, dpr);
+
+    const gainPercent = engine.getMainGainLevel();
+    context.clearRect(0, 0, rect.width, rect.height);
+    context.fillStyle = `rgba(255,255,255,${hide ? 0.4 : 1})`;
+    context.fillRect(0, 0, (gainPercent / 100) * rect.width, rect.height);
+  };
+
+  useEffect(() => {
+    if (!engine) return;
+    engine.timerUpdated.add(
+      ["TIMING", "CHANGE"],
+      0,
+      onTimingUpdated,
+      componentId
+    );
+    return () => {
+      engine.timerUpdated.remove(["TIMING", "CHANGE"], 0, componentId);
+    };
+  }, [engine]);
+
+  if (hide) return null;
 
   return (
     <canvas
       ref={canvasRef}
-      width={300}
-      height={25}
-      className="absolute top-0 left-0 w-full"
-    ></canvas>
+      width={"100%"}
+      height={"100%"}
+      className="absolute top-0 left-0 w-full h-full"
+    />
   );
 };
 

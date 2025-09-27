@@ -40,6 +40,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   public player: BaseSynthPlayerEngine | undefined;
   public preset: number[] = [];
   public analysers: AnalyserNode[] = [];
+  public mainAnalyser: AnalyserNode | undefined;
   public soundfontName: string | undefined;
   public soundfontFile: File | undefined;
   public soundfontFrom: SoundSystemMode = "DATABASE_FILE_SYSTEM";
@@ -72,48 +73,44 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.setInstrument = setInstrument;
     this.startup(systemConfig);
   }
-
   async startup(systemConfig?: Partial<ConfigSystem>) {
     const audioContext = new AudioContext();
+    this.audio = audioContext;
 
     const { Synthesizer } = await import("js-synthesizer");
     const synth = new Synthesizer();
-
-    synth.init(audioContext.sampleRate);
-    this.loadDefaultSoundFont();
-
+    await synth.init(audioContext.sampleRate);
     this.synth = synth;
-    this.audio = audioContext;
+
+    await this.loadDefaultSoundFont();
 
     this.player = new JsSynthPlayerEngine(synth, this);
     this.timer = new TimerWorker(this.player);
     this.instrumental.setEngine(this);
 
-    const analysers: AnalyserNode[] = [];
-    this.nodes = [];
-
     this.synthAudioNode = synth.createAudioNode(audioContext, 8192);
+    if (!this.synthAudioNode) throw new Error("cannot create synthAudioNode");
 
-    if (this.synthAudioNode) {
-      this.globalEqualizer = new GlobalEqualizer(this.synthAudioNode.context);
-      this.synthAudioNode.connect(this.globalEqualizer.input);
-      this.globalEqualizer.output.connect(audioContext.destination);
-    }
+    this.globalEqualizer = new GlobalEqualizer(audioContext);
+    this.mainAnalyser = audioContext.createAnalyser();
+    this.mainAnalyser.fftSize = 256;
 
+    this.synthAudioNode
+      .connect(this.globalEqualizer.input)
+      .connect(this.mainAnalyser)
+      .connect(audioContext.destination);
+
+    this.nodes = [];
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
-      this.nodes.push(
-        new SynthChannel(
-          ch,
-          this.instrumental,
-          audioContext,
-          undefined,
-          systemConfig
-        )
+      const node = new SynthChannel(
+        ch,
+        this.instrumental,
+        audioContext,
+        undefined,
+        systemConfig
       );
-      this.nodes[ch].setVelocityRender(true);
-      analysers.push(analyser);
+      node.setVelocityRender(true);
+      this.nodes.push(node);
     }
 
     this.timer.initWorker();
@@ -124,7 +121,22 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.onPlay();
     this.onStop();
 
-    return { synth: synth, audio: this.audio };
+    return { synth, audio: this.audio };
+  }
+
+  getMainGainLevel(): number {
+    if (!this.mainAnalyser) return 0;
+    const buffer = new Float32Array(this.mainAnalyser.fftSize);
+    this.mainAnalyser.getFloatTimeDomainData(buffer);
+
+    let sumSquares = 0;
+    for (let i = 0; i < buffer.length; i++) {
+      const v = buffer[i];
+      sumSquares += v * v;
+    }
+    const rms = Math.sqrt(sumSquares / buffer.length);
+
+    return rms * 100;
   }
 
   async loadPresetSoundFont(sfId?: number) {

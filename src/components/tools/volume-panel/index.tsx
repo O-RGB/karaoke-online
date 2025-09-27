@@ -82,7 +82,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
     <div
       className={`flex w-full ${
         hideMixer
-          ? "flex-row landscape:w-[50%]"
+          ? "flex-row landscape:w-[45%]"
           : "flex-col-reverse landscape:w-fit"
       } gap-1.5 `}
     >
@@ -106,13 +106,13 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
             className={`select-none relative z-20 w-full blur-overlay border blur-border rounded-md p-2 duration-300 
               ${
                 hideMixer
-                  ? "h-[35px]"
+                  ? "h-[35px] overflow-hidden"
                   : `${
                       orientation === "landscape" ? "h-[230px]" : "h-[292px]"
                     } lg:h-[150px]`
               }`}
           >
-            <MainVolumeRender hide={hideMixer}></MainVolumeRender>
+            <MainVolumeRender hide={!hideMixer}></MainVolumeRender>
 
             <div
               className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px]  left-0 p-2 py-[26px]`}

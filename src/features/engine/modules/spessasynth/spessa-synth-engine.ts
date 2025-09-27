@@ -77,6 +77,36 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.bassConfig = config ? new BassConfig(config) : undefined;
     this.systemConfig = systemConfig;
   }
+  getMainGainLevel(): number {
+    throw new Error("Method not implemented.");
+  }
+  toggleChannelEqualizer?(channelIndex: number, enabled: boolean): void {
+    throw new Error("Method not implemented.");
+  }
+  toggleAllEqualizers?(enabled: boolean): void {
+    throw new Error("Method not implemented.");
+  }
+  isChannelEQEnabled?(channelIndex: number): boolean {
+    throw new Error("Method not implemented.");
+  }
+  resetChannelEQ?(channelIndex: number): void {
+    throw new Error("Method not implemented.");
+  }
+  updateChannelEQBand?(
+    channelIndex: number,
+    bandIndex: number,
+    gainValue: number
+  ): void {
+    throw new Error("Method not implemented.");
+  }
+  getChannelEQSettings?(
+    channelIndex: number
+  ): { frequency: number; gain: number }[] | null {
+    throw new Error("Method not implemented.");
+  }
+  setupMIDIEventHook?(): void {
+    throw new Error("Method not implemented.");
+  }
 
   async startup(
     setInstrument?: (instrument: IPersetSoundfont[]) => void,

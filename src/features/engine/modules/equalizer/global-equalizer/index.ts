@@ -9,7 +9,9 @@ export class GlobalEqualizer {
   private analyserDataArray: Uint8Array;
 
   public isEnabled: boolean = true;
-  public frequencies: number[] = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+  public frequencies: number[] = [
+    32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000,
+  ];
   public gains: number[] = new Array(10).fill(0);
 
   constructor(context: BaseAudioContext) {
