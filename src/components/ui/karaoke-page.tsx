@@ -135,13 +135,16 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
                 <div className="w-full lg:pt-2">
                   <SearchSong />
                 </div>
-                <div className="flex w-full gap-2 items-start justify-between">
+
+                <div className="flex flex-col lg:flex-row w-full gap-2 items-start justify-between">
                   <VolumePanel />
-                  <div className="hidden lg:block">
-                    <div className="flex gap-2">
-                      <ClockPanel />
-                      <TempoPanel />
-                    </div>
+                  <div className="hidden lg:flex gap-2">
+                    <ClockPanel />
+                    <TempoPanel />
+                  </div>
+                  <div className="flex gap-2 block lg:hidden">
+                    <ClockPanel />
+                    <TempoPanel />
                   </div>
                 </div>
               </header>

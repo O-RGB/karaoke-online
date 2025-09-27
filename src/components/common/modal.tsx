@@ -170,7 +170,10 @@ export default function WinboxModal({
       className={`modern ${modalClassName} blur-overlay !bg-black/30`}
       x="center"
       y="center"
+      top={5}
       bottom={50}
+      left={5}
+      right={5}
       minWidth={200}
       noClose={!closable}
       background="transparent"

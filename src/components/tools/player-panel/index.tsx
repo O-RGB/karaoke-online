@@ -126,7 +126,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
 
   const buttonStyle: any = {
     className: "!rounded-none aspect-square",
-    size: "lg",
+    size: "xs",
     blur: {
       border: false,
       backgroundColor: "primary",

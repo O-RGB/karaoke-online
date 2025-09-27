@@ -70,23 +70,22 @@ const TempoPanel: React.FC<TempoPanelProps> = ({}) => {
     return null;
   }
   return (
-    <div className="blur-overlay blur-border border rounded-md p-2 w-44 hidden lg:block text-white">
-      <div className="flex justify-between items-center mb-1">
-        <span className=" text-xl font-bold">{Math.round(tempo)}</span>
-        <span className=" text-xl font-bold">{currentBeatInBar}:4</span>
-      </div>
-      <div className="relative w-full h-1 bg-white/50 mb-2">
-        <div className="absolute top-0 left-0 h-full w-full"></div>
-      </div>
-      <div className="grid grid-cols-4 gap-1">
-        {[...Array(4)].map((_, index) => (
-          <div
-            key={index}
-            className={`h-2 ${
-              index !== currentBeatInBar - 1 ? "bg-white/30" : "bg-white"
-            }`}
-          ></div>
-        ))}
+    <div className="blur-overlay blur-border border rounded-md h-[35px] w-32 text-white">
+      <div className="flex items-center justify-between h-full px-2">
+        <div className="flex mb-1">
+          {String(Math.round(tempo)).padStart(3, "0")}
+        </div>
+        <div className="flex gap-1">
+          {[...Array(4)].map((_, index) => (
+            <div
+              key={index}
+              className={`h-2 w-2 rounded-full ${
+                index !== currentBeatInBar - 1 ? "bg-white/30" : "bg-white"
+              }`}
+            ></div>
+          ))}
+        </div>
+        <div className="flex mb-1">{currentBeatInBar}:4</div>
       </div>
     </div>
   );

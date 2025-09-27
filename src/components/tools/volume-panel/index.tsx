@@ -80,68 +80,85 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   const nodes = engine.nodes;
   return (
     <div
-      className={`flex flex-col gap-1.5 ${
-        orientation === "landscape"
-          ? " top-[18px] w-[65%]"
-          : " top-[58px] lg:top-6 w-full"
-      }`}
+      className={`flex w-full ${
+        hideMixer
+          ? "flex-row landscape:w-[50%]"
+          : "flex-col-reverse landscape:w-fit"
+      } gap-1.5 `}
     >
+      {engine && (
+        <VolumeOptions
+          onPitchChange={onPitchChange}
+          onSpeedChange={onSpeedChange}
+          onMutedVolume={onMutedVolume}
+          setNotification={setNotification}
+          openQueue={() => {
+            setQueueOpen?.();
+            resetQueueingTimeout(5000);
+          }}
+          vocal={VOCAL_CHANNEL}
+          nodes={engine.nodes}
+        ></VolumeOptions>
+      )}
       {isShow?.show === true && (
-        <div className="relative">
+        <div className="relative w-full">
           <div
-            className={`select-none relative z-20 w-full lg:w-fit blur-overlay border blur-border rounded-md p-2 duration-300 ${
-              hideMixer
-                ? "h-[35px] overflow-hidden"
-                : `${
-                    orientation === "landscape" ? "h-[230px]" : "h-[292px]"
-                  } lg:h-[150px]`
-            } `}
+            className={`select-none relative z-20 w-full blur-overlay border blur-border rounded-md p-2 duration-300 
+              ${
+                hideMixer
+                  ? "h-[35px]"
+                  : `${
+                      orientation === "landscape" ? "h-[230px]" : "h-[292px]"
+                    } lg:h-[150px]`
+              }`}
           >
             <MainVolumeRender hide={hideMixer}></MainVolumeRender>
 
             <div
               className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px]  left-0 p-2 py-[26px]`}
             >
-              {nodes.map((_, ch) => {
-                return (
-                  <div key={`gain-render-${ch}`} className="relative w-full">
-                    <ChannelVolumeRender
-                      channel={ch}
-                      max={127}
-                      className="z-10 w-full absolute bottom-0 left-0 h-full"
-                    ></ChannelVolumeRender>
-                  </div>
-                );
-              })}
+              {!hideMixer &&
+                nodes.map((_, ch) => {
+                  return (
+                    <div key={`gain-render-${ch}`} className="relative w-full">
+                      <ChannelVolumeRender
+                        channel={ch}
+                        max={127}
+                        className="z-10 w-full absolute bottom-0 left-0 h-full"
+                      ></ChannelVolumeRender>
+                    </div>
+                  );
+                })}
             </div>
             <div
               className={`${grid} ${hideElement} ${animation} ${
                 hideMixer ?? "pointer-events-none !cursor-none"
               } w-full gap-0.5 h-full`}
             >
-              {nodes.map((_, ch) => {
-                return (
-                  <div
-                    key={`vol-panel-${ch}`}
-                    className="flex flex-col relative h-full"
-                  >
-                    <ChannelRender
-                      node={_}
-                      onLockChange={onLockChange}
-                      onMutedVolume={onMutedVolume}
-                      isShow={hideMixer}
-                      channel={ch}
-                      onProgramChange={onPersetChange}
-                      onChange={onControllerChange}
-                      perset={instrument}
-                    ></ChannelRender>
-                  </div>
-                );
-              })}
+              {!hideMixer &&
+                nodes.map((_, ch) => {
+                  return (
+                    <div
+                      key={`vol-panel-${ch}`}
+                      className="flex flex-col relative h-full"
+                    >
+                      <ChannelRender
+                        node={_}
+                        onLockChange={onLockChange}
+                        onMutedVolume={onMutedVolume}
+                        isShow={hideMixer}
+                        channel={ch}
+                        onProgramChange={onPersetChange}
+                        onChange={onControllerChange}
+                        perset={instrument}
+                      ></ChannelRender>
+                    </div>
+                  );
+                })}
             </div>
           </div>
 
-          <div className="relative flex w-full lg:w-[620px] justify-center items-center h-0 z-20">
+          <div className="relative flex w-full justify-center items-center h-0 z-20">
             <div className="absolute -bottom-[10px] right-4 z-10">
               <Button
                 tabIndex={-1}
@@ -166,27 +183,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
             </div>
           </div>
         </div>
-      )}
-      {showInst?.show && (
-        <InstrumentalPanel
-          className={` ${
-            orientation === "landscape" ? "flex" : "w-full grid grid-cols-10"
-          } gap-1.5 lg:w-[620px]`}
-        ></InstrumentalPanel>
-      )}
-      {engine && (
-        <VolumeOptions
-          onPitchChange={onPitchChange}
-          onSpeedChange={onSpeedChange}
-          onMutedVolume={onMutedVolume}
-          setNotification={setNotification}
-          openQueue={() => {
-            setQueueOpen?.();
-            resetQueueingTimeout(5000);
-          }}
-          vocal={VOCAL_CHANNEL}
-          nodes={engine.nodes}
-        ></VolumeOptions>
       )}
     </div>
   );

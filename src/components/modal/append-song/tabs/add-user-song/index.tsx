@@ -123,14 +123,15 @@ const AddUserSong: React.FC<AddUserSongProps> = ({
 
       return {
         render: () => (
-          <div className="w-fit flex gap-2">
+          <div className="w-full flex flex-wrap gap-2">
             <Tags color={tagColor} className="text-[10px] min-w-10 text-center">
-              {item.trackData.CODE}
+              <div className="max-w-20 truncate">{item.trackData.CODE}</div>
             </Tags>
-            <Tags color={"gray"} className="text-[10px] min-w-10 text-center">
-              {item.trackData.SUB_TYPE}
+            <Tags color={"gray"} className="text-[8px] min-w-10 text-center">
+              <span className="lowercase">.{item.trackData.SUB_TYPE}</span>
             </Tags>
-            <div className="m-auto">{name}</div>
+
+            <div className="text-nowrap">{name}</div>
           </div>
         ),
         value: item,
