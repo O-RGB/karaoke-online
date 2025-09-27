@@ -3,9 +3,8 @@ import React, { useEffect, useState } from "react";
 import SwitchRadio from "../../../../common/input-data/switch/switch-radio";
 import SliderCommon from "../../../../common/input-data/slider";
 
-interface GlobalEqProps { }
+interface GlobalEqProps {}
 
-// Define preset type
 interface EqPreset {
   id: string;
   name: string;
@@ -76,7 +75,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
     setGains(newGains);
     equalizer.setBandGain(index, value);
 
-    // Clear selected preset if the user manually adjusts
     setSelectedPreset(null);
   };
 
@@ -120,9 +118,7 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
 
   return (
     <div className="w-full bg-gray-50 rounded-lg p-4">
-      {/* Main container with two sections */}
       <div className="gap-4">
-        {/* Left side - Presets and controls */}
         <div className="p-4 w-full bg-white border-b md:border-b-0 md:border-r border-gray-200">
           <div className="flex justify-between items-center mb-4">
             <div className="text-sm font-medium text-gray-700">EQ Status</div>
@@ -145,10 +141,11 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                 <button
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
-                  className={`w-fit p-1 text-left rounded transition-all text-xs ${selectedPreset === preset.id
+                  className={`w-fit p-1 text-left rounded transition-all text-xs ${
+                    selectedPreset === preset.id
                       ? "bg-blue-100 text-blue-800 font-medium border-l-4 border-blue-600"
                       : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                    }`}
+                  }`}
                 >
                   {preset.name}
                 </button>
@@ -157,11 +154,8 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
           </div>
         </div>
 
-        {/* Right side - Equalizer */}
         <div className="p-4 md:col-span-4">
-          {/* Main equalizer area */}
           <div className="relative">
-            {/* dB scale on left */}
             <div className="absolute -left-6 top-5 h-40 text-right flex flex-col justify-between text-[8px] text-gray-500">
               <div>+30dB</div>
               <div>+15dB</div>
@@ -170,9 +164,7 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
               <div>-30dB</div>
             </div>
 
-            {/* Actual EQ visualization */}
             <div className="ml-2">
-              {/* Frequency labels */}
               <div className="grid grid-cols-10 gap-1 mb-1">
                 {frequencyLabels.map((label, i) => (
                   <div
@@ -184,9 +176,7 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                 ))}
               </div>
 
-              {/* Sliders area with horizontal lines */}
               <div className="relative h-40 mb-2 border border-gray-200 rounded bg-white">
-                {/* Horizontal guide lines */}
                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                   <div className="border-t border-gray-200"></div>
                   <div className="border-t border-gray-200"></div>
@@ -195,7 +185,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                   <div className="border-t border-gray-200"></div>
                 </div>
 
-                {/* Vertical frequency dividers */}
                 <div className="absolute inset-0 grid grid-cols-10 gap-0 pointer-events-none">
                   {[...Array(9)].map((_, i) => (
                     <div
@@ -205,7 +194,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                   ))}
                 </div>
 
-                {/* Sliders container */}
                 <div className="grid grid-cols-10 gap-1 h-full px-2 py-1">
                   {gains.map((gain, index) => (
                     <div
@@ -224,14 +212,14 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                           className={`h-full ${!isEnabled ? "opacity-50" : ""}`}
                         />
 
-                        {/* Custom fill indicator */}
                         <div
-                          className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 rounded-t ${gain > 0
+                          className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 rounded-t ${
+                            gain > 0
                               ? "bg-blue-500"
                               : gain < 0
-                                ? "bg-orange-500"
-                                : "bg-gray-400"
-                            }`}
+                              ? "bg-orange-500"
+                              : "bg-gray-400"
+                          }`}
                           style={{
                             height: `${(Math.abs(gain) / 60) * 100}%`,
                             top:
@@ -244,7 +232,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                 </div>
               </div>
 
-              {/* Value labels */}
               <div className="grid grid-cols-10 gap-1">
                 {gains.map((gain, index) => (
                   <div key={index} className="text-center text-[10px]">
@@ -254,7 +241,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                 ))}
               </div>
 
-              {/* Detailed EQ curve visualization */}
               <div className="mt-4 relative h-16 border border-gray-200 rounded bg-white overflow-hidden">
                 <svg
                   className="w-full h-full"
@@ -276,7 +262,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                     </linearGradient>
                   </defs>
 
-                  {/* Center line */}
                   <line
                     x1="0"
                     y1="50"
@@ -286,7 +271,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                     strokeWidth="1"
                   />
 
-                  {/* Draw smooth curve using values - scaled for -30 to +30 range */}
                   <path
                     d={`
                       M 0,${50 - (gains[0] / 30) * 50}
@@ -326,7 +310,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                     strokeWidth="2"
                   />
 
-                  {/* Fill area from curve to center */}
                   <path
                     d={`
                       M 0,${50 - (gains[0] / 30) * 50}
@@ -368,7 +351,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                     opacity="0.5"
                   />
 
-                  {/* Frequency bands markers */}
                   {[...Array(10)].map((_, i) => (
                     <circle
                       key={i}
@@ -385,7 +367,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
             </div>
           </div>
 
-          {/* Selected preset indicator */}
           {selectedPreset && (
             <div className="mt-3 text-center text-xs text-gray-500">
               Active:{" "}

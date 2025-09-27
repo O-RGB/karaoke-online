@@ -34,7 +34,6 @@ export interface BaseSynthEngine {
   unintsall(): Promise<void>;
   setSoundFont(file: File, from: SoundSystemMode): void;
 
-  getMainGainLevel(): number;
   toggleChannelEqualizer?(channelIndex: number, enabled: boolean): void;
   toggleAllEqualizers?(enabled: boolean): void;
   isChannelEQEnabled?(channelIndex: number): boolean;

@@ -77,6 +77,9 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.bassConfig = config ? new BassConfig(config) : undefined;
     this.systemConfig = systemConfig;
   }
+  connectAudioChain(useEq: boolean): void {
+    throw new Error("Method not implemented.");
+  }
   getMainGainLevel(): number {
     throw new Error("Method not implemented.");
   }

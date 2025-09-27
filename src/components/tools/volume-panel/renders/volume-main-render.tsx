@@ -18,16 +18,15 @@ const MainVolumeRender: React.FC<MainVolumeRenderProps> = ({ hide }) => {
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    // ✅ ปรับ resolution ให้ตรง device pixel
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     context.scale(dpr, dpr);
 
-    const gainPercent = engine.getMainGainLevel();
+    const gainPercent = engine.globalEqualizer?.getVolumeLevel() ?? 0;
     context.clearRect(0, 0, rect.width, rect.height);
-    context.fillStyle = `rgba(255,255,255,${hide ? 0.4 : 1})`;
+    context.fillStyle = `rgba(255,255,255,0.3)`;
     context.fillRect(0, 0, (gainPercent / 100) * rect.width, rect.height);
   };
 

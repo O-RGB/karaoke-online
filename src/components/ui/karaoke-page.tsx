@@ -159,7 +159,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           </ContextModal>
         </div>
         <QueueSong />
-        <div className="fixed bottom-[20dvh] landscape:bottom-[30dvh] left-0 right-0 -z-10">
+        <div className="fixed bottom-[20dvh] landscape:bottom-[25dvh] left-0 right-0 -z-10">
           <div
             style={{
               paddingTop: "max(1rem, env(safe-area-inset-top))",

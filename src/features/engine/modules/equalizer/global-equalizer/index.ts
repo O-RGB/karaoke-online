@@ -102,10 +102,18 @@ export class GlobalEqualizer {
     return this.analyserNode;
   }
 
+  private lastRms = 0;
+
   public getVolumeLevel(): number {
-    this.analyserNode.getByteFrequencyData(this.analyserDataArray);
-    const sum = this.analyserDataArray.reduce((a, b) => a + b, 0);
-    const avg = sum / this.analyserDataArray.length;
-    return Math.max(1, Math.min(100, Math.round((avg / 255) * 100)));
+    const buffer = new Float32Array(this.analyserNode.fftSize);
+    this.analyserNode.getFloatTimeDomainData(buffer);
+
+    let sumSquares = 0;
+    for (let i = 0; i < buffer.length; i++) sumSquares += buffer[i] ** 2;
+    const rms = Math.sqrt(sumSquares / buffer.length);
+
+    this.lastRms = this.lastRms * 0.8 + rms * 0.2;
+
+    return this.lastRms * 100;
   }
 }
