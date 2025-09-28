@@ -101,7 +101,6 @@ export class GlobalEqualizer {
   public getAnalyser(): AnalyserNode {
     return this.analyserNode;
   }
-
   private lastRms = 0;
 
   public getVolumeLevel(): number {
@@ -112,8 +111,12 @@ export class GlobalEqualizer {
     for (let i = 0; i < buffer.length; i++) sumSquares += buffer[i] ** 2;
     const rms = Math.sqrt(sumSquares / buffer.length);
 
-    this.lastRms = this.lastRms * 0.8 + rms * 0.2;
+    if (rms > this.lastRms) {
+      this.lastRms = this.lastRms * 0.1 + rms * 0.9;
+    } else {
+      this.lastRms = this.lastRms * 0.7 + rms * 0.3;
+    }
 
-    return this.lastRms * 100;
+    return Math.min(this.lastRms * 100, 100);
   }
 }

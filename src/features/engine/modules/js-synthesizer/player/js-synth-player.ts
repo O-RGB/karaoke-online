@@ -28,7 +28,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   public controller = new EventManager<string, number>();
   public musicQuere: MusicLoadAllData | undefined = undefined;
 
-  // ✅ ใช้ HTMLAudioElement แทน AudioBufferSourceNode
   public mp3Element?: HTMLAudioElement;
 
   private mp3PausedOffset = 0;
@@ -46,7 +45,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     if (!this.musicQuere) return;
 
     if (this.musicQuere.musicType === "MP3" && this.mp3Element) {
-      await this.mp3Element.play(); // ✅ เล่น mp3 ผ่าน <audio>
+      await this.mp3Element.play();
       this.mp3Element.currentTime = this.mp3PausedOffset;
     } else {
       await this.player?.playPlayer();
@@ -131,7 +130,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.engine.countdownUpdated.trigger(["COUNTDOWN", "CHANGE"], 0, time);
   }
 
-  // ✅ แก้ไข loadMp3
   async loadMp3(file: File): Promise<boolean> {
     if (!this.engine.audio) {
       console.error("AudioContext is not initialized.");
@@ -219,32 +217,77 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.player?.hookPlayerMIDIEvents((s, type, event) => {
       const eventType = event.getType();
       const velocity = event.getVelocity();
-      const midiNote = event.getKey();
+      const originalMidiNote = event.getKey();
       const channel = event.getChannel();
       const control = event.getControl();
       const value = event.getValue();
       const program = event.getProgram();
       const node = this.engine.nodes[channel];
 
-      if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
-        const transpose = node.transpose?.value;
-        this.eventInit?.onNoteOnChangeCallback({
-          channel,
-          midiNote,
-          velocity,
-        });
-        if (channel !== DRUM_CHANNEL) {
-          event.setKey(midiNote + (transpose ?? 0));
+      if (channel !== DRUM_CHANNEL && node) {
+        if (eventType === 0x90) {
+          const transpose = node.transpose?.value ?? 0;
+          const newNote = Math.max(
+            0,
+            Math.min(127, originalMidiNote + transpose)
+          );
+          event.setKey(newNote);
+
+          if (this.eventInit?.onNoteOnChangeCallback) {
+            this.eventInit.onNoteOnChangeCallback({
+              channel,
+              midiNote: originalMidiNote,
+              velocity,
+            });
+          }
+
+          node.noteOnChange?.({
+            channel,
+            midiNote: originalMidiNote,
+            velocity,
+          });
+        } else if (eventType === 0x80) {
+          const noteTranspose =
+            node.getNoteTranspose?.(originalMidiNote) ??
+            node.transpose?.value ??
+            0;
+          const newNote = Math.max(
+            0,
+            Math.min(127, originalMidiNote + noteTranspose)
+          );
+          event.setKey(newNote);
+
+          if (this.eventInit?.onNoteOffChangeCallback) {
+            this.eventInit.onNoteOffChangeCallback({
+              channel,
+              midiNote: originalMidiNote,
+              velocity,
+            });
+          }
+
+          node.noteOffChange?.({
+            channel,
+            midiNote: originalMidiNote,
+            velocity,
+          });
         }
-      } else if (
-        eventType === 0x80 &&
-        this.eventInit?.onNoteOffChangeCallback
-      ) {
-        this.eventInit?.onNoteOffChangeCallback({
-          channel,
-          midiNote,
-          velocity,
-        });
+      } else {
+        if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
+          this.eventInit.onNoteOnChangeCallback({
+            channel,
+            midiNote: originalMidiNote,
+            velocity,
+          });
+        } else if (
+          eventType === 0x80 &&
+          this.eventInit?.onNoteOffChangeCallback
+        ) {
+          this.eventInit.onNoteOffChangeCallback({
+            channel,
+            midiNote: originalMidiNote,
+            velocity,
+          });
+        }
       }
 
       switch (type) {
@@ -253,10 +296,11 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             let controllerNumber = 0;
             let controllerValue = value;
             let isLocked = false;
+
             switch (control) {
               case MAIN_VOLUME:
-                let volume = node.volume;
                 controllerNumber = MAIN_VOLUME;
+                let volume = node.volume;
                 if (volume?.isLocked) {
                   isLocked = true;
                   controllerValue = volume.value ?? value;
@@ -266,6 +310,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
                   controllerValue = 0;
                 }
                 break;
+
               case PAN:
                 controllerNumber = PAN;
                 let pan = node.pan;
@@ -278,6 +323,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
                   controllerValue = 0;
                 }
                 break;
+
               case REVERB:
                 controllerNumber = REVERB;
                 let reverb = node.reverb;
@@ -290,6 +336,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
                   controllerValue = 0;
                 }
                 break;
+
               case CHORUSDEPTH:
                 controllerNumber = CHORUSDEPTH;
                 let chorus = node.chorus;
@@ -300,6 +347,12 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
                 } else if (chorus?.isMute) {
                   event.setValue(0);
                   controllerValue = 0;
+                }
+                break;
+
+              case 123:
+                if (node.hasActiveNotes?.()) {
+                  node.stopAllActiveNotes?.();
                 }
                 break;
             }
@@ -314,7 +367,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
         case 192:
           if (this.eventInit?.programChangeCallback) {
-            this.eventInit?.programChangeCallback({
+            this.eventInit.programChangeCallback({
               program,
               channel,
             });
@@ -324,5 +377,22 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
       return false;
     });
+  }
+
+  public setChannelTranspose(channel: number, transpose: number): void {
+    const node = this.engine.nodes[channel];
+    if (node && channel !== DRUM_CHANNEL) {
+      node.setTranspose?.(transpose, true);
+    }
+  }
+
+  public resetAllTranspose(): void {
+    if (!this.engine.nodes) return;
+
+    for (let channel = 0; channel < 16; channel++) {
+      if (channel !== DRUM_CHANNEL) {
+        this.setChannelTranspose(channel, 0);
+      }
+    }
   }
 }

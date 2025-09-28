@@ -48,6 +48,8 @@ export class SynthChannel {
   private smoothingSpeedDown = 0.05;
   private animationId?: number;
 
+  private activeNotes = new Map<number, number>();
+
   public globalNoteOnEvent = new EventManager<INoteState, INoteChange>();
 
   public instrumental: InstrumentalNode | undefined = undefined;
@@ -100,6 +102,83 @@ export class SynthChannel {
 
     this.analyserNode = analyser;
     this.systemConfig = systemConfig;
+  }
+
+  public setTranspose(
+    newTranspose: number,
+    stopActiveNotes: boolean = true
+  ): void {
+    const oldTranspose = this.transpose?.value ?? 0;
+
+    if (oldTranspose === newTranspose) return;
+
+    if (stopActiveNotes && this.channel !== DRUM_CHANNEL) {
+      this.stopAllActiveNotes();
+    }
+
+    this.transpose?.setValue(newTranspose);
+  }
+
+  public stopAllActiveNotes(): void {
+    this.activeNotes.clear();
+  }
+
+  public noteOnChange(event: INoteChange) {
+    this.globalNoteOnEvent.trigger(["NOTE_ON", "CHANGE"], 0, event);
+
+    if (this.channel !== DRUM_CHANNEL) {
+      const currentTranspose = this.transpose?.value ?? 0;
+      this.activeNotes.set(event.midiNote, currentTranspose);
+    }
+
+    if (this.velocityMode) {
+      this.simulatedVelocityGain = event.velocity;
+    }
+  }
+
+  public noteOffChange(event: INoteChange) {
+    this.globalNoteOnEvent.trigger(["NOTE_OFF", "CHANGE"], 0, event);
+
+    if (this.channel !== DRUM_CHANNEL) {
+      this.activeNotes.delete(event.midiNote);
+    }
+  }
+
+  public getNoteTranspose(midiNote: number): number {
+    return this.activeNotes.get(midiNote) ?? this.transpose?.value ?? 0;
+  }
+
+  public hasActiveNotes(): boolean {
+    return this.activeNotes.size > 0;
+  }
+
+  public handleControllerChange<T>(
+    event: IControllerChange<T>,
+    action: (control: any, value: T) => void
+  ) {
+    switch (event.controllerNumber) {
+      case MAIN_VOLUME:
+        this.volume && action(this.volume, event.controllerValue);
+        break;
+      case PAN:
+        this.pan && action(this.pan, event.controllerValue);
+        break;
+      case REVERB:
+        this.reverb && action(this.reverb, event.controllerValue);
+        break;
+      case CHORUSDEPTH:
+        this.chorus && action(this.chorus, event.controllerValue);
+        break;
+      case EXPRESSION:
+        this.expression && action(this.expression, event.controllerValue);
+        break;
+      default:
+        break;
+    }
+  }
+
+  public transposeChange(newTranspose: number): void {
+    this.setTranspose(newTranspose, true);
   }
 
   private startSmoothing() {
@@ -169,46 +248,10 @@ export class SynthChannel {
     return this.analyserNode;
   }
 
-  public handleControllerChange<T>(
-    event: IControllerChange<T>,
-    action: (control: any, value: T) => void
-  ) {
-    switch (event.controllerNumber) {
-      case MAIN_VOLUME:
-        this.volume && action(this.volume, event.controllerValue);
-        break;
-      case PAN:
-        this.pan && action(this.pan, event.controllerValue);
-        break;
-      case REVERB:
-        this.reverb && action(this.reverb, event.controllerValue);
-        break;
-      case CHORUSDEPTH:
-        this.chorus && action(this.chorus, event.controllerValue);
-        break;
-      case EXPRESSION:
-        this.expression && action(this.expression, event.controllerValue);
-        break;
-      default:
-        break;
-    }
-  }
-
   public programChange(event: IProgramChange) {
     const oldIndex: number = this.program?.value ?? 0;
     this.program?.setValue(event.program);
     this.instrumental?.update(event, oldIndex, this);
-  }
-
-  public noteOnChange(event: INoteChange) {
-    this.globalNoteOnEvent.trigger(["NOTE_ON", "CHANGE"], 0, event);
-    if (this.velocityMode) {
-      this.simulatedVelocityGain = event.velocity;
-    }
-  }
-
-  public noteOffChange(event: INoteChange) {
-    this.globalNoteOnEvent.trigger(["NOTE_OFF", "CHANGE"], 0, event);
   }
 
   public controllerChange(event: IControllerChange<any>) {
