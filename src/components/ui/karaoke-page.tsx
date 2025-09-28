@@ -54,7 +54,6 @@ import { DatabaseService } from "@/utils/indexedDB/service";
 import { SongsSystem } from "@/features/songs";
 import { SoundfontSystemManager } from "@/features/soundfont";
 import dynamic from "next/dynamic";
-import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 
 interface KaraokePageProps {}
 
@@ -66,7 +65,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   const initializeKeyboardListeners = useKeyboardStore(
     (state) => state.initializeKeyboardListeners
   );
-  const hideMixer = useMixerStoreNew((state) => state.hideMixer);
+
   const handle = useFullScreenHandle();
   const notification = useNotificationStore((state) => state.notification);
   const config = useConfigStore((state) => state.config);
@@ -115,69 +114,72 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   };
 
   return (
-    <FullScreen handle={handle} className="fixed inset-0 w-screen h-screen">
-      <div>
-        <div id="screen-panel" className="content-safe-area ">
-          <div id="modal-root"></div>
-          <Loading isLoad={onPrepare} />
-          <WallpaperRender />
-          <AutoModal auto title={""} />
-          <div id="zoom-container" className="w-full z-10 p-4">
-            <ContextModal
-              modal={modalMap}
-              className="karaoke-layout w-full h-full"
+    <FullScreen handle={handle} className=" w-full h-screen">
+      <div id="screen-panel" className="w-full">
+        <div id="modal-root"></div>
+        <Loading isLoad={onPrepare} />
+        <WallpaperRender />
+        <AutoModal auto title={""} />
+
+        <div id="zoom-container" className="fixed inset-0 w-full z-10">
+          <ContextModal modal={modalMap} className="karaoke-layout w-full h-full">
+            <div
+              style={{
+                paddingTop: "max(1rem, env(safe-area-inset-top))",
+                paddingLeft: "max(1rem, env(safe-area-inset-left))",
+                paddingRight: "max(1rem, env(safe-area-inset-right))",
+              }}
+              className={`relative text-white flex flex-col gap-10 w-full`}
             >
-              <QueueSong />
-              <div
-                className={`relative text-white flex flex-col gap-10 w-full`}
-              >
-                <header className="relative z-30 flex flex-col lg:flex-col-reverse gap-2 landscape:gap-0 lg:gap-2 items-start">
-                  <div className="w-full lg:pt-2">
-                    <SearchSong />
+              <header className="relative z-30 flex flex-col lg:flex-col-reverse gap-2 landscape:gap-0 lg:gap-2 items-start">
+                <div className="w-full lg:pt-2">
+                  <SearchSong />
+                </div>
+
+                <div className="flex flex-col lg:flex-row w-full gap-2 items-start justify-between">
+                  <VolumePanel />
+                  <div className="hidden lg:flex gap-2">
+                    <ClockPanel />
+                    <TempoPanel />
                   </div>
-
-                  <div className="flex flex-col lg:flex-row w-full gap-2 items-start justify-between">
-                    <VolumePanel />
-                    <div className="hidden lg:flex gap-2">
-                      <ClockPanel />
-                      <TempoPanel />
-                    </div>
-                    <div className="flex gap-2 block lg:hidden">
-                      <ClockPanel />
-                      <TempoPanel />
-                    </div>
+                  <div className="flex gap-2 block lg:hidden">
+                    <ClockPanel />
+                    <TempoPanel />
                   </div>
-                </header>
+                </div>
+              </header>
 
-                <main className="relative flex items-center justify-center ">
-                  <NextSongPanel className="absolute w-full flex justify-center" />
-                  <SongInfo />
-                </main>
-              </div>
+              <main className="relative flex items-center justify-center ">
+                <NextSongPanel className="absolute w-full flex justify-center" />
+                <SongInfo />
+              </main>
+            </div>
 
-              <div
-                className={`absolute left-0 right-0 bottom-0 ${
-                  hideMixer
-                    ? "top-[10%] landscape:top-[10%]"
-                    : "top-[40%] landscape:top-[10%]"
-                }`}
-              >
-                <LyricsPlayer />
-              </div>
-
-              <footer className="absolute left-0 right-0 bottom-0 w-full -z-1">
-                <PlayerPanel
-                  style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-                  isFullScreen={handle.active}
-                  modalMap={modalMap}
-                  onFullScreen={() => {
-                    handle.active ? handle.exit() : handle.enter();
-                  }}
-                />
-              </footer>
-            </ContextModal>
+            {/* <StatusPanel notification={notification} /> */}
+          </ContextModal>
+        </div>
+        <QueueSong />
+        <div className="fixed bottom-[20dvh] landscape:bottom-[20dvh] left-0 right-0 -z-20">
+          <div
+            style={{
+              paddingTop: "max(1rem, env(safe-area-inset-top))",
+              paddingLeft: "max(1rem, env(safe-area-inset-left))",
+              paddingRight: "max(1rem, env(safe-area-inset-right))",
+            }}
+          >
+            <LyricsPlayer />
           </div>
         </div>
+        <footer className="fixed left-0 right-0 bottom-0 w-full z-10">
+          <PlayerPanel
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+            isFullScreen={handle.active}
+            modalMap={modalMap}
+            onFullScreen={() => {
+              handle.active ? handle.exit() : handle.enter();
+            }}
+          />
+        </footer>
       </div>
     </FullScreen>
   );
