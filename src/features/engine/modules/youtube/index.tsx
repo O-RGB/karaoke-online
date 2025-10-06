@@ -25,6 +25,8 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
       iv_load_policy: 3,
       mute: 1,
       playsinline: 1,
+      fs: 0, // ปิดปุ่ม fullscreen
+      enablejsapi: 1, // เปิด JS API
     },
   };
 
@@ -59,20 +61,34 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
       console.log("Loading new video:", youtubeId);
       currentVideoIdRef.current = youtubeId;
 
-      player.loadVideoById({
-        videoId: youtubeId,
-        startSeconds: 0,
-      });
-
-      // ถ้า user อนุญาติเสียงแล้ว ให้เล่นพร้อมเสียงเลย
+      // ถ้า user อนุญาติเสียงแล้ว load พร้อมเสียง
       if (hasUserUnmutedRef.current) {
-        setTimeout(() => {
-          player.unMute();
-          player.setVolume(100);
-          player.playVideo();
+        player.loadVideoById({
+          videoId: youtubeId,
+          startSeconds: 0,
+        });
+
+        // รอให้ player พร้อม แล้วเปิดเสียงและเล่น
+        const checkAndPlay = setInterval(() => {
+          const state = player.getPlayerState();
+          if (state === -1 || state === 5) {
+            // unstarted or cued
+            player.unMute();
+            player.setVolume(100);
+            player.playVideo();
+            clearInterval(checkAndPlay);
+          }
         }, 100);
+
+        // clear interval หลัง 3 วินาที
+        setTimeout(() => clearInterval(checkAndPlay), 3000);
       } else {
+        player.loadVideoById({
+          videoId: youtubeId,
+          startSeconds: 0,
+        });
         player.mute();
+        player.playVideo();
       }
     }
   }, [youtubeId]);
@@ -125,6 +141,7 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
         className={`${
           show ? "fixed inset-0 -z-10 w-full h-full" : "opacity-0"
         }`}
+        style={{ pointerEvents: "none" }} // ปิด pointer events เพื่อไม่ให้บัง UI
       >
         <YouTube
           videoId={youtubeId}
@@ -132,6 +149,7 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
           onReady={handleReady}
           onStateChange={handleStateChange}
           className="rounded-lg overflow-hidden w-full h-full"
+          style={{ pointerEvents: "none" }} // ปิด pointer events
         />
       </div>
 
