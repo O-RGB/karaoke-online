@@ -7,7 +7,10 @@ interface YoutubeEngineProps {}
 const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
   const { youtubeId, setIsReady, isPlay, show } = useYoutubePlayer();
   const playerRef = useRef<YouTubePlayer | null>(null);
+
   const [isMuted, setIsMuted] = useState(true);
+  const [hasUnmutedOnce, setHasUnmutedOnce] = useState(false);
+  const [showVolumeButton, setShowVolumeButton] = useState(true);
 
   const opts = {
     height: "100%",
@@ -20,7 +23,7 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
       showinfo: 0,
       rel: 0,
       iv_load_policy: 3,
-      mute: 1,
+      mute: 1, // เริ่ม muted
     },
   };
 
@@ -28,13 +31,9 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
     playerRef.current = event.target;
     setIsReady(true);
 
-    // ถ้า show เป็น true เล่นวิดีโอและ restore เสียง
+    // ถ้า show true เล่นวิดีโอ (ยัง muted)
     if (show) {
       playerRef.current.playVideo();
-      if (!isMuted) playerRef.current.unMute();
-      else playerRef.current.mute();
-    } else {
-      playerRef.current.pauseVideo();
       playerRef.current.mute();
     }
   };
@@ -55,30 +54,33 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
       return;
     }
 
-    if (isPlay) {
-      player.playVideo();
-    } else {
-      player.pauseVideo();
-    }
+    if (isPlay) player.playVideo();
+    else player.pauseVideo();
 
-    // restore เสียงตาม isMuted
-    if (isMuted) {
-      player.mute();
-    } else {
-      player.unMute();
+    // restore เสียงถ้า unmuted แล้ว
+    if (!isMuted && hasUnmutedOnce) {
+      try {
+        player.unMute();
+        setShowVolumeButton(false);
+      } catch (err) {
+        console.error("Failed to unmute:", err);
+        setShowVolumeButton(true);
+      }
     }
-  }, [isPlay, show, isMuted]);
+  }, [show, isPlay, isMuted, hasUnmutedOnce]);
 
   const handleToggleMute = () => {
     const player = playerRef.current;
     if (!player) return;
 
-    if (isMuted) {
+    try {
       player.unMute();
       setIsMuted(false);
-    } else {
-      player.mute();
-      setIsMuted(true);
+      setHasUnmutedOnce(true);
+      setShowVolumeButton(false);
+    } catch (err) {
+      console.error("Failed to unmute:", err);
+      setShowVolumeButton(true);
     }
   };
 
@@ -99,13 +101,13 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
         />
       </div>
 
-      {/* ปุ่มเปิด/ปิดเสียง */}
-      {show && (
+      {/* ปุ่มเปิดเสียง */}
+      {showVolumeButton && show && (
         <button
           onClick={handleToggleMute}
           className="fixed bottom-6 right-6 z-50 bg-white/80 text-black px-4 py-2 rounded-full shadow-lg backdrop-blur-md hover:bg-white transition-all"
         >
-          {isMuted ? "🔇 เปิดเสียง" : "🔊 ปิดเสียง"}
+          🔊 เปิดเสียง
         </button>
       )}
     </>
