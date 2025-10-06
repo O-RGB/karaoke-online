@@ -12,6 +12,7 @@ export interface PlayerProps {
 export interface QueuePlayerProps {
   loading: boolean;
   queue: ITrackData[];
+  youtubePlyer?: boolean;
   addQueue: (value: ITrackData) => void;
   removeQueue: (index: number) => void;
   moveQueue: (value: ITrackData[]) => void;

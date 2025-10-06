@@ -36,6 +36,7 @@ export class BaseUserSongsSystemReader {
   }
 
   async addSong(add: MusicLoadAllData[]) {
+    console.log(add);
     const zipeds: File[] = [];
 
     for (let index = 0; index < add.length; index++) {
@@ -48,17 +49,21 @@ export class BaseUserSongsSystemReader {
       const lyr = data.files.lyr;
       const cur = data.files.cur;
       const mp3 = data.files.mp3;
+      const ykr = data.files.ykr;
 
+      const keyId = `zip-${index}`;
       if (fileType === "emk" && emk) {
-        zipped = await zipFiles([emk], `zip-${index}`);
+        zipped = await zipFiles([emk], keyId);
       } else if (fileType === "midi") {
         if (midi && lyr && cur) {
-          zipped = await zipFiles([midi, lyr, cur], `zip-${index}`);
+          zipped = await zipFiles([midi, lyr, cur], keyId);
         } else if (midi && !lyr && !cur) {
-          zipped = await zipFiles([midi], `zip-${index}`);
+          zipped = await zipFiles([midi], keyId);
         }
       } else if (fileType === "mp3" && mp3) {
-        zipped = await zipFiles([mp3], `zip-${index}`);
+        zipped = await zipFiles([mp3], keyId);
+      } else if (fileType === "youtube" && ykr) {
+        zipped = await zipFiles([ykr], keyId);
       }
 
       if (zipped) {
@@ -95,6 +100,8 @@ export class BaseUserSongsSystemReader {
     }
 
     const zipeds = await extractFile(fileStoreList.file);
+
+    console.log("zipeds", zipeds);
 
     const zipped = zipeds[_originalIndex];
     if (!zipped) {

@@ -62,6 +62,7 @@ export interface KaraokeExtension {
   cur?: File;
   mp3?: File;
   mp4?: File;
+  ykr?: File;
 }
 
 export interface MusicLoadAllData extends MusicParsedData {

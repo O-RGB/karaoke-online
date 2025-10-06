@@ -9,13 +9,14 @@ import {
   REVERB,
 } from "@/features/engine/types/node.type";
 import { fixMidiHeader } from "@/lib/karaoke/ncn";
-import { Synthesizer as JsSynthesizer } from "js-synthesizer";
+import { IMIDIEvent, Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { JsSynthEngine } from "../js-synth-engine";
 import { DRUM_CHANNEL } from "@/config/value";
 import { EventManager } from "../../instrumentals/events";
 import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
 import { parseMidi } from "@/lib/karaoke/songs/midi/reader";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
+import { useYoutubePlayer } from "../../youtube/youtube-player";
 
 export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   private player: JsSynthesizer | undefined = undefined;
@@ -29,8 +30,9 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   public musicQuere: MusicLoadAllData | undefined = undefined;
 
   public mp3Element?: HTMLAudioElement;
-
   private mp3PausedOffset = 0;
+
+  public youtubeId?: string;
 
   addEvent(input: Partial<BaseSynthEvent>): void {
     this.eventInit = { ...this.eventInit, ...input };
@@ -47,6 +49,9 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     if (this.musicQuere.musicType === "MP3" && this.mp3Element) {
       await this.mp3Element.play();
       this.mp3Element.currentTime = this.mp3PausedOffset;
+    } else if (this.musicQuere?.musicType === "YOUTUBE") {
+      const youtubePlayer = useYoutubePlayer.getState();
+      youtubePlayer.setPause(false);
     } else {
       await this.player?.playPlayer();
     }
@@ -64,6 +69,9 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       this.mp3Element.pause();
       this.mp3Element.currentTime = 0;
       this.mp3PausedOffset = 0;
+    } else if (this.musicQuere?.musicType === "YOUTUBE") {
+      const youtubePlayer = useYoutubePlayer.getState();
+      youtubePlayer.setPause(true);
     } else {
       this.player?.stopPlayer();
     }
@@ -79,6 +87,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     if (this.musicQuere.musicType === "MP3" && this.mp3Element) {
       this.mp3PausedOffset = this.mp3Element.currentTime;
       this.mp3Element.pause();
+    } else if (this.musicQuere?.musicType === "YOUTUBE") {
     } else {
       this.player?.stopPlayer();
     }
@@ -109,6 +118,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
         this.eventInit?.onPlay?.();
         this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
       }
+    } else if (this.musicQuere?.musicType === "YOUTUBE") {
     } else {
       this.player?.seekPlayer(seconds);
       setTimeout(() => {
@@ -128,6 +138,17 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
   countDownUpdate(time: number): void {
     this.engine.countdownUpdated.trigger(["COUNTDOWN", "CHANGE"], 0, time);
+  }
+
+  async loadYoutube(youtubeId: string): Promise<boolean> {
+    const youtubePlayer = useYoutubePlayer.getState();
+
+    if (!youtubePlayer.isReady) return false;
+
+    youtubePlayer.setYoutubeId(youtubeId);
+
+    youtubePlayer.setShow(true);
+    return true;
   }
 
   async loadMp3(file: File): Promise<boolean> {
@@ -189,6 +210,9 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   async loadMidi(data?: MusicLoadAllData): Promise<boolean> {
     if (!data) return false;
     this.stop();
+    const youtubePlayer = useYoutubePlayer.getState();
+    youtubePlayer.setShow(false);
+    youtubePlayer.setYoutubeId(undefined)
     this.engine.timer?.stopTimer();
     const mid = data.files.midi;
     if (mid !== undefined) {
@@ -207,6 +231,15 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
       return this.loadMp3(mp3);
     }
+
+    const ykr = data.files.ykr;
+    console.log("data", data);
+    if (ykr != undefined && data.youtubeId) {
+      this.engine.timer?.updateMusic(data);
+      this.musicQuere = data;
+      this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+      return this.loadYoutube(data.youtubeId);
+    }
     return false;
   }
 
@@ -214,7 +247,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   resetMidiOutput(): void {}
 
   eventChange(): void {
-    this.player?.hookPlayerMIDIEvents((s, type, event) => {
+    this.player?.hookPlayerMIDIEvents((s, type, event: IMIDIEvent) => {
       const eventType = event.getType();
       const velocity = event.getVelocity();
       const originalMidiNote = event.getKey();
@@ -297,6 +330,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             let controllerValue = value;
             let isLocked = false;
 
+            console.log("control", control);
             switch (control) {
               case MAIN_VOLUME:
                 controllerNumber = MAIN_VOLUME;
@@ -357,6 +391,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
                 break;
             }
 
+            console.log({ controllerNumber, controllerValue, channel });
             this.eventInit.controllerChangeCallback({
               controllerNumber,
               controllerValue,

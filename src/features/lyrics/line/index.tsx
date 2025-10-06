@@ -84,13 +84,34 @@ const LyricsList: React.FC<LyricsListProps> = ({
     <div className="w-screen overflow-hidden px-8 flex justify-center">
       <div
         ref={lyricsRef}
+        className="relative w-full"
         style={{
           transform: `scaleX(${scaleX})`,
           transformOrigin: "center",
           display: "inline-block",
         }}
       >
-        <LyricsCharacter {...textStyle} clip={clipPercent} text={text} />
+        <div className="w-full flex-col gap-2 overflow-hidden flex justify-center items-center">
+          <LyricsCharacter {...textStyle} clip={clipPercent} text={text} />
+        </div>
+        {sentence.vocal && (
+          <div className="w-full flex-col gap-2 overflow-hidden flex justify-center items-center">
+            <LyricsCharacter
+              {...textStyle}
+              fontSize={textStyle?.fontSize ?? 0 - 10}
+              color={{
+                color: "#DF692E",
+                colorBorder: "#0000FF",
+              }}
+              activeColor={{
+                color: "#000000",
+                colorBorder: "#ffffff",
+              }}
+              clip={clipPercent}
+              text={sentence.vocal}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

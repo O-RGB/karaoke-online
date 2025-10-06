@@ -7,7 +7,6 @@ import useKeyboardStore from "@/features/keyboard-state";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import VolumeOptions from "./modules/options-button/volume-pitch";
 import ChannelRender from "./modules/channel";
-import InstrumentalPanel from "../instrumental-panel";
 import React, { useEffect } from "react";
 import { MdArrowDropUp } from "react-icons/md";
 import { useOrientation } from "@/hooks/orientation-hook";
@@ -18,6 +17,7 @@ import {
 } from "@/features/engine/types/synth.type";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
+import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 
 interface VolumePanelProps {}
 
@@ -157,30 +157,27 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
                 })}
             </div>
           </div>
-
-          <div className="relative flex w-full justify-center items-center h-0 z-20">
-            <div className="absolute -bottom-[10px] right-4 z-10">
-              <Button
-                tabIndex={-1}
-                size="xs"
-                className="!p-0 !w-10"
-                blur={{
-                  border: true,
-                  backgroundColor: "primary",
-                }}
-                onClick={() => setHideMixer(!hideMixer)}
-                onKeyDown={(event) =>
-                  event.key === "Enter" && event.preventDefault()
-                }
-                icon={
-                  <MdArrowDropUp
-                    className={`${
-                      hideMixer ? "rotate-180" : "rotate-0"
-                    } duration-300 text-lg`}
-                  ></MdArrowDropUp>
-                }
-              ></Button>
-            </div>
+          <div className="absolute -bottom-[13px] right-4 z-10">
+            <Button
+              tabIndex={-1}
+              size="xs"
+              className="!h-5 !pb-2"
+              blur={{
+                border: true,
+                backgroundColor: "primary",
+              }}
+              onClick={() => setHideMixer(!hideMixer)}
+              onKeyDown={(event) =>
+                event.key === "Enter" && event.preventDefault()
+              }
+              icon={
+                <IoMdArrowDropup
+                  className={`${
+                    hideMixer ? "rotate-180" : "rotate-0"
+                  } duration-300 mt-1`}
+                ></IoMdArrowDropup>
+              }
+            ></Button>
           </div>
         </div>
       )}

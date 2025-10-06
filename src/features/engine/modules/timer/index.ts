@@ -86,6 +86,7 @@ export class TimerWorker {
   updatePpq(ppq: number) {
     this.worker?.postMessage({ command: "updatePpq", value: { ppq } });
   }
+
   updateDuration(duration: number) {
     this.worker?.postMessage({
       command: "updateDuration",

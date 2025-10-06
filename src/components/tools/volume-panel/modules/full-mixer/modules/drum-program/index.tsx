@@ -14,12 +14,13 @@ const DrumProgramChange: React.FC<DrumChangeProps> = ({ program }) => {
 
   return (
     <>
-      <div className="flex p-2">
+      <div className="flex divide-x">
         {INSTRUMENT_DRUM.map((data, i) => {
           return (
             <React.Fragment key={`card-inst-${data}`}>
               <Button
                 size="xs"
+                variant="solid"
                 color={program === 100 + i ? "primary" : "white"}
                 onClick={() => {
                   engine?.setProgram?.({
@@ -27,7 +28,7 @@ const DrumProgramChange: React.FC<DrumChangeProps> = ({ program }) => {
                     program: 100 + i,
                   });
                 }}
-                className={`text-xs !rounded-md`}
+                className={`text-xs !rounded-none border-b border-l`}
               >
                 <span className="text-nowrap">
                   {i + 1}. {data}

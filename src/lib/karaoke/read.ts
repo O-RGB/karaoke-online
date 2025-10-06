@@ -17,6 +17,8 @@ import { readMp3 } from "./songs/mp3/read";
 import { SoundSystemMode } from "@/features/config/types/config.type";
 import { ParsedSongData } from "./songs/shared/types";
 import { MusicFileType, MusicSubType } from "./songs/types";
+import { readYkrFile } from "./songs/ykr/reader";
+import { groupWordDataToEvents } from "./lyrics/xml-event/convert";
 
 const convertToTrackData = (
   baseName: string,
@@ -258,6 +260,41 @@ export const musicProcessGroup = async (
     console.log(`MP4 Group ${group.baseName} -> TODO`);
   }
 
+  // 🔹 YOUTUBE
+  else if (files.ykr) {
+    group.musicType = "YOUTUBE";
+    group.fileType = "youtube";
+    group.baseName = files.ykr.name;
+    let parsedDataYoutube = await readYkrFile(files.ykr);
+    group.metadata = {
+      chords: parsedDataYoutube.data.chordsData,
+      info: parsedDataYoutube.data.metadata,
+      lyrics: groupWordDataToEvents(parsedDataYoutube.data.lyricsData),
+      lyricsRaw: [],
+    };
+    group.duration = parsedDataYoutube.data.playerState.duration ?? 0;
+
+    if (!hasLyrics(group)) {
+      group.isError = true;
+      console.log(`YOUTUBE Group ${group.baseName} ไม่มี lyrics ❌ ลบออก`);
+      return group;
+    }
+
+    let lyricsData = parsedDataYoutube.data.lyricsData.flat();
+
+    console.log("lyricsData", lyricsData);
+
+    group.lyricsRange = xmlToArrayRange(lyricsData, 0, "YOUTUBE");
+    group.trackData = convertToTrackData(
+      group.baseName,
+      "YOUTUBE",
+      "YOUTUBE",
+      group.metadata
+    );
+
+    group.youtubeId = parsedDataYoutube.data.playerState.youtubeId;
+  }
+
   return group;
 };
 
@@ -284,6 +321,7 @@ export const groupFilesByBaseName = (
         cur: undefined,
         mp3: undefined,
         mp4: undefined,
+        ykr: undefined,
       };
     }
 
@@ -308,6 +346,9 @@ export const groupFilesByBaseName = (
         break;
       case "mp4":
         grouped[baseName].mp4 = file;
+        break;
+      case "ykr":
+        grouped[baseName].ykr = file;
         break;
     }
   });

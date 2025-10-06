@@ -101,7 +101,7 @@ export const convertLyricsMapping = (
       }
 
       finalWords.push({
-        name: wordEvent.text,
+        text: wordEvent.text,
         start: convertedTick,
         end: endTime,
         length: endTime - convertedTick,
@@ -144,7 +144,7 @@ export const xmlToArrayRange = (
   const lyrInline: string[] = [];
   lyricsData.forEach((data) => {
     if (!lyrInline[data.lineIndex]) lyrInline[data.lineIndex] = "";
-    lyrInline[data.lineIndex] += data.name;
+    lyrInline[data.lineIndex] += data.text;
   });
 
   const arrayRange = new ArrayRange<ISentence>();

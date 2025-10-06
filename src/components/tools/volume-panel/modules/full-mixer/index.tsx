@@ -46,7 +46,7 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
       <WinboxModal
         onClose={() => setOpen(false)}
         title="Mixer"
-        height={340}
+        height={320}
         isOpen={open}
       >
         <div className="overflow-auto w-full h-full">

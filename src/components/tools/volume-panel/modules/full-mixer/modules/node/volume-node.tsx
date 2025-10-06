@@ -132,8 +132,8 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
         ></EQNode>
       </WinboxModal>
 
-      <div className="relative flex flex-col gap-2 min-w-12 w-12 max-w-12 overflow-hidden">
-        {config.sound?.equalizer && (
+      <div className="relative flex flex-col gap-2 min-w-12 w-12 max-w-12 overflow-hidden border-b pb-2">
+        {/* {config.sound?.equalizer && (
           <Button
             size="xs"
             onClick={openEq}
@@ -141,7 +141,7 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
           >
             EQ
           </Button>
-        )}
+        )} */}
         <div className="px-0.5">
           <div className="text-[10px] text-center break-all text-nowrap">
             {text}
@@ -164,7 +164,7 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
             ></SliderCommon>
           </div>
         </div>
-        <div className="p-0.5">
+        <div className="p-0.5 ">
           <img
             src={`/icon/instrument/${type}.png`}
             className="w-[50px] h-[30px] object-contain"

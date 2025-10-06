@@ -63,13 +63,11 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
           ...(isLandscape &&
             !fullUi && {
               right: "max(1rem, env(safe-area-inset-right))",
-              width: "14rem",
             }),
           ...(isLandscape &&
             fullUi && {
               left: "max(1rem, env(safe-area-inset-left))",
               right: "max(1rem, env(safe-area-inset-right))",
-              width: "auto",
             }),
           top: isLandscape ? "max(1rem, env(safe-area-inset-top))" : undefined,
         }}
@@ -77,15 +75,13 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
       >
         <div className="flex gap-1.5 w-full">
           <div
-            className={`w-full blur-overlay flex flex-col rounded-md overflow-hidden transition-all duration-300 ${
-              isLandscape && fullUi ? "transform scale-x-100" : ""
-            }`}
+            className={`w-full blur-overlay flex flex-col rounded-md overflow-hidden transition-all duration-300`}
           >
             <SearchSelect
               onBlur={handleSearchBlur}
               onFocus={handleSearchFocus}
               className={
-                "!placeholder-white !bg-transparent w-full !text-white font-light !h-[36px] border-white/50 hover:!border-white/50 focus:!outline-none focus:!ring-0"
+                "!placeholder-white !bg-transparent w-full !text-white font-light !h-[35px] border-white/50 hover:!border-white/50 focus:!outline-none focus:!ring-0"
               }
               onSelectItem={(value: IOptions<ITrackData>) => {
                 if (value.option) {

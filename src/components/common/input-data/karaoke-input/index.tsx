@@ -54,6 +54,12 @@ const SongTypeTag = ({ type }: { type?: MusicSubType }) => {
         MP3
       </Tags>
     );
+  if (type === "YOUTUBE")
+    return (
+      <Tags color="gray" className="!text-lg">
+        YOUTUBE
+      </Tags>
+    );
   return null;
 };
 

@@ -51,8 +51,15 @@ const MidiSettingModal: React.FC<MidiSettingModalProps> = () => {
   }, []);
 
   return (
-    <>
-      <Label>มิดี้ ขาออก</Label>
+    <div>
+      <Label
+        textSize={15}
+        textColor="text-gray-800"
+        headClass="bg-blue-500"
+        description="ส่งเสียงออกทั้งหมดไปที่ Device อื่น"
+      >
+        มิดี้ ขาออก
+      </Label>
       <Select
         disabled={midiAccess === null}
         onChange={onChangeMidiOutPut}
@@ -65,7 +72,7 @@ const MidiSettingModal: React.FC<MidiSettingModalProps> = () => {
         ]}
       ></Select>
       {midiAccess === null && <Label>ยังไม่ได้รับอนุญาต MIDI Access</Label>}
-    </>
+    </div>
   );
 };
 

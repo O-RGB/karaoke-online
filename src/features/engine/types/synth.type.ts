@@ -91,6 +91,7 @@ export interface BaseSynthEvent {
 }
 
 export interface BaseSynthPlayerEngine {
+  youtubeId?: string;
   paused: boolean;
   isFinished: boolean;
   midiData: IMidiParseResult | undefined;

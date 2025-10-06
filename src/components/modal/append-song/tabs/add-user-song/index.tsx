@@ -88,6 +88,7 @@ const AddUserSong: React.FC<AddUserSongProps> = ({
     for (let i = 0; i < preprocess.length; i++) {
       const item = preprocess[i];
       let data = await musicProcessGroup(item, false);
+      console.log(data);
       decode.push(data);
     }
 
@@ -99,13 +100,6 @@ const AddUserSong: React.FC<AddUserSongProps> = ({
       if (item.isError) {
         errors.push(item);
       } else if (item) {
-        // const isDuplicate = checkDuplicate(item);
-        // if (isDuplicate) {
-        //   item.isDuplicate = true;
-        //   duplicates.push(item);
-        // } else {
-        //   valids.push(item);
-        // }
         valids.push(item);
       }
     }
@@ -413,7 +407,8 @@ const AddUserSong: React.FC<AddUserSongProps> = ({
         <div className="h-fit space-y-1.5">
           <div>
             <Label>
-              เลือกไฟล์เพลง (.emk หรือ .mid, .cur, .lyr) - สูงสุด 200 เพลง
+              เลือกไฟล์เพลง (.emk หรือ .mid, .cur, .lyr หรือ .ykr) - สูงสุด 200
+              เพลง
             </Label>
             <Upload
               className="border border-blue-500 p-3 rounded-md hover:bg-gray-50 duration-300 flex justify-between"

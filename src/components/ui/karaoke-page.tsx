@@ -54,6 +54,7 @@ import { DatabaseService } from "@/utils/indexedDB/service";
 import { SongsSystem } from "@/features/songs";
 import { SoundfontSystemManager } from "@/features/soundfont";
 import dynamic from "next/dynamic";
+import YoutubeEngine from "@/features/engine/modules/youtube";
 
 interface KaraokePageProps {}
 
@@ -120,9 +121,11 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         <Loading isLoad={onPrepare} />
         <WallpaperRender />
         <AutoModal auto title={""} />
-
         <div id="zoom-container" className="fixed inset-0 w-full z-10">
-          <ContextModal modal={modalMap} className="karaoke-layout w-full h-full">
+          <ContextModal
+            modal={modalMap}
+            className="karaoke-layout w-full h-full"
+          >
             <div
               style={{
                 paddingTop: "max(1rem, env(safe-area-inset-top))",
@@ -159,7 +162,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
           </ContextModal>
         </div>
         <QueueSong />
-        <div className="fixed bottom-[20dvh] landscape:bottom-[20dvh] left-0 right-0 -z-20">
+        <YoutubeEngine></YoutubeEngine>
+        <div className="fixed bottom-[20dvh] landscape:bottom-[20dvh] left-0 right-0 -z-10">
           <div
             style={{
               paddingTop: "max(1rem, env(safe-area-inset-top))",

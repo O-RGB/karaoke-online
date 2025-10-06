@@ -12,24 +12,44 @@ export function groupLyricsByLine(words: LyricWordData[]): LyricWordData[][] {
   return groupedLyrics;
 }
 
+export function gorupLyricWordDataToLyrics(words: LyricWordData[][]) {
+  let lyrs: string = "";
+  words.map((wordsLine, i) => {
+    let lyr: string = "";
+    wordsLine.map((word, j) => {
+      lyr += word;
+    });
+    lyrs += lyr + "\n";
+  });
+  return lyrs;
+}
+
 export function groupWordDataToEvents(
-  words: LyricWordData[],
+  words: LyricWordData[] | LyricWordData[][],
   tickConverter?: (tick: number) => number
 ): LyricEvent[][] {
+  const flatWords: LyricWordData[] = Array.isArray(words[0])
+    ? (words as LyricWordData[][]).flat()
+    : (words as LyricWordData[]);
+
   const groupedEvents: LyricEvent[][] = [];
-  for (const word of words) {
+
+  for (const word of flatWords) {
     if (!groupedEvents[word.lineIndex]) {
       groupedEvents[word.lineIndex] = [];
     }
+
     const tick = tickConverter
       ? tickConverter(word.start ?? 0)
       : word.start ?? 0;
+
     groupedEvents[word.lineIndex].push({
-      text: word.name,
-      tick: tick,
+      text: word.text,
+      tick,
     });
   }
 
+  // เรียงลำดับภายในแต่ละบรรทัดตาม tick
   return groupedEvents.map((line) => line.sort((a, b) => a.tick - b.tick));
 }
 
@@ -46,7 +66,7 @@ export const mapEventsToWordData = (
       const end = next ? convert(next.tick) : null;
 
       return {
-        name: event.text,
+        text: event.text,
         start,
         end,
         length: end !== null ? end - start : 0,

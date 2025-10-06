@@ -412,13 +412,41 @@ export class JsSynthEngine implements BaseSynthEngine {
       default:
         break;
     }
+
+    if (isLocked === true || event.force) {
+      this.lockController({ ...event, controllerValue: false });
+    }
+
     this.synth?.midiControl(
       event.channel,
       event.controllerNumber,
       event.controllerValue
     );
 
-    node.volume?.setValue(event.controllerValue);
+    switch (event.controllerNumber) {
+      case MAIN_VOLUME:
+        node.volume?.setValue(event.controllerValue);
+        break;
+      case PAN:
+        node.pan?.setValue(event.controllerValue);
+        break;
+      case REVERB:
+        node.reverb?.setValue(event.controllerValue);
+        break;
+      case CHORUSDEPTH:
+        node.chorus?.setValue(event.controllerValue);
+        break;
+      case EXPRESSION:
+        node.expression?.setValue(event.controllerValue);
+        break;
+
+      default:
+        break;
+    }
+
+    if (isLocked === true || event.force) {
+      this.lockController({ ...event, controllerValue: true });
+    }
   }
 
   lockController(event: IControllerChange<boolean>): void {
@@ -428,6 +456,7 @@ export class JsSynthEngine implements BaseSynthEngine {
       controllerValue: event.controllerValue,
     });
   }
+
   updatePitch(channel: number | null, semitones: number = 0): void {
     if (channel !== null) {
       this.player?.pause();

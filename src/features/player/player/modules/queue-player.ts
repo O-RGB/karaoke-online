@@ -14,6 +14,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     set({ queue: [] });
 
     queue.push(value);
+    console.log("adding queure", value);
     set({ queue });
 
     if (!player?.musicQuere) {
@@ -48,6 +49,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     const player = useSynthesizerEngine.getState().engine?.player;
 
     if (!player) {
+      console.error("Player Not Working!!");
       return;
     }
 
@@ -55,8 +57,10 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     const music = queue[index];
 
     if (!music) {
+      console.error("music metadata Not Found!!");
       return;
     }
+
     set({ loading: true });
     let songsManager = useSongsStore.getState().songsManager;
     const song = await songsManager?.getSong(music);
@@ -64,13 +68,17 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     set({ loading: false });
 
     if (!song) {
+      console.error("Songs Manager Not Found!!");
       return;
     }
 
     player.stop();
     await new Promise((resolve) => setTimeout(resolve, 100));
     const isOk = await player.loadMidi(song);
-    if (!isOk) return;
+    if (!isOk) {
+      console.error("Engine can't load music to player!!");
+      return;
+    }
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     setTimeout(async () => {

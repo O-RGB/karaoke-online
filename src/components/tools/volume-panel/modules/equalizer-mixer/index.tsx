@@ -3,6 +3,7 @@ import WinboxModal from "@/components/common/modal";
 import GlobalEqualizer from "./global-equalizer";
 import React, { useState } from "react";
 import { FaList } from "react-icons/fa";
+import GlobalEqualizerModal from "@/components/modal/display/equalizer/global-equalizer";
 
 interface EqualizerProps {}
 
@@ -18,9 +19,9 @@ const EqualizerPanel: React.FC<EqualizerProps> = ({}) => {
         onClose={() => setOpen(false)}
         title="Globals Equalizer"
         isOpen={open}
-        height={580}
+        // height={580}
       >
-        <GlobalEqualizer></GlobalEqualizer>
+        <GlobalEqualizerModal></GlobalEqualizerModal>
       </WinboxModal>
       <Button
         size="xs"

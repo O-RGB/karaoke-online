@@ -11,7 +11,7 @@ interface MixerNodesProps {
 
 const MixerNodes: React.FC<MixerNodesProps> = ({ instrumental }) => {
   return (
-    <div className="flex p-2 divide-x border ">
+    <div className="flex pt-2 divide-x">
       {INSTRUMENT_TYPE_BY_INDEX.map((value, index) => {
         return (
           <React.Fragment key={`card-inst-${index}`}>
