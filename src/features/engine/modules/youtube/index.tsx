@@ -7,9 +7,9 @@ interface YoutubeEngineProps {}
 const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
   const { youtubeId, setIsReady, isPlay, show } = useYoutubePlayer();
   const playerRef = useRef<YouTubePlayer | null>(null);
+  const isUnmutingRef = useRef(false);
 
   const [isMuted, setIsMuted] = useState(true);
-  const [hasUnmutedOnce, setHasUnmutedOnce] = useState(false);
   const [showVolumeButton, setShowVolumeButton] = useState(true);
 
   const opts = {
@@ -23,7 +23,8 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
       showinfo: 0,
       rel: 0,
       iv_load_policy: 3,
-      mute: 1, // เริ่ม muted
+      mute: 1,
+      playsinline: 1, // สำคัญมากสำหรับ iOS/Safari
     },
   };
 
@@ -31,19 +32,25 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
     playerRef.current = event.target;
     setIsReady(true);
 
-    // ถ้า show true เล่นวิดีโอ (ยัง muted)
     if (show) {
-      playerRef.current.playVideo();
-      playerRef.current.mute();
+      event.target.playVideo();
+      event.target.mute();
     }
   };
 
   const handleStateChange = (e: { data: number }) => {
     const isCurrentlyPlaying = e.data === 1;
     console.log("Is playing:", isCurrentlyPlaying);
+
+    // ถ้ากำลัง unmute แล้ววิดีโอหยุด ให้เล่นต่อทันที
+    if (!isCurrentlyPlaying && isUnmutingRef.current) {
+      setTimeout(() => {
+        playerRef.current?.playVideo();
+      }, 100);
+    }
   };
 
-  // ควบคุมเล่น/หยุด และเสียงตาม show
+  // ควบคุมการเล่นและเสียง
   useEffect(() => {
     const player = playerRef.current;
     if (!player) return;
@@ -51,36 +58,76 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
     if (!show) {
       player.pauseVideo();
       player.mute();
+      setShowVolumeButton(true);
       return;
     }
 
-    if (isPlay) player.playVideo();
-    else player.pauseVideo();
-
-    // restore เสียงถ้า unmuted แล้ว
-    if (!isMuted && hasUnmutedOnce) {
+    // จัดการเสียง (ไม่ให้มันหยุดวิดีโอ)
+    if (isMuted) {
+      player.mute();
+    } else {
       try {
         player.unMute();
-        setShowVolumeButton(false);
+        player.setVolume(100);
       } catch (err) {
-        console.error("Failed to unmute:", err);
-        setShowVolumeButton(true);
+        console.error("Unmute error:", err);
       }
     }
-  }, [show, isPlay, isMuted, hasUnmutedOnce]);
 
-  const handleToggleMute = () => {
+    // จัดการเล่น/หยุด
+    if (isPlay) {
+      player.playVideo();
+    } else {
+      player.pauseVideo();
+    }
+  }, [show, isPlay, isMuted]);
+
+  const handleToggleMute = async () => {
     const player = playerRef.current;
     if (!player) return;
 
+    isUnmutingRef.current = true;
+
     try {
+      // วิธี Safari-safe: เก็บตำแหน่งปัจจุบัน
+      const currentTime = await player.getCurrentTime();
+
+      // unmute และ set volume
       player.unMute();
+      player.setVolume(100);
+
+      // เล่นต่อจากตำแหน่งเดิม
+      player.seekTo(currentTime, true);
+      player.playVideo();
+
+      // รอให้แน่ใจว่าเล่นแล้ว
+      setTimeout(() => {
+        player.playVideo();
+        isUnmutingRef.current = false;
+      }, 200);
+
       setIsMuted(false);
-      setHasUnmutedOnce(true);
       setShowVolumeButton(false);
     } catch (err) {
       console.error("Failed to unmute:", err);
-      setShowVolumeButton(true);
+      isUnmutingRef.current = false;
+
+      // fallback: reload วิดีโอพร้อมเสียง
+      try {
+        const currentTime = await player.getCurrentTime();
+        player.loadVideoById({
+          videoId: youtubeId,
+          startSeconds: currentTime,
+        });
+        player.unMute();
+        player.setVolume(100);
+
+        setIsMuted(false);
+        setShowVolumeButton(false);
+      } catch (reloadErr) {
+        console.error("Reload failed:", reloadErr);
+        setShowVolumeButton(true);
+      }
     }
   };
 
@@ -105,7 +152,7 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
       {showVolumeButton && show && (
         <button
           onClick={handleToggleMute}
-          className="fixed bottom-6 right-6 z-50 bg-white/80 text-black px-4 py-2 rounded-full shadow-lg backdrop-blur-md hover:bg-white transition-all"
+          className="fixed bottom-6 right-6 z-50 bg-white/90 text-black px-6 py-3 rounded-full shadow-xl backdrop-blur-md hover:bg-white hover:scale-105 transition-all font-semibold"
         >
           🔊 เปิดเสียง
         </button>
