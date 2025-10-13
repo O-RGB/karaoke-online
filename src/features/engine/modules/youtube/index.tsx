@@ -123,19 +123,32 @@ const YoutubeEngine: React.FC = () => {
     <>
       {/* YouTube Video */}
       <div
-        className={`${
-          show ? "fixed inset-0 -z-10 w-full h-full" : "opacity-0"
+        className={`fixed inset-0 -z-10 overflow-hidden transition-opacity duration-500 ${
+          show ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
-        style={{ pointerEvents: "none" }}
       >
-        <YouTube
-          videoId={youtubeId}
-          opts={opts}
-          onReady={handleReady}
-          onStateChange={handleStateChange}
-          className="rounded-lg overflow-hidden w-full h-full"
-          style={{ pointerEvents: "none" }}
-        />
+        <div
+          className="absolute top-1/2 left-1/2"
+          style={{
+            width: `${window.innerHeight * (16 / 9)}px`, // 16:9 ตาม height
+            height: `${window.innerHeight}px`,
+            transform: "translate(-50%, -50%)",
+            minWidth: "100vw",
+            minHeight: "100vh",
+          }}
+        >
+          <YouTube
+            videoId={youtubeId}
+            opts={{
+              ...opts,
+              width: "100%",
+              height: "100%",
+            }}
+            onReady={handleReady}
+            onStateChange={handleStateChange}
+            className="absolute top-0 left-0 w-full h-full"
+          />
+        </div>
       </div>
 
       {/* ปุ่มเปิดเสียง */}
