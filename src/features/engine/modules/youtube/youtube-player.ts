@@ -19,7 +19,8 @@ export interface IYoutubePlayer {
   setHasUserUnmuted: (v: boolean) => void;
   setShowVolumeButton: (v: boolean) => void;
   resolvePlaying: () => void;
-
+  waitUntilPlaying: () => Promise<void>;
+  resetWaitPlaying: () => void;
   // --- Controls ---
   play: () => void;
   pause: () => void;
@@ -29,12 +30,9 @@ export interface IYoutubePlayer {
   unmute: () => void;
   loadVideo: (id: string) => void;
 }
-export const useYoutubePlayer = create<
-  IYoutubePlayer & {
-    waitUntilPlaying: () => Promise<void>;
-  }
->((set, get) => {
-  let playingResolver: (() => void) | null = null;
+
+export const useYoutubePlayer = create<IYoutubePlayer>((set, get) => {
+  let playingResolvers: (() => void)[] = [];
 
   return {
     youtubeId: undefined,
@@ -53,7 +51,6 @@ export const useYoutubePlayer = create<
     setHasUserUnmuted: (v) => set({ hasUserUnmuted: v }),
     setShowVolumeButton: (v) => set({ showVolumeButton: v }),
 
-    // ---- Control actions ----
     play: () => {
       const p = get().player;
       if (p) p.playVideo();
@@ -91,25 +88,27 @@ export const useYoutubePlayer = create<
       set({ youtubeId: id });
     },
 
-    // --- รอจนกว่า YouTube จะเล่นจริง ๆ ---
+    // ✅ รอจน YouTube state === 1 (ทุกครั้ง)
     waitUntilPlaying: () => {
       return new Promise<void>((resolve) => {
-        const player = get().player;
-        if (!player) return resolve();
+        const p = get().player;
+        if (!p) return resolve();
+        const s = p.getPlayerState?.();
+        if (s === 1) return resolve(); // already playing
 
-        const state = player.getPlayerState?.();
-        if (state === 1) return resolve(); // already playing
-
-        playingResolver = resolve;
+        playingResolvers.push(resolve);
       });
     },
 
-    // internal helper: เรียกตอน YouTube เปลี่ยน state
+    // 🔁 เรียกเมื่อ state = 1
     resolvePlaying: () => {
-      if (playingResolver) {
-        playingResolver();
-        playingResolver = null;
-      }
+      playingResolvers.forEach((r) => r());
+      playingResolvers = [];
+    },
+
+    // 🔄 เรียกตอน pause เพื่อ reset queue
+    resetWaitPlaying: () => {
+      playingResolvers = [];
     },
   };
 });

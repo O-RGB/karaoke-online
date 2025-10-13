@@ -18,6 +18,7 @@ const YoutubeEngine: React.FC = () => {
     unmute,
     mute,
     resolvePlaying,
+    resetWaitPlaying,
   } = useYoutubePlayer();
 
   const currentVideoIdRef = useRef<string | undefined>("");
@@ -58,9 +59,11 @@ const YoutubeEngine: React.FC = () => {
   };
 
   const handleStateChange = (e: { data: number }) => {
-    console.log("Is playing:", e.data === 1);
-    if (e.data === 1) {
-      resolvePlaying();
+    const state = e.data;
+    if (state === 1) {
+      resolvePlaying?.();
+    } else if (state === 2 || state === 0) {
+      resetWaitPlaying?.();
     }
   };
 
