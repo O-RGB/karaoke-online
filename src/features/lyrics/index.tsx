@@ -31,7 +31,6 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = ({ className }) => {
   const [tick, setTick] = useState<number>(0);
 
   const onTickUpdated = (tick: number) => {
-    console.log("musicQuere", musicQuere);
     setTick(tick);
   };
 

@@ -1,4 +1,4 @@
-import { LyricEvent } from "../../songs/midi/types";
+import { LyricEvent, SongInfo } from "../../songs/midi/types";
 import { LyricWordData } from "../../songs/types";
 
 export function groupLyricsByLine(words: LyricWordData[]): LyricWordData[][] {
@@ -12,15 +12,25 @@ export function groupLyricsByLine(words: LyricWordData[]): LyricWordData[][] {
   return groupedLyrics;
 }
 
-export function gorupLyricWordDataToLyrics(words: LyricWordData[][]) {
-  let lyrs: string = "";
+export function gorupLyricWordDataToLyrics(
+  words: LyricWordData[][],
+  metadata: SongInfo
+): string[] {
+  let lyrs: string[] = [
+    metadata.TITLE,
+    metadata.ARTIST,
+    metadata.KEY ?? "Cm",
+    "",
+  ];
+
   words.map((wordsLine, i) => {
     let lyr: string = "";
     wordsLine.map((word, j) => {
-      lyr += word;
+      lyr += word.text;
     });
-    lyrs += lyr + "\n";
+    lyrs.push(lyr);
   });
+  console.log("gorupLyricWordDataToLyrics lyrs", lyrs);
   return lyrs;
 }
 

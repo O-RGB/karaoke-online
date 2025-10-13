@@ -1,4 +1,3 @@
-import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import { BaseSynthPlayerEngine, TimingModeType } from "../../types/synth.type";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 
@@ -18,7 +17,11 @@ export class TimerWorker {
       this.updatePpq((musicInfo.metadata as any).ticksPerBeat);
     } else {
       this.timingMode = "Time";
-      this.updateDuration((musicInfo.metadata as any).duration);
+      if ((musicInfo.metadata as any).duration) {
+        this.updateDuration((musicInfo.metadata as any).duration);
+      } else if (musicInfo.duration) {
+        this.updateDuration(musicInfo.duration);
+      }
     }
     this.updateMode(this.timingMode);
   }
@@ -38,6 +41,7 @@ export class TimerWorker {
           if (bpm !== undefined) {
             this.player?.tempoUpdate(bpm);
           }
+
           if (countdown !== undefined) {
             this.player?.countDownUpdate(countdown);
           }

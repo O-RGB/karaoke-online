@@ -18,7 +18,10 @@ import { SoundSystemMode } from "@/features/config/types/config.type";
 import { ParsedSongData } from "./songs/shared/types";
 import { MusicFileType, MusicSubType } from "./songs/types";
 import { readYkrFile } from "./songs/ykr/reader";
-import { groupWordDataToEvents } from "./lyrics/xml-event/convert";
+import {
+  gorupLyricWordDataToLyrics,
+  groupWordDataToEvents,
+} from "./lyrics/xml-event/convert";
 
 const convertToTrackData = (
   baseName: string,
@@ -253,6 +256,8 @@ export const musicProcessGroup = async (
       "MP3",
       group.metadata
     );
+
+    console.log("MP3", group);
   }
 
   // 🔹 MP4
@@ -270,7 +275,10 @@ export const musicProcessGroup = async (
       chords: parsedDataYoutube.data.chordsData,
       info: parsedDataYoutube.data.metadata,
       lyrics: groupWordDataToEvents(parsedDataYoutube.data.lyricsData),
-      lyricsRaw: [],
+      lyricsRaw: gorupLyricWordDataToLyrics(
+        parsedDataYoutube.data.lyricsData,
+        parsedDataYoutube.data.metadata
+      ),
     };
     group.duration = parsedDataYoutube.data.playerState.duration ?? 0;
 
@@ -285,6 +293,8 @@ export const musicProcessGroup = async (
     console.log("lyricsData", lyricsData);
 
     group.lyricsRange = xmlToArrayRange(lyricsData, 0, "YOUTUBE");
+
+    console.log("group.metadata", group.metadata);
     group.trackData = convertToTrackData(
       group.baseName,
       "YOUTUBE",
@@ -293,6 +303,8 @@ export const musicProcessGroup = async (
     );
 
     group.youtubeId = parsedDataYoutube.data.playerState.youtubeId;
+
+    console.log("YOUTUBE", group);
   }
 
   return group;

@@ -2,100 +2,92 @@ import React, { useEffect, useRef, useState } from "react";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useYoutubePlayer } from "./youtube-player";
 
-interface YoutubeEngineProps {}
+const YoutubeEngine: React.FC = () => {
+  const {
+    youtubeId,
+    isPlay,
+    show,
+    hasUserUnmuted,
+    showVolumeButton,
+    setPlayer,
+    setIsReady,
+    setShowVolumeButton,
+    setHasUserUnmuted,
+    play,
+    pause,
+    unmute,
+    mute,
+  } = useYoutubePlayer();
 
-const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
-  const { youtubeId, setIsReady, isPlay, show } = useYoutubePlayer();
-  const playerRef = useRef<YouTubePlayer | null>(null);
   const currentVideoIdRef = useRef<string | undefined>("");
-  const hasUserUnmutedRef = useRef(false); // เก็บว่า user กดอนุญาติแล้วหรือยัง
-
-  const [showVolumeButton, setShowVolumeButton] = useState(true);
 
   const opts = {
     height: "100%",
     width: "100%",
     playerVars: {
-      autoplay: 1,
+      autoplay: 0,
       controls: 0,
       disablekb: 1,
       modestbranding: 1,
-      showinfo: 0,
       rel: 0,
       iv_load_policy: 3,
       mute: 1,
       playsinline: 1,
-      fs: 0, // ปิดปุ่ม fullscreen
-      enablejsapi: 1, // เปิด JS API
+      fs: 0,
+      enablejsapi: 1,
     },
   };
 
   const handleReady = (event: { target: YouTubePlayer }) => {
-    playerRef.current = event.target;
-    currentVideoIdRef.current = youtubeId;
+    const player = event.target;
+    setPlayer(player);
     setIsReady(true);
+    currentVideoIdRef.current = youtubeId;
+
+    player.pauseVideo();
 
     if (show) {
-      event.target.playVideo();
-      if (!hasUserUnmutedRef.current) {
-        event.target.mute();
+      if (!hasUserUnmuted) {
+        player.mute();
       } else {
-        event.target.unMute();
-        event.target.setVolume(100);
+        player.unMute();
+        player.setVolume(100);
       }
     }
   };
 
   const handleStateChange = (e: { data: number }) => {
-    const isCurrentlyPlaying = e.data === 1;
-    console.log("Is playing:", isCurrentlyPlaying);
+    console.log("Is playing:", e.data === 1);
   };
 
-  // เปลี่ยนวิดีโอเมื่อ youtubeId เปลี่ยน (ไม่ rerender)
   useEffect(() => {
-    const player = playerRef.current;
+    const player = useYoutubePlayer.getState().player;
     if (!player || !youtubeId) return;
 
-    // ถ้า id เปลี่ยน ให้ load วิดีโอใหม่โดยไม่ rerender
     if (currentVideoIdRef.current !== youtubeId) {
-      console.log("Loading new video:", youtubeId);
       currentVideoIdRef.current = youtubeId;
 
-      // ถ้า user อนุญาติเสียงแล้ว load พร้อมเสียง
-      if (hasUserUnmutedRef.current) {
-        player.loadVideoById({
-          videoId: youtubeId,
-          startSeconds: 0,
-        });
-
-        // รอให้ player พร้อม แล้วเปิดเสียงและเล่น
-        const checkAndPlay = setInterval(() => {
+      if (hasUserUnmuted) {
+        player.loadVideoById({ videoId: youtubeId, startSeconds: 0 });
+        const check = setInterval(() => {
           const state = player.getPlayerState();
           if (state === -1 || state === 5) {
-            // unstarted or cued
             player.unMute();
             player.setVolume(100);
-            player.playVideo();
-            clearInterval(checkAndPlay);
+
+            clearInterval(check);
           }
         }, 100);
-
-        // clear interval หลัง 3 วินาที
-        setTimeout(() => clearInterval(checkAndPlay), 3000);
+        setTimeout(() => clearInterval(check), 3000);
       } else {
-        player.loadVideoById({
-          videoId: youtubeId,
-          startSeconds: 0,
-        });
+        player.loadVideoById({ videoId: youtubeId, startSeconds: 0 });
         player.mute();
-        player.playVideo();
       }
     }
   }, [youtubeId]);
 
-  // ควบคุมการเล่นและ show
   useEffect(() => {
-    const player = playerRef.current;
+    const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
     if (!show) {
@@ -111,37 +103,23 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
   }, [show, isPlay]);
 
   const handleToggleMute = async () => {
-    const player = playerRef.current;
+    const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
-    try {
-      // บันทึกว่า user อนุญาติเสียงแล้ว (ครั้งเดียวตลอดไป)
-      hasUserUnmutedRef.current = true;
-      setShowVolumeButton(false);
-
-      // เปิดเสียง
-      player.unMute();
-      player.setVolume(100);
-
-      // เล่นต่อ
-      setTimeout(() => {
-        player.playVideo();
-      }, 100);
-
-      console.log("User has granted audio permission");
-    } catch (err) {
-      console.error("Failed to unmute:", err);
-    }
+    setHasUserUnmuted(true);
+    setShowVolumeButton(false);
+    unmute();
+    play();
   };
 
   return (
     <>
-      {/* YouTube Video - render ครั้งเดียว ไม่ rerender ตาม youtubeId */}
+      {/* YouTube Video */}
       <div
         className={`${
           show ? "fixed inset-0 -z-10 w-full h-full" : "opacity-0"
         }`}
-        style={{ pointerEvents: "none" }} // ปิด pointer events เพื่อไม่ให้บัง UI
+        style={{ pointerEvents: "none" }}
       >
         <YouTube
           videoId={youtubeId}
@@ -149,11 +127,11 @@ const YoutubeEngine: React.FC<YoutubeEngineProps> = () => {
           onReady={handleReady}
           onStateChange={handleStateChange}
           className="rounded-lg overflow-hidden w-full h-full"
-          style={{ pointerEvents: "none" }} // ปิด pointer events
+          style={{ pointerEvents: "none" }}
         />
       </div>
 
-      {/* ปุ่มเปิดเสียง - แสดงเฉพาะครั้งแรก */}
+      {/* ปุ่มเปิดเสียง */}
       {showVolumeButton && show && (
         <button
           onClick={handleToggleMute}

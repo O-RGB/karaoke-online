@@ -52,6 +52,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     } else if (this.musicQuere?.musicType === "YOUTUBE") {
       const youtubePlayer = useYoutubePlayer.getState();
       youtubePlayer.setPause(false);
+      youtubePlayer.play();
     } else {
       await this.player?.playPlayer();
     }
@@ -72,6 +73,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     } else if (this.musicQuere?.musicType === "YOUTUBE") {
       const youtubePlayer = useYoutubePlayer.getState();
       youtubePlayer.setPause(true);
+      youtubePlayer.stop();
     } else {
       this.player?.stopPlayer();
     }
@@ -88,6 +90,9 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       this.mp3PausedOffset = this.mp3Element.currentTime;
       this.mp3Element.pause();
     } else if (this.musicQuere?.musicType === "YOUTUBE") {
+      const youtubePlayer = useYoutubePlayer.getState();
+      youtubePlayer.setPause(true);
+      youtubePlayer.pause();
     } else {
       this.player?.stopPlayer();
     }
@@ -119,6 +124,12 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
         this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
       }
     } else if (this.musicQuere?.musicType === "YOUTUBE") {
+      const youtubePlayer = useYoutubePlayer.getState();
+      youtubePlayer.seekTo(seconds);
+      setTimeout(() => {
+        this.engine.timer?.seekTimer(seconds);
+        if (wasPlaying) this.play();
+      }, 500);
     } else {
       this.player?.seekPlayer(seconds);
       setTimeout(() => {
@@ -142,11 +153,9 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
   async loadYoutube(youtubeId: string): Promise<boolean> {
     const youtubePlayer = useYoutubePlayer.getState();
-
     if (!youtubePlayer.isReady) return false;
-
+    this.engine.timer?.seekTimer(0);
     youtubePlayer.setYoutubeId(youtubeId);
-
     youtubePlayer.setShow(true);
     return true;
   }
@@ -212,8 +221,8 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.stop();
     const youtubePlayer = useYoutubePlayer.getState();
     youtubePlayer.setShow(false);
-    youtubePlayer.setYoutubeId(undefined)
     this.engine.timer?.stopTimer();
+
     const mid = data.files.midi;
     if (mid !== undefined) {
       this.engine.timer?.updateMusic(data);
@@ -233,7 +242,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     }
 
     const ykr = data.files.ykr;
-    console.log("data", data);
     if (ykr != undefined && data.youtubeId) {
       this.engine.timer?.updateMusic(data);
       this.musicQuere = data;

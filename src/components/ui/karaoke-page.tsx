@@ -163,7 +163,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         </div>
         <QueueSong />
         <YoutubeEngine></YoutubeEngine>
-        <div className="fixed bottom-[20dvh] landscape:bottom-[20dvh] left-0 right-0 -z-10">
+        <div className="fixed bottom-[18dvh] landscape:bottom-[18dvh] left-0 right-0 -z-10">
           <div
             style={{
               paddingTop: "max(1rem, env(safe-area-inset-top))",

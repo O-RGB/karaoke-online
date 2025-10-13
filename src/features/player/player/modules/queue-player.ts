@@ -18,6 +18,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     set({ queue });
 
     if (!player?.musicQuere) {
+      console.info("player?.musicQuere is null", player?.musicQuere);
       get().playMusic(0);
       get().removeQueue(0);
     }
