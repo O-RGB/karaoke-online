@@ -33,6 +33,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   private mp3PausedOffset = 0;
 
   public youtubeId?: string;
+  private youtubePausedTime = 0;
 
   addEvent(input: Partial<BaseSynthEvent>): void {
     this.eventInit = { ...this.eventInit, ...input };
@@ -47,11 +48,13 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     if (!this.musicQuere) return;
 
     if (this.musicQuere.musicType === "MP3" && this.mp3Element) {
-      await this.mp3Element.play();
       this.mp3Element.currentTime = this.mp3PausedOffset;
+      await this.mp3Element.play();
     } else if (this.musicQuere?.musicType === "YOUTUBE") {
       const youtubePlayer = useYoutubePlayer.getState();
-      youtubePlayer.setPause(false);
+      if (this.youtubePausedTime > 0) {
+        youtubePlayer.seekTo(this.youtubePausedTime);
+      }
       youtubePlayer.play();
       await youtubePlayer.waitUntilPlaying();
     } else {
@@ -62,6 +65,26 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.eventInit?.onPlay?.();
     this.paused = false;
     this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
+  }
+
+  pause(): void {
+    if (!this.musicQuere) return;
+
+    if (this.musicQuere.musicType === "MP3" && this.mp3Element) {
+      this.mp3PausedOffset = this.mp3Element.currentTime;
+      this.mp3Element.pause();
+    } else if (this.musicQuere?.musicType === "YOUTUBE") {
+      const youtubePlayer = useYoutubePlayer.getState();
+      youtubePlayer.setPause(true);
+      youtubePlayer.pause();
+      this.youtubePausedTime = youtubePlayer.player?.getCurrentTime() ?? 0;
+    } else {
+      this.player?.stopPlayer();
+    }
+
+    this.engine.timer?.stopTimer();
+    this.paused = true;
+    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PAUSE");
   }
 
   stop(): void {
@@ -75,6 +98,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const youtubePlayer = useYoutubePlayer.getState();
       youtubePlayer.setPause(true);
       youtubePlayer.stop();
+      this.youtubePausedTime = 0;
     } else {
       this.player?.stopPlayer();
     }
@@ -82,25 +106,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.engine.timer?.stopTimer();
     this.paused = true;
     this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "STOP");
-  }
-
-  pause(): void {
-    if (!this.musicQuere) return;
-
-    if (this.musicQuere.musicType === "MP3" && this.mp3Element) {
-      this.mp3PausedOffset = this.mp3Element.currentTime;
-      this.mp3Element.pause();
-    } else if (this.musicQuere?.musicType === "YOUTUBE") {
-      const youtubePlayer = useYoutubePlayer.getState();
-      youtubePlayer.setPause(true);
-      youtubePlayer.pause();
-    } else {
-      this.player?.stopPlayer();
-    }
-
-    this.engine.timer?.stopTimer();
-    this.paused = true;
-    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PAUSE");
   }
 
   async getCurrentTiming() {
@@ -127,16 +132,19 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     } else if (this.musicQuere?.musicType === "YOUTUBE") {
       const youtubePlayer = useYoutubePlayer.getState();
       youtubePlayer.seekTo(seconds);
-      setTimeout(() => {
-        this.engine.timer?.seekTimer(seconds);
-        if (wasPlaying) this.play();
-      }, 500);
+      this.youtubePausedTime = seconds;
+      this.engine.timer?.seekTimer(seconds);
+
+      if (wasPlaying) {
+        await this.play();
+      }
     } else {
       this.player?.seekPlayer(seconds);
-      setTimeout(() => {
-        this.engine.timer?.seekTimer(seconds);
-        if (wasPlaying) this.play();
-      }, 500);
+      this.engine.timer?.seekTimer(seconds);
+
+      if (wasPlaying) {
+        await this.play();
+      }
     }
   }
 
@@ -158,6 +166,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.engine.timer?.seekTimer(0);
     youtubePlayer.setYoutubeId(youtubeId);
     youtubePlayer.setShow(true);
+    this.youtubePausedTime = 0;
     return true;
   }
 
@@ -339,7 +348,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             let controllerValue = value;
             let isLocked = false;
 
-            console.log("control", control);
             switch (control) {
               case MAIN_VOLUME:
                 controllerNumber = MAIN_VOLUME;
@@ -400,7 +408,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
                 break;
             }
 
-            console.log({ controllerNumber, controllerValue, channel });
             this.eventInit.controllerChangeCallback({
               controllerNumber,
               controllerValue,
@@ -411,10 +418,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
         case 192:
           if (this.eventInit?.programChangeCallback) {
-            this.eventInit.programChangeCallback({
-              program,
-              channel,
-            });
+            this.eventInit.programChangeCallback({ program, channel });
           }
           break;
       }

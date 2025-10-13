@@ -81,7 +81,7 @@ const LyricsList: React.FC<LyricsListProps> = ({
   if (!sentence) return null;
 
   return (
-    <div className="w-screen overflow-hidden px-8 flex justify-center">
+    <>
       <div
         ref={lyricsRef}
         className="relative w-full"
@@ -113,7 +113,7 @@ const LyricsList: React.FC<LyricsListProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 };
 
