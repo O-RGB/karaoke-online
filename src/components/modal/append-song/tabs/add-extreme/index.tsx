@@ -235,7 +235,7 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
         <div className="p-4 rounded-lg border w-full">
           <div className="flex gap-2">
             <Link
-              href={"https://github.com/O-RGB/Karaoke-Processor-GUI/tree/main"}
+              href={"https://next-karaoke-processor.vercel.app/"}
               target="_blank"
             >
               <Button

@@ -56,7 +56,7 @@ export class PythonIndexReader extends BaseSongsSystemReader {
       const file = files[i];
       const filePath = file.name;
 
-      if (filePath.startsWith("Data/master_index_v6.json")) {
+      if (filePath.startsWith("master.json")) {
         try {
           const masterIndexText = await file.text();
           const masterIndex: MasterIndex = JSON.parse(masterIndexText);
@@ -68,7 +68,7 @@ export class PythonIndexReader extends BaseSongsSystemReader {
             error
           );
         }
-      } else if (filePath.startsWith("Data/preview_chunk_v6/")) {
+      } else if (filePath.startsWith("chunk_")) {
         const chunkIdMatch = filePath.match(/(\d+)\.json$/);
         if (chunkIdMatch) {
           const chunkId = parseInt(chunkIdMatch[1], 10);

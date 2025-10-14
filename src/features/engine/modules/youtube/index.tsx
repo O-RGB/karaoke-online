@@ -130,7 +130,7 @@ const YoutubeEngine: React.FC = () => {
         <div
           className="absolute top-1/2 left-1/2"
           style={{
-            width: `${window.innerHeight * (16 / 9)}px`, // 16:9 ตาม height
+            width: `${window.innerHeight * (16 / 9)}px`,
             height: `${window.innerHeight}px`,
             transform: "translate(-50%, -50%)",
             minWidth: "100vw",

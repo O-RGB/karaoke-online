@@ -34,11 +34,11 @@ const AppendSongModal: React.FC<AppendSongModalProps> = ({ height }) => {
           label: "เล่นด้วย Extreme",
           content: <AddDBFSong></AddDBFSong>,
         },
-        // {
-        //   icon: <GoFileZip></GoFileZip>,
-        //   label: "เพิ่มจาก Extreme",
-        //   content: <AddExtremeAndManage></AddExtremeAndManage>,
-        // },
+        {
+          icon: <GoFileZip></GoFileZip>,
+          label: "เพิ่มจาก Extreme",
+          content: <AddExtremeAndManage></AddExtremeAndManage>,
+        },
       ]}
     ></Tabs>
   );
