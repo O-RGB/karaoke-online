@@ -273,15 +273,18 @@ export const musicProcessGroup = async (
     let parsedDataYoutube = await readYkrFile(files.ykr);
 
     let lyricsDataYoutube = parsedDataYoutube.data.lyricsData ?? [];
+    let lyrics = groupWordDataToEvents(lyricsDataYoutube);
+
+    let raw = gorupLyricWordDataToLyrics(
+      lyricsDataYoutube,
+      parsedDataYoutube.data.metadata
+    );
 
     group.metadata = {
       chords: parsedDataYoutube.data.chordsData,
       info: parsedDataYoutube.data.metadata,
-      lyrics: groupWordDataToEvents(lyricsDataYoutube),
-      lyricsRaw: gorupLyricWordDataToLyrics(
-        lyricsDataYoutube,
-        parsedDataYoutube.data.metadata
-      ),
+      lyrics,
+      lyricsRaw: raw,
     };
     group.duration = parsedDataYoutube.data.playerState.duration ?? 0;
 

@@ -4,19 +4,18 @@ import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import {
   ITrackData,
   KaraokeExtension,
-  MusicLoadAllData,
 } from "@/features/songs/types/songs.type";
 import { musicProcessGroup } from "@/lib/karaoke/read";
-// import useRuntimePlayer from "@/features/player/player/modules/runtime-player";
 
 export const remoteRoutes = () => {
   const client = usePeerHostStore.getState();
 
-  client.addRoute("system/init", async (payload) => {
-    // const musicInfo = useRuntimePlayer.getState().musicInfo;
-    // console.log("system/init, musicInfo",musicInfo);
-    // return { musicInfo };
-  });
+  // client.addRoute("system/init", async (payload) => {
+  //   // const musicInfo = useRuntimePlayer.getState().musicInfo;
+  //   // console.log("system/init, musicInfo",musicInfo);
+  //   // return { musicInfo };
+  //   console.log("test")
+  // });
 
   client.addRoute("songs/search", async (payload) => {
     const { search } = payload;
@@ -32,31 +31,25 @@ export const remoteRoutes = () => {
 
   client.addRoute("songs/send-file", async (payload) => {
     const addQueue = useQueuePlayer.getState().addQueue;
-    try {
-      const { arrayBuffer, filename, ext } = payload;
 
-      console.log({ arrayBuffer, filename, ext });
-      const blob = new Blob([arrayBuffer], {
-        type: "application/octet-stream",
-      });
-      const newFile = new File([blob], `${filename}.${ext}`, {
-        type: "application/octet-stream",
-      });
+    const { arrayBuffer, filename, ext } = payload;
 
-      console.log(newFile);
+    const blob = new Blob([arrayBuffer], {
+      type: "application/octet-stream",
+    });
+    const newFile = new File([blob], `${filename}.${ext}`, {
+      type: "application/octet-stream",
+    });
 
-      let karaokeExtension: KaraokeExtension = {};
-      if (ext == "ykr") {
-        karaokeExtension.ykr = newFile;
-      }
-
-      const readed = await musicProcessGroup(karaokeExtension);
-      readed.files = karaokeExtension;
-      readed.trackData._bufferFile = readed;
-      addQueue(readed.trackData);
-    } catch (error) {
-      console.error(error);
+    let karaokeExtension: KaraokeExtension = {};
+    if (ext == "ykr") {
+      karaokeExtension.ykr = newFile;
     }
+
+    const readed = await musicProcessGroup(karaokeExtension);
+    readed.files = karaokeExtension;
+    readed.trackData._bufferFile = readed;
+    addQueue(readed.trackData);
   });
 
   client.addRoute(

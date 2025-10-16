@@ -81,6 +81,8 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
       set({ loading: false });
     }
 
+    console.log("playMusic");
+
     player.stop();
     await new Promise((resolve) => setTimeout(resolve, 100));
     const isOk = await player.loadMidi(song);
@@ -92,10 +94,10 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
 
     setTimeout(async () => {
       player.play();
-      const requestToClient = usePeerHostStore.getState().requestToClient;
-      await requestToClient(null, "system/init", {
-        musicInfo: music,
-      });
+      // const requestToClient = usePeerHostStore.getState().requestToClient;
+      // await requestToClient(null, "system/init", {
+      //   musicInfo: music,
+      // });
     }, 500);
   },
 }));
