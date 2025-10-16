@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useYoutubePlayer } from "./youtube-player";
 
@@ -23,32 +21,13 @@ const YoutubeEngine: React.FC = () => {
     resetWaitPlaying,
   } = useYoutubePlayer();
 
-  const playerRef = useRef<YouTubePlayer | null>(null);
-  const queueRef = useRef<string[]>([]);
-  const currentIndexRef = useRef<number>(0);
-
-  // เพิ่มเพลงใหม่เข้าคิว
-  useEffect(() => {
-    if (!youtubeId) return;
-    const queue = queueRef.current;
-    if (!queue.includes(youtubeId)) {
-      queue.push(youtubeId);
-    }
-    // ถ้ายังไม่มีเพลงเล่น ให้เริ่มเล่นทันที
-    if (
-      playerRef.current &&
-      currentIndexRef.current === queue.length - 1 &&
-      isPlay
-    ) {
-      cueAndPlay(youtubeId);
-    }
-  }, [youtubeId]);
+  const currentVideoIdRef = useRef<string | undefined>("");
 
   const opts = {
     height: "100%",
     width: "100%",
     playerVars: {
-      autoplay: 1, // เปลี่ยนเป็น 1 เพื่อให้เล่นต่อเนื่อง
+      autoplay: 0,
       controls: 0,
       disablekb: 1,
       modestbranding: 1,
@@ -61,40 +40,21 @@ const YoutubeEngine: React.FC = () => {
     },
   };
 
-  const cueAndPlay = (videoId: string) => {
-    const player = playerRef.current;
-    if (!player) return;
-
-    // ใช้ loadVideoById แทน cueVideoById เมื่อ user unmute แล้ว
-    if (hasUserUnmuted) {
-      player.loadVideoById({
-        videoId,
-        startSeconds: 0,
-      });
-    } else {
-      player.cueVideoById({ videoId, startSeconds: 0 });
-
-      const check = setInterval(() => {
-        const state = player.getPlayerState();
-        if (state === 5) {
-          // video cued
-          player.mute();
-          player.playVideo();
-          clearInterval(check);
-        }
-      }, 100);
-      setTimeout(() => clearInterval(check), 3000);
-    }
-  };
-
   const handleReady = (event: { target: YouTubePlayer }) => {
     const player = event.target;
-    playerRef.current = player;
     setPlayer(player);
     setIsReady(true);
+    currentVideoIdRef.current = youtubeId;
 
-    if (queueRef.current.length > 0) {
-      cueAndPlay(queueRef.current[currentIndexRef.current]);
+    player.pauseVideo();
+
+    if (show) {
+      if (!hasUserUnmuted) {
+        player.mute();
+      } else {
+        player.unMute();
+        player.setVolume(100);
+      }
     }
   };
 
@@ -105,41 +65,36 @@ const YoutubeEngine: React.FC = () => {
     } else if (state === 2 || state === 0) {
       resetWaitPlaying?.();
     }
-
-    // video ended → เล่นเพลงถัดไป
-    if (state === 0) {
-      currentIndexRef.current++;
-      if (currentIndexRef.current < queueRef.current.length) {
-        const player = playerRef.current;
-        const nextVideoId = queueRef.current[currentIndexRef.current];
-
-        // ใช้ loadVideoById เพื่อเล่นต่อเนื่องโดยไม่ต้องรอ cue
-        if (player && hasUserUnmuted) {
-          player.loadVideoById({
-            videoId: nextVideoId,
-            startSeconds: 0,
-          });
-        } else if (player) {
-          cueAndPlay(nextVideoId);
-        }
-      }
-    }
-  };
-
-  const handleToggleMute = async () => {
-    const player = playerRef.current;
-    if (!player) return;
-
-    setHasUserUnmuted(true);
-    setShowVolumeButton(false);
-    unmute();
-    play();
-    player.unMute();
-    player.setVolume(100);
   };
 
   useEffect(() => {
-    const player = playerRef.current;
+    const player = useYoutubePlayer.getState().player;
+    if (!player || !youtubeId) return;
+
+    if (currentVideoIdRef.current !== youtubeId) {
+      currentVideoIdRef.current = youtubeId;
+
+      if (hasUserUnmuted) {
+        player.loadVideoById({ videoId: youtubeId, startSeconds: 0 });
+        const check = setInterval(() => {
+          const state = player.getPlayerState();
+          if (state === -1 || state === 5) {
+            player.unMute();
+            player.setVolume(100);
+
+            clearInterval(check);
+          }
+        }, 100);
+        setTimeout(() => clearInterval(check), 3000);
+      } else {
+        player.loadVideoById({ videoId: youtubeId, startSeconds: 0 });
+        player.mute();
+      }
+    }
+  }, [youtubeId]);
+
+  useEffect(() => {
+    const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
     if (!show) {
@@ -153,6 +108,16 @@ const YoutubeEngine: React.FC = () => {
       player.pauseVideo();
     }
   }, [show, isPlay]);
+
+  const handleToggleMute = async () => {
+    const player = useYoutubePlayer.getState().player;
+    if (!player) return;
+
+    setHasUserUnmuted(true);
+    setShowVolumeButton(false);
+    unmute();
+    play();
+  };
 
   return (
     <>
