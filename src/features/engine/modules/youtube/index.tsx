@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+"use client";
+
+import React, { useEffect, useRef } from "react";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useYoutubePlayer } from "./youtube-player";
 
@@ -21,7 +23,26 @@ const YoutubeEngine: React.FC = () => {
     resetWaitPlaying,
   } = useYoutubePlayer();
 
-  const currentVideoIdRef = useRef<string | undefined>("");
+  const playerRef = useRef<YouTubePlayer | null>(null);
+  const queueRef = useRef<string[]>([]);
+  const currentIndexRef = useRef<number>(0);
+
+  // เพิ่มเพลงใหม่เข้าคิว
+  useEffect(() => {
+    if (!youtubeId) return;
+    const queue = queueRef.current;
+    if (!queue.includes(youtubeId)) {
+      queue.push(youtubeId);
+    }
+    // ถ้ายังไม่มีเพลงเล่น ให้เริ่มเล่นทันที
+    if (
+      playerRef.current &&
+      currentIndexRef.current === queue.length - 1 &&
+      isPlay
+    ) {
+      cueAndPlay(youtubeId);
+    }
+  }, [youtubeId]);
 
   const opts = {
     height: "100%",
@@ -40,21 +61,37 @@ const YoutubeEngine: React.FC = () => {
     },
   };
 
+  const cueAndPlay = (videoId: string) => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    player.cueVideoById({ videoId, startSeconds: 0 });
+
+    const check = setInterval(() => {
+      const state = player.getPlayerState();
+      if (state === 5) {
+        // video cued
+        if (hasUserUnmuted) {
+          player.unMute();
+          player.setVolume(100);
+        } else {
+          player.mute();
+        }
+        player.playVideo();
+        clearInterval(check);
+      }
+    }, 100);
+    setTimeout(() => clearInterval(check), 3000);
+  };
+
   const handleReady = (event: { target: YouTubePlayer }) => {
     const player = event.target;
+    playerRef.current = player;
     setPlayer(player);
     setIsReady(true);
-    currentVideoIdRef.current = youtubeId;
 
-    player.pauseVideo();
-
-    if (show) {
-      if (!hasUserUnmuted) {
-        player.mute();
-      } else {
-        player.unMute();
-        player.setVolume(100);
-      }
+    if (queueRef.current.length > 0) {
+      cueAndPlay(queueRef.current[currentIndexRef.current]);
     }
   };
 
@@ -65,40 +102,30 @@ const YoutubeEngine: React.FC = () => {
     } else if (state === 2 || state === 0) {
       resetWaitPlaying?.();
     }
+
+    // video ended → เล่นเพลงถัดไป
+    if (state === 0) {
+      currentIndexRef.current++;
+      if (currentIndexRef.current < queueRef.current.length) {
+        cueAndPlay(queueRef.current[currentIndexRef.current]);
+      }
+    }
+  };
+
+  const handleToggleMute = async () => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    setHasUserUnmuted(true);
+    setShowVolumeButton(false);
+    unmute();
+    play();
+    player.unMute();
+    player.setVolume(100);
   };
 
   useEffect(() => {
-    const player = useYoutubePlayer.getState().player;
-    if (!player || !youtubeId) return;
-
-    if (currentVideoIdRef.current !== youtubeId) {
-      currentVideoIdRef.current = youtubeId;
-
-      // เตรียมเพลงใหม่แบบไม่รีเซ็ต iframe
-      player.cueVideoById({ videoId: youtubeId, startSeconds: 0 });
-
-      const tryPlay = () => {
-        const state = player.getPlayerState();
-        if (state === 5) {
-          // READY
-          if (hasUserUnmuted) {
-            player.unMute();
-            player.setVolume(100);
-          } else {
-            player.mute();
-          }
-          player.playVideo();
-          clearInterval(check);
-        }
-      };
-
-      const check = setInterval(tryPlay, 100);
-      setTimeout(() => clearInterval(check), 3000);
-    }
-  }, [youtubeId]);
-
-  useEffect(() => {
-    const player = useYoutubePlayer.getState().player;
+    const player = playerRef.current;
     if (!player) return;
 
     if (!show) {
@@ -112,16 +139,6 @@ const YoutubeEngine: React.FC = () => {
       player.pauseVideo();
     }
   }, [show, isPlay]);
-
-  const handleToggleMute = async () => {
-    const player = useYoutubePlayer.getState().player;
-    if (!player) return;
-
-    setHasUserUnmuted(true);
-    setShowVolumeButton(false);
-    unmute();
-    play();
-  };
 
   return (
     <>
