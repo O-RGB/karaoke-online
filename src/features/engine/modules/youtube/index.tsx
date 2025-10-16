@@ -74,22 +74,26 @@ const YoutubeEngine: React.FC = () => {
     if (currentVideoIdRef.current !== youtubeId) {
       currentVideoIdRef.current = youtubeId;
 
-      if (hasUserUnmuted) {
-        player.loadVideoById({ videoId: youtubeId, startSeconds: 0 });
-        const check = setInterval(() => {
-          const state = player.getPlayerState();
-          if (state === -1 || state === 5) {
+      // เตรียมเพลงใหม่แบบไม่รีเซ็ต iframe
+      player.cueVideoById({ videoId: youtubeId, startSeconds: 0 });
+
+      const tryPlay = () => {
+        const state = player.getPlayerState();
+        if (state === 5) {
+          // READY
+          if (hasUserUnmuted) {
             player.unMute();
             player.setVolume(100);
-
-            clearInterval(check);
+          } else {
+            player.mute();
           }
-        }, 100);
-        setTimeout(() => clearInterval(check), 3000);
-      } else {
-        player.loadVideoById({ videoId: youtubeId, startSeconds: 0 });
-        player.mute();
-      }
+          player.playVideo();
+          clearInterval(check);
+        }
+      };
+
+      const check = setInterval(tryPlay, 100);
+      setTimeout(() => clearInterval(check), 3000);
     }
   }, [youtubeId]);
 
