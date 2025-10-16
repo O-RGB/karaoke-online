@@ -155,7 +155,7 @@ const YoutubeEngine: React.FC = () => {
       {showVolumeButton && show && (
         <button
           onClick={handleToggleMute}
-          className="fixed bottom-6 right-6 z-50 bg-white/90 text-black px-6 py-3 rounded-full shadow-xl backdrop-blur-md hover:bg-white hover:scale-105 transition-all font-semibold animate-pulse"
+          className="fixed bottom-8 right-6 z-50 bg-white/90 text-black px-6 py-3 rounded-full shadow-xl backdrop-blur-md hover:bg-white hover:scale-105 transition-all font-semibold animate-pulse"
         >
           🔊 เปิดเสียง
         </button>

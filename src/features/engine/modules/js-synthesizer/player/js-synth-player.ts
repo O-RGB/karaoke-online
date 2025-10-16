@@ -59,7 +59,16 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       await youtubePlayer.waitUntilPlaying();
       setTimeout(() => {
         youtubePlayer.play();
-      }, 500);
+        youtubePlayer.unmute();
+      }, 1000);
+      setTimeout(() => {
+        youtubePlayer.play();
+        youtubePlayer.unmute();
+      }, 1000);
+      setTimeout(() => {
+        youtubePlayer.play();
+        youtubePlayer.unmute();
+      }, 1000);
     } else {
       await this.player?.playPlayer();
     }
