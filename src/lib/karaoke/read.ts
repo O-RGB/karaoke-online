@@ -271,12 +271,15 @@ export const musicProcessGroup = async (
     group.fileType = "youtube";
     group.baseName = files.ykr.name;
     let parsedDataYoutube = await readYkrFile(files.ykr);
+
+    let lyricsDataYoutube = parsedDataYoutube.data.lyricsData ?? [];
+
     group.metadata = {
       chords: parsedDataYoutube.data.chordsData,
       info: parsedDataYoutube.data.metadata,
-      lyrics: groupWordDataToEvents(parsedDataYoutube.data.lyricsData),
+      lyrics: groupWordDataToEvents(lyricsDataYoutube),
       lyricsRaw: gorupLyricWordDataToLyrics(
-        parsedDataYoutube.data.lyricsData,
+        lyricsDataYoutube,
         parsedDataYoutube.data.metadata
       ),
     };
@@ -288,11 +291,13 @@ export const musicProcessGroup = async (
       return group;
     }
 
-    let lyricsData = parsedDataYoutube.data.lyricsData.flat();
+    if (lyricsDataYoutube.length > 0) {
+      let lyricsData = lyricsDataYoutube.flat();
 
-    console.log("lyricsData", lyricsData);
+      console.log("lyricsData", lyricsData);
 
-    group.lyricsRange = xmlToArrayRange(lyricsData, 0, "YOUTUBE");
+      group.lyricsRange = xmlToArrayRange(lyricsData, 0, "YOUTUBE");
+    }
 
     console.log("group.metadata", group.metadata);
     group.trackData = convertToTrackData(

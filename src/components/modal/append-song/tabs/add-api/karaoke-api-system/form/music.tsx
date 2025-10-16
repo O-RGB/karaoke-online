@@ -29,6 +29,7 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [album, setAlbum] = useState("");
+  const [musicType, setMusicType] = useState("midi");
   const [musicCode, setMusicCode] = useState("");
   const [signature, setSignature] = useState("");
 
@@ -55,6 +56,7 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
       title,
       artist,
       album,
+      music_type: musicType,
       music_code: musicCode,
       direct_link: directLink,
       signature,
@@ -67,7 +69,7 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
     if (gorups.length === 1) {
       const folder: File[] = [];
       const gorup = gorups[0];
-      const { cur, emk, lyr, midi, mp3, mp4 } = gorup;
+      const { cur, emk, lyr, midi, mp3, mp4, ykr } = gorup;
       const process = await musicProcessGroup(gorup);
       const trackData = process.trackData;
       if (mp3) {
@@ -78,6 +80,10 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
         if (emk) folder.push(emk);
         if (lyr) folder.push(lyr);
         if (midi) folder.push(midi);
+        if (ykr) {
+          folder.push(ykr);
+          setMusicType("ykr");
+        }
         const zip = await zipFiles(folder, trackData.TITLE);
         setUpload(zip);
         setTitle(trackData.TITLE);
@@ -112,9 +118,18 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
         const process = await musicProcessGroup(gorup);
         const trackData = process.trackData;
         const midi = process.files.midi;
+        const ykr = process.files.ykr;
+        const youtubeId = process.youtubeId;
 
-        if (isEqual(trackData, correctData) && midi) {
-          const signature = await generateMidiSignature(midi);
+        if (isEqual(trackData, correctData)) {
+          let signature: string | undefined = undefined;
+
+          if (midi) {
+            signature = await generateMidiSignature(midi);
+          } else if (ykr && youtubeId) {
+            signature = youtubeId;
+          }
+
           if (signature) {
             setSignature(signature);
             setUrlIsCorrect(true);
@@ -180,7 +195,9 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
   return (
     <div className="space-y-4">
       <div>
-        <LabelCommon>.mid (มีเนื้อร้อง) | .emk | .mid, .lyr, .cur</LabelCommon>
+        <LabelCommon>
+          .mid (มีเนื้อร้อง) | .emk | .mid, .lyr, .cur | .ykr
+        </LabelCommon>
         <Upload
           inputProps={{ multiple: true }}
           onSelectFile={(_, filelist) => onUploadImage(filelist)}
@@ -273,7 +290,6 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
           isLoading={loading}
           icon={<FaSave></FaSave>}
           iconPosition="right"
-          //   color={!onUpload || !urlIsCorrect ? "white" : "primary"}
           type="submit"
           disabled={!onUpload || !urlIsCorrect}
         >

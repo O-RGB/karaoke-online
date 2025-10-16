@@ -13,7 +13,7 @@ export function groupLyricsByLine(words: LyricWordData[]): LyricWordData[][] {
 }
 
 export function gorupLyricWordDataToLyrics(
-  words: LyricWordData[][],
+  words: LyricWordData[][] = [],
   metadata: SongInfo
 ): string[] {
   let lyrs: string[] = [
@@ -30,14 +30,16 @@ export function gorupLyricWordDataToLyrics(
     });
     lyrs.push(lyr);
   });
-  console.log("gorupLyricWordDataToLyrics lyrs", lyrs);
+
   return lyrs;
 }
 
 export function groupWordDataToEvents(
-  words: LyricWordData[] | LyricWordData[][],
+  words: LyricWordData[] | LyricWordData[][] = [],
   tickConverter?: (tick: number) => number
 ): LyricEvent[][] {
+  if (words.length === 0) return [];
+
   const flatWords: LyricWordData[] = Array.isArray(words[0])
     ? (words as LyricWordData[][]).flat()
     : (words as LyricWordData[]);

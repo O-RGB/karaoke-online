@@ -258,6 +258,13 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
       return this.loadYoutube(data.youtubeId);
     }
+
+    if (data.isRemoteYoutube && data.youtubeId) {
+      this.engine.timer?.updateMusic(data);
+      this.musicQuere = data;
+      this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+      return this.loadYoutube(data.youtubeId);
+    }
     return false;
   }
 

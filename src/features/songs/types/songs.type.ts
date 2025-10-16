@@ -47,6 +47,7 @@ export interface ITrackFlags {
   _matchedTerms?: string[];
   _priority?: number;
   _selectBy?: ITrackDataSelectBy;
+  _bufferFile?: MusicLoadAllData;
 }
 
 export interface ITrackData extends ITrackFlags, SongInfo {
@@ -72,6 +73,7 @@ export interface MusicLoadAllData extends MusicParsedData {
   trackData: ITrackData;
   isError?: boolean;
   isDuplicate?: boolean;
+  isRemoteYoutube?: boolean;
 }
 
 // [Music Searcing]----------------

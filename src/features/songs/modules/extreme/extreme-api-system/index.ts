@@ -1,9 +1,7 @@
-// File: (Updated) features/songs/readers/ApiSongsSystemReader.ts
 import { API_BASE_URL } from "@/components/modal/append-song/tabs/add-api/karaoke-api-system/config/value";
 import { decodeImageFromUrl } from "@/components/modal/append-song/tabs/add-api/karaoke-api-system/lib/decodeImageFromUrl";
 import { fetchAPI } from "@/components/modal/append-song/tabs/add-api/karaoke-api-system/lib/fetch";
 import { MusicSearch } from "@/components/modal/append-song/tabs/add-api/karaoke-api-system/types";
-import { MID_FILE_TYPE, CUR_FILE_TYPE, LYR_FILE_TYPE } from "@/config/value";
 import { BaseSongsSystemReader } from "@/features/songs/base/index-search";
 import {
   MasterIndex,
@@ -13,11 +11,7 @@ import {
   SearchOptions,
 } from "@/features/songs/types/songs.type";
 import { groupFilesByBaseName } from "@/lib/karaoke/read";
-import { parseEMKFile } from "@/lib/karaoke/songs/emk";
 import { extractFile } from "@/lib/zip";
-
-// ไม่จำเป็นต้องใช้ baseUrl จาก config แล้ว เพราะเราจะเรียกไปยัง API ภายในของเราเอง
-// const baseUrl = "/api"; // หรือจะกำหนดแบบนี้ก็ได้
 
 export class ApiSongsSystemReader extends BaseSongsSystemReader {
   constructor() {
@@ -52,9 +46,21 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
       );
 
       const direct_link = response.direct_link;
-      const zip = await decodeImageFromUrl(direct_link);
+
+      const match = direct_link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      const fileId = match ? match[1] : null;
+
+      const newUrl = fileId
+        ? `https://lh3.googleusercontent.com/d/${fileId}`
+        : null;
+
+      console.log(newUrl);
+
+      if (!newUrl) throw "Url Invalid";
+      const zip = await decodeImageFromUrl(newUrl);
       const files = await extractFile(zip);
       const extensions = groupFilesByBaseName(files);
+      console.log("extensions", extensions);
       if (extensions.length === 1) {
         return extensions[0];
       }

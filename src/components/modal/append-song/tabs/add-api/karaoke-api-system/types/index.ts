@@ -21,6 +21,7 @@ export interface IMusicDetails {
   artist: string;
   album: string;
   music_code: string;
+  music_type: string;
   direct_link: string;
   id: string;
   uploader_id: string;
@@ -36,13 +37,19 @@ export interface IMusicDetails {
 export interface MusicCreate
   extends Pick<
     IMusicDetails,
-    "title" | "artist" | "album" | "music_code" | "direct_link" | "signature"
+    | "title"
+    | "artist"
+    | "album"
+    | "music_code"
+    | "music_type"
+    | "direct_link"
+    | "signature"
   > {}
 
 export interface MusicSearch
   extends Pick<
     IMusicDetails,
-    "title" | "artist" | "album" | "music_code" | "direct_link"
+    "title" | "artist" | "album" | "music_code" | "music_type" | "direct_link"
   > {
   id: string;
   uploader_name: string;

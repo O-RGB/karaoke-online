@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import { QueuePlayerProps } from "../types/player.type";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import { ITrackData } from "@/features/songs/types/songs.type";
+import {
+  ITrackData,
+  MusicLoadAllData,
+} from "@/features/songs/types/songs.type";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import useSongsStore from "@/features/songs/store/songs.store";
 
@@ -14,11 +17,9 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     set({ queue: [] });
 
     queue.push(value);
-    console.log("adding queure", value);
     set({ queue });
 
     if (!player?.musicQuere) {
-      console.info("player?.musicQuere is null", player?.musicQuere);
       get().playMusic(0);
       get().removeQueue(0);
     }
@@ -62,15 +63,22 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
       return;
     }
 
+    let song: MusicLoadAllData | undefined = undefined;
     set({ loading: true });
-    let songsManager = useSongsStore.getState().songsManager;
-    const song = await songsManager?.getSong(music);
 
-    set({ loading: false });
+    if (!music._bufferFile) {
+      let songsManager = useSongsStore.getState().songsManager;
+      song = await songsManager?.getSong(music);
 
-    if (!song) {
-      console.error("Songs Manager Not Found!!");
-      return;
+      set({ loading: false });
+
+      if (!song) {
+        console.error("Songs Manager Not Found!!");
+        return;
+      }
+    } else {
+      song = music._bufferFile;
+      set({ loading: false });
     }
 
     player.stop();
