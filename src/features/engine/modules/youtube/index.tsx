@@ -48,7 +48,7 @@ const YoutubeEngine: React.FC = () => {
     height: "100%",
     width: "100%",
     playerVars: {
-      autoplay: 0,
+      autoplay: 1, // เปลี่ยนเป็น 1 เพื่อให้เล่นต่อเนื่อง
       controls: 0,
       disablekb: 1,
       modestbranding: 1,
@@ -65,23 +65,26 @@ const YoutubeEngine: React.FC = () => {
     const player = playerRef.current;
     if (!player) return;
 
-    player.cueVideoById({ videoId, startSeconds: 0 });
+    // ใช้ loadVideoById แทน cueVideoById เมื่อ user unmute แล้ว
+    if (hasUserUnmuted) {
+      player.loadVideoById({
+        videoId,
+        startSeconds: 0,
+      });
+    } else {
+      player.cueVideoById({ videoId, startSeconds: 0 });
 
-    const check = setInterval(() => {
-      const state = player.getPlayerState();
-      if (state === 5) {
-        // video cued
-        if (hasUserUnmuted) {
-          player.unMute();
-          player.setVolume(100);
-        } else {
+      const check = setInterval(() => {
+        const state = player.getPlayerState();
+        if (state === 5) {
+          // video cued
           player.mute();
+          player.playVideo();
+          clearInterval(check);
         }
-        player.playVideo();
-        clearInterval(check);
-      }
-    }, 100);
-    setTimeout(() => clearInterval(check), 3000);
+      }, 100);
+      setTimeout(() => clearInterval(check), 3000);
+    }
   };
 
   const handleReady = (event: { target: YouTubePlayer }) => {
@@ -107,7 +110,18 @@ const YoutubeEngine: React.FC = () => {
     if (state === 0) {
       currentIndexRef.current++;
       if (currentIndexRef.current < queueRef.current.length) {
-        cueAndPlay(queueRef.current[currentIndexRef.current]);
+        const player = playerRef.current;
+        const nextVideoId = queueRef.current[currentIndexRef.current];
+
+        // ใช้ loadVideoById เพื่อเล่นต่อเนื่องโดยไม่ต้องรอ cue
+        if (player && hasUserUnmuted) {
+          player.loadVideoById({
+            videoId: nextVideoId,
+            startSeconds: 0,
+          });
+        } else if (player) {
+          cueAndPlay(nextVideoId);
+        }
       }
     }
   };
