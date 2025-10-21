@@ -1,3 +1,5 @@
+// src/features/engine/modules/youtube/youtube-player.ts
+
 import { create } from "zustand";
 import type { YouTubePlayer } from "react-youtube";
 
@@ -88,19 +90,17 @@ export const useYoutubePlayer = create<IYoutubePlayer>((set, get) => {
       set({ youtubeId: id });
     },
 
-    // ✅ รอจน YouTube state === 1 (ทุกครั้ง)
     waitUntilPlaying: () => {
       return new Promise<void>((resolve) => {
         const p = get().player;
         if (!p) return resolve();
         const s = p.getPlayerState?.();
-        if (s === 1) return resolve(); // already playing
+        if (s === 1) return resolve();
 
         playingResolvers.push(resolve);
       });
     },
 
-    // 🔁 เรียกเมื่อ state = 1
     resolvePlaying: () => {
       playingResolvers.forEach((r) => r());
       playingResolvers = [];

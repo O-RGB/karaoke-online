@@ -45,6 +45,10 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
         }
       );
 
+      fetch(`${API_BASE_URL}/music/${trackData._musicId}/play`, {
+        method: "POST",
+      }).catch((err) => console.error("Failed to update play count:", err));
+
       const direct_link = response.direct_link;
 
       const match = direct_link.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -53,8 +57,6 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
       const newUrl = fileId
         ? `https://lh3.googleusercontent.com/d/${fileId}`
         : null;
-
-      console.log(newUrl);
 
       if (!newUrl) throw "Url Invalid";
       const zip = await decodeImageFromUrl(newUrl);
@@ -65,7 +67,13 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
         return extensions[0];
       }
     } catch (error) {
-      console.error("Error getting song file:", error);
+      alert(error);
+      fetch(`${API_BASE_URL}/music/${trackData._musicId}/report-broken-link`, {
+        method: "POST",
+      }).catch((err) =>
+        alert(`Failed to update play count: ${JSON.stringify(err)}`)
+      );
+
       return undefined;
     }
   }

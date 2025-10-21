@@ -39,6 +39,9 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
   const [directLinkMessage, setDirectLinkMessage] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
 
+  // ADD: 1. เพิ่ม State สำหรับเก็บข้อความ Error ของ Music Code
+  const [musicCodeError, setMusicCodeError] = useState<string>("");
+
   useEffect(() => {
     if (value) {
       setTitle(value.title || "");
@@ -49,10 +52,28 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
     }
   }, [value]);
 
+  // ADD: 2. ใช้ useEffect เพื่อ Validate Music Code ทุกครั้งที่ค่าเปลี่ยน
+  useEffect(() => {
+    // ไม่ต้อง validate ถ้ายังไม่มีค่า หรือยังไม่ได้อัปโหลดไฟล์
+    if (!musicCode && !onUpload) {
+      setMusicCodeError("");
+      return;
+    }
+
+    const musicCodeRegex = /^[a-zA-Z]{3}\d{4}$/;
+    if (!musicCodeRegex.test(musicCode)) {
+      setMusicCodeError(
+        "รูปแบบต้องเป็น 'AAA0001' (อังกฤษ 3 ตัว, ตัวเลข 4 ตัว)"
+      );
+    } else {
+      setMusicCodeError(""); // ล้าง Error ถ้าถูกต้อง
+    }
+  }, [musicCode, onUpload]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const response = await onSubmit?.({
+    await onSubmit?.({
       title,
       artist,
       album,
@@ -63,6 +84,8 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
     });
     setLoading(false);
   };
+
+  // ... (ส่วนที่เหลือของโค้ดเหมือนเดิม) ...
 
   const onUploadImage = async (files: FileList) => {
     const gorups = groupFilesByBaseName(files);
@@ -153,11 +176,6 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
       const domain = parsedUrl.hostname;
 
       if (domain === "drive.google.com") {
-        // if (!parsedUrl.pathname.endsWith("usp=sharing")) {
-        //   setDirectLinkMessage("เปิดแชร์ไฟล์ให้ ทุกคนที่มีลิงก์");
-        //   return null;
-        // }
-
         const match = parsedUrl.pathname.match(/\/d\/([a-zA-Z0-9_-]+)/);
         if (!match) {
           setDirectLinkMessage("ไม่พบ fileId หรือ sharing ไม่ถูกต้อง");
@@ -253,6 +271,10 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
             className="w-full border rounded p-2"
             required
           />
+          {/* ADD: 3. แสดงข้อความ Error ถ้ามี */}
+          {musicCodeError && (
+            <span className="text-red-500 text-xs mt-1">{musicCodeError}</span>
+          )}
         </div>
 
         <div>
@@ -291,7 +313,8 @@ const MusicForm: React.FC<MusicFormProps> = ({ value, onSubmit }) => {
           icon={<FaSave></FaSave>}
           iconPosition="right"
           type="submit"
-          disabled={!onUpload || !urlIsCorrect}
+          // UPDATE: 4. เพิ่มเงื่อนไข `!!musicCodeError` เพื่อ disable ปุ่ม
+          disabled={!onUpload || !urlIsCorrect || !!musicCodeError}
         >
           {value ? "Update Music" : "Add Music"}
         </Button>

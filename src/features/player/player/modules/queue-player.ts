@@ -46,7 +46,6 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     get().playMusic(0);
     get().removeQueue(0);
   },
-
   playMusic: async (index) => {
     const player = useSynthesizerEngine.getState().engine?.player;
 
@@ -60,6 +59,12 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
 
     if (!music) {
       console.error("music metadata Not Found!!");
+
+      player.stop();
+      if (player) {
+        player.musicQuere = undefined;
+      }
+
       return;
     }
 

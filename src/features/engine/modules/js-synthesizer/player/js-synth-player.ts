@@ -43,7 +43,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.player = player;
     this.engine = engine;
   }
-
   async play(): Promise<void> {
     if (!this.musicQuere) return;
 
@@ -115,7 +114,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     const currentTick = (await this.player?.retrievePlayerCurrentTick()) ?? 0;
     return currentTick;
   }
-
   async setCurrentTiming(seconds: number): Promise<void> {
     const wasPlaying = !this.paused;
     this.pause();
@@ -137,6 +135,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       youtubePlayer.seekTo(seconds);
       this.youtubePausedTime = seconds;
       this.engine.timer?.seekTimer(seconds);
+      await youtubePlayer.waitUntilPlaying();
 
       if (wasPlaying) {
         await this.play();
