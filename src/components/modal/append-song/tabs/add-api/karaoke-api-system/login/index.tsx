@@ -52,29 +52,35 @@ const ApiLoginRegister: React.FC = () => {
 
     try {
       if (mode === "login") {
-        try {
-          const data = await fetchAPI<LoginBody, LoginResponse>(
-            `${API_BASE_URL}/token`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: {
-                username: email,
-                password,
-              },
-            }
-          );
+        // ✅ เข้าสู่ระบบ ไม่ต้องเช็ค password strength
+        const data = await fetchAPI<LoginBody, LoginResponse>(
+          `${API_BASE_URL}/token`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: {
+              username: email,
+              password,
+            },
+          }
+        );
 
-          appendLocalConfig({ token: data.access_token });
-          setConfig({ token: data.access_token });
-          setMessage("เข้าสู่ระบบสำเร็จ!");
-          notify({ type: "success", text: `เข้าสู่ระบบสำเร็จ` });
-        } catch (err: any) {
-          console.log("status:", err.status);
-          console.log("body:", err.body);
-          notify({ type: "error", text: `ผิดพลาด: ${err.message}` });
-        }
+        appendLocalConfig({ token: data.access_token });
+        setConfig({ token: data.access_token });
+        setMessage("เข้าสู่ระบบสำเร็จ!");
+        notify({ type: "success", text: `เข้าสู่ระบบสำเร็จ` });
       } else {
+        // 🧩 สมัครสมาชิก ต้องตรวจสอบรหัสผ่านก่อน
+        const passwordRegex =
+          /^(?=.*[A-Za-z])(?=.*[\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+        if (!passwordRegex.test(password)) {
+          setIsLoading(false);
+          setError(
+            "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร และมีตัวเลขหรืออักขระพิเศษอย่างน้อย 1 ตัว"
+          );
+          return;
+        }
+
         const body = {
           email,
           password,
@@ -190,6 +196,12 @@ const ApiLoginRegister: React.FC = () => {
                 required
                 className="!text-black w-full"
               />
+              {mode === "register" && (
+                <p className="text-xs text-gray-500 mt-1">
+                  * ต้องมีอย่างน้อย 8 ตัว และมีตัวเลขหรืออักขระพิเศษอย่างน้อย 1
+                  ตัว
+                </p>
+              )}
             </div>
 
             <Button

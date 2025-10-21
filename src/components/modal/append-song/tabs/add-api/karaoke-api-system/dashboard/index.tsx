@@ -1,178 +1,99 @@
-import CardCommon from "@/components/common/display/card";
-import useConfigStore from "@/features/config/config-store";
-import ProfileForm from "../form/profile";
-import ProfileCard from "./profile-card";
-import ModalServer from "../common/modal";
+"use client";
+
 import React, { useLayoutEffect, useState } from "react";
+import useConfigStore from "@/features/config/config-store";
 import { API_BASE_URL } from "../config/value";
-import {
-  MusicCreate,
-  IMusicDetails,
-  ProfileDetails,
-  UpdateProfileBody,
-} from "../types";
+import { ProfileDetails, UpdateProfileBody } from "../types";
 import { fetchAPI } from "../lib/fetch";
 import { useNotification } from "../common/notification-provider";
-import MusicForm from "../form/music";
-import MusicCard from "./music-card";
-import Button from "@/components/common/button/button";
-import { FaPlus } from "react-icons/fa";
 import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 
-interface DashboardProps extends IAlertCommon {}
+// Import Components ที่จะสร้างขึ้นมาใหม่
+import ProfileCard from "./profile-card";
+import ModalServer from "../common/modal";
+import ProfileForm from "../form/profile";
+import MyMusicTab from "./my-music";
 
-const Dashboard: React.FC<DashboardProps> = ({
-  closeAlert,
-  closeProcessing,
-  setAlert,
-  setProcessing,
-}) => {
+// --- Enum สำหรับจัดการ Tab ---
+enum DashboardTab {
+  MyMusic = "เพลงของฉัน",
+}
+
+const Dashboard: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
   const { notify } = useNotification();
-
   const token = useConfigStore((state) => state.config.token);
+  const setConfig = useConfigStore((state) => state.setConfig);
+
   const [profile, setProfile] = useState<ProfileDetails>();
   const [onEditing, setEditing] = useState<boolean>(false);
-  const [onAddMusic, setAddMusic] = useState<boolean>(false);
-  const [musicList, setMusicList] = useState<IMusicDetails[]>([]);
-  const setConfig = useConfigStore((state) => state.setConfig);
+  const [activeTab, setActiveTab] = useState<DashboardTab>(
+    DashboardTab.MyMusic
+  );
 
   const getProfile = async () => {
     if (!token) return;
-
     try {
       const response = await fetchAPI<{}, ProfileDetails>(
         `${API_BASE_URL}/users/me`,
         {
           method: "GET",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       );
-      notify({ type: "info", text: "สวัสดี " + response.first_name });
       setProfile(response);
     } catch (error) {
-      notify({ type: "error", text: `ผิดพลาด ${JSON.stringify(error)}` });
+      notify({ type: "error", text: `เกิดข้อผิดพลาดในการโหลดโปรไฟล์` });
     }
   };
 
   const updateProfile = async (update: UpdateProfileBody) => {
     if (!token) return;
-
     try {
       const response = await fetchAPI<UpdateProfileBody, ProfileDetails>(
         `${API_BASE_URL}/users/me`,
         {
           method: "PUT",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
           body: update,
         }
       );
-
       setProfile(response);
       setEditing(false);
       notify({ type: "success", text: "แก้ไขข้อมูลแล้ว" });
     } catch (error) {
-      notify({ type: "error", text: `ผิดพลาด ${JSON.stringify(error)}` });
-    }
-  };
-
-  const getMusicList = async () => {
-    if (!token) return;
-
-    try {
-      const response = await fetchAPI<{}, IMusicDetails[]>(
-        `${API_BASE_URL}/music`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setMusicList(response);
-    } catch (error) {
-      notify({ type: "error", text: `ผิดพลาด ${JSON.stringify(error)}` });
-    }
-  };
-
-  const addMusic = async (create: MusicCreate) => {
-    if (!token) return;
-
-    try {
-      const response = await fetchAPI<MusicCreate, IMusicDetails>(
-        `${API_BASE_URL}/music`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: create,
-        }
-      );
-      if (response.id) {
-        setAddMusic(false);
-        getMusicList();
-        notify({ type: "success", text: "สร้างเพลงเรียบร้อย" });
-      } else {
-        notify({ type: "warning", text: "สร้างเพลงไม่สำเร็จ" });
-      }
-    } catch (err: any) {
-      const message =
-        err?.error?.detail?.message !== undefined
-          ? err.error.detail.message
-          : err;
-      notify({
-        type: "error",
-        text: `ผิดพลาด ${JSON.stringify(message)}`,
-      });
-
-      if (message === "Duplicate song found") {
-        let existing_music: any = {};
-        if (err?.error?.detail?.existing_music) {
-          existing_music = err.error.existing_music;
-        }
-        setAlert?.({
-          title: "เพลงซ้ำจาก Server",
-          description: `ไฟล์ midi นี้มีในระบบแล้วคุณไม่จำเป็นต้องอัปโหลดซ้ำ เพลงที่มีอยู่แล้ว Music Code: ${existing_music.music_code}`,
-          variant: "warning",
-        });
-      }
-    }
-  };
-
-  const removeMusic = async (id: string) => {
-    if (!token) return;
-
-    try {
-      await fetchAPI<MusicCreate, IMusicDetails>(
-        `${API_BASE_URL}/music/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      setAddMusic(false);
-      getMusicList();
-      notify({ type: "success", text: "ลบเพลงเรียบร้อย" });
-    } catch (error) {
-      notify({ type: "error", text: `ผิดพลาด ${JSON.stringify(error)}` });
+      notify({ type: "error", text: `ผิดพลาด: ${JSON.stringify(error)}` });
     }
   };
 
   useLayoutEffect(() => {
     getProfile();
-    getMusicList();
   }, []);
+
+  const onLogout = () => {
+    setAlert?.({
+      onOk: () => {
+        closeAlert?.();
+        setConfig({ token: undefined });
+      },
+      title: "ยืนยันการออกจากระบบ",
+      description: "กดตกลงเพื่อออกจากระบบ",
+      variant: "warning",
+    });
+  };
+
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case DashboardTab.MyMusic:
+      default:
+        return <MyMusicTab setAlert={setAlert} closeAlert={closeAlert} />;
+    }
+  };
 
   return (
     <>
@@ -185,65 +106,36 @@ const Dashboard: React.FC<DashboardProps> = ({
           <ProfileForm onSubmit={updateProfile} value={profile}></ProfileForm>
         )}
       </ModalServer>
-      <ModalServer
-        title="เพิ่มเพลง"
-        isOpen={onAddMusic}
-        onClose={() => setAddMusic(false)}
-      >
-        <MusicForm onSubmit={addMusic}></MusicForm>
-      </ModalServer>
 
-      <div className="flex flex-col gap-2 justify-center items-center h-full bg-gradient-to-r from-violet-600 to-indigo-600">
-        <CardCommon className="max-w-md mx-2 !p-4">
+      <div className="flex flex-col h-full bg-gray-50">
+        {/* --- ส่วนโปรไฟล์ --- */}
+        <div className="p-4 border-b bg-white">
           <ProfileCard
             onEdit={() => setEditing(true)}
-            onLogout={() => {
-              setAlert?.({
-                onOk: () => {
-                  closeAlert?.();
-                  setConfig({ token: undefined });
-                },
-                title: "ยืนยันการออกจากระบบ",
-                description: "กดตกลงเพิ่มออกจากระบบ",
-                variant: "warning",
-              });
-            }}
+            onLogout={onLogout}
             profile={profile}
-          ></ProfileCard>
-        </CardCommon>
+          />
+        </div>
 
-        <CardCommon className="max-w-md !p-2 ">
-          <div className="flex justify-between items-center mb-2">
-            <div className="text-xs text-gray-400">เพลงของคุณ</div>
-            <Button
-              disabled={!profile}
-              size="xs"
-              onClick={() => setAddMusic(true)}
-              icon={<FaPlus className="text-xs font-light"></FaPlus>}
+        {/* --- ส่วน Tab --- */}
+        <div className="flex border-b bg-white">
+          {Object.values(DashboardTab).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`py-2 px-4 text-sm font-medium transition-colors ${
+                activeTab === tab
+                  ? "border-b-2 border-blue-500 text-blue-600"
+                  : "text-gray-500 hover:text-blue-500"
+              }`}
             >
-              เพิ่ม
-            </Button>
-          </div>
-          <div className="divide-y">
-            {musicList.length == 0 && (
-              <div className="p-2 text-gray-200 text-xs text-center">
-                ยังไม่มีเพลง
-              </div>
-            )}
-            {musicList.map((state, index) => {
-              return (
-                <div key={`${index}-${state.id}`}>
-                  <MusicCard
-                    onDelete={removeMusic}
-                    setAlert={setAlert}
-                    closeAlert={closeAlert}
-                    music={state}
-                  ></MusicCard>
-                </div>
-              );
-            })}
-          </div>
-        </CardCommon>
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* --- ส่วนแสดงผลเนื้อหาของ Tab --- */}
+        <div className="flex-1 overflow-y-auto p-4">{renderActiveTab()}</div>
       </div>
     </>
   );
