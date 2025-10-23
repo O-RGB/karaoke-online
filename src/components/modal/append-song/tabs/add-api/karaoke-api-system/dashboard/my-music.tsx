@@ -13,6 +13,15 @@ import { fetchAPI } from "../lib/fetch";
 import { IMusicDetails, MusicCreate } from "../types";
 import MusicCard from "./music-card";
 
+// (ตัวเลือกการเรียงลำดับ)
+const sortOptions = [
+  { value: "relevance", label: "ความเกี่ยวข้อง" },
+  { value: "created", label: "วันที่เพิ่ม" },
+  { value: "play", label: "ยอดเล่น" },
+  { value: "like", label: "ถูกใจ" },
+  { value: "bookmark", label: "บุ๊กมาร์ก" },
+];
+
 const MyMusicTab: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
   const { notify } = useNotification();
   const token = useConfigStore((state) => state.config.token);
@@ -21,28 +30,33 @@ const MyMusicTab: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
   const [loading, setLoading] = useState(true);
   const [onAddMusic, setAddMusic] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const observer = useRef<IntersectionObserver | null>(null);
+  // (State สำหรับเก็บค่า Filter/Sort)
+  const [sortBy, setSortBy] = useState("created");
+  const [order, setOrder] = useState("desc");
+
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const fetchMusic = useCallback(
-    async (isNewSearch = false) => {
+    async (pageToFetch: number, isNewSearch = false) => {
       if (!token) return;
-
       if (loading && !isNewSearch) return;
 
       setLoading(true);
 
-      const currentPage = isNewSearch ? 1 : page;
       const limit = 20;
-      const offset = (currentPage - 1) * limit;
+      const offset = (pageToFetch - 1) * limit;
 
+      // (สร้าง URL โดยมีทั้ง Search และ Sort)
       let url = `${API_BASE_URL}/music?limit=${limit}&offset=${offset}`;
+
       if (searchTerm.trim()) {
         url += `&q=${encodeURIComponent(searchTerm.trim())}`;
       }
+
+      url += `&sort_by=${sortBy}&order=${order}`;
 
       try {
         const response = await fetchAPI<{}, IMusicDetails[]>(url, {
@@ -50,23 +64,22 @@ const MyMusicTab: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        setMusicList((prev) =>
-          currentPage === 1 ? response : [...prev, ...response]
-        );
+        setMusicList(response);
         setHasMore(response.length === limit);
-        setPage(currentPage + 1);
+        setCurrentPage(pageToFetch);
       } catch (error) {
         notify({ type: "error", text: `เกิดข้อผิดพลาดในการโหลดเพลง` });
       } finally {
         setLoading(false);
       }
     },
-    [token, page, loading, searchTerm, notify]
+    // ( Dependencies ทำให้ fetch ใหม่เมื่อ Search หรือ Sort เปลี่ยน)
+    [token, loading, searchTerm, notify, currentPage, sortBy, order]
   );
 
   const addMusic = async (create: MusicCreate) => {
+    // ... (เหมือนเดิม) ...
     if (!token) return;
-
     try {
       const response = await fetchAPI<MusicCreate, IMusicDetails>(
         `${API_BASE_URL}/music`,
@@ -81,7 +94,7 @@ const MyMusicTab: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
       );
       if (response.id) {
         setAddMusic(false);
-        fetchMusic(true);
+        fetchMusic(1, true);
         notify({ type: "success", text: "สร้างเพลงเรียบร้อย" });
       } else {
         notify({ type: "warning", text: "สร้างเพลงไม่สำเร็จ" });
@@ -89,7 +102,6 @@ const MyMusicTab: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
     } catch (err: any) {
       const message = err?.body?.detail?.message || err.message;
       notify({ type: "error", text: `ผิดพลาด: ${JSON.stringify(message)}` });
-
       if (message === "Duplicate song found") {
         let existing_music = err?.body?.detail?.existing_music || {};
         setAlert?.({
@@ -102,14 +114,13 @@ const MyMusicTab: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
   };
 
   const removeMusic = async (id: string) => {
+    // ... (เหมือนเดิม) ...
     if (!token) return;
-
     try {
       await fetchAPI<never, void>(`${API_BASE_URL}/music/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setMusicList((prev) => prev.filter((music) => music.id !== id));
       notify({ type: "success", text: "ลบเพลงเรียบร้อย" });
     } catch (error) {
@@ -118,27 +129,24 @@ const MyMusicTab: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
   };
 
   useEffect(() => {
+    fetchMusic(1, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // (Effect นี้จะทำงานเมื่อ Search หรือ Sort เปลี่ยน)
+  useEffect(() => {
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     debounceTimeout.current = setTimeout(() => {
-      fetchMusic(true);
+      if (searchTerm.trim() && sortBy === "created") {
+        setSortBy("relevance");
+      }
+      if (!searchTerm.trim() && sortBy === "relevance") {
+        setSortBy("created");
+      }
+      fetchMusic(1, true);
     }, 500);
-  }, [searchTerm]);
-
-  const lastMusicElementRef = useCallback(
-    (node: HTMLDivElement) => {
-      if (loading) return;
-      if (observer.current) observer.current.disconnect();
-
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          fetchMusic();
-        }
-      });
-
-      if (node) observer.current.observe(node);
-    },
-    [loading, hasMore, fetchMusic]
-  );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, sortBy, order]);
 
   return (
     <div className="space-y-4 h-full flex flex-col">
@@ -150,7 +158,8 @@ const MyMusicTab: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
         <MusicForm onSubmit={addMusic} />
       </ModalServer>
 
-      <div className="flex justify-between items-center gap-2 sticky top-0 bg-gray-50 py-2 z-10">
+      {/* (UI สำหรับ Search และ Dropdown Filter/Sort) */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sticky top-0 bg-gray-50 py-2 z-10">
         <div className="relative w-full max-w-xs">
           <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -161,17 +170,40 @@ const MyMusicTab: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
             className="border rounded-lg px-3 py-1.5 pl-9 w-full text-sm focus:ring-2 focus:ring-blue-200 focus:border-blue-500 outline-none"
           />
         </div>
-        <Button size="sm" onClick={() => setAddMusic(true)} icon={<FaPlus />}>
-          เพิ่มเพลง
-        </Button>
+
+        <div className="flex gap-2 items-center">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="border rounded-lg px-2 py-1.5 text-sm outline-none"
+          >
+            {sortOptions
+              .filter((opt) => searchTerm.trim() || opt.value !== "relevance")
+              .map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+          </select>
+          <select
+            value={order}
+            onChange={(e) => setOrder(e.target.value)}
+            className="border rounded-lg px-2 py-1.5 text-sm outline-none"
+          >
+            <option value="desc">มากไปน้อย</option>
+            <option value="asc">น้อยไปมาก</option>
+          </select>
+
+          <Button size="sm" onClick={() => setAddMusic(true)} icon={<FaPlus />}>
+            เพิ่มเพลง
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2 flex-1 overflow-y-auto">
-        {musicList.map((music, index) => (
-          <div
-            ref={musicList.length === index + 1 ? lastMusicElementRef : null}
-            key={music.id}
-          >
+        {musicList.map((music) => (
+          <div key={music.id}>
+            {/* (ใช้ MusicCard ที่อัปเดตแล้ว) */}
             <MusicCard
               music={music}
               onDelete={removeMusic}
@@ -198,6 +230,29 @@ const MyMusicTab: React.FC<IAlertCommon> = ({ setAlert, closeAlert }) => {
           </div>
         )}
       </div>
+
+      {/* (Pagination Controls) */}
+      {(!loading || currentPage > 1) && (
+        <div className="flex justify-end items-center gap-2 py-1 px-4 border-t bg-gray-50 flex-shrink-0">
+          <Button
+            size="xs"
+            onClick={() => fetchMusic(currentPage - 1)}
+            disabled={loading || currentPage === 1}
+          >
+            ก่อนหน้า
+          </Button>
+          <span className="text-xs font-medium text-gray-700">
+            หน้า {currentPage}
+          </span>
+          <Button
+            size="xs"
+            onClick={() => fetchMusic(currentPage + 1)}
+            disabled={loading || !hasMore}
+          >
+            ถัดไป
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
