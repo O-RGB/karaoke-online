@@ -6,7 +6,7 @@ import Button from "@/components/common/button/button";
 import EqualizerPanel from "../equalizer-mixer";
 import useConfigStore from "@/features/config/config-store";
 import ButtonCommon from "@/components/common/button/button";
-import React, { useEffect } from "react";
+import React, { useEffect, useId, useState } from "react";
 import { IoSpeedometerSharp } from "react-icons/io5";
 import { MAIN_VOLUME } from "@/features/engine/types/node.type";
 import { FaList } from "react-icons/fa";
@@ -19,6 +19,7 @@ import {
   PiUserSoundFill,
   PiUserMinusFill,
 } from "react-icons/pi";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 
 interface VolumeOptionsProps {
   onPitchChange: (value: number) => void;
@@ -39,33 +40,41 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   vocal,
   nodes,
 }) => {
-  const engineMode = useConfigStore((state) => state.config.system?.engine);
-  useEffect(() => {}, [nodes]);
+  const componnetId = useId();
+  const engine = useSynthesizerEngine((state) => state.engine);
+
+  const [speed, setSpeed] = useState<number>(100);
+  const [pitch, setPitch] = useState<number>(0);
+
+  useEffect(() => {
+    if (engine) {
+      engine?.speedUpdated.add(["SPEED", "CHANGE"], 0, setSpeed, componnetId);
+      engine?.pitchUpdated.add(["PITCH", "CHANGE"], 0, setPitch, componnetId);
+    }
+  }, [nodes, engine]);
   return (
     <div className="flex gap-2">
       <NumberButton
         onChange={(value) => {
           onPitchChange(value);
+          setPitch(value);
           setNotification({ text: `Pitch ${value}` });
         }}
-        value={0}
+        value={pitch}
         icon={
           <PiMicrophoneStageFill className="text-[15px]"></PiMicrophoneStageFill>
         }
       ></NumberButton>
 
-      {/* {engineMode === "spessa" && (
-          <NumberButton
-            onChange={(value) => {
-              onSpeedChange(value);
-              setNotification({ text: `Speed ${value}` });
-            }}
-            value={100}
-            icon={
-              <IoSpeedometerSharp className="text-[15px]"></IoSpeedometerSharp>
-            }
-          ></NumberButton>
-        )} */}
+      <NumberButton
+        onChange={(value) => {
+          onSpeedChange(value);
+          setSpeed(value);
+          setNotification({ text: `Speed ${value}` });
+        }}
+        value={speed}
+        icon={<IoSpeedometerSharp className="text-[15px]"></IoSpeedometerSharp>}
+      ></NumberButton>
 
       <SwitchButton
         className="!rounded-[4px] !p-2"

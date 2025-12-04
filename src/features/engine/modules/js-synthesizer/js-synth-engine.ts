@@ -50,6 +50,8 @@ export class JsSynthEngine implements BaseSynthEngine {
   public timer: TimerWorker | undefined = undefined;
   public timerUpdated = new EventManager<"TIMING", number>();
   public tempoUpdated = new EventManager<"TEMPO", number>();
+  public speedUpdated = new EventManager<"SPEED", number>();
+  public pitchUpdated = new EventManager<"PITCH", number>();
   public playerUpdated = new EventManager<"PLAYER", PlayerStatusType>();
   public countdownUpdated = new EventManager<"COUNTDOWN", number>();
   public musicUpdated = new EventManager<"MUSIC", MusicLoadAllData>();
@@ -57,6 +59,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   public bassConfig: BassConfig | undefined = undefined;
 
   public isRecording: boolean = false;
+  private currentPlaybackRate: number = 1.0;
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
   private micSource: MediaStreamAudioSourceNode | null = null;
@@ -472,6 +475,7 @@ export class JsSynthEngine implements BaseSynthEngine {
       }
       this.player?.play();
     }
+    this.pitchUpdated.trigger(["PITCH", "CHANGE"], 0, semitones);
   }
 
   updatePreset(channel: number, value: number): void {
@@ -479,10 +483,9 @@ export class JsSynthEngine implements BaseSynthEngine {
   }
 
   updateSpeed(value: number) {
-    this.synth?.retrievePlayerBpm().then((bpm) => {
-      const newBpm = (bpm * value) / 100;
-      this.synth?.setPlayerTempo(PlayerSetTempoType.ExternalBpm, newBpm);
-    });
+    this.currentPlaybackRate = value / 100;
+    this.synth?.setPlayerTempo(0, this.currentPlaybackRate);
+    this.timer?.updatePlaybackRate(this.currentPlaybackRate);
   }
 
   setBassLock(program: number): void {

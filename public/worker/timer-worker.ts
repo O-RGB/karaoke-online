@@ -40,6 +40,11 @@ interface DurationCommandPayload {
   duration: number;
 }
 
+// [เพิ่ม] 1. เพิ่ม Interface สำหรับ PlaybackRate
+interface PlaybackRatePayload {
+  rate: number;
+}
+
 type WorkerCommandPayload =
   | StartCommandPayload
   | SeekCommandPayload
@@ -48,6 +53,7 @@ type WorkerCommandPayload =
   | ModeCommandPayload
   | DurationCommandPayload
   | SeekValue // Support direct number for seek
+  | PlaybackRatePayload // [เพิ่ม] 1. เพิ่ม Type ใหม่
   | undefined;
 
 interface WorkerMessage {
@@ -60,7 +66,8 @@ interface WorkerMessage {
     | "setTempoMap"
     | "updatePpq"
     | "updateMode"
-    | "updateDuration";
+    | "updateDuration"
+    | "updatePlaybackRate"; // [เพิ่ม] 1. เพิ่ม Command ใหม่
   value?: WorkerCommandPayload;
 }
 
@@ -89,6 +96,7 @@ let ppq: number = 480;
 let mode: TimingMode = "Time";
 let tempoMap: TempoMapEntry[] = [];
 let duration: number | null = null;
+let playbackRate: number = 1.0; // [เพิ่ม] 2. เพิ่มตัวแปร State สำหรับเก็บความเร็ว
 
 // Tracking variables
 let lastCountdownValue: number = -1;
@@ -162,8 +170,11 @@ function getRemainingTime(): number {
       cachedTicksPerSecond = (bpm * ppq) / 60;
     }
 
+    // [แก้ไข] 3. การคำนวณเวลาที่เหลือ ต้องหารด้วย playbackRate ด้วย
     const timeRemaining =
-      cachedTicksPerSecond > 0 ? remainingTicks / cachedTicksPerSecond : 0;
+      cachedTicksPerSecond > 0
+        ? remainingTicks / (cachedTicksPerSecond * playbackRate)
+        : 0;
     return isFinite(timeRemaining) ? timeRemaining : 0;
   }
 }
@@ -201,6 +212,9 @@ function tick(): void {
   const deltaTime = now - lastTickTime;
   lastTickTime = now;
 
+  // [แก้ไข] 3. นำ playbackRate มาคำนวณ deltaTime ที่แท้จริง
+  const effectiveDeltaTime = deltaTime * playbackRate;
+
   let bpm = cachedBpm;
 
   // Update accumulated value based on mode
@@ -211,11 +225,13 @@ function tick(): void {
       cachedTicksPerSecond = (bpm * ppq) / 60;
     }
 
-    const elapsedTicks = (deltaTime / 1000) * cachedTicksPerSecond;
+    // [แก้ไข] 3. ใช้ effectiveDeltaTime แทน deltaTime
+    const elapsedTicks = (effectiveDeltaTime / 1000) * cachedTicksPerSecond;
     accumulatedValue += elapsedTicks;
   } else {
     // Time mode
-    accumulatedValue += deltaTime / 1000;
+    // [แก้ไข] 3. ใช้ effectiveDeltaTime แทน deltaTime
+    accumulatedValue += effectiveDeltaTime / 1000;
   }
 
   // Validate accumulated value
@@ -224,7 +240,9 @@ function tick(): void {
       "Invalid accumulatedValue:",
       accumulatedValue,
       "deltaTime:",
-      deltaTime
+      deltaTime,
+      "effectiveDeltaTime:",
+      effectiveDeltaTime
     );
     accumulatedValue = 0;
   }
@@ -432,6 +450,22 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
       if (durationValue && typeof durationValue.duration === "number") {
         duration = durationValue.duration;
         lastCountdownValue = -1;
+      }
+      break;
+    }
+
+    // [เพิ่ม] 2. เพิ่ม case สำหรับรับค่าความเร็วใหม่
+    case "updatePlaybackRate": {
+      const rateValue = value as PlaybackRatePayload | undefined;
+      if (rateValue && typeof rateValue.rate === "number") {
+        playbackRate = rateValue.rate;
+
+        // ถ้าโหมด Tick ทำงานอยู่ ต้องคำนวณ ticksPerSecond ใหม่ทันที
+        if (mode === "Tick") {
+          invalidateCache(); // ล้าง cache bpm
+          const currentBpm = findBpmForTick(accumulatedValue); // หา bpm ปัจจุบัน
+          cachedTicksPerSecond = (currentBpm * ppq) / 60; // คำนวณ ticksPerSecond ใหม่
+        }
       }
       break;
     }

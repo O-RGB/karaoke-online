@@ -25,6 +25,8 @@ export interface BaseSynthEngine {
   timer?: TimerWorker | undefined;
   timerUpdated: EventManager<"TIMING", number>;
   tempoUpdated: EventManager<"TEMPO", number>;
+  speedUpdated: EventManager<"SPEED", number>;
+  pitchUpdated: EventManager<"PITCH", number>;
   playerUpdated: EventManager<"PLAYER", PlayerStatusType>;
   countdownUpdated: EventManager<"COUNTDOWN", number>;
   musicUpdated: EventManager<"MUSIC", MusicLoadAllData>;

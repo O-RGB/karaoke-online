@@ -102,4 +102,11 @@ export class TimerWorker {
     console.log("update mode", mode);
     this.worker?.postMessage({ command: "updateMode", value: { mode } });
   }
+
+  updatePlaybackRate(rate: number) {
+    this.worker?.postMessage({
+      command: "updatePlaybackRate",
+      value: { rate },
+    });
+  }
 }

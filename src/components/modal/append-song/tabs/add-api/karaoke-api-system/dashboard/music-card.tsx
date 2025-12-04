@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { IMusicDetails } from "../types";
-// --- 1. เพิ่ม FaCalendarAlt ---
 import { FaPlay, FaHeart, FaBookmark, FaCalendarAlt } from "react-icons/fa";
 import ModalServer from "../common/modal";
 import MusicDetails from "./music-detail";
@@ -28,7 +27,6 @@ const MusicCard: React.FC<MusicCardProps> = ({
     setOptnDetail(false);
   };
 
-  // --- 2. สร้างฟังก์ชันจัดรูปแบบวันที่ ---
   const formattedDate = new Date(music.created_at).toLocaleDateString("th-TH", {
     year: "numeric",
     month: "short",
@@ -59,7 +57,7 @@ const MusicCard: React.FC<MusicCardProps> = ({
           <h3 className="text-sm font-semibold text-gray-900 truncate">
             {music.title}
           </h3>
-          {/* --- 3. เพิ่มการแสดงผลวันที่ --- */}
+
           <p className=" text-[10px] text-gray-600 flex flex-col lg:flex-row lg:gap-2">
             <span className="hidden lg:block">-</span>
             <span>{music.artist}</span>

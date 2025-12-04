@@ -56,6 +56,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public timer: TimerWorker | undefined = undefined;
   public timerUpdated = new EventManager<"TIMING", number>();
   public tempoUpdated = new EventManager<"TEMPO", number>();
+  public speedUpdated = new EventManager<"SPEED", number>();
+  public pitchUpdated = new EventManager<"PITCH", number>();
   public playerUpdated = new EventManager<"PLAYER", PlayerStatusType>();
   public countdownUpdated = new EventManager<"COUNTDOWN", number>();
   public musicUpdated = new EventManager<"MUSIC", MusicLoadAllData>();

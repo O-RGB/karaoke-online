@@ -150,6 +150,10 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     }
   }
 
+  speedUpdate(speed: number): void {
+    this.engine.speedUpdated.trigger(["SPEED", "CHANGE"], 0, speed);
+  }
+
   tempoUpdate(tempo: number): void {
     this.engine.tempoUpdated.trigger(["TEMPO", "CHANGE"], 0, tempo);
   }
@@ -227,10 +231,14 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     await this.player?.addSMFDataToPlayer(midiBuffer);
     return true;
   }
-
   async loadMidi(data?: MusicLoadAllData): Promise<boolean> {
     if (!data) return false;
     this.stop();
+
+    this.engine.updatePitch(0);
+    this.engine.updateSpeed(100);
+    this.speedUpdate(100);
+
     const youtubePlayer = useYoutubePlayer.getState();
     youtubePlayer.setShow(false);
     this.engine.timer?.stopTimer();
