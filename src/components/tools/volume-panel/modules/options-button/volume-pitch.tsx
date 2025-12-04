@@ -55,6 +55,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   return (
     <div className="flex gap-2">
       <NumberButton
+        collapsible
         onChange={(value) => {
           onPitchChange(value);
           setPitch(value);
@@ -67,6 +68,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
       ></NumberButton>
 
       <NumberButton
+        collapsible
         onChange={(value) => {
           onSpeedChange(value);
           setSpeed(value);
@@ -90,39 +92,40 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
         colorClose="danger"
       ></SwitchButton>
 
-      <Menu
-        transition
-        boundingBoxPadding="10 10 10 10"
-        className={"szh-menu-custom !bg-black/20"}
-        menuButton={() => {
-          return (
-            <MenuButton>
-              <ButtonCommon
-                className="!rounded-[4px] !p-2"
-                blur={{ border: true, backgroundColor: "primary" }}
+      <div>
+        <Menu
+          transition
+          boundingBoxPadding="10 10 10 10"
+          className={"szh-menu-custom !bg-black/20"}
+          menuButton={() => {
+            return (
+              <MenuButton className={"w-full h-full"}>
+                <ButtonCommon
+                  icon={<CgOptions></CgOptions>}
+                  className="!rounded-[4px] !p-2 w-full h-full"
+                  blur={{ border: true, backgroundColor: "primary" }}
+                ></ButtonCommon>
+              </MenuButton>
+            );
+          }}
+        >
+          <div className="px-2 ">
+            <div className="flex flex-col gap-2">
+              <Button
+                size="xs"
+                onClick={openQueue}
+                icon={<FaList></FaList>}
+                blur={{ border: true }}
               >
-                <CgOptions></CgOptions>
-              </ButtonCommon>
-            </MenuButton>
-          );
-        }}
-      >
-        <div className="px-2 ">
-          <div className="flex flex-col gap-2">
-            <Button
-              size="xs"
-              onClick={openQueue}
-              icon={<FaList></FaList>}
-              blur={{ border: true }}
-            >
-              คิวเพลง
-            </Button>
-            {nodes && <FullMixer nodes={nodes}></FullMixer>}
-            {nodes && <DrumMixer></DrumMixer>}
-            <EqualizerPanel></EqualizerPanel>
+                คิวเพลง
+              </Button>
+              {nodes && <FullMixer nodes={nodes}></FullMixer>}
+              {nodes && <DrumMixer></DrumMixer>}
+              <EqualizerPanel></EqualizerPanel>
+            </div>
           </div>
-        </div>
-      </Menu>
+        </Menu>
+      </div>
     </div>
   );
 };

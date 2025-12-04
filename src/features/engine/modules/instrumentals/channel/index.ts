@@ -232,11 +232,26 @@ export class SynthChannel {
       }
     } else {
       if (this.analyserNode) {
-        const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
-        this.analyserNode.getByteFrequencyData(dataArray);
-        const value = Math.round(
-          dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length
-        );
+        // 1. เปลี่ยนมาใช้ TimeDomainData เพื่อดู Amplitude ที่แท้จริง
+        // หมายเหตุ: fftSize 256 จะได้ buffer ขนาด 256 สำหรับ TimeDomain
+        const dataArray = new Uint8Array(this.analyserNode.fftSize);
+        this.analyserNode.getByteTimeDomainData(dataArray);
+
+        // 2. คำนวณ RMS (Root Mean Square)
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          // ค่าใน TimeDomain ของ 8-bit จะอยู่ที่ 0-255 โดย 128 คือจุดกึ่งกลาง (Silence)
+          const amplitude = dataArray[i] - 128;
+          sum += amplitude * amplitude;
+        }
+
+        // ค่า rms ที่ได้จะอยู่ที่ประมาณ 0 ถึง 128
+        const rms = Math.sqrt(sum / dataArray.length);
+
+        // 3. Normalize ให้เป็น scale ที่คุณต้องการ (เช่นเทียบกับ 0-255 หรือ 0-100)
+        // คูณเพิ่ม Gain (เช่น * 2 หรือ * 3) เพื่อชดเชยเพราะ RMS มักจะค่าน้อยกว่า Peak
+        const value = Math.round(rms * 2);
+
         return value;
       }
     }

@@ -8,7 +8,6 @@ import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer
 import VolumeOptions from "./modules/options-button/volume-pitch";
 import ChannelRender from "./modules/channel";
 import React, { useEffect } from "react";
-import { MdArrowDropUp } from "react-icons/md";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import {
@@ -17,7 +16,7 @@ import {
 } from "@/features/engine/types/synth.type";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
-import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
+import { IoMdArrowDropup } from "react-icons/io";
 
 interface VolumePanelProps {}
 
@@ -27,7 +26,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   const engine = useSynthesizerEngine((state) => state.engine);
 
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
-  const showInst = useConfigStore((state) => state.config.widgets?.inst);
 
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
   const resetQueueingTimeout = useKeyboardStore(
@@ -113,7 +111,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
               }`}
           >
             <MainVolumeRender hide={!hideMixer}></MainVolumeRender>
-
             <div
               className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px]  left-0 p-2 py-[26px]`}
             >

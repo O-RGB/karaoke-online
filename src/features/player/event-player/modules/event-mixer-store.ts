@@ -29,7 +29,7 @@ const useMixerStoreNew = create<MixerStore>((set, get) => ({
     set((state) => ({
       gainMain,
     })),
-  hideMixer: false,
+  hideMixer: true,
   setHideMixer: (hideMixer) =>
     set((state) => ({
       hideMixer,
