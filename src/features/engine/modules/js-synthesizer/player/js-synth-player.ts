@@ -250,6 +250,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       this.engine.timer?.updatePpq((data.metadata as any).ticksPerBeat);
       this.musicQuere = data;
       this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+
       return !!this.prepareMidi(mid);
     }
 

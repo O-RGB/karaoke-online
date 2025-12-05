@@ -5,7 +5,6 @@ import {
   ITrackData,
   MusicLoadAllData,
 } from "@/features/songs/types/songs.type";
-import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import useSongsStore from "@/features/songs/store/songs.store";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
@@ -95,15 +94,23 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
       console.error("Engine can't load music to player!!");
       return;
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise(() =>
+      setTimeout(() => {
+        player.setCurrentTiming(0);
+      }, 500)
+    );
+    await new Promise(() =>
+      setTimeout(() => {
+        player.play();
+      }, 500)
+    );
 
-    setTimeout(async () => {
-      player.play();
-      // const requestToClient = usePeerHostStore.getState().requestToClient;
-      // await requestToClient(null, "system/init", {
-      //   musicInfo: music,
-      // });
-    }, 500);
+    // setTimeout(async () => {
+    //   // const requestToClient = usePeerHostStore.getState().requestToClient;
+    //   // await requestToClient(null, "system/init", {
+    //   //   musicInfo: music,
+    //   // });
+    // }, 500);
   },
 }));
 

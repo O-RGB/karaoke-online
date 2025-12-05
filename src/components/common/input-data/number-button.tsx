@@ -10,8 +10,8 @@ interface NumberButtonProps {
   color?: string;
   suffix?: string;
   blur?: ButtonBlur | boolean;
-  collapsible?: boolean; // <-- แบบหุบ/ขยาย
-  holdable?: boolean; // <-- แบบกดแช่ (เพิ่ม/ลดต่อเนื่อง)
+  collapsible?: boolean;
+  holdable?: boolean;
 }
 
 const NumberButton: React.FC<NumberButtonProps> = ({
@@ -26,7 +26,7 @@ const NumberButton: React.FC<NumberButtonProps> = ({
     backgroundColor: "primary",
   },
   collapsible = false,
-  holdable = false, // default ไม่รองรับการกดแช่
+  holdable = false,
 }) => {
   const [int, setInt] = useState<number>(value);
   const [expanded, setExpanded] = useState(false);
@@ -34,7 +34,6 @@ const NumberButton: React.FC<NumberButtonProps> = ({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const holdInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // AUTO COLLAPSE TIMER
   const startCollapseTimer = () => {
     if (!collapsible) return;
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -43,7 +42,6 @@ const NumberButton: React.FC<NumberButtonProps> = ({
     }, 5000);
   };
 
-  // เพิ่ม/ลด 1 step
   const handleStep = (type: "+" | "-") => {
     const newValue = type === "+" ? int + 1 : int - 1;
     setInt(newValue);
@@ -51,20 +49,16 @@ const NumberButton: React.FC<NumberButtonProps> = ({
     startCollapseTimer();
   };
 
-  // เริ่มกดแช่
   const startHold = (type: "+" | "-") => {
-    if (!holdable) return; // ❗ ไม่รองรับกดแช่
+    if (!holdable) return;
 
-    // ทำงานทันที 1 ครั้ง
     handleStep(type);
 
-    // เริ่ม loop ทุก 120ms
     holdInterval.current = setInterval(() => {
       handleStep(type);
     }, 120);
   };
 
-  // หยุดกดแช่
   const stopHold = () => {
     if (holdInterval.current) {
       clearInterval(holdInterval.current);
@@ -78,19 +72,29 @@ const NumberButton: React.FC<NumberButtonProps> = ({
     startCollapseTimer();
   };
 
+  const pauseCollapse = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const resumeCollapse = () => {
+    if (!collapsible) return;
+    if (!expanded) return;
+    startCollapseTimer();
+  };
+
   useEffect(() => {
     setInt(value);
   }, [value]);
 
-  // ------------------------------------------------
-  // UI Mode ปกติ (ไม่ collapsible)
-  // ------------------------------------------------
   if (!collapsible) {
     return (
       <div
         className={`blur-overlay border blur-border rounded-md flex items-center justify-center ${className}`}
       >
-        <div className={`flex justify-center items-center gap-2 ${color}`}>
+        <div className={`flex justify-center items-center ${color}`}>
           {icon}
           <div className="flex gap-2 items-center">
             {/* Minus */}
@@ -128,14 +132,13 @@ const NumberButton: React.FC<NumberButtonProps> = ({
     );
   }
 
-  // ------------------------------------------------
-  // UI Mode collapsible
-  // ------------------------------------------------
   return (
     <div
+      onMouseEnter={pauseCollapse}
+      onMouseLeave={resumeCollapse}
       className={`blur-overlay border blur-border rounded-md flex items-center justify-center ${className}`}
     >
-      <div className={`flex items-center ${expanded ? "gap-2" : ""} ${color}`}>
+      <div className={`flex items-center ${color}`}>
         {/* Icon-only (collapsed) */}
         {!expanded && (
           <Button
@@ -150,7 +153,7 @@ const NumberButton: React.FC<NumberButtonProps> = ({
         {/* Expanded */}
         <div
           className={`
-            flex items-center gap-2 
+            flex items-center
             transition-all duration-300 overflow-hidden
             ${expanded ? "max-w-36" : "max-w-0"}
           `}
@@ -169,9 +172,12 @@ const NumberButton: React.FC<NumberButtonProps> = ({
             icon={<FaMinus className="font-light" />}
           />
 
-          <span className="-mt-0.5 whitespace-nowrap">
-            {int} {suffix}
-          </span>
+          <div className="-mt-0.5 whitespace-nowrap px-1">
+            <span>
+              {int}
+              {suffix}
+            </span>
+          </div>
 
           {/* Plus */}
           <Button

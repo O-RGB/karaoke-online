@@ -91,6 +91,7 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.player = new JsSynthPlayerEngine(synth, this);
     this.timer = new TimerWorker(this.player);
     this.instrumental.setEngine(this);
+    this.synth.setGain(0.3);
 
     const analysers: AnalyserNode[] = [];
     this.nodes = [];
@@ -336,6 +337,7 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.player.addEvent({
         onNoteOffChangeCallback: (e) => {
           notes[e.channel].noteOffChange(e);
+          console.log("noteOFF");
           callback?.(e);
         },
       });
@@ -348,6 +350,7 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.player.addEvent({
         onNoteOnChangeCallback: (e) => {
           notes[e.channel].noteOnChange(e);
+          console.log("noteON")
           callback?.(e);
         },
       });

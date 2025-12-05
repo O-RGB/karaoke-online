@@ -115,7 +115,9 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
 
   useEffect(() => {
     if (playerStatus === "PLAY") {
-      engine?.player?.eventChange?.();
+      setTimeout(() => {
+        engine?.player?.eventChange?.();
+      }, 500);
     }
   }, [playerStatus]);
 

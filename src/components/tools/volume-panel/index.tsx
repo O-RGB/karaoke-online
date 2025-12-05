@@ -82,7 +82,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
         hideMixer
           ? "flex-row landscape:w-[45%]"
           : "flex-col-reverse landscape:w-fit"
-      } gap-1.5 `}
+      } gap-2 `}
     >
       {engine && (
         <VolumeOptions

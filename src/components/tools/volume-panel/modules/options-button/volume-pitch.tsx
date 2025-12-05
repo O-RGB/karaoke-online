@@ -75,6 +75,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
           setNotification({ text: `Speed ${value}` });
         }}
         value={speed}
+        suffix="%"
         icon={<IoSpeedometerSharp className="text-[15px]"></IoSpeedometerSharp>}
       ></NumberButton>
 
