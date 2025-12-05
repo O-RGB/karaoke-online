@@ -94,10 +94,13 @@ const YoutubeEngine: React.FC = () => {
       }
     }
   }, [youtubeId]);
-
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
+
+    // ❗ ป้องกัน error
+    const iframe = player.getIframe && player.getIframe();
+    if (!iframe) return;
 
     if (!show) {
       player.pauseVideo();

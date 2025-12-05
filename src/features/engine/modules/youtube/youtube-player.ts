@@ -1,14 +1,12 @@
-// src/features/engine/modules/youtube/youtube-player.ts
-
+import { YouTubePlayer } from "react-youtube";
 import { create } from "zustand";
-import type { YouTubePlayer } from "react-youtube";
 
 export interface IYoutubePlayer {
   show?: boolean;
   youtubeId?: string;
   isPlay?: boolean;
   isReady?: boolean;
-  player?: YouTubePlayer | null;
+  player?: YouTubePlayer;
   hasUserUnmuted?: boolean;
   showVolumeButton?: boolean;
 
