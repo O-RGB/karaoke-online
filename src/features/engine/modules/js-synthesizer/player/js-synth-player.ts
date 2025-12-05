@@ -67,6 +67,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.eventInit?.onPlay?.();
     this.paused = false;
     this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
+    console.log("Play...");
   }
 
   pause(): void {
@@ -87,6 +88,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.engine.timer?.stopTimer();
     this.paused = true;
     this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PAUSE");
+    console.log("Pause...");
   }
 
   stop(): void {
@@ -108,6 +110,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.engine.timer?.stopTimer();
     this.paused = true;
     this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "STOP");
+    console.log("Stop...");
   }
 
   async getCurrentTiming() {
@@ -143,10 +146,11 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     } else {
       this.player?.seekPlayer(seconds);
       this.engine.timer?.seekTimer(seconds);
-
       if (wasPlaying) {
         await this.play();
+        console.log("Play Form JsSynth: setCurrentTime");
       }
+      this.engine.panic();
     }
   }
 
@@ -229,15 +233,14 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.midiData = midiData;
     await this.player?.resetPlayer();
     await this.player?.addSMFDataToPlayer(midiBuffer);
+    this.engine.updateSpeed();
+    this.engine.updatePitch(null);
     return true;
   }
+
   async loadMidi(data?: MusicLoadAllData): Promise<boolean> {
     if (!data) return false;
     this.stop();
-
-    this.engine.updatePitch(0);
-    this.engine.updateSpeed(100);
-    this.speedUpdate(100);
 
     const youtubePlayer = useYoutubePlayer.getState();
     youtubePlayer.setShow(false);
@@ -250,7 +253,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       this.engine.timer?.updatePpq((data.metadata as any).ticksPerBeat);
       this.musicQuere = data;
       this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
-
       return !!this.prepareMidi(mid);
     }
 
@@ -276,6 +278,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
       return this.loadYoutube(data.youtubeId);
     }
+
     return false;
   }
 

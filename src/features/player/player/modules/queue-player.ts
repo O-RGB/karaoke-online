@@ -45,6 +45,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     get().playMusic(0);
     get().removeQueue(0);
   },
+
   playMusic: async (index) => {
     const player = useSynthesizerEngine.getState().engine?.player;
 
@@ -85,25 +86,20 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
       set({ loading: false });
     }
 
-    console.log("playMusic");
-
     player.stop();
     await new Promise((resolve) => setTimeout(resolve, 100));
     const isOk = await player.loadMidi(song);
+
     if (!isOk) {
       console.error("Engine can't load music to player!!");
       return;
     }
-    await new Promise(() =>
-      setTimeout(() => {
-        player.setCurrentTiming(0);
-      }, 500)
-    );
-    await new Promise(() =>
-      setTimeout(() => {
-        player.play();
-      }, 500)
-    );
+
+    player.setCurrentTiming(0);
+    console.log("Play Form Quere-player");
+    setTimeout(() => {
+      player.play();
+    }, 500);
 
     // setTimeout(async () => {
     //   // const requestToClient = usePeerHostStore.getState().requestToClient;

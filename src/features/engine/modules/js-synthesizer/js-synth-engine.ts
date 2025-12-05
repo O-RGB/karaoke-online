@@ -59,7 +59,9 @@ export class JsSynthEngine implements BaseSynthEngine {
   public bassConfig: BassConfig | undefined = undefined;
 
   public isRecording: boolean = false;
-  private currentPlaybackRate: number = 1.0;
+  public currentPlaybackRate: number = 1.0;
+  public globalPitch: number = 0;
+
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
   private micSource: MediaStreamAudioSourceNode | null = null;
@@ -350,7 +352,6 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.player.addEvent({
         onNoteOnChangeCallback: (e) => {
           notes[e.channel].noteOnChange(e);
-          console.log("noteON")
           callback?.(e);
         },
       });
@@ -463,32 +464,36 @@ export class JsSynthEngine implements BaseSynthEngine {
     });
   }
 
-  updatePitch(channel: number | null, semitones: number = 0): void {
+  updatePitch(
+    channel: number | null,
+    semitones: number = this.globalPitch
+  ): void {
     if (channel !== null) {
-      this.player?.pause();
       if (this.nodes[channel]) {
         this.nodes[channel].transpose?.setValue(semitones);
       }
-      this.player?.play();
     } else {
-      this.player?.pause();
-
       for (let index = 0; index < this.nodes.length; index++) {
         this.nodes[index].transpose?.setValue(semitones);
       }
-      this.player?.play();
     }
     this.pitchUpdated.trigger(["PITCH", "CHANGE"], 0, semitones);
+    this.globalPitch = semitones;
+    console.log("Update Pitch:", semitones);
+    this.panic();
   }
 
   updatePreset(channel: number, value: number): void {
     this.setProgram({ channel: channel, program: value });
+    this.panic();
   }
 
-  updateSpeed(value: number) {
-    this.currentPlaybackRate = value / 100;
+  updateSpeed(value?: number) {
+    this.currentPlaybackRate = value ? value / 100 : this.currentPlaybackRate;
     this.synth?.setPlayerTempo(0, this.currentPlaybackRate);
     this.timer?.updatePlaybackRate(this.currentPlaybackRate);
+    console.log("Update Speed:", this.currentPlaybackRate);
+    this.panic();
   }
 
   setBassLock(program: number): void {
@@ -500,6 +505,12 @@ export class JsSynthEngine implements BaseSynthEngine {
       }
     });
   }
+
+  panic(): void {
+    this.synth?.midiAllSoundsOff();
+    this.synth?.midiAllNotesOff();
+  }
+
   async unintsall() {
     await this.audio?.close();
   }

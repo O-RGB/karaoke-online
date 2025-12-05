@@ -31,6 +31,9 @@ export interface BaseSynthEngine {
   countdownUpdated: EventManager<"COUNTDOWN", number>;
   musicUpdated: EventManager<"MUSIC", MusicLoadAllData>;
 
+  currentPlaybackRate: number;
+  globalPitch: number;
+
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;
   unintsall(): Promise<void>;
@@ -79,6 +82,7 @@ export interface BaseSynthEngine {
 
   bassConfig?: BassConfig;
   setBassLock(program: number): void;
+  panic(): void;
 
   startRecording?(options: { includeMicrophone: boolean }): Promise<void>;
   stopRecording?(): Promise<string>;

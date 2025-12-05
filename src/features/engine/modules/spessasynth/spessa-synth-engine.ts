@@ -63,6 +63,9 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public musicUpdated = new EventManager<"MUSIC", MusicLoadAllData>();
   public musicQuere: MusicLoadAllData | undefined = undefined;
 
+  public currentPlaybackRate: number = 1.0;
+  public globalPitch: number = 0;
+
   public isRecording: boolean = false;
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
@@ -412,6 +415,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       }
     });
   }
+
+  panic(): void {}
 
   async startRecording(options: { includeMicrophone: boolean }): Promise<void> {
     if (this.isRecording) {
