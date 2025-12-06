@@ -295,7 +295,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const value = event.getValue();
       const program = event.getProgram();
       const node = this.engine.nodes[channel];
-
       const isNoteOn = eventType === 0x90 && velocity > 0;
       const isNoteOff =
         eventType === 0x80 || (eventType === 0x90 && velocity === 0);

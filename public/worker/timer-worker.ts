@@ -1,8 +1,7 @@
-// Types
 type TimingMode = "Tick" | "Time";
 
 interface TempoMapEntry {
-  key: [number, number]; // [startTick, endTick]
+  key: [number, number];
   value: {
     value: {
       bpm: number;
@@ -19,7 +18,6 @@ interface SeekCommandPayload {
   value: number;
 }
 
-// Alternative interface for direct value
 type SeekValue = number;
 
 interface TempoMapCommandPayload {
@@ -40,7 +38,6 @@ interface DurationCommandPayload {
   duration: number;
 }
 
-// [เพิ่ม] 1. เพิ่ม Interface สำหรับ PlaybackRate
 interface PlaybackRatePayload {
   rate: number;
 }
@@ -52,8 +49,8 @@ type WorkerCommandPayload =
   | PpqCommandPayload
   | ModeCommandPayload
   | DurationCommandPayload
-  | SeekValue // Support direct number for seek
-  | PlaybackRatePayload // [เพิ่ม] 1. เพิ่ม Type ใหม่
+  | SeekValue
+  | PlaybackRatePayload
   | undefined;
 
 interface WorkerMessage {
@@ -67,7 +64,7 @@ interface WorkerMessage {
     | "updatePpq"
     | "updateMode"
     | "updateDuration"
-    | "updatePlaybackRate"; // [เพิ่ม] 1. เพิ่ม Command ใหม่
+    | "updatePlaybackRate";
   value?: WorkerCommandPayload;
 }
 
@@ -87,7 +84,6 @@ interface TimingResponseMessage {
 
 type WorkerResponseMessage = TimingMessage | TimingResponseMessage;
 
-// Worker State
 let intervalId: ReturnType<typeof setInterval> | null = null;
 let lastTickTime: number | null = null;
 let accumulatedValue: number = 0;
@@ -96,13 +92,11 @@ let ppq: number = 480;
 let mode: TimingMode = "Time";
 let tempoMap: TempoMapEntry[] = [];
 let duration: number | null = null;
-let playbackRate: number = 1.0; // [เพิ่ม] 2. เพิ่มตัวแปร State สำหรับเก็บความเร็ว
+let playbackRate: number = 1.0;
 
-// Tracking variables
 let lastCountdownValue: number = -1;
 let lastTickValueSent: number = -1;
 
-// Cache variables
 let cachedBpm: number = 120;
 let lastBpmLookupTick: number = -1;
 let cachedTicksPerSecond: number = 0;
@@ -170,7 +164,6 @@ function getRemainingTime(): number {
       cachedTicksPerSecond = (bpm * ppq) / 60;
     }
 
-    // [แก้ไข] 3. การคำนวณเวลาที่เหลือ ต้องหารด้วย playbackRate ด้วย
     const timeRemaining =
       cachedTicksPerSecond > 0
         ? remainingTicks / (cachedTicksPerSecond * playbackRate)
@@ -212,12 +205,10 @@ function tick(): void {
   const deltaTime = now - lastTickTime;
   lastTickTime = now;
 
-  // [แก้ไข] 3. นำ playbackRate มาคำนวณ deltaTime ที่แท้จริง
   const effectiveDeltaTime = deltaTime * playbackRate;
 
   let bpm = cachedBpm;
 
-  // Update accumulated value based on mode
   if (mode === "Tick") {
     bpm = findBpmForTick(accumulatedValue);
 
@@ -225,16 +216,12 @@ function tick(): void {
       cachedTicksPerSecond = (bpm * ppq) / 60;
     }
 
-    // [แก้ไข] 3. ใช้ effectiveDeltaTime แทน deltaTime
     const elapsedTicks = (effectiveDeltaTime / 1000) * cachedTicksPerSecond;
     accumulatedValue += elapsedTicks;
   } else {
-    // Time mode
-    // [แก้ไข] 3. ใช้ effectiveDeltaTime แทน deltaTime
     accumulatedValue += effectiveDeltaTime / 1000;
   }
 
-  // Validate accumulated value
   if (isNaN(accumulatedValue) || !isFinite(accumulatedValue)) {
     console.error(
       "Invalid accumulatedValue:",
@@ -247,7 +234,6 @@ function tick(): void {
     accumulatedValue = 0;
   }
 
-  // Check if we've reached the duration limit
   if (duration !== null && accumulatedValue >= duration) {
     accumulatedValue = duration;
 
@@ -267,7 +253,6 @@ function tick(): void {
   let currentCountdownValue =
     remainingTime > 10 ? 10 : Math.ceil(remainingTime);
 
-  // Validate countdown value
   if (isNaN(currentCountdownValue) || !isFinite(currentCountdownValue)) {
     console.error(
       "Invalid countdown:",
@@ -285,9 +270,7 @@ function tick(): void {
         : 0;
   }
 
-  // Send messages based on mode
   if (mode === "Time") {
-    // Time mode: send message every 50ms
     const message: TimingMessage = {
       type: mode,
       value: accumulatedValue,
@@ -296,7 +279,6 @@ function tick(): void {
     };
     self.postMessage(message);
   } else {
-    // Tick mode: send message only when values change
     const currentTickValue = Math.floor(accumulatedValue);
 
     if (
@@ -317,7 +299,6 @@ function tick(): void {
   lastCountdownValue = currentCountdownValue;
 }
 
-// Message handler
 self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
   const { command, value } = e.data;
 
@@ -347,7 +328,6 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
     }
 
     case "seek": {
-      // Support both direct number and object payload
       let seekValue: number;
 
       if (typeof value === "number") {
@@ -366,9 +346,8 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
       accumulatedValue = seekValue;
       invalidateCache();
       lastCountdownValue = -1;
-      lastTickValueSent = -1; // Reset tick tracking
+      lastTickValueSent = -1;
 
-      // Always send message after seek (whether running or not)
       const bpm = findBpmForTick(accumulatedValue);
       const remainingTime = getRemainingTime();
       const countdownValue = remainingTime > 10 ? 10 : Math.ceil(remainingTime);
@@ -454,17 +433,15 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
       break;
     }
 
-    // [เพิ่ม] 2. เพิ่ม case สำหรับรับค่าความเร็วใหม่
     case "updatePlaybackRate": {
       const rateValue = value as PlaybackRatePayload | undefined;
       if (rateValue && typeof rateValue.rate === "number") {
         playbackRate = rateValue.rate;
 
-        // ถ้าโหมด Tick ทำงานอยู่ ต้องคำนวณ ticksPerSecond ใหม่ทันที
         if (mode === "Tick") {
-          invalidateCache(); // ล้าง cache bpm
-          const currentBpm = findBpmForTick(accumulatedValue); // หา bpm ปัจจุบัน
-          cachedTicksPerSecond = (currentBpm * ppq) / 60; // คำนวณ ticksPerSecond ใหม่
+          invalidateCache();
+          const currentBpm = findBpmForTick(accumulatedValue);
+          cachedTicksPerSecond = (currentBpm * ppq) / 60;
         }
       }
       break;
@@ -472,7 +449,6 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
   }
 };
 
-// Export types for external use (if needed)
 export type {
   TimingMode,
   TempoMapEntry,
