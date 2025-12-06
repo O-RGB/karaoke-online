@@ -1,5 +1,4 @@
 import Button from "../../common/button/button";
-import ChannelVolumeRender from "./renders/volume-meter";
 import MainVolumeRender from "./renders/volume-main-render";
 import useConfigStore from "@/features/config/config-store";
 import useNotificationStore from "@/features/notification-store";
@@ -68,6 +67,20 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
 
   useEffect(() => {}, [engine?.nodes, engine]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setHideMixer(true);
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, [setHideMixer]);
+
   const grid =
     "grid grid-cols-8 lg:grid-cols-none grid-flow-row lg:grid-flow-col";
   const hideElement = `${hideMixer ? "opacity-0" : "opacity-100"}`;
@@ -77,6 +90,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   if (!engine?.nodes) return <></>;
 
   const nodes = engine.nodes;
+
   return (
     <div
       className={`flex w-full ${

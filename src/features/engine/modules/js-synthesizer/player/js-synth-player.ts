@@ -300,14 +300,16 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const isNoteOff =
         eventType === 0x80 || (eventType === 0x90 && velocity === 0);
 
-      if (channel !== DRUM_CHANNEL && node) {
+      if (node) {
         if (isNoteOn) {
-          const transpose = node.transpose?.value ?? 0;
-          const newNote = Math.max(
-            0,
-            Math.min(127, originalMidiNote + transpose)
-          );
-          event.setKey(newNote);
+          if (channel !== DRUM_CHANNEL) {
+            const transpose = node.transpose?.value ?? 0;
+            const newNote = Math.max(
+              0,
+              Math.min(127, originalMidiNote + transpose)
+            );
+            event.setKey(newNote);
+          }
           if (this.eventInit?.onNoteOnChangeCallback) {
             this.eventInit.onNoteOnChangeCallback({
               channel,
@@ -322,15 +324,17 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             velocity,
           });
         } else if (isNoteOff) {
-          const noteTranspose =
-            node.getNoteTranspose?.(originalMidiNote) ??
-            node.transpose?.value ??
-            0;
-          const newNote = Math.max(
-            0,
-            Math.min(127, originalMidiNote + noteTranspose)
-          );
-          event.setKey(newNote);
+          if (channel !== DRUM_CHANNEL) {
+            const noteTranspose =
+              node.getNoteTranspose?.(originalMidiNote) ??
+              node.transpose?.value ??
+              0;
+            const newNote = Math.max(
+              0,
+              Math.min(127, originalMidiNote + noteTranspose)
+            );
+            event.setKey(newNote);
+          }
 
           if (this.eventInit?.onNoteOffChangeCallback) {
             this.eventInit.onNoteOffChangeCallback({
