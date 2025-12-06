@@ -55,7 +55,7 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
         onMuted={onMutedVolume}
         node={node}
       ></MuteVolumeButton>
-      <div className="flex items-center justify-center h-full py-1.5 w-full border-x border-white/20">
+      <div className="flex items-center justify-center h-full py-1.5 w-full border-x border-white/20 opacity-30 hover:opacity-100 z-20 duration-300">
         <VolumeNodePreset
           synthNode={node.volume}
           vertical={true}
@@ -65,6 +65,7 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
           channel={channel}
           disabled={isShow}
           nodeType={"VOLUME"}
+          className=""
         ></VolumeNodePreset>
       </div>
       <VolumeNodesPanel

@@ -16,6 +16,7 @@ interface VolumeNodePresetProps {
   onLock?: (event: IControllerChange<boolean>) => void;
   controllerNumber: number;
   synthNode?: SynthNode<INodeKey, number>;
+  className?: string;
 }
 
 const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
@@ -28,6 +29,7 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
   onLock,
   controllerNumber,
   synthNode,
+  className,
 }) => {
   const componentId = useId();
   const [volume, setValue] = useState<number>(100);
@@ -79,7 +81,7 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
       disabled={disabled}
       value={disabled ? 0 : volume}
       onChange={onSliderChange}
-      className="z-20"
+      className={`z-20 ${className}`}
       max={127}
     ></SliderCommon>
   );

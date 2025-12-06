@@ -155,7 +155,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
             <div
               className={`${grid} ${hideElement} ${animation} ${
                 hideMixer ?? "pointer-events-none !cursor-none"
-              } w-full gap-0.5 h-full`}
+              } w-full gap-0.5 h-full `}
             >
               {!hideMixer &&
                 nodes.map((_, ch) => {
