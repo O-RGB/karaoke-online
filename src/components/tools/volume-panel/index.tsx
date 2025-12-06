@@ -17,6 +17,7 @@ import {
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
 import { IoMdArrowDropup } from "react-icons/io";
+import NotesChannelRender from "./renders/notes";
 
 interface VolumePanelProps {}
 
@@ -117,12 +118,22 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
               {!hideMixer &&
                 nodes.map((_, ch) => {
                   return (
-                    <div key={`gain-render-${ch}`} className="relative w-full">
-                      <ChannelVolumeRender
-                        channel={ch}
-                        max={127}
-                        className="z-10 w-full absolute bottom-0 left-0 h-full"
-                      ></ChannelVolumeRender>
+                    <div
+                      key={`gain-render-${ch}`}
+                      className="relative w-full flex-wrap text-wrap"
+                    >
+                      <div className="z-10 w-full absolute bottom-0 left-0 h-full">
+                        {_.note ? (
+                          <NotesChannelRender
+                            off={_.note.notesOff}
+                            on={_.note.notesOn}
+                            row={16}
+                            col={8}
+                          ></NotesChannelRender>
+                        ) : (
+                          <>-</>
+                        )}
+                      </div>
                     </div>
                   );
                 })}

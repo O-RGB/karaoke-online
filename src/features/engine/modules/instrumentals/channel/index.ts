@@ -87,9 +87,7 @@ export class SynthChannel {
     this.transpose = new SynthNode(undefined, null, channel, 0);
     this.expression.setLock(true);
 
-    if (keyModifierManager) {
-      this.note = new KeyboardNode(channel, keyModifierManager);
-    }
+    this.note = new KeyboardNode(channel);
 
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
@@ -126,10 +124,11 @@ export class SynthChannel {
   public noteOnChange(event: INoteChange) {
     this.globalNoteOnEvent.trigger(["NOTE_ON", "CHANGE"], 0, event);
 
-    if (this.channel !== DRUM_CHANNEL) {
-      const currentTranspose = this.transpose?.value ?? 0;
-      this.activeNotes.set(event.midiNote, currentTranspose);
-    }
+    // if (this.channel !== DRUM_CHANNEL) {
+    const currentTranspose = this.transpose?.value ?? 0;
+    this.activeNotes.set(event.midiNote, currentTranspose);
+    this.note?.setOn(event);
+    // }
 
     if (this.velocityMode) {
       this.simulatedVelocityGain = event.velocity;
@@ -139,9 +138,10 @@ export class SynthChannel {
   public noteOffChange(event: INoteChange) {
     this.globalNoteOnEvent.trigger(["NOTE_OFF", "CHANGE"], 0, event);
 
-    if (this.channel !== DRUM_CHANNEL) {
-      this.activeNotes.delete(event.midiNote);
-    }
+    // if (this.channel !== DRUM_CHANNEL) {
+    this.activeNotes.delete(event.midiNote);
+    this.note?.setOff(event);
+    // }
   }
 
   public getNoteTranspose(midiNote: number): number {

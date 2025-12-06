@@ -94,6 +94,7 @@ const YoutubeEngine: React.FC = () => {
       }
     }
   }, [youtubeId]);
+
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;

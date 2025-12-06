@@ -123,8 +123,8 @@ const VolumeVelocityRender: React.FC<VolumeVelocityRenderProps> = ({
 
       {/* ใช้ MiniNoteListener สำหรับแต่ละ note แต่ดึงข้อมูลมาใช้สำหรับทั้ง channel */}
       <div className="hidden">
-        {node.note?.notes?.map((re, i) => {
-          const note = node.note?.notes[i];
+        {node.note?.notesOn?.map((re, i) => {
+          const note = node.note?.notesOn[i];
           if (!note) return null;
           return (
             <React.Fragment key={`key-min-${i}`}>

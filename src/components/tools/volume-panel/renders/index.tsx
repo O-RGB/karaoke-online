@@ -41,7 +41,7 @@ const VolumeGainRender: React.FC<VolumeGainRenderProps> = ({
       <div
         className={`${grid} ${hideElement} ${animation} w-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px] left-0 py-[26px] p-2`}
       >
-        {nodes?.map((data, ch) => {
+        {/* {nodes?.map((data, ch) => {
           return (
             <div key={`gain-render-${ch}`} className="relative w-full">
               <ChannelVolumeRender
@@ -49,6 +49,15 @@ const VolumeGainRender: React.FC<VolumeGainRenderProps> = ({
                 max={127}
                 className="z-10 w-full absolute bottom-0 left-0 h-full"
               ></ChannelVolumeRender>
+            </div>
+          );
+        })} */}
+        {nodes?.map((data, ch) => {
+          return (
+            <div key={`gain-render-${ch}`} className="relative w-full">
+              {new Array(127).fill(0).map((s) => {
+                return <>t</>;
+              })}
             </div>
           );
         })}

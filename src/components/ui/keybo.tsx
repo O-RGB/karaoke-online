@@ -10,8 +10,8 @@ interface KeyRenderProps {
 const KeyRender: React.FC<KeyRenderProps> = ({ nodes, channel }) => {
   return (
     <div className="border p-1 text-nowrap w-full flex">
-      {nodes.note?.notes?.map((re, i) => {
-        const note = nodes.note?.notes[i];
+      {nodes.note?.notesOn?.map((re, i) => {
+        const note = nodes.note?.notesOn[i];
         if (!note) return <></>;
         return (
           <React.Fragment key={`key-min-${i}`}>

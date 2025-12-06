@@ -339,7 +339,6 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.player.addEvent({
         onNoteOffChangeCallback: (e) => {
           notes[e.channel].noteOffChange(e);
-          console.log("noteOFF");
           callback?.(e);
         },
       });

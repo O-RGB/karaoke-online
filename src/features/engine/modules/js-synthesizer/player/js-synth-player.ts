@@ -296,15 +296,18 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const program = event.getProgram();
       const node = this.engine.nodes[channel];
 
+      const isNoteOn = eventType === 0x90 && velocity > 0;
+      const isNoteOff =
+        eventType === 0x80 || (eventType === 0x90 && velocity === 0);
+
       if (channel !== DRUM_CHANNEL && node) {
-        if (eventType === 0x90) {
+        if (isNoteOn) {
           const transpose = node.transpose?.value ?? 0;
           const newNote = Math.max(
             0,
             Math.min(127, originalMidiNote + transpose)
           );
           event.setKey(newNote);
-
           if (this.eventInit?.onNoteOnChangeCallback) {
             this.eventInit.onNoteOnChangeCallback({
               channel,
@@ -318,7 +321,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             midiNote: originalMidiNote,
             velocity,
           });
-        } else if (eventType === 0x80) {
+        } else if (isNoteOff) {
           const noteTranspose =
             node.getNoteTranspose?.(originalMidiNote) ??
             node.transpose?.value ??

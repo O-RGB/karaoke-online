@@ -93,7 +93,7 @@ const DrumNode: React.FC<DrumNodeProps> = ({ note, keyNote, onNoteChange }) => {
   };
 
   useEffect(() => {
-    const noteByIndex = note.notes[keyNote];
+    const noteByIndex = note.notesOn[keyNote];
     if (!noteByIndex) return;
 
     noteByIndex.linkEvent(["NOTE_ON", "CHANGE"], handleNoteEvent, componentId);

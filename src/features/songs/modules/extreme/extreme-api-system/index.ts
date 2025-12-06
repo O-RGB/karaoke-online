@@ -45,9 +45,9 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
         }
       );
 
-      fetch(`${API_BASE_URL}/music/${trackData._musicId}/play`, {
-        method: "POST",
-      }).catch((err) => console.error("Failed to update play count:", err));
+      // fetch(`${API_BASE_URL}/music/${trackData._musicId}/play`, {
+      //   method: "POST",
+      // }).catch((err) => console.error("Failed to update play count:", err));
 
       const direct_link = response.direct_link;
 
