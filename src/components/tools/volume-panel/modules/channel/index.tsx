@@ -41,13 +41,13 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
 
   return (
     <>
-      {channel !== 8 && channel !== 9 && (
+      {/* {channel !== 8 && channel !== 9 && (
         <ChannelLimit
           channel={channel}
           instrumental={instrumental}
           node={node}
         ></ChannelLimit>
-      )}
+      )} */}
       <MuteVolumeButton
         disabled={isShow}
         controllerNumber={MAIN_VOLUME}

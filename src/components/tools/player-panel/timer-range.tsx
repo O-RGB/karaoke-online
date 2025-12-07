@@ -54,6 +54,7 @@ const TimerBar: React.FC<TimerBarProps> = ({}) => {
     <div className="w-full flex items-center relative pl-3 px-2">
       <SliderCommon
         tabIndex={-1}
+        color="#ffffff"
         value={dragging ? tempTiming : timing}
         min={0}
         max={musicQuere?.duration}

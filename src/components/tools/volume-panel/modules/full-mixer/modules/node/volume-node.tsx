@@ -159,6 +159,7 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
               value={expression}
               vertical
               className="m-auto"
+              color="#ffffff"
               step={5}
               onChange={onValueChange}
             ></SliderCommon>

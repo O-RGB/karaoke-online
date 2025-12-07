@@ -74,9 +74,9 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
     );
   }
 
-  const SliderProps = (
+  const SliderProps = ({ color = "#ffffff" }: { color: string }) => (
     <SliderCommon
-      color={locked ? "red" : undefined}
+      color={locked ? "red" : color}
       vertical={vertical}
       disabled={disabled}
       value={disabled ? 0 : volume}
@@ -87,7 +87,7 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
   );
 
   if (!label) {
-    return SliderProps;
+    return SliderProps({ color: "#ffffff" });
   }
 
   if (!synthNode) return <></>;
@@ -120,7 +120,7 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
             </div>
           </>
         )}
-        {SliderProps}
+        {SliderProps({ color: "#3b82f6" })}
       </div>
     </>
   );

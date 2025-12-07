@@ -13,10 +13,11 @@ const SliderCommon: React.FC<SliderCommonProps> = ({
   onChange,
   onPressStart,
   onPressEnd,
-  color,
+  color = "#2563eb",
   ...props
 }) => {
   const [isUserInteracting, setIsUserInteracting] = useState(false);
+  const lineThickness = 2;
 
   return (
     <Slider
@@ -29,28 +30,41 @@ const SliderCommon: React.FC<SliderCommonProps> = ({
         setIsUserInteracting(false);
         onPressEnd?.();
       }}
+      classNames={{
+        handle:
+          "!outline-none !shadow-none focus:!outline-none focus:!shadow-none",
+      }}
       onChange={(value) => {
         if (typeof value === "number") {
           onChange?.(value);
         }
       }}
       styles={{
-        handle: {
-          transitionDuration: isUserInteracting ? "0s" : "1s",
-          borderColor: color,
-          backgroundColor: color,
-          width: 20,
-          height: 20,
-          borderRadius: "50%",
-          borderWidth: 3,
-          marginLeft: props.vertical ? -8 : 0,
-          marginTop: !props.vertical ? -8 : 0,
-        },
         track: {
           backgroundColor: color,
+          borderWidth: 0,
+          ...(props.vertical
+            ? { width: lineThickness }
+            : { height: lineThickness, marginTop: 0.5 }),
         },
         rail: {
           backgroundColor: `${color}33`,
+          opacity: 1,
+          ...(props.vertical
+            ? { width: lineThickness }
+            : { height: lineThickness, marginTop: 0.5 }),
+        },
+        handle: {
+          transitionDuration: isUserInteracting ? "0s" : "0.7s",
+          borderColor: color,
+          backgroundColor: color,
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          borderWidth: 3,
+          marginLeft: props.vertical ? -8 : -0,
+          marginTop: !props.vertical ? -8 : -0,
+          opacity: 1,
         },
       }}
     />

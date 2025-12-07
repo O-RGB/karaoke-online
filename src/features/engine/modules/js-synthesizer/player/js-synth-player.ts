@@ -302,12 +302,15 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       if (node) {
         if (isNoteOn) {
           if (channel !== DRUM_CHANNEL) {
+            const nodeVolume = node.volume?.value ?? 0;
             const transpose = node.transpose?.value ?? 0;
             const newNote = Math.max(
               0,
               Math.min(127, originalMidiNote + transpose)
             );
+
             event.setKey(newNote);
+            event.setVelocity(nodeVolume);
           }
           if (this.eventInit?.onNoteOnChangeCallback) {
             this.eventInit.onNoteOnChangeCallback({
