@@ -23,20 +23,26 @@ const MainVolumeRender: React.FC<MainVolumeRenderProps> = ({ hide }) => {
   const [gainPercent, setGainPercent] = useState(0);
   const currentDb = percentToDb(gainPercent);
 
-  // update value from engine
+  const animRef = useRef<number>(0);
+  const lastValueRef = useRef<number>(-1);
+
   useEffect(() => {
     if (!engine) return;
 
-    const update = () => {
-      setGainPercent(engine.globalEqualizer?.getVolumeLevel() ?? 0);
+    const animate = () => {
+      const v = engine.globalEqualizer?.getVolumeLevel() ?? 0;
+
+      if (v !== lastValueRef.current) {
+        lastValueRef.current = v;
+        setGainPercent(v);
+      }
+
+      animRef.current = requestAnimationFrame(animate);
     };
 
-    update(); // initial
+    animRef.current = requestAnimationFrame(animate);
 
-    engine.timerUpdated.add(["TIMING", "CHANGE"], 0, update, componentId);
-    return () => {
-      engine.timerUpdated.remove(["TIMING", "CHANGE"], 0, componentId);
-    };
+    return () => cancelAnimationFrame(animRef.current);
   }, [engine]);
 
   if (hide) return null;
@@ -81,10 +87,10 @@ const MainVolumeRender: React.FC<MainVolumeRenderProps> = ({ hide }) => {
         );
       })}
 
-      {/* main bar (HTML) */}
+      {/* main bar */}
       <div
         ref={barRef}
-        className="absolute top-0 left-0 h-full transition-[width] duration-[30ms] ease-linear"
+        className="absolute top-0 left-0 h-full"
         style={{
           width: `${gainPercent}%`,
           background:
