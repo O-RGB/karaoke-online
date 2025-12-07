@@ -5,8 +5,8 @@ interface MainVolumeRenderProps {
   hide: boolean;
 }
 
-const DB_MARKS = [-60, -40, -20, -10, -6, -3, 0];
-const MINOR_MARKS = [-50, -30, -15, -9, -4.5, -1.5];
+const DB_MARKS = [-30, -18, -12, -6, -3, 0];
+const MINOR_MARKS = [-24, -15, -9, -4.5, -1.5];
 
 const percentToDb = (percent: number): number => {
   if (percent === 0) return -60;
