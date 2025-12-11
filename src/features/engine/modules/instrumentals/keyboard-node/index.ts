@@ -1,22 +1,22 @@
 import { MAX_CHANNEL } from "@/config/value";
 import { INoteChange } from "@/features/engine/types/synth.type";
-import { SynthNode } from "../node";
+import { SynthControl } from "../node";
 
 export class KeyboardNode {
-  public notesOn: SynthNode<"NOTE_ON", INoteChange>[] = [];
-  public notesOff: SynthNode<"NOTE_OFF", INoteChange>[] = [];
+  public notesOn: SynthControl<"NOTE_ON", INoteChange>[] = [];
+  public notesOff: SynthControl<"NOTE_OFF", INoteChange>[] = [];
   private activeNotes: Map<number, INoteChange> = new Map();
 
   constructor(channel: number) {
     this.notesOn = MAX_CHANNEL.map((_, midiNote) => {
-      return new SynthNode(undefined, "NOTE_ON", channel, {
+      return new SynthControl(undefined, "NOTE_ON", channel, {
         channel,
         midiNote,
         velocity: 0,
       });
     });
     this.notesOff = MAX_CHANNEL.map((_, midiNote) => {
-      return new SynthNode(undefined, "NOTE_OFF", channel, {
+      return new SynthControl(undefined, "NOTE_OFF", channel, {
         channel,
         midiNote,
         velocity: 0,

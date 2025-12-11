@@ -64,7 +64,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
 
   useEffect(() => {
     if (engine) {
-      engine?.playerUpdated.add(
+      engine?.playerUpdated.on(
         ["PLAYER", "CHANGE"],
         0,
         onPlayerUpdated,

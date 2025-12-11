@@ -29,19 +29,19 @@ const InstrumentalCard: React.FC<InstrumentalCardProps> = ({
 
   useEffect(() => {
     if (!instrumental) return;
-    instrumental.expression[index].linkEvent(
+    instrumental.expression[index].on(
       ["EXPRESSION", "CHANGE"],
       (v) => setExpression(v.value),
       componentId
     );
-    instrumental.velocity[index].linkEvent(
+    instrumental.velocity[index].on(
       ["VELOCITY", "CHANGE"],
       (v) => setVelocity(v.value),
       componentId
     );
     return () => {
-      instrumental.expression[index].unlinkEvent(["EXPRESSION", "CHANGE"], componentId);
-      instrumental.velocity[index].unlinkEvent(["VELOCITY", "CHANGE"], componentId);
+      instrumental.expression[index].off(["EXPRESSION", "CHANGE"], componentId);
+      instrumental.velocity[index].off(["VELOCITY", "CHANGE"], componentId);
     };
   }, [instrumental]);
 

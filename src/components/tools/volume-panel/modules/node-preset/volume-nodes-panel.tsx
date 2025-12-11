@@ -80,7 +80,7 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
 
   useEffect(() => {
     if (node) {
-      node.program?.linkEvent(
+      node.program?.on(
         ["PROGARM", "CHANGE"],
         onValueChange,
         componentId
@@ -88,7 +88,7 @@ const VolumeNodesPanel: React.FC<VolumeNodesPanelProps> = ({
     }
 
     return () => {
-      node?.program?.unlinkEvent(["PROGARM", "CHANGE"], componentId);
+      node?.program?.off(["PROGARM", "CHANGE"], componentId);
     };
   }, [node, programOption]);
 

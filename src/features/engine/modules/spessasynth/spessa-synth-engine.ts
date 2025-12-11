@@ -32,8 +32,9 @@ import {
 import { GlobalEqualizer } from "../equalizer/global-equalizer";
 import { RecordingsManager } from "@/utils/indexedDB/db/display/table";
 import { TimerWorker } from "../timer";
-import { EventManager } from "../instrumentals/events";
+import { EventEmitter } from "../instrumentals/events";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
+import { NotesModifierManager } from "../notes-modifier-manager";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -54,17 +55,19 @@ export class SpessaSynthEngine implements BaseSynthEngine {
 
   public systemConfig?: Partial<ConfigSystem> = undefined;
   public timer: TimerWorker | undefined = undefined;
-  public timerUpdated = new EventManager<"TIMING", number>();
-  public tempoUpdated = new EventManager<"TEMPO", number>();
-  public speedUpdated = new EventManager<"SPEED", number>();
-  public pitchUpdated = new EventManager<"PITCH", number>();
-  public playerUpdated = new EventManager<"PLAYER", PlayerStatusType>();
-  public countdownUpdated = new EventManager<"COUNTDOWN", number>();
-  public musicUpdated = new EventManager<"MUSIC", MusicLoadAllData>();
+  public timerUpdated = new EventEmitter<"TIMING", number>();
+  public tempoUpdated = new EventEmitter<"TEMPO", number>();
+  public speedUpdated = new EventEmitter<"SPEED", number>();
+  public pitchUpdated = new EventEmitter<"PITCH", number>();
+  public playerUpdated = new EventEmitter<"PLAYER", PlayerStatusType>();
+  public countdownUpdated = new EventEmitter<"COUNTDOWN", number>();
+  public musicUpdated = new EventEmitter<"MUSIC", MusicLoadAllData>();
   public musicQuere: MusicLoadAllData | undefined = undefined;
 
   public currentPlaybackRate: number = 1.0;
   public globalPitch: number = 0;
+
+  public notesModifier: NotesModifierManager = new NotesModifierManager();
 
   public isRecording: boolean = false;
   private mediaRecorder: MediaRecorder | null = null;

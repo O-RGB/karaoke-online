@@ -1,93 +1,73 @@
 import { EventKey } from "../types/node.type";
 
-export class EventManager<K = any, R = any> {
-  public callbacks: Map<
+export class EventEmitter<K = any, R = any> {
+  public listeners: Map<
     string,
-    { componentId: string; callback: (event: R) => void }[]
+    { listenerId: string; callback: (event: R) => void }[]
   > = new Map();
-  public debug: boolean = false;
-  public debugName: string | undefined = undefined;
 
-  private generateKey(eventKey: EventKey<K>, index: number): string {
+  public debug: boolean = false;
+  public debugName?: string;
+
+  private makeKey(eventKey: EventKey<K>, index: number): string {
     return `${eventKey.join("-")}-${index}`;
   }
 
-  openDebug(bool: boolean, debugName?: string) {
-    this.debug = bool;
+  enableDebug(enable: boolean, debugName?: string) {
+    this.debug = enable;
     this.debugName = debugName;
   }
 
-  add(
+  on(
     eventKey: EventKey<K>,
     index: number,
     callback: (event: R) => void,
-    componentId: string
+    listenerId: string
   ): void {
-    const key = this.generateKey(eventKey, index);
+    const key = this.makeKey(eventKey, index);
 
-    if (!this.callbacks.has(key)) {
-      this.callbacks.set(key, []);
+    if (!this.listeners.has(key)) {
+      this.listeners.set(key, []);
     }
 
-    // Check if this component has already registered a callback for this event
-    const existingCallbackIndex = this.callbacks
+    const existing = this.listeners
       .get(key)
-      ?.findIndex((item) => item.componentId === componentId);
+      ?.find((i) => i.listenerId === listenerId);
 
-    if (existingCallbackIndex === undefined || existingCallbackIndex === -1) {
-      // Only add if no callback from this component exists
-      this.callbacks.get(key)?.push({ componentId, callback });
+    if (!existing) {
+      this.listeners.get(key)?.push({ listenerId, callback });
 
       if (this.debug) {
-        console.log(
-          this.debugName,
-          "Added new callback for component:",
-          componentId
-        );
-        console.log(this.debugName, this.callbacks);
-      }
-    } else if (this.debug) {
-      console.log(
-        this.debugName,
-        "Callback for component already exists:",
-        componentId
-      );
-    }
-
-  }
-
-  remove(eventKey: EventKey<K>, index: number, componentId: string): boolean {
-    const key = this.generateKey(eventKey, index);
-
-    if (this.callbacks.has(key)) {
-      const list = this.callbacks.get(key);
-      if (list) {
-        const initialLength = list.length;
-        const filteredList = list.filter(
-          (item) => item.componentId !== componentId
-        );
-        this.callbacks.set(key, filteredList);
-
-        if (this.debug && initialLength !== filteredList.length) {
-          console.log(
-            this.debugName,
-            "Removed callbacks for component:",
-            componentId
-          );
-        }
-
-        return initialLength !== filteredList.length;
+        console.log(this.debugName, "New listener:", listenerId);
       }
     }
-    return false;
   }
 
-  trigger(eventKey: EventKey<K>, index: number, eventContent: R): void {
-    const key = this.generateKey(eventKey, index);
-    this.callbacks.get(key)?.forEach((item) => item.callback(eventContent));
+  off(eventKey: EventKey<K>, index: number, listenerId: string): boolean {
+    const key = this.makeKey(eventKey, index);
+
+    const items = this.listeners.get(key);
+    if (!items) return false;
+
+    const before = items.length;
+    const filtered = items.filter((i) => i.listenerId !== listenerId);
+
+    this.listeners.set(key, filtered);
+
+    if (this.debug && before !== filtered.length) {
+      console.log(this.debugName, "Removed listener:", listenerId);
+    }
+
+    return before !== filtered.length;
+  }
+
+  emit(eventKey: EventKey<K>, index: number, content: R): void {
+    const key = this.makeKey(eventKey, index);
+
+    this.listeners.get(key)?.forEach((item) => item.callback(content));
 
     if (this.debug) {
-      console.log(this.debugName, "Triggered event:", key);
+      console.log(this.debugName, "Emit event:", key);
     }
   }
 }

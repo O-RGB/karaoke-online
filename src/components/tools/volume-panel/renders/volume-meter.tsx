@@ -37,13 +37,13 @@ const ChannelVolumeRender: React.FC<ChannelVolumeRenderProps> = ({
 
   useEffect(() => {
     if (engine) {
-      engine?.playerUpdated.add(
+      engine?.playerUpdated.on(
         ["PLAYER", "CHANGE"],
         0,
         onPlayerUpdate,
         componnetId
       );
-      engine?.timerUpdated.add(
+      engine?.timerUpdated.on(
         ["TIMING", "CHANGE"],
         0,
         onTimingUpdated,

@@ -1,4 +1,4 @@
-import { DRUM_NOTES_LIST } from "@/config/value";
+import { DRUM_CHANNEL, DRUM_NOTES_LIST, MAX_CHANNEL } from "@/config/value";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import { midiService } from "./node/output";
 import { INoteChange } from "@/features/engine/types/synth.type";
@@ -79,11 +79,10 @@ const DrumPanel: React.FC<DrumPanelProps> = ({}) => {
   }, []);
 
   if (!engine?.nodes) return <></>;
-  const nodes = engine.nodes;
+  const notesModifier = engine.notesModifier;
 
-  if (nodes.length < 10) return <></>;
-  const drum = nodes[9].note;
-  if (!drum) return <></>;
+  const drum = notesModifier.getNote(DRUM_CHANNEL);
+  if (drum.length <= 0) return <></>;
 
   const handleOutputChange = (value: string) => {
     midiService.setOutputById(value);
@@ -125,15 +124,11 @@ const DrumPanel: React.FC<DrumPanelProps> = ({}) => {
         ></Select>
       </div>
       <div className="flex flex-wrap gap-1">
-        {DRUM_NOTES_LIST.map((keyNote, _) => {
-          const name = DrumNoteMap[keyNote];
+        {MAX_CHANNEL.map((keyNote, index) => {
           return (
-            <div className="p-1 border" key={`drum-note-${keyNote}`}>
-              <DrumNode
-                onNoteChange={handleNoteEvent}
-                note={drum}
-                keyNote={keyNote}
-              ></DrumNode>
+            <div className="p-1 border" key={`drum-note-${index}`}>
+              {index}
+              <DrumNode noteEvent={drum[index]} keyNote={index}></DrumNode>
             </div>
           );
         })}

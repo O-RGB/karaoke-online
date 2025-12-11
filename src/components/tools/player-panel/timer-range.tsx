@@ -37,7 +37,7 @@ const TimerBar: React.FC<TimerBarProps> = ({}) => {
 
   useEffect(() => {
     if (engine) {
-      engine?.timerUpdated.add(
+      engine?.timerUpdated.on(
         ["TIMING", "CHANGE"],
         0,
         onTimingUpdated,
@@ -46,7 +46,7 @@ const TimerBar: React.FC<TimerBarProps> = ({}) => {
     }
 
     return () => {
-      engine?.timerUpdated.remove(["TIMING", "CHANGE"], 0, componnetId);
+      engine?.timerUpdated.off(["TIMING", "CHANGE"], 0, componnetId);
     };
   }, [engine, dragging]);
 

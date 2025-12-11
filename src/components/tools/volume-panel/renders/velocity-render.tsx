@@ -28,7 +28,7 @@ const ChannelVolumeBg: React.FC<ChannelVolumeBgProps> = ({
 
   useEffect(() => {
     if (engine) {
-      engine?.playerUpdated.add(
+      engine?.playerUpdated.on(
         ["PLAYER", "CHANGE"],
         0,
         onPlayerUpdate,

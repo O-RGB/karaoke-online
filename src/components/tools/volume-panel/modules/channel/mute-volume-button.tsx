@@ -25,7 +25,7 @@ const MuteVolumeButton: React.FC<MuteVolumeButtonProps> = ({
 
   useEffect(() => {
     if (node) {
-      node.volume?.linkEvent(
+      node.volume?.on(
         ["VOLUME", "MUTE"],
         (v) => setIsMuted(v.value),
         componentId
@@ -33,7 +33,7 @@ const MuteVolumeButton: React.FC<MuteVolumeButtonProps> = ({
     }
 
     return () => {
-      node.volume?.unlinkEvent(["VOLUME", "MUTE"], componentId);
+      node.volume?.off(["VOLUME", "MUTE"], componentId);
     };
   }, [node]);
 

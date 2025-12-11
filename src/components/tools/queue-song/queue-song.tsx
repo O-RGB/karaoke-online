@@ -283,7 +283,7 @@ const QueueSong: React.FC<QueueSongProps> = ({
 
   useEffect(() => {
     if (engine) {
-      engine?.countdownUpdated.add(
+      engine?.countdownUpdated.on(
         ["COUNTDOWN", "CHANGE"],
         0,
         onCountDownUpdated,
@@ -291,7 +291,7 @@ const QueueSong: React.FC<QueueSongProps> = ({
       );
     }
     return () => {
-      engine?.countdownUpdated.remove(["COUNTDOWN", "CHANGE"], 0, componnetId);
+      engine?.countdownUpdated.off(["COUNTDOWN", "CHANGE"], 0, componnetId);
     };
   }, [engine]);
 

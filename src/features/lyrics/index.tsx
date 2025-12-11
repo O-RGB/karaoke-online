@@ -59,7 +59,7 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = ({ className }) => {
 
   useEffect(() => {
     if (timerUpdated) {
-      timerUpdated.add(["TIMING", "CHANGE"], 0, onTickUpdated, componnetId);
+      timerUpdated.on(["TIMING", "CHANGE"], 0, onTickUpdated, componnetId);
     }
   }, [timerUpdated]);
 

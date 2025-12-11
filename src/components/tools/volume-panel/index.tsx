@@ -139,8 +139,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
                       <div className="z-10 w-full absolute bottom-0 left-0 h-full">
                         {_.note ? (
                           <NotesChannelRender
-                            off={_.note.notesOff}
-                            on={_.note.notesOn}
+                            noteModifier={_.noteModifier}
                             row={16}
                             col={8}
                           ></NotesChannelRender>

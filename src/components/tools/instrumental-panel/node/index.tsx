@@ -21,7 +21,7 @@ const InstrumentalButtonRender: React.FC<InstrumentalButtonRenderProps> = ({
   const [expression, setExpression] = useState<number>(100);
 
   useEffect(() => {
-    instrumental.expression[indexKey].linkEvent(
+    instrumental.expression[indexKey].on(
       ["EXPRESSION", "CHANGE"],
       (v) => setExpression(v.value),
       componentId
@@ -36,11 +36,11 @@ const InstrumentalButtonRender: React.FC<InstrumentalButtonRenderProps> = ({
       componentId
     );
     return () => {
-      instrumental.expression[indexKey].unlinkEvent(
+      instrumental.expression[indexKey].off(
         ["EXPRESSION", "CHANGE"],
         componentId
       );
-      instrumental.equalizer[indexKey].unlinkEvent(
+      instrumental.equalizer[indexKey].off(
         ["EQUALIZER", "CHANGE"],
         componentId
       );

@@ -1,99 +1,85 @@
-import { EventManager } from "../events";
-import { EventKey, SynthNodeProps, TEventType } from "../types/node.type";
+import { EventEmitter } from "../events";
+import { EventKey, SynthControlProps, TEventType } from "../types/node.type";
 
-export class SynthNode<K = any, R = any> implements SynthNodeProps<K, R> {
-  public value: R | undefined = undefined;
-  public isMute: boolean = false;
-  public isLocked: boolean = false;
-  public type: K | undefined;
+export class SynthControl<K = any, R = any> implements SynthControlProps<K, R> {
+  public value?: R;
+  public backupValue?: R;
+
+  public isMute = false;
+  public isLocked = false;
+
+  public type?: K;
   public channel: number = 0;
-  public event: EventManager<K, TEventType<R>> | undefined = undefined;
-  public backupValue: R | undefined = undefined;
+  public events?: EventEmitter<K, TEventType<R>>;
 
   constructor(
-    event?: EventManager<K, TEventType<R>>,
+    events?: EventEmitter<K, TEventType<R>>,
     type?: K,
     channel?: number,
     value?: R,
     isMute?: boolean,
     isLock?: boolean
   ) {
-    if (value !== undefined) {
-      this.value = value;
-      this.backupValue = value;
-    }
+    this.value = value;
+    this.backupValue = value;
+
     if (isMute !== undefined) this.isMute = isMute;
     if (isLock !== undefined) this.isLocked = isLock;
-    if (type !== undefined) this.type = type;
-    if (channel !== undefined) this.channel = channel;
 
-    if (event !== undefined) {
-      this.event = event;
-    } else {
-      this.event = new EventManager<K, TEventType<R>>()
-    }
+    this.type = type;
+    this.channel = channel ?? 0;
+    this.events = events ?? new EventEmitter<K, TEventType<R>>();
   }
 
-  public setLock(isLock: boolean) {
-    this.isLocked = isLock;
-
+  public setLock(val: boolean) {
+    this.isLocked = val;
     if (!this.type) return;
-    this.event?.trigger([this.type, "LOCK"], this.channel, {
-      value: isLock,
-    });
+
+    this.events?.emit([this.type, "LOCK"], this.channel, { value: val });
   }
 
-  public setMute(mute: boolean) {
-    this.isMute = mute;
-
+  public setMute(val: boolean) {
+    this.isMute = val;
     if (!this.type) return;
-    this.event?.trigger([this.type, "MUTE"], this.channel, {
-      value: mute,
-    });
+
+    this.events?.emit([this.type, "MUTE"], this.channel, { value: val });
   }
 
-  public setValue(value: R) {
-    this.value = value;
-
+  public setValue(val: R) {
+    this.value = val;
     if (!this.type) return;
-    this.event?.trigger([this.type, "CHANGE"], this.channel, {
-      value: value,
-    });
+
+    this.events?.emit([this.type, "CHANGE"], this.channel, { value: val });
   }
 
   public reset() {
     if (this.backupValue !== undefined) {
-      console.log("reset value", this.backupValue);
       this.setValue(this.backupValue);
     }
   }
 
-  public linkEvent(
+  public on(
     eventKey: EventKey<K>,
     callback: (event: TEventType<R>) => void,
-    componentId: string
+    listenerId: string
   ) {
-    if (!this.type || !this.event) return;
+    if (!this.type || !this.events) return;
 
-    this.event.add(eventKey, this.channel, callback, componentId);
+    this.events.on(eventKey, this.channel, callback, listenerId);
 
-    let currentValue: any;
-    if (eventKey[1] === "CHANGE") {
-      currentValue = this.value;
-    } else if (eventKey[1] === "MUTE") {
-      currentValue = this.isMute;
-    } else if (eventKey[1] === "LOCK") {
-      currentValue = this.isLocked;
-    }
+    const lastValue =
+      eventKey[1] === "CHANGE"
+        ? this.value
+        : eventKey[1] === "MUTE"
+        ? this.isMute
+        : this.isLocked;
 
-    callback({ value: currentValue });
+    callback({ value: lastValue as any });
   }
 
-  public unlinkEvent(
-    eventKey: EventKey<K>,
-    componentId: string
-  ) {
-    if (!this.type || !this.event) return;
-    this.event.remove(eventKey, this.channel, componentId);
+  public off(eventKey: EventKey<K>, listenerId: string) {
+    if (!this.type || !this.events) return;
+
+    this.events.off(eventKey, this.channel, listenerId);
   }
 }

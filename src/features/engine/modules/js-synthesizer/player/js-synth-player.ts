@@ -12,7 +12,7 @@ import { fixMidiHeader } from "@/lib/karaoke/ncn";
 import { IMIDIEvent, Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { JsSynthEngine } from "../js-synth-engine";
 import { DRUM_CHANNEL } from "@/config/value";
-import { EventManager } from "../../instrumentals/events";
+import { EventEmitter } from "../../instrumentals/events";
 import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
 import { parseMidi } from "@/lib/karaoke/songs/midi/reader";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
@@ -26,7 +26,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   public midiData: IMidiParseResult | undefined = undefined;
 
   public eventInit?: BaseSynthEvent | undefined;
-  public controller = new EventManager<string, number>();
+  public controller = new EventEmitter<string, number>();
   public musicQuere: MusicLoadAllData | undefined = undefined;
 
   public mp3Element?: HTMLAudioElement;
@@ -66,7 +66,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.engine.timer?.startTimer();
     this.eventInit?.onPlay?.();
     this.paused = false;
-    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
+    this.engine.playerUpdated.emit(["PLAYER", "CHANGE"], 0, "PLAY");
     console.log("Play...");
   }
 
@@ -87,7 +87,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
     this.engine.timer?.stopTimer();
     this.paused = true;
-    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PAUSE");
+    this.engine.playerUpdated.emit(["PLAYER", "CHANGE"], 0, "PAUSE");
     console.log("Pause...");
   }
 
@@ -109,7 +109,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
     this.engine.timer?.stopTimer();
     this.paused = true;
-    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "STOP");
+    this.engine.playerUpdated.emit(["PLAYER", "CHANGE"], 0, "STOP");
     console.log("Stop...");
   }
 
@@ -131,7 +131,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
         this.paused = false;
         this.engine.timer?.startTimer();
         this.eventInit?.onPlay?.();
-        this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
+        this.engine.playerUpdated.emit(["PLAYER", "CHANGE"], 0, "PLAY");
       }
     } else if (this.musicQuere?.musicType === "YOUTUBE") {
       const youtubePlayer = useYoutubePlayer.getState();
@@ -155,19 +155,19 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   }
 
   speedUpdate(speed: number): void {
-    this.engine.speedUpdated.trigger(["SPEED", "CHANGE"], 0, speed);
+    this.engine.speedUpdated.emit(["SPEED", "CHANGE"], 0, speed);
   }
 
   tempoUpdate(tempo: number): void {
-    this.engine.tempoUpdated.trigger(["TEMPO", "CHANGE"], 0, tempo);
+    this.engine.tempoUpdated.emit(["TEMPO", "CHANGE"], 0, tempo);
   }
 
   timingUpdate(tickOrTime: number): void {
-    this.engine.timerUpdated.trigger(["TIMING", "CHANGE"], 0, tickOrTime);
+    this.engine.timerUpdated.emit(["TIMING", "CHANGE"], 0, tickOrTime);
   }
 
   countDownUpdate(time: number): void {
-    this.engine.countdownUpdated.trigger(["COUNTDOWN", "CHANGE"], 0, time);
+    this.engine.countdownUpdated.emit(["COUNTDOWN", "CHANGE"], 0, time);
   }
 
   async loadYoutube(youtubeId: string): Promise<boolean> {
@@ -252,7 +252,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       this.engine.timer?.updateTempoMap(data.tempoRange);
       this.engine.timer?.updatePpq((data.metadata as any).ticksPerBeat);
       this.musicQuere = data;
-      this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+      this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
       return !!this.prepareMidi(mid);
     }
 
@@ -260,7 +260,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     if (mp3 != undefined) {
       this.engine.timer?.updateMusic(data);
       this.musicQuere = data;
-      this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+      this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
       return this.loadMp3(mp3);
     }
 
@@ -268,14 +268,14 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     if (ykr != undefined && data.youtubeId) {
       this.engine.timer?.updateMusic(data);
       this.musicQuere = data;
-      this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+      this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
       return this.loadYoutube(data.youtubeId);
     }
 
     if (data.isRemoteYoutube && data.youtubeId) {
       this.engine.timer?.updateMusic(data);
       this.musicQuere = data;
-      this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+      this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
       return this.loadYoutube(data.youtubeId);
     }
 
@@ -289,7 +289,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.player?.hookPlayerMIDIEvents((s, type, event: IMIDIEvent) => {
       const eventType = event.getType();
       const velocity = event.getVelocity();
-      const originalMidiNote = event.getKey();
+      const midiNote = event.getKey();
       const channel = event.getChannel();
       const control = event.getControl();
       const value = event.getValue();
@@ -299,76 +299,68 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const isNoteOff =
         eventType === 0x80 || (eventType === 0x90 && velocity === 0);
 
-      if (node) {
-        if (isNoteOn) {
-          if (channel !== DRUM_CHANNEL) {
-            const nodeVolume = node.volume?.value ?? 0;
-            const transpose = node.transpose?.value ?? 0;
-            const newNote = Math.max(
-              0,
-              Math.min(127, originalMidiNote + transpose)
-            );
+      // if (type === 0x90 && velocity > 0) {
+      //   if (isDrum) {
+      //     const drumName = this.getDrumName(midiNote);
 
-            event.setKey(newNote);
-            event.setVelocity(nodeVolume);
-          }
-          if (this.eventInit?.onNoteOnChangeCallback) {
-            this.eventInit.onNoteOnChangeCallback({
-              channel,
-              midiNote: originalMidiNote,
-              velocity,
-            });
-          }
+      //     console.log(
+      //       `[DRUM] channel:${channel}  note:${midiNote}  name:${drumName}  velocity:${velocity}`
+      //     );
+      //   } else {
+      //     const family = this.getInstrumentFamily(program);
 
-          node.noteOnChange?.({
-            channel,
-            midiNote: originalMidiNote,
-            velocity,
-          });
-        } else if (isNoteOff) {
-          if (channel !== DRUM_CHANNEL) {
-            const noteTranspose =
-              node.getNoteTranspose?.(originalMidiNote) ??
-              node.transpose?.value ??
-              0;
-            const newNote = Math.max(
-              0,
-              Math.min(127, originalMidiNote + noteTranspose)
-            );
-            event.setKey(newNote);
-          }
+      //     console.log(
+      //       `[INSTRUMENT] channel:${channel}  program:${program}  family:${family}  note:${midiNote}  velocity:${velocity}`
+      //     );
+      //   }
+      // }
 
-          if (this.eventInit?.onNoteOffChangeCallback) {
-            this.eventInit.onNoteOffChangeCallback({
-              channel,
-              midiNote: originalMidiNote,
-              velocity,
-            });
-          }
+      if (isNoteOn) {
+        const output = this.engine.notesModifier.noteOn({
+          channel,
+          midiNote,
+          velocity,
+        });
 
-          node.noteOffChange?.({
-            channel,
-            midiNote: originalMidiNote,
-            velocity,
-          });
-        }
-      } else {
-        if (eventType === 0x90 && this.eventInit?.onNoteOnChangeCallback) {
+        event.setKey(output.midiNote);
+        event.setVelocity(output.velocity);
+
+        if (this.eventInit?.onNoteOnChangeCallback) {
           this.eventInit.onNoteOnChangeCallback({
             channel,
-            midiNote: originalMidiNote,
-            velocity,
-          });
-        } else if (
-          eventType === 0x80 &&
-          this.eventInit?.onNoteOffChangeCallback
-        ) {
-          this.eventInit.onNoteOffChangeCallback({
-            channel,
-            midiNote: originalMidiNote,
+            midiNote,
             velocity,
           });
         }
+
+        node.noteOnChange?.({
+          channel,
+          midiNote,
+          velocity,
+        });
+      } else if (isNoteOff) {
+        const output = this.engine.notesModifier.noteOff({
+          channel,
+          midiNote,
+          velocity,
+        });
+
+        event.setKey(output.midiNote);
+        event.setVelocity(output.velocity);
+
+        if (this.eventInit?.onNoteOffChangeCallback) {
+          this.eventInit.onNoteOffChangeCallback({
+            channel,
+            midiNote,
+            velocity,
+          });
+        }
+
+        node.noteOffChange?.({
+          channel,
+          midiNote,
+          velocity,
+        });
       }
 
       switch (type) {

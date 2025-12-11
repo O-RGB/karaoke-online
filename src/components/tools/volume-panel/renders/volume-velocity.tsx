@@ -1,6 +1,6 @@
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
-import { EventManager } from "@/features/engine/modules/instrumentals/events";
-import { SynthNode } from "@/features/engine/modules/instrumentals/node";
+import { EventEmitter } from "@/features/engine/modules/instrumentals/events";
+import { SynthControl } from "@/features/engine/modules/instrumentals/node";
 import {
   INoteState,
   TEventType,
@@ -147,7 +147,7 @@ const VolumeVelocityRender: React.FC<VolumeVelocityRenderProps> = ({
 export default VolumeVelocityRender;
 
 interface MiniNoteListenerProps {
-  synthNode: SynthNode<INoteState, INoteChange>
+  synthNode: SynthControl<INoteState, INoteChange>
   channel: number;
   onNoteOn: (value: TEventType<INoteChange>) => void;
   onNoteOff: (value: TEventType<boolean>) => void;
@@ -162,11 +162,11 @@ const MiniNoteListener: React.FC<MiniNoteListenerProps> = ({
   const componentId = useId();
 
   useEffect(() => {
-    synthNode.linkEvent(["NOTE_ON", "CHANGE"], onNoteOn, componentId);
-    synthNode.linkEvent(["NOTE_ON", "MUTE"], onNoteOff as any, componentId);
+    synthNode.on(["NOTE_ON", "CHANGE"], onNoteOn, componentId);
+    synthNode.on(["NOTE_ON", "MUTE"], onNoteOff as any, componentId);
     return () => {
-      synthNode.unlinkEvent(["NOTE_ON", "CHANGE"], componentId);
-      synthNode.unlinkEvent(["NOTE_ON", "MUTE"], componentId);
+      synthNode.off(["NOTE_ON", "CHANGE"], componentId);
+      synthNode.off(["NOTE_ON", "MUTE"], componentId);
     };
   }, [synthNode, channel, onNoteOn]);
 

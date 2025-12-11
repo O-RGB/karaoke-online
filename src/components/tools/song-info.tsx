@@ -17,7 +17,7 @@ const SongInfo: React.FC<SongInfoProps> = ({ className }) => {
 
   useEffect(() => {
     if (engine) {
-      engine?.musicUpdated.add(
+      engine?.musicUpdated.on(
         ["MUSIC", "CHANGE"],
         0,
         onMusicUpdated,

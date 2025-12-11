@@ -30,8 +30,8 @@ const ChannelLimit: React.FC<ChannelLimitProps> = ({
   };
 
   useEffect(() => {
-    node.program?.linkEvent(["PROGARM", "CHANGE"], onProgramChange, componentId);
-    return () => node.program?.unlinkEvent(["PROGARM", "CHANGE"], componentId);
+    node.program?.on(["PROGARM", "CHANGE"], onProgramChange, componentId);
+    return () => node.program?.off(["PROGARM", "CHANGE"], componentId);
   }, [node]);
 
   if (!node || program === undefined) return;

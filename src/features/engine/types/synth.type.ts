@@ -6,9 +6,10 @@ import { BassConfig } from "../modules/instrumentals/config";
 import { GlobalEqualizer } from "../modules/equalizer/global-equalizer";
 import { SoundSystemMode } from "@/features/config/types/config.type";
 import { TimerWorker } from "../modules/timer";
-import { EventManager } from "../modules/instrumentals/events";
+import { EventEmitter } from "../modules/instrumentals/events";
 import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
+import { NotesModifierManager } from "../modules/notes-modifier-manager";
 
 export type TimingModeType = "Tick" | "Time";
 export type PlayerStatusType = "PLAY" | "STOP" | "PAUSE";
@@ -23,16 +24,18 @@ export interface BaseSynthEngine {
   instrumental: InstrumentalNode | undefined;
 
   timer?: TimerWorker | undefined;
-  timerUpdated: EventManager<"TIMING", number>;
-  tempoUpdated: EventManager<"TEMPO", number>;
-  speedUpdated: EventManager<"SPEED", number>;
-  pitchUpdated: EventManager<"PITCH", number>;
-  playerUpdated: EventManager<"PLAYER", PlayerStatusType>;
-  countdownUpdated: EventManager<"COUNTDOWN", number>;
-  musicUpdated: EventManager<"MUSIC", MusicLoadAllData>;
+  timerUpdated: EventEmitter<"TIMING", number>;
+  tempoUpdated: EventEmitter<"TEMPO", number>;
+  speedUpdated: EventEmitter<"SPEED", number>;
+  pitchUpdated: EventEmitter<"PITCH", number>;
+  playerUpdated: EventEmitter<"PLAYER", PlayerStatusType>;
+  countdownUpdated: EventEmitter<"COUNTDOWN", number>;
+  musicUpdated: EventEmitter<"MUSIC", MusicLoadAllData>;
 
   currentPlaybackRate: number;
   globalPitch: number;
+
+  notesModifier: NotesModifierManager;
 
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;

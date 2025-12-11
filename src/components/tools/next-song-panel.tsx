@@ -18,7 +18,7 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({ className }) => {
 
   useEffect(() => {
     if (engine) {
-      engine?.countdownUpdated.add(
+      engine?.countdownUpdated.on(
         ["COUNTDOWN", "CHANGE"],
         0,
         onCountDownUpdated,
@@ -26,7 +26,7 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({ className }) => {
       );
     }
     return () => {
-      engine?.countdownUpdated.remove(["COUNTDOWN", "CHANGE"], 0, componnetId);
+      engine?.countdownUpdated.off(["COUNTDOWN", "CHANGE"], 0, componnetId);
     };
   }, [engine]);
 

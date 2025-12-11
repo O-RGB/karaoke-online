@@ -49,7 +49,7 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
 
     this.engine.timer?.startTimer();
     this.paused = false;
-    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
+    this.engine.playerUpdated.emit(["PLAYER", "CHANGE"], 0, "PLAY");
   }
 
   stop(): void {
@@ -59,7 +59,7 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
     this.player.stop();
     this.engine.timer?.stopTimer();
     this.paused = true;
-    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "STOP");
+    this.engine.playerUpdated.emit(["PLAYER", "CHANGE"], 0, "STOP");
   }
 
   pause(): void {
@@ -81,7 +81,7 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
 
     this.engine.timer?.stopTimer();
     this.paused = true;
-    this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PAUSE");
+    this.engine.playerUpdated.emit(["PLAYER", "CHANGE"], 0, "PAUSE");
   }
 
   async getCurrentTiming() {
@@ -115,7 +115,7 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
         newNode.start(0, timing);
         this.paused = false;
         this.engine.timer?.startTimer();
-        this.engine.playerUpdated.trigger(["PLAYER", "CHANGE"], 0, "PLAY");
+        this.engine.playerUpdated.emit(["PLAYER", "CHANGE"], 0, "PLAY");
       } else {
         this.paused = true;
       }
@@ -132,15 +132,15 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
   }
 
   tempoUpdate(tempo: number): void {
-    this.engine.tempoUpdated.trigger(["TEMPO", "CHANGE"], 0, tempo);
+    this.engine.tempoUpdated.emit(["TEMPO", "CHANGE"], 0, tempo);
   }
 
   timingUpdate(tickOrTime: number): void {
-    this.engine.timerUpdated.trigger(["TIMING", "CHANGE"], 0, tickOrTime);
+    this.engine.timerUpdated.emit(["TIMING", "CHANGE"], 0, tickOrTime);
   }
 
   countDownUpdate(time: number): void {
-    this.engine.countdownUpdated.trigger(["COUNTDOWN", "CHANGE"], 0, time);
+    this.engine.countdownUpdated.emit(["COUNTDOWN", "CHANGE"], 0, time);
   }
 
   async getCurrentTickAndTempo(
@@ -209,7 +209,7 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
       this.engine.timer?.updateTempoMap(data.tempoRange);
       this.engine.timer?.updatePpq((data.metadata as any).ticksPerBeat);
       this.musicQuere = data;
-      this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+      this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
       return !!this.prepareMidi(mid);
     }
 
@@ -217,7 +217,7 @@ export class SpessaPlayerEngine implements BaseSynthPlayerEngine {
     if (mp3 != undefined) {
       this.engine.timer?.updateMusic(data);
       this.musicQuere = data;
-      this.engine.musicUpdated.trigger(["MUSIC", "CHANGE"], 0, data);
+      this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
       return this.loadMp3(mp3);
     }
     return false;

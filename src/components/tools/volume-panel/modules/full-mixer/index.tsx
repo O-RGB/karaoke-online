@@ -30,14 +30,14 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
     if (nodes.length < DRUM_CHANNEL) return;
 
     const drumNode = nodes[DRUM_CHANNEL];
-    drumNode.program?.linkEvent(
+    drumNode.program?.on(
       ["PROGARM", "CHANGE"],
       (value) => setProgarm(value.value),
       componentId
     );
 
     return () => {
-      drumNode.program?.unlinkEvent?.(["PROGARM", "CHANGE"], componentId);
+      drumNode.program?.off?.(["PROGARM", "CHANGE"], componentId);
     };
   }, [nodes]);
 

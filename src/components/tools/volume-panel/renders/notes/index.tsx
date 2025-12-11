@@ -1,11 +1,9 @@
-import { SynthNode } from "@/features/engine/modules/instrumentals/node";
-import { INoteState } from "@/features/engine/modules/instrumentals/types/node.type";
-import { INoteChange } from "@/features/engine/types/synth.type";
 import React, { useEffect, useRef, useMemo } from "react";
+import { NoteEventManager } from "@/features/engine/modules/notes-modifier-manager/note";
+import { INoteChange } from "@/features/engine/types/synth.type";
 
 interface NotesChannelRenderProps {
-  on: SynthNode<INoteState, INoteChange>[];
-  off: SynthNode<INoteState, INoteChange>[];
+  noteModifier: NoteEventManager[];
   row: number;
   col: number;
 }
@@ -16,8 +14,7 @@ interface CellState {
 }
 
 const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
-  on,
-  off,
+  noteModifier,
   row = 8,
   col = 8,
 }) => {
@@ -49,7 +46,6 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
     }));
   }, [total]);
 
-  // Resize canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -83,6 +79,7 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
     updateSize();
     const observer = new ResizeObserver(updateSize);
     observer.observe(container);
+
     return () => observer.disconnect();
   }, [row, col]);
 
@@ -101,7 +98,7 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
 
     const { activeCount, intensity } = cellsRef.current[i];
 
-    const brightness = activeCount > 0 ? 0.4 : intensity * 0.2 + 0.1;
+    const brightness = activeCount > 0 ? 0.5 : intensity * 0.25 + 0.1;
 
     ctx.clearRect(x, y, cellWidth, cellHeight);
     ctx.fillStyle = `rgba(255,255,255,${brightness})`;
@@ -124,11 +121,9 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
     }
   };
 
-  //
-  // ultra-low-GPU redraw scheduler
-  //
   const scheduleDraw = () => {
     if (rafRef.current) return;
+
     rafRef.current = requestAnimationFrame(() => {
       rafRef.current = undefined;
 
@@ -136,7 +131,6 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
       dirty.forEach((i) => drawCell(i));
       dirty.clear();
 
-      // soft fade-out
       let anyFade = false;
       cellsRef.current.forEach((cell, idx) => {
         if (cell.activeCount === 0 && cell.intensity > 0.02) {
@@ -150,50 +144,51 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
     });
   };
 
-  //
-  // connect NOTE_ON / NOTE_OFF
-  //
+  const getCellIndexByNote = (midiNote: number) => {
+    const i = Math.floor(midiNote / notesPerCell);
+    return Math.min(i, total - 1);
+  };
+
+  const onNoteChange = (note: INoteChange) => {
+    const { midiNote, velocity } = note;
+
+    const cellIndex = getCellIndexByNote(midiNote);
+    const cell = cellsRef.current[cellIndex];
+    if (!cell) return;
+
+    if (velocity > 0) {
+      cell.activeCount = 1;
+      cell.intensity = velocity;
+    } else {
+      cell.activeCount = 0;
+    }
+
+    dirtyCellsRef.current.add(cellIndex);
+    scheduleDraw();
+  };
+
   useEffect(() => {
-    const id = `gpu-opt-${Date.now()}`;
+    const id = `grid-${Date.now()}`;
 
-    const onNote = (i: number) => {
-      const cell = cellsRef.current[i];
-      cell.activeCount++;
-      cell.intensity = 1;
-      dirtyCellsRef.current.add(i);
-      scheduleDraw();
-    };
+    noteModifier.forEach((manager, keyIndex) => {
+      const noteNode = manager.note;
+      if (!noteNode) return;
 
-    const offNote = (i: number) => {
-      const cell = cellsRef.current[i];
-      cell.activeCount = Math.max(0, cell.activeCount - 1);
-      dirtyCellsRef.current.add(i);
-      scheduleDraw();
-    };
-
-    on.forEach((node, idx) => {
-      const i = Math.floor(idx / notesPerCell);
-      if (i < total) node.linkEvent(["NOTE_ON", "CHANGE"], () => onNote(i), id);
-    });
-
-    off.forEach((node, idx) => {
-      const i = Math.floor(idx / notesPerCell);
-      if (i < total)
-        node.linkEvent(["NOTE_OFF", "CHANGE"], () => offNote(i), id);
+      noteNode.on(
+        [keyIndex, "CHANGE"],
+        (event) => {
+          onNoteChange(event.value);
+        },
+        id
+      );
     });
 
     return () => {
-      on.forEach((node, idx) => {
-        const i = Math.floor(idx / notesPerCell);
-        if (i < total) node.unlinkEvent(["NOTE_ON", "CHANGE"], id);
-      });
-
-      off.forEach((node, idx) => {
-        const i = Math.floor(idx / notesPerCell);
-        if (i < total) node.unlinkEvent(["NOTE_OFF", "CHANGE"], id);
+      noteModifier.forEach((manager, keyIndex) => {
+        manager.note?.off([keyIndex, "CHANGE"], id);
       });
     };
-  }, [on, off, notesPerCell, total]);
+  }, [noteModifier, notesPerCell, total]);
 
   return (
     <div ref={containerRef} className="w-full h-full">

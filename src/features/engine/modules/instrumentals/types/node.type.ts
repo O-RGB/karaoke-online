@@ -1,4 +1,4 @@
-import { EventManager } from "../events";
+import { EventEmitter } from "../events";
 
 export type DrumNotesType =
   | "acoustic_bass_drum"
@@ -97,10 +97,11 @@ export type INoteState = "VELOCITY" | "NOTE_ON" | "NOTE_OFF";
 
 export type EventKey<K = any> = [K, INodeOption];
 export type TEventType<K = any, R = any> = TEventCallBack<K, R>;
-export interface SynthNodeProps<K = any, R = any> {
-  value: R | undefined;
+export interface SynthControlProps<K = any, R = any> {
+  value?: R;
+  backupValue?: R;
   isMute: boolean;
-  event?: EventManager<K, TEventType<R>> | undefined;
+  event?: EventEmitter<K, TEventType<R>>;
   setLock?: (isLock: boolean) => void;
   setMute?: (mute: boolean) => void;
   setValue?: (value: R) => void;

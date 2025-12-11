@@ -48,8 +48,8 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
 
   useEffect(() => {
     if (engine) {
-      engine?.speedUpdated.add(["SPEED", "CHANGE"], 0, setSpeed, componnetId);
-      engine?.pitchUpdated.add(["PITCH", "CHANGE"], 0, setPitch, componnetId);
+      engine?.speedUpdated.on(["SPEED", "CHANGE"], 0, setSpeed, componnetId);
+      engine?.pitchUpdated.on(["PITCH", "CHANGE"], 0, setPitch, componnetId);
     }
   }, [nodes, engine]);
   return (

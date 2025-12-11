@@ -1,42 +1,29 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
-import { DRUM_CHANNEL } from "@/config/value";
-import { KeyboardNode } from "@/features/engine/modules/instrumentals/keyboard-node";
-import {
-  INoteState,
-  TEventType,
-} from "@/features/engine/modules/instrumentals/types/node.type";
+import { TEventType } from "@/features/engine/modules/instrumentals/types/node.type";
 import { INoteChange } from "@/features/engine/types/synth.type";
+import { NoteEventManager } from "@/features/engine/modules/notes-modifier-manager/note";
+import SliderCommon from "@/components/common/input-data/slider";
 
 interface DrumNodeProps {
-  note: KeyboardNode;
+  noteEvent: NoteEventManager;
   keyNote: number;
-  onNoteChange?: (event: TEventType<INoteState, INoteChange>) => void;
+  onNoteChange?: (event: TEventType<any, INoteChange>) => void;
 }
 
-const DrumNode: React.FC<DrumNodeProps> = ({ note, keyNote, onNoteChange }) => {
+const DrumNode: React.FC<DrumNodeProps> = ({ noteEvent, keyNote }) => {
   const componentId = useId();
-  const channel = DRUM_CHANNEL;
 
   const velocityRef = useRef(0);
   const displayRef = useRef<HTMLDivElement>(null);
   const valueRef = useRef<HTMLDivElement>(null);
   const animationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [outputs, setOutputs] = useState<MIDIOutput[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [gain, setGain] = useState<number>(100);
 
   const DECAY_RATE = 0.9;
   const MIN_VELOCITY = 0.01;
   const ANIMATION_INTERVAL = 50;
-
-  // useEffect(() => {
-  //   midiService.init().then(() => {
-  //     setOutputs(midiService.outputs);
-  //     setSelectedId(midiService.selectedOutput?.id || null);
-  //   });
-  //   midiService.onOutputsChanged(setOutputs);
-  // }, []);
 
   const updateDisplay = () => {
     velocityRef.current *= DECAY_RATE;
@@ -75,60 +62,50 @@ const DrumNode: React.FC<DrumNodeProps> = ({ note, keyNote, onNoteChange }) => {
     );
   };
 
-  const handleNoteEvent = (v: any) => {
-    const newVelocity = v.value.velocity;
+  const handleSetGain = (value: number) => {
+    noteEvent.setGain(value);
+    setGain(value);
+  };
+
+  const handleNoteEvent = (v: TEventType<INoteChange>) => {
+    const newVelocity = v.value.velocity ?? 0;
 
     if (newVelocity > 0) {
       velocityRef.current = newVelocity;
-      // midiService.sendNoteOn(keyNote, newVelocity, channel);
-      onNoteChange?.(v);
 
       if (!animationIntervalRef.current) {
         startAnimation();
       }
-    } else {
-      // midiService.sendNoteOff(keyNote, channel);
-      onNoteChange?.(v);
     }
   };
 
   useEffect(() => {
-    const noteByIndex = note.notesOn[keyNote];
-    if (!noteByIndex) return;
+    const ev = noteEvent;
+    if (!ev) return;
 
-    noteByIndex.linkEvent(["NOTE_ON", "CHANGE"], handleNoteEvent, componentId);
+    ev.gain?.on(
+      [null, "CHANGE"],
+      (event) => {
+        setGain(event.value);
+      },
+      componentId
+    );
+
+    ev.note?.on([keyNote, "CHANGE"], handleNoteEvent, componentId);
 
     return () => {
-      noteByIndex.unlinkEvent(["NOTE_ON", "CHANGE"], componentId);
+      ev.note?.off([keyNote, "CHANGE"], componentId);
+      ev.gain?.off([null, "CHANGE"], componentId);
 
       if (animationIntervalRef.current) {
         clearInterval(animationIntervalRef.current);
         animationIntervalRef.current = null;
       }
     };
-  }, [note, keyNote, channel, componentId]);
-
-  // const handleOutputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   midiService.setOutputById(e.target.value);
-  //   setSelectedId(e.target.value);
-  // };
+  }, [noteEvent, keyNote, componentId]);
 
   return (
-    <div className="flex flex-col items-center gap-2 w-5 text-xs">
-      {/* MIDI Output Selector */}
-      {/* <select
-        value={selectedId ?? ""}
-        onChange={handleOutputChange}
-        className="text-xs p-1 rounded border bg-white text-gray-800"
-      >
-        {outputs.map((out) => (
-          <option key={out.id} value={out.id}>
-            {out.name}
-          </option>
-        ))}
-        {outputs.length === 0 && <option>No MIDI Output</option>}
-      </select> */}
-
+    <div className="flex flex-col items-center gap-2 w-5 text-xs relative">
       {/* Volume Meter */}
       <div className="h-24 w-3 bg-gray-300 rounded-full overflow-hidden flex flex-col-reverse">
         <div
@@ -139,6 +116,19 @@ const DrumNode: React.FC<DrumNodeProps> = ({ note, keyNote, onNoteChange }) => {
       </div>
       <div ref={valueRef} className="text-[10px] text-gray-400">
         0
+      </div>
+
+      {/* Gain Slider */}
+      <div className="h-24 w-full absolute top-0 left-1 right-0">
+        <SliderCommon
+          min={0}
+          step={0.5}
+          className="h-full"
+          max={128}
+          value={gain}
+          vertical
+          onChange={handleSetGain}
+        />
       </div>
     </div>
   );

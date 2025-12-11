@@ -23,15 +23,15 @@ import {
 import { CHANNEL_DEFAULT, DEFAULT_SOUND_FONT } from "@/config/value";
 import { JsSynthPlayerEngine } from "./player/js-synth-player";
 import { GlobalEqualizer } from "../equalizer/global-equalizer";
-import { PlayerSetTempoType } from "js-synthesizer/dist/lib/Constants";
 import { RecordingsManager } from "@/utils/indexedDB/db/display/table";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { InstrumentalNode } from "../instrumentals/instrumental";
 import { SynthChannel } from "../instrumentals/channel";
 import { BassConfig } from "../instrumentals/config";
 import { TimerWorker } from "../timer";
-import { EventManager } from "../instrumentals/events";
+import { EventEmitter } from "../instrumentals/events";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
+import { NotesModifierManager } from "../notes-modifier-manager";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -48,19 +48,21 @@ export class JsSynthEngine implements BaseSynthEngine {
   public nodes: SynthChannel[] = [];
   public instrumental = new InstrumentalNode();
   public timer: TimerWorker | undefined = undefined;
-  public timerUpdated = new EventManager<"TIMING", number>();
-  public tempoUpdated = new EventManager<"TEMPO", number>();
-  public speedUpdated = new EventManager<"SPEED", number>();
-  public pitchUpdated = new EventManager<"PITCH", number>();
-  public playerUpdated = new EventManager<"PLAYER", PlayerStatusType>();
-  public countdownUpdated = new EventManager<"COUNTDOWN", number>();
-  public musicUpdated = new EventManager<"MUSIC", MusicLoadAllData>();
+  public timerUpdated = new EventEmitter<"TIMING", number>();
+  public tempoUpdated = new EventEmitter<"TEMPO", number>();
+  public speedUpdated = new EventEmitter<"SPEED", number>();
+  public pitchUpdated = new EventEmitter<"PITCH", number>();
+  public playerUpdated = new EventEmitter<"PLAYER", PlayerStatusType>();
+  public countdownUpdated = new EventEmitter<"COUNTDOWN", number>();
+  public musicUpdated = new EventEmitter<"MUSIC", MusicLoadAllData>();
 
   public bassConfig: BassConfig | undefined = undefined;
 
   public isRecording: boolean = false;
   public currentPlaybackRate: number = 1.0;
   public globalPitch: number = 0;
+
+  public notesModifier: NotesModifierManager = new NotesModifierManager();
 
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
@@ -106,15 +108,19 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.globalEqualizer.output.connect(audioContext.destination);
     }
 
+    this.notesModifier.init();
+
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
+      const noteEvent = this.notesModifier.getNote(ch);
+      console.log(noteEvent);
       this.nodes.push(
         new SynthChannel(
           ch,
           this.instrumental,
           audioContext,
-          undefined,
+          noteEvent,
           systemConfig
         )
       );
@@ -393,7 +399,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     });
   }
   setVelocity(event: IVelocityChange): void {}
-
   setController(event: IControllerChange): void {
     const node = this.nodes[event.channel];
     let isLocked = false;
@@ -467,18 +472,18 @@ export class JsSynthEngine implements BaseSynthEngine {
     channel: number | null,
     semitones: number = this.globalPitch
   ): void {
-    if (channel !== null) {
-      if (this.nodes[channel]) {
-        this.nodes[channel].transpose?.setValue(semitones);
-      }
-    } else {
-      for (let index = 0; index < this.nodes.length; index++) {
-        this.nodes[index].transpose?.setValue(semitones);
-      }
-    }
-    this.pitchUpdated.trigger(["PITCH", "CHANGE"], 0, semitones);
+    // if (channel !== null) {
+    //   if (this.nodes[channel]) {
+    //     this.nodes[channel].transpose?.setValue(semitones);
+    //   }
+    // } else {
+    //   for (let index = 0; index < this.nodes.length; index++) {
+    //     this.nodes[index].transpose?.setValue(semitones);
+    //   }
+    // }
+    this.notesModifier.setGlobalTranspose(semitones);
+    this.pitchUpdated.emit(["PITCH", "CHANGE"], 0, semitones);
     this.globalPitch = semitones;
-    console.log("Update Pitch:", semitones);
     this.panic();
   }
 
@@ -491,7 +496,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.currentPlaybackRate = value ? value / 100 : this.currentPlaybackRate;
     this.synth?.setPlayerTempo(0, this.currentPlaybackRate);
     this.timer?.updatePlaybackRate(this.currentPlaybackRate);
-    console.log("Update Speed:", this.currentPlaybackRate);
     this.panic();
   }
 

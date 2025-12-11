@@ -1,4 +1,4 @@
-import { EventManager } from "@/features/engine/modules/instrumentals/events";
+import { EventEmitter } from "@/features/engine/modules/instrumentals/events";
 import React, { useEffect, useId, useState } from "react";
 import { IPianoKey } from "./piano.type";
 import { KeyboardNode } from "@/features/engine/modules/instrumentals/keyboard-node";
@@ -7,10 +7,10 @@ import {
   INoteState,
   TEventType,
 } from "@/features/engine/modules/instrumentals/types/node.type";
-import { SynthNode } from "@/features/engine/modules/instrumentals/node";
+import { SynthControl } from "@/features/engine/modules/instrumentals/node";
 
 interface PianoNoteProps {
-  synthNode: SynthNode<INoteState, INoteChange>
+  synthNode: SynthControl<INoteState, INoteChange>
   channel: number;
   index: number;
   keyStyle: IPianoKey;
@@ -31,7 +31,7 @@ const PianoNote: React.FC<PianoNoteProps> = ({
 
   useEffect(() => {
     if (synthNode) {
-      synthNode.linkEvent(
+      synthNode.on(
         ["NOTE_ON", "CHANGE"],
         (v) => setOn(v.value),
         componentId
@@ -39,7 +39,7 @@ const PianoNote: React.FC<PianoNoteProps> = ({
     }
 
     return () => {
-      synthNode.unlinkEvent(["NOTE_ON", "CHANGE"], componentId);
+      synthNode.off(["NOTE_ON", "CHANGE"], componentId);
     };
   }, [synthNode]);
 

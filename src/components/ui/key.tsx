@@ -1,5 +1,5 @@
-import { EventManager } from "@/features/engine/modules/instrumentals/events";
-import { SynthNode } from "@/features/engine/modules/instrumentals/node";
+import { EventEmitter } from "@/features/engine/modules/instrumentals/events";
+import { SynthControl } from "@/features/engine/modules/instrumentals/node";
 import {
   INoteState,
   TEventType,
@@ -8,7 +8,7 @@ import { INoteChange } from "@/features/engine/types/synth.type";
 import React, { useEffect, useId, useState } from "react";
 
 interface KeyMinProps {
-  synthNode: SynthNode<INoteState, INoteChange>
+  synthNode: SynthControl<INoteState, INoteChange>
 }
 
 const KeyMin: React.FC<KeyMinProps> = ({ synthNode }) => {
@@ -17,7 +17,7 @@ const KeyMin: React.FC<KeyMinProps> = ({ synthNode }) => {
 
   useEffect(() => {
     if (synthNode) {
-      synthNode.linkEvent(
+      synthNode.on(
         ["NOTE_ON", "CHANGE"],
         (v) => setOn(v.value),
         componentId
@@ -25,7 +25,7 @@ const KeyMin: React.FC<KeyMinProps> = ({ synthNode }) => {
     }
 
     return () => {
-      synthNode.unlinkEvent(["NOTE_ON", "CHANGE"], componentId)
+      synthNode.off(["NOTE_ON", "CHANGE"], componentId)
     }
   }, [synthNode]);
 

@@ -1,5 +1,5 @@
-import { SynthNode } from "../node";
-import { EventManager } from "../events";
+import { SynthControl } from "../node";
+import { EventEmitter } from "../events";
 import { INodeKey, INodeState, INoteState } from "../types/node.type";
 import {
   IControllerChange,
@@ -19,25 +19,28 @@ import { KeyModifierManager } from "spessasynth_lib/@types/synthetizer/key_modif
 import { DRUM_CHANNEL } from "@/config/value";
 import { ChannelEqualizer } from "../../equalizer/channel-equalizer";
 import { ConfigSystem } from "@/features/config/types/config.type";
+import { NoteEventManager } from "../../notes-modifier-manager/note";
 
 export class SynthChannel {
   public channel: number | undefined;
 
   public note: KeyboardNode | undefined = undefined;
 
-  public volume: SynthNode<INodeKey, number> | undefined = undefined;
-  public maxVolume: SynthNode<INodeKey, number> | undefined = undefined;
+  public noteModifier: NoteEventManager[] = [];
 
-  public chorus: SynthNode<INodeKey, number> | undefined = undefined;
-  public reverb: SynthNode<INodeKey, number> | undefined = undefined;
-  public transpose: SynthNode<null, number> | undefined = undefined;
-  public pan: SynthNode<INodeKey, number> | undefined = undefined;
+  public volume: SynthControl<INodeKey, number> | undefined = undefined;
+  public maxVolume: SynthControl<INodeKey, number> | undefined = undefined;
 
-  public velocity: SynthNode<INodeState, number> | undefined = undefined;
-  public expression: SynthNode<INodeState, number> | undefined = undefined;
-  public program: SynthNode<INodeState, number> | undefined = undefined;
-  public isDrum: SynthNode<INodeState, boolean> | undefined = undefined;
-  public isActive: SynthNode<INodeState, boolean> | undefined = undefined;
+  public chorus: SynthControl<INodeKey, number> | undefined = undefined;
+  public reverb: SynthControl<INodeKey, number> | undefined = undefined;
+  public transpose: SynthControl<null, number> | undefined = undefined;
+  public pan: SynthControl<INodeKey, number> | undefined = undefined;
+
+  public velocity: SynthControl<INodeState, number> | undefined = undefined;
+  public expression: SynthControl<INodeState, number> | undefined = undefined;
+  public program: SynthControl<INodeState, number> | undefined = undefined;
+  public isDrum: SynthControl<INodeState, boolean> | undefined = undefined;
+  public isActive: SynthControl<INodeState, boolean> | undefined = undefined;
 
   public analyserNode?: AnalyserNode | undefined = undefined;
   public velocityMode?: boolean = false;
@@ -50,7 +53,7 @@ export class SynthChannel {
 
   private activeNotes = new Map<number, number>();
 
-  public globalNoteOnEvent = new EventManager<INoteState, INoteChange>();
+  public globalNoteOnEvent = new EventEmitter<INoteState, INoteChange>();
 
   public instrumental: InstrumentalNode | undefined = undefined;
 
@@ -62,7 +65,7 @@ export class SynthChannel {
     channel: number,
     instrumental: InstrumentalNode,
     audioContext: AudioContext,
-    keyModifierManager: KeyModifierManager | undefined,
+    noteModifier: NoteEventManager[],
     systemConfig?: Partial<ConfigSystem>
   ) {
     if (!audioContext) {
@@ -72,22 +75,23 @@ export class SynthChannel {
 
     this.channel = channel;
     if (channel === DRUM_CHANNEL) {
-      this.isDrum = new SynthNode(undefined, "DRUM", channel, true);
+      this.isDrum = new SynthControl(undefined, "DRUM", channel, true);
     }
     this.instrumental = instrumental;
     this.audioContext = audioContext;
-    this.volume = new SynthNode(undefined, "VOLUME", channel, 100);
-    this.maxVolume = new SynthNode(undefined, "MAX_VOLUME", channel, 10);
-    this.chorus = new SynthNode(undefined, "CHORUS", channel, 100);
-    this.reverb = new SynthNode(undefined, "REVERB", channel, 100);
-    this.pan = new SynthNode(undefined, "PAN", channel, 100);
-    this.program = new SynthNode(undefined, "PROGARM", channel);
-    this.velocity = new SynthNode(undefined, "VELOCITY", channel);
-    this.expression = new SynthNode(undefined, "EXPRESSION", channel);
-    this.transpose = new SynthNode(undefined, null, channel, 0);
+    this.volume = new SynthControl(undefined, "VOLUME", channel, 100);
+    this.maxVolume = new SynthControl(undefined, "MAX_VOLUME", channel, 10);
+    this.chorus = new SynthControl(undefined, "CHORUS", channel, 100);
+    this.reverb = new SynthControl(undefined, "REVERB", channel, 100);
+    this.pan = new SynthControl(undefined, "PAN", channel, 100);
+    this.program = new SynthControl(undefined, "PROGARM", channel);
+    this.velocity = new SynthControl(undefined, "VELOCITY", channel);
+    this.expression = new SynthControl(undefined, "EXPRESSION", channel);
+    this.transpose = new SynthControl(undefined, null, channel, 0);
     this.expression.setLock(true);
 
     this.note = new KeyboardNode(channel);
+    this.noteModifier = noteModifier;
 
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
@@ -122,7 +126,7 @@ export class SynthChannel {
   }
 
   public noteOnChange(event: INoteChange) {
-    this.globalNoteOnEvent.trigger(["NOTE_ON", "CHANGE"], 0, event);
+    this.globalNoteOnEvent.emit(["NOTE_ON", "CHANGE"], 0, event);
 
     // if (this.channel !== DRUM_CHANNEL) {
     const currentTranspose = this.transpose?.value ?? 0;
@@ -136,7 +140,7 @@ export class SynthChannel {
   }
 
   public noteOffChange(event: INoteChange) {
-    this.globalNoteOnEvent.trigger(["NOTE_OFF", "CHANGE"], 0, event);
+    this.globalNoteOnEvent.emit(["NOTE_OFF", "CHANGE"], 0, event);
 
     // if (this.channel !== DRUM_CHANNEL) {
     this.activeNotes.delete(event.midiNote);

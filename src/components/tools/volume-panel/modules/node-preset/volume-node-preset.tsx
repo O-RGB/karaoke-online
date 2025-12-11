@@ -5,7 +5,7 @@ import { IControllerChange } from "@/features/engine/types/synth.type";
 import React, { useEffect, useId, useState } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
 import { INodeKey } from "@/features/engine/modules/instrumentals/types/node.type";
-import { SynthNode } from "@/features/engine/modules/instrumentals/node";
+import { SynthControl } from "@/features/engine/modules/instrumentals/node";
 interface VolumeNodePresetProps {
   disabled?: boolean;
   channel: number;
@@ -15,7 +15,7 @@ interface VolumeNodePresetProps {
   onChange?: (value: IControllerChange) => void;
   onLock?: (event: IControllerChange<boolean>) => void;
   controllerNumber: number;
-  synthNode?: SynthNode<INodeKey, number>;
+  synthNode?: SynthControl<INodeKey, number>;
   className?: string;
 }
 
@@ -46,12 +46,12 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
 
   useEffect(() => {
     if (synthNode) {
-      synthNode.linkEvent(
+      synthNode.on(
         [nodeType, "CHANGE"],
         (value) => setValue(value.value),
         componentId
       );
-      synthNode?.linkEvent(
+      synthNode?.on(
         [nodeType, "LOCK"],
         (value) => setLocked(value.value),
         componentId
@@ -59,8 +59,8 @@ const VolumeNodePreset: React.FC<VolumeNodePresetProps> = ({
     }
 
     return () => {
-      synthNode?.unlinkEvent([nodeType, "CHANGE"], componentId);
-      synthNode?.unlinkEvent([nodeType, "LOCK"], componentId);
+      synthNode?.off([nodeType, "CHANGE"], componentId);
+      synthNode?.off([nodeType, "LOCK"], componentId);
     };
   }, [synthNode]);
 

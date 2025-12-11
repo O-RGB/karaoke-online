@@ -79,12 +79,12 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
   };
 
   useEffect(() => {
-    instrumental.expression[indexKey].linkEvent(
+    instrumental.expression[indexKey].on(
       ["EXPRESSION", "CHANGE"],
       (v) => setExpression(v.value),
       componentId
     );
-    instrumental.equalizer[indexKey].linkEvent(
+    instrumental.equalizer[indexKey].on(
       ["EQUALIZER", "CHANGE"],
       (v) => {
         console.log("setQeConfig(v.value)", v);
@@ -102,11 +102,11 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
       componentId
     );
     return () => {
-      instrumental.expression[indexKey].unlinkEvent(
+      instrumental.expression[indexKey].off(
         ["EXPRESSION", "CHANGE"],
         componentId
       );
-      instrumental.equalizer[indexKey].unlinkEvent(
+      instrumental.equalizer[indexKey].off(
         ["EQUALIZER", "CHANGE"],
         componentId
       );

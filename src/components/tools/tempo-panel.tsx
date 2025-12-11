@@ -28,19 +28,19 @@ const TempoPanel: React.FC<TempoPanelProps> = ({}) => {
 
   useEffect(() => {
     if (engine) {
-      engine?.timerUpdated.add(
+      engine?.timerUpdated.on(
         ["TIMING", "CHANGE"],
         0,
         onTickUpdated,
         componnetId
       );
-      engine?.tempoUpdated.add(
+      engine?.tempoUpdated.on(
         ["TEMPO", "CHANGE"],
         0,
         onTempoUpdated,
         componnetId
       );
-      engine?.musicUpdated.add(
+      engine?.musicUpdated.on(
         ["MUSIC", "CHANGE"],
         0,
         onMusicUpdated,
