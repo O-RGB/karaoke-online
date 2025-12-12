@@ -10,6 +10,8 @@ import { EventEmitter } from "../modules/instrumentals/events";
 import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 import { NotesModifierManager } from "../modules/notes-modifier-manager";
+import { InstrumentalsControl } from "../modules/instrumentals-group";
+import { SynthControl } from "../modules/instrumentals/node";
 
 export type TimingModeType = "Tick" | "Time";
 export type PlayerStatusType = "PLAY" | "STOP" | "PAUSE";
@@ -31,11 +33,13 @@ export interface BaseSynthEngine {
   playerUpdated: EventEmitter<"PLAYER", PlayerStatusType>;
   countdownUpdated: EventEmitter<"COUNTDOWN", number>;
   musicUpdated: EventEmitter<"MUSIC", MusicLoadAllData>;
+  gain: EventEmitter<"GAIN", number>;
 
   currentPlaybackRate: number;
   globalPitch: number;
 
   notesModifier: NotesModifierManager;
+  instrumentalTest: InstrumentalsControl;
 
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;
@@ -67,6 +71,7 @@ export interface BaseSynthEngine {
   noteOffChange(event?: (event: INoteChange) => void): void;
   persetChange(event: (event: IPersetSoundfont[]) => void): void;
   loadDefaultSoundFont(audio?: AudioContext): Promise<any>;
+  setGain(value?: number): void;
 
   soundfontName: string | undefined;
   soundfontFile: File | undefined;

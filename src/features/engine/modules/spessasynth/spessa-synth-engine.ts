@@ -35,6 +35,8 @@ import { TimerWorker } from "../timer";
 import { EventEmitter } from "../instrumentals/events";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 import { NotesModifierManager } from "../notes-modifier-manager";
+import { InstrumentalsControl } from "../instrumentals-group";
+import { SynthControl } from "../instrumentals/node";
 
 export class SpessaSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Time";
@@ -46,6 +48,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public soundfontName: string = "Default Soundfont sf2";
   public soundfontFile: File | undefined;
   public soundfontFrom: SoundSystemMode = "DATABASE_FILE_SYSTEM";
+
+  public instrumentalTest: InstrumentalsControl = new InstrumentalsControl();
 
   public nodes: SynthChannel[] = [];
   public instrumental = new InstrumentalNode();
@@ -62,6 +66,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public playerUpdated = new EventEmitter<"PLAYER", PlayerStatusType>();
   public countdownUpdated = new EventEmitter<"COUNTDOWN", number>();
   public musicUpdated = new EventEmitter<"MUSIC", MusicLoadAllData>();
+  public gain = new EventEmitter<"GAIN", number>();
   public musicQuere: MusicLoadAllData | undefined = undefined;
 
   public currentPlaybackRate: number = 1.0;
@@ -211,6 +216,8 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.soundfontName = "Default Soundfont sf2";
     this.soundfontFrom = "DATABASE_FILE_SYSTEM";
   }
+
+  setGain(value?: number): void {}
 
   getAnalyserNode(auto: AudioContext) {
     return Array.from({ length: 16 }, () => {

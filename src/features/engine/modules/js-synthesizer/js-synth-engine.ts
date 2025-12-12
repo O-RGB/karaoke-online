@@ -32,6 +32,7 @@ import { TimerWorker } from "../timer";
 import { EventEmitter } from "../instrumentals/events";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 import { NotesModifierManager } from "../notes-modifier-manager";
+import { InstrumentalsControl } from "../instrumentals-group";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -55,14 +56,15 @@ export class JsSynthEngine implements BaseSynthEngine {
   public playerUpdated = new EventEmitter<"PLAYER", PlayerStatusType>();
   public countdownUpdated = new EventEmitter<"COUNTDOWN", number>();
   public musicUpdated = new EventEmitter<"MUSIC", MusicLoadAllData>();
+  public gain = new EventEmitter<"GAIN", number>();
 
   public bassConfig: BassConfig | undefined = undefined;
 
   public isRecording: boolean = false;
   public currentPlaybackRate: number = 1.0;
   public globalPitch: number = 0;
-
   public notesModifier: NotesModifierManager = new NotesModifierManager();
+  public instrumentalTest = new InstrumentalsControl();
 
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
@@ -96,6 +98,7 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.timer = new TimerWorker(this.player);
     this.instrumental.setEngine(this);
     this.synth.setGain(0.3);
+    this.gain.emit(["GAIN", "CHANGE"], 0, 0.3);
 
     const analysers: AnalyserNode[] = [];
     this.nodes = [];
@@ -196,6 +199,12 @@ export class JsSynthEngine implements BaseSynthEngine {
     } catch (error) {
       return false;
     }
+  }
+
+  public setGain(value: number): void {
+    const v = Math.max(0, Math.min(10, value / 100));
+    this.gain.emit(["GAIN", "CHANGE"], 0, value);
+    this.synth?.setGain(v);
   }
 
   async startRecording(options: { includeMicrophone: boolean }): Promise<void> {

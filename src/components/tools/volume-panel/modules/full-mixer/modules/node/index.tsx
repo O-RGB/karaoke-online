@@ -4,20 +4,27 @@ import {
 } from "@/features/engine/modules/instrumentals/instrumental";
 import React from "react";
 import InstrumentalVolumeNode from "./volume-node";
+import { InstrumentalsControl } from "@/features/engine/modules/instrumentals-group";
+import { INSTS_KEYS_MAP } from "@/features/engine/modules/instrumentals-group/types";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import VolumeGainNode from "./volume-gain";
 
 interface MixerNodesProps {
-  instrumental: InstrumentalNode;
+  instrumental: InstrumentalsControl;
 }
 
 const MixerNodes: React.FC<MixerNodesProps> = ({ instrumental }) => {
   return (
     <div className="flex pt-2 divide-x">
-      {INSTRUMENT_TYPE_BY_INDEX.map((value, index) => {
+      <VolumeGainNode></VolumeGainNode>
+      {INSTS_KEYS_MAP.map((value, index) => {
+        const inst = instrumental.get(value);
+        if (!inst) return <>{value}</>;
         return (
           <React.Fragment key={`card-inst-${index}`}>
             <InstrumentalVolumeNode
               indexKey={index}
-              instrumental={instrumental}
+              instrumental={inst}
               type={value}
             ></InstrumentalVolumeNode>
           </React.Fragment>

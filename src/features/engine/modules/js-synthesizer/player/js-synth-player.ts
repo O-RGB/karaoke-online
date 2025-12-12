@@ -35,6 +35,8 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   public youtubeId?: string;
   private youtubePausedTime = 0;
 
+  private channelPrograms = new Array(16).fill(0);
+
   addEvent(input: Partial<BaseSynthEvent>): void {
     this.eventInit = { ...this.eventInit, ...input };
   }
@@ -291,156 +293,39 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const velocity = event.getVelocity();
       const midiNote = event.getKey();
       const channel = event.getChannel();
-      const control = event.getControl();
-      const value = event.getValue();
       const program = event.getProgram();
-      const node = this.engine.nodes[channel];
+
       const isNoteOn = eventType === 0x90 && velocity > 0;
       const isNoteOff =
         eventType === 0x80 || (eventType === 0x90 && velocity === 0);
 
-      // if (type === 0x90 && velocity > 0) {
-      //   if (isDrum) {
-      //     const drumName = this.getDrumName(midiNote);
-
-      //     console.log(
-      //       `[DRUM] channel:${channel}  note:${midiNote}  name:${drumName}  velocity:${velocity}`
-      //     );
-      //   } else {
-      //     const family = this.getInstrumentFamily(program);
-
-      //     console.log(
-      //       `[INSTRUMENT] channel:${channel}  program:${program}  family:${family}  note:${midiNote}  velocity:${velocity}`
-      //     );
-      //   }
-      // }
-
       if (isNoteOn) {
-        const output = this.engine.notesModifier.noteOn({
-          channel,
-          midiNote,
-          velocity,
-        });
-
-        event.setKey(output.midiNote);
-        event.setVelocity(output.velocity);
-
-        if (this.eventInit?.onNoteOnChangeCallback) {
-          this.eventInit.onNoteOnChangeCallback({
-            channel,
-            midiNote,
-            velocity,
-          });
-        }
-
-        node.noteOnChange?.({
-          channel,
-          midiNote,
-          velocity,
-        });
+        const currentProgram = this.channelPrograms[channel];
+        const insts = this.engine.instrumentalTest.noteOn(
+          { channel, midiNote, velocity },
+          currentProgram
+        );
+        this.engine.notesModifier.noteOn(insts);
+        event.setValue(insts.velocity);
       } else if (isNoteOff) {
-        const output = this.engine.notesModifier.noteOff({
-          channel,
-          midiNote,
-          velocity,
-        });
-
-        event.setKey(output.midiNote);
-        event.setVelocity(output.velocity);
-
-        if (this.eventInit?.onNoteOffChangeCallback) {
-          this.eventInit.onNoteOffChangeCallback({
-            channel,
-            midiNote,
-            velocity,
-          });
-        }
-
-        node.noteOffChange?.({
-          channel,
-          midiNote,
-          velocity,
-        });
+        const currentProgram = this.channelPrograms[channel];
+        const insts = this.engine.instrumentalTest.noteOff(
+          { channel, midiNote, velocity },
+          currentProgram
+        );
+        this.engine.notesModifier.noteOff(insts);
+        event.setValue(insts.velocity);
       }
 
       switch (type) {
-        case 176:
-          if (this.eventInit?.controllerChangeCallback) {
-            let controllerNumber = 0;
-            let controllerValue = value;
-            let isLocked = false;
+        case 192: // Program Change
+          this.channelPrograms[channel] = program;
 
-            switch (control) {
-              case MAIN_VOLUME:
-                controllerNumber = MAIN_VOLUME;
-                let volume = node.volume;
-                if (volume?.isLocked) {
-                  isLocked = true;
-                  controllerValue = volume.value ?? value;
-                  event.setValue(controllerValue);
-                } else if (volume?.isMute) {
-                  event.setValue(0);
-                  controllerValue = 0;
-                }
-                break;
-
-              case PAN:
-                controllerNumber = PAN;
-                let pan = node.pan;
-                if (pan?.isLocked) {
-                  isLocked = true;
-                  controllerValue = pan.value ?? value;
-                  event.setValue(controllerValue);
-                } else if (pan?.isMute) {
-                  event.setValue(0);
-                  controllerValue = 0;
-                }
-                break;
-
-              case REVERB:
-                controllerNumber = REVERB;
-                let reverb = node.reverb;
-                if (reverb?.isLocked) {
-                  isLocked = true;
-                  controllerValue = reverb.value ?? value;
-                  event.setValue(controllerValue);
-                } else if (reverb?.isMute) {
-                  event.setValue(0);
-                  controllerValue = 0;
-                }
-                break;
-
-              case CHORUSDEPTH:
-                controllerNumber = CHORUSDEPTH;
-                let chorus = node.chorus;
-                if (chorus?.isLocked) {
-                  isLocked = true;
-                  controllerValue = chorus?.value ?? value;
-                  event.setValue(controllerValue);
-                } else if (chorus?.isMute) {
-                  event.setValue(0);
-                  controllerValue = 0;
-                }
-                break;
-
-              case 123:
-                if (node.hasActiveNotes?.()) {
-                  node.stopAllActiveNotes?.();
-                }
-                break;
-            }
-
-            this.eventInit.controllerChangeCallback({
-              controllerNumber,
-              controllerValue,
+          if (this.eventInit?.programChangeCallback) {
+            this.eventInit.programChangeCallback({
+              program,
               channel,
             });
-          }
-          break;
-
-        case 192:
-          if (this.eventInit?.programChangeCallback) {
-            this.eventInit.programChangeCallback({ program, channel });
           }
           break;
       }

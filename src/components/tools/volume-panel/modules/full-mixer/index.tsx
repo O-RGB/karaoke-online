@@ -16,7 +16,7 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
   const componentId = useId();
 
   const instrumental = useSynthesizerEngine(
-    (state) => state.engine?.instrumental
+    (state) => state.engine?.instrumentalTest
   );
   const [program, setProgarm] = useState<number>(0);
 
