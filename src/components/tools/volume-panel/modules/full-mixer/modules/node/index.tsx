@@ -1,13 +1,8 @@
-import {
-  INSTRUMENT_TYPE_BY_INDEX,
-  InstrumentalNode,
-} from "@/features/engine/modules/instrumentals/instrumental";
 import React from "react";
 import InstrumentalVolumeNode from "./volume-node";
 import { InstrumentalsControl } from "@/features/engine/modules/instrumentals-group";
-import { INSTS_KEYS_MAP } from "@/features/engine/modules/instrumentals-group/types";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import VolumeGainNode from "./volume-gain";
+import { INSTS_KEYS_MAP } from "@/features/engine/modules/instrumentals-group/types";
 
 interface MixerNodesProps {
   instrumental: InstrumentalsControl;

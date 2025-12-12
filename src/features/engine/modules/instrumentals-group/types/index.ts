@@ -20,46 +20,49 @@ export const GUITAR_NYLON: number[] = [25];
 // 6. Guitar Jazz
 export const GUITAR_JAZZ: number[] = [26, 27];
 
-// 7. Guitar Overdriven
+// 7. Guitar Muted
+export const GUITAR_MUTED: number[] = [28];
+
+// 8. Guitar Overdriven
 export const GUITAR_OVERDRIVEN: number[] = [29];
 
-// 8. Guitar Distortion
+// 9. Guitar Distortion
 export const GUITAR_DISTORTION: number[] = [30, 31];
 
-// 9. Bass
+// 10. Bass
 export const BASS: number[] = [32, 33, 34, 35, 36, 37, 38, 39];
 
-// 10. String
+// 11. String
 export const STRING: number[] = [40, 41, 42, 43, 44, 45, 46, 47];
 
-// 11. Ensemble
+// 12. Ensemble
 export const ENSEMBLE: number[] = [48, 49, 50, 51, 52, 53, 54, 55];
 
-// 12. Brass
+// 13. Brass
 export const BRASS: number[] = [56, 57, 58, 59, 60, 61, 62, 63];
 
-// 13. Reed
+// 14. Reed
 export const REED: number[] = [64, 65, 66, 67, 68, 69, 70, 71];
 
-// 14. Pipe
+// 15. Pipe
 export const PIPE: number[] = [72, 73, 74, 75, 76, 77, 78, 79];
 
-// 15. Synth Lead
+// 16. Synth Lead
 export const SYNTH_LEAD: number[] = [80, 81, 82, 83, 84, 85, 86, 87];
 
-// 16. Synth Pad
+// 17. Synth Pad
 export const SYNTH_PAD: number[] = [88, 89, 90, 91, 92, 93, 94, 95];
 
-// 17. Synth Effect
+// 18. Synth Effect
 export const SYNTH_EFFECT: number[] = [96, 97, 98, 99, 100, 101, 102, 103];
 
-// 18. Ethnic
+// 19. Ethnic
 export const ETHNIC: number[] = [104, 105, 106, 107, 108, 109, 110, 111];
 
-// 19. Percussive
+// 20. Percussive
 export const PERCUSSIVE: number[] = [112, 113, 114, 115, 116, 117, 118, 119];
 
-// 20. Sound Effects
+// 21. Sound Effects
 export const SOUND_EFFECTS: number[] = [120, 121, 122, 123, 124, 125, 126, 127];
 
 // ─────────────────────────────────────────────
@@ -73,6 +76,7 @@ export type InstrumentFamilyName =
   | "Guitar Clean"
   | "Guitar Nylon"
   | "Guitar Jazz"
+  | "Guitar Muted"
   | "Guitar Overdriven"
   | "Guitar Distortion"
   | "Bass"
@@ -100,6 +104,20 @@ export type InstrumentDrumName =
   | "Bongo"
   | "Conga"
   | "Timbale"
+  | "HandClap"
+  | "Tambourine"
+  | "Splash"
+  | "Vibraslap"
+  | "Agogo"
+  | "Cabasa"
+  | "Maracas"
+  | "Whistle"
+  | "Guiro"
+  | "Claves"
+  | "WoodBlock"
+  | "Cuica"
+  | "Triangle"
+  | "Shaker"
   | "Perc";
 
 export type InstsKeysMap = InstrumentFamilyName | InstrumentDrumName;
@@ -115,6 +133,7 @@ export const INSTRUMENT_FAMILY_NAMES: InstrumentFamilyName[] = [
   "Guitar Clean",
   "Guitar Nylon",
   "Guitar Jazz",
+  "Guitar Muted",
   "Guitar Overdriven",
   "Guitar Distortion",
   "Bass",
@@ -143,6 +162,20 @@ export const INSTRUMENT_DRUM_NAMES: InstrumentDrumName[] = [
   "Bongo",
   "Conga",
   "Timbale",
+  "HandClap",
+  "Tambourine",
+  "Splash",
+  "Vibraslap",
+  "Agogo",
+  "Cabasa",
+  "Maracas",
+  "Whistle",
+  "Guiro",
+  "Claves",
+  "WoodBlock",
+  "Cuica",
+  "Triangle",
+  "Shaker",
   "Perc",
 ];
 
