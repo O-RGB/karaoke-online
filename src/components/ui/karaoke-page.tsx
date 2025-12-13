@@ -120,7 +120,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
         <div id="modal-root"></div>
         <Loading isLoad={onPrepare} />
         <WallpaperRender />
-        <AutoModal auto title={""} />
+        {/* <AutoModal auto title={""} /> */}
         <div id="zoom-container" className="fixed inset-0 w-full z-10">
           <ContextModal
             modal={modalMap}

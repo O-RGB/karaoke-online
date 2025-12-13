@@ -4,10 +4,10 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import React, { useEffect } from "react";
 
 interface DrumChangeProps {
-  program?: number;
+  program: number;
 }
 
-const DrumProgramChange: React.FC<DrumChangeProps> = ({ program }) => {
+const DrumProgramChange: React.FC<DrumChangeProps> = ({ program = 100 }) => {
   const engine = useSynthesizerEngine((state) => state.engine);
 
   useEffect(() => {}, [program]);

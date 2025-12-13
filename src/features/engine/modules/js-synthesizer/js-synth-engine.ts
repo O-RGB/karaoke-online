@@ -25,7 +25,6 @@ import { JsSynthPlayerEngine } from "./player/js-synth-player";
 import { GlobalEqualizer } from "../equalizer/global-equalizer";
 import { RecordingsManager } from "@/utils/indexedDB/db/display/table";
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
-import { InstrumentalNode } from "../instrumentals/instrumental";
 import { SynthChannel } from "../instrumentals/channel";
 import { BassConfig } from "../instrumentals/config";
 import { TimerWorker } from "../timer";
@@ -33,6 +32,7 @@ import { EventEmitter } from "../instrumentals/events";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 import { NotesModifierManager } from "../notes-modifier-manager";
 import { InstrumentalsControl } from "../instrumentals-group";
+import { SynthControl } from "../instrumentals/node";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -47,7 +47,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   public globalEqualizer: GlobalEqualizer | undefined;
 
   public nodes: SynthChannel[] = [];
-  public instrumental = new InstrumentalNode();
+
   public timer: TimerWorker | undefined = undefined;
   public timerUpdated = new EventEmitter<"TIMING", number>();
   public tempoUpdated = new EventEmitter<"TEMPO", number>();
@@ -56,7 +56,12 @@ export class JsSynthEngine implements BaseSynthEngine {
   public playerUpdated = new EventEmitter<"PLAYER", PlayerStatusType>();
   public countdownUpdated = new EventEmitter<"COUNTDOWN", number>();
   public musicUpdated = new EventEmitter<"MUSIC", MusicLoadAllData>();
-  public gain = new EventEmitter<"GAIN", number>();
+  public gain: SynthControl<"GAIN", number> = new SynthControl(
+    undefined,
+    "GAIN",
+    0,
+    30
+  );
 
   public bassConfig: BassConfig | undefined = undefined;
 
@@ -64,7 +69,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   public currentPlaybackRate: number = 1.0;
   public globalPitch: number = 0;
   public notesModifier: NotesModifierManager = new NotesModifierManager();
-  public instrumentalTest = new InstrumentalsControl();
+  public instrumentals = new InstrumentalsControl();
 
   private mediaRecorder: MediaRecorder | null = null;
   private recordedChunks: Blob[] = [];
@@ -96,9 +101,8 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     this.player = new JsSynthPlayerEngine(synth, this);
     this.timer = new TimerWorker(this.player);
-    this.instrumental.setEngine(this);
+
     this.synth.setGain(0.3);
-    this.gain.emit(["GAIN", "CHANGE"], 0, 0.3);
 
     const analysers: AnalyserNode[] = [];
     this.nodes = [];
@@ -117,17 +121,10 @@ export class JsSynthEngine implements BaseSynthEngine {
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
       const noteEvent = this.notesModifier.getNote(ch);
-      console.log(noteEvent);
       this.nodes.push(
-        new SynthChannel(
-          ch,
-          this.instrumental,
-          audioContext,
-          noteEvent,
-          systemConfig
-        )
+        new SynthChannel(ch, audioContext, noteEvent, systemConfig)
       );
-      this.nodes[ch].setVelocityRender(true);
+
       analysers.push(analyser);
     }
 
@@ -203,7 +200,7 @@ export class JsSynthEngine implements BaseSynthEngine {
 
   public setGain(value: number): void {
     const v = Math.max(0, Math.min(10, value / 100));
-    this.gain.emit(["GAIN", "CHANGE"], 0, value);
+    this.gain.setValue(value);
     this.synth?.setGain(v);
   }
 
@@ -353,7 +350,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     if (this.player?.addEvent) {
       this.player.addEvent({
         onNoteOffChangeCallback: (e) => {
-          notes[e.channel].noteOffChange(e);
           callback?.(e);
         },
       });
@@ -365,7 +361,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     if (this.player?.addEvent) {
       this.player.addEvent({
         onNoteOnChangeCallback: (e) => {
-          notes[e.channel].noteOnChange(e);
           callback?.(e);
         },
       });
@@ -377,16 +372,7 @@ export class JsSynthEngine implements BaseSynthEngine {
       this.player.addEvent({
         programChangeCallback: (e) => {
           callback?.(e);
-          const { channel, program } = e;
-          const has = this.bassConfig?.onProgramChange(e);
-          if (has?.isBass) {
-            const nodeProgram = this.nodes[channel].program?.value;
-            if (nodeProgram === program) return;
-            this.setProgram(has.event);
-            this.nodes[channel].programChange(has.event);
-          } else {
-            this.nodes[channel].programChange(e);
-          }
+          this.nodes[e.channel].programChange(e);
         },
       });
     }
@@ -425,9 +411,6 @@ export class JsSynthEngine implements BaseSynthEngine {
       case CHORUSDEPTH:
         isLocked = node.chorus?.isLocked ?? false;
         break;
-      case EXPRESSION:
-        isLocked = node.expression?.isLocked ?? false;
-        break;
 
       default:
         break;
@@ -456,9 +439,6 @@ export class JsSynthEngine implements BaseSynthEngine {
       case CHORUSDEPTH:
         node.chorus?.setValue(event.controllerValue);
         break;
-      case EXPRESSION:
-        node.expression?.setValue(event.controllerValue);
-        break;
 
       default:
         break;
@@ -481,15 +461,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     channel: number | null,
     semitones: number = this.globalPitch
   ): void {
-    // if (channel !== null) {
-    //   if (this.nodes[channel]) {
-    //     this.nodes[channel].transpose?.setValue(semitones);
-    //   }
-    // } else {
-    //   for (let index = 0; index < this.nodes.length; index++) {
-    //     this.nodes[index].transpose?.setValue(semitones);
-    //   }
-    // }
     this.notesModifier.setGlobalTranspose(semitones);
     this.pitchUpdated.emit(["PITCH", "CHANGE"], 0, semitones);
     this.globalPitch = semitones;
@@ -506,16 +477,6 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.synth?.setPlayerTempo(0, this.currentPlaybackRate);
     this.timer?.updatePlaybackRate(this.currentPlaybackRate);
     this.panic();
-  }
-
-  setBassLock(program: number): void {
-    this.bassConfig?.setLockBass(program);
-    const bass = this.instrumental.group.get("bass");
-    bass?.forEach((node) => {
-      if (node.channel !== undefined) {
-        this.setProgram({ channel: node.channel, program });
-      }
-    });
   }
 
   panic(): void {

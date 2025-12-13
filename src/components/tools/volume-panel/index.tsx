@@ -137,15 +137,11 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
                       className="relative w-full flex-wrap text-wrap"
                     >
                       <div className="z-10 w-full absolute bottom-0 left-0 h-full">
-                        {_.note ? (
-                          <NotesChannelRender
-                            noteModifier={_.noteModifier}
-                            row={16}
-                            col={8}
-                          ></NotesChannelRender>
-                        ) : (
-                          <>-</>
-                        )}
+                        <NotesChannelRender
+                          noteModifier={_.noteModifier}
+                          row={16}
+                          col={8}
+                        ></NotesChannelRender>
                       </div>
                     </div>
                   );

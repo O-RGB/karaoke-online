@@ -7,26 +7,26 @@ interface VolumeGainNodeProps {}
 const VolumeGainNode: React.FC<VolumeGainNodeProps> = ({}) => {
   const componentId = useId();
   const engin = useSynthesizerEngine((state) => state.engine);
-  const [master, setMaster] = useState<number>(40);
+  const [master, setMaster] = useState<number>(30);
 
   const onValueChange = (value: number) => {
     engin?.setGain?.(value);
   };
 
   useEffect(() => {
-    engin?.gain?.on(["GAIN", "CHANGE"], 0, setMaster, componentId);
+    engin?.gain?.on(["GAIN", "CHANGE"], (v) => setMaster(v.value), componentId);
 
     return () => {
-      engin?.gain?.off(["GAIN", "CHANGE"], 0, componentId);
+      engin?.gain?.off(["GAIN", "CHANGE"], componentId);
     };
-  }, [engin]);
+  }, [engin?.gain]);
 
   if (!engin?.gain) return <>er</>;
   return (
     <>
-      <div className="relative flex flex-col gap-2 min-w-12 w-12 max-w-12 overflow-hidden border-b pb-2">
+      <div className="relative flex flex-col gap-2 min-w-11 w-11 max-w-11 overflow-hidden border-b pb-2">
         <div className="px-0.5">
-          <div className="text-[10px] text-center break-all text-nowrap">
+          <div className="text-[9px] text-center break-all text-nowrap">
             Gain
           </div>
         </div>
@@ -49,13 +49,13 @@ const VolumeGainNode: React.FC<VolumeGainNodeProps> = ({}) => {
             ></SliderCommon>
           </div>
         </div>
-        <div className="p-0.5 ">
-          {/* <img
+        {/* <div className="p-0.5 ">
+          <img
             src={`/icon/instrument/${type}.png`}
             className="w-[50px] h-[30px] object-contain"
             alt=""
-          /> */}
-        </div>
+          />
+        </div> */}
       </div>
     </>
   );

@@ -62,6 +62,7 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
   };
 
   const handleNoteEvent = (v: any) => {
+    if (v.value?.velocity === 0) return;
     const velocity = v.value?.velocity ?? v.velocity ?? 0;
 
     if (velocity > gainLevelRef.current || gainLevelRef.current < 20) {
@@ -85,21 +86,36 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
 
   useEffect(() => {
     instrumental.inst?.on([type, "CHANGE"], handleNoteEvent, componentId);
+    instrumental.gain?.on(
+      ["GAIN", "CHANGE"],
+      (v) => {
+        setGain(v.value);
+      },
+      componentId
+    );
 
     return () => {
       instrumental.inst?.off([type, "CHANGE"], componentId);
+      instrumental.gain?.off(["GAIN", "CHANGE"], componentId);
 
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
     };
-  }, [indexKey, instrumental, type, componentId]);
+  }, [
+    indexKey,
+    instrumental,
+    type,
+    componentId,
+    instrumental.inst,
+    instrumental.gain,
+  ]);
 
   return (
-    <div className="relative flex flex-col gap-2 min-w-12 w-12 max-w-12 overflow-hidden border-b pb-2">
+    <div className="relative flex flex-col gap-2 min-w-11 w-min-w-11 max-w-min-w-11 overflow-hidden border-b pb-2">
       <div className="px-0.5">
-        <div className="text-[10px] text-center break-all text-nowrap">
+        <div className="text-[9px] text-center break-all text-nowrap">
           {text}
         </div>
       </div>

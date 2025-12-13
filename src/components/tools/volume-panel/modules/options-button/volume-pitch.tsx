@@ -121,7 +121,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
                 คิวเพลง
               </Button>
               {nodes && <FullMixer nodes={nodes}></FullMixer>}
-              {nodes && <DrumMixer></DrumMixer>}
+              {/* {nodes && <DrumMixer></DrumMixer>} */}
               <EqualizerPanel></EqualizerPanel>
             </div>
           </div>

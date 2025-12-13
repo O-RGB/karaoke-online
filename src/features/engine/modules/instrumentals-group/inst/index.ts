@@ -9,7 +9,7 @@ export interface InstrumentalType {
 
 export class Instrumental {
   public inst: SynthControl<InstsKeysMap, INoteChange> | undefined = undefined;
-  public gain?: SynthControl<null, number>;
+  public gain?: SynthControl<"GAIN", number>;
   public defaultGain = 127;
 
   constructor(value: InstrumentalType) {
@@ -19,7 +19,7 @@ export class Instrumental {
       velocity: 0,
     });
 
-    this.gain = new SynthControl(undefined, null, 0, this.defaultGain);
+    this.gain = new SynthControl(undefined, "GAIN", 0, this.defaultGain);
   }
 
   public setGain(value: number): void {

@@ -68,53 +68,52 @@ export const SOUND_EFFECTS: number[] = [120, 121, 122, 123, 124, 125, 126, 127];
 // ─────────────────────────────────────────────
 // Type Definitions
 // ─────────────────────────────────────────────
-
 export type InstrumentFamilyName =
   | "Piano"
-  | "Chromatic Percussion"
+  | "ChromaPerc" // Chromatic Percussion
   | "Organ"
-  | "Guitar Clean"
-  | "Guitar Nylon"
-  | "Guitar Jazz"
-  | "Guitar Muted"
-  | "Guitar Overdriven"
-  | "Guitar Distortion"
+  | "G.Clean"
+  | "G.Nylon"
+  | "G.Jazz"
+  | "G.Muted"
+  | "G.Overdrive"
+  | "G.Distort"
   | "Bass"
-  | "String"
+  | "Strings"
   | "Ensemble"
   | "Brass"
   | "Reed"
   | "Pipe"
-  | "Synth Lead"
-  | "Synth Pad"
-  | "Synth Effect"
+  | "Lead"
+  | "Pad"
+  | "SFX" // Synth Effect
   | "Ethnic"
-  | "Percussive"
-  | "Sound Effects";
+  | "Perc"
+  | "FX"; // Sound Effects
 
 export type InstrumentDrumName =
   | "Kick"
   | "Snare"
-  | "SideStick"
+  | "Stick" // SideStick
   | "Tom"
-  | "HiHat"
-  | "CowBell"
+  | "HH" // HiHat
+  | "Cowbell"
   | "Crash"
   | "Ride"
   | "Bongo"
   | "Conga"
   | "Timbale"
-  | "HandClap"
-  | "Tambourine"
+  | "Clap"
+  | "Tamb"
   | "Splash"
-  | "Vibraslap"
+  | "Vibra" // Vibraslap
   | "Agogo"
   | "Cabasa"
-  | "Maracas"
+  | "Maraca"
   | "Whistle"
   | "Guiro"
-  | "Claves"
-  | "WoodBlock"
+  | "Clave"
+  | "WoodBlk"
   | "Cuica"
   | "Triangle"
   | "Shaker"
@@ -128,51 +127,51 @@ export type InstsKeysMap = InstrumentFamilyName | InstrumentDrumName;
 
 export const INSTRUMENT_FAMILY_NAMES: InstrumentFamilyName[] = [
   "Piano",
-  "Chromatic Percussion",
+  "ChromaPerc",
   "Organ",
-  "Guitar Clean",
-  "Guitar Nylon",
-  "Guitar Jazz",
-  "Guitar Muted",
-  "Guitar Overdriven",
-  "Guitar Distortion",
+  "G.Clean",
+  "G.Nylon",
+  "G.Jazz",
+  "G.Muted",
+  "G.Overdrive",
+  "G.Distort",
   "Bass",
-  "String",
+  "Strings",
   "Ensemble",
   "Brass",
   "Reed",
   "Pipe",
-  "Synth Lead",
-  "Synth Pad",
-  "Synth Effect",
+  "Lead",
+  "Pad",
+  "SFX",
   "Ethnic",
-  "Percussive",
-  "Sound Effects",
+  "Perc",
+  "FX",
 ];
 
 export const INSTRUMENT_DRUM_NAMES: InstrumentDrumName[] = [
   "Kick",
   "Snare",
-  "SideStick",
+  "Stick",
   "Tom",
-  "HiHat",
-  "CowBell",
+  "HH",
+  "Cowbell",
   "Crash",
   "Ride",
   "Bongo",
   "Conga",
   "Timbale",
-  "HandClap",
-  "Tambourine",
+  "Clap",
+  "Tamb",
   "Splash",
-  "Vibraslap",
+  "Vibra",
   "Agogo",
   "Cabasa",
-  "Maracas",
+  "Maraca",
   "Whistle",
   "Guiro",
-  "Claves",
-  "WoodBlock",
+  "Clave",
+  "WoodBlk",
   "Cuica",
   "Triangle",
   "Shaker",

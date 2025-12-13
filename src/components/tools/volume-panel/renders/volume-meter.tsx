@@ -57,14 +57,14 @@ const ChannelVolumeRender: React.FC<ChannelVolumeRenderProps> = ({
     if (!engine?.nodes) return;
 
     let level = 0;
-    if (node) {
-      const volumes = node.map((n) => n.getGain());
-      const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
-      const averageGain = totalGain / volumes.length;
-      level = averageGain;
-    } else if (channel) {
-      level = engine.nodes[channel]?.getGain(true);
-    }
+    // if (node) {
+    //   const volumes = node.map((n) => n.getGain());
+    //   const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
+    //   const averageGain = totalGain / volumes.length;
+    //   level = averageGain;
+    // } else if (channel) {
+    //   level = engine.nodes[channel]?.getGain(true);
+    // }
 
     const heightPercentage = (level / 150) * 100;
     setCurrentLevel(Math.min(heightPercentage, 100));

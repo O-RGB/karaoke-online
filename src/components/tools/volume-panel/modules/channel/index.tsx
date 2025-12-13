@@ -32,9 +32,9 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
   onChange,
   node,
 }) => {
-  const instrumental = useSynthesizerEngine(
-    (state) => state.engine?.instrumental
-  );
+  // const instrumental = useSynthesizerEngine(
+  //   (state) => state.engine?.instrumental
+  // );
   useEffect(() => {}, [isShow, node]);
 
   if (!node) return <></>;

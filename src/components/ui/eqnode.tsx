@@ -63,19 +63,19 @@ const EQNode: React.FC<EQNodeProps> = ({
     //   componnetId
     // );
 
-    const intervalId = setInterval(() => {
-      const volumes = node.map((n) => n.getGain());
-      const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
-      const averageGain = totalGain / volumes.length;
-      setVolumeLevel(averageGain);
-    }, render);
+    // const intervalId = setInterval(() => {
+    //   const volumes = node.map((n) => n.getGain());
+    //   const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
+    //   const averageGain = totalGain / volumes.length;
+    //   setVolumeLevel(averageGain);
+    // }, render);
 
     return () => {
       //   instrumental.equalizer[indexKey].unlinkEvent(
       //     ["EQUALIZER", "CHANGE"],
       //     componnetId
       //   );
-      clearInterval(intervalId);
+      // clearInterval(intervalId);
     };
   }, [eqConfig]);
 

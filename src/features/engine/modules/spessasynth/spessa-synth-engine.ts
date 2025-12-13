@@ -49,10 +49,10 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public soundfontFile: File | undefined;
   public soundfontFrom: SoundSystemMode = "DATABASE_FILE_SYSTEM";
 
-  public instrumentalTest: InstrumentalsControl = new InstrumentalsControl();
+  public instrumentals: InstrumentalsControl = new InstrumentalsControl();
 
   public nodes: SynthChannel[] = [];
-  public instrumental = new InstrumentalNode();
+  // public instrumental = new InstrumentalNode();
 
   public bassConfig: BassConfig | undefined = undefined;
   public globalEqualizer: GlobalEqualizer | undefined = undefined;
@@ -66,7 +66,12 @@ export class SpessaSynthEngine implements BaseSynthEngine {
   public playerUpdated = new EventEmitter<"PLAYER", PlayerStatusType>();
   public countdownUpdated = new EventEmitter<"COUNTDOWN", number>();
   public musicUpdated = new EventEmitter<"MUSIC", MusicLoadAllData>();
-  public gain = new EventEmitter<"GAIN", number>();
+  public gain: SynthControl<"GAIN", number> = new SynthControl(
+    undefined,
+    "GAIN",
+    0,
+    30
+  );
   public musicQuere: MusicLoadAllData | undefined = undefined;
 
   public currentPlaybackRate: number = 1.0;
@@ -90,6 +95,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.bassConfig = config ? new BassConfig(config) : undefined;
     this.systemConfig = systemConfig;
   }
+
   connectAudioChain(useEq: boolean): void {
     throw new Error("Method not implemented.");
   }
@@ -146,14 +152,14 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     this.synth?.setDrums(9, true);
     this.player = new SpessaPlayerEngine(player, this);
     this.timer = new TimerWorker(this.player);
-    this.instrumental.setEngine(this);
+    // this.instrumental.setEngine(this);
 
     const analysers: AnalyserNode[] = [];
 
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
       const synthChannel = new SynthChannel(
         ch,
-        this.instrumental,
+        // this.instrumental,
         audioContext,
         synth.keyModifierManager,
         systemConfig
@@ -269,7 +275,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "noteon",
       "note-on-listener",
       (e: INoteChange) => {
-        this.nodes[e.channel].noteOnChange(e);
+        // this.nodes[e.channel].noteOnChange(e);
       }
     );
   }
@@ -278,7 +284,7 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       "noteoff",
       "note-off-listener",
       (e: INoteChange) => {
-        this.nodes[e.channel].noteOffChange(e);
+        // this.nodes[e.channel].noteOffChange(e);
       }
     );
   }
@@ -351,9 +357,9 @@ export class SpessaSynthEngine implements BaseSynthEngine {
       case CHORUSDEPTH:
         isLocked = node.chorus?.isLocked ?? false;
         break;
-      case EXPRESSION:
-        isLocked = node.expression?.isLocked ?? false;
-        break;
+      // case EXPRESSION:
+      //   isLocked = node.expression?.isLocked ?? false;
+      //   break;
 
       default:
         break;
@@ -416,15 +422,15 @@ export class SpessaSynthEngine implements BaseSynthEngine {
     });
   }
 
-  setBassLock(program: number) {
-    this.bassConfig?.setLockBass(program);
-    const bass = this.instrumental.group.get("bass");
-    bass?.forEach((node) => {
-      if (node.channel !== undefined) {
-        this.setProgram({ channel: node.channel, program });
-      }
-    });
-  }
+  // setBassLock(program: number) {
+  //   this.bassConfig?.setLockBass(program);
+  //   const bass = this.instrumental.group.get("bass");
+  //   bass?.forEach((node) => {
+  //     if (node.channel !== undefined) {
+  //       this.setProgram({ channel: node.channel, program });
+  //     }
+  //   });
+  // }
 
   panic(): void {}
 

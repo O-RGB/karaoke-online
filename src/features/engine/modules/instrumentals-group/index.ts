@@ -34,48 +34,48 @@ export class InstrumentalsControl {
   constructor() {
     const list: { name: InstsKeysMap; keys: number[] }[] = [
       { name: "Piano", keys: PIANO },
-      { name: "Chromatic Percussion", keys: CHROMATIC_PERCUSSION },
+      { name: "ChromaPerc", keys: CHROMATIC_PERCUSSION },
       { name: "Organ", keys: ORGAN },
-      { name: "Guitar Clean", keys: GUITAR_CLEAN },
-      { name: "Guitar Nylon", keys: GUITAR_NYLON },
-      { name: "Guitar Jazz", keys: GUITAR_JAZZ },
-      { name: "Guitar Muted", keys: GUITAR_MUTED },
-      { name: "Guitar Overdriven", keys: GUITAR_OVERDRIVEN },
-      { name: "Guitar Distortion", keys: GUITAR_DISTORTION },
+      { name: "G.Clean", keys: GUITAR_CLEAN },
+      { name: "G.Nylon", keys: GUITAR_NYLON },
+      { name: "G.Jazz", keys: GUITAR_JAZZ },
+      { name: "G.Muted", keys: GUITAR_MUTED },
+      { name: "G.Overdrive", keys: GUITAR_OVERDRIVEN },
+      { name: "G.Distort", keys: GUITAR_DISTORTION },
       { name: "Bass", keys: BASS },
-      { name: "String", keys: STRING },
+      { name: "Strings", keys: STRING },
       { name: "Ensemble", keys: ENSEMBLE },
       { name: "Brass", keys: BRASS },
       { name: "Reed", keys: REED },
       { name: "Pipe", keys: PIPE },
-      { name: "Synth Lead", keys: SYNTH_LEAD },
-      { name: "Synth Pad", keys: SYNTH_PAD },
-      { name: "Synth Effect", keys: SYNTH_EFFECT },
+      { name: "Lead", keys: SYNTH_LEAD },
+      { name: "Pad", keys: SYNTH_PAD },
+      { name: "SFX", keys: SYNTH_EFFECT },
       { name: "Ethnic", keys: ETHNIC },
-      { name: "Percussive", keys: PERCUSSIVE },
-      { name: "Sound Effects", keys: SOUND_EFFECTS },
+      { name: "Perc", keys: PERCUSSIVE },
+      { name: "FX", keys: SOUND_EFFECTS },
       { name: "Kick", keys: [] },
       { name: "Snare", keys: [] },
-      { name: "SideStick", keys: [] },
+      { name: "Stick", keys: [] },
       { name: "Tom", keys: [] },
-      { name: "HiHat", keys: [] },
-      { name: "CowBell", keys: [] },
+      { name: "HH", keys: [] },
+      { name: "Cowbell", keys: [] },
       { name: "Crash", keys: [] },
       { name: "Ride", keys: [] },
       { name: "Bongo", keys: [] },
       { name: "Conga", keys: [] },
       { name: "Timbale", keys: [] },
-      { name: "HandClap", keys: [] },
-      { name: "Tambourine", keys: [] },
+      { name: "Clap", keys: [] },
+      { name: "Tamb", keys: [] },
       { name: "Splash", keys: [] },
-      { name: "Vibraslap", keys: [] },
+      { name: "Vibra", keys: [] },
       { name: "Agogo", keys: [] },
       { name: "Cabasa", keys: [] },
-      { name: "Maracas", keys: [] },
+      { name: "Maraca", keys: [] },
       { name: "Whistle", keys: [] },
       { name: "Guiro", keys: [] },
-      { name: "Claves", keys: [] },
-      { name: "WoodBlock", keys: [] },
+      { name: "Clave", keys: [] },
+      { name: "WoodBlk", keys: [] },
       { name: "Cuica", keys: [] },
       { name: "Triangle", keys: [] },
       { name: "Shaker", keys: [] },
@@ -87,7 +87,7 @@ export class InstrumentalsControl {
     }
   }
 
-  private getInstrumentFamily(program: number): InstrumentFamilyName {
+  public getInstrumentFamily(program: number): InstrumentFamilyName {
     switch (program) {
       // Piano (0-7)
       case 0:
@@ -109,7 +109,7 @@ export class InstrumentalsControl {
       case 13:
       case 14:
       case 15:
-        return "Chromatic Percussion";
+        return "ChromaPerc";
 
       // Organ (16-23)
       case 16:
@@ -124,29 +124,29 @@ export class InstrumentalsControl {
 
       // Guitar Clean (24)
       case 24:
-        return "Guitar Clean";
+        return "G.Clean";
 
       // Guitar Nylon (25)
       case 25:
-        return "Guitar Nylon";
+        return "G.Nylon";
 
       // Guitar Jazz (26-27)
       case 26:
       case 27:
-        return "Guitar Jazz";
+        return "G.Jazz";
 
       // Guitar Muted (28)
       case 28:
-        return "Guitar Muted";
+        return "G.Muted";
 
       // Guitar Overdriven (29)
       case 29:
-        return "Guitar Overdriven";
+        return "G.Overdrive";
 
       // Guitar Distortion (30-31)
       case 30:
       case 31:
-        return "Guitar Distortion";
+        return "G.Distort";
 
       // Bass (32-39)
       case 32:
@@ -168,7 +168,7 @@ export class InstrumentalsControl {
       case 45:
       case 46:
       case 47:
-        return "String";
+        return "Strings";
 
       // Ensemble (48-55)
       case 48:
@@ -223,7 +223,7 @@ export class InstrumentalsControl {
       case 85:
       case 86:
       case 87:
-        return "Synth Lead";
+        return "Lead";
 
       // Synth Pad (88-95)
       case 88:
@@ -234,7 +234,7 @@ export class InstrumentalsControl {
       case 93:
       case 94:
       case 95:
-        return "Synth Pad";
+        return "Pad";
 
       // Synth Effect (96-103)
       case 96:
@@ -245,7 +245,7 @@ export class InstrumentalsControl {
       case 101:
       case 102:
       case 103:
-        return "Synth Effect";
+        return "SFX";
 
       // Ethnic (104-111)
       case 104:
@@ -267,7 +267,7 @@ export class InstrumentalsControl {
       case 117:
       case 118:
       case 119:
-        return "Percussive";
+        return "Perc";
 
       // Sound Effects (120-127)
       case 120:
@@ -278,7 +278,7 @@ export class InstrumentalsControl {
       case 125:
       case 126:
       case 127:
-        return "Sound Effects";
+        return "FX";
 
       default:
         return "Piano";
@@ -294,13 +294,13 @@ export class InstrumentalsControl {
       case 40:
         return "Snare";
       case 37:
-        return "SideStick";
+        return "Stick";
       case 39:
-        return "HandClap";
+        return "Clap";
       case 42:
       case 44:
       case 46:
-        return "HiHat";
+        return "HH";
       case 41:
       case 43:
       case 45:
@@ -319,13 +319,13 @@ export class InstrumentalsControl {
       case 53:
         return "Ride";
       case 54:
-        return "Tambourine";
+        return "Timbale";
       case 55:
         return "Splash";
       case 56:
-        return "CowBell";
+        return "Cowbell";
       case 58:
-        return "Vibraslap";
+        return "Vibra";
       case 60:
       case 61:
         return "Bongo";
@@ -342,7 +342,7 @@ export class InstrumentalsControl {
       case 69:
         return "Cabasa";
       case 70:
-        return "Maracas";
+        return "Maraca";
       case 71:
       case 72:
         return "Whistle";
@@ -350,10 +350,10 @@ export class InstrumentalsControl {
       case 74:
         return "Guiro";
       case 75:
-        return "Claves";
+        return "Clave";
       case 76:
       case 77:
-        return "WoodBlock";
+        return "WoodBlk";
       case 78:
       case 79:
         return "Cuica";
@@ -376,6 +376,10 @@ export class InstrumentalsControl {
     if (!inst) return event;
 
     const output = inst.noteOn(event);
+
+    if (key === "Tom") {
+      console.log("INPUT:" + event.velocity, " OUTPUT: " + output.velocity);
+    }
 
     return output;
   }

@@ -52,26 +52,26 @@ const ChannelVolumeBg: React.FC<ChannelVolumeBgProps> = ({
     }
 
     const animate = (lastTime: number = performance.now()) => {
-      const now = performance.now();
-      const deltaTime = (now - lastTime) / 1000;
+      // const now = performance.now();
+      // const deltaTime = (now - lastTime) / 1000;
 
-      const currentOpacity = parseFloat(element.style.opacity || "0");
+      // const currentOpacity = parseFloat(element.style.opacity || "0");
 
-      const volumes = node.map((n) => n.getGain());
-      const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
-      const averageGain = totalGain / volumes.length;
-      const gainOpacity = Math.min(averageGain / maxGain, 1);
+      // const volumes = node.map((n) => n.getGain());
+      // const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
+      // const averageGain = totalGain / volumes.length;
+      // const gainOpacity = Math.min(averageGain / maxGain, 1);
 
-      const decayedOpacity = Math.max(
-        0,
-        currentOpacity - decreaseAmount * deltaTime * 60
-      );
+      // const decayedOpacity = Math.max(
+      //   0,
+      //   currentOpacity - decreaseAmount * deltaTime * 60
+      // );
 
-      const newOpacity = Math.max(gainOpacity, decayedOpacity);
+      // const newOpacity = Math.max(gainOpacity, decayedOpacity);
 
-      element.style.opacity = newOpacity.toString();
+      // element.style.opacity = newOpacity.toString();
 
-      animationFrameIdRef.current = requestAnimationFrame(() => animate(now));
+      // animationFrameIdRef.current = requestAnimationFrame(() => animate(now));
     };
 
     animationFrameIdRef.current = requestAnimationFrame(animate);

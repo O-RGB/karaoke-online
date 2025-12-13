@@ -16,9 +16,9 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
   const componentId = useId();
 
   const instrumental = useSynthesizerEngine(
-    (state) => state.engine?.instrumentalTest
+    (state) => state.engine?.instrumentals
   );
-  const [program, setProgarm] = useState<number>(0);
+  const [program, setProgarm] = useState<number>(100);
 
   const [open, setOpen] = useState<boolean>(false);
   const openMixer = () => {
@@ -46,7 +46,7 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
       <WinboxModal
         onClose={() => setOpen(false)}
         title="Mixer"
-        height={320}
+        height={240}
         isOpen={open}
       >
         <div className="overflow-auto w-full h-full">

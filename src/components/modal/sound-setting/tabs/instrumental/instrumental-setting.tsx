@@ -1,90 +1,90 @@
-import SliderCommon, {
-  SliderCommonProps,
-} from "@/components/common/input-data/slider";
-import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
-import { enumToReadable, lowercaseToReadable } from "@/lib/general";
-import React, { useEffect, useId, useState } from "react";
-import {
-  INodeState,
-  InstrumentType,
-} from "@/features/engine/modules/instrumentals/types/node.type";
-import { SynthControl } from "@/features/engine/modules/instrumentals/node";
+// import SliderCommon, {
+//   SliderCommonProps,
+// } from "@/components/common/input-data/slider";
+// import { InstrumentalNode } from "@/features/engine/modules/instrumentals/instrumental";
+// import { enumToReadable, lowercaseToReadable } from "@/lib/general";
+// import React, { useEffect, useId, useState } from "react";
+// import {
+//   INodeState,
+//   InstrumentType,
+// } from "@/features/engine/modules/instrumentals/types/node.type";
+// import { SynthControl } from "@/features/engine/modules/instrumentals/node";
 
-interface InstrumentalSettingProps {
-  instrumental?: InstrumentalNode;
-  selectedType?: InstrumentType;
-  selectedIndex: number;
-  valueKey: INodeState;
-  color: string;
-  sliderProps?: SliderCommonProps;
-}
+// interface InstrumentalSettingProps {
+//   instrumental?: InstrumentalNode;
+//   selectedType?: InstrumentType;
+//   selectedIndex: number;
+//   valueKey: INodeState;
+//   color: string;
+//   sliderProps?: SliderCommonProps;
+// }
 
-const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
-  instrumental,
-  selectedType,
-  selectedIndex,
-  valueKey,
-  color,
-  sliderProps,
-}) => {
-  const componentId = useId();
+// const InstrumentalSetting: React.FC<InstrumentalSettingProps> = ({
+//   instrumental,
+//   selectedType,
+//   selectedIndex,
+//   valueKey,
+//   color,
+//   sliderProps,
+// }) => {
+//   const componentId = useId();
 
-  const [value, setValue] = useState<number>(
-    valueKey === "EXPRESSION" ? 100 : 0
-  );
+//   const [value, setValue] = useState<number>(
+//     valueKey === "EXPRESSION" ? 100 : 0
+//   );
 
-  const onValueChange = (value: number) => {
-    if (selectedType === undefined) return;
-    if (valueKey === "EXPRESSION") {
-      instrumental?.setExpression(selectedType, value, selectedIndex);
-    } else {
-      instrumental?.setVelocity(selectedType, value, selectedIndex);
-    }
-  };
+//   // const onValueChange = (value: number) => {
+//   //   if (selectedType === undefined) return;
+//   //   if (valueKey === "EXPRESSION") {
+//   //     instrumental?.setExpression(selectedType, value, selectedIndex);
+//   //   } else {
+//   //     instrumental?.setVelocity(selectedType, value, selectedIndex);
+//   //   }
+//   // };
 
-  useEffect(() => {
-    if (!instrumental) return;
+//   useEffect(() => {
+//     if (!instrumental) return;
 
-    let synthNode: SynthControl<INodeState, number> | undefined = undefined;
-    if (valueKey === "EXPRESSION") {
-      synthNode = instrumental.expression[selectedIndex];
-    } else {
-      synthNode = instrumental.velocity[selectedIndex];
-    }
+//     let synthNode: SynthControl<INodeState, number> | undefined = undefined;
+//     if (valueKey === "EXPRESSION") {
+//       synthNode = instrumental.expression[selectedIndex];
+//     } else {
+//       synthNode = instrumental.velocity[selectedIndex];
+//     }
 
-    synthNode.on(
-      [valueKey, "CHANGE"],
-      (v) => {
-        setValue(v.value);
-      },
-      componentId
-    );
+//     synthNode.on(
+//       [valueKey, "CHANGE"],
+//       (v) => {
+//         setValue(v.value);
+//       },
+//       componentId
+//     );
 
-    return () => {
-      synthNode.off([valueKey, "CHANGE"], componentId);
-    };
-  }, [instrumental, selectedIndex, selectedType]);
+//     return () => {
+//       synthNode.off([valueKey, "CHANGE"], componentId);
+//     };
+//   }, [instrumental, selectedIndex, selectedType]);
 
-  return (
-    <>
-      <div className="flex flex-col gap-1">
-        <span className="text-lg font-bold">
-          {selectedType && lowercaseToReadable(selectedType)}
-        </span>
-        <span className="text-sm">
-          <span>{enumToReadable(valueKey)} </span>
-          <span style={{ color }}>{value}</span>
-        </span>
-        <SliderCommon
-          {...sliderProps}
-          color={color}
-          onChange={onValueChange}
-          value={value}
-          max={127}
-        ></SliderCommon>
-      </div>
-    </>
-  );
-};
+//   return (
+//     <>
+//       <div className="flex flex-col gap-1">
+//         <span className="text-lg font-bold">
+//           {selectedType && lowercaseToReadable(selectedType)}
+//         </span>
+//         <span className="text-sm">
+//           <span>{enumToReadable(valueKey)} </span>
+//           <span style={{ color }}>{value}</span>
+//         </span>
+//         <SliderCommon
+//           {...sliderProps}
+//           color={color}
+//           // onChange={onValueChange}
+//           value={value}
+//           max={127}
+//         ></SliderCommon>
+//       </div>
+//     </>
+//   );
+// };
 
-export default InstrumentalSetting;
+// export default InstrumentalSetting;

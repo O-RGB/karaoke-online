@@ -1,6 +1,6 @@
 import { PROGRAM_CATEGORY } from "@/config/value";
 import { SynthChannel } from "../channel";
-import { EventEmitter, } from "../events";
+import { EventEmitter } from "../events";
 import {
   EventKey,
   IMidiOutput,
@@ -67,17 +67,23 @@ export const findProgramCategory = (
 
 export class InstrumentalNode {
   public programGroup = PROGRAM_CATEGORY;
-  public isMidiOutput: boolean = false
+  public isMidiOutput: boolean = false;
   public group = new Map<InstrumentType, Map<number, SynthChannel>>();
   public midiOutput: IMidiOutput = { port: null, isConnected: false };
-  public notesEvent = new Map<InstrumentType, Map<number, EventEmitter<INoteState, INoteChange>>>();
+  public notesEvent = new Map<
+    InstrumentType,
+    Map<number, EventEmitter<INoteState, INoteChange>>
+  >();
 
   public expression: SynthControl<INodeState, number>[] = [];
   public velocity: SynthControl<INodeState, number>[] = [];
   public equalizer: SynthControl<INodeState, EQConfig>[] = [];
 
   private engine: BaseSynthEngine | undefined = undefined;
-  public groupEvent = new EventEmitter<InstrumentType, Map<number, SynthChannel>>()
+  public groupEvent = new EventEmitter<
+    InstrumentType,
+    Map<number, SynthChannel>
+  >();
 
   constructor() {
     this.initializeGroupMap();
@@ -106,8 +112,12 @@ export class InstrumentalNode {
   private initializeGroupMap() {
     for (let index = 0; index < this.programGroup.length; index++) {
       this.group.set(INSTRUMENT_TYPE_BY_INDEX[index], new Map());
-      this.notesEvent.set(INSTRUMENT_TYPE_BY_INDEX[index], new Map())
-      this.groupEvent.emit([INSTRUMENT_TYPE_BY_INDEX[index], "CHANGE"], index, new Map())
+      this.notesEvent.set(INSTRUMENT_TYPE_BY_INDEX[index], new Map());
+      this.groupEvent.emit(
+        [INSTRUMENT_TYPE_BY_INDEX[index], "CHANGE"],
+        index,
+        new Map()
+      );
     }
   }
 
@@ -121,19 +131,14 @@ export class InstrumentalNode {
 
     this.equalizer = INSTRUMENT_TYPE_BY_INDEX.map(
       (_, i) =>
-        new SynthControl(
-          undefined,
-          "EQUALIZER",
-          i,
-          {
-            enabled: false,
-            gains: [0, 0, 0],
-            boostLevel: 0,
-            inputVolume: 1,
-            outputVolume: 1,
-            volumeCompensation: 1,
-          } as EQConfig
-        )
+        new SynthControl(undefined, "EQUALIZER", i, {
+          enabled: false,
+          gains: [0, 0, 0],
+          boostLevel: 0,
+          inputVolume: 1,
+          outputVolume: 1,
+          volumeCompensation: 1,
+        } as EQConfig)
     );
   }
 
@@ -161,7 +166,11 @@ export class InstrumentalNode {
         const oldEqualizer = this.equalizer[oldType.index].value;
         if (oldEqualizer)
           this.updateEQ(oldType.category, oldEqualizer, oldType.index);
-        this.groupEvent.emit([oldType.category, "CHANGE"], oldType.index, oldTypeChannels)
+        this.groupEvent.emit(
+          [oldType.category, "CHANGE"],
+          oldType.index,
+          oldTypeChannels
+        );
       }
     }
 
@@ -178,122 +187,121 @@ export class InstrumentalNode {
     const oldEqualizer = this.equalizer[newType.index].value;
     if (oldEqualizer)
       this.updateEQ(newType.category, oldEqualizer, newType.index);
-    this.groupEvent.emit([newType.category, "CHANGE"], newType.index, byType)
-
+    this.groupEvent.emit([newType.category, "CHANGE"], newType.index, byType);
   }
 
   updateEQ(type: InstrumentType | number, value: EQConfig, indexKey: number) {
     let groupType = this.getGroupType(type);
-    const nodes: Map<number, SynthChannel> = this.group.get(groupType) ?? new Map();
+    const nodes: Map<number, SynthChannel> =
+      this.group.get(groupType) ?? new Map();
     nodes.forEach((node) => node.equalizer?.applyConfig(value));
     this.equalizer[indexKey].setValue(value);
   }
 
-  setExpression(
-    type: InstrumentType | number,
-    value: number,
-    indexKey: number
-  ) {
-    let groupType = this.getGroupType(type);
-    const nodes: Map<number, SynthChannel> =
-      this.group.get(groupType) ?? new Map();
-    nodes.forEach((node) => {
-      if (node.expression !== undefined && node.channel !== undefined) {
-        if (node.channel !== 9) {
-          this.updateController(node.channel, value);
-          node.expression.setValue(value);
-        }
-      }
-    });
+  // setExpression(
+  //   type: InstrumentType | number,
+  //   value: number,
+  //   indexKey: number
+  // ) {
+  //   let groupType = this.getGroupType(type);
+  //   const nodes: Map<number, SynthChannel> =
+  //     this.group.get(groupType) ?? new Map();
+  //   nodes.forEach((node) => {
+  //     if (node.expression !== undefined && node.channel !== undefined) {
+  //       if (node.channel !== 9) {
+  //         this.updateController(node.channel, value);
+  //         node.expression.setValue(value);
+  //       }
+  //     }
+  //   });
 
-    this.expression[indexKey].setValue(value);
-  }
+  //   this.expression[indexKey].setValue(value);
+  // }
 
-  setVelocity(type: InstrumentType | number, value: number, indexKey: number) {
-    let groupType = this.getGroupType(type);
-    const nodes: Map<number, SynthChannel> =
-      this.group.get(groupType) ?? new Map();
-    nodes?.forEach((node) => {
-      if (node.velocity !== undefined && node.channel !== undefined) {
-        if (node.channel !== 9) {
-          this.engine?.setVelocity({ channel: node.channel, value });
-          node.velocity.setValue(value);
-        }
-      }
-    });
-    this.velocity[indexKey].setValue(value);
-  }
+  // setVelocity(type: InstrumentType | number, value: number, indexKey: number) {
+  //   let groupType = this.getGroupType(type);
+  //   const nodes: Map<number, SynthChannel> =
+  //     this.group.get(groupType) ?? new Map();
+  //   nodes?.forEach((node) => {
+  //     if (node.velocity !== undefined && node.channel !== undefined) {
+  //       if (node.channel !== 9) {
+  //         this.engine?.setVelocity({ channel: node.channel, value });
+  //         node.velocity.setValue(value);
+  //       }
+  //     }
+  //   });
+  //   this.velocity[indexKey].setValue(value);
+  // }
 
-  getGain() {
-    let gain: number[] = [];
-    this.group.forEach((types) => {
-      let node: SynthChannel[] = Array.from(types.values());
-      const volumes = node.map((n) => n.getGain());
-      const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
-      const averageGain = totalGain / volumes.length;
-      gain.push(averageGain);
-    });
-    return gain;
-  }
+  // getGain() {
+  //   let gain: number[] = [];
+  //   this.group.forEach((types) => {
+  //     let node: SynthChannel[] = Array.from(types.values());
+  //     const volumes = node.map((n) => n.getGain());
+  //     const totalGain = volumes.reduce((acc, volume) => acc + volume, 0);
+  //     const averageGain = totalGain / volumes.length;
+  //     gain.push(averageGain);
+  //   });
+  //   return gain;
+  // }
 
-  onNoteOnEvent(type: InstrumentType) {
-    if (this.isMidiOutput) {
-      const channels = this.group.get(type)
-      channels?.forEach((k) => {
-        k.globalNoteOnEvent.on(["NOTE_ON", "CHANGE"], 0, ((c) => {
-          console.log(k, c)
-          if (this.midiOutput.isConnected && this.midiOutput.port) {
-            const channel = k.channel || 0;
-            const noteNumber = c.midiNote || 60;
-            const velocity = c.velocity || 127;
+  // onNoteOnEvent(type: InstrumentType) {
+  //   if (this.isMidiOutput) {
+  //     const channels = this.group.get(type)
+  //     channels?.forEach((k) => {
+  //       k.globalNoteOnEvent.on(["NOTE_ON", "CHANGE"], 0, ((c) => {
+  //         console.log(k, c)
+  //         if (this.midiOutput.isConnected && this.midiOutput.port) {
+  //           const channel = k.channel || 0;
+  //           const noteNumber = c.midiNote || 60;
+  //           const velocity = c.velocity || 127;
 
-            // MIDI Note On command (0x90 = 144)
-            this.midiOutput.port.send([0x90 + channel, noteNumber, velocity]);
-          }
-        }), "instrumentall-system")
-        k.globalNoteOnEvent.on(["NOTE_OFF", "CHANGE"], 0, ((c) => {
-          console.log(k, c)
-          if (this.midiOutput.isConnected && this.midiOutput.port) {
-            const channel = k.channel || 0;
-            const noteNumber = c.midiNote || 60;
-            const velocity = c.velocity || 127;
+  //           // MIDI Note On command (0x90 = 144)
+  //           this.midiOutput.port.send([0x90 + channel, noteNumber, velocity]);
+  //         }
+  //       }), "instrumentall-system")
+  //       k.globalNoteOnEvent.on(["NOTE_OFF", "CHANGE"], 0, ((c) => {
+  //         console.log(k, c)
+  //         if (this.midiOutput.isConnected && this.midiOutput.port) {
+  //           const channel = k.channel || 0;
+  //           const noteNumber = c.midiNote || 60;
+  //           const velocity = c.velocity || 127;
 
-            // MIDI Note On command (0x80 = 128)
-            this.midiOutput.port.send([0x80 + channel, noteNumber, velocity]);
-          }
-        }), "instrumentall-system")
-        if (k.channel) {
-          this.engine?.setController({ channel: k.channel, controllerNumber: MAIN_VOLUME, controllerValue: 0 })
-          this.updateController(k.channel, 0);
-        }
-      })
-    }
-  }
+  //           // MIDI Note On command (0x80 = 128)
+  //           this.midiOutput.port.send([0x80 + channel, noteNumber, velocity]);
+  //         }
+  //       }), "instrumentall-system")
+  //       if (k.channel) {
+  //         this.engine?.setController({ channel: k.channel, controllerNumber: MAIN_VOLUME, controllerValue: 0 })
+  //         this.updateController(k.channel, 0);
+  //       }
+  //     })
+  //   }
+  // }
 
-  setMidiOutput(callback: (isMidiOutput: boolean) => { type: InstrumentType, isOutput: boolean }) {
-    const { isOutput, type } = callback(this.isMidiOutput)
-    this.isMidiOutput = isOutput
-    if (isOutput) {
-      this.onNoteOnEvent(type)
-    } else {
-      const channels = this.group.get(type)
-      channels?.forEach((k) => {
-        k.globalNoteOnEvent.off(["NOTE_ON", "CHANGE"], 0, "instrumentall-system")
-        if (k.channel) {
-          this.engine?.setController({ channel: k.channel, controllerNumber: MAIN_VOLUME, controllerValue: 100 })
-          this.updateController(k.channel, 100);
-        }
-      })
-    }
-  }
+  // setMidiOutput(callback: (isMidiOutput: boolean) => { type: InstrumentType, isOutput: boolean }) {
+  //   const { isOutput, type } = callback(this.isMidiOutput)
+  //   this.isMidiOutput = isOutput
+  //   if (isOutput) {
+  //     this.onNoteOnEvent(type)
+  //   } else {
+  //     const channels = this.group.get(type)
+  //     channels?.forEach((k) => {
+  //       k.globalNoteOnEvent.off(["NOTE_ON", "CHANGE"], 0, "instrumentall-system")
+  //       if (k.channel) {
+  //         this.engine?.setController({ channel: k.channel, controllerNumber: MAIN_VOLUME, controllerValue: 100 })
+  //         this.updateController(k.channel, 100);
+  //       }
+  //     })
+  //   }
+  // }
 
   sendMIDIControlChange(channel: number, controlNumber: number, value: number) {
     if (this.midiOutput.isConnected && this.midiOutput.port) {
       // MIDI Control Change command (0xB0 = 176)
-      this.midiOutput.port.send([0xB0 + channel, controlNumber, value]);
+      this.midiOutput.port.send([0xb0 + channel, controlNumber, value]);
     }
   }
-
 
   updateController(
     channel: number,
@@ -321,10 +329,10 @@ export class InstrumentalNode {
     callback: (event: Map<number, SynthChannel>) => void,
     componentId: string
   ) {
-    this.groupEvent.on(eventKey, indexKey, callback, componentId)
-    const event = this.group.get(eventKey[0])
+    this.groupEvent.on(eventKey, indexKey, callback, componentId);
+    const event = this.group.get(eventKey[0]);
     if (event) {
-      callback(event)
+      callback(event);
     }
   }
 
@@ -333,7 +341,6 @@ export class InstrumentalNode {
     indexKey: number,
     componentId: string
   ) {
-    this.groupEvent.off(eventKey, indexKey, componentId)
+    this.groupEvent.off(eventKey, indexKey, componentId);
   }
-
 }

@@ -23,7 +23,7 @@ export interface BaseSynthEngine {
   synth: Spessasynth | JsSynthesizer | undefined;
   nodes?: SynthChannel[] | undefined;
   globalEqualizer: GlobalEqualizer | undefined;
-  instrumental: InstrumentalNode | undefined;
+  // instrumental: InstrumentalNode | undefined;
 
   timer?: TimerWorker | undefined;
   timerUpdated: EventEmitter<"TIMING", number>;
@@ -33,13 +33,13 @@ export interface BaseSynthEngine {
   playerUpdated: EventEmitter<"PLAYER", PlayerStatusType>;
   countdownUpdated: EventEmitter<"COUNTDOWN", number>;
   musicUpdated: EventEmitter<"MUSIC", MusicLoadAllData>;
-  gain: EventEmitter<"GAIN", number>;
+  gain: SynthControl<"GAIN", number>;
 
   currentPlaybackRate: number;
   globalPitch: number;
 
   notesModifier: NotesModifierManager;
-  instrumentalTest: InstrumentalsControl;
+  instrumentals: InstrumentalsControl;
 
   startup(): Promise<{ synth: any; audio?: AudioContext }>;
   startup(): void;
@@ -88,8 +88,8 @@ export interface BaseSynthEngine {
   setMute(event: IControllerChange<boolean>): void;
   setupMIDIEventHook?(): void;
 
-  bassConfig?: BassConfig;
-  setBassLock(program: number): void;
+  // bassConfig?: BassConfig;
+  // setBassLock(program: number): void;
   panic(): void;
 
   startRecording?(options: { includeMicrophone: boolean }): Promise<void>;
