@@ -10,6 +10,7 @@ import { MdBuild, MdDeleteForever } from "react-icons/md";
 import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 import { DircetoryLocalSongsManager } from "@/utils/indexedDB/db/local-songs/table";
 import { DBFSongsSystemReader } from "@/features/songs/modules/extreme/extreme-file-system";
+import { useOrientation } from "@/hooks/orientation-hook";
 
 interface AddDBFSongProps extends IAlertCommon {}
 
@@ -19,6 +20,7 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
   setProcessing,
   closeProcessing,
 }) => {
+  const { isMobile } = useOrientation();
   const [name, setName] = useState<string>();
   const readerRef = useRef<DBFSongsSystemReader | null>(null);
 
@@ -164,7 +166,7 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
 
   return (
     <>
-      <div className="flex flex-col h-full space-y-4">
+      <div className="flex flex-col h-full space-y-4 relative">
         <div className="flex justify-between items-center gap-2">
           <Label
             textSize={15}
@@ -174,8 +176,9 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
           >
             Import Karaoke Extreme
           </Label>
-          <div>
+          <div style={{ opacity: isMobile ? 0.5 : 1 }}>
             <SwitchRadio<boolean>
+              disabled={isMobile}
               value={mode === "EXTREME_FILE_SYSTEM"}
               onChange={async (value) => {
                 if (value) {
@@ -201,10 +204,19 @@ const AddDBFSong: React.FC<AddDBFSongProps> = ({
           </div>
         </div>
 
+        {isMobile && (
+          <div className="absolute w-full h-[80%]">
+            <div className="text-3xl text-red-500  flex justify-center items-center w-full h-full">
+              ไม่รองรับในมือถือ
+            </div>
+          </div>
+        )}
+
         <div
           style={{
-            opacity: mode === "EXTREME_FILE_SYSTEM" ? 1 : 0.5,
-            pointerEvents: mode !== "EXTREME_FILE_SYSTEM" ? "none" : "auto",
+            opacity: isMobile || mode === "EXTREME_FILE_SYSTEM" ? 1 : 0.5,
+            pointerEvents:
+              isMobile || mode !== "EXTREME_FILE_SYSTEM" ? "none" : "auto",
           }}
           className="space-y-4 w-full flex flex-col items-center"
         >

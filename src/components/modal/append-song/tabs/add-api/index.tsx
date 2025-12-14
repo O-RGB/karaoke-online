@@ -62,7 +62,7 @@ const AddApiSong: React.FC<AddApiSongProps> = ({
           </div>
         </div>
 
-        <NotificationProvider>
+        {/* <NotificationProvider>
           {!token ? (
             <ApiLoginRegister></ApiLoginRegister>
           ) : (
@@ -73,7 +73,7 @@ const AddApiSong: React.FC<AddApiSongProps> = ({
               setProcessing={setProcessing}
             ></Dashboard>
           )}
-        </NotificationProvider>
+        </NotificationProvider> */}
       </div>
     </>
   );

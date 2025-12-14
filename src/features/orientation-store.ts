@@ -26,9 +26,9 @@ const useOrientationStore = create<OrientationState>((set, get) => ({
       /iphone|ipad|ipod|android|blackberry|iemobile|opera mini|mobile/i;
     const isMobileUA = mobileUA.test(navigator.userAgent);
 
-    const isSmallScreen = window.matchMedia("(max-width: 1024px)").matches;
+    // const isSmallScreen = window.matchMedia("(max-width: 1024px)").matches;
 
-    set({ isMobile: isMobileUA || isSmallScreen });
+    set({ isMobile: isMobileUA });
   },
 
   detectOrientation: () => {

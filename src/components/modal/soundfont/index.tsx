@@ -111,16 +111,16 @@ const SoundfontManager: React.FC<SoundfontManagerProps> = ({ height }) => {
             label: "โฟลเดอร์",
             icon: <BiFolder></BiFolder>,
           },
-          {
-            content: (
-              <SoundfontFree
-                getSoundFontList={getSoundFontList}
-                soundFontStorage={sfStorage}
-              ></SoundfontFree>
-            ),
-            label: "แจกฟรี",
-            icon: <BiDownload></BiDownload>,
-          },
+          // {
+          //   content: (
+          //     <SoundfontFree
+          //       getSoundFontList={getSoundFontList}
+          //       soundFontStorage={sfStorage}
+          //     ></SoundfontFree>
+          //   ),
+          //   label: "แจกฟรี",
+          //   icon: <BiDownload></BiDownload>,
+          // },
         ]}
       ></Tabs>
     </>

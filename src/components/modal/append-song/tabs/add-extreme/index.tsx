@@ -30,7 +30,6 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
   setProcessing,
   closeProcessing,
 }) => {
-  const engine = useSynthesizerEngine((state) => state.engine);
   const songsManager = useSongsStore((state) => state.songsManager);
   const soundfontBaseManager = useSongsStore(
     (state) => state.soundfontBaseManager
@@ -76,14 +75,12 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
   }, [fetchStoredData]);
 
   const handleDeleteAllData = async () => {
-    closeAlert?.(); // ปิด Alert Dialog ก่อน
+    closeAlert?.();
     setIsProcessing(true);
     setStatusMessage("กำลังลบข้อมูล Index ทั้งหมด...");
     try {
-      // สมมติว่ามีฟังก์ชัน clearAllLocalSongData ใน reader
-      //   await pythonIndexReader.clearAllLocalSongData();
       setStatusMessage("✅ ลบข้อมูล Index ทั้งหมดเรียบร้อยแล้ว");
-      await fetchStoredData(); // โหลดข้อมูลใหม่ (ซึ่งควรจะเป็นค่าว่าง)
+      await fetchStoredData();
     } catch (error) {
       setStatusMessage(
         `❌ เกิดข้อผิดพลาดในการลบข้อมูล: ${
@@ -147,41 +144,6 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
     },
     [pythonIndexReader, fetchStoredData]
   );
-
-  // const handleChunkFiles = useCallback(
-  //   async (selectedFile: File, fileList: FileList) => {
-  //     if (!fileList || fileList.length === 0) return;
-  //     setIsProcessing(true);
-  //     setStatusMessage(`กำลังประมวลผล ${fileList.length} chunk files...`);
-  //     try {
-  //       const filesArray = Array.from(fileList);
-  //       const processingPromises = filesArray.map(async (file) => {
-  //         const chunkId = parseInt(file.name.replace(".json", ""), 10);
-  //         if (isNaN(chunkId)) {
-  //           console.warn(`ข้ามไฟล์ที่มีชื่อไม่ถูกต้อง: ${file.name}`);
-  //           return;
-  //         }
-  //         const fileContent = await file.text();
-  //         const chunkData = JSON.parse(fileContent);
-  //         await pythonIndexReader.savePreviewChunk(chunkId, chunkData);
-  //       });
-  //       await Promise.all(processingPromises);
-  //       setStatusMessage(
-  //         `✅ บันทึก Chunk Files ทั้ง ${fileList.length} ไฟล์สำเร็จ!`
-  //       );
-  //       await fetchStoredData();
-  //     } catch (error) {
-  //       setStatusMessage(
-  //         `❌ เกิดข้อผิดพลาดในการประมวลผล: ${
-  //           error instanceof Error ? error.message : String(error)
-  //         }`
-  //       );
-  //     } finally {
-  //       setIsProcessing(false);
-  //     }
-  //   },
-  //   [pythonIndexReader, fetchStoredData]
-  // );
 
   useEffect(() => {}, [songsManager?.currentMode]);
 
@@ -269,7 +231,6 @@ const AddExtremeAndManage: React.FC<AddExtremeAndManageProps> = ({
 
           <div className="relative flex py-4 items-center">
             <div className="flex-grow border-t border-gray-300"></div>
-            {/* <span className="flex-shrink mx-4 text-gray-400 text-sm">หรือ</span> */}
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
 

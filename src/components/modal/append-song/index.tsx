@@ -8,6 +8,7 @@ import { PiMusicNotesPlusDuotone } from "react-icons/pi";
 import { GoFileZip } from "react-icons/go";
 import { FaComputer } from "react-icons/fa6";
 import { FaServer } from "react-icons/fa";
+import { useOrientation } from "@/hooks/orientation-hook";
 
 interface AppendSongModalProps {
   height?: number;

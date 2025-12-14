@@ -38,7 +38,6 @@ const AutoModal = dynamic(() => import("../modal/auto/auto-modal"), {
 import SearchSong from "../tools/search-song/search-song";
 import ClockPanel from "../tools/clock-panel";
 import TempoPanel from "../tools/tempo-panel";
-import useNotificationStore from "@/features/notification-store";
 import WallpaperRender from "./wallpaper-render/wallpaper-render";
 import useConfigStore from "@/features/config/config-store";
 import QueueSong from "../tools/queue-song/queue-song";
@@ -68,7 +67,6 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
   );
 
   const handle = useFullScreenHandle();
-  const notification = useNotificationStore((state) => state.notification);
   const config = useConfigStore((state) => state.config);
   const [onPrepare, setPrepare] = useState<boolean>(false);
 
@@ -111,7 +109,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     ADD_MUSIC: <AppendSongModal />,
     DISPLAY: <DisplaySettingModal />,
     SOUND_SETTING: <SoundSettingModal />,
-    DONATE: <DonateModal />,
+    // DONATE: <DonateModal />,
   };
 
   return (
