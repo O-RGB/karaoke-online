@@ -98,12 +98,12 @@ const ContextModal: React.FC<ContextModalProps> = ({
           onClick: handleSelectContext,
           type: "DISPLAY",
         },
-        {
-          icon: <BiSupport></BiSupport>,
-          text: "สนับสนุนเรา",
-          onClick: handleSelectContext,
-          type: "DONATE",
-        },
+        // {
+        //   icon: <BiSupport></BiSupport>,
+        //   text: "สนับสนุนเรา",
+        //   onClick: handleSelectContext,
+        //   type: "DONATE",
+        // },
       ],
       name: "ปรับแต่ง",
       icon: <></>,

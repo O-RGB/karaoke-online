@@ -88,8 +88,10 @@ export class JsSynthEngine implements BaseSynthEngine {
   }
 
   async startup(systemConfig?: Partial<ConfigSystem>) {
-    const audioContext = new AudioContext();
-
+    const contextOptions: AudioContextOptions = {
+      latencyHint: "playback",
+    };
+    const audioContext = new AudioContext(contextOptions);
     const { Synthesizer } = await import("js-synthesizer");
     const synth = new Synthesizer();
 
@@ -103,11 +105,17 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.timer = new TimerWorker(this.player);
 
     this.synth.setGain(0.3);
-
-    const analysers: AnalyserNode[] = [];
     this.nodes = [];
 
     this.synthAudioNode = synth.createAudioNode(audioContext, 8192);
+
+    // this.synth.setInterpolation(7);
+    // const test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    // for (let index = 0; index < test.length; index++) {
+    //   const element = test[index];
+    //   this.synth.setGenerator(element, 48, 127);
+    //   this.synth.setGenerator(element, 15, 127);
+    // }
 
     if (this.synthAudioNode) {
       this.globalEqualizer = new GlobalEqualizer(this.synthAudioNode.context);
@@ -118,14 +126,14 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.notesModifier.init();
 
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
+      // const analyser = audioContext.createAnalyser();
+      // analyser.fftSize = 256;
       const noteEvent = this.notesModifier.getNote(ch);
       this.nodes.push(
         new SynthChannel(ch, audioContext, noteEvent, systemConfig)
       );
 
-      analysers.push(analyser);
+      // analysers.push(analyser);
     }
 
     this.timer.initWorker();

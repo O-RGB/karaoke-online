@@ -55,6 +55,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   return (
     <div className="flex gap-2">
       <NumberButton
+        holdable
         collapsible
         onChange={(value) => {
           onPitchChange(value);
@@ -69,6 +70,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
 
       <NumberButton
         collapsible
+        holdable
         onChange={(value) => {
           onSpeedChange(value);
           setSpeed(value);

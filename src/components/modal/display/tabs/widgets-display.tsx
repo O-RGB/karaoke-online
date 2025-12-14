@@ -84,6 +84,7 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
           <div className="flex justify-between gap-3 items-center">
             <div className="flex items-center gap-2 text-black">
               <NumberButton
+                holdable
                 blur={false}
                 value={Math.round(zoomLevel * 100)}
                 onChange={handleZoomChange}
@@ -152,27 +153,6 @@ const WidgetsDisplay: React.FC<WidgetsDisplayProps> = ({}) => {
               <SwitchRadio<boolean>
                 onChange={(value) => onSetWidgets(2, value)}
                 value={widgets.clock?.show}
-                options={[
-                  {
-                    value: true,
-                    children: "เปิด",
-                  },
-                  {
-                    value: false,
-                    children: "ปิด",
-                  },
-                ]}
-              ></SwitchRadio>
-            </div>
-          </div>
-        </div>
-        <div>
-          <Label>เครื่องดนตรี</Label>
-          <div className="flex justify-between gap-3 items-center">
-            <div>
-              <SwitchRadio<boolean>
-                onChange={(value) => onSetWidgets(3, value)}
-                value={widgets.inst?.show}
                 options={[
                   {
                     value: true,
