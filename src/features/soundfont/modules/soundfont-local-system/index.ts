@@ -12,18 +12,18 @@ export class SoundfontLocalSystemManager extends SoundfontBase {
     this.soundfontDatabase = new SoundfontPlayerManager();
   }
 
-  async getSoundfont(id: string): Promise<File | undefined> {
-    const response = await this.soundfontDatabase.get(Number(id));
+  async getSoundfont(sf: ISoundfontPlayer): Promise<File | undefined> {
+    const response = await this.soundfontDatabase.get(sf.id);
     const file = response?.file;
     return file;
   }
   async deleteSoundfont(file: ISoundfontPlayer): Promise<boolean> {
-    console.log(file,'loack');
     await this.soundfontDatabase.delete(file.id);
     return true;
   }
   async soundfonts(): Promise<ISoundfontPlayer[]> {
-    return this.soundfontDatabase.getAll();
+    const sfList = await this.soundfontDatabase.getAll();
+    return sfList.map((x, i) => ({ ...x, keyId: `sf-local-system-${i}` }));
   }
 
   getSoundfontSelected(): string | undefined {
@@ -31,15 +31,18 @@ export class SoundfontLocalSystemManager extends SoundfontBase {
   }
 
   public async loadSoundfont(
-    idOrFilename: string
-  ): Promise<string | undefined> {
-    const test = Number(idOrFilename);
+    sf: ISoundfontPlayer
+  ): Promise<ISoundfontPlayer | undefined> {
+    const test = Number(sf.id);
     if (typeof test === "number") {
       const file = await this.soundfontDatabase.get(test);
 
       if (!file?.file) return;
       this.engine.setSoundFont(file.file, this.system);
-      return file.file.name;
+      return {
+        ...sf,
+        file: file.file,
+      };
     }
   }
 }

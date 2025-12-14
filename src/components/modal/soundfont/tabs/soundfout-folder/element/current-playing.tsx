@@ -2,6 +2,7 @@ import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
 import { DEFAULT_SOUND_FONT } from "@/config/value";
 import { SoundSystemMode } from "@/features/config/types/config.type";
+import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 import { ReactNode } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { FaCircleCheck } from "react-icons/fa6";
@@ -10,7 +11,7 @@ import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 
 interface CurrentlyPlayingProps {
   loading: boolean;
-  selected: string | undefined;
+  selected: ISoundfontPlayer | undefined;
   from?: SoundSystemMode;
   onClickDefault?: () => void;
   addButton?: React.ReactNode;
@@ -59,7 +60,7 @@ export const CurrentlyPlaying: React.FC<CurrentlyPlayingProps> = ({
             </div>
             <div className="text-center">
               <div className="text-sm text-wrap break-all line-clamp-1">
-                {selected ?? DEFAULT_SOUND_FONT}
+                {selected?.file.name ?? DEFAULT_SOUND_FONT}
               </div>
               {getSourceLabel()}
             </div>
@@ -67,7 +68,7 @@ export const CurrentlyPlaying: React.FC<CurrentlyPlayingProps> = ({
         </div>
         <div className="w-[50%] lg:w-full space-y-1">
           <Button
-            disabled={DEFAULT_SOUND_FONT === selected}
+            disabled={selected === undefined}
             className="w-full h-8 lg:h-10"
             onClick={onClickDefault}
             color="gray"

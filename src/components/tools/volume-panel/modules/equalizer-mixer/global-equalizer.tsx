@@ -16,35 +16,47 @@ const defaultPresets: EqPreset[] = [
     name: "Flat",
     gains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   },
+
   {
     id: "bass-boost",
     name: "Bass Boost",
-    gains: [12, 10, 8, 5, 2, 0, 0, 0, -2, -3],
+    // ลด low ไม่ให้ดันพร้อมกันแรงเกิน
+    gains: [6, 5, 4, 2, 1, 0, 0, 0, -1, -2],
   },
+
   {
     id: "vocal-enhance",
     name: "Vocal Enhance",
-    gains: [-4, -6, -2, 3, 10, 12, 8, 3, 0, -5],
+    // ดัน mid ให้เด่น แต่ไม่ spike
+    gains: [-3, -4, -1, 2, 6, 7, 5, 2, 0, -3],
   },
+
   {
     id: "treble-boost",
     name: "Treble Boost",
-    gains: [-3, -3, -2, -2, -4, 0, 6, 10, 12, 14],
+    // ปลายใส แต่ไม่บาดหู
+    gains: [-2, -2, -1, -1, -2, 0, 4, 6, 7, 8],
   },
+
   {
     id: "v-shape",
     name: "V-Shape",
-    gains: [10, 8, 5, 0, -8, -8, 0, 5, 8, 10],
+    // ยังคง V แต่ไม่กิน headroom
+    gains: [6, 5, 3, 0, -5, -5, 0, 3, 5, 6],
   },
+
   {
     id: "club",
     name: "Club",
-    gains: [6, 6, 3, 3, 3, 2, 2, 0, 0, 0],
+    // เน้น low-mid อุ่น ๆ
+    gains: [4, 4, 2, 2, 2, 1, 1, 0, 0, 0],
   },
+
   {
     id: "rock",
     name: "Rock",
-    gains: [8, 5, 3, -4, -6, -3, 3, 8, 10, 10],
+    // กีตาร์ชัด แต่ไม่แตก
+    gains: [5, 4, 2, -3, -4, -2, 2, 5, 6, 6],
   },
 ];
 
@@ -58,7 +70,7 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
   const [isEnabled, setIsEnabled] = useState<boolean>(
     equalizer?.isEnabled || false
   );
-  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [selectedPreset, setSelectedPreset] = useState<string>("flat");
 
   useEffect(() => {
     if (!equalizer) return;
@@ -75,7 +87,7 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
     setGains(newGains);
     equalizer.setBandGain(index, value);
 
-    setSelectedPreset(null);
+    setSelectedPreset("");
   };
 
   const handleToggleEQ = (enabled: boolean) => {
@@ -117,9 +129,9 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
   ];
 
   return (
-    <div className="w-full bg-gray-50 rounded-lg p-4">
+    <div className="w-full bg-gray-50 rounded-lg">
       <div className="gap-4">
-        <div className="p-4 w-full bg-white border-b md:border-b-0 md:border-r border-gray-200">
+        <div className=" w-full bg-white border-gray-200">
           <div className="flex justify-between items-center mb-4">
             <div className="text-sm font-medium text-gray-700">EQ Status</div>
             <SwitchRadio
@@ -133,9 +145,6 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
           </div>
 
           <div className="mb-4">
-            <div className="text-sm font-medium text-gray-700 mb-2">
-              Presets
-            </div>
             <div className="flex flex-wrap gap-2">
               {defaultPresets.map((preset) => (
                 <button
@@ -154,14 +163,14 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
           </div>
         </div>
 
-        <div className="p-4 md:col-span-4">
+        <div className="p-4">
           <div className="relative">
             <div className="absolute -left-6 top-5 h-40 text-right flex flex-col justify-between text-[8px] text-gray-500">
-              <div>+30dB</div>
-              <div>+15dB</div>
+              <div>+20dB</div>
+              <div>+10dB</div>
               <div>0dB</div>
-              <div>-15dB</div>
-              <div>-30dB</div>
+              <div>-10dB</div>
+              <div>-20dB</div>
             </div>
 
             <div className="ml-2">
@@ -169,13 +178,12 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                 {frequencyLabels.map((label, i) => (
                   <div
                     key={i}
-                    className="text-center text-[10px] font-medium text-gray-600"
+                    className="text-center text-[8px] font-medium text-gray-600"
                   >
                     {label}
                   </div>
                 ))}
               </div>
-
               <div className="relative h-40 mb-2 border border-gray-200 rounded bg-white">
                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                   <div className="border-t border-gray-200"></div>
@@ -205,33 +213,17 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                           disabled={!isEnabled}
                           vertical
                           value={[gain]}
-                          min={-30}
-                          max={30}
+                          min={-20}
+                          max={20}
                           step={0.5}
                           onChange={(value) => handleGainChange(index, value)}
                           className={`h-full ${!isEnabled ? "opacity-50" : ""}`}
                         />
-
-                        <div
-                          className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 rounded-t ${
-                            gain > 0
-                              ? "bg-blue-500"
-                              : gain < 0
-                              ? "bg-orange-500"
-                              : "bg-gray-400"
-                          }`}
-                          style={{
-                            height: `${(Math.abs(gain) / 60) * 100}%`,
-                            top:
-                              gain > 0 ? `${((30 - gain) / 60) * 100}%` : "50%",
-                          }}
-                        ></div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-
               <div className="grid grid-cols-10 gap-1">
                 {gains.map((gain, index) => (
                   <div key={index} className="text-center text-[10px]">
@@ -240,140 +232,9 @@ const GlobalEqualizer: React.FC<GlobalEqProps> = () => {
                   </div>
                 ))}
               </div>
-
-              <div className="mt-4 relative h-16 border border-gray-200 rounded bg-white overflow-hidden">
-                <svg
-                  className="w-full h-full"
-                  viewBox="0 0 1000 100"
-                  preserveAspectRatio="none"
-                >
-                  <defs>
-                    <linearGradient
-                      id="curve-gradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="0%"
-                      y2="100%"
-                    >
-                      <stop offset="0%" stopColor="rgba(37, 99, 235, 0.5)" />
-                      <stop offset="50%" stopColor="rgba(37, 99, 235, 0.05)" />
-                      <stop offset="50%" stopColor="rgba(249, 115, 22, 0.05)" />
-                      <stop offset="100%" stopColor="rgba(249, 115, 22, 0.5)" />
-                    </linearGradient>
-                  </defs>
-
-                  <line
-                    x1="0"
-                    y1="50"
-                    x2="1000"
-                    y2="50"
-                    stroke="#cbd5e1"
-                    strokeWidth="1"
-                  />
-
-                  <path
-                    d={`
-                      M 0,${50 - (gains[0] / 30) * 50}
-                      C ${100 / 3},${50 - (gains[0] / 30) * 50}
-                        ${100 / 3},${50 - (gains[1] / 30) * 50}
-                        ${100},${50 - (gains[1] / 30) * 50}
-                      C ${100 + 100 / 3},${50 - (gains[1] / 30) * 50}
-                        ${200 - 100 / 3},${50 - (gains[2] / 30) * 50}
-                        ${200},${50 - (gains[2] / 30) * 50}
-                      C ${200 + 100 / 3},${50 - (gains[2] / 30) * 50}
-                        ${300 - 100 / 3},${50 - (gains[3] / 30) * 50}
-                        ${300},${50 - (gains[3] / 30) * 50}
-                      C ${300 + 100 / 3},${50 - (gains[3] / 30) * 50}
-                        ${400 - 100 / 3},${50 - (gains[4] / 30) * 50}
-                        ${400},${50 - (gains[4] / 30) * 50}
-                      C ${400 + 100 / 3},${50 - (gains[4] / 30) * 50}
-                        ${500 - 100 / 3},${50 - (gains[5] / 30) * 50}
-                        ${500},${50 - (gains[5] / 30) * 50}
-                      C ${500 + 100 / 3},${50 - (gains[5] / 30) * 50}
-                        ${600 - 100 / 3},${50 - (gains[6] / 30) * 50}
-                        ${600},${50 - (gains[6] / 30) * 50}
-                      C ${600 + 100 / 3},${50 - (gains[6] / 30) * 50}
-                        ${700 - 100 / 3},${50 - (gains[7] / 30) * 50}
-                        ${700},${50 - (gains[7] / 30) * 50}
-                      C ${700 + 100 / 3},${50 - (gains[7] / 30) * 50}
-                        ${800 - 100 / 3},${50 - (gains[8] / 30) * 50}
-                        ${800},${50 - (gains[8] / 30) * 50}
-                      C ${800 + 100 / 3},${50 - (gains[8] / 30) * 50}
-                        ${900 - 100 / 3},${50 - (gains[9] / 30) * 50}
-                        ${900},${50 - (gains[9] / 30) * 50}
-                      C ${900 + 100 / 3},${50 - (gains[9] / 30) * 50}
-                        ${1000 - 100 / 3},${50 - (gains[9] / 30) * 50}
-                        ${1000},${50 - (gains[9] / 30) * 50}
-                    `}
-                    fill="none"
-                    stroke="#2563eb"
-                    strokeWidth="2"
-                  />
-
-                  <path
-                    d={`
-                      M 0,${50 - (gains[0] / 30) * 50}
-                      C ${100 / 3},${50 - (gains[0] / 30) * 50}
-                        ${100 / 3},${50 - (gains[1] / 30) * 50}
-                        ${100},${50 - (gains[1] / 30) * 50}
-                      C ${100 + 100 / 3},${50 - (gains[1] / 30) * 50}
-                        ${200 - 100 / 3},${50 - (gains[2] / 30) * 50}
-                        ${200},${50 - (gains[2] / 30) * 50}
-                      C ${200 + 100 / 3},${50 - (gains[2] / 30) * 50}
-                        ${300 - 100 / 3},${50 - (gains[3] / 30) * 50}
-                        ${300},${50 - (gains[3] / 30) * 50}
-                      C ${300 + 100 / 3},${50 - (gains[3] / 30) * 50}
-                        ${400 - 100 / 3},${50 - (gains[4] / 30) * 50}
-                        ${400},${50 - (gains[4] / 30) * 50}
-                      C ${400 + 100 / 3},${50 - (gains[4] / 30) * 50}
-                        ${500 - 100 / 3},${50 - (gains[5] / 30) * 50}
-                        ${500},${50 - (gains[5] / 30) * 50}
-                      C ${500 + 100 / 3},${50 - (gains[5] / 30) * 50}
-                        ${600 - 100 / 3},${50 - (gains[6] / 30) * 50}
-                        ${600},${50 - (gains[6] / 30) * 50}
-                      C ${600 + 100 / 3},${50 - (gains[6] / 30) * 50}
-                        ${700 - 100 / 3},${50 - (gains[7] / 30) * 50}
-                        ${700},${50 - (gains[7] / 30) * 50}
-                      C ${700 + 100 / 3},${50 - (gains[7] / 30) * 50}
-                        ${800 - 100 / 3},${50 - (gains[8] / 30) * 50}
-                        ${800},${50 - (gains[8] / 30) * 50}
-                      C ${800 + 100 / 3},${50 - (gains[8] / 30) * 50}
-                        ${900 - 100 / 3},${50 - (gains[9] / 30) * 50}
-                        ${900},${50 - (gains[9] / 30) * 50}
-                      C ${900 + 100 / 3},${50 - (gains[9] / 30) * 50}
-                        ${1000 - 100 / 3},${50 - (gains[9] / 30) * 50}
-                        ${1000},${50 - (gains[9] / 30) * 50}
-                      L 1000,50
-                      L 0,50
-                      Z
-                    `}
-                    fill="url(#curve-gradient)"
-                    opacity="0.5"
-                  />
-
-                  {[...Array(10)].map((_, i) => (
-                    <circle
-                      key={i}
-                      cx={i * 100 + 50}
-                      cy={50 - (gains[i] / 30) * 50}
-                      r="3"
-                      fill="#2563eb"
-                      stroke="#fff"
-                      strokeWidth="1"
-                    />
-                  ))}
-                </svg>
-              </div>
+              ​
             </div>
           </div>
-
-          {selectedPreset && (
-            <div className="mt-3 text-center text-xs text-gray-500">
-              Active:{" "}
-              {defaultPresets.find((p) => p.id === selectedPreset)?.name ||
-                "Custom"}
-            </div>
-          )}
         </div>
       </div>
     </div>

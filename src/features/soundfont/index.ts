@@ -11,7 +11,7 @@ export class SoundfontSystemManager {
   private local: SoundfontBase | undefined = undefined;
   private engine: BaseSynthEngine | undefined = undefined;
   public currentMode: SoundSystemMode | undefined = undefined;
-  public selected?: string | undefined = undefined;
+  public selected?: ISoundfontPlayer = undefined;
   public selectedFrom?: SoundSystemMode | undefined = undefined;
 
   constructor(engine: BaseSynthEngine, config?: SoundSystemMode) {
@@ -74,21 +74,21 @@ export class SoundfontSystemManager {
     return DEFAULT_SOUND_FONT;
   }
 
-  async setSoundfont(idOrFilename: string, form?: SoundSystemMode) {
+  async setSoundfont(sf: ISoundfontPlayer, form?: SoundSystemMode) {
     const targetMode = form ?? "DATABASE_FILE_SYSTEM";
 
-    let selected: string | undefined = undefined;
+    let selected: ISoundfontPlayer | undefined = undefined;
     if (
       targetMode === "EXTREME_FILE_SYSTEM" &&
       this.currentMode === "EXTREME_FILE_SYSTEM"
     ) {
-      selected = await this.manager?.loadSoundfont(idOrFilename);
+      selected = await this.manager?.loadSoundfont(sf);
     } else if (
       targetMode === "DATABASE_FILE_SYSTEM" ||
       "PYTHON_FILE_ENCODE" ||
       "PYTHON_API_SYSTEM"
     ) {
-      selected = await this.local?.loadSoundfont(idOrFilename);
+      selected = await this.local?.loadSoundfont(sf);
     } else {
       console.error(
         `Cannot set soundfont from ${targetMode} while in ${this.currentMode} mode.`

@@ -1,5 +1,6 @@
 export interface ISoundfontPlayer {
   id: number;
+  keyId: string;
   file: File;
   createdAt: Date;
 }

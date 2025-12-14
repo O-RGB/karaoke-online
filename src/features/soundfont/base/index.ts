@@ -10,9 +10,11 @@ export abstract class SoundfontBase {
     this.engine = engine;
   }
 
-  abstract loadSoundfont(idOrFilename: string): Promise<string | undefined>;
-  abstract getSoundfont(id: string): Promise<File | undefined>;
-  abstract deleteSoundfont(id: ISoundfontPlayer): boolean | Promise<boolean>;
+  abstract loadSoundfont(
+    sf: ISoundfontPlayer
+  ): Promise<ISoundfontPlayer | undefined>;
+  abstract getSoundfont(sf: ISoundfontPlayer): Promise<File | undefined>;
+  abstract deleteSoundfont(sf: ISoundfontPlayer): boolean | Promise<boolean>;
   abstract soundfonts(): Promise<ISoundfontPlayer[]>;
   abstract getSoundfontSelected(): string | undefined;
 }

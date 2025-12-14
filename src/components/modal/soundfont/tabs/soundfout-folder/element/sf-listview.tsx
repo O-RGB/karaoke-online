@@ -1,5 +1,6 @@
 import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
+import Tags from "@/components/common/display/tags";
 import TableList from "@/components/common/table/table-list";
 import { SoundSystemMode } from "@/features/config/types/config.type";
 import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
@@ -19,7 +20,7 @@ interface SoundfontListViewProps {
     option: ListItem<ISoundfontPlayer>
   ) => void;
   onItemDelete?: (value: ISoundfontPlayer, index: number) => void;
-  isSelected: (fileName: string) => boolean;
+  isSelected: (sf: ISoundfontPlayer) => boolean;
   from?: SoundSystemMode;
 }
 
@@ -32,11 +33,11 @@ export const SoundfontListView: React.FC<SoundfontListViewProps> = ({
   isSelected,
   from,
 }) => {
-  const renderActionButtonIcon = (fileName: string): ReactNode => {
+  const renderActionButtonIcon = (sf: ISoundfontPlayer): ReactNode => {
     if (loading) {
       return <AiOutlineLoading3Quarters className="animate-spin" />;
     }
-    if (isSelected(fileName)) {
+    if (isSelected(sf)) {
       return <FaCircleCheck className="!text-green-500" />;
     }
     return <IoMdAddCircle />;
@@ -54,14 +55,14 @@ export const SoundfontListView: React.FC<SoundfontListViewProps> = ({
         deleteItem={!!onItemDelete}
         onDeleteItem={onItemDelete}
         itemAction={(item: ISoundfontPlayer, index: number, option) => (
-          <Button
-            disabled={loading}
-            onClick={() => onItemSelect(item.file.name, index, option)}
-            color="white"
-            icon={renderActionButtonIcon(
-              from === "EXTREME_FILE_SYSTEM" ? item.file.name : `${item.id}`
-            )}
-          />
+          <>
+            <Button
+              disabled={loading}
+              onClick={() => onItemSelect(item.file.name, index, option)}
+              color="white"
+              icon={renderActionButtonIcon(item)}
+            />
+          </>
         )}
       />
     </div>

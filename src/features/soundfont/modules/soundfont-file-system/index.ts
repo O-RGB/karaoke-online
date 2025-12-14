@@ -5,7 +5,7 @@ import { BaseSynthEngine } from "@/features/engine/types/synth.type";
 import { ISoundfontPlayer } from "@/utils/indexedDB/db/player/types";
 
 export class SoundfontFileSystemManager extends SoundfontBase {
-  deleteSoundfont(id: ISoundfontPlayer): boolean | Promise<boolean> {
+  deleteSoundfont(sf: ISoundfontPlayer): boolean | Promise<boolean> {
     throw new Error("Method not implemented.");
   }
   private fileSystemManager: FileSystemManager | undefined = undefined;
@@ -15,12 +15,12 @@ export class SoundfontFileSystemManager extends SoundfontBase {
     this.fileSystemManager = FileSystemManager.getInstance();
   }
 
-  getSoundfont(filename: string): Promise<File | undefined> {
+  getSoundfont(sf: ISoundfontPlayer): Promise<File | undefined> {
     if (!this.fileSystemManager) {
       new Promise((resolve) => resolve(undefined));
       throw "File system Manager Is Null";
     }
-    return this.fileSystemManager.getFileByPath(`SoundFont/${filename}`);
+    return this.fileSystemManager.getFileByPath(`SoundFont/${sf.file.name}`);
   }
 
   async soundfonts(): Promise<ISoundfontPlayer[]> {
@@ -30,10 +30,16 @@ export class SoundfontFileSystemManager extends SoundfontBase {
       throw "File system Manager Is Null";
     }
     const files = await this.fileSystemManager?.listFiles("SoundFont/");
-    return files.map(
+    const maping = files.map(
       (data, index) =>
-        ({ createdAt: new Date(), file: data, id: index } as ISoundfontPlayer)
+        ({
+          createdAt: new Date(),
+          file: data,
+          id: index,
+          keyId: `sf-file-system-${index}`,
+        } as ISoundfontPlayer)
     );
+    return maping;
   }
 
   getSoundfontSelected(): string | undefined {
@@ -41,19 +47,23 @@ export class SoundfontFileSystemManager extends SoundfontBase {
   }
 
   public async loadSoundfont(
-    idOrFilename: string
-  ): Promise<string | undefined> {
+    sf: ISoundfontPlayer
+  ): Promise<ISoundfontPlayer | undefined> {
     if (!this.fileSystemManager) {
       new Promise((resolve) => resolve(undefined));
       console.log("File system Manager Is Null");
       throw "File system Manager Is Null";
     }
+
     const file = await this.fileSystemManager.getFileByPath(
-      `SoundFont/${idOrFilename}`
+      `SoundFont/${sf.file.name}`
     );
 
     if (!file) return;
     this.engine.setSoundFont(file, this.system);
-    return file.name;
+    return {
+      ...sf,
+      file,
+    };
   }
 }

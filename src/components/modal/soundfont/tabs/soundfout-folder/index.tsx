@@ -15,38 +15,23 @@ import { CurrentlyPlaying } from "./element/current-playing";
 import { SoundfontListView } from "./element/sf-listview";
 import { IoMdWifi } from "react-icons/io";
 
-const soundfontDb = new SoundfontPlayerManager();
-
 interface SoundfontFolderProps extends IAlertCommon {
   loading: boolean;
-  soundFontStorage: ListItem<ISoundfontPlayer>[];
-  soundFontExtreme: ListItem<ISoundfontPlayer>[];
-  selected?: string;
-  from?: SoundSystemMode;
+  sfStorage: ListItem<ISoundfontPlayer>[];
+  sfExtreme: ListItem<ISoundfontPlayer>[];
+  selected?: ISoundfontPlayer;
   setLoading: (isLoad: boolean) => void;
   getSoundFontList: () => Promise<ListItem<ISoundfontPlayer>[]>;
-  updateSoundFont: (idOrFilename: string, from: SoundSystemMode) => void;
-  removeSF2Local?: (id: ISoundfontPlayer, index: number) => void;
+  updateSoundFont: (sf: ISoundfontPlayer, from: SoundSystemMode) => void;
+  removeSF2Local?: (sf: ISoundfontPlayer, index: number) => void;
   onClickDefault?: () => void;
-}
-
-interface FileDownload {
-  id: string;
-  fileName: string;
-  progress: number;
-}
-
-interface FileToAssemble {
-  id: string;
-  fileName: string;
 }
 
 const SoundfontFolder: FC<SoundfontFolderProps> = ({
   loading,
   selected,
-  from,
-  soundFontStorage,
-  soundFontExtreme,
+  sfStorage,
+  sfExtreme,
   setLoading,
   getSoundFontList,
   removeSF2Local,
@@ -69,9 +54,6 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
   const [hostId, setHostId] = useState<string>();
   const fullRemoteUrl =
     hostUrl && hostId ? `${hostUrl}/fileTransfers/${hostId}` : "";
-
-  const [downloads, setDownloads] = useState<Record<string, FileDownload>>({});
-  const [pendingAssembly, setPendingAssembly] = useState<FileToAssemble[]>([]);
 
   const onOpenPeer = async () => {
     setFileTransfersLoading(true);
@@ -97,15 +79,6 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
   useEffect(() => {
     if (setOnFileProgress) {
       setOnFileProgress((value) => {
-        setDownloads((prevDownloads) => ({
-          ...prevDownloads,
-          [value.transferId]: {
-            id: value.transferId,
-            fileName: value.fileName,
-            progress: value.progress,
-          },
-        }));
-
         if (value.progress < 100 || value.status === "PROCESSING") {
           setProcessing?.({
             title: "กำลังโหลดไฟล์",
@@ -124,26 +97,10 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
             variant: "error",
             description: `${value.error || "ไม่สามารถรับไฟล์ได้"}`,
           });
-          setDownloads((prev) => {
-            const newDownloads = { ...prev };
-            delete newDownloads[value.transferId];
-            return newDownloads;
-          });
         }
 
         if (value.status === "READY_FOR_ASSEMBLY") {
           closeProcessing?.();
-
-          setPendingAssembly((prev) => [
-            ...prev,
-            { id: value.transferId, fileName: value.fileName },
-          ]);
-
-          setDownloads((prev) => {
-            const newDownloads = { ...prev };
-            delete newDownloads[value.transferId];
-            return newDownloads;
-          });
 
           setAlert?.({
             title: "ดาวน์โหลดสำเร็จ",
@@ -169,20 +126,6 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
 
         if (value.status === "COMPLETE") {
           getSoundFontList();
-
-          setTimeout(() => {
-            setDownloads((prev) => {
-              const newDownloads = { ...prev };
-              delete newDownloads[value.transferId];
-              return newDownloads;
-            });
-            closeProcessing?.();
-            setAlert?.({
-              title: "รับไฟล์สำเร็จ!",
-              variant: "success",
-              description: `ไฟล์ ${value.fileName} ถูกบันทึกแล้ว`,
-            });
-          }, 1000);
         }
       });
     }
@@ -206,7 +149,6 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
 
     try {
       await assembleFile(transferId);
-      setPendingAssembly((prev) => prev.filter((f) => f.id !== transferId));
     } catch (error: any) {
       closeProcessing?.();
       setAlert?.({
@@ -225,6 +167,8 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
     };
   }, [disconnect]);
 
+  useEffect(() => {}, [selected]);
+
   return (
     <div className="flex flex-col lg:flex-row gap-4 w-full h-full relative">
       <div className="w-full lg:w-1/4 flex flex-col justify-between gap-4">
@@ -239,7 +183,6 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
             onClickDefault={onClickDefault}
             loading={loading}
             selected={selected}
-            from={from}
             addButton={
               <Button
                 className="w-full"
@@ -281,28 +224,6 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
             </div>
           </div>
         )}
-
-        {/* {pendingAssembly.length > 0 && (
-          <div className="p-4 border rounded-lg bg-yellow-50 space-y-3">
-            <Label>ไฟล์ที่พร้อมใช้งาน (รอรวมไฟล์)</Label>
-            {pendingAssembly.map((file) => (
-              <div
-                key={file.id}
-                className="flex items-center justify-between gap-2 p-2 bg-white rounded-md border"
-              >
-                <span className="text-sm truncate" title={file.fileName}>
-                  {file.fileName}
-                </span>
-                <Button
-                  color="green"
-                  onClick={() => handleAssembleFile(file.id, file.fileName)}
-                >
-                  รวมไฟล์
-                </Button>
-              </div>
-            ))}
-          </div>
-        )} */}
       </div>
 
       <div
@@ -314,32 +235,31 @@ const SoundfontFolder: FC<SoundfontFolderProps> = ({
       >
         <SoundfontListView
           title="โฟลเดอร์ Soundfont"
-          list={soundFontStorage}
+          list={sfStorage}
           loading={loading}
           from="DATABASE_FILE_SYSTEM"
-          onItemSelect={(fileName: any, index: any, option: any) => {
-            if (option.value.id) {
-              updateSoundFont(String(option.value.id), "DATABASE_FILE_SYSTEM");
-            }
+          onItemSelect={(
+            fileName: string,
+            index: number,
+            option: ListItem<ISoundfontPlayer>
+          ) => {
+            updateSoundFont(option.value, "DATABASE_FILE_SYSTEM");
           }}
           onItemDelete={removeSF2Local}
-          isSelected={(id: string) =>
-            selected === id && from === "DATABASE_FILE_SYSTEM"
-          }
+          isSelected={(sf: ISoundfontPlayer) => selected?.keyId === sf.keyId}
         />
-
         {config?.system?.soundMode === "EXTREME_FILE_SYSTEM" && (
           <SoundfontListView
             from="EXTREME_FILE_SYSTEM"
             title="Karaoke Extreme Soundfont"
-            list={soundFontExtreme}
+            list={sfExtreme}
             loading={loading}
-            onItemSelect={(fileName: any) =>
-              updateSoundFont(fileName, "EXTREME_FILE_SYSTEM")
-            }
-            isSelected={(fileName: string) =>
-              selected === fileName && from === "EXTREME_FILE_SYSTEM"
-            }
+            onItemSelect={(
+              fileName: string,
+              index: number,
+              option: ListItem<ISoundfontPlayer>
+            ) => updateSoundFont(option.value, "EXTREME_FILE_SYSTEM")}
+            isSelected={(sf: ISoundfontPlayer) => selected?.file.name === sf.file.name}
           />
         )}
       </div>

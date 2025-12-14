@@ -3,6 +3,13 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import Button from "../button/button";
 import { RiDeleteBin5Line } from "react-icons/ri";
 
+export interface ListItem<TValue = any> {
+  label?: string;
+  value: TValue;
+  className?: string;
+  render?: () => ReactNode;
+}
+
 interface TableListProps<TValue = any> {
   list?: ListItem<TValue>[];
   onClickItem?: (value: TValue, index: number) => void;
@@ -71,28 +78,36 @@ const TableList = <TValue,>({
             {list.map((data, i) => (
               <div
                 ref={(el: any) => (itemRefs.current[i] = el)}
-                onClick={() => handleClick?.(data.value, i)}
+                key={`${listKey}-${i}`}
+                onClick={() => handleClick(data.value, i)}
                 className={`${
                   hoverFocus
                     ? `${
                         onFocus === i ? "bg-gray-300" : ""
                       } hover:bg-gray-200 duration-300 cursor-pointer`
                     : ""
-                } p-1 w-full text-sm flex items-center justify-between ${
+                } p-1 w-full text-sm flex items-center gap-2 ${
                   data.className || ""
                 }`}
-                key={`${listKey}-${i}`}
               >
-                {data.render
-                  ? data.render()
-                  : data.label && (
-                      <span className="line-clamp-1">{data.label}</span>
-                    )}
-                <div className="flex gap-2">
+                {/* LABEL */}
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  {data.render ? (
+                    data.render()
+                  ) : (
+                    <span className="block truncate">{data.label}</span>
+                  )}
+                </div>
+
+                {/* ACTIONS (FIXED WIDTH / NO SHRINK) */}
+                <div className="flex gap-2 flex-shrink-0">
                   {itemAction?.(data.value, i, data)}
                   {deleteItem && (
                     <Button
-                      onClick={() => onDeleteItem?.(data.value, i)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteItem?.(data.value, i);
+                      }}
                       color="danger"
                       blur={false}
                       icon={<RiDeleteBin5Line className="text-white" />}
