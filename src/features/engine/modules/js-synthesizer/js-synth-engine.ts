@@ -109,12 +109,11 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     this.synthAudioNode = synth.createAudioNode(audioContext, 8192);
 
-    // this.synth.setInterpolation(7);
     // const test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    // this.synth.setInterpolation(7);
     // for (let index = 0; index < test.length; index++) {
     //   const element = test[index];
-    //   this.synth.setGenerator(element, 48, 127);
-    //   this.synth.setGenerator(element, 15, 127);
+    //   this.synth.setPortamentoMode(element, 1);
     // }
 
     if (this.synthAudioNode) {
