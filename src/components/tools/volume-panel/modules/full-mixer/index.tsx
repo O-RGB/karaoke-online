@@ -1,7 +1,7 @@
 import React, { useEffect, useId, useState, useMemo } from "react";
 import { RxMixerVertical } from "react-icons/rx";
 import { FiRotateCcw } from "react-icons/fi";
-import { FaSave, FaTrash } from "react-icons/fa";
+import { FaSave, FaTrash, FaPlus } from "react-icons/fa";
 
 import Button from "@/components/common/button/button";
 import ButtonCommon from "@/components/common/button/button";
@@ -17,6 +17,7 @@ import { DRUM_CHANNEL } from "@/config/value";
 
 import DrumProgramChange from "./modules/drum-program";
 import MixerNodes from "./modules/node";
+import { InstrumentsPresets } from "@/features/config/types/config.type";
 
 interface FullMixerProps {
   nodes: SynthChannel[];
@@ -37,13 +38,16 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
   const [open, setOpen] = useState<boolean>(false);
 
   const presetOptions: SelectOption[] = useMemo(() => {
-    return instPreset.map((preset) => ({
-      label: preset.label,
-      value: preset.value,
-    }));
+    return instPreset
+      .sort((a, b) => a.value - b.value)
+      .map((preset) => ({
+        label: `${preset.value === 0 ? "[Def] " : ""}${preset.label}`,
+        value: preset.value,
+      }));
   }, [instPreset]);
 
-  const isDefaultPreset = selectPreset === "0";
+  const currentPresetId = parseInt(selectPreset, 10);
+  const isDefaultPreset = currentPresetId === 0;
 
   const handleOpenMixer = () => {
     setOpen(!open);
@@ -56,14 +60,17 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
   };
 
   const handleReset = () => {
-    handleLoadPreset("0");
+    if (instrumental) {
+      instrumental.loadConfig(instPreset, currentPresetId);
+    }
   };
 
-  const handleSave = () => {
-    const name = window.prompt(
-      "กรุณาตั้งชื่อ Preset ของคุณ:",
-      `User Preset #${instPreset.length + 1}`
-    );
+  const handleCreateNew = () => {
+    const defaultName = isDefaultPreset
+      ? `My Preset ${instPreset.length}`
+      : `${instPreset.find((p) => p.value === currentPresetId)?.label} (Copy)`;
+
+    const name = window.prompt("ชื่อ Preset ใหม่:", defaultName);
     if (!name || name.trim() === "") return;
 
     const newId =
@@ -71,33 +78,47 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
         ? Math.max(...instPreset.map((p) => p.value)) + 1
         : 1;
 
-    const currentPresetData = instrumental?.getPreset(0, name);
-    if (!currentPresetData) return;
+    const currentSettings = instrumental?.getPreset(newId, name);
+    if (!currentSettings) return;
 
-    const newPresetList = [
-      ...instPreset,
-      { ...currentPresetData, value: newId },
-    ];
+    const newPresetList = [...instPreset, currentSettings];
     setConfig({ sound: { instPreset: newPresetList } });
-
     setSelectPreset(String(newId));
+  };
+
+  const handleUpdate = () => {
+    if (isDefaultPreset) return;
+    const confirmUpdate = window.confirm(`บันทึกทับ Preset เดิม?`);
+    if (!confirmUpdate) return;
+
+    const oldPreset = instPreset.find((p) => p.value === currentPresetId);
+    if (!oldPreset) return;
+
+    const updatedSettings = instrumental?.getPreset(
+      currentPresetId,
+      oldPreset.label
+    );
+    if (!updatedSettings) return;
+
+    const newPresetList = instPreset.map((p) =>
+      p.value === currentPresetId ? updatedSettings : p
+    );
+
+    setConfig({ sound: { instPreset: newPresetList } });
   };
 
   const handleDelete = () => {
     if (isDefaultPreset) return;
-
-    const confirmDelete = window.confirm("คุณต้องการลบ Preset นี้ใช่หรือไม่?");
+    const confirmDelete = window.confirm("ลบ Preset นี้?");
     if (!confirmDelete) return;
 
-    const currentId = parseInt(selectPreset, 10);
-    const newPresetList = instPreset.filter((p) => p.value !== currentId);
-
+    const newPresetList = instPreset.filter((p) => p.value !== currentPresetId);
     setConfig({ sound: { instPreset: newPresetList } });
-    handleReset();
+    handleLoadPreset("0");
   };
 
   useEffect(() => {
-    if (!nodes || nodes.length < DRUM_CHANNEL) return;
+    if (!nodes || nodes.length <= DRUM_CHANNEL) return;
     const drumNode = nodes[DRUM_CHANNEL];
 
     const handleProgramChange = (value: { value: number }) => {
@@ -119,54 +140,69 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
       <WinboxModal
         onClose={() => setOpen(false)}
         title="Mixer Controls"
-        height={290}
+        height={320}
         isOpen={open}
       >
-        <div className="flex gap-2 relative px-2 pt-2 items-center">
-          <div className="flex-1">
+        <div className="flex items-center gap-1 p-2 bg-gray-50 border-b h-[45px]">
+          <div className="flex-1 min-w-0 pr-1 pb-0.5">
             <SelectCommon
               value={selectPreset}
-              className="!text-xs w-full"
+              className="!text-[9px] w-full "
               options={[...presetOptions]}
               onChange={(e) => handleLoadPreset(e.target.value)}
             />
           </div>
 
-          {/* Logic ปุ่ม: ถ้าเลือก 0 แสดง Save, ถ้าเลือก Preset อื่น แสดง Delete */}
-          {isDefaultPreset ? (
-            <ButtonCommon
-              className="!p-1 !px-2 !text-xs !gap-1.5 rounded"
-              size="xs"
-              onClick={handleSave}
-              color="primary"
-              icon={<FaSave />}
-            >
-              Save
-            </ButtonCommon>
-          ) : (
-            <ButtonCommon
-              className="!p-1 !px-2 !text-xs !gap-1.5 rounded"
-              size="xs"
-              onClick={handleDelete}
-              color="danger"
-              icon={<FaTrash />}
-            >
-              Delete
-            </ButtonCommon>
-          )}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {!isDefaultPreset && (
+              <ButtonCommon
+                className="!p-1.5 !px-2 !text-xs rounded-md"
+                size="xs"
+                onClick={handleUpdate}
+                color="primary"
+                title="Save changes"
+              >
+                <FaSave />
+              </ButtonCommon>
+            )}
 
-          <ButtonCommon
-            className="!p-1 !px-2 !text-xs !gap-1.5 rounded"
-            size="xs"
-            color="gray"
-            onClick={handleReset}
-            icon={<FiRotateCcw />}
-          >
-            Reset
-          </ButtonCommon>
+            <ButtonCommon
+              className="!p-1.5 !px-2 !text-xs rounded-md"
+              size="xs"
+              onClick={handleCreateNew}
+              color="success"
+              title="Save as New"
+            >
+              <FaPlus />
+            </ButtonCommon>
+
+            {!isDefaultPreset && (
+              <ButtonCommon
+                className="!p-1.5 !px-2 !text-xs rounded-md"
+                size="xs"
+                onClick={handleDelete}
+                color="danger"
+                title="Delete"
+              >
+                <FaTrash />
+              </ButtonCommon>
+            )}
+
+            <div className="w-[1px] h-4 bg-gray-300 mx-0.5"></div>
+
+            <ButtonCommon
+              className="!p-1.5 !px-2 !text-xs rounded-md"
+              size="xs"
+              color="gray"
+              onClick={handleReset}
+              title="Reset"
+            >
+              <FiRotateCcw />
+            </ButtonCommon>
+          </div>
         </div>
 
-        <div className="overflow-auto w-full h-[calc(100%-40px)] p-1">
+        <div className="overflow-auto w-full h-[calc(100%-45px)] p-1">
           {instrumental && <MixerNodes instrumental={instrumental} />}
           <DrumProgramChange program={program} />
         </div>
