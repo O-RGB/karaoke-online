@@ -14,6 +14,10 @@ const deepMerge = (target: any, source: any): any => {
   if (typeof source !== "object" || source === null) {
     return source;
   }
+  if (Array.isArray(source)) {
+    return [...source];
+  }
+
   const output = { ...target };
   Object.keys(source).forEach((key) => {
     if (typeof source[key] === "object" && source[key] !== null) {
@@ -37,7 +41,6 @@ const useConfigStore = create<ConfigStoreProps>((set) => ({
         typeof configUpdate === "function"
           ? configUpdate(state.config)
           : deepMerge(state.config, configUpdate);
-
       if (typeof window !== "undefined") {
         localStorage.setItem("config", JSON.stringify(newConfig));
       }

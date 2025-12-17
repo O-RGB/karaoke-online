@@ -27,6 +27,7 @@ import {
   SYNTH_LEAD,
   SYNTH_PAD,
 } from "./types";
+import { InstrumentsPresets } from "@/features/config/types/config.type";
 
 export class InstrumentalsControl {
   public instrumentals: Map<InstsKeysMap, Instrumental> = new Map();
@@ -86,6 +87,41 @@ export class InstrumentalsControl {
       this.instrumentals.set(item.name, new Instrumental(item));
     }
   }
+
+  public loadConfig(instPreset: InstrumentsPresets[], index: number = 0) {
+    try {
+      const saved = instPreset[index];
+      const preset = saved.preset;
+      for (let i = 0; i < preset.length; i++) {
+        const set = preset[i];
+        const inst = this.instrumentals.get(set.key);
+        if (!inst) return;
+        inst.setGain(set.value);
+      }
+    } catch (error) {}
+  }
+
+  public getPreset(value: number, label: string): InstrumentsPresets {
+    let temp: InstrumentsPresets = {
+      label,
+      value,
+      preset: [],
+    };
+    const insts = Array.from(this.instrumentals.keys());
+    for (let i = 0; i < insts.length; i++) {
+      const key = insts[i];
+      const inst = this.instrumentals.get(key);
+      if (!inst) return temp;
+      const value = inst.gain?.value ?? 128;
+      temp.preset.push({
+        key,
+        value,
+      });
+    }
+    return temp;
+  }
+
+  public setPreset(value: number) {}
 
   public getInstrumentFamily(program: number): InstrumentFamilyName {
     switch (program) {
@@ -376,10 +412,6 @@ export class InstrumentalsControl {
     if (!inst) return event;
 
     const output = inst.noteOn(event);
-
-    if (key === "Tom") {
-      console.log("INPUT:" + event.velocity, " OUTPUT: " + output.velocity);
-    }
 
     return output;
   }

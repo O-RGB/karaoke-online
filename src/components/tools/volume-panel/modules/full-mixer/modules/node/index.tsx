@@ -10,7 +10,7 @@ interface MixerNodesProps {
 
 const MixerNodes: React.FC<MixerNodesProps> = ({ instrumental }) => {
   return (
-    <div className="flex pt-2 divide-x">
+    <div className="flex pt-2 divide-x w-full overflow-auto">
       <VolumeGainNode></VolumeGainNode>
       {INSTS_KEYS_MAP.map((value, index) => {
         const inst = instrumental.get(value);

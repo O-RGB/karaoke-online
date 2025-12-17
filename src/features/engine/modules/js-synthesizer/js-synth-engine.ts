@@ -125,14 +125,10 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.notesModifier.init();
 
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
-      // const analyser = audioContext.createAnalyser();
-      // analyser.fftSize = 256;
       const noteEvent = this.notesModifier.getNote(ch);
       this.nodes.push(
         new SynthChannel(ch, audioContext, noteEvent, systemConfig)
       );
-
-      // analysers.push(analyser);
     }
 
     this.timer.initWorker();
@@ -142,6 +138,7 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.noteOnChange();
     this.onPlay();
     this.onStop();
+    this.instrumentals.loadConfig(systemConfig?.sound?.instPreset ?? []);
 
     return { synth: synth, audio: this.audio };
   }

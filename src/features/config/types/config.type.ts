@@ -1,3 +1,4 @@
+import { InstsKeysMap } from "@/features/engine/modules/instrumentals-group/types";
 import { EngineType } from "@/features/engine/synth-store";
 import { TimingModeType } from "@/features/engine/types/synth.type";
 
@@ -54,10 +55,19 @@ export interface MixerConfig {
   program: number[];
   value: number;
 }
+
+export interface InstrumentsPresets {
+  value: number;
+  label: string;
+  preset: {
+    value: number;
+    key: InstsKeysMap;
+  }[];
+}
 export interface SoundSetting {
   soundFont: string;
   lockBase: number;
-  mixer: MixerConfig[];
+  instPreset: InstrumentsPresets[];
   equalizer: boolean;
 }
 

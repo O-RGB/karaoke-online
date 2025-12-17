@@ -33,10 +33,10 @@ export const useSynthesizerEngine = create<ISynthesizerEngine>((set, get) => ({
     //   console.info("[Spessa] Synth engine started...");
     //   return spessaSynth;
     // } else {
-      const jsSynth = new JsSynthEngine(setInstrument);
-      set({ engine: jsSynth, timer: jsSynth.timer, type });
-      console.info("[jsSynth] Synth engine started...");
-      return jsSynth;
+    const jsSynth = new JsSynthEngine(setInstrument, configs);
+    set({ engine: jsSynth, timer: jsSynth.timer, type });
+    console.info("[jsSynth] Synth engine started...");
+    return jsSynth;
     // }
   },
 

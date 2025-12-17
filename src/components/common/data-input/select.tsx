@@ -6,8 +6,8 @@ import {
   useInputFocus,
 } from "./base";
 
-interface SelectOption {
-  value: string;
+export interface SelectOption {
+  value: string | number;
   label: string;
   disabled?: boolean;
 }

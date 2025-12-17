@@ -125,7 +125,7 @@ const SectionPanel = ({
               e.stopPropagation();
               onReset();
             }}
-            className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-all opacity-0 group-hover:opacity-100"
+            className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-all"
             title="Reset Default"
           >
             <FiRotateCcw size={12} />

@@ -14,7 +14,7 @@ const DrumProgramChange: React.FC<DrumChangeProps> = ({ program = 100 }) => {
 
   return (
     <>
-      <div className="flex divide-x">
+      <div className="flex divide-x overflow-auto">
         {INSTRUMENT_DRUM.map((data, i) => {
           return (
             <React.Fragment key={`card-inst-${data}`}>
