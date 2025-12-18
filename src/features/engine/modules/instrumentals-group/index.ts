@@ -91,30 +91,42 @@ export class InstrumentalsControl {
 
   public loadConfig(instPreset: InstrumentsPresets[], targetId: number = 0) {
     try {
-      // แก้ไข: ใช้ .find เพื่อหา object ที่มี value ตรงกับ targetId
+      // 1. ค้นหา Preset ที่ต้องการ
       const saved = instPreset.find((p) => p.value === targetId);
 
-      // ถ้าไม่เจอให้ return หรือ fallback ไปใช้ default
-      if (!saved) {
-        console.warn(`Preset ID ${targetId} not found in config`);
+      // 2. [เพิ่มใหม่] ถ้าไม่เจอใน List แต่เป็น ID 0 (Default) ให้ Reset ค่ากลับเป็นค่าเริ่มต้น
+      if (!saved && targetId === 0) {
+        this.resetToFactory();
         return;
       }
 
-      const preset = saved.preset;
+      // 3. ถ้าไม่เจอ และไม่ใช่ ID 0 ก็จบการทำงาน
+      if (!saved) {
+        console.warn(`Preset ID ${targetId} not found`);
+        return;
+      }
 
-      // Logic เดิม
+      // 4. ถ้าเจอ ก็ Load ตามปกติ
+      const preset = saved.preset;
       for (let i = 0; i < preset.length; i++) {
         const set = preset[i];
         const inst = this.instrumentals.get(set.key);
-        if (!inst) continue; // ใช้ continue ดีกว่า return เพื่อให้ทำตัวถัดไปต่อได้ถ้าตัวนี้มีปัญหา
+        if (!inst) continue;
         inst.setGain(set.value);
         inst.setLock(set.lock);
         inst.setMute(set.mute);
       }
     } catch (error) {
-      // แก้ไข: ปริ้น error ออกมาดูตอน Production
       console.error("Error loading config:", error);
     }
+  }
+  private resetToFactory() {
+    this.instrumentals.forEach((inst) => {
+      inst.setGain(inst.defaultGain); // กลับไปเป็น 127
+      inst.setMute(false); // เลิก Mute
+      inst.setLock(false); // ปลด Lock
+      // inst.setSolo(false);         // (Optional) จะปลด Solo ด้วยก็ได้ถ้าต้องการ
+    });
   }
 
   public getPreset(value: number, label: string): InstrumentsPresets {
