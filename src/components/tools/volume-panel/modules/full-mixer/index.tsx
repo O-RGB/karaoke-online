@@ -59,12 +59,24 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
 
   const handleLoadPreset = (valueStr: string) => {
     const value = Number(valueStr);
-    instrumental?.loadConfig(instPreset, value);
+
+    // แก้ไข: เช็คตรงนี้เลย ถ้าเป็น 0 เรียก resetToFactory()
+    if (value === 0) {
+      instrumental?.resetToFactory();
+    } else {
+      instrumental?.loadConfig(instPreset, value);
+    }
+
     setSelectPreset(valueStr);
   };
 
   const handleReset = () => {
-    instrumental?.loadConfig(instPreset, currentPresetId);
+    // แก้ไข: เช็คตรงนี้ด้วยเพื่อความชัดเจน
+    if (currentPresetId === 0) {
+      instrumental?.resetToFactory();
+    } else {
+      instrumental?.loadConfig(instPreset, currentPresetId);
+    }
   };
 
   const executeCreate = () => {

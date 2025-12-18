@@ -120,12 +120,12 @@ export class InstrumentalsControl {
       console.error("Error loading config:", error);
     }
   }
-  private resetToFactory() {
+  public resetToFactory() {
     this.instrumentals.forEach((inst) => {
       inst.setGain(inst.defaultGain); // กลับไปเป็น 127
       inst.setMute(false); // เลิก Mute
       inst.setLock(false); // ปลด Lock
-      // inst.setSolo(false);         // (Optional) จะปลด Solo ด้วยก็ได้ถ้าต้องการ
+      inst.setSolo(false); // (Optional) จะปลด Solo ด้วยก็ได้ถ้าต้องการ
     });
   }
 
