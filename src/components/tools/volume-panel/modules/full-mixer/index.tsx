@@ -140,7 +140,7 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
       <WinboxModal
         onClose={() => setOpen(false)}
         title="Mixer Controls"
-        height={320}
+        height={330}
         isOpen={open}
       >
         <div className="flex items-center gap-1 p-2 bg-gray-50 border-b h-[45px]">

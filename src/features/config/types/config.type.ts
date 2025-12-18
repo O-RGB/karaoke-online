@@ -61,6 +61,8 @@ export interface InstrumentsPresets {
   label: string;
   preset: {
     value: number;
+    mute: boolean;
+    lock: boolean;
     key: InstsKeysMap;
   }[];
 }

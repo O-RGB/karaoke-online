@@ -97,6 +97,8 @@ export class InstrumentalsControl {
         const inst = this.instrumentals.get(set.key);
         if (!inst) return;
         inst.setGain(set.value);
+        inst.setLock(set.lock);
+        inst.setMute(set.mute);
       }
     } catch (error) {}
   }
@@ -113,9 +115,13 @@ export class InstrumentalsControl {
       const inst = this.instrumentals.get(key);
       if (!inst) return temp;
       const value = inst.gain?.value ?? 128;
+      const mute = inst.mute.value ?? false;
+      const lock = inst.lock.value ?? false;
       temp.preset.push({
         key,
         value,
+        mute,
+        lock,
       });
     }
     return temp;
