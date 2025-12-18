@@ -87,20 +87,34 @@ export class InstrumentalsControl {
       this.instrumentals.set(item.name, new Instrumental(item));
     }
   }
+  // features/engine/modules/instrumentals/control.ts (หรือไฟล์ class InstrumentalsControl)
 
-  public loadConfig(instPreset: InstrumentsPresets[], index: number = 0) {
+  public loadConfig(instPreset: InstrumentsPresets[], targetId: number = 0) {
     try {
-      const saved = instPreset[index];
+      // แก้ไข: ใช้ .find เพื่อหา object ที่มี value ตรงกับ targetId
+      const saved = instPreset.find((p) => p.value === targetId);
+
+      // ถ้าไม่เจอให้ return หรือ fallback ไปใช้ default
+      if (!saved) {
+        console.warn(`Preset ID ${targetId} not found in config`);
+        return;
+      }
+
       const preset = saved.preset;
+
+      // Logic เดิม
       for (let i = 0; i < preset.length; i++) {
         const set = preset[i];
         const inst = this.instrumentals.get(set.key);
-        if (!inst) return;
+        if (!inst) continue; // ใช้ continue ดีกว่า return เพื่อให้ทำตัวถัดไปต่อได้ถ้าตัวนี้มีปัญหา
         inst.setGain(set.value);
         inst.setLock(set.lock);
         inst.setMute(set.mute);
       }
-    } catch (error) {}
+    } catch (error) {
+      // แก้ไข: ปริ้น error ออกมาดูตอน Production
+      console.error("Error loading config:", error);
+    }
   }
 
   public getPreset(value: number, label: string): InstrumentsPresets {
