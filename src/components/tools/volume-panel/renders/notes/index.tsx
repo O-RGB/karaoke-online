@@ -6,6 +6,7 @@ interface NotesChannelRenderProps {
   noteModifier: NoteEventManager[];
   row: number;
   col: number;
+  stop?: boolean;
 }
 
 interface CellState {
@@ -17,6 +18,7 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
   noteModifier,
   row = 8,
   col = 8,
+  stop = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,7 +33,7 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
 
   const cellsRef = useRef<CellState[]>([]);
   const dirtyCellsRef = useRef<Set<number>>(new Set());
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | undefined>(undefined);
 
   const { total, notesPerCell } = useMemo(() => {
     const total = row * col;
@@ -39,6 +41,7 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
     return { total, notesPerCell };
   }, [row, col]);
 
+  /* ---------- init cells ---------- */
   useEffect(() => {
     cellsRef.current = new Array(total).fill(0).map(() => ({
       activeCount: 0,
@@ -46,6 +49,7 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
     }));
   }, [total]);
 
+  /* ---------- canvas resize ---------- */
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -61,19 +65,20 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
       canvas.height = rect.height * dpr;
 
       const ctx = canvas.getContext("2d", { alpha: true });
-      if (ctx) {
-        ctx.scale(dpr, dpr);
-        ctxRef.current = ctx;
+      if (!ctx) return;
 
-        dimensionsRef.current = {
-          width: rect.width,
-          height: rect.height,
-          cellWidth: rect.width / col,
-          cellHeight: rect.height / row,
-        };
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
 
-        drawAllCells();
-      }
+      ctxRef.current = ctx;
+      dimensionsRef.current = {
+        width: rect.width,
+        height: rect.height,
+        cellWidth: rect.width / col,
+        cellHeight: rect.height / row,
+      };
+
+      drawAllCells();
     };
 
     updateSize();
@@ -83,6 +88,7 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
     return () => observer.disconnect();
   }, [row, col]);
 
+  /* ---------- drawing ---------- */
   const drawCell = (i: number) => {
     const ctx = ctxRef.current;
     if (!ctx) return;
@@ -97,7 +103,6 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
     const y = r * cellHeight;
 
     const { activeCount, intensity } = cellsRef.current[i];
-
     const brightness = activeCount > 0 ? 0.5 : intensity * 0.25 + 0.1;
 
     ctx.clearRect(x, y, cellWidth, cellHeight);
@@ -121,7 +126,9 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
     }
   };
 
+  /* ---------- animation scheduler ---------- */
   const scheduleDraw = () => {
+    if (stop) return;
     if (rafRef.current) return;
 
     rafRef.current = requestAnimationFrame(() => {
@@ -140,18 +147,20 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
         }
       });
 
-      if (anyFade) scheduleDraw();
+      if (anyFade && !stop) scheduleDraw();
     });
   };
 
+  /* ---------- note mapping ---------- */
   const getCellIndexByNote = (midiNote: number) => {
     const i = Math.floor(midiNote / notesPerCell);
     return Math.min(i, total - 1);
   };
 
   const onNoteChange = (note: INoteChange) => {
-    const { midiNote, velocity } = note;
+    if (stop) return;
 
+    const { midiNote, velocity } = note;
     const cellIndex = getCellIndexByNote(midiNote);
     const cell = cellsRef.current[cellIndex];
     if (!cell) return;
@@ -167,6 +176,7 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
     scheduleDraw();
   };
 
+  /* ---------- bind note events ---------- */
   useEffect(() => {
     const id = `grid-${Date.now()}`;
 
@@ -176,9 +186,7 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
 
       noteNode.on(
         [keyIndex, "CHANGE"],
-        (event) => {
-          onNoteChange(event.value);
-        },
+        (event) => onNoteChange(event.value),
         id
       );
     });
@@ -188,7 +196,17 @@ const NotesChannelRender: React.FC<NotesChannelRenderProps> = ({
         manager.note?.off([keyIndex, "CHANGE"], id);
       });
     };
-  }, [noteModifier, notesPerCell, total]);
+  }, [noteModifier, notesPerCell, total, stop]);
+
+  /* ---------- stop handler ---------- */
+  useEffect(() => {
+    if (!stop) return;
+
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = undefined;
+    }
+  }, [stop]);
 
   return (
     <div ref={containerRef} className="w-full h-full">

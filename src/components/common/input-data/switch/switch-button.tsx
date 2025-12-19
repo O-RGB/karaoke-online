@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button, { ButtonColor } from "../../button/button";
 
 interface SwitchButtonProps {
@@ -9,6 +9,7 @@ interface SwitchButtonProps {
   colorClose?: ButtonColor;
   onChange?: (open: boolean) => void;
   className?: string;
+  disabled?: boolean; // ✅ เพิ่ม
 }
 
 const SwitchButton: React.FC<SwitchButtonProps> = ({
@@ -19,22 +20,29 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({
   colorClose,
   onChange,
   className,
+  disabled = false, // ✅ default
 }) => {
   const [open, setOpen] = useState<boolean>(true);
 
   const handleOnClick = () => {
-    let v = !open;
+    if (disabled) return;
+
+    const v = !open;
     setOpen(v);
     onChange?.(v);
   };
+
+  const disabledStyle = disabled ? "opacity-50 cursor-not-allowed" : "";
+
   return (
     <Button
+      disabled={disabled}
       blur={{
         border: true,
         backgroundColor: !open ? colorClose : "primary",
       }}
       onClick={handleOnClick}
-      className={className}
+      className={`${className ?? ""} ${disabledStyle}`}
       icon={iconClose && <span>{open ? iconOpen : iconClose}</span>}
     >
       {labelClose && (

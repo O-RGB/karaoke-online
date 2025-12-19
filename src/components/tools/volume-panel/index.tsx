@@ -28,6 +28,8 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   const engine = useSynthesizerEngine((state) => state.engine);
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
 
+  const [isYoutube, setIsYoutube] = useState<boolean>(false);
+
   const clientMaster = usePeerHostStore((state) => state.sendToMaster);
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
   const resetQueueingTimeout = useKeyboardStore(
@@ -91,8 +93,17 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
 
   useEffect(() => {
     engine?.sfPreset?.on(["SF_PRESET", "CHANGE"], 0, setPreset, componentId);
+    engine?.musicUpdated?.on(
+      ["MUSIC", "CHANGE"],
+      0,
+      (event) => {
+        setIsYoutube(event.musicType === "YOUTUBE");
+      },
+      componentId
+    );
     return () => {
       engine?.sfPreset?.off(["SF_PRESET", "CHANGE"], 0, componentId);
+      engine?.musicUpdated?.off(["MUSIC", "CHANGE"], 0, componentId);
     };
   }, [engine?.sfPreset]);
 
@@ -111,6 +122,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
     >
       {engine && (
         <VolumeOptions
+          isYoutube={isYoutube}
           onPitchChange={onPitchChange}
           onSpeedChange={onSpeedChange}
           onMutedVolume={onMutedVolume}
@@ -135,7 +147,10 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
                     } lg:h-[150px]`
               }`}
           >
-            <MainVolumeRender hide={!hideMixer}></MainVolumeRender>
+            <MainVolumeRender
+              stop={isYoutube}
+              hide={!hideMixer}
+            ></MainVolumeRender>
             <div
               className={`${grid} ${hideElement} ${animation} w-full h-full gap-y-9 lg:gap-y-0 gap-0.5 absolute -top-[3px]  left-0 p-2 py-[26px]`}
             >
@@ -148,6 +163,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
                     >
                       <div className="z-10 w-full absolute bottom-0 left-0 h-full">
                         <NotesChannelRender
+                          stop={isYoutube}
                           noteModifier={_.noteModifier}
                           row={16}
                           col={8}

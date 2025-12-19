@@ -12,6 +12,7 @@ interface NumberButtonProps {
   blur?: ButtonBlur | boolean;
   collapsible?: boolean;
   holdable?: boolean;
+  disabled?: boolean; // ✅ เพิ่ม
 }
 
 const NumberButton: React.FC<NumberButtonProps> = ({
@@ -27,6 +28,7 @@ const NumberButton: React.FC<NumberButtonProps> = ({
   },
   collapsible = false,
   holdable = false,
+  disabled = false, // ✅ default
 }) => {
   const [int, setInt] = useState<number>(value);
   const [expanded, setExpanded] = useState(false);
@@ -35,7 +37,7 @@ const NumberButton: React.FC<NumberButtonProps> = ({
   const holdInterval = useRef<NodeJS.Timeout | null>(null);
 
   const startCollapseTimer = () => {
-    if (!collapsible) return;
+    if (!collapsible || disabled) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       setExpanded(false);
@@ -43,6 +45,8 @@ const NumberButton: React.FC<NumberButtonProps> = ({
   };
 
   const handleStep = (type: "+" | "-") => {
+    if (disabled) return;
+
     const newValue = type === "+" ? int + 1 : int - 1;
     setInt(newValue);
     onChange?.(newValue);
@@ -50,7 +54,7 @@ const NumberButton: React.FC<NumberButtonProps> = ({
   };
 
   const startHold = (type: "+" | "-") => {
-    if (!holdable) return;
+    if (!holdable || disabled) return;
 
     handleStep(type);
 
@@ -67,7 +71,7 @@ const NumberButton: React.FC<NumberButtonProps> = ({
   };
 
   const handleExpand = () => {
-    if (!collapsible) return;
+    if (!collapsible || disabled) return;
     setExpanded(true);
     startCollapseTimer();
   };
@@ -80,8 +84,7 @@ const NumberButton: React.FC<NumberButtonProps> = ({
   };
 
   const resumeCollapse = () => {
-    if (!collapsible) return;
-    if (!expanded) return;
+    if (!collapsible || !expanded || disabled) return;
     startCollapseTimer();
   };
 
@@ -89,16 +92,27 @@ const NumberButton: React.FC<NumberButtonProps> = ({
     setInt(value);
   }, [value]);
 
+  useEffect(() => {
+    if (disabled) {
+      stopHold();
+      pauseCollapse();
+    }
+  }, [disabled]);
+
+  const disabledStyle = disabled
+    ? "opacity-50 cursor-not-allowed pointer-events-none"
+    : "";
+
   if (!collapsible) {
     return (
       <div
-        className={`blur-overlay border blur-border rounded-md flex items-center justify-center ${className}`}
+        className={`blur-overlay border blur-border rounded-md flex items-center justify-center ${className} ${disabledStyle}`}
       >
         <div className={`flex justify-center items-center ${color}`}>
           {icon}
           <div className="flex gap-2 items-center">
-            {/* Minus */}
             <Button
+              disabled={disabled}
               blur={blur}
               onMouseDown={() => startHold("-")}
               onMouseUp={stopHold}
@@ -106,17 +120,17 @@ const NumberButton: React.FC<NumberButtonProps> = ({
               onClick={() => !holdable && handleStep("-")}
               size="xs"
               className="!rounded-[4px] !p-2"
-              icon={<FaMinus className="font-light" />}
+              icon={<FaMinus />}
             />
 
-            <div className={`flex items-center justify-center gap-1 ${color}`}>
-              <span className="-mt-0.5">
+            <div className="flex items-center gap-1">
+              <span>
                 {int} {suffix}
               </span>
             </div>
 
-            {/* Plus */}
             <Button
+              disabled={disabled}
               blur={blur}
               onMouseDown={() => startHold("+")}
               onMouseUp={stopHold}
@@ -124,7 +138,7 @@ const NumberButton: React.FC<NumberButtonProps> = ({
               onClick={() => !holdable && handleStep("+")}
               size="xs"
               className="!rounded-[4px] !p-2"
-              icon={<FaPlus className="font-light" />}
+              icon={<FaPlus />}
             />
           </div>
         </div>
@@ -136,32 +150,30 @@ const NumberButton: React.FC<NumberButtonProps> = ({
     <div
       onMouseEnter={pauseCollapse}
       onMouseLeave={resumeCollapse}
-      className={`blur-overlay border blur-border rounded-md flex items-center justify-center ${className}`}
+      className={`blur-overlay border blur-border rounded-md flex items-center justify-center ${className} ${disabledStyle}`}
     >
       <div className={`flex items-center ${color}`}>
-        {/* Icon-only (collapsed) */}
         {!expanded && (
           <Button
+            disabled={disabled}
             onClick={handleExpand}
             blur={blur}
             size="xs"
             icon={icon}
             className="!rounded-[4px] !p-2"
-          ></Button>
+          />
         )}
 
-        {/* Expanded */}
         <div
           className={`
-            flex items-center
-            transition-all duration-300 overflow-hidden
+            flex items-center transition-all duration-300 overflow-hidden
             ${expanded ? "max-w-36" : "max-w-0"}
           `}
         >
           <div className="p-2">{icon}</div>
 
-          {/* Minus */}
           <Button
+            disabled={disabled}
             blur={blur}
             onMouseDown={() => startHold("-")}
             onMouseUp={stopHold}
@@ -169,18 +181,16 @@ const NumberButton: React.FC<NumberButtonProps> = ({
             onClick={() => !holdable && handleStep("-")}
             size="xs"
             className="!rounded-[4px] !p-2"
-            icon={<FaMinus className="font-light" />}
+            icon={<FaMinus />}
           />
 
-          <div className="-mt-0.5 whitespace-nowrap px-1">
-            <span>
-              {int}
-              {suffix}
-            </span>
+          <div className="px-1 whitespace-nowrap">
+            {int}
+            {suffix}
           </div>
 
-          {/* Plus */}
           <Button
+            disabled={disabled}
             blur={blur}
             onMouseDown={() => startHold("+")}
             onMouseUp={stopHold}
@@ -188,7 +198,7 @@ const NumberButton: React.FC<NumberButtonProps> = ({
             onClick={() => !holdable && handleStep("+")}
             size="xs"
             className="!rounded-[4px] !p-2"
-            icon={<FaPlus className="font-light" />}
+            icon={<FaPlus />}
           />
         </div>
       </div>

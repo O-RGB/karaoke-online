@@ -29,6 +29,7 @@ interface VolumeOptionsProps {
   setNotification: (notification: INotificationValue) => void;
   vocal: number;
   nodes?: SynthChannel[];
+  isYoutube?: boolean;
 }
 
 const VolumeOptions: React.FC<VolumeOptionsProps> = ({
@@ -39,6 +40,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   setNotification,
   vocal,
   nodes,
+  isYoutube = false,
 }) => {
   const componnetId = useId();
   const engine = useSynthesizerEngine((state) => state.engine);
@@ -55,6 +57,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   return (
     <div className="flex gap-2">
       <NumberButton
+        disabled={isYoutube}
         holdable
         collapsible
         onChange={(value) => {
@@ -69,6 +72,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
       ></NumberButton>
 
       <NumberButton
+        disabled={isYoutube}
         collapsible
         holdable
         onChange={(value) => {
@@ -82,6 +86,7 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
       ></NumberButton>
 
       <SwitchButton
+        disabled={isYoutube}
         className="!rounded-[4px] !p-2"
         onChange={(muted) => {
           onMutedVolume({

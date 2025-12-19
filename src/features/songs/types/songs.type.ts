@@ -47,7 +47,7 @@ export interface ITrackFlags {
   _matchedTerms?: string[];
   _priority?: number;
   _selectBy?: ITrackDataSelectBy;
-  _bufferFile?: MusicLoadAllData;
+  _bufferFile?: File;
 }
 
 export interface ITrackData extends ITrackFlags, SongInfo {

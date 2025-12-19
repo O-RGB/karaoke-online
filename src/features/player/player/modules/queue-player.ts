@@ -3,15 +3,18 @@ import { QueuePlayerProps } from "../types/player.type";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import {
   ITrackData,
+  KaraokeExtension,
   MusicLoadAllData,
 } from "@/features/songs/types/songs.type";
 import useSongsStore from "@/features/songs/store/songs.store";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
+import { musicProcessGroup } from "@/lib/karaoke/read";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   loading: false,
   queue: [],
   addQueue: async (value) => {
+    console.log("REMOTE YOUTUBE: ", value);
     const player = useSynthesizerEngine.getState().engine?.player;
     let queue = [...get().queue];
     set({ queue: [] });
@@ -83,8 +86,10 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
         console.error("Songs Manager Not Found!!");
         return;
       }
-    } else {
-      song = music._bufferFile;
+    } else if (music._bufferFile) {
+      let karaokeExtension: KaraokeExtension = {};
+      karaokeExtension.ykr = music._bufferFile;
+      song = await musicProcessGroup(karaokeExtension);
       set({ loading: false });
     }
 
@@ -109,8 +114,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     //   //   musicInfo: music,
     //   // });
     // }, 500);
-
-    client(null, "system/music-info", song.trackData);
+    if (song) client(null, "system/music-info", song.trackData);
   },
 }));
 

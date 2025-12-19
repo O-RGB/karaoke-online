@@ -77,8 +77,10 @@ export const remoteRoutes = () => {
     }
 
     const readed = await musicProcessGroup(karaokeExtension);
+
+    console.log("REMOTE YOUTUBE: ", readed);
     readed.files = karaokeExtension;
-    readed.trackData._bufferFile = readed;
+    readed.trackData._bufferFile = newFile;
     addQueue(readed.trackData);
   });
 

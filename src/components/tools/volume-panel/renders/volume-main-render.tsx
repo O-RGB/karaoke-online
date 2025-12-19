@@ -3,6 +3,7 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 
 interface MainVolumeRenderProps {
   hide: boolean;
+  stop?: boolean;
 }
 
 const DB_MARKS = [-30, -18, -12, -6, -3, 0];
@@ -13,9 +14,11 @@ const percentToDb = (percent: number): number => {
   return Math.round(20 * Math.log10(percent / 100));
 };
 
-const MainVolumeRender: React.FC<MainVolumeRenderProps> = ({ hide }) => {
+const MainVolumeRender: React.FC<MainVolumeRenderProps> = ({
+  hide,
+  stop = false,
+}) => {
   const engine = useSynthesizerEngine((state) => state.engine);
-  const componentId = useId();
 
   const barRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -27,7 +30,14 @@ const MainVolumeRender: React.FC<MainVolumeRenderProps> = ({ hide }) => {
   const lastValueRef = useRef<number>(-1);
 
   useEffect(() => {
-    if (!engine) return;
+    if (!engine || stop) {
+      // ถ้า stop = true หรือ engine หาย → หยุด animation ทันที
+      if (animRef.current) {
+        cancelAnimationFrame(animRef.current);
+        animRef.current = 0;
+      }
+      return;
+    }
 
     const animate = () => {
       const v = engine.globalEqualizer?.getVolumeLevel() ?? 0;
@@ -42,8 +52,13 @@ const MainVolumeRender: React.FC<MainVolumeRenderProps> = ({ hide }) => {
 
     animRef.current = requestAnimationFrame(animate);
 
-    return () => cancelAnimationFrame(animRef.current);
-  }, [engine]);
+    return () => {
+      if (animRef.current) {
+        cancelAnimationFrame(animRef.current);
+        animRef.current = 0;
+      }
+    };
+  }, [engine, stop]);
 
   if (hide) return null;
 

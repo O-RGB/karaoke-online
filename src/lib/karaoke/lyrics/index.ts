@@ -13,7 +13,6 @@ import { ParsedSongData } from "../songs/shared/types";
 import { LyricWordData, MusicMode } from "../songs/types";
 import { ArrayRange } from "../songs/utils/arrayrange";
 import { ISentence } from "./types";
-import { groupWordDataToEvents } from "./xml-event/convert";
 
 export const curToArrayRange = (
   lyrics: string[],
