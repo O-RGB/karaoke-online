@@ -50,7 +50,7 @@ interface FileTransfer {
   chunkIds: number[];
 }
 
-// [Updated] เพิ่ม waitForResponse
+// [Updated] เพิ่ม waitForResponse เพื่อเลือกได้ว่าจะรอคำตอบหรือไม่
 interface RequestOptions {
   timeout?: number;
   role?: UserRole;
@@ -209,7 +209,7 @@ const setupHostConnectionHandlers = (
       return;
     }
 
-    // 5. Handle Incoming Requests (Routes) - Expects RESPONSE
+    // 5. Handle Incoming Requests (Routes) - แบบปกติ (มีการตอบกลับ RESPONSE)
     if (data?.type === "REQUEST" && data.requestId) {
       try {
         const { route, payload } = data.payload;
@@ -236,13 +236,15 @@ const setupHostConnectionHandlers = (
       return;
     }
 
-    // 6. Handle Incoming Events (One-way Routes) - No RESPONSE
+    // [Added] 6. Handle Incoming Events (One-way Routes) - แบบ Route เร็ว (ไม่ต้องตอบกลับ)
+    // ส่วนนี้จะทำให้ sendToMaster ทำงานได้เหมือน Route ปกติ แต่เร็วขึ้นมาก
     if (data?.type === "EVENT") {
       try {
         const { route, payload } = data.payload;
         const handler = get().routes[route];
 
         if (handler) {
+          // เรียกใช้งาน Handler เดิมที่มีอยู่แล้ว
           handler(payload, conn.peer, userType);
         }
       } catch (e: any) {
@@ -299,7 +301,7 @@ const setupHostConnectionHandlers = (
       const newClientRoles = { ...state.clientRoles };
       delete newClientRoles[conn.peer];
 
-      // ลบออกจาก Master List
+      // [Added] ลบออกจาก Master List เมื่อ Connection ปิด
       const newMasterConnections = state.masterConnections.filter(
         (c) => c.peer !== conn.peer
       );
@@ -378,6 +380,7 @@ export interface PeerHostState {
   clientNicknames: { [peerId: string]: string };
   clientRoles: { [peerId: string]: UserRole };
 
+  // [Added] Array เก็บ Connection ของ Master (เพื่อความเร็วในการส่ง)
   masterConnections: DataConnection[];
 
   heartbeatIntervalId: NodeJS.Timeout | null;
@@ -413,6 +416,7 @@ export interface PeerHostState {
   initializePeer: (userType: UserType) => Promise<string>;
   sendMessage: (info: RemoteSendMessage) => Promise<void>;
 
+  // [Modified] ส่งหา Master โดยระบุ Route ได้ (ทำงานเร็ว ไม่รอ response)
   sendToMaster: (route: string, payload: any) => void;
 
   sendMessageWithResponse: <T = any>(
@@ -470,7 +474,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
   lastSeen: {},
   clientNicknames: {},
   clientRoles: {},
-  masterConnections: [],
+  masterConnections: [], // เริ่มต้นเป็น array ว่าง
   heartbeatIntervalId: null,
   remoteStreams: {},
   calls: {},
@@ -596,11 +600,12 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
     }
   },
 
+  // [Modified] sendToMaster แบบระบุ Route (ใช้ type "EVENT" เพื่อประสิทธิภาพ)
   sendToMaster: (route: string, payload: any) => {
     const { masterConnections } = get();
     masterConnections.forEach((conn) => {
       if (conn.open) {
-        try {
+        try { 
           conn.send({
             type: "EVENT",
             payload: { route, payload },
@@ -711,6 +716,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
         .flat()
         .find((c) => c.peer === peerId);
 
+      // จัดการ Master List (เพิ่ม/ลบ)
       if (role === "master") {
         if (
           targetConn &&
@@ -826,7 +832,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
     }
   },
 
-  // [Modified] Update requestToClient to support waitForResponse
+  // [Modified] requestToClient เพิ่ม options.waitForResponse
   requestToClient: <T = any>(
     clientId: string | null,
     route: string,
@@ -834,7 +840,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
     options: RequestOptions = {}
   ): Promise<T> => {
     const { connections, pendingRequests, clientRoles } = get();
-    // Default waitForResponse = true to keep old behavior
+    // Default waitForResponse = true (เพื่อให้ทำงานเหมือนเดิมถ้าไม่ระบุ)
     const { timeout = 10000, role, waitForResponse = true } = options;
 
     if (clientId) {
@@ -847,9 +853,8 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
           return reject(new Error(`Client with ID ${clientId} not found.`));
         }
 
-        // [Logic] If not waiting for response
+        // [Logic] ถ้าไม่รอ Response ให้ส่งเป็น EVENT แล้วจบเลย
         if (!waitForResponse) {
-          // Send as EVENT
           conn.send({
             type: "EVENT",
             payload: { route, payload },
@@ -857,7 +862,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
           return resolve({} as T);
         }
 
-        // [Logic] If waiting for response (Existing logic)
+        // [Logic] ถ้ารอ Response (Logic เดิม)
         const requestId = crypto.randomUUID();
         const timeoutId = setTimeout(() => {
           pendingRequests.delete(requestId);
@@ -890,6 +895,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
       });
     }
 
+    // กรณี Broadcast (ส่งหลายคน)
     return new Promise<T>((resolve, reject) => {
       let targets: DataConnection[];
       const allConnections = Object.values(connections).flat();
@@ -899,7 +905,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
           (conn) => clientRoles[conn.peer] === role
         );
         if (targets.length === 0) {
-          // If expecting response, reject. If not, just resolve.
+          // ถ้าไม่รอ Response ไม่ต้อง Error ว่าหาไม่เจอ ก็แค่ข้ามไป
           if (waitForResponse) {
             return reject(
               new Error(`No clients found with role '${role}' to request.`)
@@ -920,7 +926,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
         }
       }
 
-      // [Logic] If not waiting for response (Broadcast)
+      // [Logic] ถ้าไม่รอ Response (Broadcast แบบ Fire-and-Forget)
       if (!waitForResponse) {
         targets.forEach((conn) => {
           if (conn.open) {
@@ -933,7 +939,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
         return resolve({} as T);
       }
 
-      // [Logic] If waiting for response (Broadcast)
+      // [Logic] ถ้ารอ Response (Broadcast แล้วรอทุกคนตอบ)
       let hasSettled = false;
       const requestIds: string[] = [];
       let timeoutCount = 0;
