@@ -33,6 +33,7 @@ import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 import { NotesModifierManager } from "../notes-modifier-manager";
 import { InstrumentalsControl } from "../instrumentals-group";
 import { SynthControl } from "../instrumentals/node";
+import { PeerHostState } from "@/features/remote/store/peer-js-store";
 
 export class JsSynthEngine implements BaseSynthEngine {
   public time: TimingModeType = "Tick";
@@ -49,6 +50,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   public nodes: SynthChannel[] = [];
 
   public timer: TimerWorker | undefined = undefined;
+  public sfPreset = new EventEmitter<"SF_PRESET", IPersetSoundfont[]>();
   public timerUpdated = new EventEmitter<"TIMING", number>();
   public tempoUpdated = new EventEmitter<"TEMPO", number>();
   public speedUpdated = new EventEmitter<"SPEED", number>();
@@ -78,16 +80,17 @@ export class JsSynthEngine implements BaseSynthEngine {
   private recorderDestination: MediaStreamAudioDestinationNode | null = null;
   private synthAudioNode: AudioNode | null = null;
 
-  private setInstrument: ((instrument: IPersetSoundfont[]) => void) | undefined;
+  // private setInstrument: ((instrument: IPersetSoundfont[]) => void) | undefined;
   constructor(
-    setInstrument?: (instrument: IPersetSoundfont[]) => void,
-    systemConfig?: Partial<ConfigSystem>
+    configs: Partial<ConfigSystem>,
+    peerHost: PeerHostState
+    // setInstrument?: (instrument: IPersetSoundfont[]) => void
   ) {
-    this.setInstrument = setInstrument;
-    this.startup(systemConfig);
+    // this.setInstrument = setInstrument;
+    this.startup(configs, peerHost);
   }
 
-  async startup(systemConfig?: Partial<ConfigSystem>) {
+  async startup(configs: Partial<ConfigSystem>, peerHost: PeerHostState) {
     const contextOptions: AudioContextOptions = {
       latencyHint: "playback",
     };
@@ -96,16 +99,17 @@ export class JsSynthEngine implements BaseSynthEngine {
     const synth = new Synthesizer();
 
     synth.init(audioContext.sampleRate);
-    this.loadDefaultSoundFont();
 
     this.synth = synth;
     this.audio = audioContext;
 
-    this.player = new JsSynthPlayerEngine(synth, this);
+    this.player = new JsSynthPlayerEngine(synth, this, peerHost);
     this.timer = new TimerWorker(this.player);
 
     this.synth.setGain(0.3);
     this.nodes = [];
+
+    this.loadDefaultSoundFont();
 
     this.synthAudioNode = synth.createAudioNode(audioContext, 8192);
 
@@ -126,9 +130,7 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
       const noteEvent = this.notesModifier.getNote(ch);
-      this.nodes.push(
-        new SynthChannel(ch, audioContext, noteEvent, systemConfig)
-      );
+      this.nodes.push(new SynthChannel(ch, audioContext, noteEvent, configs));
     }
 
     this.timer.initWorker();
@@ -138,17 +140,19 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.noteOnChange();
     this.onPlay();
     this.onStop();
-    this.instrumentals.loadConfig(systemConfig?.sound?.instPreset ?? []);
+    this.instrumentals.loadConfig(configs?.sound?.instPreset ?? []);
 
     return { synth: synth, audio: this.audio };
   }
 
-  async loadPresetSoundFont(sfId?: number) {
-    if (!sfId || !this.synth) {
+  async loadPresetSoundFont(sfId: number) {
+    if (!this.synth) {
+      console.error("can't loadPresetSoundFont", this.synth);
       return;
     }
 
     const preset = this.synth.getSFontObject(sfId);
+
     if (preset) {
       const list = preset.getPresetIterable();
       const presetList = Array.from(list);
@@ -158,7 +162,15 @@ export class JsSynthEngine implements BaseSynthEngine {
         presetName: data.name,
         program: data.num,
       }));
-      this.setInstrument?.(instrument);
+
+      if (instrument.length === 0) {
+        console.error("instrument is []");
+      } else {
+        console.log(["SF_PRESET", "CHANGE"], instrument);
+        this.sfPreset.emit(["SF_PRESET", "CHANGE"], 0, instrument);
+      }
+    } else {
+      console.error("preset is null");
     }
   }
 

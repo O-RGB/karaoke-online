@@ -1,10 +1,11 @@
 import { Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { Synthetizer as Spessasynth } from "spessasynth_lib";
 import { SynthChannel } from "../modules/instrumentals/channel";
-import { InstrumentalNode } from "../modules/instrumentals/instrumental";
-import { BassConfig } from "../modules/instrumentals/config";
 import { GlobalEqualizer } from "../modules/equalizer/global-equalizer";
-import { SoundSystemMode } from "@/features/config/types/config.type";
+import {
+  ConfigSystem,
+  SoundSystemMode,
+} from "@/features/config/types/config.type";
 import { TimerWorker } from "../modules/timer";
 import { EventEmitter } from "../modules/instrumentals/events";
 import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
@@ -12,6 +13,7 @@ import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 import { NotesModifierManager } from "../modules/notes-modifier-manager";
 import { InstrumentalsControl } from "../modules/instrumentals-group";
 import { SynthControl } from "../modules/instrumentals/node";
+import { PeerHostState } from "@/features/remote/store/peer-js-store";
 
 export type TimingModeType = "Tick" | "Time";
 export type PlayerStatusType = "PLAY" | "STOP" | "PAUSE";
@@ -26,6 +28,7 @@ export interface BaseSynthEngine {
   // instrumental: InstrumentalNode | undefined;
 
   timer?: TimerWorker | undefined;
+  sfPreset: EventEmitter<"SF_PRESET", IPersetSoundfont[]>;
   timerUpdated: EventEmitter<"TIMING", number>;
   tempoUpdated: EventEmitter<"TEMPO", number>;
   speedUpdated: EventEmitter<"SPEED", number>;
@@ -41,8 +44,11 @@ export interface BaseSynthEngine {
   notesModifier: NotesModifierManager;
   instrumentals: InstrumentalsControl;
 
-  startup(): Promise<{ synth: any; audio?: AudioContext }>;
-  startup(): void;
+  startup(
+    configs: Partial<ConfigSystem>,
+    peerHost: PeerHostState
+  ): Promise<{ synth: any; audio?: AudioContext }>;
+
   unintsall(): Promise<void>;
   setSoundFont(file: File, from: SoundSystemMode): void;
 

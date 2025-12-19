@@ -6,7 +6,7 @@ import useKeyboardStore from "@/features/keyboard-state";
 import useMixerStoreNew from "@/features/player/event-player/modules/event-mixer-store";
 import VolumeOptions from "./modules/options-button/volume-pitch";
 import ChannelRender from "./modules/channel";
-import React, { useEffect } from "react";
+import React, { useEffect, useId, useState } from "react";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import {
@@ -17,36 +17,39 @@ import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/zoom.css";
 import { IoMdArrowDropup } from "react-icons/io";
 import NotesChannelRender from "./renders/notes";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 interface VolumePanelProps {}
 
 const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   const VOCAL_CHANNEL = 8;
 
+  const componentId = useId();
   const engine = useSynthesizerEngine((state) => state.engine);
-
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
 
+  const client = usePeerHostStore((state) => state.requestToClient);
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
   const resetQueueingTimeout = useKeyboardStore(
     (state) => state.resetQueueingTimeout
   );
-  const instrument = useMixerStoreNew((state) => state.instrument);
 
+  const [preset, setPreset] = useState<IPersetSoundfont[]>([]);
   const { orientation } = useOrientation();
   const setNotification = useNotificationStore(
     (state) => state.setNotification
   );
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
   const setHideMixer = useMixerStoreNew((state) => state.setHideMixer);
-  const updatePitch = useMixerStoreNew((state) => state.updatePitch);
 
   const onPitchChange = (value: number) => {
-    updatePitch(null, value);
+    engine?.updatePitch(null, value);
+    client(null, "system/vocal", { vocal: value }, { role: "master" });
   };
 
   const onSpeedChange = (value: number) => {
     engine?.updateSpeed?.(value);
+    client(null, "system/speed", { speed: value }, { role: "master" });
   };
 
   const onLockChange = (event: IControllerChange<boolean>) => {
@@ -85,6 +88,13 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
     "grid grid-cols-8 lg:grid-cols-none grid-flow-row lg:grid-flow-col";
   const hideElement = `${hideMixer ? "opacity-0" : "opacity-100"}`;
   const animation = `duration-300 transition-all`;
+
+  useEffect(() => {
+    engine?.sfPreset?.on(["SF_PRESET", "CHANGE"], 0, setPreset, componentId);
+    return () => {
+      engine?.sfPreset?.off(["SF_PRESET", "CHANGE"], 0, componentId);
+    };
+  }, [engine?.sfPreset]);
 
   if (!engine) return <></>;
   if (!engine?.nodes) return <></>;
@@ -167,7 +177,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
                         channel={ch}
                         onProgramChange={onPersetChange}
                         onChange={onControllerChange}
-                        perset={instrument}
+                        perset={preset}
                       ></ChannelRender>
                     </div>
                   );

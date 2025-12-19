@@ -3,6 +3,7 @@ import SliderCommon from "@/components/common/input-data/slider";
 import { lowercaseToReadable } from "@/lib/general";
 import { Instrumental } from "@/features/engine/modules/instrumentals-group/inst";
 import { InstsKeysMap } from "@/features/engine/modules/instrumentals-group/types";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 interface InstrumentalVolumeNodeProps {
   indexKey: number;
@@ -15,6 +16,7 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
   type,
   instrumental,
 }) => {
+  const client = usePeerHostStore((state) => state.requestToClient);
   const componentId = useId();
 
   const [gain, setGain] = useState<number>(
@@ -86,18 +88,42 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
 
   const onValueChange = (value: number) => {
     instrumental.setGain(value);
+    client(
+      null,
+      "system/instrumental",
+      { gain: value, key: type },
+      { role: "master" }
+    );
   };
 
   const toggleMute = () => {
     instrumental.setMute(!isMuted);
+    client(
+      null,
+      "system/instrumental",
+      { mute: !isMuted, key: type },
+      { role: "master" }
+    );
   };
 
   const toggleSolo = () => {
     instrumental.setSolo(!isSolo);
+    client(
+      null,
+      "system/instrumental",
+      { solo: !isSolo, key: type },
+      { role: "master" }
+    );
   };
 
   const toggleLock = () => {
     instrumental.setLock(!isLocked);
+    client(
+      null,
+      "system/instrumental",
+      { lock: !isLocked, key: type },
+      { role: "master" }
+    );
   };
 
   useEffect(() => {

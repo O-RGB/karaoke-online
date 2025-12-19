@@ -8,12 +8,10 @@ export interface InstrumentalType {
 }
 
 export class Instrumental {
-  // Static Counter เพื่อนับจำนวน Solo
   private static totalSoloCount = 0;
 
   public inst: SynthControl<InstsKeysMap, INoteChange> | undefined = undefined;
 
-  // เปลี่ยน Gain และ Status ต่างๆ เป็น SynthControl ทั้งหมด
   public gain: SynthControl<"GAIN", number>;
   public mute: SynthControl<"MUTE", boolean>;
   public solo: SynthControl<"SOLO", boolean>;
@@ -22,14 +20,12 @@ export class Instrumental {
   public defaultGain = 127;
 
   constructor(value: InstrumentalType) {
-    // Main Instrument Node
     this.inst = new SynthControl(undefined, value.name, 0, {
       channel: 0,
       midiNote: 0,
       velocity: 0,
     });
 
-    // Controls
     this.gain = new SynthControl(undefined, "GAIN", 0, this.defaultGain);
     this.mute = new SynthControl(undefined, "MUTE", 0, false);
     this.solo = new SynthControl(undefined, "SOLO", 0, false);
@@ -42,7 +38,6 @@ export class Instrumental {
   }
 
   public setMute(mute: boolean) {
-    // set value แล้ว event จะถูกยิงออกไปเอง
     this.mute.setValue(mute);
   }
 
@@ -51,7 +46,6 @@ export class Instrumental {
   }
 
   public setSolo(solo: boolean) {
-    // ต้องเช็คก่อนค่าเปลี่ยน เพื่อจัดการ Static Counter
     const currentSolo = this.solo.value;
     if (currentSolo === solo) return;
 
@@ -65,20 +59,17 @@ export class Instrumental {
   }
 
   public noteOn(note: INoteChange): INoteChange {
-    // ดึงค่าจาก SynthControl.value
     const isMuted = this.mute.value;
     const isSolo = this.solo.value;
     const isLocked = this.lock.value;
     const gain = this.gain.value ?? this.defaultGain;
 
-    // 1. Mute Logic
     if (isMuted) {
       const mutedNote = { ...note, velocity: 0 };
       this.inst?.setValue(mutedNote);
       return mutedNote;
     }
 
-    // 2. Solo Logic (Global check)
     if (Instrumental.totalSoloCount > 0 && !isSolo) {
       const mutedNote = { ...note, velocity: 0 };
       this.inst?.setValue(mutedNote);
@@ -87,7 +78,6 @@ export class Instrumental {
 
     let finalVelocity = 0;
 
-    // 3. Lock / Curve Logic
     if (isLocked) {
       finalVelocity = note.velocity === 0 ? 0 : gain;
     } else {
@@ -114,7 +104,6 @@ export class Instrumental {
     return note;
   }
 
-  // Helper สำหรับโหลด Preset ถ้าจำเป็นต้องโหลดสถานะ M/S/L ด้วย
   public loadState(gain: number, mute: boolean, solo: boolean, lock: boolean) {
     this.setGain(gain);
     this.setMute(mute);

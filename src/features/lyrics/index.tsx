@@ -122,11 +122,13 @@ const LyricsPlayer: React.FC<LyricsPlayerProps> = ({ className }) => {
           tick={isTopActive ? tick : 0}
           sentence={topSentence}
           textStyle={textStyle}
+          id="top"
         />
         <LyricsList
           tick={isBottomActive ? tick : 0}
           sentence={bottomSentence}
           textStyle={textStyle}
+          id="bottom"
         />
       </div>
     </div>

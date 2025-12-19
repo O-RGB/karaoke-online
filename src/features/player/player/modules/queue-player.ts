@@ -6,6 +6,7 @@ import {
   MusicLoadAllData,
 } from "@/features/songs/types/songs.type";
 import useSongsStore from "@/features/songs/store/songs.store";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   loading: false,
@@ -48,6 +49,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
 
   playMusic: async (index) => {
     const player = useSynthesizerEngine.getState().engine?.player;
+    const client = usePeerHostStore.getState().requestToClient;
 
     if (!player) {
       console.error("Player Not Working!!");
@@ -107,6 +109,8 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     //   //   musicInfo: music,
     //   // });
     // }, 500);
+
+    client(null, "system/music-info", song.trackData);
   },
 }));
 

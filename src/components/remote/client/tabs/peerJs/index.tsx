@@ -2,14 +2,21 @@ import { IAlertCommon } from "@/components/common/alert/types/alert.type";
 import React, { useEffect, useState } from "react";
 import Button from "@/components/common/button/button";
 import Label from "@/components/common/display/label";
-import { remoteHost } from "@/config/value";
+import { CHANNEL_DEFAULT, remoteHost } from "@/config/value";
 import { remoteRoutes } from "@/features/remote/routes";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
+import { UserRole } from "@/features/remote/types/remote.type";
 import { useQRCode } from "next-qrcode";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { FaUserCircle } from "react-icons/fa";
 import { FiCheck, FiCopy } from "react-icons/fi";
-import { RiRemoteControlFill } from "react-icons/ri";
+import {
+  RiRemoteControlFill,
+  RiVipCrownFill,
+  RiSmartphoneLine,
+} from "react-icons/ri";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import useQueuePlayer from "@/features/player/player/modules/queue-player";
+import useConfigStore from "@/features/config/config-store";
 
 interface PeerJsClientStartupProps extends IAlertCommon {
   title?: string;
@@ -31,8 +38,17 @@ const PeerJsClientStartup: React.FC<PeerJsClientStartupProps> = ({
   className = "",
   setAlert,
 }) => {
-  const { initializePeer, peers, connections, clientNicknames } =
-    usePeerHostStore();
+  const {
+    initializePeer,
+    peers,
+    connections,
+    clientNicknames,
+    clientRoles,
+    setClientRole,
+    requestToClient,
+  } = usePeerHostStore();
+
+  const engine = useSynthesizerEngine((state) => state.engine);
 
   const [hostUrl, setHostUrl] = useState<string>();
   const [hostId, setHostId] = useState<string>();
@@ -66,6 +82,39 @@ const PeerJsClientStartup: React.FC<PeerJsClientStartupProps> = ({
       navigator.clipboard.writeText(fullRemoteUrl);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
+
+  const handleToggleRole = (peerId: string, currentRole: UserRole) => {
+    const newRole: UserRole = currentRole === "master" ? "user" : "master";
+    setClientRole(peerId, newRole);
+
+    if (newRole === "master") {
+      const queue = useQueuePlayer.getState().queue;
+      const instPreset = useConfigStore.getState().config.sound?.instPreset;
+      const nodes = engine?.nodes ?? [];
+      const gain = engine?.gain.value ?? 30;
+      const eqs = engine?.globalEqualizer?.getEQValues() ?? [];
+      const preset = engine?.instrumentals.getGains();
+      const programs: number[] = [];
+      for (let ch = 0; ch < CHANNEL_DEFAULT.length; ch++) {
+        programs.push(nodes[ch].program?.value ?? 0);
+      }
+      requestToClient(peerId, "system/master", {
+        role: newRole,
+      });
+      requestToClient(peerId, "system/status", {
+        programs,
+        gain,
+        queue,
+        instPreset,
+        preset,
+        eqs,
+      });
+      requestToClient(peerId, "system/eq", {
+        eq: eqs,
+      });
+      requestToClient(peerId, "system/programs", { programs });
     }
   };
 
@@ -121,18 +170,6 @@ const PeerJsClientStartup: React.FC<PeerJsClientStartupProps> = ({
               ใช้กล้องมือถือสแกน QR Code หรือคัดลอกลิงก์เพื่อควบคุม
             </p>
           </header>
-
-          {/* <Button
-            onClick={() => {
-              setAlert?.({
-                title: "PeerJs คืออะไร",
-                description: `เป็นไลบรารี่ที่ช่วยให้การเชื่อมต่อระหว่างอุปกรณ์ (Peer-to-Peer) ทำได้ง่ายขึ้นโดยไม่ต้องมีเซิร์ฟเวอร์กลาง แต่ละอุปกรณ์จะมี ID เป็นของตัวเอง, ใช้ WebRTC สำหรับการเชื่อมต่อแบบ Real-time, ข้อมูลถูกส่งตรงระหว่างอุปกรณ์โดยไม่ผ่านเซิร์ฟเวอร์, รองรับทั้งการส่งข้อมูลและสตรีมมิ่ง, ในระบบนี้ เราสร้าง QR Code ที่มี ID ของคุณ เพื่อให้อุปกรณ์อื่นสามารถเชื่อมต่อมาได้โดยตรง`,
-              });
-            }}
-            icon={<BsTools></BsTools>}
-          >
-            PeerJS ทำงานอย่างไร?
-          </Button> */}
 
           <div className="flex flex-col items-center w-full max-w-md">
             <a
@@ -200,35 +237,70 @@ const PeerJsClientStartup: React.FC<PeerJsClientStartupProps> = ({
             </h3>
           </header>
 
-          <div className="flex-1">
+          <div className="flex-1 overflow-hidden">
             {connections.NORMAL.length > 0 ? (
-              <ul className="space-y-3 pr-2 max-h-64 overflow-y-auto">
-                {connections.NORMAL.map((conn) => (
-                  <li
-                    key={conn.connectionId}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <FaUserCircle
-                        className="text-3xl text-gray-400"
-                        aria-hidden="true"
-                      />
-                      <div>
-                        <span className="block font-medium text-gray-800">
-                          {clientNicknames[conn.peer] || "อุปกรณ์ไม่มีชื่อ"}
-                        </span>
-                        <span className="inline-flex items-center mt-1 text-xs font-medium text-green-700">
+              <ul className="space-y-3 pr-2 max-h-[400px] overflow-y-auto">
+                {connections.NORMAL.map((conn) => {
+                  const role = clientRoles[conn.peer] || "user";
+                  const isMaster = role === "master";
+
+                  return (
+                    <li
+                      key={conn.connectionId}
+                      className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+                        isMaster
+                          ? "bg-yellow-50 border-yellow-200 shadow-sm"
+                          : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        {/* ไอคอนตาม Role */}
+                        <div
+                          className={`p-2 rounded-full shrink-0 ${
+                            isMaster
+                              ? "bg-yellow-100 text-yellow-600"
+                              : "bg-gray-200 text-gray-500"
+                          }`}
+                        >
+                          {isMaster ? (
+                            <RiVipCrownFill size={24} aria-hidden="true" />
+                          ) : (
+                            <RiSmartphoneLine size={24} aria-hidden="true" />
+                          )}
+                        </div>
+
+                        <div className="flex flex-col min-w-0">
                           <span
-                            className="flex w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"
-                            aria-hidden="true"
-                          ></span>
-                          เชื่อมต่อแล้ว
-                        </span>
+                            className={`block font-medium truncate ${
+                              isMaster ? "text-yellow-800" : "text-gray-800"
+                            }`}
+                          >
+                            {clientNicknames[conn.peer] || "อุปกรณ์ไม่มีชื่อ"}
+                          </span>
+                          <span className="inline-flex items-center mt-1 text-xs font-medium text-green-700">
+                            <span
+                              className="flex w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"
+                              aria-hidden="true"
+                            ></span>
+                            เชื่อมต่อแล้ว
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <span className="sr-only">สถานะ: เชื่อมต่อแล้ว</span>
-                  </li>
-                ))}
+
+                      {/* ปุ่มเปลี่ยน Role */}
+                      <button
+                        onClick={() => handleToggleRole(conn.peer, role)}
+                        className={`ml-2 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors shrink-0 ${
+                          isMaster
+                            ? "bg-red-100 text-red-600 hover:bg-red-200"
+                            : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                        }`}
+                      >
+                        {isMaster ? "ลดระดับ" : "ตั้งเป็น Master"}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 py-8">

@@ -18,6 +18,7 @@ import {
   ReverbParams,
   LimiterParams,
 } from "@/features/engine/modules/equalizer/global-equalizer";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 // --- Configuration ---
 interface EqPreset {
@@ -153,6 +154,9 @@ const GlobalEqualizer: React.FC = () => {
     (state) => state.engine?.globalEqualizer
   );
 
+  const client = usePeerHostStore((state) => state.requestToClient);
+  const addRoute = usePeerHostStore((state) => state.addRoute);
+
   // UI States
   const [activeSections, setActiveSections] = useState<Record<string, boolean>>(
     {
@@ -215,6 +219,15 @@ const GlobalEqualizer: React.FC = () => {
     const newGains = [...gains];
     newGains[i] = val;
     setGains(newGains);
+
+    client(
+      null,
+      "system/eq",
+      {
+        eq: newGains,
+      },
+      { role: "master" }
+    );
     equalizer.setBandGain(i, val);
     setSelectedPreset("");
   };
@@ -283,6 +296,23 @@ const GlobalEqualizer: React.FC = () => {
     "16k",
   ];
 
+  useEffect(() => {
+    addRoute("system/eq", (payload) => {
+      const { eq: nextGains, presetId: preset } = payload;
+      setGains(nextGains);
+      applyPreset({
+        gains: nextGains,
+        id: preset,
+        name: "remote",
+      });
+    });
+    addRoute("system/open-eq", (payload) => {
+      const { enabled } = payload;
+      setIsEnabled(enabled);
+      equalizer.toggleEQ(enabled);
+    });
+  }, []);
+
   return (
     // เปลี่ยน Background หลักเป็นสีเทา เพื่อให้ Card สีขาวเด่นขึ้น (Grouping)
     <div className="w-full   min-h-full">
@@ -335,7 +365,17 @@ const GlobalEqualizer: React.FC = () => {
             {defaultPresets.map((p) => (
               <button
                 key={p.id}
-                onClick={() => applyPreset(p)}
+                onClick={() => {
+                  client(
+                    null,
+                    "system/eq",
+                    {
+                      eq: p.gains,
+                    },
+                    { role: "master" }
+                  );
+                  applyPreset(p);
+                }}
                 className={`text-[10px] px-2 py-0.5 rounded border transition-all ${
                   selectedPreset === p.id
                     ? "bg-gray-800 text-white border-gray-800"

@@ -3,18 +3,22 @@ import LyricsCharacter from "../character";
 import { ISentence } from "@/lib/karaoke/lyrics/types";
 import { groupThaiCharacters } from "@/lib/karaoke/cursors/lib";
 import { LyricsCharacterStyle } from "../types";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 interface LyricsListProps {
   sentence?: ISentence;
   tick: number;
   textStyle?: LyricsCharacterStyle;
+  id: string;
 }
 
 const LyricsList: React.FC<LyricsListProps> = ({
   sentence,
   tick,
   textStyle,
+  id,
 }) => {
+  const client = usePeerHostStore((state) => state.requestToClient);
   const [clipPercent, setClipPercent] = useState(0);
   const [scaleX, setScaleX] = useState(1);
   const lyricsRef = useRef<HTMLDivElement>(null);
@@ -71,6 +75,7 @@ const LyricsList: React.FC<LyricsListProps> = ({
 
   useEffect(() => {
     updateScale();
+    client(null, `system/lyrics-${id}`, text);
   }, [text]);
 
   useEffect(() => {

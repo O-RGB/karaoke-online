@@ -87,26 +87,23 @@ export class InstrumentalsControl {
       this.instrumentals.set(item.name, new Instrumental(item));
     }
   }
-  // features/engine/modules/instrumentals/control.ts (หรือไฟล์ class InstrumentalsControl)
-
-  public loadConfig(instPreset: InstrumentsPresets[], targetId: number = 0) {
+  public loadConfig(
+    instPreset: InstrumentsPresets[],
+    targetId: number = 0
+  ): InstrumentsPresets | undefined {
     try {
-      // 1. ค้นหา Preset ที่ต้องการ
       const saved = instPreset.find((p) => p.value === targetId);
 
-      // 2. [เพิ่มใหม่] ถ้าไม่เจอใน List แต่เป็น ID 0 (Default) ให้ Reset ค่ากลับเป็นค่าเริ่มต้น
       if (!saved && targetId === 0) {
         this.resetToFactory();
         return;
       }
 
-      // 3. ถ้าไม่เจอ และไม่ใช่ ID 0 ก็จบการทำงาน
       if (!saved) {
         console.warn(`Preset ID ${targetId} not found`);
         return;
       }
 
-      // 4. ถ้าเจอ ก็ Load ตามปกติ
       const preset = saved.preset;
       for (let i = 0; i < preset.length; i++) {
         const set = preset[i];
@@ -116,16 +113,19 @@ export class InstrumentalsControl {
         inst.setLock(set.lock);
         inst.setMute(set.mute);
       }
+
+      return saved;
     } catch (error) {
       console.error("Error loading config:", error);
+      return;
     }
   }
   public resetToFactory() {
     this.instrumentals.forEach((inst) => {
-      inst.setGain(inst.defaultGain); // กลับไปเป็น 127
-      inst.setMute(false); // เลิก Mute
-      inst.setLock(false); // ปลด Lock
-      inst.setSolo(false); // (Optional) จะปลด Solo ด้วยก็ได้ถ้าต้องการ
+      inst.setGain(inst.defaultGain);
+      inst.setMute(false);
+      inst.setLock(false);
+      inst.setSolo(false);
     });
   }
 
@@ -151,6 +151,10 @@ export class InstrumentalsControl {
       });
     }
     return temp;
+  }
+
+  public getGains() {
+    return this.getPreset(-1, "กำหนดเอง");
   }
 
   public setPreset(value: number) {}

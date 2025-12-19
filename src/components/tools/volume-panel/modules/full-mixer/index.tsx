@@ -17,6 +17,7 @@ import { DEFAULT_INST_PRESET, DRUM_CHANNEL } from "@/config/value";
 
 import DrumProgramChange from "./modules/drum-program";
 import MixerNodes from "./modules/node";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 
 interface FullMixerProps {
   nodes: SynthChannel[];
@@ -27,6 +28,7 @@ type ActionMode = "create" | "update" | "delete" | null;
 const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
   const componentId = useId();
 
+  const client = usePeerHostStore((state) => state.requestToClient);
   const instPreset =
     useConfigStore((state) => state.config.sound?.instPreset) ?? [];
   const setConfig = useConfigStore((state) => state.setConfig);
@@ -60,18 +62,18 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
   const handleLoadPreset = (valueStr: string) => {
     const value = Number(valueStr);
 
-    // แก้ไข: เช็คตรงนี้เลย ถ้าเป็น 0 เรียก resetToFactory()
     if (value === 0) {
       instrumental?.resetToFactory();
+      client(null, "system/instrumentals", { preset: DEFAULT_INST_PRESET });
     } else {
-      instrumental?.loadConfig(instPreset, value);
+      const preset = instrumental?.loadConfig(instPreset, value);
+      client(null, "system/instrumentals", { preset });
     }
 
     setSelectPreset(valueStr);
   };
 
   const handleReset = () => {
-    // แก้ไข: เช็คตรงนี้ด้วยเพื่อความชัดเจน
     if (currentPresetId === 0) {
       instrumental?.resetToFactory();
     } else {

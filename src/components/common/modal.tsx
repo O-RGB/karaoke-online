@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useState,
+  useRef, // เพิ่ม useRef
 } from "react";
 import { createPortal } from "react-dom";
 import WinBox from "react-winbox";
@@ -11,6 +12,9 @@ import { useOrientation } from "@/hooks/orientation-hook";
 import useKeyboardStore from "@/features/keyboard-state";
 import "winbox/dist/css/winbox.min.css";
 import "winbox/dist/css/themes/white.min.css";
+
+// คุณอาจต้อง import Type ของ WinBox ถ้า TypeScript ฟ้อง
+// หรือใช้ any ถ้าระบุ Type ยากใน setup ปัจจุบัน
 
 export default function WinboxModal({
   isOpen,
@@ -39,6 +43,9 @@ export default function WinboxModal({
   });
 
   const [contentHeight, setContentHeight] = useState(0);
+
+  // 1. สร้าง Ref เพื่อเข้าถึง Instance ของ React-WinBox
+  const winboxRef = useRef<WinBox>(null);
 
   const calculateDimensions = useCallback(() => {
     if (width && height) {
@@ -131,6 +138,39 @@ export default function WinboxModal({
     }
   }, [isOpen]);
 
+  // 2. เพิ่ม useEffect เพื่อย้าย DOM ของ WinBox เข้าไปใน modalRoot
+  useEffect(() => {
+    if (showModal && winboxRef.current) {
+      // ใช้ setTimeout เล็กน้อยเพื่อให้แน่ใจว่า WinBox ถูกสร้างใน DOM แล้ว
+      const timer = setTimeout(() => {
+        try {
+          // ดึง ID ของ WinBox window
+          const winboxId = winboxRef.current?.getId();
+          if (winboxId) {
+            const winboxElement = document.getElementById(winboxId);
+            const modalRootElement = document.getElementById("modal-root");
+
+            // ถ้าย้ายได้ และยังไม่ได้อยู่ที่นั่น ให้ย้ายเข้าไป
+            if (
+              winboxElement &&
+              modalRootElement &&
+              winboxElement.parentElement !== modalRootElement
+            ) {
+              modalRootElement.appendChild(winboxElement);
+
+              // (Optional) อาจจะต้องสั่ง forceUpdate หรือ resize ถ้าตำแหน่งเพี้ยน
+              // แต่ปกติ WinBox จะจัดการตัวเองได้ถ้า container เป็น full width/height
+            }
+          }
+        } catch (e) {
+          console.error("Error moving WinBox to modal root:", e);
+        }
+      }, 50); // Delay 50ms
+
+      return () => clearTimeout(timer);
+    }
+  }, [showModal]); // ทำงานเมื่อ showModal เปลี่ยนเป็น true
+
   const handleClose = () => {
     setShowModal(false);
     if (!isAlert) setPaused(false);
@@ -157,6 +197,7 @@ export default function WinboxModal({
 
   return createPortal(
     <WinBox
+      ref={winboxRef} // 3. ผูก Ref เข้ากับ Component
       width={modalDimensions.width}
       height={modalDimensions.height}
       title={title}
@@ -177,6 +218,7 @@ export default function WinboxModal({
       minWidth={200}
       noClose={!closable}
       background="transparent"
+      // เอา root={modalRoot} ออก เพราะ Type ไม่รองรับ
     >
       <div style={{ height: contentHeight, overflow: "hidden" }}>
         {childrenWithHeight}

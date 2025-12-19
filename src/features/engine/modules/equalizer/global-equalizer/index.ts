@@ -333,6 +333,10 @@ export class GlobalEqualizer {
     return this.analyserNode;
   }
 
+  public getEQValues(): number[] {
+    return this.eqNodes.map((node) => node.gain.value);
+  }
+
   public getVolumeLevel(): number {
     const buffer = new Float32Array(this.analyserNode.fftSize);
     this.analyserNode.getFloatTimeDomainData(buffer);

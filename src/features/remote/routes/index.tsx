@@ -1,21 +1,51 @@
-import { usePeerHostStore } from "../store/peer-js-store";
 import useSongsStore from "@/features/songs/store/songs.store";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
+import { usePeerHostStore } from "../store/peer-js-store";
+import { musicProcessGroup } from "@/lib/karaoke/read";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import {
   ITrackData,
   KaraokeExtension,
 } from "@/features/songs/types/songs.type";
-import { musicProcessGroup } from "@/lib/karaoke/read";
 
 export const remoteRoutes = () => {
   const client = usePeerHostStore.getState();
+  const engine = useSynthesizerEngine.getState().engine;
 
-  // client.addRoute("system/init", async (payload) => {
-  //   // const musicInfo = useRuntimePlayer.getState().musicInfo;
-  //   // console.log("system/init, musicInfo",musicInfo);
-  //   // return { musicInfo };
-  //   console.log("test")
-  // });
+  client.addRoute("system/instrumental", async (payload) => {
+    const instrumentals = useSynthesizerEngine.getState().engine?.instrumentals;
+    if (!instrumentals) return {};
+    const { gain, mute, lock, solo, key } = payload;
+    const inst = instrumentals.get(key);
+    if (!inst) return {};
+    if (gain !== undefined) inst.setGain(gain);
+    if (mute !== undefined) inst.setMute(mute);
+    if (lock !== undefined) inst.setLock(lock);
+    if (solo !== undefined) inst.setSolo(solo);
+  });
+
+  client.addRoute("system/play", async (payload) => {
+    engine?.player?.play();
+  });
+
+  client.addRoute("system/pause", async (payload) => {
+    engine?.player?.pause();
+  });
+
+  client.addRoute("system/next", async (payload) => {
+    const queue = useQueuePlayer.getState();
+    queue.nextMusic();
+  });
+
+  client.addRoute("system/vocal", async (payload) => {
+    const { vocal } = payload;
+    engine?.updatePitch(null, vocal);
+  });
+
+  client.addRoute("system/speed", async (payload) => {
+    const { speed } = payload;
+    engine?.updateSpeed(speed);
+  });
 
   client.addRoute("songs/search", async (payload) => {
     const { search } = payload;
@@ -25,8 +55,8 @@ export const remoteRoutes = () => {
   });
 
   client.addRoute("songs/quere", async (payload) => {
-    const queue = useQueuePlayer.getState().queue;
-    return queue;
+    const queue = useQueuePlayer.getState();
+    return queue.queue;
   });
 
   client.addRoute("songs/send-file", async (payload) => {

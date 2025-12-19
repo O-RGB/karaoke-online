@@ -10,6 +10,10 @@ import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
 import { parseMidi } from "@/lib/karaoke/songs/midi/reader";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 import { useYoutubePlayer } from "../../youtube/youtube-player";
+import {
+  PeerHostState,
+  usePeerHostStore,
+} from "@/features/remote/store/peer-js-store";
 
 export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   private player: JsSynthesizer | undefined = undefined;
@@ -29,14 +33,20 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   private youtubePausedTime = 0;
 
   private channelPrograms = new Array(16).fill(0);
+  private peerHost: PeerHostState | undefined = undefined;
 
   addEvent(input: Partial<BaseSynthEvent>): void {
     this.eventInit = { ...this.eventInit, ...input };
   }
 
-  constructor(player: JsSynthesizer, engine: JsSynthEngine) {
+  constructor(
+    player: JsSynthesizer,
+    engine: JsSynthEngine,
+    peerHost: PeerHostState
+  ) {
     this.player = player;
     this.engine = engine;
+    this.peerHost = peerHost;
   }
   async play(): Promise<void> {
     if (!this.musicQuere) return;
@@ -280,6 +290,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   resetMidiOutput(): void {}
 
   eventChange(): void {
+    const requestToClient = this.peerHost?.requestToClient;
     this.player?.hookPlayerMIDIEvents((s, t, event: IMIDIEvent) => {
       const vel = event.getVelocity();
       const midiNote = event.getKey();
@@ -310,6 +321,14 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
         );
 
         this.player?.midiNoteOn(channel, insts.midiNote, insts.velocity);
+        requestToClient?.(
+          null,
+          "system/note",
+          {
+            event: insts,
+          },
+          { role: "master" }
+        );
         return true;
       } else if (isNoteOff) {
         if (isMute) {
@@ -335,6 +354,15 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             program,
             channel,
           });
+          requestToClient?.(
+            null,
+            "system/program",
+            {
+              program,
+              channel,
+            },
+            { role: "master" }
+          );
           break;
         case 176: // controller Change
           this.eventInit?.controllerChangeCallback?.({
@@ -342,6 +370,16 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             controllerNumber: control,
             controllerValue: value,
           });
+          requestToClient?.(
+            null,
+            "system/controller",
+            {
+              channel,
+              controllerNumber: control,
+              controllerValue: value,
+            },
+            { role: "master" }
+          );
           break;
         case 81: // Tempo Change
           console.log("Tempo Change", vel, t, program);

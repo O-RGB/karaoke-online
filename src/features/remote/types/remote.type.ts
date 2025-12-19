@@ -1,5 +1,8 @@
 export type TypeUserControl = "NORMAL" | "SUPER";
 
+// [Added] เพิ่ม Type สำหรับ Role (master/user)
+export type UserRole = "master" | "user";
+
 export interface RemoteReceivedMessages {
   from: string;
   content: RemoteSendMessage;
