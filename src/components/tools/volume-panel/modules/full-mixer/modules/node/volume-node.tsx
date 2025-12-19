@@ -16,7 +16,7 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
   type,
   instrumental,
 }) => {
-  const client = usePeerHostStore((state) => state.requestToClient);
+  const clientMaster = usePeerHostStore((state) => state.sendToMaster);
   const componentId = useId();
 
   const [gain, setGain] = useState<number>(
@@ -88,42 +88,22 @@ const InstrumentalVolumeNode: React.FC<InstrumentalVolumeNodeProps> = ({
 
   const onValueChange = (value: number) => {
     instrumental.setGain(value);
-    client(
-      null,
-      "system/instrumental",
-      { gain: value, key: type },
-      { role: "master" }
-    );
+    clientMaster("system/instrumental", { gain: value, key: type });
   };
 
   const toggleMute = () => {
     instrumental.setMute(!isMuted);
-    client(
-      null,
-      "system/instrumental",
-      { mute: !isMuted, key: type },
-      { role: "master" }
-    );
+    clientMaster("system/instrumental", { mute: !isMuted, key: type });
   };
 
   const toggleSolo = () => {
     instrumental.setSolo(!isSolo);
-    client(
-      null,
-      "system/instrumental",
-      { solo: !isSolo, key: type },
-      { role: "master" }
-    );
+    clientMaster("system/instrumental", { solo: !isSolo, key: type });
   };
 
   const toggleLock = () => {
     instrumental.setLock(!isLocked);
-    client(
-      null,
-      "system/instrumental",
-      { lock: !isLocked, key: type },
-      { role: "master" }
-    );
+    clientMaster("system/instrumental", { lock: !isLocked, key: type });
   };
 
   useEffect(() => {

@@ -64,10 +64,20 @@ const FullMixer: React.FC<FullMixerProps> = ({ nodes }) => {
 
     if (value === 0) {
       instrumental?.resetToFactory();
-      client(null, "system/instrumentals", { preset: DEFAULT_INST_PRESET });
+      client(
+        null,
+        "system/instrumentals",
+        { preset: DEFAULT_INST_PRESET },
+        { waitForResponse: false }
+      );
     } else {
       const preset = instrumental?.loadConfig(instPreset, value);
-      client(null, "system/instrumentals", { preset });
+      client(
+        null,
+        "system/instrumentals",
+        { preset },
+        { waitForResponse: false }
+      );
     }
 
     setSelectPreset(valueStr);

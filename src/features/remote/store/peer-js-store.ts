@@ -21,7 +21,6 @@ export type ConnectionStatus =
   | "DISCONNECTED"
   | "ERROR";
 
-// [Added] Type สำหรับ Handler ตอน Client เชื่อมต่อ
 type ConnectHandler = (
   clientId: string,
   userType: UserType
@@ -51,9 +50,11 @@ interface FileTransfer {
   chunkIds: number[];
 }
 
+// [Updated] เพิ่ม waitForResponse
 interface RequestOptions {
   timeout?: number;
   role?: UserRole;
+  waitForResponse?: boolean;
 }
 
 // --- Helper Functions ---
@@ -208,7 +209,7 @@ const setupHostConnectionHandlers = (
       return;
     }
 
-    // 5. Handle Incoming Requests (Routes)
+    // 5. Handle Incoming Requests (Routes) - Expects RESPONSE
     if (data?.type === "REQUEST" && data.requestId) {
       try {
         const { route, payload } = data.payload;
@@ -235,7 +236,25 @@ const setupHostConnectionHandlers = (
       return;
     }
 
-    // 6. Handle Nickname Info
+    // 6. Handle Incoming Events (One-way Routes) - No RESPONSE
+    if (data?.type === "EVENT") {
+      try {
+        const { route, payload } = data.payload;
+        const handler = get().routes[route];
+
+        if (handler) {
+          handler(payload, conn.peer, userType);
+        }
+      } catch (e: any) {
+        console.error(
+          `Error handling event route '${data.payload?.route}':`,
+          e
+        );
+      }
+      return;
+    }
+
+    // 7. Handle Nickname Info
     if (data?.type === "NICKNAME_INFO") {
       set((state) => ({
         clientNicknames: {
@@ -250,7 +269,7 @@ const setupHostConnectionHandlers = (
       return;
     }
 
-    // 7. Handle Pong
+    // 8. Handle Pong
     if (data?.type === "pong") {
       set((state) => ({
         lastSeen: { ...state.lastSeen, [conn.peer]: Date.now() },
@@ -258,7 +277,7 @@ const setupHostConnectionHandlers = (
       return;
     }
 
-    // 8. General Messages
+    // 9. General Messages
     const received = { from: conn.peer, content: data, userType };
     set((state) => ({
       received,
@@ -280,6 +299,11 @@ const setupHostConnectionHandlers = (
       const newClientRoles = { ...state.clientRoles };
       delete newClientRoles[conn.peer];
 
+      // ลบออกจาก Master List
+      const newMasterConnections = state.masterConnections.filter(
+        (c) => c.peer !== conn.peer
+      );
+
       if (
         Object.values(newConnections).flat().length === 0 &&
         Object.keys(state.calls).length === 0
@@ -291,6 +315,7 @@ const setupHostConnectionHandlers = (
         lastSeen: newLastSeen,
         clientNicknames: newClientNicknames,
         clientRoles: newClientRoles,
+        masterConnections: newMasterConnections,
       };
     });
   });
@@ -353,6 +378,8 @@ export interface PeerHostState {
   clientNicknames: { [peerId: string]: string };
   clientRoles: { [peerId: string]: UserRole };
 
+  masterConnections: DataConnection[];
+
   heartbeatIntervalId: NodeJS.Timeout | null;
   remoteStreams: { [peerId: string]: MediaStream };
   calls: { [peerId: string]: MediaConnection };
@@ -361,7 +388,6 @@ export interface PeerHostState {
   pendingRequests: Map<string, PendingRequest>;
   routes: RouteRegistry;
 
-  // [Added] Handler สำหรับ Client Connect
   connectHandler: ConnectHandler | null;
 
   allowCalls?: boolean;
@@ -386,6 +412,9 @@ export interface PeerHostState {
   setAllowCalls: (isAllow: boolean) => void;
   initializePeer: (userType: UserType) => Promise<string>;
   sendMessage: (info: RemoteSendMessage) => Promise<void>;
+
+  sendToMaster: (route: string, payload: any) => void;
+
   sendMessageWithResponse: <T = any>(
     clientId: string,
     message: any,
@@ -402,7 +431,6 @@ export interface PeerHostState {
   removeRoute: (route: string) => void;
   getRoutes: () => string[];
 
-  // [Added] Function ลงทะเบียน Connect Handler
   onClientConnect: (handler: ConnectHandler) => void;
 
   requestToClient: <T = any>(
@@ -442,20 +470,21 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
   lastSeen: {},
   clientNicknames: {},
   clientRoles: {},
+  masterConnections: [],
   heartbeatIntervalId: null,
   remoteStreams: {},
   calls: {},
   visibleClientIds: [],
   pendingRequests: new Map(),
   routes: {},
-  connectHandler: null, // Initial state
+  connectHandler: null,
   fileTransfers: {},
   pendingAssembly: {},
 
   setOnFileProgress: (callback) => set({ onFileProgress: callback }),
   setAllowCalls: (isAllow: boolean) => set({ allowCalls: isAllow }),
 
-  onClientConnect: (handler) => set({ connectHandler: handler }), // Implementation
+  onClientConnect: (handler) => set({ connectHandler: handler }),
 
   startHeartbeatChecks: () => {
     if (get().heartbeatIntervalId) return;
@@ -508,15 +537,11 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
 
           setupHostConnectionHandlers(conn, userType, set, get);
 
-          // [Added] Logic for onClientConnect (Send SYSTEM_INIT)
           conn.on("open", async () => {
             const handler = get().connectHandler;
             if (handler) {
               try {
-                // Call external handler
                 const initPayload = await handler(conn.peer, userType);
-
-                // If handler returns data, send it as SYSTEM_INIT
                 if (initPayload !== undefined) {
                   conn.send({
                     type: "SYSTEM_INIT",
@@ -569,6 +594,22 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
     } else {
       connections[info.user].forEach((conn) => conn.send(messageToSend));
     }
+  },
+
+  sendToMaster: (route: string, payload: any) => {
+    const { masterConnections } = get();
+    masterConnections.forEach((conn) => {
+      if (conn.open) {
+        try {
+          conn.send({
+            type: "EVENT",
+            payload: { route, payload },
+          });
+        } catch (error) {
+          console.warn(`[Host] Failed to send to master ${conn.peer}`, error);
+        }
+      }
+    });
   },
 
   sendMessageWithResponse: <T = any>(
@@ -629,6 +670,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
         lastSeen: {},
         clientNicknames: {},
         clientRoles: {},
+        masterConnections: [],
         heartbeatIntervalId: null,
         remoteStreams: {},
         calls: {},
@@ -663,12 +705,33 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
   },
 
   setClientRole: (peerId: string, role: UserRole) => {
-    set((state) => ({
-      clientRoles: {
-        ...state.clientRoles,
-        [peerId]: role,
-      },
-    }));
+    set((state) => {
+      let newMasterConnections = [...state.masterConnections];
+      const targetConn = Object.values(state.connections)
+        .flat()
+        .find((c) => c.peer === peerId);
+
+      if (role === "master") {
+        if (
+          targetConn &&
+          !newMasterConnections.some((c) => c.peer === peerId)
+        ) {
+          newMasterConnections.push(targetConn);
+        }
+      } else {
+        newMasterConnections = newMasterConnections.filter(
+          (c) => c.peer !== peerId
+        );
+      }
+
+      return {
+        clientRoles: {
+          ...state.clientRoles,
+          [peerId]: role,
+        },
+        masterConnections: newMasterConnections,
+      };
+    });
   },
 
   removeRoute: (route: string) => {
@@ -763,6 +826,7 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
     }
   },
 
+  // [Modified] Update requestToClient to support waitForResponse
   requestToClient: <T = any>(
     clientId: string | null,
     route: string,
@@ -770,7 +834,8 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
     options: RequestOptions = {}
   ): Promise<T> => {
     const { connections, pendingRequests, clientRoles } = get();
-    const { timeout = 10000, role } = options;
+    // Default waitForResponse = true to keep old behavior
+    const { timeout = 10000, role, waitForResponse = true } = options;
 
     if (clientId) {
       return new Promise<T>((resolve, reject) => {
@@ -782,6 +847,17 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
           return reject(new Error(`Client with ID ${clientId} not found.`));
         }
 
+        // [Logic] If not waiting for response
+        if (!waitForResponse) {
+          // Send as EVENT
+          conn.send({
+            type: "EVENT",
+            payload: { route, payload },
+          });
+          return resolve({} as T);
+        }
+
+        // [Logic] If waiting for response (Existing logic)
         const requestId = crypto.randomUUID();
         const timeoutId = setTimeout(() => {
           pendingRequests.delete(requestId);
@@ -823,18 +899,41 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
           (conn) => clientRoles[conn.peer] === role
         );
         if (targets.length === 0) {
-          return reject(
-            new Error(`No clients found with role '${role}' to request.`)
-          );
+          // If expecting response, reject. If not, just resolve.
+          if (waitForResponse) {
+            return reject(
+              new Error(`No clients found with role '${role}' to request.`)
+            );
+          } else {
+            return resolve({} as T);
+          }
         }
       } else {
         targets = allConnections;
       }
 
       if (targets.length === 0) {
-        return reject(new Error("No active connections to broadcast to."));
+        if (waitForResponse) {
+          return reject(new Error("No active connections to broadcast to."));
+        } else {
+          return resolve({} as T);
+        }
       }
 
+      // [Logic] If not waiting for response (Broadcast)
+      if (!waitForResponse) {
+        targets.forEach((conn) => {
+          if (conn.open) {
+            conn.send({
+              type: "EVENT",
+              payload: { route, payload },
+            });
+          }
+        });
+        return resolve({} as T);
+      }
+
+      // [Logic] If waiting for response (Broadcast)
       let hasSettled = false;
       const requestIds: string[] = [];
       let timeoutCount = 0;

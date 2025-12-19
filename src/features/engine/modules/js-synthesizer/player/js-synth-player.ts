@@ -290,7 +290,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
   resetMidiOutput(): void {}
 
   eventChange(): void {
-    const requestToClient = this.peerHost?.requestToClient;
+    const sendToMaster = this.peerHost?.sendToMaster;
     this.player?.hookPlayerMIDIEvents((s, t, event: IMIDIEvent) => {
       const vel = event.getVelocity();
       const midiNote = event.getKey();
@@ -321,14 +321,9 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
         );
 
         this.player?.midiNoteOn(channel, insts.midiNote, insts.velocity);
-        requestToClient?.(
-          null,
-          "system/note",
-          {
-            event: insts,
-          },
-          { role: "master" }
-        );
+        sendToMaster?.("system/note", {
+          event: insts,
+        });
         return true;
       } else if (isNoteOff) {
         if (isMute) {
@@ -354,15 +349,10 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             program,
             channel,
           });
-          requestToClient?.(
-            null,
-            "system/program",
-            {
-              program,
-              channel,
-            },
-            { role: "master" }
-          );
+          sendToMaster?.("system/program", {
+            program,
+            channel,
+          });
           break;
         case 176: // controller Change
           this.eventInit?.controllerChangeCallback?.({
@@ -370,16 +360,11 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             controllerNumber: control,
             controllerValue: value,
           });
-          requestToClient?.(
-            null,
-            "system/controller",
-            {
-              channel,
-              controllerNumber: control,
-              controllerValue: value,
-            },
-            { role: "master" }
-          );
+          sendToMaster?.("system/controller", {
+            channel,
+            controllerNumber: control,
+            controllerValue: value,
+          });
           break;
         case 81: // Tempo Change
           console.log("Tempo Change", vel, t, program);

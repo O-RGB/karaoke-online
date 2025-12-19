@@ -28,7 +28,7 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
   const engine = useSynthesizerEngine((state) => state.engine);
   const isShow = useConfigStore((state) => state.config.widgets?.mix);
 
-  const client = usePeerHostStore((state) => state.requestToClient);
+  const clientMaster = usePeerHostStore((state) => state.sendToMaster);
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
   const resetQueueingTimeout = useKeyboardStore(
     (state) => state.resetQueueingTimeout
@@ -44,12 +44,12 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
 
   const onPitchChange = (value: number) => {
     engine?.updatePitch(null, value);
-    client(null, "system/vocal", { vocal: value }, { role: "master" });
+    clientMaster("system/vocal", { vocal: value });
   };
 
   const onSpeedChange = (value: number) => {
     engine?.updateSpeed?.(value);
-    client(null, "system/speed", { speed: value }, { role: "master" });
+    clientMaster("system/speed", { speed: value });
   };
 
   const onLockChange = (event: IControllerChange<boolean>) => {

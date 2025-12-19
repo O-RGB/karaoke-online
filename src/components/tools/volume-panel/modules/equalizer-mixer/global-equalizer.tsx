@@ -154,7 +154,7 @@ const GlobalEqualizer: React.FC = () => {
     (state) => state.engine?.globalEqualizer
   );
 
-  const client = usePeerHostStore((state) => state.requestToClient);
+  const clientMaster = usePeerHostStore((state) => state.sendToMaster);
   const addRoute = usePeerHostStore((state) => state.addRoute);
 
   // UI States
@@ -220,14 +220,9 @@ const GlobalEqualizer: React.FC = () => {
     newGains[i] = val;
     setGains(newGains);
 
-    client(
-      null,
-      "system/eq",
-      {
-        eq: newGains,
-      },
-      { role: "master" }
-    );
+    clientMaster("system/eq", {
+      eq: newGains,
+    });
     equalizer.setBandGain(i, val);
     setSelectedPreset("");
   };
@@ -366,14 +361,9 @@ const GlobalEqualizer: React.FC = () => {
               <button
                 key={p.id}
                 onClick={() => {
-                  client(
-                    null,
-                    "system/eq",
-                    {
-                      eq: p.gains,
-                    },
-                    { role: "master" }
-                  );
+                  clientMaster("system/eq", {
+                    eq: p.gains,
+                  });
                   applyPreset(p);
                 }}
                 className={`text-[10px] px-2 py-0.5 rounded border transition-all ${

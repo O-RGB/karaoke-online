@@ -75,7 +75,7 @@ const LyricsList: React.FC<LyricsListProps> = ({
 
   useEffect(() => {
     updateScale();
-    client(null, `system/lyrics-${id}`, text);
+    client(null, `system/lyrics-${id}`, text, { waitForResponse: false });
   }, [text]);
 
   useEffect(() => {
