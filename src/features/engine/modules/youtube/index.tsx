@@ -12,7 +12,7 @@ const YoutubeEngine: React.FC = () => {
     setPlayer,
     setIsReady,
     setShowVolumeButton,
-    setHasUserUnmuted, // ใช้ตัวนี้เพื่อ Reset state ใน iOS
+    setHasUserUnmuted,
     play,
     resolvePlaying,
     resetWaitPlaying,
@@ -31,14 +31,13 @@ const YoutubeEngine: React.FC = () => {
       modestbranding: 1,
       rel: 0,
       iv_load_policy: 3,
-      mute: 1, // Default mute ไว้ก่อน
+      mute: 1,
       playsinline: 1,
       fs: 0,
       enablejsapi: 1,
     },
   };
 
-  // 1. คำนวณขนาดวิดีโอ (Cover Screen)
   useEffect(() => {
     const handleResize = () => {
       const windowWidth = window.innerWidth;
@@ -62,7 +61,6 @@ const YoutubeEngine: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 2. Handle Ready
   const handleReady = (event: { target: YouTubePlayer }) => {
     const player = event.target;
     setPlayer(player);
@@ -70,13 +68,11 @@ const YoutubeEngine: React.FC = () => {
     currentVideoIdRef.current = youtubeId;
 
     if (isIOS()) {
-      // 🍎 iOS: บังคับ Mute และโชว์ปุ่มเสมอ ตอนเริ่ม
       player.mute();
       player.playVideo();
       setShowVolumeButton(true);
-      setHasUserUnmuted(false); // Reset state ว่ายังไม่ได้เปิดเสียง
+      setHasUserUnmuted(false);
     } else {
-      // 🤖 Android/PC: เช็คว่าเคยเปิดเสียงมาหรือยัง
       if (hasUserUnmuted) {
         player.unMute();
         player.setVolume(100);
@@ -99,7 +95,6 @@ const YoutubeEngine: React.FC = () => {
     }
   };
 
-  // 3. Logic เปลี่ยนวิดีโอ (หัวใจสำคัญอยู่ตรงนี้)
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player || !youtubeId) return;
@@ -109,36 +104,37 @@ const YoutubeEngine: React.FC = () => {
       const loadOpts = { videoId: youtubeId, startSeconds: 0 };
 
       if (isIOS()) {
-        // 🍎 iOS: บังคับ Mute + โชว์ปุ่มทุก Link!
-        console.log("🍎 iOS New Video: Force Mute & Show Button");
         player.mute();
         player.loadVideoById(loadOpts);
         player.playVideo();
-
-        setShowVolumeButton(true); // บังคับโชว์ปุ่ม
-        setHasUserUnmuted(false); // Reset state
+        setShowVolumeButton(true);
+        setHasUserUnmuted(false);
       } else {
-        // 🤖 Android: เช็ค State เดิม
         if (hasUserUnmuted) {
-          // ถ้าเคยเปิดเสียงแล้ว -> ใช้สูตร Force Loop ให้เสียงมาต่อเนื่อง
-          console.log("🤖 Android: Keeping Audio On");
           player.loadVideoById(loadOpts);
 
-          // Loop กระชากเสียง (สูตรที่คุณชอบ)
+          player.playVideo();
+
           const check = setInterval(() => {
             const state = player.getPlayerState();
-            if (state === -1 || state === 5 || state === 3) {
+
+            if (state === -1 || state === 5) {
               player.unMute();
               player.setVolume(100);
+
+              player.playVideo();
+
+              clearInterval(check);
             }
+
             if (state === 1) {
               player.unMute();
               clearInterval(check);
             }
           }, 100);
+
           setTimeout(() => clearInterval(check), 3000);
         } else {
-          // ถ้ายังไม่เคยเปิดเสียง -> Mute + โชว์ปุ่ม
           player.mute();
           player.loadVideoById(loadOpts);
           player.playVideo();
@@ -148,7 +144,6 @@ const YoutubeEngine: React.FC = () => {
     }
   }, [youtubeId]);
 
-  // 4. Play/Pause Control
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
@@ -171,12 +166,11 @@ const YoutubeEngine: React.FC = () => {
     }
   }, [show, isPlay]);
 
-  // 5. ปุ่มเปิดเสียง (กดแล้ว Unmute)
   const handleToggleMute = () => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
-    setHasUserUnmuted(true); // จำค่าไว้ (มีผลกับ Android รอบหน้า)
+    setHasUserUnmuted(true);
     setShowVolumeButton(false);
 
     player.unMute();
@@ -186,7 +180,6 @@ const YoutubeEngine: React.FC = () => {
 
   return (
     <>
-      {/* Background Video */}
       <div
         className={`fixed inset-0 -z-10 overflow-hidden bg-black transition-opacity duration-500 ${
           show ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -211,7 +204,6 @@ const YoutubeEngine: React.FC = () => {
         </div>
       </div>
 
-      {/* ปุ่มเปิดเสียง (Glassmorphism) */}
       {showVolumeButton && show && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
           <button
