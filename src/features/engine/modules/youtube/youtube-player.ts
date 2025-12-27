@@ -1,8 +1,8 @@
 import { YouTubePlayer } from "react-youtube";
 import { create } from "zustand";
 
-// ฟังก์ชันเช็คว่าเป็น iOS หรือไม่ (iPhone, iPad, iPod)
-const isIOS = () => {
+// [UPDATE] เพิ่ม export เพื่อให้ index.tsx เรียกใช้ได้
+export const isIOS = () => {
   if (typeof window === "undefined" || typeof navigator === "undefined")
     return false;
 
@@ -66,15 +66,13 @@ export const useYoutubePlayer = create<IYoutubePlayer>((set, get) => {
     play: () => {
       const p = get().player;
       if (p) {
-        // [FIX] แก้ไขเฉพาะ iOS: ต้อง Mute ก่อนเล่นเสมอ เพื่อให้ Auto Play ทำงานได้
+        // iOS: เช็ค Mute ก่อนเล่นเสมอ
         if (isIOS()) {
-          // ถ้าเป็น iOS และยังไม่ได้ Mute ให้ Mute ก่อน
           if (typeof p.isMuted === "function" && !p.isMuted()) {
             p.mute();
           }
           p.playVideo();
         } else {
-          // [ANDROID/PC] ทำงานปกติ เล่นได้เลย
           p.playVideo();
         }
       }
@@ -108,7 +106,6 @@ export const useYoutubePlayer = create<IYoutubePlayer>((set, get) => {
     loadVideo: (id) => {
       const p = get().player;
       if (!p) return;
-      // startSeconds: 0 จะช่วยให้เริ่มเล่นใหม่เสมอ
       p.loadVideoById({ videoId: id, startSeconds: 0 });
       set({ youtubeId: id });
     },
@@ -129,7 +126,6 @@ export const useYoutubePlayer = create<IYoutubePlayer>((set, get) => {
       playingResolvers = [];
     },
 
-    // 🔄 เรียกตอน pause เพื่อ reset queue
     resetWaitPlaying: () => {
       playingResolvers = [];
     },

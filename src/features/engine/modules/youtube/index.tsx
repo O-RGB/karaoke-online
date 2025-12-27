@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import YouTube, { YouTubePlayer } from "react-youtube";
-import { useYoutubePlayer } from "./youtube-player";
+import { useYoutubePlayer, isIOS } from "./youtube-player";
 
 const YoutubeEngine: React.FC = () => {
   const {
@@ -25,14 +25,14 @@ const YoutubeEngine: React.FC = () => {
     height: "100%",
     width: "100%",
     playerVars: {
-      autoplay: 0, // ปิด autoplay ของ iframe แล้วคุมด้วย js
+      autoplay: 0,
       controls: 0,
       disablekb: 1,
       modestbranding: 1,
       rel: 0,
       iv_load_policy: 3,
-      mute: 1, // [CRITICAL] ค่าเริ่มต้นต้อง mute ไว้ก่อนเสมอสำหรับ Mobile
-      playsinline: 1, // [CRITICAL] ต้องมีเพื่อให้ iOS เล่นในหน้าเว็บได้ไม่เด้ง Fullscreen
+      mute: 1,
+      playsinline: 1,
       fs: 0,
       enablejsapi: 1,
     },
@@ -44,7 +44,6 @@ const YoutubeEngine: React.FC = () => {
     setIsReady(true);
     currentVideoIdRef.current = youtubeId;
 
-    // ถ้าผู้ใช้เคยเปิดเสียงแล้ว ให้เปิดเสียงตาม
     if (show && hasUserUnmuted) {
       player.unMute();
       player.setVolume(100);
@@ -52,7 +51,6 @@ const YoutubeEngine: React.FC = () => {
       player.mute();
     }
 
-    // รอคำสั่ง play จาก Store
     player.pauseVideo();
   };
 
@@ -63,26 +61,20 @@ const YoutubeEngine: React.FC = () => {
     const currentState = useYoutubePlayer.getState();
 
     if (state === 1) {
-      // Playing
       resolvePlaying?.();
     } else if (state === 2) {
-      // Paused
       resetWaitPlaying?.();
 
-      // Fix: บางครั้ง iOS หรือ Browser หยุดเอง เราต้องสั่งเล่นต่อถ้า State บอกว่าต้องเล่น
       if (currentState.show && currentState.isPlay) {
         console.log("Auto-resume trigger");
-        // เรียก play() ของ store เพื่อผ่าน logic check ios อีกรอบ หรือสั่งตรงก็ได้
-        // แต่การสั่งตรงอาจติด Autoplay policy บน iOS ถ้าไม่มี interaction
-        // ในที่นี้ถ้ามันเคยเล่นแล้วหยุด มันมักจะ resume ได้
         player.playVideo();
       }
     } else if (state === 0) {
-      // Ended
       resetWaitPlaying?.();
     }
   };
 
+  // ✅ FIX: เปลี่ยนเพลงโดยไม่ Reset สถานะเสียง
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player || !youtubeId) return;
@@ -90,13 +82,17 @@ const YoutubeEngine: React.FC = () => {
     if (currentVideoIdRef.current !== youtubeId) {
       currentVideoIdRef.current = youtubeId;
 
+      // ✅ ไม่ต้องแยก iOS/Android แล้ว - ใช้ logic เดียวกัน
       if (hasUserUnmuted) {
+        // ผู้ใช้เปิดเสียงแล้ว → โหลดวิดีโอใหม่พร้อมเสียง
+        player.unMute();
+        player.setVolume(100);
         player.loadVideoById({
           videoId: youtubeId,
           startSeconds: 0,
         });
       } else {
-        // ถ้ายังไม่ unmute หรือเป็น iOS ที่ต้องการความชัวร์ ให้ mute ก่อนโหลด
+        // ยังไม่เปิดเสียง → โหลดแบบ mute
         player.mute();
         player.loadVideoById({
           videoId: youtubeId,
@@ -123,7 +119,6 @@ const YoutubeEngine: React.FC = () => {
     }
 
     if (isPlay) {
-      // เรียก play() ผ่าน store เพื่อให้ผ่าน Logic isIOS ที่เราแก้
       play();
     } else {
       player.pauseVideo();
@@ -134,19 +129,17 @@ const YoutubeEngine: React.FC = () => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
+    // ✅ เมื่อกดปุ่มครั้งแรก → จำสถานะไว้ตลอด
     setHasUserUnmuted(true);
     setShowVolumeButton(false);
 
     player.unMute();
     player.setVolume(100);
-
-    // สั่งเล่นอีกครั้งเพื่อความชัวร์
     play();
   };
 
   return (
     <>
-      {/* YouTube Video */}
       <div
         className={`fixed inset-0 -z-10 overflow-hidden transition-opacity duration-500 ${
           show ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -180,7 +173,7 @@ const YoutubeEngine: React.FC = () => {
         </div>
       </div>
 
-      {/* ปุ่มเปิดเสียง (แสดงเฉพาะเมื่อยังไม่ได้เปิดเสียงและวิดีโอโชว์อยู่) */}
+      {/* ✅ ปุ่มเปิดเสียง - กดครั้งเดียว ใช้ได้ตลอด */}
       {showVolumeButton && show && (
         <button
           onClick={handleToggleMute}
