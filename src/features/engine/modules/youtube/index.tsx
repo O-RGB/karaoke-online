@@ -1,5 +1,3 @@
-// src/features/engine/modules/youtube/index.tsx
-
 import React, { useEffect, useRef } from "react";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useYoutubePlayer } from "./youtube-player";
@@ -27,13 +25,13 @@ const YoutubeEngine: React.FC = () => {
     height: "100%",
     width: "100%",
     playerVars: {
-      autoplay: 0, // เราคุมเอง
+      autoplay: 0,
       controls: 0,
       disablekb: 1,
       modestbranding: 1,
       rel: 0,
       iv_load_policy: 3,
-      mute: 1, // เริ่มต้นด้วย Mute เสมอเพื่อกัน Autoplay Block
+      mute: 1,
       playsinline: 1,
       fs: 0,
       enablejsapi: 1,
@@ -46,7 +44,6 @@ const YoutubeEngine: React.FC = () => {
     setIsReady(true);
     currentVideoIdRef.current = youtubeId;
 
-    // ถ้าตอนโหลดครั้งแรก User เคยเปิดเสียงมาแล้ว ให้เปิดเสียงรอเลย
     if (show && hasUserUnmuted) {
       player.unMute();
       player.setVolume(100);
@@ -54,7 +51,6 @@ const YoutubeEngine: React.FC = () => {
       player.mute();
     }
 
-    // อย่าเพิ่งสั่ง Play ตรงนี้ รอ useEffect ทำงาน
     player.pauseVideo();
   };
 
@@ -62,30 +58,22 @@ const YoutubeEngine: React.FC = () => {
     const state = e.data;
     const player = e.target;
 
-    // ดึงค่าล่าสุดจาก Store โดยตรงเพื่อกันค่า Stale ใน Callback
     const currentState = useYoutubePlayer.getState();
 
     if (state === 1) {
-      // Playing
       resolvePlaying?.();
     } else if (state === 2) {
-      // Paused
       resetWaitPlaying?.();
 
-      // 🔥 FIX: Windows Protection
-      // ถ้าสถานะบอกว่าต้อง "เล่น" และ "แสดงผล" อยู่ แต่มันดัน Pause (โดน Browser สกัด)
-      // ให้สั่ง Play ซ้ำทันที
       if (currentState.show && currentState.isPlay) {
         console.log("Auto-resume trigger for Windows");
         player.playVideo();
       }
     } else if (state === 0) {
-      // Ended
       resetWaitPlaying?.();
     }
   };
 
-  // 1. จัดการการเปลี่ยน Video ID
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player || !youtubeId) return;
@@ -93,15 +81,12 @@ const YoutubeEngine: React.FC = () => {
     if (currentVideoIdRef.current !== youtubeId) {
       currentVideoIdRef.current = youtubeId;
 
-      // 🔥 FIX: ไม่ใช้ setInterval และไม่สั่ง unMute ซ้ำซ้อน
       if (hasUserUnmuted) {
-        // โหลดวิดีโอเฉยๆ Player จะจำค่า Unmute จากวิดีโอเก่าเอง
         player.loadVideoById({
           videoId: youtubeId,
           startSeconds: 0,
         });
       } else {
-        // ถ้ายังไม่เคยเปิดเสียง ต้อง Mute ก่อนโหลด
         player.mute();
         player.loadVideoById({
           videoId: youtubeId,
@@ -111,12 +96,10 @@ const YoutubeEngine: React.FC = () => {
     }
   }, [youtubeId, hasUserUnmuted]);
 
-  // 2. จัดการ Play/Pause/Show
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
-    // Safety check for iframe
     try {
       const iframe = player.getIframe && player.getIframe();
       if (!iframe) return;
@@ -140,14 +123,13 @@ const YoutubeEngine: React.FC = () => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
-    // User Interaction ของจริง -> Browser ยอมรับแน่นอน
     setHasUserUnmuted(true);
     setShowVolumeButton(false);
 
     player.unMute();
     player.setVolume(100);
-    play(); // สั่ง Store ให้เล่น
-    player.playVideo(); // สั่ง Player โดยตรงด้วยเพื่อความไว
+    play();
+    player.playVideo();
   };
 
   return (

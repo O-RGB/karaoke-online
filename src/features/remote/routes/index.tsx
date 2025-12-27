@@ -7,10 +7,29 @@ import {
   ITrackData,
   KaraokeExtension,
 } from "@/features/songs/types/songs.type";
+import { useYoutubePlayer } from "@/features/engine/modules/youtube/youtube-player";
 
 export const remoteRoutes = () => {
   const client = usePeerHostStore.getState();
   const engine = useSynthesizerEngine.getState().engine;
+
+  client.addRoute("system/unmute", async (payload) => {
+    const ytStore = useYoutubePlayer.getState();
+
+    // 1. บอก Store ว่า user (ผ่าน remote) อนุญาตให้เปิดเสียงแล้ว
+    ytStore.setHasUserUnmuted(true);
+    ytStore.setShowVolumeButton(false);
+
+    // 2. สั่ง Player โดยตรง
+    if (ytStore.player) {
+      ytStore.unmute(); // สั่ง unMute ของ YouTube API
+
+      // บางที unMute แล้วมันหยุดเล่น ต้องสั่ง Play ซ้ำเพื่อความชัวร์
+      ytStore.play();
+    }
+
+    return { success: true };
+  });
 
   client.addRoute("system/instrumental", async (payload) => {
     const instrumentals = useSynthesizerEngine.getState().engine?.instrumentals;
