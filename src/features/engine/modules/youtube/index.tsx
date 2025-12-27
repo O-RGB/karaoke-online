@@ -1,5 +1,3 @@
-// src/features/engine/modules/youtube/index.tsx
-
 import React, { useEffect, useRef } from "react";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useYoutubePlayer } from "./youtube-player";
@@ -72,28 +70,38 @@ const YoutubeEngine: React.FC = () => {
       // Paused
       resetWaitPlaying?.();
 
-      // 🔥 FIX: Windows Protection
+      // 🔥 FIX: Windows Protection & Android Interruptions
       // ถ้าสถานะบอกว่าต้อง "เล่น" และ "แสดงผล" อยู่ แต่มันดัน Pause (โดน Browser สกัด)
       // ให้สั่ง Play ซ้ำทันที
       if (currentState.show && currentState.isPlay) {
-        console.log("Auto-resume trigger for Windows");
+        console.log("Auto-resume trigger (Paused state)");
         player.playVideo();
       }
     } else if (state === 0) {
       // Ended
       resetWaitPlaying?.();
     }
+    // 🔥 FIX ANDROID: เพิ่มดัก State -1 (Unstarted) และ 5 (Cued)
+    // เพราะ Android บางทีโหลดเสร็จแล้วหยุดอยู่แค่นี้ ไม่ยอมไปต่อ
+    else if (state === -1 || state === 5) {
+      if (currentState.show && currentState.isPlay) {
+        console.log("Force play trigger (Unstarted/Cued state)");
+        player.playVideo();
+      }
+    }
   };
 
   // 1. จัดการการเปลี่ยน Video ID
   useEffect(() => {
-    const player = useYoutubePlayer.getState().player;
+    // ดึง State ล่าสุดเสมอ
+    const currentState = useYoutubePlayer.getState();
+    const player = currentState.player;
+
     if (!player || !youtubeId) return;
 
     if (currentVideoIdRef.current !== youtubeId) {
       currentVideoIdRef.current = youtubeId;
 
-      // 🔥 FIX: ไม่ใช้ setInterval และไม่สั่ง unMute ซ้ำซ้อน
       if (hasUserUnmuted) {
         // โหลดวิดีโอเฉยๆ Player จะจำค่า Unmute จากวิดีโอเก่าเอง
         player.loadVideoById({
@@ -107,6 +115,12 @@ const YoutubeEngine: React.FC = () => {
           videoId: youtubeId,
           startSeconds: 0,
         });
+      }
+
+      // 🔥 FIX ANDROID: สั่ง Play ซ้ำทันทีหลังจากโหลดเสร็จ
+      // ไม่ต้องรอ onStateChange เพราะบาง Browser อาจจะไม่ Trigger ถ้าไม่ได้ User Interaction
+      if (currentState.isPlay) {
+        player.playVideo();
       }
     }
   }, [youtubeId, hasUserUnmuted]);
@@ -190,9 +204,31 @@ const YoutubeEngine: React.FC = () => {
       {showVolumeButton && show && (
         <button
           onClick={handleToggleMute}
-          className="fixed bottom-8 right-6 z-50 bg-white/90 text-black px-6 py-3 rounded-full shadow-xl backdrop-blur-md hover:bg-white hover:scale-105 transition-all font-semibold animate-pulse"
+          className="
+            fixed z-50 
+            top-1/2 left-1/2 
+            -translate-x-1/2 -translate-y-1/2
+            
+            flex items-center gap-4
+            px-12 py-6
+            
+            bg-black/40 
+            backdrop-blur-2xl 
+            border border-white/10
+            rounded-full 
+            shadow-[0_8px_32px_rgba(0,0,0,0.25)]
+            
+            text-white/90 font-bold text-2xl tracking-wider
+            cursor-pointer
+            
+            transition-all duration-300 ease-out
+            hover:scale-110 
+            hover:bg-black/50 hover:border-white/30 hover:text-white
+            active:scale-95
+          "
         >
-          🔊 เปิดเสียง
+          <span className="text-3xl">🔊</span>
+          <span>แตะเพื่อเปิดเสียง</span>
         </button>
       )}
     </>
