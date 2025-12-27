@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useYoutubePlayer, isIOS } from "./youtube-player";
 
@@ -19,73 +19,94 @@ const YoutubeEngine: React.FC = () => {
   } = useYoutubePlayer();
 
   const currentVideoIdRef = useRef<string | undefined>("");
-  // ตัวแปรเช็คว่า User เคยแตะหน้าจอหรือยัง (สำหรับ iOS)
   const isGlobalUnlockedRef = useRef(false);
+
+  // State สำหรับเก็บขนาดวิดีโอเพื่อให้เต็มจอ (Cover Mode)
+  const [videoSize, setVideoSize] = useState({ w: 0, h: 0 });
 
   const opts = {
     height: "100%",
     width: "100%",
     playerVars: {
-      autoplay: 0, // เราคุม Play เอง
+      autoplay: 0,
       controls: 0,
       disablekb: 1,
       modestbranding: 1,
       rel: 0,
       iv_load_policy: 3,
-      mute: 0, // Default เป็น 0 ไว้ก่อน แล้วไปสั่ง Mute ใน Code เฉพาะ iOS
+      mute: 0,
       playsinline: 1,
       fs: 0,
       enablejsapi: 1,
     },
   };
 
-  // ✅ เทคนิค #1: The First-Touch Hijack (สำหรับ iOS เท่านั้น)
-  // ดักจับ Event อะไรก็ได้ทีนึง เพื่อ Unlock เสียง Video
+  // ✅ 1. คำนวณขนาดวิดีโอให้เต็มจอเสมอ (Cover Logic)
   useEffect(() => {
-    if (!isIOS()) return; // Android ไม่ต้องใช้ Logic นี้
+    const handleResize = () => {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const windowRatio = windowWidth / windowHeight;
+      const videoRatio = 16 / 9;
+
+      let w, h;
+
+      // ถ้าจอ "ยาวกว่า" สัดส่วนวิดีโอ (เช่น จอมือถือแนวตั้ง) -> ยึดความสูงเป็นหลัก
+      // ถ้าจอ "กว้างกว่า" สัดส่วนวิดีโอ (เช่น จอคอม) -> ยึดความกว้างเป็นหลัก
+      if (windowRatio < videoRatio) {
+        h = windowHeight;
+        w = windowHeight * videoRatio;
+      } else {
+        w = windowWidth;
+        h = windowWidth / videoRatio;
+      }
+
+      // เผื่อ scale นิดหน่อยกันขอบหลุด
+      setVideoSize({ w: Math.ceil(w) + 20, h: Math.ceil(h) + 20 });
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // คำนวณทีแรกทันที
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // ✅ 2. iOS First-Touch Hijack
+  useEffect(() => {
+    if (!isIOS()) return;
 
     const handleGlobalInteraction = () => {
       if (isGlobalUnlockedRef.current) return;
-
       const player = useYoutubePlayer.getState().player;
+
       if (player && typeof player.playVideo === "function") {
         console.log("👆 iOS First Interaction: Unlocking Audio...");
-
-        // สั่ง Play + Unmute ทันทีที่มีการแตะหน้าจอ
         player.unMute();
         player.setVolume(100);
         player.playVideo();
-
         setHasUserUnmuted(true);
         setShowVolumeButton(false);
         isGlobalUnlockedRef.current = true;
 
-        // ลบ Listener ออกเพื่อ Performance
         window.removeEventListener("click", handleGlobalInteraction);
         window.removeEventListener("touchstart", handleGlobalInteraction);
-        window.removeEventListener("keydown", handleGlobalInteraction);
       }
     };
 
-    // ดักทุกทางที่เป็นไปได้
     window.addEventListener("click", handleGlobalInteraction, {
       passive: false,
     });
     window.addEventListener("touchstart", handleGlobalInteraction, {
       passive: false,
     });
-    window.addEventListener("keydown", handleGlobalInteraction, {
-      passive: false,
-    });
 
     return () => {
       window.removeEventListener("click", handleGlobalInteraction);
       window.removeEventListener("touchstart", handleGlobalInteraction);
-      window.removeEventListener("keydown", handleGlobalInteraction);
     };
   }, []);
 
-  // ✅ Handle Ready: แยก Logic ชัดเจน
+  // ✅ 3. Handle Ready & Video Change Logic
   const handleReady = (event: { target: YouTubePlayer }) => {
     const player = event.target;
     setPlayer(player);
@@ -93,20 +114,15 @@ const YoutubeEngine: React.FC = () => {
     currentVideoIdRef.current = youtubeId;
 
     if (isIOS()) {
-      // 🍎 iOS: ต้อง Mute ก่อนเสมอ กัน Error และรอ Hijack หรือปุ่ม Unmute
-      console.log("🍎 iOS Ready: Muting initially");
       player.mute();
       if (!isGlobalUnlockedRef.current) {
-        // ถ้ายังไม่เคยแตะหน้าจอเลย ให้ Pause รอไว้ หรือเล่นแบบใบ้
         player.playVideo();
       }
     } else {
-      // 🤖 Android / PC: จัดเต็ม Unmute + Play เลย
-      console.log("🤖 Android/PC Ready: Aggressive Start");
+      // Android/PC: เริ่มแบบเปิดเสียงเลย
       player.unMute();
       player.setVolume(100);
       player.playVideo();
-      // Force state ว่า unmuted แล้ว
       setHasUserUnmuted(true);
       setShowVolumeButton(false);
     }
@@ -120,87 +136,55 @@ const YoutubeEngine: React.FC = () => {
     if (state === 1) {
       // Playing
       resolvePlaying?.();
-
-      // เช็คเสียงหายเฉพาะ iOS
       if (isIOS()) {
         const isMuted = player.isMuted?.() ?? true;
-        if (isMuted && currentState.hasUserUnmuted) {
-          // พยายาม Unmute อีกรอบ
-          player.unMute();
-        }
+        if (isMuted && currentState.hasUserUnmuted) player.unMute();
       } else {
-        // Android: ถ้าเล่นอยู่ ต้องมั่นใจว่าเสียงเปิด
-        if (player.isMuted()) {
-          player.unMute();
-        }
+        if (player.isMuted()) player.unMute();
       }
     } else if (state === 2) {
       // Paused
       resetWaitPlaying?.();
-
-      // Auto-resume ถ้าควรจะเล่นอยู่
-      if (currentState.show && currentState.isPlay) {
-        player.playVideo();
-      }
+      if (currentState.show && currentState.isPlay) player.playVideo();
     } else if (state === 0) {
       // Ended
       resetWaitPlaying?.();
     }
   };
 
-  // ✅ เทคนิค #2: Seamless Loading (แก้บั๊ก Android ไม่มีเสียงตรงนี้)
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player || !youtubeId) return;
 
     if (currentVideoIdRef.current !== youtubeId) {
-      console.log("🎵 Loading new video:", youtubeId);
       currentVideoIdRef.current = youtubeId;
-
-      const loadOpts = {
-        videoId: youtubeId,
-        startSeconds: 0,
-      };
+      const loadOpts = { videoId: youtubeId, startSeconds: 0 };
 
       if (isIOS()) {
-        // 🍎 iOS Logic
         if (hasUserUnmuted || isGlobalUnlockedRef.current) {
-          // ถ้าเคย Unlock แล้ว ให้โหลดและ Unmute
           player.loadVideoById(loadOpts);
           setTimeout(() => {
             player.unMute();
             player.playVideo();
           }, 100);
         } else {
-          // ถ้ายังไม่ Unlock ต้อง Mute
           player.mute();
           player.loadVideoById(loadOpts);
-          player.playVideo(); // เล่นแบบเงียบๆ ไปก่อน
+          player.playVideo();
           setShowVolumeButton(true);
         }
       } else {
-        // 🤖 Android / Desktop Logic (แก้จุดที่ User เจอ)
-        // สั่ง Unmute ก่อนโหลด หรือหลังโหลดทันที
+        // Android fix
         player.unMute();
         player.setVolume(100);
-
-        // ใช้ loadVideoById แล้ว Play เลย
         player.loadVideoById(loadOpts);
-
-        // กันเหนียวสำหรับ Android บางรุ่นที่ load แล้วแอบ Mute
-        setTimeout(() => {
-          player.unMute();
-        }, 500);
       }
     }
   }, [youtubeId]);
 
-  // Control Play/Pause
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
-
-    // Safety check for iframe
     try {
       if (!player.getIframe()) return;
     } catch (e) {
@@ -213,21 +197,20 @@ const YoutubeEngine: React.FC = () => {
     }
 
     if (isPlay) {
-      play(); // สั่ง store ให้ update
+      play();
       player.playVideo();
     } else {
       player.pauseVideo();
     }
   }, [show, isPlay]);
 
-  // ปุ่มกดเปิดเสียง (Fallback)
   const handleToggleMute = () => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
     setHasUserUnmuted(true);
     setShowVolumeButton(false);
-    isGlobalUnlockedRef.current = true; // จำค่าไว้ด้วย
+    isGlobalUnlockedRef.current = true;
 
     player.unMute();
     player.setVolume(100);
@@ -237,41 +220,54 @@ const YoutubeEngine: React.FC = () => {
   return (
     <>
       <div
-        className={`fixed inset-0 -z-10 overflow-hidden transition-opacity duration-500 ${
+        className={`fixed inset-0 -z-10 overflow-hidden bg-black transition-opacity duration-500 ${
           show ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
         <div
-          className="absolute top-1/2 left-1/2"
+          className="absolute top-1/2 left-1/2 overflow-hidden pointer-events-none"
           style={{
-            // คำนวณ Aspect Ratio ให้เต็มจอเสมอ
-            width: "100vw",
-            height: "100vh",
+            width: `${videoSize.w}px`,
+            height: `${videoSize.h}px`,
             transform: "translate(-50%, -50%)",
-            pointerEvents: "none", // ป้องกัน user ไปกด pause/play ที่ตัววิดีโอโดยตรง
           }}
         >
-          {/* Wrapper เพื่อขยาย Video ให้เกินขอบจอ (ตัดขอบดำ) ถ้าต้องการ */}
-          <div className="w-full h-full relative">
-            <YouTube
-              videoId={youtubeId}
-              opts={opts}
-              onReady={handleReady}
-              onStateChange={handleStateChange}
-              className="absolute top-0 left-0 w-full h-full"
-              iframeClassName="w-full h-full"
-            />
-          </div>
+          <YouTube
+            videoId={youtubeId}
+            opts={opts}
+            onReady={handleReady}
+            onStateChange={handleStateChange}
+            className="w-full h-full"
+            iframeClassName="w-full h-full object-cover"
+          />
         </div>
       </div>
 
+      {/* ✅ ปุ่มเปิดเสียงใหม่: ใหญ่ กลางจอ เบลอสวย */}
       {showVolumeButton && show && (
-        <button
-          onClick={handleToggleMute}
-          className="fixed bottom-8 right-6 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full shadow-xl backdrop-blur-md hover:from-purple-600 hover:to-pink-600 hover:scale-105 transition-all font-semibold animate-pulse"
-        >
-          🔊 แตะเพื่อเปิดเสียง
-        </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+          <button
+            onClick={handleToggleMute}
+            className="group relative flex flex-col items-center justify-center 
+                       w-48 h-48 rounded-3xl 
+                       bg-white/10 border border-white/20 
+                       backdrop-blur-xl shadow-2xl
+                       hover:scale-105 hover:bg-white/20 transition-all duration-300
+                       animate-pulse"
+          >
+            {/* ไอคอนลำโพง */}
+            <div className="text-6xl mb-4 filter drop-shadow-lg transform group-hover:rotate-12 transition-transform duration-300">
+              🔊
+            </div>
+            {/* ข้อความ */}
+            <span className="text-white font-bold text-lg tracking-wider drop-shadow-md">
+              เปิดเสียง
+            </span>
+
+            {/* วงแหวน Glow Effect */}
+            <div className="absolute inset-0 rounded-3xl border-2 border-white/10 scale-110 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500"></div>
+          </button>
+        </div>
       )}
     </>
   );
