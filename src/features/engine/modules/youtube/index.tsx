@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import YouTube, { YouTubePlayer } from "react-youtube";
-import { useYoutubePlayer, isIOS } from "./youtube-player"; // อย่าลืม import isIOS
+import { useYoutubePlayer, isIOS } from "./youtube-player";
 
 const YoutubeEngine: React.FC = () => {
   const {
@@ -13,12 +13,20 @@ const YoutubeEngine: React.FC = () => {
     setIsReady,
     setShowVolumeButton,
     setHasUserUnmuted,
-    play, // fn จาก store (เปลี่ยน state isPlay=true)
+    play, // สั่ง Store ให้ isPlay = true
+    setPause, // สั่ง Store ให้ isPlay = false
     resolvePlaying,
     resetWaitPlaying,
   } = useYoutubePlayer();
 
   const currentVideoIdRef = useRef<string | undefined>("");
+  // ใช้ Ref เพื่อเช็คว่า User Unmuted จริงๆ โดยไม่อิง State ใน render cycle
+  const hasUserUnmutedRef = useRef(hasUserUnmuted);
+
+  // Sync Ref กับ State
+  useEffect(() => {
+    hasUserUnmutedRef.current = hasUserUnmuted;
+  }, [hasUserUnmuted]);
 
   const opts = {
     height: "100%",
@@ -43,14 +51,14 @@ const YoutubeEngine: React.FC = () => {
     setIsReady(true);
     currentVideoIdRef.current = youtubeId;
 
-    // Logic เริ่มต้น: ถ้าเป็น iOS ต้อง Mute เสมอ
     if (isIOS()) {
+      // iOS: เริ่มต้นเงียบเสมอ รอ User กดปุ่ม
       player.mute();
       setHasUserUnmuted(false);
       setShowVolumeButton(true);
     } else {
-      // Android / PC: ถ้าเคยเปิดเสียงแล้ว ให้เปิดต่อได้เลย
-      if (show && hasUserUnmuted) {
+      // Android/PC: ถ้าเคยเปิดเสียงแล้ว ให้เปิดเสียงรอเลย
+      if (show && hasUserUnmutedRef.current) {
         player.unMute();
         player.setVolume(100);
       } else {
@@ -58,6 +66,7 @@ const YoutubeEngine: React.FC = () => {
       }
     }
 
+    // เริ่มต้นให้ Pause ไว้ก่อน รอคำสั่งจาก Effect
     player.pauseVideo();
   };
 
@@ -66,44 +75,59 @@ const YoutubeEngine: React.FC = () => {
     const player = e.target;
     const currentState = useYoutubePlayer.getState();
 
+    // 1 = Playing
     if (state === 1) {
-      // Playing
       resolvePlaying?.();
-    } else if (state === 2) {
-      // Paused
+      // 🔥 FIX Android: ถ้า Youtube บอกว่าเล่น Store ต้องรู้ว่าเล่น
+      if (!currentState.isPlay) {
+        play();
+      }
+    }
+    // 2 = Paused
+    else if (state === 2) {
       resetWaitPlaying?.();
 
-      // Auto-resume protection
-      if (currentState.show && currentState.isPlay && !isIOS()) {
-        console.log("Auto-resume trigger");
+      // 🔥 FIX Android: ป้องกันการ Pause เองตอนโหลดเพลงใหม่
+      // ถ้า Store บอกว่าเล่นอยู่ แต่ Player ดัน Pause (อาจจะเพราะกำลัง Buffer หรือเปลี่ยนเพลง)
+      // อย่าเพิ่งสั่ง setPause(false) เข้า Store ทันที ให้เช็คก่อน
+      if (currentState.show && currentState.isPlay) {
+        // พยายาม Resume
         player.playVideo();
+      } else {
+        // ถ้า User ตั้งใจ Pause จริงๆ
+        setPause(false);
       }
-    } else if (state === 0) {
-      // Ended
+    }
+    // 0 = Ended
+    else if (state === 0) {
       resetWaitPlaying?.();
-    } else if (state === -1 || state === 5) {
-      // Android Fix: Unstarted/Cued
+      // จบเพลง -> ต้อง setPause เพื่อให้ Queue รู้ว่าจบ (หรือ Queue อาจจะจับจากเวลา)
+      setPause(false);
+    }
+    // -1 = Unstarted, 5 = Cued
+    else if (state === -1 || state === 5) {
+      // ถ้า Android ค้างที่ State นี้ตอนเปลี่ยนเพลง ให้ถีบมันไปต่อ
       if (currentState.show && currentState.isPlay && !isIOS()) {
-        console.log("Force play trigger (Unstarted/Cued state)");
         player.playVideo();
       }
     }
   };
 
-  // 1. จัดการการเปลี่ยน Video ID (หัวใจสำคัญ)
+  // 1. จัดการการเปลี่ยน Video ID (หัวใจสำคัญของการแก้ปัญหา)
+  // ❌ เอา hasUserUnmuted ออกจาก dependency array เพื่อไม่ให้โหลดซ้ำตอนกดปุ่มเปิดเสียง
   useEffect(() => {
     const currentState = useYoutubePlayer.getState();
     const player = currentState.player;
 
     if (!player || !youtubeId) return;
 
+    // เช็คว่า ID เปลี่ยนจริงๆ หรือไม่
     if (currentVideoIdRef.current !== youtubeId) {
       currentVideoIdRef.current = youtubeId;
 
       // --- กรณี iOS ---
-      // บังคับ Reset ทุกรอบ ให้ปุ่มขึ้นใหม่เสมอ
+      // เปลี่ยนเพลงทุกครั้ง -> ต้อง Reset ให้กดเปิดเสียงใหม่ทุกครั้ง
       if (isIOS()) {
-        console.log("iOS: Resetting for new video");
         setHasUserUnmuted(false);
         setShowVolumeButton(true);
         player.mute();
@@ -113,30 +137,32 @@ const YoutubeEngine: React.FC = () => {
       }
 
       // --- กรณี Android / Desktop ---
-      if (hasUserUnmuted) {
-        // โหลดและเล่นต่อทันที
-        player.loadVideoById({ videoId: youtubeId, startSeconds: 0 });
+      const isCurrentlyUnmuted = hasUserUnmutedRef.current; // ใช้ Ref ค่าล่าสุด
 
-        // 🔥 FIX ANDROID:
-        // สั่ง play() ของ Store ทันที เพื่อให้ currentim / progress bar ทำงาน
-        // ไม่ต้องรอ callback จาก YouTube State Change
+      if (isCurrentlyUnmuted) {
+        // 1. สั่งโหลด
+        player.loadVideoById({ videoId: youtubeId, startSeconds: 0 });
+        player.unMute(); // ย้ำอีกที
+
+        // 2. 🔥 FIX ANDROID: สั่ง Store ให้เป็น Playing ทันที!
+        // ไม่ต้องรอ onStateChange เพราะมันช้าและอาจเพี้ยน
         play();
         player.playVideo();
       } else {
-        // ยังไม่เคยเปิดเสียง -> Mute แล้วเล่น (Autoplay แบบเงียบ)
+        // ยังไม่เคยเปิดเสียง (Autoplay แบบ Mute)
         player.mute();
         player.loadVideoById({ videoId: youtubeId, startSeconds: 0 });
 
-        // ถ้า Store บอกว่าเล่นอยู่ ก็สั่งเล่นต่อเลย
+        // ถ้าคิวรันอยู่ ก็ให้เล่นต่อ (แบบเงียบ)
         if (currentState.isPlay) {
-          play(); // ย้ำ State
+          play(); // ย้ำ Store
           player.playVideo();
         }
       }
     }
-  }, [youtubeId, hasUserUnmuted]);
+  }, [youtubeId]); // 🔥 ลบ hasUserUnmuted ออกจากตรงนี้ แก้ปัญหา iOS เสียงหาย
 
-  // 2. จัดการ Play/Pause/Show
+  // 2. จัดการ Play/Pause/Show ตาม State
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
@@ -154,7 +180,7 @@ const YoutubeEngine: React.FC = () => {
     }
 
     if (isPlay) {
-      // iOS ต้องผ่าน User Interaction เท่านั้นในรอบแรก
+      // iOS กันเหนียว: ห้ามสั่ง Play ถ้ายังไม่ Unmute (รอปุ่ม)
       if (isIOS() && !hasUserUnmuted) {
         return;
       }
@@ -162,19 +188,22 @@ const YoutubeEngine: React.FC = () => {
     } else {
       player.pauseVideo();
     }
-  }, [show, isPlay]);
+  }, [show, isPlay, hasUserUnmuted]); // เพิ่ม hasUserUnmuted เข้าไปเพื่อให้ Effect ทำงานตอนกดปุ่ม
 
   const handleToggleMute = () => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
+    // 1. อัปเดต State UI
     setHasUserUnmuted(true);
     setShowVolumeButton(false);
 
+    // 2. สั่ง Player โดยตรง (สำคัญมากสำหรับ iOS)
     player.unMute();
     player.setVolume(100);
 
-    play(); // สั่ง Store ให้ state = Playing -> currentim จะเริ่มวิ่ง
+    // 3. สั่ง Play ทั้ง Store และ Player
+    play(); // Store: isPlay = true -> ตัวนับเวลาเริ่มเดิน
     player.playVideo();
   };
 
@@ -209,7 +238,7 @@ const YoutubeEngine: React.FC = () => {
         </div>
       </div>
 
-      {/* ปุ่มเปิดเสียง (ปรับปรุงใหม่ Responsive) */}
+      {/* ปุ่มเปิดเสียง (Responsive + Glassmorphism) */}
       {showVolumeButton && show && (
         <button
           onClick={handleToggleMute}
@@ -220,7 +249,6 @@ const YoutubeEngine: React.FC = () => {
             
             flex items-center justify-center gap-3
             
-            /* Responsive Sizing */
             w-[80vw] max-w-[280px] md:w-auto md:max-w-none
             px-6 py-4 md:px-12 md:py-6
             
@@ -237,10 +265,7 @@ const YoutubeEngine: React.FC = () => {
             hover:scale-105 active:scale-95
           "
         >
-          {/* Icon size responsive */}
           <span className="text-2xl md:text-3xl">🔊</span>
-
-          {/* Text size responsive */}
           <span className="text-lg md:text-2xl whitespace-nowrap">
             {isIOS() ? "แตะเพื่อเล่น" : "แตะเพื่อเปิดเสียง"}
           </span>
