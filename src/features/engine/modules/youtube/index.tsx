@@ -20,6 +20,7 @@ const YoutubeEngine: React.FC = () => {
   } = useYoutubePlayer();
 
   const currentVideoIdRef = useRef<string | undefined>("");
+  const isLoadingNewVideoRef = useRef(false);
 
   const opts = {
     height: "100%",
@@ -57,12 +58,30 @@ const YoutubeEngine: React.FC = () => {
   const handleStateChange = (e: { data: number; target: YouTubePlayer }) => {
     const state = e.data;
     const player = e.target;
-
     const currentState = useYoutubePlayer.getState();
 
+    // ✅ FIX: เมื่อเริ่มเล่น (state = 1) ต้องเช็คว่าเสียงเปิดอยู่หรือไม่
     if (state === 1) {
+      // กำลังเล่นอยู่
+
+      // ถ้าผู้ใช้เปิดเสียงไว้ ต้องบังคับ unmute ทุกครั้ง (สำคัญมากบน iOS!)
+      if (currentState.hasUserUnmuted) {
+        player.unMute();
+        player.setVolume(100);
+      }
+
       resolvePlaying?.();
+      isLoadingNewVideoRef.current = false;
+    } else if (state === 3) {
+      // กำลังโหลด (buffering)
+
+      // ✅ ช่วงนี้คือโอกาสดีที่จะตั้งค่าเสียงก่อนเล่น
+      if (currentState.hasUserUnmuted && !isLoadingNewVideoRef.current) {
+        player.unMute();
+        player.setVolume(100);
+      }
     } else if (state === 2) {
+      // หยุดชั่วคราว (paused)
       resetWaitPlaying?.();
 
       if (currentState.show && currentState.isPlay) {
@@ -70,34 +89,52 @@ const YoutubeEngine: React.FC = () => {
         player.playVideo();
       }
     } else if (state === 0) {
+      // จบวิดีโอ
       resetWaitPlaying?.();
+    } else if (state === 5) {
+      // พร้อมเล่น (cued)
+
+      // ✅ ถ้าเปิดเสียงไว้ ต้อง unmute ก่อนเล่น
+      if (currentState.hasUserUnmuted) {
+        player.unMute();
+        player.setVolume(100);
+      }
     }
   };
 
-  // ✅ FIX: เปลี่ยนเพลงโดยไม่ Reset สถานะเสียง
+  // ✅ เปลี่ยนเพลงพร้อมรักษาสถานะเสียง
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player || !youtubeId) return;
 
     if (currentVideoIdRef.current !== youtubeId) {
+      console.log("🎵 Loading new video:", youtubeId);
       currentVideoIdRef.current = youtubeId;
+      isLoadingNewVideoRef.current = true;
 
-      // ✅ ไม่ต้องแยก iOS/Android แล้ว - ใช้ logic เดียวกัน
+      // ✅ สำคัญ: ตั้งค่าเสียงก่อนโหลด
       if (hasUserUnmuted) {
-        // ผู้ใช้เปิดเสียงแล้ว → โหลดวิดีโอใหม่พร้อมเสียง
         player.unMute();
         player.setVolume(100);
-        player.loadVideoById({
-          videoId: youtubeId,
-          startSeconds: 0,
-        });
       } else {
-        // ยังไม่เปิดเสียง → โหลดแบบ mute
         player.mute();
-        player.loadVideoById({
-          videoId: youtubeId,
-          startSeconds: 0,
-        });
+      }
+
+      // โหลดวิดีโอใหม่
+      player.loadVideoById({
+        videoId: youtubeId,
+        startSeconds: 0,
+      });
+
+      // ✅ iOS Fix: รอ 100ms แล้ว unmute อีกครั้ง
+      if (hasUserUnmuted && isIOS()) {
+        setTimeout(() => {
+          if (player && player.unMute) {
+            player.unMute();
+            player.setVolume(100);
+            console.log("🔊 iOS: Force unmute after loadVideo");
+          }
+        }, 100);
       }
     }
   }, [youtubeId, hasUserUnmuted]);
@@ -129,7 +166,8 @@ const YoutubeEngine: React.FC = () => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
-    // ✅ เมื่อกดปุ่มครั้งแรก → จำสถานะไว้ตลอด
+    console.log("🔊 User unmuted - will persist for all videos");
+
     setHasUserUnmuted(true);
     setShowVolumeButton(false);
 
@@ -173,7 +211,7 @@ const YoutubeEngine: React.FC = () => {
         </div>
       </div>
 
-      {/* ✅ ปุ่มเปิดเสียง - กดครั้งเดียว ใช้ได้ตลอด */}
+      {/* ปุ่มเปิดเสียง - กดครั้งเดียว ใช้ได้ตลอด */}
       {showVolumeButton && show && (
         <button
           onClick={handleToggleMute}
