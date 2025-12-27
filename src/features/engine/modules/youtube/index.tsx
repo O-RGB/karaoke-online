@@ -12,14 +12,13 @@ const YoutubeEngine: React.FC = () => {
     setPlayer,
     setIsReady,
     setShowVolumeButton,
-    setHasUserUnmuted,
+    setHasUserUnmuted, // ใช้ตัวนี้เพื่อ Reset state ใน iOS
     play,
     resolvePlaying,
     resetWaitPlaying,
   } = useYoutubePlayer();
 
   const currentVideoIdRef = useRef<string | undefined>("");
-  const isGlobalUnlockedRef = useRef(false);
   const [videoSize, setVideoSize] = useState({ w: 0, h: 0 });
 
   const opts = {
@@ -32,7 +31,7 @@ const YoutubeEngine: React.FC = () => {
       modestbranding: 1,
       rel: 0,
       iv_load_policy: 3,
-      mute: 0,
+      mute: 1, // Default mute ไว้ก่อน
       playsinline: 1,
       fs: 0,
       enablejsapi: 1,
@@ -63,45 +62,7 @@ const YoutubeEngine: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 2. Global Event Listener (First-Touch Hijack)
-  useEffect(() => {
-    if (!isIOS()) return;
-
-    const handleGlobalInteraction = () => {
-      if (isGlobalUnlockedRef.current) return;
-      const player = useYoutubePlayer.getState().player;
-
-      if (player && typeof player.playVideo === "function") {
-        console.log("👆 iOS Interaction Detected: Unlocking...");
-        player.unMute();
-        player.setVolume(100);
-        player.playVideo();
-
-        // Update State
-        setHasUserUnmuted(true);
-        setShowVolumeButton(false);
-        isGlobalUnlockedRef.current = true;
-
-        // Clean up
-        window.removeEventListener("click", handleGlobalInteraction);
-        window.removeEventListener("touchstart", handleGlobalInteraction);
-      }
-    };
-
-    window.addEventListener("click", handleGlobalInteraction, {
-      passive: false,
-    });
-    window.addEventListener("touchstart", handleGlobalInteraction, {
-      passive: false,
-    });
-
-    return () => {
-      window.removeEventListener("click", handleGlobalInteraction);
-      window.removeEventListener("touchstart", handleGlobalInteraction);
-    };
-  }, []);
-
-  // 3. Handle Ready (จุดที่แก้: สั่งโชว์ปุ่มตรงนี้)
+  // 2. Handle Ready
   const handleReady = (event: { target: YouTubePlayer }) => {
     const player = event.target;
     setPlayer(player);
@@ -109,53 +70,36 @@ const YoutubeEngine: React.FC = () => {
     currentVideoIdRef.current = youtubeId;
 
     if (isIOS()) {
-      // 🍎 iOS:
-      player.mute(); // Mute ก่อนเสมอ
-
-      if (!isGlobalUnlockedRef.current) {
-        // ถ้ายังไม่ Unlock -> เล่นแบบใบ้ + โชว์ปุ่มทันที
-        player.playVideo();
-        setShowVolumeButton(true); // <--- บรรทัดสำคัญที่เพิ่มมา
-        setHasUserUnmuted(false);
-      }
-    } else {
-      // 🤖 Android/PC:
-      player.unMute();
-      player.setVolume(100);
+      // 🍎 iOS: บังคับ Mute และโชว์ปุ่มเสมอ ตอนเริ่ม
+      player.mute();
       player.playVideo();
-      setHasUserUnmuted(true);
-      setShowVolumeButton(false);
-    }
-  };
-
-  const handleStateChange = (e: { data: number; target: YouTubePlayer }) => {
-    const state = e.data;
-    const player = e.target;
-    const currentState = useYoutubePlayer.getState();
-
-    if (state === 1) {
-      // Playing
-      resolvePlaying?.();
-      if (isIOS()) {
-        // ถ้าเล่นอยู่ แต่เสียงยังปิด และ User กดเปิดแล้ว -> พยายามเปิดเสียงอีกรอบ
-        const isMuted = player.isMuted?.() ?? true;
-        if (isMuted && currentState.hasUserUnmuted) {
-          player.unMute();
-        }
+      setShowVolumeButton(true);
+      setHasUserUnmuted(false); // Reset state ว่ายังไม่ได้เปิดเสียง
+    } else {
+      // 🤖 Android/PC: เช็คว่าเคยเปิดเสียงมาหรือยัง
+      if (hasUserUnmuted) {
+        player.unMute();
+        player.setVolume(100);
+        player.playVideo();
+        setShowVolumeButton(false);
       } else {
-        if (player.isMuted()) player.unMute();
+        player.mute();
+        player.playVideo();
+        setShowVolumeButton(true);
       }
-    } else if (state === 2) {
-      // Paused
-      resetWaitPlaying?.();
-      if (currentState.show && currentState.isPlay) player.playVideo();
-    } else if (state === 0) {
-      // Ended
+    }
+  };
+
+  const handleStateChange = (e: { data: number }) => {
+    const state = e.data;
+    if (state === 1) {
+      resolvePlaying?.();
+    } else if (state === 2 || state === 0) {
       resetWaitPlaying?.();
     }
   };
 
-  // 4. Handle Video Change
+  // 3. Logic เปลี่ยนวิดีโอ (หัวใจสำคัญอยู่ตรงนี้)
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player || !youtubeId) return;
@@ -165,28 +109,46 @@ const YoutubeEngine: React.FC = () => {
       const loadOpts = { videoId: youtubeId, startSeconds: 0 };
 
       if (isIOS()) {
-        if (hasUserUnmuted || isGlobalUnlockedRef.current) {
+        // 🍎 iOS: บังคับ Mute + โชว์ปุ่มทุก Link!
+        console.log("🍎 iOS New Video: Force Mute & Show Button");
+        player.mute();
+        player.loadVideoById(loadOpts);
+        player.playVideo();
+
+        setShowVolumeButton(true); // บังคับโชว์ปุ่ม
+        setHasUserUnmuted(false); // Reset state
+      } else {
+        // 🤖 Android: เช็ค State เดิม
+        if (hasUserUnmuted) {
+          // ถ้าเคยเปิดเสียงแล้ว -> ใช้สูตร Force Loop ให้เสียงมาต่อเนื่อง
+          console.log("🤖 Android: Keeping Audio On");
           player.loadVideoById(loadOpts);
-          setTimeout(() => {
-            player.unMute();
-            player.playVideo();
+
+          // Loop กระชากเสียง (สูตรที่คุณชอบ)
+          const check = setInterval(() => {
+            const state = player.getPlayerState();
+            if (state === -1 || state === 5 || state === 3) {
+              player.unMute();
+              player.setVolume(100);
+            }
+            if (state === 1) {
+              player.unMute();
+              clearInterval(check);
+            }
           }, 100);
+          setTimeout(() => clearInterval(check), 3000);
         } else {
-          // New video, no permission yet
+          // ถ้ายังไม่เคยเปิดเสียง -> Mute + โชว์ปุ่ม
           player.mute();
           player.loadVideoById(loadOpts);
           player.playVideo();
-          setShowVolumeButton(true); // บังคับโชว์ปุ่มเมื่อเปลี่ยนวิดีโอใหม่
+          setShowVolumeButton(true);
         }
-      } else {
-        player.unMute();
-        player.setVolume(100);
-        player.loadVideoById(loadOpts);
       }
     }
   }, [youtubeId]);
 
-  // 5. Play/Pause Control
+  // 4. Play/Pause Control
   useEffect(() => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
@@ -209,14 +171,13 @@ const YoutubeEngine: React.FC = () => {
     }
   }, [show, isPlay]);
 
+  // 5. ปุ่มเปิดเสียง (กดแล้ว Unmute)
   const handleToggleMute = () => {
     const player = useYoutubePlayer.getState().player;
     if (!player) return;
 
-    console.log("🔊 Button Clicked: Unmuting...");
-    setHasUserUnmuted(true);
+    setHasUserUnmuted(true); // จำค่าไว้ (มีผลกับ Android รอบหน้า)
     setShowVolumeButton(false);
-    isGlobalUnlockedRef.current = true;
 
     player.unMute();
     player.setVolume(100);
@@ -225,6 +186,7 @@ const YoutubeEngine: React.FC = () => {
 
   return (
     <>
+      {/* Background Video */}
       <div
         className={`fixed inset-0 -z-10 overflow-hidden bg-black transition-opacity duration-500 ${
           show ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -249,10 +211,7 @@ const YoutubeEngine: React.FC = () => {
         </div>
       </div>
 
-      {/* Overlay ปุ่มเปิดเสียง 
-         - ใช้ z-[9999] เพื่อให้อยู่บนสุดแน่นอน
-         - ตรวจสอบ showVolumeButton && show
-      */}
+      {/* ปุ่มเปิดเสียง (Glassmorphism) */}
       {showVolumeButton && show && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
           <button
