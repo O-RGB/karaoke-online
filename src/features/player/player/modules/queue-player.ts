@@ -52,9 +52,7 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   playMusic: async (index) => {
     const player = useSynthesizerEngine.getState().engine?.player;
     const client = usePeerHostStore.getState().requestToClient;
-    const addNotification = useNotificationStore(
-      (state) => state.addNotification
-    );
+    const addNotification = useNotificationStore.getState().addNotification
 
     if (!player) {
       console.error("[playMusic] Player engine is not available");
