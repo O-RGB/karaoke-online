@@ -250,37 +250,41 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     youtubePlayer.setShow(false);
     this.engine.timer?.stopTimer();
 
-    const mid = data.files.midi;
-    if (mid !== undefined) {
-      this.engine.timer?.updateMusic(data);
-      this.engine.timer?.updateTempoMap(data.tempoRange);
-      this.engine.timer?.updatePpq((data.metadata as any).ticksPerBeat);
-      this.musicQuere = data;
-      this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
-      return !!this.prepareMidi(mid);
-    }
+    try {
+      const mid = data.files.midi;
+      if (mid !== undefined) {
+        this.engine.timer?.updateMusic(data);
+        this.engine.timer?.updateTempoMap(data.tempoRange);
+        this.engine.timer?.updatePpq((data.metadata as any).ticksPerBeat);
+        this.musicQuere = data;
+        this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
+        return !!this.prepareMidi(mid);
+      }
 
-    const mp3 = data.files.mp3;
-    if (mp3 != undefined) {
-      this.engine.timer?.updateMusic(data);
-      this.musicQuere = data;
-      this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
-      return this.loadMp3(mp3);
-    }
+      const mp3 = data.files.mp3;
+      if (mp3 != undefined) {
+        this.engine.timer?.updateMusic(data);
+        this.musicQuere = data;
+        this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
+        return this.loadMp3(mp3);
+      }
 
-    const ykr = data.files.ykr;
-    if (ykr != undefined && data.youtubeId) {
-      this.engine.timer?.updateMusic(data);
-      this.musicQuere = data;
-      this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
-      return this.loadYoutube(data.youtubeId);
-    }
+      const ykr = data.files.ykr;
+      if (ykr != undefined && data.youtubeId) {
+        this.engine.timer?.updateMusic(data);
+        this.musicQuere = data;
+        this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
+        return this.loadYoutube(data.youtubeId);
+      }
 
-    if (data.isRemoteYoutube && data.youtubeId) {
-      this.engine.timer?.updateMusic(data);
-      this.musicQuere = data;
-      this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
-      return this.loadYoutube(data.youtubeId);
+      if (data.isRemoteYoutube && data.youtubeId) {
+        this.engine.timer?.updateMusic(data);
+        this.musicQuere = data;
+        this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
+        return this.loadYoutube(data.youtubeId);
+      }
+    } catch (error) {
+      return false;
     }
 
     return false;

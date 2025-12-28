@@ -8,21 +8,46 @@ export class TimerWorker {
   constructor(player: BaseSynthPlayerEngine) {
     this.player = player;
   }
-
   updateMusic(musicInfo: MusicLoadAllData) {
     if (musicInfo.musicType === "MIDI") {
       this.timingMode = "Tick";
+
+      const metadata = musicInfo.metadata as any;
+      const duration = metadata?.duration;
+      const ticksPerBeat = metadata?.ticksPerBeat;
+
+      if (duration == null) {
+        throw new Error(
+          "[updateMusic][MIDI] Missing required metadata: duration"
+        );
+      }
+
+      if (ticksPerBeat == null) {
+        throw new Error(
+          "[updateMusic][MIDI] Missing required metadata: ticksPerBeat"
+        );
+      }
+
       this.updateTempoMap(musicInfo.tempoRange);
-      this.updateDuration((musicInfo.metadata as any).duration);
-      this.updatePpq((musicInfo.metadata as any).ticksPerBeat);
+      this.updateDuration(duration);
+      this.updatePpq(ticksPerBeat);
     } else {
       this.timingMode = "Time";
-      if ((musicInfo.metadata as any).duration) {
-        this.updateDuration((musicInfo.metadata as any).duration);
-      } else if (musicInfo.duration) {
-        this.updateDuration(musicInfo.duration);
+
+      const durationFromMeta = (musicInfo.metadata as any)?.duration;
+      const durationFromRoot = musicInfo.duration;
+
+      if (durationFromMeta != null) {
+        this.updateDuration(durationFromMeta);
+      } else if (durationFromRoot != null) {
+        this.updateDuration(durationFromRoot);
+      } else {
+        throw new Error(
+          "[updateMusic][Audio] Unable to determine duration (metadata.duration and musicInfo.duration are both missing)"
+        );
       }
     }
+
     this.updateMode(this.timingMode);
   }
 

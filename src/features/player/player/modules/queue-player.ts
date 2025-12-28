@@ -9,6 +9,7 @@ import {
 import useSongsStore from "@/features/songs/store/songs.store";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import { musicProcessGroup } from "@/lib/karaoke/read";
+import useNotificationStore from "@/features/notification-store";
 
 const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   loading: false,
@@ -48,13 +49,21 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     get().playMusic(0);
     get().removeQueue(0);
   },
-
   playMusic: async (index) => {
     const player = useSynthesizerEngine.getState().engine?.player;
     const client = usePeerHostStore.getState().requestToClient;
+    const addNotification = useNotificationStore(
+      (state) => state.addNotification
+    );
 
     if (!player) {
-      console.error("Player Not Working!!");
+      console.error("[playMusic] Player engine is not available");
+
+      addNotification({
+        title: "ไม่สามารถเล่นเพลงได้",
+        description: "ระบบเล่นเพลงยังไม่พร้อม กรุณาลองใหม่อีกครั้ง",
+        variant: "error",
+      });
       return;
     }
 
@@ -62,58 +71,88 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
     const music = queue[index];
 
     if (!music) {
-      console.error("music metadata Not Found!!");
+      console.error("[playMusic] Music not found in queue", { index, queue });
+
+      addNotification({
+        title: "ไม่พบเพลงในคิว",
+        description: "เพลงที่เลือกอาจถูกลบออก หรือคิวไม่ถูกต้อง",
+        variant: "error",
+      });
 
       player.stop();
-      if (player) {
-        player.musicQuere = undefined;
-      }
-
+      player.musicQuere = undefined;
       return;
     }
 
-    let song: MusicLoadAllData | undefined = undefined;
+    let song: MusicLoadAllData | undefined;
     set({ loading: true });
 
-    if (!music._bufferFile) {
-      let songsManager = useSongsStore.getState().songsManager;
-      song = await songsManager?.getSong(music);
+    try {
+      if (!music._bufferFile) {
+        const songsManager = useSongsStore.getState().songsManager;
 
-      set({ loading: false });
+        if (!songsManager) {
+          throw new Error("SongsManager is not initialized");
+        }
 
-      if (!song) {
-        console.error("Songs Manager Not Found!!");
-        return;
+        song = await songsManager.getSong(music);
+      } else {
+        const karaokeExtension: KaraokeExtension = {
+          ykr: music._bufferFile,
+        };
+
+        song = await musicProcessGroup(karaokeExtension);
       }
-    } else if (music._bufferFile) {
-      let karaokeExtension: KaraokeExtension = {};
-      karaokeExtension.ykr = music._bufferFile;
-      song = await musicProcessGroup(karaokeExtension);
+    } catch (error) {
+      console.error("[playMusic] Failed to load song", error);
+
+      addNotification({
+        title: "โหลดเพลงไม่สำเร็จ",
+        description: "เกิดข้อผิดพลาดระหว่างเตรียมเพลง",
+        variant: "error",
+      });
+
       set({ loading: false });
+      return;
+    }
+
+    set({ loading: false });
+
+    if (!song) {
+      console.error("[playMusic] Song data is empty after loading");
+
+      addNotification({
+        title: "ไม่สามารถเล่นเพลงได้",
+        description: "ข้อมูลเพลงไม่สมบูรณ์",
+        variant: "error",
+      });
+      return;
     }
 
     player.stop();
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((r) => setTimeout(r, 100));
+
     const isOk = await player.loadMidi(song);
 
     if (!isOk) {
-      console.error("Engine can't load music to player!!");
+      console.error("[playMusic] Player failed to load music", song);
+
+      addNotification({
+        title: "เล่นเพลงไม่สำเร็จ",
+        description: "ระบบไม่สามารถโหลดเพลงเข้าสู่ตัวเล่นได้",
+        variant: "error",
+      });
       return;
     }
 
     player.setCurrentTiming(0);
-    console.log("Play Form Quere-player");
+    console.log("[playMusic] Start playing");
+
     setTimeout(() => {
       player.play();
     }, 500);
 
-    // setTimeout(async () => {
-    //   // const requestToClient = usePeerHostStore.getState().requestToClient;
-    //   // await requestToClient(null, "system/init", {
-    //   //   musicInfo: music,
-    //   // });
-    // }, 500);
-    if (song) client(null, "system/music-info", song.trackData);
+    client?.(null, "system/music-info", song.trackData);
   },
 }));
 
