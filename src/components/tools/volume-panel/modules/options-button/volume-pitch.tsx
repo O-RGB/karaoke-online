@@ -26,7 +26,7 @@ interface VolumeOptionsProps {
   onSpeedChange: (value: number) => void;
   openQueue?: () => void;
   onMutedVolume: (event: IControllerChange<boolean>) => void;
-  setNotification: (notification: INotificationValue) => void;
+
   vocal: number;
   nodes?: SynthChannel[];
   isYoutube?: boolean;
@@ -37,7 +37,6 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
   onSpeedChange,
   openQueue,
   onMutedVolume,
-  setNotification,
   vocal,
   nodes,
   isYoutube = false,
@@ -63,7 +62,6 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
         onChange={(value) => {
           onPitchChange(value);
           setPitch(value);
-          setNotification({ text: `Pitch ${value}` });
         }}
         value={pitch}
         icon={
@@ -78,7 +76,6 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
         onChange={(value) => {
           onSpeedChange(value);
           setSpeed(value);
-          setNotification({ text: `Speed ${value}` });
         }}
         value={speed}
         suffix="%"

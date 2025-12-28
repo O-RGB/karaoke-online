@@ -12,6 +12,7 @@ const SongInfo: React.FC<SongInfoProps> = ({ className }) => {
   const [musicInfo, setMusicInfo] = useState<MusicLoadAllData>();
 
   const onMusicUpdated = (music: MusicLoadAllData) => {
+    console.log("music", music);
     setMusicInfo(music);
   };
 
@@ -38,11 +39,10 @@ const SongInfo: React.FC<SongInfoProps> = ({ className }) => {
   if (!show) return <></>;
   return (
     <div className={`${className}`}>
-      <div className={`w-fit h-20 flex flex-col gap-2 `}>
-        <div className="p-3 border blur-overlay rounded-md text-white ">
-          ชื่อเพลง: {musicInfo?.metadata?.info.TITLE} <br />
-          นักร้อง: {musicInfo?.metadata?.info.ARTIST}
-        </div>
+      <div className="p-2 border blur-overlay rounded-md text-white text-sm leading-4">
+        <span className="text-xs">ชื่อเพลง:</span> {musicInfo?.trackData.TITLE}{" "}
+        <br />
+        <span className="text-xs">นักร้อง:</span> {musicInfo?.trackData.ARTIST}
       </div>
     </div>
   );

@@ -50,7 +50,7 @@ const NextSongPanel: React.FC<NextSongPanelProps> = ({ className }) => {
       <div
         className={`w-full h-20 px-6 lg:px-20 flex flex-col justify-center items-center gap-2`}
       >
-        <div className=" flex justify-center gap-3 lg:gap-10">
+        <div className="flex justify-center gap-3 lg:gap-10">
           <div
             className={`${
               countdown <= 3 ? "bg-white/70" : "bg-white/20"

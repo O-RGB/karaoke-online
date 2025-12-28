@@ -14,7 +14,6 @@ const useQueuePlayer = create<QueuePlayerProps>((set, get) => ({
   loading: false,
   queue: [],
   addQueue: async (value) => {
-    console.log("REMOTE YOUTUBE: ", value);
     const player = useSynthesizerEngine.getState().engine?.player;
     let queue = [...get().queue];
     set({ queue: [] });

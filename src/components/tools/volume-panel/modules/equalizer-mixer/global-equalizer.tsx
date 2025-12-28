@@ -2,7 +2,7 @@ import { useSynthesizerEngine } from "@/features/engine/synth-store";
 import React, { useEffect, useState } from "react";
 import SwitchRadio from "../../../../common/input-data/switch/switch-radio";
 import SliderCommon from "../../../../common/input-data/slider";
-// React Icons
+
 import {
   FiChevronDown,
   FiChevronUp,
@@ -19,8 +19,8 @@ import {
   LimiterParams,
 } from "@/features/engine/modules/equalizer/global-equalizer";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
+import useNotificationStore from "@/features/notification-store";
 
-// --- Configuration ---
 interface EqPreset {
   id: string;
   name: string;
@@ -32,8 +32,6 @@ const defaultPresets: EqPreset[] = [
   { id: "warm", name: "Warm", gains: [1, 2, 1, 0, 0, -1, -1, -2, -2, -3] },
   { id: "bright", name: "Bright", gains: [-1, -1, 0, 0, 1, 2, 3, 4, 3, 2] },
 ];
-
-// --- Sub Components ---
 
 const RackSlider = ({
   label,
@@ -67,7 +65,6 @@ const RackSlider = ({
     );
   }
 
-  // ปรับลด margin และขนาดตัวอักษรให้แน่นขึ้น (Compact View)
   return (
     <div className="flex flex-col gap-0.5 mb-1.5 w-full">
       <div className="flex justify-between items-end text-[10px] text-gray-500 px-0.5">
@@ -83,7 +80,7 @@ const RackSlider = ({
         max={max}
         step={step}
         onChange={handleChange}
-        className="h-1.5" // ลดความสูงของราง Slider
+        className="h-1.5"
       />
     </div>
   );
@@ -98,7 +95,6 @@ const SectionPanel = ({
   children,
 }: any) => {
   return (
-    // เปลี่ยนเป็น Card Style แยกชิ้นกันชัดเจน
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-2 last:mb-0">
       <div
         className={`flex justify-between items-center py-2 px-3 cursor-pointer select-none group transition-colors ${
@@ -138,7 +134,6 @@ const SectionPanel = ({
       </div>
 
       {isOpen && (
-        // ลด padding เนื้อหาภายใน
         <div className="p-3 animate-in slide-in-from-top-1 duration-200 bg-white">
           {children}
         </div>
@@ -147,21 +142,21 @@ const SectionPanel = ({
   );
 };
 
-// --- Main Component ---
-
 const GlobalEqualizer: React.FC = () => {
   const equalizer = useSynthesizerEngine(
     (state) => state.engine?.globalEqualizer
   );
 
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification
+  );
   const clientMaster = usePeerHostStore((state) => state.sendToMaster);
   const addRoute = usePeerHostStore((state) => state.addRoute);
 
-  // UI States
   const [activeSections, setActiveSections] = useState<Record<string, boolean>>(
     {
       eq: true,
-      tone: true, // เปิดไว้ให้เห็นภาพรวม
+      tone: true,
       dynamics: false,
       space: false,
       master: true,
@@ -170,7 +165,6 @@ const GlobalEqualizer: React.FC = () => {
   const toggleSection = (key: string) =>
     setActiveSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  // Value States
   const [gains, setGains] = useState<number[]>(new Array(10).fill(0));
   const [isEnabled, setIsEnabled] = useState<boolean>(true);
   const [selectedPreset, setSelectedPreset] = useState<string>("flat");
@@ -188,7 +182,9 @@ const GlobalEqualizer: React.FC = () => {
     mix: 0,
     duration: 2.5,
     decay: 2.0,
+    preDelay: 0.02,
   });
+
   const [limiter, setLimiter] = useState<LimiterParams>({
     threshold: -0.3,
     release: 0.1,
@@ -214,7 +210,6 @@ const GlobalEqualizer: React.FC = () => {
       </div>
     );
 
-  // --- Handlers ---
   const handleGainChange = (i: number, val: number) => {
     const newGains = [...gains];
     newGains[i] = val;
@@ -232,11 +227,11 @@ const GlobalEqualizer: React.FC = () => {
     setSelectedPreset(p.id);
   };
 
-  // Updates (Keep Logic Same)
   const updateComp = (key: keyof CompressorParams, val: number) => {
-    setComp({ ...comp, [key]: val });
+    setComp((prev) => ({ ...prev, [key]: val }));
     equalizer.setCompressor({ [key]: val });
   };
+
   const updateReverb = (key: keyof ReverbParams, val: number) => {
     setReverb({ ...reverb, [key]: val });
     equalizer.setReverb({ [key]: val });
@@ -246,7 +241,6 @@ const GlobalEqualizer: React.FC = () => {
     equalizer.setLimiter({ [key]: val });
   };
 
-  // Resets
   const resetEQ = () => applyPreset(defaultPresets[0]);
   const resetTone = () => {
     setSaturation(0);
@@ -266,7 +260,12 @@ const GlobalEqualizer: React.FC = () => {
     equalizer.setCompressor(def);
   };
   const resetSpace = () => {
-    const def = { mix: 0, duration: 2.5, decay: 2.0 };
+    const def = {
+      mix: 0,
+      duration: 2.5,
+      decay: 2.0,
+      preDelay: 0.02,
+    };
     setReverb(def);
     equalizer.setReverb(def);
   };
@@ -305,11 +304,13 @@ const GlobalEqualizer: React.FC = () => {
       const { enabled } = payload;
       setIsEnabled(enabled);
       equalizer.toggleEQ(enabled);
+      addNotification({
+        title: `Global Effects ${enabled ? "เปิด" : "ปิด"}}`,
+      });
     });
   }, []);
 
   return (
-    // เปลี่ยน Background หลักเป็นสีเทา เพื่อให้ Card สีขาวเด่นขึ้น (Grouping)
     <div className="w-full   min-h-full">
       {/* Header */}
       <div className="bg-white  top-0 z-20 pb-2">
@@ -332,6 +333,9 @@ const GlobalEqualizer: React.FC = () => {
               onChange={(v) => {
                 setIsEnabled(v);
                 equalizer.toggleEQ(v);
+                addNotification({
+                  title: `Global Effects ${v ? "เปิด" : "ปิด"}`,
+                });
               }}
               options={[
                 { label: "ON", value: true },

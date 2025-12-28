@@ -80,13 +80,7 @@ export class JsSynthEngine implements BaseSynthEngine {
   private recorderDestination: MediaStreamAudioDestinationNode | null = null;
   private synthAudioNode: AudioNode | null = null;
 
-  // private setInstrument: ((instrument: IPersetSoundfont[]) => void) | undefined;
-  constructor(
-    configs: Partial<ConfigSystem>,
-    peerHost: PeerHostState
-    // setInstrument?: (instrument: IPersetSoundfont[]) => void
-  ) {
-    // this.setInstrument = setInstrument;
+  constructor(configs: Partial<ConfigSystem>, peerHost: PeerHostState) {
     this.startup(configs, peerHost);
   }
 
@@ -113,13 +107,6 @@ export class JsSynthEngine implements BaseSynthEngine {
 
     this.synthAudioNode = synth.createAudioNode(audioContext, 8192);
 
-    // const test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-    // this.synth.setInterpolation(7);
-    // for (let index = 0; index < test.length; index++) {
-    //   const element = test[index];
-    //   this.synth.setPortamentoMode(element, 1);
-    // }
-
     if (this.synthAudioNode) {
       this.globalEqualizer = new GlobalEqualizer(this.synthAudioNode.context);
       this.synthAudioNode.connect(this.globalEqualizer.input);
@@ -141,6 +128,18 @@ export class JsSynthEngine implements BaseSynthEngine {
     this.onPlay();
     this.onStop();
     this.instrumentals.loadConfig(configs?.sound?.instPreset ?? []);
+
+    synth.setReverbOn(true);
+    synth.setReverb(0.78, 0.55, 0.9, 0.22);
+    synth.setChorusOn(true);
+    synth.setChorus(2, 0.06, 0.25, 6.0, 0);
+
+    // for (let channel = 0; channel < 16; channel++) {
+    //   // synth.setGenerator(channel, 8, 8000); // InitialFilterFc
+    //   // synth.setGenerator(channel, 9, 0); // InitialFilterQ
+    //   // synth.setGenerator(channel, 38, 400); // ReleaseVolEnv
+    //   // synth.setGenerator(channel, 16, 600); // ReverbEffectsSend
+    // }
 
     return { synth: synth, audio: this.audio };
   }

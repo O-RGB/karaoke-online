@@ -18,6 +18,7 @@ import { DEFAULT_INST_PRESET, DRUM_CHANNEL } from "@/config/value";
 import DrumProgramChange from "./modules/drum-program";
 import MixerNodes from "./modules/node";
 import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
+import useNotificationStore from "@/features/notification-store";
 
 interface FullMixerProps {
   nodes: SynthChannel[];

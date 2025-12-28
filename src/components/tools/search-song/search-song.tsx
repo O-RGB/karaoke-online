@@ -10,6 +10,7 @@ import { toOptions } from "@/lib/general";
 import { FaList } from "react-icons/fa";
 import { useOrientation } from "@/hooks/orientation-hook";
 import { ITrackData } from "@/features/songs/types/songs.type";
+import useNotificationStore from "@/features/notification-store";
 
 interface SearchSongProps {}
 
@@ -17,6 +18,9 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const songsManager = useSongsStore((state) => state.songsManager);
   const { orientation } = useOrientation();
 
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification
+  );
   const addQueue = useQueuePlayer((state) => state.addQueue);
   const setQueueOpen = useKeyboardStore((state) => state.setQueueOpen);
   const resetQueueingTimeout = useKeyboardStore(
@@ -45,6 +49,11 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
 
   const setSongPlayer = async (value: ITrackData) => {
     addQueue(value);
+    addNotification({
+      title: "เพิ่มเพลง",
+      description: `${value.TITLE}`,
+      variant: "info",
+    });
   };
 
   const isLandscape = orientation === "landscape";

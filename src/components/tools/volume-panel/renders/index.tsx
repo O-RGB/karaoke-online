@@ -1,6 +1,5 @@
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import React, { useEffect } from "react";
-import ChannelVolumeRender from "./volume-meter";
 import ChannelRender from "../modules/channel";
 import {
   IControllerChange,

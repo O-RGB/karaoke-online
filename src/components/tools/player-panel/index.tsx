@@ -129,10 +129,12 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
   const buttonStyle: any = {
     className: "!rounded-none aspect-square",
     size: "xs",
-    blur: {
-      border: false,
-      backgroundColor: "primary",
-    },
+    color: "white",
+    variant: "ghost",
+    // blur: {
+    //   border: false,
+    //   backgroundColor: "primary",
+    // },
   };
 
   return (
@@ -206,7 +208,7 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({
         </div>
         <div
           style={style}
-          className={`${className} w-full blur-overlay bg-black/10 border-t blur-border flex justify-between z-10`}
+          className={`${className} w-full flex justify-between z-10 border-t-[0.5px] blur-border blur-overlay`}
         >
           <div className="flex w-full">
             <div className="flex items-center h-full">

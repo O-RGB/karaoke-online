@@ -43,13 +43,13 @@ const debugLog = (
       ? "❌"
       : "⚙️";
 
-  console.log(
-    `%c${icon} [${timestamp}] [${direction}] [${
-      peerId || "SYSTEM"
-    }] type: ${type}`,
-    `color: ${color}; font-weight: bold;`,
-    details || ""
-  );
+  // console.log(
+  //   `%c${icon} [${timestamp}] [${direction}] [${
+  //     peerId || "SYSTEM"
+  //   }] type: ${type}`,
+  //   `color: ${color}; font-weight: bold;`,
+  //   details || ""
+  // );
 };
 // ----------------------
 
@@ -120,7 +120,7 @@ const setupHostConnectionHandlers = (
     // 1. Handle File Transfer Start
     if (data?.type === "FILE_TRANSFER_START") {
       const { transferId, fileName, fileSize } = data.payload;
-      console.log(`[Host] Receiving file: ${fileName} (${fileSize} bytes)`);
+
       set((state) => ({
         fileTransfers: {
           ...state.fileTransfers,
@@ -218,7 +218,6 @@ const setupHostConnectionHandlers = (
       const transfer = get().fileTransfers[transferId];
 
       if (transfer) {
-        console.log(`[Host] File transfer complete for ${transferId}.`);
         get().onFileProgress?.({
           transferId,
           progress: 100,
@@ -979,11 +978,6 @@ export const usePeerHostStore = create<PeerHostState>((set, get) => ({
         return resolve({} as T);
       }
 
-      // ... (ส่วน Broadcast wait for response logic เดิม ไม่ได้แก้)
-      // ขอละไว้เพื่อให้โค้ดไม่ยาวเกินไป แต่ Debug Log ด้านบนครอบคลุมแล้วครับ
-
-      // *** ใส่ Logic เดิมกลับเข้าไปตรงนี้ได้เลยครับสำหรับ Broadcast แบบรอ Response ***
-      // เพื่อความสมบูรณ์ ผมใส่แบบย่อให้:
       let hasSettled = false;
       const requestIds: string[] = [];
       let timeoutCount = 0;

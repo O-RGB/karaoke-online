@@ -1,141 +1,154 @@
 import { EQPreset } from "../types/equalizer.type";
 
-// Interface สำหรับรับค่า Parameter แบบละเอียด
+/* =======================
+   Interfaces
+======================= */
+
 export interface CompressorParams {
-  threshold: number; // dB (-100 to 0)
-  ratio: number; // 1 to 20
-  knee: number; // 0 to 40
-  attack: number; // 0 to 1 (seconds)
-  release: number; // 0 to 1 (seconds)
+  threshold: number; // dB
+  ratio: number; // 1..20
+  knee: number; // 0..40
+  attack: number; // seconds
+  release: number; // seconds
 }
 
 export interface ReverbParams {
-  mix: number; // 0 to 1
+  mix: number; // 0..1
   duration: number; // seconds
-  decay: number; // exponential decay factor
+  decay: number;
+  preDelay: number; // seconds
 }
 
 export interface LimiterParams {
-  threshold: number; // Ceiling (-20 to 0 dB)
+  threshold: number; // dB
   release: number; // seconds
 }
+
+/* =======================
+   Global Equalizer
+======================= */
 
 export class GlobalEqualizer {
   private audioContext: BaseAudioContext;
 
-  // --- Nodes ---
+  // Core Nodes
   private inputNode: GainNode;
+  private outputNode: GainNode;
   private masterGainNode: GainNode;
   private analyserNode: AnalyserNode;
-  private outputNode: GainNode;
 
   // Processors
   private eqNodes: BiquadFilterNode[] = [];
   private compressorNode: DynamicsCompressorNode;
-  private waveShaperNode: WaveShaperNode; // Saturation
+  private waveShaperNode: WaveShaperNode;
   private pannerNode: StereoPannerNode;
 
-  // Reverb System
+  // Reverb
   private reverbNode: ConvolverNode;
   private reverbGainNode: GainNode;
 
-  // Limiter System
+  // Limiter
   private limiterNode: DynamicsCompressorNode;
 
-  // --- State ---
-  public isEnabled: boolean = true;
-  public frequencies: number[] = [
-    32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000,
-  ];
+  // State
+  public isEnabled = true;
+
+  public frequencies = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+
   public gains: number[] = new Array(10).fill(0);
 
-  // Default Params (Pro Standard Defaults)
   public compParams: CompressorParams = {
     threshold: -24,
-    ratio: 1, // 1:1 = Bypass
-    knee: 30, // Soft knee
-    attack: 0.003, // 3ms
-    release: 0.25, // 250ms
+    ratio: 1,
+    knee: 30,
+    attack: 0.003,
+    release: 0.25,
   };
-
-  public saturationAmount: number = 0;
-  public panValue: number = 0;
 
   public reverbParams: ReverbParams = {
     mix: 0,
     duration: 2.5,
     decay: 2.0,
+    preDelay: 0.02,
   };
 
   public limiterParams: LimiterParams = {
-    threshold: -0.5, // Ceiling
+    threshold: -0.5,
     release: 0.1,
   };
 
-  public masterVolume: number = 1.0;
+  public saturationAmount = 0;
+  public panValue = 0;
+  public masterVolume = 1.0;
 
-  // Internal visualizer state
   private lastRms = 0;
+
+  /* =======================
+     Constructor
+  ======================= */
 
   constructor(context: BaseAudioContext) {
     this.audioContext = context;
 
-    // 1. Init Base Nodes
-    this.inputNode = this.audioContext.createGain();
-    this.masterGainNode = this.audioContext.createGain();
-    this.outputNode = this.audioContext.createGain();
+    this.inputNode = context.createGain();
+    this.outputNode = context.createGain();
+    this.masterGainNode = context.createGain();
 
-    // Analyser
-    this.analyserNode = this.audioContext.createAnalyser();
+    this.analyserNode = context.createAnalyser();
     this.analyserNode.fftSize = 256;
     this.analyserNode.smoothingTimeConstant = 0.8;
 
-    // 2. Create Processors
-    // Compressor
-    this.compressorNode = this.audioContext.createDynamicsCompressor();
-    this.updateCompressorNode();
-
-    // Saturation
-    this.waveShaperNode = this.audioContext.createWaveShaper();
+    this.compressorNode = context.createDynamicsCompressor();
+    this.waveShaperNode = context.createWaveShaper();
     this.waveShaperNode.oversample = "4x";
 
-    // Panner
-    this.pannerNode = this.audioContext.createStereoPanner();
+    this.pannerNode = context.createStereoPanner();
 
-    // Reverb
-    this.reverbNode = this.audioContext.createConvolver();
-    this.reverbGainNode = this.audioContext.createGain();
+    this.reverbNode = context.createConvolver();
+    this.reverbGainNode = context.createGain();
     this.reverbGainNode.gain.value = 0;
-    this.updateImpulseResponse();
 
-    // Limiter (Brickwall Config)
-    this.limiterNode = this.audioContext.createDynamicsCompressor();
-    this.limiterNode.knee.value = 0; // Hard knee
-    this.limiterNode.ratio.value = 20; // Infinity ratio
-    this.limiterNode.attack.value = 0.001; // Instant attack
+    this.limiterNode = context.createDynamicsCompressor();
+    this.limiterNode.knee.value = 0;
+    this.limiterNode.ratio.value = 20;
+    this.limiterNode.attack.value = 0.001;
+
+    this.updateCompressorNode();
     this.updateLimiterNode();
+    this.updateImpulseResponse();
 
     this.boot();
   }
 
-  public boot(): void {
+  /* =======================
+     Boot
+  ======================= */
+
+  private boot() {
     this.createEQNodes();
     this.connectGraph();
   }
 
-  private createEQNodes(): void {
-    this.eqNodes = this.frequencies.map((frequency, index) => {
-      const filter = this.audioContext.createBiquadFilter();
-      filter.type = "peaking";
-      filter.frequency.value = frequency;
-      filter.Q.value = 1.2; // Standard Graphic EQ Q
-      filter.gain.value = this.gains[index];
-      return filter;
+  /* =======================
+     EQ
+  ======================= */
+
+  private createEQNodes() {
+    this.eqNodes = this.frequencies.map((freq, i) => {
+      const f = this.audioContext.createBiquadFilter();
+      f.type = "peaking";
+      f.frequency.value = freq;
+      f.Q.value = 1.2;
+      f.gain.value = this.gains[i];
+      return f;
     });
   }
 
-  // Chain: Input -> EQ -> Comp -> Saturation -> Panner -> (Split Reverb) -> Limiter -> Master -> Output
-  private connectGraph(): void {
+  /* =======================
+     Graph
+  ======================= */
+
+  private connectGraph() {
     this.disconnectAll();
 
     if (!this.isEnabled) {
@@ -144,34 +157,29 @@ export class GlobalEqualizer {
       return;
     }
 
-    let current: AudioNode = this.inputNode;
+    let node: AudioNode = this.inputNode;
 
-    // 1. EQ
-    for (const eq of this.eqNodes) {
-      current.connect(eq);
-      current = eq;
+    for (let i = 0; i < this.eqNodes.length; i++) {
+      node.connect(this.eqNodes[i]);
+      node = this.eqNodes[i];
     }
 
-    // 2. Compressor
-    current.connect(this.compressorNode);
-    current = this.compressorNode;
+    node.connect(this.compressorNode);
+    node = this.compressorNode;
 
-    // 3. Saturation (Drive)
-    current.connect(this.waveShaperNode);
-    current = this.waveShaperNode;
+    node.connect(this.waveShaperNode);
+    node = this.waveShaperNode;
 
-    // 4. Panner
-    current.connect(this.pannerNode);
+    node.connect(this.pannerNode);
 
-    // 5. Reverb Split
-    // Dry Path
+    // Dry
     this.pannerNode.connect(this.limiterNode);
-    // Wet Path
+
+    // Wet
     this.pannerNode.connect(this.reverbGainNode);
     this.reverbGainNode.connect(this.reverbNode);
     this.reverbNode.connect(this.limiterNode);
 
-    // 6. Final Limiter & Master
     this.limiterNode.connect(this.masterGainNode);
     this.masterGainNode.connect(this.analyserNode);
     this.analyserNode.connect(this.outputNode);
@@ -179,7 +187,7 @@ export class GlobalEqualizer {
 
   private disconnectAll() {
     this.inputNode.disconnect();
-    this.eqNodes.forEach((n) => n.disconnect());
+    for (let i = 0; i < this.eqNodes.length; i++) this.eqNodes[i].disconnect();
     this.compressorNode.disconnect();
     this.waveShaperNode.disconnect();
     this.pannerNode.disconnect();
@@ -190,7 +198,55 @@ export class GlobalEqualizer {
     this.analyserNode.disconnect();
   }
 
-  // --- Internal Updates ---
+  /* =======================
+     Reverb (Custom IR)
+  ======================= */
+
+  private createImpulseResponse(
+    duration: number,
+    decay: number,
+    preDelay: number
+  ): AudioBuffer {
+    const sr = this.audioContext.sampleRate;
+    const length = sr * duration;
+    const impulse = this.audioContext.createBuffer(2, length, sr);
+    const preDelaySamples = Math.floor(preDelay * sr);
+
+    for (let ch = 0; ch < 2; ch++) {
+      const data = impulse.getChannelData(ch);
+      let lastOut = 0;
+      const alpha = 0.12;
+
+      for (let i = 0; i < length; i++) {
+        const white = Math.random() * 2 - 1;
+        lastOut += alpha * (white - lastOut);
+
+        if (i < preDelaySamples) {
+          data[i] = 0;
+        } else {
+          const t = (i - preDelaySamples) / (length - preDelaySamples);
+          const env = Math.exp(-decay * t);
+          const wobble = 1 + 0.1 * Math.sin(t * 20);
+          data[i] = lastOut * env * wobble;
+        }
+      }
+    }
+
+    return impulse;
+  }
+
+  private updateImpulseResponse() {
+    const { duration, decay, preDelay } = this.reverbParams;
+    this.reverbNode.buffer = this.createImpulseResponse(
+      duration,
+      decay,
+      preDelay
+    );
+  }
+
+  /* =======================
+     Updates
+  ======================= */
 
   private updateCompressorNode() {
     const t = this.audioContext.currentTime;
@@ -207,38 +263,35 @@ export class GlobalEqualizer {
     this.limiterNode.release.setValueAtTime(this.limiterParams.release, t);
   }
 
-  private updateImpulseResponse() {
-    const rate = this.audioContext.sampleRate;
-    const length = rate * this.reverbParams.duration;
-    const impulse = this.audioContext.createBuffer(2, length, rate);
-    const left = impulse.getChannelData(0);
-    const right = impulse.getChannelData(1);
-    const decay = this.reverbParams.decay;
-
-    for (let i = 0; i < length; i++) {
-      const n = i;
-      const e = Math.pow(1 - n / length, decay);
-      // Simple white noise with exponential decay
-      left[i] = (Math.random() * 2 - 1) * e;
-      right[i] = (Math.random() * 2 - 1) * e;
-    }
-    this.reverbNode.buffer = impulse;
-  }
-
   private makeDistortionCurve(amount: number) {
+    const n = 44100;
+    const curve = new Float32Array(n);
     const k = amount;
-    const n_samples = 44100;
-    const curve = new Float32Array(n_samples);
     const deg = Math.PI / 180;
-    for (let i = 0; i < n_samples; ++i) {
-      let x = (i * 2) / n_samples - 1;
-      // Classic sigmoid soft-clipping
+
+    for (let i = 0; i < n; i++) {
+      const x = (i * 2) / n - 1;
       curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
     }
     return curve;
   }
 
-  // --- Public API (Setters) ---
+  /* =======================
+     Public API
+  ======================= */
+
+  public setBandGain(index: number, gain: number) {
+    if (!this.eqNodes[index]) return;
+    this.eqNodes[index].gain.setTargetAtTime(
+      gain,
+      this.audioContext.currentTime,
+      0.1
+    );
+  }
+
+  public applyPreset(preset: EQPreset) {
+    preset.gains.forEach((g, i) => this.setBandGain(i, g));
+  }
 
   public setCompressor(params: Partial<CompressorParams>) {
     this.compParams = { ...this.compParams, ...params };
@@ -251,11 +304,15 @@ export class GlobalEqualizer {
   }
 
   public setReverb(params: Partial<ReverbParams>) {
-    const shouldUpdateIR =
-      params.duration !== undefined || params.decay !== undefined;
+    const updateIR =
+      params.duration !== undefined ||
+      params.decay !== undefined ||
+      params.preDelay !== undefined;
+
     this.reverbParams = { ...this.reverbParams, ...params };
 
-    if (shouldUpdateIR) this.updateImpulseResponse();
+    if (updateIR) this.updateImpulseResponse();
+
     if (params.mix !== undefined) {
       this.reverbGainNode.gain.setTargetAtTime(
         params.mix,
@@ -290,62 +347,37 @@ export class GlobalEqualizer {
     this.connectGraph();
   }
 
-  public setBandGain(index: number, gain: number) {
-    if (this.eqNodes[index]) {
-      this.gains[index] = gain;
-      this.eqNodes[index].gain.setTargetAtTime(
-        gain,
-        this.audioContext.currentTime,
-        0.1
-      );
-    }
-  }
+  /* =======================
+     IO / Meter
+  ======================= */
 
-  public applyPreset(preset: EQPreset) {
-    preset.gains.forEach((g, i) => this.setBandGain(i, g));
-  }
-
-  public reset() {
-    this.gains.fill(0);
-    this.gains.forEach((_, i) => this.setBandGain(i, 0));
-    this.setSaturation(0);
-    this.setPan(0);
-    this.setCompressor({
-      threshold: -24,
-      ratio: 1,
-      knee: 30,
-      attack: 0.003,
-      release: 0.25,
-    });
-    this.setLimiter({ threshold: -0.5, release: 0.1 });
-    this.setReverb({ mix: 0 });
-    this.setMasterGain(1.0);
-  }
-
-  // --- Getters ---
   public get input() {
     return this.inputNode;
   }
+
   public get output() {
     return this.outputNode;
   }
+
   public getAnalyser() {
     return this.analyserNode;
   }
-
   public getEQValues(): number[] {
     return this.eqNodes.map((node) => node.gain.value);
   }
-
+  
   public getVolumeLevel(): number {
-    const buffer = new Float32Array(this.analyserNode.fftSize);
-    this.analyserNode.getFloatTimeDomainData(buffer);
-    let sum = 0;
-    for (let i = 0; i < buffer.length; i++) sum += buffer[i] ** 2;
-    const rms = Math.sqrt(sum / buffer.length);
+    const buf = new Float32Array(this.analyserNode.fftSize);
+    this.analyserNode.getFloatTimeDomainData(buf);
 
-    // Smooth meter
-    this.lastRms = Math.max(rms, this.lastRms * 0.9); // Slow release visual
+    let sum = 0;
+    for (let i = 0; i < buf.length; i++) {
+      const s = buf[i];
+      sum += s * s;
+    }
+
+    const rms = Math.sqrt(sum / buf.length);
+    this.lastRms = Math.max(rms, this.lastRms * 0.9);
     return Math.min(this.lastRms * 100, 100);
   }
 }

@@ -7,29 +7,12 @@ import {
   ITrackData,
   KaraokeExtension,
 } from "@/features/songs/types/songs.type";
-import { useYoutubePlayer } from "@/features/engine/modules/youtube/youtube-player";
+import useNotificationStore from "@/features/notification-store";
 
 export const remoteRoutes = () => {
   const client = usePeerHostStore.getState();
   const engine = useSynthesizerEngine.getState().engine;
-
-  client.addRoute("system/unmute", async (payload) => {
-    const ytStore = useYoutubePlayer.getState();
-
-    // 1. บอก Store ว่า user (ผ่าน remote) อนุญาตให้เปิดเสียงแล้ว
-    ytStore.setHasUserUnmuted(true);
-    ytStore.setShowVolumeButton(false);
-
-    // 2. สั่ง Player โดยตรง
-    if (ytStore.player) {
-      ytStore.unmute(); // สั่ง unMute ของ YouTube API
-
-      // บางที unMute แล้วมันหยุดเล่น ต้องสั่ง Play ซ้ำเพื่อความชัวร์
-      ytStore.play();
-    }
-
-    return { success: true };
-  });
+  const addNotification = useNotificationStore.getState().addNotification;
 
   client.addRoute("system/instrumental", async (payload) => {
     const instrumentals = useSynthesizerEngine.getState().engine?.instrumentals;
@@ -45,24 +28,44 @@ export const remoteRoutes = () => {
 
   client.addRoute("system/play", async (payload) => {
     engine?.player?.play();
+    addNotification({
+      title: `Remote: Play`,
+      variant: "info",
+    });
   });
 
   client.addRoute("system/pause", async (payload) => {
     engine?.player?.pause();
+    addNotification({
+      title: `Remote: Pause`,
+      variant: "info",
+    });
   });
 
   client.addRoute("system/next", async (payload) => {
     const queue = useQueuePlayer.getState();
     queue.nextMusic();
+    addNotification({
+      title: `Remote: Next`,
+      variant: "info",
+    });
   });
 
   client.addRoute("system/vocal", async (payload) => {
     const { vocal } = payload;
+    addNotification({
+      title: `Remote: Pitch ${vocal}`,
+      variant: "info",
+    });
     engine?.updatePitch(null, vocal);
   });
 
   client.addRoute("system/speed", async (payload) => {
     const { speed } = payload;
+    addNotification({
+      title: `Remote: Speed ${speed}%`,
+      variant: "info",
+    });
     engine?.updateSpeed(speed);
   });
 
@@ -97,10 +100,14 @@ export const remoteRoutes = () => {
 
     const readed = await musicProcessGroup(karaokeExtension);
 
-    console.log("REMOTE YOUTUBE: ", readed);
     readed.files = karaokeExtension;
     readed.trackData._bufferFile = newFile;
     addQueue(readed.trackData);
+    addNotification({
+      title: "Remote: ส่งไฟล์",
+      description: `${readed.metadata?.info.TITLE}`,
+      variant: "success",
+    });
   });
 
   client.addRoute(
@@ -111,6 +118,11 @@ export const remoteRoutes = () => {
 
       if (tracklist) {
         addQueue(tracklist);
+        addNotification({
+          title: "Remote: เลือกเพลง",
+          description: `${tracklist.TITLE}`,
+          variant: "success",
+        });
         return {
           data: true,
         };

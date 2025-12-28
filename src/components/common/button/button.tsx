@@ -90,7 +90,7 @@ const colorStyles: Record<ButtonColor, Record<ButtonVariant, string>> = {
   },
   white: {
     solid:
-      "bg-white text-gray-800 md:hover:text-blue-500 active:bg-blue-50 active:border-blue-600 disabled:text-gray-400 disabled:bg-white/70 shadow-sm",
+      "text-gray-800 md:hover:text-blue-500 active:bg-blue-50 active:border-blue-600 disabled:text-gray-400 disabled:bg-white/70 shadow-sm",
     outline:
       "border-2 border-white text-white md:hover:bg-white/20 active:bg-white/30 disabled:border-white/50 disabled:text-white/50",
     ghost:
@@ -108,7 +108,7 @@ const blurBackgroundStyles: Record<ButtonColor, string> = {
     "!bg-yellow-500/80 md:hover:!bg-yellow-500/50 active:!bg-yellow-500/60",
   success: "!bg-green-500/80 md:hover:!bg-green-500/50 active:!bg-green-500/60",
   gray: "!bg-gray-500/80 md:hover:!bg-gray-500/50 active:!bg-gray-500/60",
-  white: "!bg-white/50 md:hover:!bg-white/30 active:!bg-white/60",
+  white: "md:hover:!bg-white/30 active:!bg-white/60",
 };
 
 // blur styles สำหรับแต่ละสี (เพิ่ม md: prefix สำหรับ hover)
@@ -126,7 +126,7 @@ const getBlurClasses = (blur: ButtonCommonProps["blur"]) => {
   if (!blur) return "";
 
   if (typeof blur === "boolean") {
-    return `blur-overlay ${blurTextStyles.white} !bg-white/10 md:hover:!bg-white/20 active:!bg-white/30`;
+    return `blur-overlay ${blurTextStyles.white} md:hover:!bg-white/20 active:!bg-white/30`;
   }
 
   // เลือกสีข้อความและ border
@@ -141,12 +141,12 @@ const getBlurClasses = (blur: ButtonCommonProps["blur"]) => {
     backgroundClass = blurBackgroundStyles[blur.backgroundColor];
   } else {
     // ถ้าไม่ระบุ ใช้สีโปร่งใสเดิม
-    backgroundClass = "!bg-white/10 md:hover:!bg-white/20 active:!bg-white/30";
+    backgroundClass = "md:hover:!bg-white/20 active:!bg-white/30";
   }
 
   const borderClass = blur.border ? " border" : "";
 
-  return `blur-overlay ${textClass} ${backgroundClass}${borderClass}`;
+  return `blur-overlay ${textClass} ${backgroundClass} ${borderClass}`;
 };
 
 const SIZE_VALUES = {

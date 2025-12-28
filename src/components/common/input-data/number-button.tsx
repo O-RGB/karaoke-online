@@ -113,13 +113,14 @@ const NumberButton: React.FC<NumberButtonProps> = ({
           <div className="flex gap-2 items-center">
             <Button
               disabled={disabled}
-              blur={blur}
+              variant="ghost"
+              color="white"
               onMouseDown={() => startHold("-")}
               onMouseUp={stopHold}
               onMouseLeave={stopHold}
               onClick={() => !holdable && handleStep("-")}
               size="xs"
-              className="!rounded-[4px] !p-2"
+              className="!rounded-none !p-2"
               icon={<FaMinus />}
             />
 
@@ -131,13 +132,14 @@ const NumberButton: React.FC<NumberButtonProps> = ({
 
             <Button
               disabled={disabled}
-              blur={blur}
+              variant="ghost"
+              color="white"
               onMouseDown={() => startHold("+")}
               onMouseUp={stopHold}
               onMouseLeave={stopHold}
               onClick={() => !holdable && handleStep("+")}
               size="xs"
-              className="!rounded-[4px] !p-2"
+              className="!rounded-none !p-2"
               icon={<FaPlus />}
             />
           </div>
@@ -157,10 +159,11 @@ const NumberButton: React.FC<NumberButtonProps> = ({
           <Button
             disabled={disabled}
             onClick={handleExpand}
-            blur={blur}
+            variant="ghost"
+            color="white"
             size="xs"
             icon={icon}
-            className="!rounded-[4px] !p-2"
+            className="!rounded-none !p-2"
           />
         )}
 
@@ -174,13 +177,14 @@ const NumberButton: React.FC<NumberButtonProps> = ({
 
           <Button
             disabled={disabled}
-            blur={blur}
+            variant="ghost"
+            color="white"
             onMouseDown={() => startHold("-")}
             onMouseUp={stopHold}
             onMouseLeave={stopHold}
             onClick={() => !holdable && handleStep("-")}
             size="xs"
-            className="!rounded-[4px] !p-2"
+            className="!rounded-none !p-2"
             icon={<FaMinus />}
           />
 
@@ -191,13 +195,14 @@ const NumberButton: React.FC<NumberButtonProps> = ({
 
           <Button
             disabled={disabled}
-            blur={blur}
+            variant="ghost"
+            color="white"
             onMouseDown={() => startHold("+")}
             onMouseUp={stopHold}
             onMouseLeave={stopHold}
             onClick={() => !holdable && handleStep("+")}
             size="xs"
-            className="!rounded-[4px] !p-2"
+            className="!rounded-none !p-2"
             icon={<FaPlus />}
           />
         </div>

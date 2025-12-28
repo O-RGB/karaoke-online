@@ -54,6 +54,7 @@ import { SongsSystem } from "@/features/songs";
 import { SoundfontSystemManager } from "@/features/soundfont";
 import dynamic from "next/dynamic";
 import YoutubeEngine from "@/features/engine/modules/youtube";
+import GlobalToast from "../common/alert/toast/toast-notification";
 
 interface KaraokePageProps {}
 
@@ -114,6 +115,7 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
 
   return (
     <FullScreen handle={handle} className=" w-full h-screen">
+      <GlobalToast></GlobalToast>
       <div id="screen-panel" className="w-full">
         <div id="modal-root"></div>
         <Loading isLoad={onPrepare} />
@@ -151,12 +153,10 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
               </header>
 
               <main className="relative flex items-center justify-center ">
-                <NextSongPanel className="absolute w-full flex justify-center" />
+                <NextSongPanel className="absolute w-full flex justify-center top-3" />
                 <SongInfo />
               </main>
             </div>
-
-            {/* <StatusPanel notification={notification} /> */}
           </ContextModal>
         </div>
         <QueueSong />

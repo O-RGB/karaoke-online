@@ -38,9 +38,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
 
   const [preset, setPreset] = useState<IPersetSoundfont[]>([]);
   const { orientation } = useOrientation();
-  const setNotification = useNotificationStore(
-    (state) => state.setNotification
-  );
   const hideMixer = useMixerStoreNew((state) => state.hideMixer);
   const setHideMixer = useMixerStoreNew((state) => state.setHideMixer);
 
@@ -126,7 +123,6 @@ const VolumePanel: React.FC<VolumePanelProps> = ({}) => {
           onPitchChange={onPitchChange}
           onSpeedChange={onSpeedChange}
           onMutedVolume={onMutedVolume}
-          setNotification={setNotification}
           openQueue={() => {
             setQueueOpen?.();
             resetQueueingTimeout(5000);

@@ -15,7 +15,7 @@ body {
 }
 
 :root {
-  --blur-amount: 8px;
+   --blur-amount: 8px;
   --border-opacity: 0.5;
   --background-color: transparent;
   --ui-zoom-scale: 1;
@@ -53,7 +53,7 @@ body {
 
 .szh-menu-custom > ul {
   border-radius: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
 }
