@@ -2,6 +2,7 @@ export interface FetchAPIOptions<T = any> {
   method?: "GET" | "POST" | "PUT" | "DELETE" | string;
   headers?: Record<string, string>;
   body?: T;
+  responseType?: "json" | "blob";
 }
 
 export interface FetchAPIError {
@@ -14,12 +15,20 @@ export async function fetchAPI<TBody = any, R = any>(
   endpoint: string,
   options?: FetchAPIOptions<TBody>
 ): Promise<R> {
-  const { method = "GET", headers = {}, body } = options || {};
+  const {
+    method = "GET",
+    headers = {},
+    body,
+    responseType = "json",
+  } = options || {};
 
   let fetchBody: any;
   const fetchHeaders: Record<string, string> = { ...headers };
-  if (body) {
+
+  // ---------- prepare body ----------
+  if (body !== undefined && body !== null) {
     const contentType = headers?.["Content-Type"] || "";
+
     if (contentType.includes("application/json")) {
       fetchBody = body;
     } else if (contentType.includes("application/x-www-form-urlencoded")) {
@@ -27,8 +36,8 @@ export async function fetchAPI<TBody = any, R = any>(
         fetchBody = body.toString();
       } else if (typeof body === "object") {
         const params = new URLSearchParams();
-        for (const key in body) {
-          params.append(key, (body as any)[key]);
+        for (const key in body as any) {
+          params.append(key, String((body as any)[key]));
         }
         fetchBody = params.toString();
       } else {
@@ -36,14 +45,19 @@ export async function fetchAPI<TBody = any, R = any>(
       }
     } else if (body instanceof FormData) {
       fetchBody = body;
+      // browser จะ set boundary ให้เอง
       delete fetchHeaders["Content-Type"];
     } else {
       fetchBody = body;
     }
   }
+
+  // ---------- call proxy ----------
   const response = await fetch("/api/proxy", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
       endpoint,
       method,
@@ -52,14 +66,16 @@ export async function fetchAPI<TBody = any, R = any>(
     }),
   });
 
-  const contentType = response.headers.get("content-type") || "";
-
+  // ---------- handle no content ----------
   if (response.status === 204) {
     return {} as R;
   }
 
+  // ---------- error handling ----------
   if (!response.ok) {
+    const contentType = response.headers.get("content-type") || "";
     let errorBody: any;
+
     try {
       errorBody = contentType.includes("application/json")
         ? await response.json()
@@ -69,6 +85,7 @@ export async function fetchAPI<TBody = any, R = any>(
     }
 
     let message = "Fetch failed";
+
     if (typeof errorBody === "string") {
       message = errorBody;
     } else if (errorBody?.error?.detail) {
@@ -79,19 +96,24 @@ export async function fetchAPI<TBody = any, R = any>(
         : errorBody.detail;
     }
 
-    const error: FetchAPIError = {
+    throw {
       status: response.status,
       message,
       body: errorBody,
-    };
-    throw error;
+    } as FetchAPIError;
   }
 
+  // ---------- blob response ----------
+  if (responseType === "blob") {
+    return (await response.blob()) as unknown as R;
+  }
+
+  // ---------- json response ----------
+  const contentType = response.headers.get("content-type") || "";
   if (contentType.includes("application/json")) {
-    const data: R = await response.json();
-    return data;
+    return (await response.json()) as R;
   }
 
-  const blob = await response.blob();
-  return blob as unknown as R;
+  // fallback (rare case)
+  return (await response.text()) as unknown as R;
 }

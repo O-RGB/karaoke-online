@@ -18,6 +18,34 @@ interface KlyrWord {
   vocal?: string;
 }
 
+export function fixMidiBuffer(buffer: ArrayBuffer): ArrayBuffer {
+  const view = new DataView(buffer);
+  const MThd_MAGIC = 0x4d546864;
+
+  if (view.getUint32(0) !== MThd_MAGIC) {
+    const newBuffer = buffer.slice(0);
+    const newView = new DataView(newBuffer);
+
+    newView.setUint32(0, MThd_MAGIC);
+    return newBuffer;
+  }
+
+  return buffer;
+}
+export async function fixMidiHeader(file: File): Promise<File> {
+  const arrayBuffer = await file.arrayBuffer();
+  const fixedBuffer = fixMidiBuffer(arrayBuffer);
+
+  if (fixedBuffer === arrayBuffer) {
+    return file;
+  }
+
+  return new File([fixedBuffer], file.name, {
+    type: "audio/midi",
+    lastModified: Date.now(),
+  });
+}
+
 function readVariableLength(
   view: DataView,
   offset: number
@@ -101,8 +129,10 @@ function _parseEvent(
 
 function _parseMidiFile(buffer: ArrayBuffer): MidiFile {
   const view = new DataView(buffer);
+
   if (view.getUint32(0) !== 0x4d546864)
     throw new Error("Invalid MIDI file header");
+
   const headerLength = view.getUint32(4);
   const format = view.getUint16(8);
   const trackCount = view.getUint16(10);
@@ -263,10 +293,35 @@ function _extractDataFromEvents(
   };
 }
 
+/**
+ * Main parse function with Retry Logic
+ * Step 1: Normal Parse
+ * Step 2: If Header Error -> Fix Header -> Retry
+ * Step 3: If Fail again -> Throw
+ */
 export function parse(arrayBuffer: ArrayBuffer): IMidiParseResult {
-  const midiData = _parseMidiFile(arrayBuffer);
-  const extracted = _extractDataFromEvents(midiData);
-  return { ...midiData, ...extracted };
+  try {
+    const midiData = _parseMidiFile(arrayBuffer);
+    const extracted = _extractDataFromEvents(midiData);
+    return { ...midiData, ...extracted };
+  } catch (error: any) {
+    if (error.message === "Invalid MIDI file header") {
+      try {
+        console.warn("Invalid MIDI header detected. Retrying with auto-fix...");
+
+        const fixedBuffer = fixMidiBuffer(arrayBuffer);
+
+        const midiData = _parseMidiFile(fixedBuffer);
+        const extracted = _extractDataFromEvents(midiData);
+        return { ...midiData, ...extracted };
+      } catch (retryError) {
+        console.error("Auto-fix failed. The file might be severely corrupted.");
+        throw retryError;
+      }
+    }
+
+    throw error;
+  }
 }
 
 export async function parseMidi(

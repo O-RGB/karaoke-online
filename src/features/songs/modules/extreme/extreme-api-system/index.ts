@@ -29,50 +29,84 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
   }
 
   async getSong(trackData: ITrackData): Promise<KaraokeExtension | undefined> {
-    if (trackData._musicId === undefined) {
-      console.error("Missing index information in trackData", trackData);
-      return undefined;
-    }
+    // if (trackData._musicId === undefined) {
+    //   console.error("Missing index information in trackData", trackData);
+    //   return undefined;
+    // }
 
     try {
-      const response = await fetchAPI<{}, MusicSearch>(
-        `${API_BASE_URL}/music/${trackData._musicId}`,
+      const blob = await fetchAPI<null, Blob>(
+        `${API_BASE_URL}/get_song?superIndex=${trackData._superIndex}&originalIndex=${trackData._originalIndex}`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          responseType: "blob",
         }
       );
+
+      let song: File[] = [];
+      if (blob.type === "application/zip") {
+        let unzip = new File([blob], `song_${trackData._originalIndex}.zip`, {
+          type: blob.type,
+        });
+        song = await extractFile(unzip);
+      } else if (blob.type === "application/octet-stream") {
+        song = [
+          new File([blob], `song_${trackData._originalIndex}.emk`, {
+            type: blob.type,
+          }),
+        ];
+      }
+
+      const res: KaraokeExtension[] = groupFilesByBaseName(song);
+      console.log(res);
+
+      if (res.length === 1) {
+        return res[0];
+      }
+
+      return undefined;
+
+      //get_song?superIndex=4284&originalIndex=85687
+
+      // const response = await fetchAPI<{}, MusicSearch>(
+      //   `${API_BASE_URL}/music/${trackData._musicId}`,
+      //   {
+      //     method: "GET",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
 
       // fetch(`${API_BASE_URL}/music/${trackData._musicId}/play`, {
       //   method: "POST",
       // }).catch((err) => console.error("Failed to update play count:", err));
 
-      const direct_link = response.direct_link;
+      // const direct_link = response.direct_link;
 
-      const match = direct_link.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      const fileId = match ? match[1] : null;
+      // const match = direct_link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      // const fileId = match ? match[1] : null;
 
-      const newUrl = fileId
-        ? `https://lh3.googleusercontent.com/d/${fileId}`
-        : null;
+      // const newUrl = fileId
+      //   ? `https://lh3.googleusercontent.com/d/${fileId}`
+      //   : null;
 
-      if (!newUrl) throw "Url Invalid";
-      const zip = await decodeImageFromUrl(newUrl);
-      const files = await extractFile(zip);
-      const extensions = groupFilesByBaseName(files);
-      console.log("extensions", extensions);
-      if (extensions.length === 1) {
-        return extensions[0];
-      }
+      // if (!newUrl) throw "Url Invalid";
+      // const zip = await decodeImageFromUrl(newUrl);
+      // const files = await extractFile(zip);
+      // const extensions = groupFilesByBaseName(files);
+      // console.log("extensions", extensions);
+      // if (extensions.length === 1) {
+      //   return extensions[0];
+      // }
     } catch (error) {
+      console.error(error);
       alert(error);
-      fetch(`${API_BASE_URL}/music/${trackData._musicId}/report-broken-link`, {
-        method: "POST",
-      }).catch((err) =>
-        alert(`Failed to update play count: ${JSON.stringify(err)}`)
-      );
+      // fetch(`${API_BASE_URL}/music/${trackData._musicId}/report-broken-link`, {
+      //   method: "POST",
+      // }).catch((err) =>
+      //   alert(`Failed to update play count: ${JSON.stringify(err)}`)
+      // );
 
       return undefined;
     }
@@ -80,7 +114,7 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
 
   async search(query: string, options?: SearchOptions): Promise<ITrackData[]> {
     try {
-      const response = await fetchAPI<{}, MusicSearch[]>(
+      const response = await fetchAPI<{}, any[]>(
         `${API_BASE_URL}/search?q=${encodeURIComponent(query)}`,
         {
           method: "GET",
@@ -89,19 +123,28 @@ export class ApiSongsSystemReader extends BaseSongsSystemReader {
           },
         }
       );
+      // const response = await fetchAPI<{}, MusicSearch[]>(
+      //   `${API_BASE_URL}/search?q=${encodeURIComponent(query)}`,
+      //   {
+      //     method: "GET",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
 
       const finalRecords: ITrackData[] = response.map((item) => {
         return {
-          TITLE: item.title,
-          ARTIST: item.artist,
+          TITLE: item.TITLE,
+          ARTIST: item.ARTIST,
           ALBUM: item.album,
           CODE: item.music_code,
           _musicPlayCount: item.play_count,
           _musicLike: item.like_count,
           _musicUploader: item.uploader_name,
           _musicId: item.id,
-          _originalIndex: 0,
-          _superIndex: 0,
+          _originalIndex: item._originalIndex,
+          _superIndex: item._superIndex,
           _priority: 0,
           _system: "PYTHON_API_SYSTEM",
         } as ITrackData;
