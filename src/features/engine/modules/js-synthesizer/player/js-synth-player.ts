@@ -7,7 +7,7 @@ import { IMIDIEvent, Synthesizer as JsSynthesizer } from "js-synthesizer";
 import { JsSynthEngine } from "../js-synth-engine";
 import { EventEmitter } from "../../instrumentals/events";
 import { IMidiParseResult } from "@/lib/karaoke/songs/midi/types";
-import { parseMidi } from "@/lib/karaoke/songs/midi/reader";
+import { fixMidiBuffer, parseMidi } from "@/lib/karaoke/songs/midi/reader";
 import { MusicLoadAllData } from "@/features/songs/types/songs.type";
 import { useYoutubePlayer } from "../../youtube/youtube-player";
 import {
@@ -216,26 +216,25 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     const currentTick = (await this.player?.retrievePlayerCurrentTick()) || 0;
     return { tick: currentTick, tempo: _bpm };
   }
-
   async prepareMidi(midi: File) {
     this.engine.timer?.seekTimer(0);
-    const buffer = await midi.arrayBuffer();
+    const rawBuffer = await midi.arrayBuffer();
+    const cleanBuffer = fixMidiBuffer(rawBuffer);
+
     let midiData: IMidiParseResult;
-    let midiBuffer: ArrayBuffer;
 
     try {
-      midiData = await parseMidi(buffer);
-      midiBuffer = buffer;
+      midiData = await parseMidi(cleanBuffer);
     } catch (error) {
-      const fixed = await fixMidiHeader(midi);
-      midiBuffer = await fixed.arrayBuffer();
-      midiData = await parseMidi(midiBuffer);
+      console.error("Parse failed even after header fix:", error);
+      throw error;
     }
 
     this.midiData = midiData;
     this.channelPrograms.fill(0);
+
     await this.player?.resetPlayer();
-    await this.player?.addSMFDataToPlayer(midiBuffer);
+    await this.player?.addSMFDataToPlayer(cleanBuffer);
     this.engine.updateSpeed();
     this.engine.updatePitch(null);
     this.eventChange();
