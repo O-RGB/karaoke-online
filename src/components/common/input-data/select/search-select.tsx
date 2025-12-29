@@ -14,6 +14,9 @@ interface SearchSelectProps extends InputProps {
   };
 }
 
+// สร้างค่าคงที่สำหรับ ID ของตัวเลือก "ไม่พบข้อมูล"
+const NOT_FOUND_VALUE = "__NOT_FOUND__";
+
 const SearchSelect: React.FC<SearchSelectProps> = ({
   options = [],
   onSearch,
@@ -28,26 +31,42 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
 
-  const searchAsync = async (value: string): Promise<IOptions[]> => {
-    if (!onSearch || !value.trim()) {
+  const latestValueRef = useRef(value);
+
+  const searchAsync = async (searchValue: string): Promise<IOptions[]> => {
+    if (!onSearch || !searchValue.trim()) {
       setIsLoading(false);
       return [];
     }
 
     try {
-      const result = await onSearch(value);
+      const result = await onSearch(searchValue);
       return result ?? [];
     } catch (error) {
       console.error("Search error:", error);
       return [];
     } finally {
-      setIsLoading(false);
+      if (searchValue === latestValueRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
-  const handleSearch = async (value: string) => {
-    const data = await searchAsync(value);
-    setOptionsSearch(data);
+  const handleSearch = async (searchValue: string) => {
+    const data = await searchAsync(searchValue);
+
+    // [เพิ่ม] ตรวจสอบว่าถ้าไม่มีข้อมูลและ User ยังพิมพ์อยู่ ให้แสดง "ไม่พบข้อมูล"
+    if (data.length === 0 && searchValue.trim() !== "") {
+      setOptionsSearch([
+        {
+          label: "ไม่พบข้อมูล",
+          value: NOT_FOUND_VALUE,
+          // เราสามารถใช้ label เป็นตัวแสดงผลได้เลย เพราะ Dropdown จะ render label
+        },
+      ]);
+    } else {
+      setOptionsSearch(data);
+    }
   };
 
   useEffect(() => {
@@ -61,6 +80,7 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setValue(newValue);
+    latestValueRef.current = newValue;
 
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -78,6 +98,11 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
   };
 
   const handleItemClick = (data: IOptions) => {
+    // [เพิ่ม] ป้องกันการกดเลือกรายการ "ไม่พบข้อมูล"
+    if (data.value === NOT_FOUND_VALUE) {
+      return;
+    }
+
     onSelectItem?.(data);
     setValue("");
     setOptionsSearch([]);

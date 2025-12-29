@@ -78,6 +78,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
   );
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const latestSearchRef = useRef(searching);
 
   const selectedSong = searchResult[selectedIndex]?.option;
   const hasResults = searchResult.length > 0;
@@ -94,7 +95,9 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
       const results = (await onSearch?.(query)) || [];
       setSearchResult(results);
     } finally {
-      setLoading(false);
+      if (query === latestSearchRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -143,6 +146,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
   }, [onEnter]);
 
   useEffect(() => {
+    latestSearchRef.current = searching;
     setLoading(true);
     if (searching || openSearchBox) {
       debouncedSearch(searching);
@@ -150,6 +154,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
     } else {
       setSearchResult([]);
       resetSearchingTimeout(0);
+      setLoading(false);
     }
     setSelectedIndex(0);
   }, [searching, openSearchBox]);
@@ -214,13 +219,22 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
           />
         </div>
 
+        {/* Loading State */}
         {loading && (
-          <div className="h-full flex items-center justify-center mt-3">
+          <div className="h-full flex items-center justify-center mt-3 ml-2">
             <AiOutlineLoading className="text-2xl text-white animate-spin" />
           </div>
         )}
 
-        {hasResults && selectedSong && (
+        {/* Not Found State (เพิ่มใหม่) */}
+        {!loading && !hasResults && searching.length > 0 && (
+          <div className="flex items-center justify-center w-full text-white/60 animate-fadeIn">
+            <span>ไม่พบเพลงที่ค้นหา</span>
+          </div>
+        )}
+
+        {/* Results Found State */}
+        {!loading && hasResults && selectedSong && (
           <div
             className={`flex flex-col justify-center w-full ${
               selectedSong.LYRIC_TITLE ? "gap-2" : ""
@@ -270,11 +284,11 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
                     </div>
                   )}
                 </div>
-                {selectedSong._system === "PYTHON_API_SYSTEM" && (
+                {/* {selectedSong._system === "PYTHON_API_SYSTEM" && (
                   <div className="hover:underline duration-300 text-xs opacity-80">
                     แจ้งลบ
                   </div>
-                )}
+                )} */}
               </div>
             )}
           </div>
