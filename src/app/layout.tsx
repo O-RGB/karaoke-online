@@ -37,6 +37,35 @@ export default function RootLayout({
           href="/favicon-96x96.png"
           sizes="96x96"
         />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Next Karaoke คาราโอเกะออนไลน์" />
+        <meta
+          property="og:description"
+          content="คาราโอเกะออนไลน์ด้วยเทคโนโลยี MIDI และ SoundFont เล่นได้ทันทีผ่านเบราว์เซอร์ ไม่ต้องติดตั้งโปรแกรม"
+        />
+        <meta
+          property="og:image"
+          content="https://next-karaoke.vercel.app/cover.png"
+        />
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta
+          property="twitter:url"
+          content="https://next-karaoke.vercel.app/cover.png"
+        />
+        <meta
+          property="twitter:title"
+          content="NEXTAMP – โปรแกรมเล่นเพลงสำหรับนักดนตรี"
+        />
+        <meta
+          property="twitter:description"
+          content="คาราโอเกะออนไลน์ด้วยเทคโนโลยี MIDI และ SoundFont เล่นได้ทันทีผ่านเบราว์เซอร์ ไม่ต้องติดตั้งโปรแกรม"
+        />
+        <meta
+          property="twitter:image"
+          content="https://next-karaoke.vercel.app/cover.png"
+        />
+
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <link
@@ -53,6 +82,7 @@ export default function RootLayout({
           content="black-translucent"
         />
         <meta name="google" content="notranslate" />
+        <meta name="theme-color" content="#000000" />
       </head>
 
       <body className={`${notoSansThai.className} antialiased relative`}>
