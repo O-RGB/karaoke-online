@@ -25,6 +25,7 @@ export const metadata: Metadata = {
     "คาราโอเกะออนไลน์ด้วยเทคโนโลยี MIDI และ SoundFont เล่นได้ทันทีผ่านเบราว์เซอร์ ไม่ต้องติดตั้งโปรแกรม",
   openGraph: {
     type: "website",
+    url: "https://next-karaoke.vercel.app",
     title: "Next Karaoke คาราโอเกะออนไลน์",
     description:
       "คาราโอเกะออนไลน์ด้วยเทคโนโลยี MIDI และ SoundFont เล่นได้ทันทีผ่านเบราว์เซอร์ ไม่ต้องติดตั้งโปรแกรม",
