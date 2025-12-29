@@ -3,7 +3,7 @@ import SearchDropdown from "./search-dropdown";
 import useKeyboardStore from "@/features/keyboard-state";
 import SwitchButton from "@/components/common/input-data/switch/switch-button";
 import KaraokeSearchInput from "@/components/common/input-data/karaoke-input";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import useSongsStore from "@/features/songs/store/songs.store";
 import useQueuePlayer from "@/features/player/player/modules/queue-player";
 import { toOptions } from "@/lib/general";
@@ -30,13 +30,37 @@ const SearchSong: React.FC<SearchSongProps> = ({}) => {
   const queueing = useKeyboardStore((state) => state.queueing);
   const [fullUi, setFullUi] = useState<boolean>(false);
 
-  async function onSearch<T = any>(value: string) {
-    const se = (await songsManager?.onSearch(value)) ?? [];
-    const op = toOptions<ITrackData>({
-      render: (value) => <SearchDropdown value={value}></SearchDropdown>,
-      list: se,
+  const searchDebounceRef = useRef<{
+    timer: NodeJS.Timeout;
+    resolve: (value: any) => void;
+  } | null>(null);
+
+  async function onSearch<T = any>(value: string): Promise<T> {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current.timer);
+      searchDebounceRef.current.resolve([]);
+    }
+
+    return new Promise<T>((resolve) => {
+      const timer = setTimeout(async () => {
+        try {
+          const se = (await songsManager?.onSearch(value)) ?? [];
+          const op = toOptions<ITrackData>({
+            render: (value) => <SearchDropdown value={value}></SearchDropdown>,
+            list: se,
+          });
+          resolve(op as T);
+        } catch (error) {
+          resolve([] as any);
+        } finally {
+          if (searchDebounceRef.current?.timer === timer) {
+            searchDebounceRef.current = null;
+          }
+        }
+      }, 500);
+
+      searchDebounceRef.current = { timer, resolve };
     });
-    return op as T;
   }
 
   const handleSearchFocus = () => {
