@@ -15,11 +15,28 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
+  themeColor: "#000000",
 };
 
 export const metadata: Metadata = {
   title: "Next Karaoke",
   manifest: "/manifest.json",
+  description:
+    "คาราโอเกะออนไลน์ด้วยเทคโนโลยี MIDI และ SoundFont เล่นได้ทันทีผ่านเบราว์เซอร์ ไม่ต้องติดตั้งโปรแกรม",
+  openGraph: {
+    type: "website",
+    title: "Next Karaoke คาราโอเกะออนไลน์",
+    description:
+      "คาราโอเกะออนไลน์ด้วยเทคโนโลยี MIDI และ SoundFont เล่นได้ทันทีผ่านเบราว์เซอร์ ไม่ต้องติดตั้งโปรแกรม",
+    images: "https://next-karaoke.vercel.app/cover.png",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NEXTAMP – โปรแกรมเล่นเพลงสำหรับนักดนตรี",
+    description:
+      "คาราโอเกะออนไลน์ด้วยเทคโนโลยี MIDI และ SoundFont เล่นได้ทันทีผ่านเบราว์เซอร์ ไม่ต้องติดตั้งโปรแกรม",
+    images: "https://next-karaoke.vercel.app/cover.png",
+  },
 };
 
 export default function RootLayout({
@@ -37,35 +54,6 @@ export default function RootLayout({
           href="/favicon-96x96.png"
           sizes="96x96"
         />
-
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="Next Karaoke คาราโอเกะออนไลน์" />
-        <meta
-          property="og:description"
-          content="คาราโอเกะออนไลน์ด้วยเทคโนโลยี MIDI และ SoundFont เล่นได้ทันทีผ่านเบราว์เซอร์ ไม่ต้องติดตั้งโปรแกรม"
-        />
-        <meta
-          property="og:image"
-          content="https://next-karaoke.vercel.app/cover.png"
-        />
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta
-          property="twitter:url"
-          content="https://next-karaoke.vercel.app/cover.png"
-        />
-        <meta
-          property="twitter:title"
-          content="NEXTAMP – โปรแกรมเล่นเพลงสำหรับนักดนตรี"
-        />
-        <meta
-          property="twitter:description"
-          content="คาราโอเกะออนไลน์ด้วยเทคโนโลยี MIDI และ SoundFont เล่นได้ทันทีผ่านเบราว์เซอร์ ไม่ต้องติดตั้งโปรแกรม"
-        />
-        <meta
-          property="twitter:image"
-          content="https://next-karaoke.vercel.app/cover.png"
-        />
-
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <link
@@ -73,7 +61,6 @@ export default function RootLayout({
           sizes="180x180"
           href="/apple-touch-icon.png"
         />
-
         <meta name="apple-mobile-web-app-title" content="Karaoke" />
         <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
