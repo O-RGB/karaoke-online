@@ -41,6 +41,7 @@ export type SoundSystemMode =
   | "PYTHON_API_SYSTEM";
 
 export interface ConfigSystem {
+  version?: string; // <-- เพิ่มบรรทัดนี้ครับ
   refreshRate: Partial<RefreshRateConfig>;
   lyrics: Partial<LyricsConfig>;
   widgets: Partial<WidgetsConfig>;

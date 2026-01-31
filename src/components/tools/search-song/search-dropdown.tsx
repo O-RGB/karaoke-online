@@ -62,14 +62,14 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
         </div>
         <div className="rounded-md flex flex-col items-center gap-2 justify-between">
           <SourceTag from={value._system} size={size}></SourceTag>
-          {value._system === "PYTHON_API_SYSTEM" && (
+          {/* {value._system === "PYTHON_API_SYSTEM" && (
             <div
               onClick={(e) => e.stopPropagation()}
               className="hover:underline duration-300 text-xs opacity-80 text-nowrap"
             >
               แจ้งลบ
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </>

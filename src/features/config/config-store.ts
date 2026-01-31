@@ -1,14 +1,6 @@
-import { DEFAULT_CONFIG } from "@/config/value";
+import { DEFAULT_CONFIG, CONFIG_VERSION, FORCE_CONFIG } from "@/config/value";
 import { create } from "zustand";
 import { ConfigStoreProps } from "./types/config.type";
-
-const loadConfigFromLocalStorage = () => {
-  if (typeof window !== "undefined") {
-    const storedConfig = localStorage.getItem("config");
-    return storedConfig ? JSON.parse(storedConfig) : DEFAULT_CONFIG;
-  }
-  return DEFAULT_CONFIG;
-};
 
 const deepMerge = (target: any, source: any): any => {
   if (typeof source !== "object" || source === null) {
@@ -31,6 +23,34 @@ const deepMerge = (target: any, source: any): any => {
     }
   });
   return output;
+};
+
+const loadConfigFromLocalStorage = () => {
+  if (typeof window !== "undefined") {
+    const storedConfigStr = localStorage.getItem("config");
+
+    if (!storedConfigStr) {
+      return DEFAULT_CONFIG;
+    }
+
+    try {
+      const storedConfig = JSON.parse(storedConfigStr);
+
+      if (storedConfig.version !== CONFIG_VERSION) {
+        let migratedConfig = deepMerge(storedConfig, FORCE_CONFIG);
+        migratedConfig = deepMerge(DEFAULT_CONFIG, migratedConfig);
+        migratedConfig.version = CONFIG_VERSION;
+        localStorage.setItem("config", JSON.stringify(migratedConfig));
+        return migratedConfig;
+      }
+
+      return storedConfig;
+    } catch (e) {
+      console.error("Config load error", e);
+      return DEFAULT_CONFIG;
+    }
+  }
+  return DEFAULT_CONFIG;
 };
 
 const useConfigStore = create<ConfigStoreProps>((set) => ({

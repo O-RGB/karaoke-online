@@ -196,7 +196,18 @@ export const DEFAULT_INST_PRESET: InstrumentsPresets = {
   ],
 };
 
+// ===============================================
+// ส่วนควบคุม Version และการบังคับ Update Config
+// ===============================================
+export const CONFIG_VERSION = "1.0.0";
+export const FORCE_CONFIG: Partial<ConfigSystem> = {
+  system: {
+    soundMode:"DATABASE_FILE_SYSTEM", 
+  },
+};
+
 export const DEFAULT_CONFIG: ConfigSystem = {
+  version: CONFIG_VERSION, // <-- ผูก Version เข้ากับ Default Config
   refreshRate: {
     render: 100,
     // type: "MIDDLE",
@@ -246,7 +257,7 @@ export const DEFAULT_CONFIG: ConfigSystem = {
     uploadToDrive: false,
     engine: "jsSynth",
     timingModeType: "Time",
-    zoom: 1, // <-- เพิ่มบรรทัดนี้
+    zoom: 1,
   },
   sound: {
     equalizer: true,
