@@ -253,7 +253,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const mid = data.files.midi;
       if (mid !== undefined) {
         this.engine.timer?.updateMusic(data);
-        this.engine.timer?.updateTempoMap(data.tempoRange);
+        // this.engine.timer?.updateTempoMap(data.tempoRange);
         this.engine.timer?.updatePpq((data.metadata as any).ticksPerBeat);
         this.musicQuere = data;
         this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
@@ -371,6 +371,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
           break;
         case 81: // Tempo Change
           console.log("Tempo Change", vel, t, program);
+          this.engine.timer?.updateTempo(program);
           break;
       }
 

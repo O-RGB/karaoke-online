@@ -28,7 +28,7 @@ export class TimerWorker {
         );
       }
 
-      this.updateTempoMap(musicInfo.tempoRange);
+      // this.updateTempoMap(musicInfo.tempoRange);
       this.updateDuration(duration);
       this.updatePpq(ticksPerBeat);
     } else {
@@ -53,7 +53,7 @@ export class TimerWorker {
 
   initWorker() {
     const worker = new Worker(
-      new URL("/public/worker/timer-worker.ts", import.meta.url)
+      new URL("/public/timer-worker/worker.ts", import.meta.url)
     );
 
     worker.onmessage = (e: MessageEvent) => {
@@ -63,9 +63,9 @@ export class TimerWorker {
         case "Time":
           this.player?.timingUpdate(value);
 
-          if (bpm !== undefined) {
-            this.player?.tempoUpdate(bpm);
-          }
+          // if (bpm !== undefined) {
+          //   this.player?.tempoUpdate(bpm);
+          // }
 
           if (countdown !== undefined) {
             this.player?.countDownUpdate(countdown);
@@ -108,8 +108,8 @@ export class TimerWorker {
     }
   }
 
-  updateTempoMap(tempos: any) {
-    this.worker?.postMessage({ command: "setTempoMap", value: { tempos } });
+  updateTempo(mppq: number) {
+    this.worker?.postMessage({ command: "updateTempo", value: { mppq } });
   }
 
   updatePpq(ppq: number) {
