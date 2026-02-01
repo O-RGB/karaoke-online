@@ -6,7 +6,6 @@ export class EventEmitter<K = any, R = any> {
     { listenerId: string; callback: (event: R) => void }[]
   > = new Map();
 
-  // 1. เพิ่มตัวแปรเก็บค่าล่าสุด
   public lastValue: Map<string, R> = new Map();
 
   public debug: boolean = false;
@@ -45,7 +44,6 @@ export class EventEmitter<K = any, R = any> {
       }
     }
 
-    // 2. ถ้ามีค่าล่าสุดเก็บไว้ ให้ส่งกลับไปให้ Listener นี้ทันที (ครั้งแรกครั้งเดียว)
     if (this.lastValue.has(key)) {
       const value = this.lastValue.get(key);
       if (value !== undefined) {
@@ -75,7 +73,14 @@ export class EventEmitter<K = any, R = any> {
   emit(eventKey: EventKey<K>, index: number, content: R): void {
     const key = this.makeKey(eventKey, index);
 
-    // 3. บันทึกค่าล่าสุดลง Memory ไว้เสมอ
+    if (this.lastValue.has(key)) {
+      const oldValue = this.lastValue.get(key);
+
+      if (oldValue === content) {
+        return;
+      }
+    }
+
     this.lastValue.set(key, content);
 
     this.listeners.get(key)?.forEach((item) => item.callback(content));
@@ -85,7 +90,6 @@ export class EventEmitter<K = any, R = any> {
     }
   }
 
-  // (Optional) เพิ่มฟังก์ชันสำหรับเคลียร์ค่า เผื่อต้องการ Reset
   clearLastValue(eventKey: EventKey<K>, index: number) {
     const key = this.makeKey(eventKey, index);
     this.lastValue.delete(key);

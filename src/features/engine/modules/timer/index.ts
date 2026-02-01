@@ -57,19 +57,24 @@ export class TimerWorker {
     );
 
     worker.onmessage = (e: MessageEvent) => {
-      const { type, value, bpm, countdown, isEnd } = e.data;
+      const { type, value, bpm, elapsedSeconds, countdown } = e.data;
       switch (type) {
         case "Tick":
         case "Time":
           this.player?.timingUpdate(value);
 
-          // if (bpm !== undefined) {
-          //   this.player?.tempoUpdate(bpm);
-          // }
+          if (bpm !== undefined) {
+            this.player?.tempoUpdate(bpm);
+          }
 
           if (countdown !== undefined) {
             this.player?.countDownUpdate(countdown);
           }
+
+          console.log({
+            countdown,
+            elapsedSeconds,
+          });
           break;
       }
     };

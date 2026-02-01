@@ -219,7 +219,7 @@ const QueueSong: React.FC<QueueSongProps> = ({
       }
     }
   };
-  
+
   const onCountDownUpdated = (count: number) => {
     setCountDown(count);
 
@@ -270,7 +270,6 @@ const QueueSong: React.FC<QueueSongProps> = ({
       let songPlaying = clone[selected];
 
       if (songPlaying) {
-        console.log("on enter")
         playMusic(selected);
         resetQueueingTimeout(0);
         let removed = clone.filter((_, i) => i !== selected);

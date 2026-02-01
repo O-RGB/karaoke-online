@@ -16,8 +16,8 @@ import {
   stopTick,
   seekTo,
   reset,
-  getRemainingTime,
-  computeCountdown,
+  getElapsedSeconds,
+  getCountdown,
   getBpm,
   setPpq,
   setMode,
@@ -60,7 +60,8 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
         type: mode,
         value: accumulatedValue,
         bpm: getBpm(),
-        countdown: computeCountdown(getRemainingTime()),
+        elapsedSeconds: Math.floor(getElapsedSeconds()),
+        countdown: getCountdown(),
       };
 
       console.log("Sending seek message:", message);
@@ -78,7 +79,8 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
         type: "timingResponse",
         value: accumulatedValue,
         bpm: getBpm(),
-        remainingTime: getRemainingTime(),
+        elapsedSeconds: Math.floor(getElapsedSeconds()),
+        countdown: getCountdown(),
       };
       self.postMessage(response);
       break;

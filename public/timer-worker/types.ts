@@ -6,6 +6,7 @@ export interface TimingMessage {
   type: TimingMode;
   value: number;
   bpm: number;
+  elapsedSeconds: number;
   countdown: number;
 }
 
@@ -13,7 +14,8 @@ export interface TimingResponseMessage {
   type: "timingResponse";
   value: number;
   bpm: number;
-  remainingTime: number;
+  elapsedSeconds: number;
+  countdown: number;
 }
 
 export type WorkerResponseMessage = TimingMessage | TimingResponseMessage;

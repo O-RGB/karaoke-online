@@ -12,8 +12,6 @@ export let mode: TimingMode = "Time";
 export let duration: number | null = null;
 export let playbackRate: number = 1.0;
 
-let lastCountdownValue: number = -1;
-let lastTickValueSent: number = -1;
 let mppq: number = 500000; // default 120 BPM (60_000_000 / 120)
 let ticksPerSecond: number = (ppq * 1000000) / mppq;
 
@@ -27,12 +25,10 @@ export function setPpq(value: number): void {
 export function setMode(value: TimingMode): void {
   mode = value;
   accumulatedValue = 0;
-  lastCountdownValue = -1;
 }
 
 export function setDuration(value: number): void {
   duration = value;
-  lastCountdownValue = -1;
 }
 
 export function setPlaybackRate(rate: number): void {
@@ -50,15 +46,12 @@ export function setTempo(newMppq: number): void {
 
 export function seekTo(value: number): void {
   accumulatedValue = value;
-  lastCountdownValue = -1;
-  lastTickValueSent = -1;
 }
 
 export function reset(): void {
   stopTick();
   accumulatedValue = 0;
   duration = null;
-  lastCountdownValue = -1;
 }
 
 // ─── Tick Loop ──────────────────────────────────────────────────────────────
@@ -93,28 +86,9 @@ export function stopTick(): void {
   }
 
   lastTickTime = null;
-  lastCountdownValue = -1;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-
-/**
- * Calculate remaining time based on current mode.
- */
-export function getRemainingTime(): number {
-  if (duration === null) return 0;
-
-  if (mode === "Time") {
-    const remaining = duration - accumulatedValue;
-    return remaining > 0 && isFinite(remaining) ? remaining : 0;
-  }
-
-  const remainingTicks = Math.max(0, duration - accumulatedValue);
-  const timeRemaining =
-    ticksPerSecond > 0 ? remainingTicks / (ticksPerSecond * playbackRate) : 0;
-
-  return isFinite(timeRemaining) ? timeRemaining : 0;
-}
 
 /**
  * Get current BPM derived from mppq.
@@ -124,22 +98,30 @@ export function getBpm(): number {
 }
 
 /**
- * Reused by both tick() and seek handler.
+ * Calculate elapsed seconds from accumulatedValue.
+ * Tick mode: แปลง ticks → วินาที่ ผ่าน ticksPerSecond
+ * Time mode: accumulatedValue คือวินาที่อยู่แล้ว
  */
-export function computeCountdown(remainingTime: number): number {
-  const raw = remainingTime > 10 ? 10 : Math.ceil(remainingTime);
-
-  if (isNaN(raw) || !isFinite(raw)) {
-    console.error("Invalid countdown:", raw, "remainingTime:", remainingTime);
-    return duration !== null
-      ? Math.max(0, Math.ceil(duration - accumulatedValue))
-      : 0;
+export function getElapsedSeconds(): number {
+  if (mode === "Tick") {
+    return ticksPerSecond > 0 ? accumulatedValue / ticksPerSecond : 0;
   }
-
-  return raw;
+  return accumulatedValue;
 }
 
-// ─── Internal ───────────────────────────────────────────────────────────────
+/**
+ * Calculate countdown (วินาที่คงเหลือ) จาก duration กับ elapsedSeconds.
+ * คืน 0 ถ้า duration ยังไม่ set
+ */
+export function getCountdown(): number {
+  if (duration === null) return 0;
+  let totalDurationSeconds = duration;
+  if (mode === "Tick") {
+    totalDurationSeconds = ticksPerSecond > 0 ? duration / ticksPerSecond : 0;
+  }
+  const remaining = totalDurationSeconds - getElapsedSeconds();
+  return remaining > 0 ? Math.floor(remaining) : 0;
+}
 
 function tick(): void {
   if (!isRunning || lastTickTime === null) return;
@@ -178,38 +160,19 @@ function tick(): void {
       type: mode,
       value: accumulatedValue,
       bpm,
+      elapsedSeconds: getElapsedSeconds(),
       countdown: 0,
     } satisfies TimingMessage);
     stopTick();
     return;
   }
 
-  // ── Normal tick → send message based on mode ─────────────────────────────
-  const countdown = computeCountdown(getRemainingTime());
-
-  if (mode === "Time") {
-    self.postMessage({
-      type: mode,
-      value: accumulatedValue,
-      bpm,
-      countdown,
-    } satisfies TimingMessage);
-  } else {
-    const currentTickValue = Math.floor(accumulatedValue);
-
-    if (
-      currentTickValue !== lastTickValueSent ||
-      countdown !== lastCountdownValue
-    ) {
-      self.postMessage({
-        type: mode,
-        value: accumulatedValue,
-        bpm,
-        countdown,
-      } satisfies TimingMessage);
-      lastTickValueSent = currentTickValue;
-    }
-  }
-
-  lastCountdownValue = countdown;
+  // ── ส่ง message ทุก tick ─────────────────────────────────────────────────
+  self.postMessage({
+    type: mode,
+    value: accumulatedValue,
+    bpm,
+    elapsedSeconds: Math.floor(getElapsedSeconds()),
+    countdown: getCountdown(),
+  } satisfies TimingMessage);
 }
