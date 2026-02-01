@@ -5,9 +5,11 @@ export class TimerWorker {
   private worker: Worker | null = null;
   private player: BaseSynthPlayerEngine | null = null;
   private timingMode: TimingModeType = "Tick";
+
   constructor(player: BaseSynthPlayerEngine) {
     this.player = player;
   }
+
   updateMusic(musicInfo: MusicLoadAllData) {
     if (musicInfo.musicType === "MIDI") {
       this.timingMode = "Tick";
@@ -16,19 +18,11 @@ export class TimerWorker {
       const duration = metadata?.duration;
       const ticksPerBeat = metadata?.ticksPerBeat;
 
-      if (duration == null) {
-        throw new Error(
-          "[updateMusic][MIDI] Missing required metadata: duration"
-        );
-      }
+      if (duration == null)
+        throw new Error("[updateMusic][MIDI] Missing duration");
+      if (ticksPerBeat == null)
+        throw new Error("[updateMusic][MIDI] Missing ticksPerBeat");
 
-      if (ticksPerBeat == null) {
-        throw new Error(
-          "[updateMusic][MIDI] Missing required metadata: ticksPerBeat"
-        );
-      }
-
-      // this.updateTempoMap(musicInfo.tempoRange);
       this.updateDuration(duration);
       this.updatePpq(ticksPerBeat);
     } else {
@@ -42,9 +36,7 @@ export class TimerWorker {
       } else if (durationFromRoot != null) {
         this.updateDuration(durationFromRoot);
       } else {
-        throw new Error(
-          "[updateMusic][Audio] Unable to determine duration (metadata.duration and musicInfo.duration are both missing)"
-        );
+        throw new Error("[updateMusic][Audio] Missing duration");
       }
     }
 
@@ -57,25 +49,40 @@ export class TimerWorker {
     );
 
     worker.onmessage = (e: MessageEvent) => {
-      const { type, value, bpm, elapsedSeconds, countdown } = e.data;
-      switch (type) {
-        case "Tick":
-        case "Time":
-          this.player?.timingUpdate(value);
+      const data = e.data;
 
+      switch (data.type) {
+        case "displayUpdate": {
+          const { bpm, elapsedSeconds, countdown, totalSeconds } = data;
           if (bpm !== undefined) {
             this.player?.tempoUpdate(bpm);
           }
-
+          if (elapsedSeconds !== undefined) {
+            this.player?.secondsUpdate(elapsedSeconds);
+          }
           if (countdown !== undefined) {
             this.player?.countDownUpdate(countdown);
           }
-
-          console.log({
-            countdown,
-            elapsedSeconds,
-          });
+          if (totalSeconds !== undefined) {
+            this.player?.durationUpdate(totalSeconds);
+          }
           break;
+        }
+
+        case "Tick":
+        case "Time": {
+          this.player?.timingUpdate(data.value);
+          break;
+        }
+
+        case "seekResponse": {
+          this.player?.setCurrentTiming?.(data.seekValue);
+          this.player?.secondsUpdate(data.elapsedSeconds);
+          this.player?.countDownUpdate(data.countdown);
+          this.player?.durationUpdate(data.totalSeconds);
+          if (data.bpm !== undefined) this.player?.tempoUpdate(data.bpm);
+          break;
+        }
       }
     };
 
@@ -129,7 +136,6 @@ export class TimerWorker {
   }
 
   updateMode(mode: TimingModeType) {
-    console.log("update mode", mode);
     this.worker?.postMessage({ command: "updateMode", value: { mode } });
   }
 

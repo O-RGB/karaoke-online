@@ -7,21 +7,24 @@ interface TimerBarProps {}
 const TimerBar: React.FC<TimerBarProps> = ({}) => {
   const componnetId = useId();
   const engine = useSynthesizerEngine((state) => state.engine);
-  const musicQuere = useSynthesizerEngine(
-    (state) => state.engine?.player?.musicQuere
-  );
 
-  const [timing, setTiming] = useState<number>(0);
+  const [sec, setSec] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
   const [tempTiming, setTempTiming] = useState<number>(0);
   const [dragging, setDragging] = useState<boolean>(false);
 
   const onTimingUpdated = (tick: number) => {
     if (!dragging) {
-      setTiming(tick);
+      setSec(tick);
     }
   };
 
+  const onDurationUpdated = (sec: number) => {
+    setDuration(sec);
+  };
+
   const onTimeChange = (value: number) => {
+    console.log(value);
     setTempTiming(value);
   };
 
@@ -31,22 +34,29 @@ const TimerBar: React.FC<TimerBarProps> = ({}) => {
 
   const onPressEnd = () => {
     setDragging(false);
-    setTiming(tempTiming);
-    engine?.player?.setCurrentTiming?.(tempTiming);
+    setSec(tempTiming);
+    engine?.timer?.seekTimer(tempTiming);
   };
 
   useEffect(() => {
     if (engine) {
-      engine?.timerUpdated.on(
-        ["TIMING", "CHANGE"],
+      engine?.secondsUpdated.on(
+        ["SECONDS", "CHANGE"],
         0,
         onTimingUpdated,
+        componnetId
+      );
+      engine?.durationUpdated.on(
+        ["DURATION", "CHANGE"],
+        0,
+        onDurationUpdated,
         componnetId
       );
     }
 
     return () => {
-      engine?.timerUpdated.off(["TIMING", "CHANGE"], 0, componnetId);
+      engine?.secondsUpdated.off(["SECONDS", "CHANGE"], 0, componnetId);
+      engine?.durationUpdated.off(["DURATION", "CHANGE"], 0, componnetId);
     };
   }, [engine, dragging]);
 
@@ -55,9 +65,9 @@ const TimerBar: React.FC<TimerBarProps> = ({}) => {
       <SliderCommon
         tabIndex={-1}
         color="#ffffff"
-        value={dragging ? tempTiming : timing}
+        value={dragging ? tempTiming : sec}
         min={0}
-        max={musicQuere?.duration}
+        max={duration}
         style={{ width: "100%" }}
         onPressStart={onPressStart}
         onPressEnd={onPressEnd}

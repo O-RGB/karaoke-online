@@ -119,6 +119,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     const currentTick = (await this.player?.retrievePlayerCurrentTick()) ?? 0;
     return currentTick;
   }
+
   async setCurrentTiming(seconds: number): Promise<void> {
     const wasPlaying = !this.paused;
     this.pause();
@@ -126,7 +127,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     if (this.musicQuere?.musicType === "MP3" && this.mp3Element) {
       this.mp3PausedOffset = seconds;
       this.mp3Element.currentTime = seconds;
-      this.engine.timer?.seekTimer(seconds);
+      // this.engine.timer?.seekTimer(seconds);
 
       if (wasPlaying) {
         await this.mp3Element.play();
@@ -139,7 +140,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const youtubePlayer = useYoutubePlayer.getState();
       youtubePlayer.seekTo(seconds);
       this.youtubePausedTime = seconds;
-      this.engine.timer?.seekTimer(seconds);
+      // this.engine.timer?.seekTimer(seconds);
       await youtubePlayer.waitUntilPlaying();
 
       if (wasPlaying) {
@@ -147,7 +148,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       }
     } else {
       this.player?.seekPlayer(seconds);
-      this.engine.timer?.seekTimer(seconds);
+      // this.engine.timer?.seekTimer(seconds);
       if (wasPlaying) {
         await this.play();
         console.log("Play Form JsSynth: setCurrentTime");
@@ -170,6 +171,14 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
   countDownUpdate(time: number): void {
     this.engine.countdownUpdated.emit(["COUNTDOWN", "CHANGE"], 0, time);
+  }
+
+  secondsUpdate(sec: number): void {
+    this.engine.secondsUpdated.emit(["SECONDS", "CHANGE"], 0, sec);
+  }
+
+  durationUpdate(sec: number): void {
+    this.engine.durationUpdated.emit(["DURATION", "CHANGE"], 0, sec);
   }
 
   async loadYoutube(youtubeId: string): Promise<boolean> {
@@ -291,6 +300,10 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
   setMidiOutput(): void {}
   resetMidiOutput(): void {}
+
+  setSeek(value: number): void {
+    this.player?.seekPlayer(value);
+  }
 
   eventChange(): void {
     const sendToMaster = this.peerHost?.sendToMaster;

@@ -1,4 +1,10 @@
-import type { TimingMode, TimingMessage } from "./types";
+// timing.ts
+
+import type {
+  TimingMode,
+  TimingMessage,
+  DisplayResponseMessage,
+} from "./types";
 
 // ─── State ──────────────────────────────────────────────────────────────────
 
@@ -12,7 +18,7 @@ export let mode: TimingMode = "Time";
 export let duration: number | null = null;
 export let playbackRate: number = 1.0;
 
-let mppq: number = 500000; // default 120 BPM (60_000_000 / 120)
+let mppq: number = 500000;
 let ticksPerSecond: number = (ppq * 1000000) / mppq;
 
 // ─── Setters ────────────────────────────────────────────────────────────────
@@ -35,92 +41,79 @@ export function setPlaybackRate(rate: number): void {
   playbackRate = rate;
 }
 
-/**
- * Update tempo from MPPQ value received from MIDI player.
- * MPPQ = microseconds per quarter note (e.g. 500000 = 120 BPM)
- */
 export function setTempo(newMppq: number): void {
   mppq = newMppq;
   ticksPerSecond = (ppq * 1000000) / mppq;
 }
 
-export function seekTo(value: number): void {
-  accumulatedValue = value;
-}
+// ─── Getters (Return เป็น Seconds เสมอ สำหรับ UI) ───────────────────────────
 
-export function reset(): void {
-  stopTick();
-  accumulatedValue = 0;
-  duration = null;
-}
-
-// ─── Tick Loop ──────────────────────────────────────────────────────────────
-
-/**
- * Start the timing interval.
- */
-export function startTick(startPpq?: number, startMode?: TimingMode): void {
-  if (isRunning) return;
-
-  if (startPpq && startPpq !== ppq) {
-    setPpq(startPpq);
-  }
-  if (startMode) {
-    mode = startMode;
-  }
-
-  isRunning = true;
-  lastTickTime = performance.now();
-  intervalId = setInterval(tick, 50);
-}
-
-/**
- * Stop the timing interval.
- */
-export function stopTick(): void {
-  isRunning = false;
-
-  if (intervalId !== null) {
-    clearInterval(intervalId);
-    intervalId = null;
-  }
-
-  lastTickTime = null;
-}
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-/**
- * Get current BPM derived from mppq.
- */
 export function getBpm(): number {
-  return 60000000 / mppq;
+  return Math.round(60000000 / mppq);
 }
 
-/**
- * Calculate elapsed seconds from accumulatedValue.
- * Tick mode: แปลง ticks → วินาที่ ผ่าน ticksPerSecond
- * Time mode: accumulatedValue คือวินาที่อยู่แล้ว
- */
 export function getElapsedSeconds(): number {
   if (mode === "Tick") {
-    return ticksPerSecond > 0 ? accumulatedValue / ticksPerSecond : 0;
+    return accumulatedValue / ticksPerSecond;
   }
   return accumulatedValue;
 }
 
-/**
- * Calculate countdown (วินาที่คงเหลือ) จาก duration กับ elapsedSeconds.
- * คืน 0 ถ้า duration ยังไม่ set
- */
 export function getCountdown(): number {
   if (duration === null) return 0;
-  let totalDurationSeconds = duration;
+  const remaining = Math.max(0, duration - accumulatedValue);
+
   if (mode === "Tick") {
-    totalDurationSeconds = ticksPerSecond > 0 ? duration / ticksPerSecond : 0;
+    return remaining / ticksPerSecond;
   }
-  const remaining = totalDurationSeconds - getElapsedSeconds();
-  return remaining > 0 ? Math.floor(remaining) : 0;
+  return remaining;
+}
+
+export function getTotalSeconds(): number {
+  if (duration === null) return 0;
+  if (mode === "Tick") {
+    return duration / ticksPerSecond;
+  }
+  return duration;
+}
+
+// ─── Logic ──────────────────────────────────────────────────────────────────
+
+export function reset(): void {
+  accumulatedValue = 0;
+  lastTickTime = null;
+}
+
+export function calculateSeekValue(seconds: number): number {
+  if (mode === "Tick") {
+    return seconds * ticksPerSecond;
+  }
+  return seconds;
+}
+
+export function seekTo(targetValue: number): void {
+  accumulatedValue = targetValue;
+  lastTickTime = performance.now();
+}
+
+export function startTick(initialPpq?: number, initialMode?: TimingMode): void {
+  if (initialPpq) setPpq(initialPpq);
+  if (initialMode) setMode(initialMode);
+
+  if (isRunning) return;
+  isRunning = true;
+  lastTickTime = performance.now();
+
+  intervalId = setInterval(tick, 50);
+}
+
+export function stopTick(): void {
+  isRunning = false;
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
+  lastTickTime = null;
 }
 
 function tick(): void {
@@ -141,38 +134,43 @@ function tick(): void {
 
   const bpm = getBpm();
 
-  if (isNaN(accumulatedValue) || !isFinite(accumulatedValue)) {
-    console.error(
-      "Invalid accumulatedValue:",
-      accumulatedValue,
-      "deltaTime:",
-      deltaTime,
-      "effectiveDeltaTime:",
-      effectiveDeltaTime
-    );
-    accumulatedValue = 0;
-  }
-
-  // ── Duration reached → send final message and stop ───────────────────────
+  // ── Duration reached ───────────────────────
   if (duration !== null && accumulatedValue >= duration) {
     accumulatedValue = duration;
+
+    // ส่งข้อมูล Engine
     self.postMessage({
       type: mode,
       value: accumulatedValue,
-      bpm,
-      elapsedSeconds: getElapsedSeconds(),
-      countdown: 0,
     } satisfies TimingMessage);
+
+    // ส่งข้อมูล Display
+    self.postMessage({
+      type: "displayUpdate",
+      bpm,
+      elapsedSeconds: Math.floor(getElapsedSeconds()),
+      countdown: 0,
+      totalSeconds: Math.floor(getTotalSeconds()),
+    } satisfies DisplayResponseMessage);
+
     stopTick();
     return;
   }
 
-  // ── ส่ง message ทุก tick ─────────────────────────────────────────────────
+  // ── Regular Tick ───────────────────────────
+
+  // 1. ส่งข้อมูลเข้า Engine (เร็ว, เล็ก)
   self.postMessage({
     type: mode,
     value: accumulatedValue,
+  } satisfies TimingMessage);
+
+  // 2. ส่งข้อมูลอัพเดท UI (แยกออกมา)
+  self.postMessage({
+    type: "displayUpdate",
     bpm,
     elapsedSeconds: Math.floor(getElapsedSeconds()),
-    countdown: getCountdown(),
-  } satisfies TimingMessage);
+    countdown: Math.floor(getCountdown()),
+    totalSeconds: Math.floor(getTotalSeconds()),
+  } satisfies DisplayResponseMessage);
 }

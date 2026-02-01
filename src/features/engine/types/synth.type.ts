@@ -35,6 +35,8 @@ export interface BaseSynthEngine {
   pitchUpdated: EventEmitter<"PITCH", number>;
   playerUpdated: EventEmitter<"PLAYER", PlayerStatusType>;
   countdownUpdated: EventEmitter<"COUNTDOWN", number>;
+  secondsUpdated: EventEmitter<"SECONDS", number>;
+  durationUpdated: EventEmitter<"DURATION", number>;
   musicUpdated: EventEmitter<"MUSIC", MusicLoadAllData>;
   gain: SynthControl<"GAIN", number>;
 
@@ -123,6 +125,8 @@ export interface BaseSynthPlayerEngine {
   timingUpdate(tick: number): void;
   tempoUpdate(tempo: number): void;
   countDownUpdate(time: number): void;
+  secondsUpdate(sec: number): void;
+  durationUpdate(sec: number): void;
   getCurrentTickAndTempo(
     timeDivision?: number,
     currentTime?: number,
@@ -132,6 +136,7 @@ export interface BaseSynthPlayerEngine {
   loadMidi(data?: MusicLoadAllData): Promise<boolean>;
   setMidiOutput(output: MIDIOutput): void;
   resetMidiOutput(): void;
+  setSeek(value: number): void;
   eventChange?(): void;
   addEvent?(input: Partial<BaseSynthEvent>): void;
   setPlayBackRate?(rate: number): void;

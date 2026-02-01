@@ -1,3 +1,5 @@
+// worker.ts
+
 import type {
   WorkerMessage,
   StartCommandPayload,
@@ -7,8 +9,8 @@ import type {
   ModeCommandPayload,
   DurationCommandPayload,
   PlaybackRatePayload,
-  TimingMessage,
   TimingResponseMessage,
+  SeekResponseMessage,
 } from "./types";
 
 import {
@@ -27,9 +29,17 @@ import {
   accumulatedValue,
   mode,
   ppq,
+  getTotalSeconds,
+  calculateSeekValue,
 } from "./timing";
 
-// ─── Message Handler ────────────────────────────────────────────────────────
+function parseSeeValue(value: WorkerMessage["value"]): number | null {
+  if (typeof value === "number") return value;
+  if (value && typeof (value as SeekCommandPayload).value === "number") {
+    return (value as SeekCommandPayload).value;
+  }
+  return null;
+}
 
 self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
   const { command, value } = e.data;
@@ -47,25 +57,31 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
     }
 
     case "seek": {
-      const seekValue = parseSeeValue(value);
-      if (seekValue === null) {
+      // 1. รับค่าวินาทีจาก Slider
+      const inputSeconds = parseSeeValue(value);
+      if (inputSeconds === null) {
         console.error("Invalid seek value:", value);
         break;
       }
 
-      console.log("Seeking to:", seekValue);
-      seekTo(seekValue);
+      // 2. คำนวณเป็นหน่วยที่ถูกต้อง (Tick/Time)
+      const targetSeekValue = calculateSeekValue(inputSeconds);
 
-      const message: TimingMessage = {
-        type: mode,
-        value: accumulatedValue,
+      // 3. Update State
+      seekTo(targetSeekValue);
+
+      // 4. ส่ง Response แบบ Seek (รวม Display info ไปด้วยเลย)
+      const response: SeekResponseMessage = {
+        type: "seekResponse",
+        seekValue: targetSeekValue,
+        mode: mode,
         bpm: getBpm(),
         elapsedSeconds: Math.floor(getElapsedSeconds()),
-        countdown: getCountdown(),
+        countdown: Math.floor(getCountdown()),
+        totalSeconds: Math.floor(getTotalSeconds()),
       };
 
-      console.log("Sending seek message:", message);
-      self.postMessage(message);
+      self.postMessage(response);
       break;
     }
 
@@ -75,30 +91,28 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
     }
 
     case "getTiming": {
-      const response: TimingResponseMessage = {
+      const message: TimingResponseMessage = {
         type: "timingResponse",
         value: accumulatedValue,
         bpm: getBpm(),
         elapsedSeconds: Math.floor(getElapsedSeconds()),
-        countdown: getCountdown(),
+        countdown: Math.floor(getCountdown()),
+        totalSeconds: Math.floor(getTotalSeconds()),
       };
-      self.postMessage(response);
+      self.postMessage(message);
       break;
     }
 
     case "updateTempo": {
       const payload = value as TempoCommandPayload | undefined;
-      if (payload && typeof payload.mppq === "number") {
-        setTempo(payload.mppq);
-      }
+      if (payload && typeof payload.mppq === "number") setTempo(payload.mppq);
       break;
     }
 
     case "updatePpq": {
       const payload = value as PpqCommandPayload | undefined;
-      if (payload && typeof payload.ppq === "number" && payload.ppq !== ppq) {
+      if (payload && typeof payload.ppq === "number" && payload.ppq !== ppq)
         setPpq(payload.ppq);
-      }
       break;
     }
 
@@ -116,28 +130,16 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
 
     case "updateDuration": {
       const payload = value as DurationCommandPayload | undefined;
-      if (payload && typeof payload.duration === "number") {
+      if (payload && typeof payload.duration === "number")
         setDuration(payload.duration);
-      }
       break;
     }
 
     case "updatePlaybackRate": {
       const payload = value as PlaybackRatePayload | undefined;
-      if (payload && typeof payload.rate === "number") {
+      if (payload && typeof payload.rate === "number")
         setPlaybackRate(payload.rate);
-      }
       break;
     }
   }
 };
-
-// ─── Internal ───────────────────────────────────────────────────────────────
-
-function parseSeeValue(value: WorkerMessage["value"]): number | null {
-  if (typeof value === "number") return value;
-  if (value && typeof (value as SeekCommandPayload).value === "number") {
-    return (value as SeekCommandPayload).value;
-  }
-  return null;
-}

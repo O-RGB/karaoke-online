@@ -57,6 +57,8 @@ export class JsSynthEngine implements BaseSynthEngine {
   public pitchUpdated = new EventEmitter<"PITCH", number>();
   public playerUpdated = new EventEmitter<"PLAYER", PlayerStatusType>();
   public countdownUpdated = new EventEmitter<"COUNTDOWN", number>();
+  public secondsUpdated = new EventEmitter<"SECONDS", number>();
+  public durationUpdated = new EventEmitter<"DURATION", number>();
   public musicUpdated = new EventEmitter<"MUSIC", MusicLoadAllData>();
   public gain: SynthControl<"GAIN", number> = new SynthControl(
     undefined,
