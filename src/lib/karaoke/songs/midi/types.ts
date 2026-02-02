@@ -20,56 +20,33 @@ export interface TempoEvent {
   bpm: number;
 }
 
+// --- [New] Time Signature Event ---
+export interface TimeSignatureEvent {
+  tick: number;
+  numerator: number;
+  denominator: number;
+}
+
 export type VOCAL_CHANNEL = "NONE" | "9" | "1" | "RIGHT";
 export const vocalChannelOption: MIDIOptionValue<VOCAL_CHANNEL>[] = [
-  {
-    label: "NONE",
-    value: "NONE",
-  },
-  {
-    label: "9",
-    value: "9",
-  },
-  {
-    label: "1",
-    value: "1",
-  },
-  {
-    label: "RIGHT",
-    value: "RIGHT",
-  },
+  { label: "NONE", value: "NONE" },
+  { label: "9", value: "9" },
+  { label: "1", value: "1" },
+  { label: "RIGHT", value: "RIGHT" },
 ];
 
 export type ARTIST_TYPE = "M" | "F" | "MF";
 export const artistTypeOption: MIDIOptionValue<ARTIST_TYPE>[] = [
-  {
-    label: "M",
-    value: "M",
-  },
-  {
-    label: "F",
-    value: "F",
-  },
-  {
-    label: "MF",
-    value: "MF",
-  },
+  { label: "M", value: "M" },
+  { label: "F", value: "F" },
+  { label: "MF", value: "MF" },
 ];
 
 export type LANGUAGE = "DEFAULT" | "THAI" | "CHINESEBIG5";
 export const languageOption: MIDIOptionValue<LANGUAGE>[] = [
-  {
-    label: "DEFAULT",
-    value: "DEFAULT",
-  },
-  {
-    label: "THAI",
-    value: "THAI",
-  },
-  {
-    label: "CHINESEBIG5",
-    value: "CHINESEBIG5",
-  },
+  { label: "DEFAULT", value: "DEFAULT" },
+  { label: "THAI", value: "THAI" },
+  { label: "CHINESEBIG5", value: "CHINESEBIG5" },
 ];
 
 export type KEY =
@@ -97,99 +74,31 @@ export type KEY =
   | "Bbm"
   | "B"
   | "Bm";
+
 export const keyOption: MIDIOptionValue<KEY>[] = [
-  {
-    label: "Cm",
-    value: "Cm",
-  },
-  {
-    label: "C#",
-    value: "C#",
-  },
-  {
-    label: "C#m",
-    value: "C#m",
-  },
-  {
-    label: "D",
-    value: "D",
-  },
-  {
-    label: "Dm",
-    value: "Dm",
-  },
-  {
-    label: "Eb",
-    value: "Eb",
-  },
-  {
-    label: "Ebm",
-    value: "Ebm",
-  },
-  {
-    label: "E",
-    value: "E",
-  },
-  {
-    label: "Em",
-    value: "Em",
-  },
-  {
-    label: "F",
-    value: "F",
-  },
-  {
-    label: "Fm",
-    value: "Fm",
-  },
-  {
-    label: "F#",
-    value: "F#",
-  },
-  {
-    label: "F#m",
-    value: "F#m",
-  },
-  {
-    label: "G",
-    value: "G",
-  },
-  {
-    label: "Gm",
-    value: "Gm",
-  },
-  {
-    label: "Ab",
-    value: "Ab",
-  },
-  {
-    label: "Abm",
-    value: "Abm",
-  },
-  {
-    label: "A",
-    value: "A",
-  },
-  {
-    label: "Am",
-    value: "Am",
-  },
-  {
-    label: "Bb",
-    value: "Bb",
-  },
-  {
-    label: "Bbm",
-    value: "Bbm",
-  },
-  {
-    label: "B",
-    value: "B",
-  },
-  {
-    label: "Bm",
-    value: "Bm",
-  },
+  { label: "Cm", value: "Cm" },
+  { label: "C#", value: "C#" },
+  { label: "C#m", value: "C#m" },
+  { label: "D", value: "D" },
+  { label: "Dm", value: "Dm" },
+  { label: "Eb", value: "Eb" },
+  { label: "Ebm", value: "Ebm" },
+  { label: "E", value: "E" },
+  { label: "Em", value: "Em" },
+  { label: "F", value: "F" },
+  { label: "Fm", value: "Fm" },
+  { label: "F#", value: "F#" },
+  { label: "F#m", value: "F#m" },
+  { label: "G", value: "G" },
+  { label: "Gm", value: "Gm" },
+  { label: "Ab", value: "Ab" },
+  { label: "Abm", value: "Abm" },
+  { label: "A", value: "A" },
+  { label: "Am", value: "Am" },
+  { label: "Bb", value: "Bb" },
+  { label: "Bbm", value: "Bbm" },
+  { label: "B", value: "B" },
+  { label: "Bm", value: "Bm" },
 ];
 
 export interface SongInfo {
@@ -241,6 +150,7 @@ export interface IMidiParseResult extends ParsedSongData, MidiFile {
   firstNote: number;
   tempos: ArrayRange<TempoEvent>;
   duration: number;
+  timeSignatures: TimeSignatureEvent[]; // [New] เพิ่มตรงนี้
 }
 
 export interface BuildOptions {

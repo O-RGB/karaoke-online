@@ -2,43 +2,52 @@
 
 export type TimingMode = "Tick" | "Time";
 
-// ------------------------------------------------------------------
-// 1. Timing Message (สำหรับ Engine เท่านั้น ส่งถี่ๆ 20fps+)
-// ------------------------------------------------------------------
-export interface TimingMessage {
-  type: TimingMode; // "Tick" หรือ "Time"
-  value: number; // Ticks (ถ้าโหมด Tick) หรือ Seconds (ถ้าโหมด Time)
+// [New] Interface for Time Signature
+export interface TimeSignature {
+  tick: number;
+  numerator: number;
+  denominator: number;
 }
 
-// ------------------------------------------------------------------
-// 2. Display Message (สำหรับ UI หน้าจอ ส่งแยกมาต่างหาก)
-// ------------------------------------------------------------------
+// [New] Interface for Beat Info (ส่งกลับ UI)
+export interface BeatInfo {
+  measure: number; // ห้องที่
+  beat: number; // จังหวะที่
+  subBeat: number; // เศษจังหวะ (0-1)
+  numerator: number;
+  denominator: number;
+  isPreStart: boolean; // True ถ้ายังไม่ถึง First Note
+}
+
+// 1. Timing Message (Engine only)
+export interface TimingMessage {
+  type: TimingMode;
+  value: number;
+}
+
+// 2. Display Message (UI only)
 export interface DisplayResponseMessage {
   type: "displayUpdate";
-  bpm: number;
-  elapsedSeconds: number; // วินาทีปัจจุบัน (เอาไปโชว์ 00:01)
-  countdown: number; // วินาทีนับถอยหลัง
-  totalSeconds: number; // ความยาวเพลงรวม (วินาที)
-}
-
-// ------------------------------------------------------------------
-// 3. Seek Response (ตอบกลับเมื่อ User สั่ง Seek)
-// ------------------------------------------------------------------
-export interface SeekResponseMessage {
-  type: "seekResponse";
-  seekValue: number; // ค่าที่คำนวณเสร็จแล้ว (Ticks/Seconds) สำหรับส่งเข้า Engine
-  mode: TimingMode;
-
-  // แนบข้อมูล Display มาด้วยเลย เพื่อให้ UI อัพเดททันทีหลังปล่อยมือ
   bpm: number;
   elapsedSeconds: number;
   countdown: number;
   totalSeconds: number;
+  beatInfo: BeatInfo; // [New] แนบข้อมูลจังหวะ
 }
 
-// ------------------------------------------------------------------
-// 4. Timing Response (สำหรับตอนเรียก getTiming แบบ Manual)
-// ------------------------------------------------------------------
+// 3. Seek Response
+export interface SeekResponseMessage {
+  type: "seekResponse";
+  seekValue: number;
+  mode: TimingMode;
+  bpm: number;
+  elapsedSeconds: number;
+  countdown: number;
+  totalSeconds: number;
+  beatInfo: BeatInfo; // [New]
+}
+
+// 4. Timing Response
 export interface TimingResponseMessage {
   type: "timingResponse";
   value: number;
@@ -46,23 +55,23 @@ export interface TimingResponseMessage {
   elapsedSeconds: number;
   countdown: number;
   totalSeconds: number;
+  beatInfo: BeatInfo; // [New]
 }
 
-// Union Type รวมทั้งหมด
 export type WorkerResponseMessage =
   | TimingMessage
   | DisplayResponseMessage
   | SeekResponseMessage
   | TimingResponseMessage;
 
-// ─── Worker Commands (เหมือนเดิม) ─────────────────────────────────────────
+// Worker Commands
 export interface StartCommandPayload {
   ppq?: number;
   mode?: TimingMode;
 }
 export interface SeekCommandPayload {
   value: number;
-} // รับวินาทีเสมอ
+}
 export interface TempoCommandPayload {
   mppq: number;
 }
@@ -78,6 +87,13 @@ export interface DurationCommandPayload {
 export interface PlaybackRatePayload {
   rate: number;
 }
+// [New] Command Payloads
+export interface TimeSignaturesPayload {
+  timeSignatures: TimeSignature[];
+}
+export interface FirstNotePayload {
+  firstNote: number;
+}
 
 export type WorkerCommandPayload =
   | StartCommandPayload
@@ -87,6 +103,8 @@ export type WorkerCommandPayload =
   | ModeCommandPayload
   | DurationCommandPayload
   | PlaybackRatePayload
+  | TimeSignaturesPayload // [New]
+  | FirstNotePayload // [New]
   | number
   | undefined;
 
@@ -101,6 +119,8 @@ export interface WorkerMessage {
     | "updatePpq"
     | "updateMode"
     | "updateDuration"
-    | "updatePlaybackRate";
+    | "updatePlaybackRate"
+    | "updateTimeSignatures" // [New]
+    | "updateFirstNote"; // [New]
   value?: WorkerCommandPayload;
 }

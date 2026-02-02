@@ -38,7 +38,6 @@ export interface ButtonCommonProps
   blur?: ButtonBlur | boolean;
 }
 
-// สร้าง colorStyles โดยเพิ่ม md: prefix สำหรับ hover effects
 const colorStyles: Record<ButtonColor, Record<ButtonVariant, string>> = {
   primary: {
     solid:
@@ -98,7 +97,6 @@ const colorStyles: Record<ButtonColor, Record<ButtonVariant, string>> = {
   },
 };
 
-// blur background styles สำหรับแต่ละสี (เพิ่ม md: prefix)
 const blurBackgroundStyles: Record<ButtonColor, string> = {
   primary: "md:hover:!bg-white/20 active:!bg-white/60",
   secondary:
@@ -111,7 +109,6 @@ const blurBackgroundStyles: Record<ButtonColor, string> = {
   white: "md:hover:!bg-white/30 active:!bg-white/60",
 };
 
-// blur styles สำหรับแต่ละสี (เพิ่ม md: prefix สำหรับ hover)
 const blurTextStyles: Record<ButtonColor, string> = {
   primary: "text-blue-500 border-blue-500 md:hover:text-blue-400",
   secondary: "text-purple-500 border-purple-500 md:hover:text-purple-400",
@@ -129,18 +126,14 @@ const getBlurClasses = (blur: ButtonCommonProps["blur"]) => {
     return `blur-overlay ${blurTextStyles.white} md:hover:!bg-white/20 active:!bg-white/30`;
   }
 
-  // เลือกสีข้อความและ border
   const textClass = blur.color
     ? blurTextStyles[blur.color]
     : blurTextStyles.white;
 
-  // เลือกสีพื้นหลัง
   let backgroundClass = "";
   if (blur.backgroundColor) {
-    // ถ้าระบุสี background มา ใช้สีนั้น
     backgroundClass = blurBackgroundStyles[blur.backgroundColor];
   } else {
-    // ถ้าไม่ระบุ ใช้สีโปร่งใสเดิม
     backgroundClass = "md:hover:!bg-white/20 active:!bg-white/30";
   }
 
@@ -256,4 +249,4 @@ const ButtonCommon = forwardRef<HTMLButtonElement, ButtonCommonProps>(
 
 ButtonCommon.displayName = "ButtonCommon";
 
-export default ButtonCommon;
+export default React.memo(ButtonCommon);

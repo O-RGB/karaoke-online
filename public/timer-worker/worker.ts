@@ -11,6 +11,8 @@ import type {
   PlaybackRatePayload,
   TimingResponseMessage,
   SeekResponseMessage,
+  TimeSignaturesPayload, // [New]
+  FirstNotePayload, // [New]
 } from "./types";
 
 import {
@@ -31,6 +33,9 @@ import {
   ppq,
   getTotalSeconds,
   calculateSeekValue,
+  setTimeSignatures, // [New]
+  setFirstNote, // [New]
+  getBeatInfo, // [New] used for seek response
 } from "./timing";
 
 function parseSeeValue(value: WorkerMessage["value"]): number | null {
@@ -50,27 +55,22 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
       startTick(payload?.ppq, payload?.mode);
       break;
     }
-
     case "stop": {
       stopTick();
       break;
     }
-
     case "seek": {
-      // 1. รับค่าวินาทีจาก Slider
       const inputSeconds = parseSeeValue(value);
       if (inputSeconds === null) {
         console.error("Invalid seek value:", value);
         break;
       }
-
-      // 2. คำนวณเป็นหน่วยที่ถูกต้อง (Tick/Time)
       const targetSeekValue = calculateSeekValue(inputSeconds);
-
-      // 3. Update State
       seekTo(targetSeekValue);
 
-      // 4. ส่ง Response แบบ Seek (รวม Display info ไปด้วยเลย)
+      // Include beatInfo in response
+      const currentTick = mode === "Tick" ? targetSeekValue : 0;
+
       const response: SeekResponseMessage = {
         type: "seekResponse",
         seekValue: targetSeekValue,
@@ -79,18 +79,17 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
         elapsedSeconds: Math.floor(getElapsedSeconds()),
         countdown: Math.floor(getCountdown()),
         totalSeconds: Math.floor(getTotalSeconds()),
+        beatInfo: getBeatInfo(currentTick), // [New]
       };
-
       self.postMessage(response);
       break;
     }
-
     case "reset": {
       reset();
       break;
     }
-
     case "getTiming": {
+      const currentTick = mode === "Tick" ? accumulatedValue : 0;
       const message: TimingResponseMessage = {
         type: "timingResponse",
         value: accumulatedValue,
@@ -98,24 +97,22 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
         elapsedSeconds: Math.floor(getElapsedSeconds()),
         countdown: Math.floor(getCountdown()),
         totalSeconds: Math.floor(getTotalSeconds()),
+        beatInfo: getBeatInfo(currentTick), // [New]
       };
       self.postMessage(message);
       break;
     }
-
     case "updateTempo": {
       const payload = value as TempoCommandPayload | undefined;
       if (payload && typeof payload.mppq === "number") setTempo(payload.mppq);
       break;
     }
-
     case "updatePpq": {
       const payload = value as PpqCommandPayload | undefined;
       if (payload && typeof payload.ppq === "number" && payload.ppq !== ppq)
         setPpq(payload.ppq);
       break;
     }
-
     case "updateMode": {
       const payload = value as ModeCommandPayload | undefined;
       if (
@@ -127,18 +124,32 @@ self.onmessage = (e: MessageEvent<WorkerMessage>): void => {
       }
       break;
     }
-
     case "updateDuration": {
       const payload = value as DurationCommandPayload | undefined;
       if (payload && typeof payload.duration === "number")
         setDuration(payload.duration);
       break;
     }
-
     case "updatePlaybackRate": {
       const payload = value as PlaybackRatePayload | undefined;
       if (payload && typeof payload.rate === "number")
         setPlaybackRate(payload.rate);
+      break;
+    }
+    // [New]
+    case "updateTimeSignatures": {
+      const payload = value as TimeSignaturesPayload | undefined;
+      if (payload && Array.isArray(payload.timeSignatures)) {
+        setTimeSignatures(payload.timeSignatures);
+      }
+      break;
+    }
+    // [New]
+    case "updateFirstNote": {
+      const payload = value as FirstNotePayload | undefined;
+      if (payload && typeof payload.firstNote === "number") {
+        setFirstNote(payload.firstNote);
+      }
       break;
     }
   }

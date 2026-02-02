@@ -4,10 +4,9 @@ import React, { useEffect, useId, useState } from "react";
 
 interface TimerBarProps {}
 
-const TimerBar: React.FC<TimerBarProps> = ({}) => {
+const TimerBar: React.FC<TimerBarProps> = React.memo(({}) => {
   const componnetId = useId();
   const engine = useSynthesizerEngine((state) => state.engine);
-
   const [sec, setSec] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [tempTiming, setTempTiming] = useState<number>(0);
@@ -75,6 +74,8 @@ const TimerBar: React.FC<TimerBarProps> = ({}) => {
       />
     </div>
   );
-};
+});
+
+TimerBar.displayName = "TimerBar";
 
 export default TimerBar;

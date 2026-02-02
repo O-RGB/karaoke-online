@@ -37,6 +37,8 @@ export interface BaseSynthEngine {
   countdownUpdated: EventEmitter<"COUNTDOWN", number>;
   secondsUpdated: EventEmitter<"SECONDS", number>;
   durationUpdated: EventEmitter<"DURATION", number>;
+  beatUpdated: EventEmitter<"BEAT", number>;
+  numeratorUpdated: EventEmitter<"NUMERATOR", number>;
   musicUpdated: EventEmitter<"MUSIC", MusicLoadAllData>;
   gain: SynthControl<"GAIN", number>;
 
@@ -127,6 +129,7 @@ export interface BaseSynthPlayerEngine {
   countDownUpdate(time: number): void;
   secondsUpdate(sec: number): void;
   durationUpdate(sec: number): void;
+  beatUpdate(beat: number, numerator: number): void;
   getCurrentTickAndTempo(
     timeDivision?: number,
     currentTime?: number,

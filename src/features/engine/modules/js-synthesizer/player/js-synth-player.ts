@@ -181,6 +181,11 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     this.engine.durationUpdated.emit(["DURATION", "CHANGE"], 0, sec);
   }
 
+  beatUpdate(beat: number, numerator: number): void {
+    this.engine.beatUpdated.emit(["BEAT", "CHANGE"], 0, beat);
+    this.engine.numeratorUpdated.emit(["NUMERATOR", "CHANGE"], 0, numerator);
+  }
+
   async loadYoutube(youtubeId: string): Promise<boolean> {
     const youtubePlayer = useYoutubePlayer.getState();
     if (!youtubePlayer.isReady) return false;

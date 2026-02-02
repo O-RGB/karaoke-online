@@ -6,10 +6,14 @@ import { AiFillLike, AiOutlineLoading } from "react-icons/ai";
 import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
 import { MdPlayCircleFilled } from "react-icons/md";
 import { FaPlay, FaPlayCircle, FaUser } from "react-icons/fa";
-import { useKeyboardEvents } from "@/hooks/keyboard-hook";
+// import { useKeyboardEvents } from "@/hooks/keyboard-hook";
 import { ITrackData } from "@/features/songs/types/songs.type";
 import { SourceTag } from "@/components/tools/search-song/source-tag";
 import { MusicFileType, MusicSubType } from "@/lib/karaoke/songs/types";
+import {
+  useKeyboardNavigation,
+  useKeyboardSearch,
+} from "@/hooks/keyboard-hook";
 
 interface KaraokeSearchInputProps {
   onSearch?: (value: string) => Promise<IOptions[]>;
@@ -71,8 +75,8 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
   const [searchResult, setSearchResult] = useState<IOptions<ITrackData>[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const { searching, onEnter, arrowLeft, arrowRight, openSearchBox } =
-    useKeyboardEvents();
+  const { searching, openSearchBox } = useKeyboardSearch();
+  const { onEnter, arrowLeft, arrowRight } = useKeyboardNavigation();
   const resetSearchingTimeout = useKeyboardStore(
     (state) => state.resetSearchingTimeout
   );

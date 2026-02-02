@@ -113,6 +113,8 @@ const KaraokePage: React.FC<KaraokePageProps> = ({}) => {
     // DONATE: <DonateModal />,
   };
 
+  console.log("[HOME RERENDER] /src/components/ui/karaoke-page.tsx");
+
   return (
     <FullScreen handle={handle} className=" w-full h-screen">
       <GlobalToast></GlobalToast>

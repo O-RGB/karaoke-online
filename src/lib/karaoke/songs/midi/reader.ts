@@ -8,6 +8,7 @@ import {
   LyricEvent,
   ChordEvent,
   TempoEvent,
+  TimeSignatureEvent, // Import เพิ่ม
 } from "./types";
 import { base64ToArrayBuffer, TIS620ToString } from "../shared/lib";
 import { tempoToArrayRange } from "../../lyrics/tempo-list";
@@ -207,9 +208,13 @@ function _extractDataFromEvents(
   let lyrics: LyricEvent[][] = [];
   let chords: ChordEvent[] = [];
   let tempoChanges: TempoEvent[] = [];
+  let timeSignatures: TimeSignatureEvent[] = []; // เก็บ Time Signatures
   let detectedHeader = "LyrHdr1";
   let foundLyrics = false;
-  let firstNote: number = 0;
+
+  // [Fix] เริ่มต้นด้วย null เพื่อให้จับค่าแรกได้ถูกต้อง
+  let firstNote: number | null = null;
+
   let duration = 0;
 
   midiData.tracks.forEach((track) => {
@@ -218,18 +223,23 @@ function _extractDataFromEvents(
         duration = event.absoluteTime;
       }
 
+      // [Fix] Logic หา First Note
       if (
         event.type === "channel" &&
         event.status >= 0x90 &&
         event.status <= 0x9f
       ) {
+        // ตรวจสอบ Note On ที่ Velocity > 0
         if ((event as any).data && (event as any).data[1] > 0) {
           if (firstNote === null || event.absoluteTime < firstNote) {
             firstNote = event.absoluteTime;
           }
         }
       }
+
       if (event.type !== "meta") return;
+
+      // Tempo
       if (event.metaType === 0x51 && event.data && event.data.length === 3) {
         const microsecondsPerBeat =
           (event.data[0] << 16) | (event.data[1] << 8) | event.data[2];
@@ -240,9 +250,23 @@ function _extractDataFromEvents(
         });
       }
 
+      // [New] Time Signature (0x58)
+      if (event.metaType === 0x58 && event.data && event.data.length === 4) {
+        const numerator = event.data[0];
+        const denominator = Math.pow(2, event.data[1]);
+        timeSignatures.push({
+          tick: event.absoluteTime,
+          numerator: numerator,
+          denominator: denominator,
+        });
+      }
+
+      // Chord
       if (event.metaType === 0x06 && event.text) {
         chords.push({ chord: event.text, tick: event.absoluteTime });
       }
+
+      // Lyrics Header
       if (
         !foundLyrics &&
         event.metaType === 0x01 &&
@@ -280,6 +304,12 @@ function _extractDataFromEvents(
 
   chords.sort((a, b) => a.tick - b.tick);
 
+  // Default Time Signature if none found
+  if (timeSignatures.length === 0) {
+    timeSignatures.push({ tick: 0, numerator: 4, denominator: 4 });
+  }
+  timeSignatures.sort((a, b) => a.tick - b.tick);
+
   const tempos = tempoToArrayRange(tempoChanges, duration);
 
   return {
@@ -287,18 +317,13 @@ function _extractDataFromEvents(
     lyrics,
     chords,
     lyrHeader: detectedHeader,
-    firstNote,
+    firstNote: firstNote ?? 0, // ถ้าหาไม่เจอให้เป็น 0
     tempos,
     duration,
+    timeSignatures,
   };
 }
 
-/**
- * Main parse function with Retry Logic
- * Step 1: Normal Parse
- * Step 2: If Header Error -> Fix Header -> Retry
- * Step 3: If Fail again -> Throw
- */
 export function parse(arrayBuffer: ArrayBuffer): IMidiParseResult {
   try {
     const midiData = _parseMidiFile(arrayBuffer);
@@ -308,9 +333,7 @@ export function parse(arrayBuffer: ArrayBuffer): IMidiParseResult {
     if (error.message === "Invalid MIDI file header") {
       try {
         console.warn("Invalid MIDI header detected. Retrying with auto-fix...");
-
         const fixedBuffer = fixMidiBuffer(arrayBuffer);
-
         const midiData = _parseMidiFile(fixedBuffer);
         const extracted = _extractDataFromEvents(midiData);
         return { ...midiData, ...extracted };
@@ -319,7 +342,6 @@ export function parse(arrayBuffer: ArrayBuffer): IMidiParseResult {
         throw retryError;
       }
     }
-
     throw error;
   }
 }
