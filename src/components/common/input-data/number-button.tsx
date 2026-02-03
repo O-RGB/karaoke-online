@@ -125,9 +125,7 @@ const NumberButton: React.FC<NumberButtonProps> = ({
             />
 
             <div className="flex items-center gap-1">
-              <span>
-                {int} {suffix}
-              </span>
+              {int} {suffix}
             </div>
 
             <Button

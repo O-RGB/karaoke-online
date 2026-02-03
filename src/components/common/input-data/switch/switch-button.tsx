@@ -43,10 +43,10 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({
       }}
       onClick={handleOnClick}
       className={`${className ?? ""} ${disabledStyle}`}
-      icon={iconClose && <span>{open ? iconOpen : iconClose}</span>}
+      icon={iconClose && <div>{open ? iconOpen : iconClose}</div>}
     >
       {labelClose && (
-        <span className="text-sm -mt-0.5">{open ? labelOpen : labelClose}</span>
+        <div className="text-sm -mt-0.5">{open ? labelOpen : labelClose}</div>
       )}
     </Button>
   );

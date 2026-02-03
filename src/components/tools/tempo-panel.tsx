@@ -26,7 +26,6 @@ const TempoPanel: React.FC<TempoPanelProps> = () => {
 
   useEffect(() => {
     if (!engine) return;
-
     engine.tempoUpdated.on(["TEMPO", "CHANGE"], 0, onTempoUpdated, componentId);
     engine.beatUpdated.on(["BEAT", "CHANGE"], 0, onBeatUpdated, componentId);
     engine.numeratorUpdated.on(
@@ -45,7 +44,6 @@ const TempoPanel: React.FC<TempoPanelProps> = () => {
 
   const beatDots = useMemo(() => {
     if (numerator <= 0) return null;
-
     return Array.from({ length: numerator }, (_, index) => (
       <div
         key={index}
@@ -65,9 +63,7 @@ const TempoPanel: React.FC<TempoPanelProps> = () => {
         <div className="flex mb-1">
           {String(Math.round(tempo)).padStart(3, "0")}
         </div>
-
         <div className="flex gap-1">{beatDots}</div>
-
         <div className="flex mb-1">
           {beat}:{numerator}
         </div>

@@ -1,10 +1,8 @@
 import NumberButton from "@/components/common/input-data/number-button";
 import SwitchButton from "@/components/common/input-data/switch/switch-button";
 import FullMixer from "../full-mixer";
-import DrumMixer from "../drum-mixer";
 import Button from "@/components/common/button/button";
 import EqualizerPanel from "../equalizer-mixer";
-import useConfigStore from "@/features/config/config-store";
 import ButtonCommon from "@/components/common/button/button";
 import React, { useEffect, useId, useState } from "react";
 import { IoSpeedometerSharp } from "react-icons/io5";
@@ -104,13 +102,13 @@ const VolumeOptions: React.FC<VolumeOptionsProps> = ({
           className={"szh-menu-custom !bg-black/20"}
           menuButton={() => {
             return (
-              <MenuButton className={"w-full h-full"}>
+              <div className={"w-full h-full"}>
                 <ButtonCommon
                   icon={<CgOptions></CgOptions>}
                   className="!rounded-[4px] !p-2 w-full h-full"
                   blur={{ border: true, backgroundColor: "primary" }}
                 ></ButtonCommon>
-              </MenuButton>
+              </div>
             );
           }}
         >

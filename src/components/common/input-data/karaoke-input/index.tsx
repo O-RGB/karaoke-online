@@ -218,6 +218,7 @@ const KaraokeSearchInput: React.FC<KaraokeSearchInputProps> = ({
           <input
             type="text"
             value={searching}
+            readOnly={true}
             autoFocus
             className="text-2xl appearance-none focus:!outline-none !bg-transparent px-2"
           />

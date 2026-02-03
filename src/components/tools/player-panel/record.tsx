@@ -83,9 +83,7 @@ const RecordStatus: React.FC<RecordStatusProps> = ({}) => {
           className={"h-full"}
           boundingBoxPadding="10 10 10 10"
           menuButton={
-            <MenuButton>
-              <Button {...buttonStyle} icon={<BsMicFill className="" />} />
-            </MenuButton>
+            <Button {...buttonStyle} icon={<BsMicFill className="" />} />
           }
         >
           <MenuItem

@@ -252,14 +252,14 @@ const WallpaperRender: React.FC<WallpaperRenderProps> = ({
                   className="h-7 w-10"
                 >
                   <div className="flex gap-1 text-white !text-xs">
-                    <span
+                    <div
                       className={`${
                         i === selectLive ? "" : "animate-ping text-red-500"
                       } `}
                     >
                       <BsRecordCircle className="mt-0.5" />
-                    </span>
-                    <span>{i + 1}</span>
+                    </div>
+                    <div>{i + 1}</div>
                   </div>
                 </Button>
               </React.Fragment>

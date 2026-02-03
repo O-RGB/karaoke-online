@@ -30,9 +30,9 @@ const DrumProgramChange: React.FC<DrumChangeProps> = ({ program = 100 }) => {
                 }}
                 className={`text-xs !rounded-none border-b border-l`}
               >
-                <span className="text-nowrap">
+                <div className="text-nowrap">
                   {i + 1}. {data}
-                </span>
+                </div>
               </Button>
             </React.Fragment>
           );
