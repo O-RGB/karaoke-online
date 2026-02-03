@@ -10,7 +10,7 @@ import { MAIN_VOLUME } from "@/features/engine/types/node.type";
 import { FaList } from "react-icons/fa";
 import { IControllerChange } from "@/features/engine/types/synth.type";
 import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
-import { Menu, MenuButton } from "@szhsin/react-menu";
+import { Menu } from "@szhsin/react-menu";
 import { CgOptions } from "react-icons/cg";
 import {
   PiMicrophoneStageFill,

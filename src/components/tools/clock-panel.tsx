@@ -4,7 +4,7 @@ import useConfigStore from "../../features/config/config-store";
 interface ClockPanelProps {}
 
 const ClockPanel: React.FC<ClockPanelProps> = ({}) => {
-  const { config } = useConfigStore();
+  const config = useConfigStore().config;
   const widgetConfig = config.widgets;
   const isShow = widgetConfig?.clock?.show;
 

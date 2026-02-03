@@ -127,7 +127,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
     if (this.musicQuere?.musicType === "MP3" && this.mp3Element) {
       this.mp3PausedOffset = seconds;
       this.mp3Element.currentTime = seconds;
-      // this.engine.timer?.seekTimer(seconds);
 
       if (wasPlaying) {
         await this.mp3Element.play();
@@ -140,7 +139,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const youtubePlayer = useYoutubePlayer.getState();
       youtubePlayer.seekTo(seconds);
       this.youtubePausedTime = seconds;
-      // this.engine.timer?.seekTimer(seconds);
+
       await youtubePlayer.waitUntilPlaying();
 
       if (wasPlaying) {
@@ -148,7 +147,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       }
     } else {
       this.player?.seekPlayer(seconds);
-      // this.engine.timer?.seekTimer(seconds);
+
       if (wasPlaying) {
         await this.play();
         console.log("Play Form JsSynth: setCurrentTime");
@@ -249,6 +248,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
 
     await this.player?.resetPlayer();
     await this.player?.addSMFDataToPlayer(cleanBuffer);
+    this.engine.nodes.forEach((node) => node.isActive?.setValue(false));
     this.engine.updateSpeed();
     this.engine.updatePitch(null);
     this.eventChange();
@@ -267,7 +267,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const mid = data.files.midi;
       if (mid !== undefined) {
         this.engine.timer?.updateMusic(data);
-        // this.engine.timer?.updateTempoMap(data.tempoRange);
+
         this.engine.timer?.updatePpq((data.metadata as any).ticksPerBeat);
         this.musicQuere = data;
         this.engine.musicUpdated.emit(["MUSIC", "CHANGE"], 0, data);
@@ -320,7 +320,6 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       const value = event.getValue();
       const control = event.getControl();
 
-      // NODE
       const currentProgram = this.engine.nodes[channel]?.program?.value ?? 0;
       const isMute = this.engine.nodes[channel]?.volume?.isMute ?? false;
 
@@ -365,7 +364,8 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
       }
 
       switch (t) {
-        case 192: // Program Change
+        case 192:
+          this.engine.nodes[channel]?.isActive?.setValue(true);
           this.eventInit?.programChangeCallback?.({
             program,
             channel,
@@ -375,7 +375,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             channel,
           });
           break;
-        case 176: // controller Change
+        case 176:
           this.eventInit?.controllerChangeCallback?.({
             channel,
             controllerNumber: control,
@@ -387,7 +387,7 @@ export class JsSynthPlayerEngine implements BaseSynthPlayerEngine {
             controllerValue: value,
           });
           break;
-        case 81: // Tempo Change
+        case 81:
           console.log("Tempo Change", vel, t, program);
           this.engine.timer?.updateTempo(program);
           break;

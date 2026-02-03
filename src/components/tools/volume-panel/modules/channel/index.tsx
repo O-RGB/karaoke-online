@@ -1,14 +1,12 @@
-import React, { useEffect } from "react";
-import MuteVolumeButton from "./mute-volume-button";
+import React, { useEffect, useId, useState } from "react";
 import { MAIN_VOLUME } from "@/features/engine/types/node.type";
-import VolumeNodePreset from "../node-preset/volume-node-preset";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
 import {
   IControllerChange,
   IProgramChange,
 } from "@/features/engine/types/synth.type";
-import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
-import ChannelLimit from "./limit";
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import MuteVolumeButton from "./mute-volume-button";
+import VolumeNodePreset from "../node-preset/volume-node-preset";
 import VolumeNodesPanel from "../node-preset/volume-nodes-panel";
 
 interface ChannelRenderProps {
@@ -32,22 +30,29 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
   onChange,
   node,
 }) => {
-  // const instrumental = useSynthesizerEngine(
-  //   (state) => state.engine?.instrumental
-  // );
-  useEffect(() => {}, [isShow, node]);
+  const componnetId = useId();
+
+  const [active, setActive] = useState<boolean>(false);
+
+  useEffect(() => {
+    node.isActive?.on(
+      ["ACTIVE", "CHANGE"],
+      (event) => {
+        const value = event.value;
+        setActive(value);
+      },
+      componnetId
+    );
+
+    return () => {
+      node.isActive?.off(["ACTIVE", "CHANGE"], componnetId);
+    };
+  }, [isShow, node]);
 
   if (!node) return <></>;
 
   return (
     <>
-      {/* {channel !== 8 && channel !== 9 && (
-        <ChannelLimit
-          channel={channel}
-          instrumental={instrumental}
-          node={node}
-        ></ChannelLimit>
-      )} */}
       <MuteVolumeButton
         disabled={isShow}
         controllerNumber={MAIN_VOLUME}
@@ -55,7 +60,12 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
         onMuted={onMutedVolume}
         node={node}
       ></MuteVolumeButton>
-      <div className="flex items-center justify-center h-full py-1.5 w-full border-x border-white/20 opacity-30 hover:opacity-100 z-20 duration-300">
+      <div
+        style={{
+          opacity: active ? 1 : 0.2,
+        }}
+        className="flex items-center justify-center h-full py-1.5 w-full border-x border-white/20 opacity-30 hover:opacity-100 z-20 duration-300"
+      >
         <VolumeNodePreset
           synthNode={node.volume}
           vertical={true}
@@ -69,7 +79,7 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
         ></VolumeNodePreset>
       </div>
       <VolumeNodesPanel
-        disabled={isShow}
+        disabled={!active || isShow}
         node={node}
         channel={channel}
         onContrllerChange={onChange}
@@ -81,4 +91,5 @@ const ChannelRender: React.FC<ChannelRenderProps> = ({
   );
 };
 
-export default ChannelRender;
+// เพิ่ม React.memo ที่นี่ เพื่อป้องกันการ Re-render หาก Props ไม่เปลี่ยน
+export default React.memo(ChannelRender);

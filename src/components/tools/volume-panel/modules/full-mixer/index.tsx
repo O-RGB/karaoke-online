@@ -1,24 +1,20 @@
 import React, { useEffect, useId, useState, useMemo } from "react";
-import { RxMixerVertical } from "react-icons/rx";
-import { FiRotateCcw } from "react-icons/fi";
-import { FaSave, FaTrash, FaPlus } from "react-icons/fa";
-
 import Button from "@/components/common/button/button";
 import ButtonCommon from "@/components/common/button/button";
 import WinboxModal from "@/components/common/modal";
+import DrumProgramChange from "./modules/drum-program";
+import MixerNodes from "./modules/node";
+import useConfigStore from "@/features/config/config-store";
+import { RxMixerVertical } from "react-icons/rx";
+import { FiRotateCcw } from "react-icons/fi";
+import { FaSave, FaTrash, FaPlus } from "react-icons/fa";
+import { useSynthesizerEngine } from "@/features/engine/synth-store";
+import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
+import { DEFAULT_INST_PRESET, DRUM_CHANNEL } from "@/config/value";
+import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
 import SelectCommon, {
   SelectOption,
 } from "@/components/common/data-input/select";
-
-import { useSynthesizerEngine } from "@/features/engine/synth-store";
-import useConfigStore from "@/features/config/config-store";
-import { SynthChannel } from "@/features/engine/modules/instrumentals/channel";
-import { DEFAULT_INST_PRESET, DRUM_CHANNEL } from "@/config/value";
-
-import DrumProgramChange from "./modules/drum-program";
-import MixerNodes from "./modules/node";
-import { usePeerHostStore } from "@/features/remote/store/peer-js-store";
-import useNotificationStore from "@/features/notification-store";
 
 interface FullMixerProps {
   nodes: SynthChannel[];

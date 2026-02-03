@@ -9,7 +9,7 @@ import {
   CHORUSDEPTH,
 } from "@/features/engine/types/node.type";
 import { SynthControl } from "../node";
-import { INodeKey, INodeState } from "../types/node.type";
+import { INodeKey, INodeOption, INodeState } from "../types/node.type";
 import { DRUM_CHANNEL } from "@/config/value";
 import { ChannelEqualizer } from "../../equalizer/channel-equalizer";
 import { ConfigSystem } from "@/features/config/types/config.type";
@@ -27,7 +27,7 @@ export class SynthChannel {
 
   public program: SynthControl<INodeState, number> | undefined = undefined;
   public isDrum: SynthControl<INodeState, boolean> | undefined = undefined;
-  public isActive: SynthControl<INodeState, boolean> | undefined = undefined;
+  public isActive: SynthControl<INodeOption, boolean> | undefined = undefined;
 
   public analyserNode?: AnalyserNode | undefined = undefined;
   // public instrumental: InstrumentalNode | undefined = undefined;
@@ -38,7 +38,6 @@ export class SynthChannel {
 
   constructor(
     channel: number,
-    // instrumental: InstrumentalNode,
     audioContext: AudioContext,
     noteModifier: NoteEventManager[],
     systemConfig?: Partial<ConfigSystem>
@@ -52,8 +51,8 @@ export class SynthChannel {
     if (channel === DRUM_CHANNEL) {
       this.isDrum = new SynthControl(undefined, "DRUM", channel, true);
     }
-    // this.instrumental = instrumental;
     this.audioContext = audioContext;
+    this.isActive = new SynthControl(undefined, "ACTIVE", channel, false);
     this.volume = new SynthControl(undefined, "VOLUME", channel, 100);
     this.chorus = new SynthControl(undefined, "CHORUS", channel, 100);
     this.reverb = new SynthControl(undefined, "REVERB", channel, 100);
