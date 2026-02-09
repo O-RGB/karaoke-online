@@ -131,7 +131,7 @@ const ContextModal: React.FC<ContextModalProps> = ({
       {buttonMenu ? (
         <Menu
           boundingBoxPadding="10 10 10 10"
-          menuButton={<>{buttonMenu}</>}
+          menuButton={<MenuButton>{buttonMenu}</MenuButton>}
         >
           <ContextMenuCommon items={ItemsGroup}></ContextMenuCommon>
         </Menu>
